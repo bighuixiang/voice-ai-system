@@ -1,5 +1,7 @@
 # Voice AI Decision System - Git Ignore File
 
+ai-service/models
+
 # Environment files
 .env
 .env.local

@@ -1,0 +1,245 @@
+// SCSS Mixins 工具库
+@use "sass:color";
+@use "variables" as *;
+
+// 响应式断点 Mixin
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: 769px) and (max-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: 1025px) {
+    @content;
+  }
+}
+
+@mixin large-desktop {
+  @media (min-width: 1440px) {
+    @content;
+  }
+}
+
+// Flexbox 布局 Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// 文本省略 Mixins
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-ellipsis-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 卡片样式 Mixin
+@mixin card-style($padding: $spacing-lg) {
+  background: $bg-color;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-base;
+  box-shadow: $box-shadow-base;
+  padding: $padding;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: $box-shadow-light;
+  }
+}
+
+// 按钮样式 Mixins
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm $spacing-md;
+  border: none;
+  border-radius: $border-radius-base;
+  font-size: $font-size-base;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background-color: $primary-color;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: color.adjust($primary-color, $lightness: 10%);
+  }
+  
+  &:active:not(:disabled) {
+    background-color: color.adjust($primary-color, $lightness: -10%);
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background-color: transparent;
+  color: $primary-color;
+  border: 1px solid $primary-color;
+  
+  &:hover:not(:disabled) {
+    background-color: $primary-color;
+    color: white;
+  }
+}
+
+// 输入框样式 Mixin
+@mixin input-base {
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-base;
+  font-size: $font-size-base;
+  color: $text-color-primary;
+  background-color: $bg-color;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+  }
+  
+  &:disabled {
+    background-color: $bg-color-page;
+    color: $text-color-disabled;
+    cursor: not-allowed;
+  }
+  
+  &::placeholder {
+    color: $text-color-placeholder;
+  }
+}
+
+// 滚动条样式 Mixin
+@mixin custom-scrollbar($width: 6px, $track-color: $bg-color, $thumb-color: $border-color) {
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $track-color;
+    border-radius: $border-radius-base;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: $border-radius-base;
+    
+    &:hover {
+      background: color.adjust($thumb-color, $lightness: -10%);
+    }
+  }
+}
+
+// 加载动画 Mixin
+@mixin loading-spinner($size: 20px, $color: $primary-color) {
+  width: $size;
+  height: $size;
+  border: 2px solid rgba($color, 0.3);
+  border-top: 2px solid $color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// 渐变背景 Mixin
+@mixin gradient-background($start-color: $primary-color, $end-color: color.adjust($primary-color, $lightness: 20%)) {
+  background: linear-gradient(135deg, $start-color 0%, $end-color 100%);
+}
+
+// 阴影效果 Mixins
+@mixin shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+@mixin shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@mixin shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+@mixin shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+// 过渡动画 Mixins
+@mixin transition-base {
+  transition: all 0.3s ease;
+}
+
+@mixin transition-fast {
+  transition: all 0.15s ease;
+}
+
+@mixin transition-slow {
+  transition: all 0.5s ease;
+}
+
+// 绝对定位居中 Mixin
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 清除浮动 Mixin
+@mixin clearfix {
+  &::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}

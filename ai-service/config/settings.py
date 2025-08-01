@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     
     # Model settings
     WHISPER_MODEL: str = "base"
-    LLM_MODEL: str = "Qwen/Qwen2-1.5B-Instruct"
+    LLM_MODEL: str = "microsoft/DialoGPT-medium"
     DEVICE: str = "cpu"  # or "cuda" if GPU available
     
     # Vector database settings

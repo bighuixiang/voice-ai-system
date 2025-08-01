@@ -194,12 +194,20 @@ export class AIClientService {
    */
   private serializeRequest(request: ProcessingRequest): string {
     try {
-      return JSON.stringify({
-        type: request.type,
-        content: request.content,
-        metadata: request.metadata,
-        timestamp: new Date().toISOString(),
-      });
+      // AI服务期望简单的格式：{"content": "text"}
+      if (request.type === 'text') {
+        return JSON.stringify({
+          content: request.content
+        });
+      } else {
+        // 对于语音处理，使用FormData，这里不会被调用
+        return JSON.stringify({
+          type: request.type,
+          content: request.content,
+          metadata: request.metadata,
+          timestamp: new Date().toISOString(),
+        });
+      }
     } catch (error) {
       this.logger.error(`Request serialization failed: ${error.message}`);
       throw new BadRequestException('Failed to serialize request data');

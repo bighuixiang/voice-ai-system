@@ -225,9 +225,9 @@ class MemoryKnowledgeService:
             
         except Exception as e:
             logger.error(f"Search failed: {e}")
-            return []    
-  
-  def _calculate_relevance_scores(self, query_keywords: List[str]) -> Dict[int, Tuple[float, List[str]]]:
+            return []
+    
+    def _calculate_relevance_scores(self, query_keywords: List[str]) -> Dict[int, Tuple[float, List[str]]]:
         """Calculate relevance scores for documents based on keyword matching"""
         document_scores = defaultdict(lambda: (0.0, []))
         
@@ -305,9 +305,9 @@ class MemoryKnowledgeService:
             return None
         except Exception as e:
             logger.error(f"Failed to get document by ID {doc_id}: {e}")
-            return None    
-   
- async def get_document(self, doc_id: int) -> Optional[KnowledgeDocument]:
+            return None
+    
+    async def get_document(self, doc_id: int) -> Optional[KnowledgeDocument]:
         """Get a document by ID"""
         return self._get_document_by_id(doc_id)
     
