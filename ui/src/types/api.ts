@@ -40,6 +40,22 @@ export interface TextProcessResponse {
   timestamp: string;
 }
 
+// 流式响应数据块类型
+export interface StreamChunk {
+  type: 'understanding' | 'action' | 'suggestion' | 'complete' | 'error';
+  data: any;
+  timestamp: string;
+}
+
+// 流式响应状态
+export interface StreamState {
+  id: string;
+  isStreaming: boolean;
+  chunks: StreamChunk[];
+  currentResponse: Partial<TextProcessResponse>;
+  error?: string;
+}
+
 export interface VoiceProcessResponse {
   id: string;
   transcription: string;

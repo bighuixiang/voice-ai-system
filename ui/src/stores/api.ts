@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getApiClient, type APIConfig, type TextInputData, type VoiceOptions, type TextProcessResponse, type VoiceProcessResponse } from '@/services/api'
+import type { StreamChunk, StreamState } from '@/types/api'
 
 // API请求记录接口
 export interface APIRequest {
@@ -36,6 +37,10 @@ export const useAPIStore = defineStore('api', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const uploadProgress = ref(0)
+  
+  // 流式响应状态
+  const streamState = ref<StreamState | null>(null)
+  const isStreaming = ref(false)
 
   // 计算属性
   const hasError = computed(() => error.value !== null)
@@ -296,6 +301,178 @@ export const useAPIStore = defineStore('api', () => {
     uploadProgress.value = Math.max(0, Math.min(100, progress))
   }
 
+  // 流式文本处理
+  const processTextStream = async (
+    data: TextInputData,
+    onChunk?: (chunk: StreamChunk) => void
+  ): Promise<TextProcessResponse> => {
+    const requestId = Date.now().toString()
+    isLoading.value = true
+    isStreaming.value = true
+    error.value = null
+
+    // 初始化流式状态
+    streamState.value = {
+      id: requestId,
+      isStreaming: true,
+      chunks: [],
+      currentResponse: {
+        id: requestId,
+        text: data.text,
+        understanding: {
+          intent: '',
+          entities: [],
+          confidence: 0
+        },
+        actions: [],
+        suggestions: [],
+        processing_time: 0,
+        timestamp: new Date().toISOString()
+      }
+    }
+
+    // 创建请求记录
+    const apiRequest: APIRequest = {
+      id: requestId,
+      type: 'text',
+      timestamp: new Date().toISOString(),
+      request: {
+        url: '/api/process/text/stream',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        data: { ...data, stream: true }
+      },
+      status: 'pending'
+    }
+
+    currentRequest.value = apiRequest
+    requestHistory.value.unshift(apiRequest)
+
+    try {
+      const startTime = Date.now()
+      
+      const response = await getApiClient().processTextStream(
+        data,
+        (chunk: any) => {
+          // 处理流式数据块
+          const streamChunk: StreamChunk = {
+            type: chunk.type || 'understanding',
+            data: chunk.data || chunk,
+            timestamp: new Date().toISOString()
+          }
+
+          // 添加到流式状态
+          if (streamState.value) {
+            streamState.value.chunks.push(streamChunk)
+            
+            // 更新当前响应状态
+            updateCurrentResponse(streamChunk)
+          }
+
+          // 调用外部回调
+          if (onChunk) {
+            onChunk(streamChunk)
+          }
+        }
+      )
+
+      const endTime = Date.now()
+      const duration = endTime - startTime
+
+      // 更新请求记录
+      apiRequest.response = {
+        status: 200,
+        headers: {},
+        data: response,
+        processingTime: response.processing_time || 0
+      }
+      apiRequest.status = 'success'
+      apiRequest.duration = duration
+      
+      // 保存历史记录
+      saveHistoryToStorage()
+
+      return response
+    } catch (err: any) {
+      // 更新错误信息
+      apiRequest.error = {
+        message: err.message || '未知错误',
+        code: err.code || 'UNKNOWN_ERROR',
+        details: err
+      }
+      apiRequest.status = 'error'
+      error.value = err.message
+      
+      // 更新流式状态错误
+      if (streamState.value) {
+        streamState.value.error = err.message
+        streamState.value.isStreaming = false
+      }
+      
+      throw err
+    } finally {
+      isLoading.value = false
+      isStreaming.value = false
+      currentRequest.value = null
+      
+      // 标记流式响应完成
+      if (streamState.value) {
+        streamState.value.isStreaming = false
+      }
+    }
+  }
+
+  // 更新当前响应状态
+  const updateCurrentResponse = (chunk: StreamChunk) => {
+    if (!streamState.value?.currentResponse) return
+
+    const current = streamState.value.currentResponse
+
+    switch (chunk.type) {
+      case 'understanding':
+        if (chunk.data.intent) {
+          current.understanding!.intent = chunk.data.intent
+        }
+        if (chunk.data.entities) {
+          current.understanding!.entities = chunk.data.entities
+        }
+        if (chunk.data.confidence !== undefined) {
+          current.understanding!.confidence = chunk.data.confidence
+        }
+        break
+
+      case 'action':
+        if (chunk.data && !current.actions!.find(a => a.type === chunk.data.type)) {
+          current.actions!.push(chunk.data)
+        }
+        break
+
+      case 'suggestion':
+        if (chunk.data && !current.suggestions!.includes(chunk.data)) {
+          current.suggestions!.push(chunk.data)
+        }
+        break
+
+      case 'complete':
+        // 最终完成时更新所有数据
+        if (chunk.data) {
+          Object.assign(current, chunk.data)
+        }
+        break
+    }
+  }
+
+  // 清除流式状态
+  const clearStreamState = () => {
+    streamState.value = null
+    isStreaming.value = false
+  }
+
+  // 获取当前流式响应
+  const getCurrentStreamResponse = () => {
+    return streamState.value?.currentResponse || null
+  }
+
   // 初始化时加载配置和历史记录
   loadConfig()
   loadHistoryFromStorage()
@@ -308,6 +485,8 @@ export const useAPIStore = defineStore('api', () => {
     isLoading,
     error,
     uploadProgress,
+    streamState,
+    isStreaming,
     
     // 计算属性
     hasError,
@@ -318,6 +497,7 @@ export const useAPIStore = defineStore('api', () => {
     // 方法
     clearError,
     processText,
+    processTextStream,
     processVoice,
     checkHealth,
     updateConfig,
@@ -329,6 +509,8 @@ export const useAPIStore = defineStore('api', () => {
     saveHistoryToStorage,
     loadHistoryFromStorage,
     addToHistory,
-    setUploadProgress
+    setUploadProgress,
+    clearStreamState,
+    getCurrentStreamResponse
   }
 })

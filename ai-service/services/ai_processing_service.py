@@ -208,6 +208,193 @@ class AIProcessingService:
                 processing_time=processing_time,
                 timestamp=str(time.time())
             )
+
+    async def process_text_stream(self, text: str):
+        """Process text input with streaming response"""
+        start_time = time.time()
+        self._processing_stats['total_requests'] += 1
+        
+        try:
+            logger.info("Starting streaming text processing pipeline")
+            
+            # Validate services
+            if not self.llm_service.is_loaded():
+                raise RuntimeError("LLM service not ready")
+            
+            # Validate input
+            if not text or not text.strip():
+                raise ValueError("Empty text input")
+            
+            text = text.strip()
+            logger.info(f"Processing text (streaming): '{text[:100]}{'...' if len(text) > 100 else ''}'")
+            
+            # Yield initial status
+            yield {
+                "type": "status",
+                "data": {"message": "开始分析文本...", "step": "initializing"},
+                "timestamp": str(time.time())
+            }
+            
+            # Step 1: Text understanding
+            step1_start = time.time()
+            logger.info("Step 1: Text understanding")
+            
+            yield {
+                "type": "status", 
+                "data": {"message": "正在理解文本内容...", "step": "understanding"},
+                "timestamp": str(time.time())
+            }
+            
+            understanding = await self.llm_service.understand(text)
+            step1_time = time.time() - step1_start
+            
+            # Yield understanding results progressively
+            yield {
+                "type": "understanding",
+                "data": {
+                    "intent": understanding.get("intent", "unknown"),
+                    "confidence": understanding.get("confidence", 0.0) * 0.6  # Partial confidence
+                },
+                "timestamp": str(time.time())
+            }
+            
+            logger.info(f"Step 1 completed in {step1_time:.2f}s")
+            
+            # Step 2: Knowledge retrieval
+            step2_start = time.time()
+            logger.info("Step 2: Knowledge base search")
+            
+            yield {
+                "type": "status",
+                "data": {"message": "搜索相关知识...", "step": "knowledge_search"},
+                "timestamp": str(time.time())
+            }
+            
+            context = await self._search_knowledge_context(text, understanding)
+            step2_time = time.time() - step2_start
+            
+            # Update understanding with entities if found
+            if understanding.get("entities"):
+                yield {
+                    "type": "understanding",
+                    "data": {
+                        "intent": understanding.get("intent", "unknown"),
+                        "entities": understanding.get("entities", []),
+                        "confidence": understanding.get("confidence", 0.0) * 0.8
+                    },
+                    "timestamp": str(time.time())
+                }
+            
+            logger.info(f"Step 2 completed in {step2_time:.2f}s")
+            
+            # Step 3: Content generation
+            step3_start = time.time()
+            logger.info("Step 3: Content generation")
+            
+            yield {
+                "type": "status",
+                "data": {"message": "生成回复内容...", "step": "content_generation"},
+                "timestamp": str(time.time())
+            }
+            
+            response_content = await self.llm_service.generate_response(text, understanding, context)
+            step3_time = time.time() - step3_start
+            
+            # Yield suggestion
+            if response_content:
+                yield {
+                    "type": "suggestion",
+                    "data": response_content,
+                    "timestamp": str(time.time())
+                }
+            
+            logger.info(f"Step 3 completed in {step3_time:.2f}s")
+            
+            # Step 4: Decision generation
+            step4_start = time.time()
+            logger.info("Step 4: Decision generation")
+            
+            yield {
+                "type": "status",
+                "data": {"message": "生成建议操作...", "step": "decision_generation"},
+                "timestamp": str(time.time())
+            }
+            
+            decision = await self.llm_service.decide(understanding, context)
+            step4_time = time.time() - step4_start
+            
+            # Yield actions
+            actions = decision.get("actions", [])
+            for action in actions:
+                yield {
+                    "type": "action",
+                    "data": {
+                        "type": action,
+                        "parameters": {"text": text},
+                        "priority": 2
+                    },
+                    "timestamp": str(time.time())
+                }
+            
+            logger.info(f"Step 4 completed in {step4_time:.2f}s")
+            
+            # Final understanding with full confidence
+            yield {
+                "type": "understanding",
+                "data": {
+                    "intent": understanding.get("intent", "unknown"),
+                    "entities": understanding.get("entities", []),
+                    "confidence": understanding.get("confidence", 0.0)
+                },
+                "timestamp": str(time.time())
+            }
+            
+            processing_time = time.time() - start_time
+            self._processing_stats['successful_requests'] += 1
+            self._update_average_processing_time(processing_time)
+            
+            # Yield completion
+            final_result = ProcessingResult(
+                success=True,
+                understanding=understanding,
+                actions=actions,
+                response_content=response_content,
+                processing_time=processing_time,
+                timestamp=str(time.time()),
+                metadata={
+                    'input_length': len(text),
+                    'decision_confidence': decision.get("confidence", 0.0),
+                    'context_documents': len(context),
+                    'processing_steps': ['understanding', 'knowledge_search', 'content_generation', 'decision'],
+                    'response_length': len(response_content) if response_content else 0
+                }
+            )
+            
+            yield {
+                "type": "complete",
+                "data": {
+                    "success": final_result.success,
+                    "understanding": final_result.understanding,
+                    "actions": final_result.actions,
+                    "response_content": final_result.response_content,
+                    "processing_time": final_result.processing_time,
+                    "timestamp": final_result.timestamp
+                },
+                "timestamp": str(time.time())
+            }
+            
+            logger.info(f"Streaming text processing completed successfully in {processing_time:.2f}s")
+            
+        except Exception as e:
+            processing_time = time.time() - start_time
+            self._processing_stats['failed_requests'] += 1
+            logger.error(f"Streaming text processing failed: {e}")
+            
+            yield {
+                "type": "error",
+                "data": {"message": str(e)},
+                "timestamp": str(time.time())
+            }
     
     async def _search_knowledge_context(self, text: str, understanding: Dict[str, Any]) -> List[str]:
         """Search for relevant knowledge context"""

@@ -15,7 +15,7 @@
           </div>
         </div>
       </el-header>
-      
+
       <el-main class="app-main">
         <div class="main-content">
           <el-row :gutter="20">
@@ -25,44 +25,39 @@
                   @submit="handleTextSubmit"
                   @success="handleTextSuccess"
                   @error="handleTextError"
+                  @stream-chunk="handleStreamChunk"
                 />
-                
-        
-                
+
                 <el-card class="panel-card" header="语音测试">
-                  <div class="placeholder-content">
-                    语音输入面板 - 待实现
-                  </div>
+                  <div class="placeholder-content">语音输入面板 - 待实现</div>
                 </el-card>
               </div>
             </el-col>
-            
+
             <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
               <div class="result-panels">
-                <el-card class="panel-card" header="处理结果">
-                  <div class="placeholder-content">
-                    结果展示面板 - 待实现
-                  </div>
-                </el-card>
-                
+                <ResultPanel
+                  :result="currentResult"
+                  :is-streaming="apiStore.isStreaming"
+                  :stream-chunks="streamChunks"
+                />
+
                 <el-card class="panel-card" header="请求日志">
-                  <div class="placeholder-content">
-                    请求日志面板 - 待实现
-                  </div>
+                  <div class="placeholder-content">请求日志面板 - 待实现</div>
                 </el-card>
               </div>
             </el-col>
           </el-row>
           <el-row>
             <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                      <!-- 配置测试组件 -->
-                      <ConfigTest />
+              <!-- 配置测试组件 -->
+              <ConfigTest />
             </el-col>
           </el-row>
         </div>
       </el-main>
     </el-container>
-    
+
     <!-- 配置面板抽屉 -->
     <el-drawer
       v-model="showConfig"
@@ -71,39 +66,69 @@
       size="400px"
     >
       <div class="config-content">
-        <div class="placeholder-content">
-          配置面板 - 待实现
-        </div>
+        <div class="placeholder-content">配置面板 - 待实现</div>
       </div>
     </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Microphone, Setting } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import ConfigTest from '@/components/ConfigTest.vue'
-import TextInputPanel from '@/components/TextInputPanel.vue'
-import type { TextInputData, TextProcessResponse } from '@/types/api'
+import { ref } from "vue";
+import { Microphone, Setting } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
+import ConfigTest from "@/components/ConfigTest.vue";
+import TextInputPanel from "@/components/TextInputPanel.vue";
+import ResultPanel from "@/components/ResultPanel.vue";
+import { useAPIStore } from "@/stores/api";
+import type {
+  TextInputData,
+  TextProcessResponse,
+  StreamChunk,
+} from "@/types/api";
 
-const showConfig = ref(false)
+const showConfig = ref(false);
+
+// API Store
+const apiStore = useAPIStore();
+
+// 流式响应状态
+const currentResult = ref<TextProcessResponse | null>(null);
+const streamChunks = ref<StreamChunk[]>([]);
 
 // 文本输入事件处理
 const handleTextSubmit = (data: TextInputData) => {
-  console.log('Text submit:', data)
-  ElMessage.info('正在处理文本...')
-}
+  console.log("Text submit:", data);
+  ElMessage.info("正在处理文本...");
+
+  // 清空之前的结果
+  currentResult.value = null;
+  streamChunks.value = [];
+};
 
 const handleTextSuccess = (response: TextProcessResponse) => {
-  console.log('Text success:', response)
-  ElMessage.success('文本处理成功')
-}
+  console.log("Text success:", response);
+  ElMessage.success("文本处理完成");
+
+  // 更新最终结果
+  currentResult.value = response;
+};
 
 const handleTextError = (error: string) => {
-  console.error('Text error:', error)
-  ElMessage.error(`文本处理失败: ${error}`)
-}
+  console.error("Text error:", error);
+  ElMessage.error(`文本处理失败: ${error}`);
+};
+
+// 处理流式数据块
+const handleStreamChunk = (chunk: StreamChunk) => {
+  console.log("Stream chunk:", chunk);
+  streamChunks.value.push(chunk);
+
+  // 更新当前结果（从API store获取实时状态）
+  const currentStreamResponse = apiStore.getCurrentStreamResponse();
+  if (currentStreamResponse) {
+    currentResult.value = currentStreamResponse as TextProcessResponse;
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -122,14 +147,14 @@ const handleTextError = (error: string) => {
   background-color: $bg-color;
   border-bottom: 1px solid $border-color;
   padding: 0 $spacing-lg;
-  
+
   .header-content {
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  
+
   .app-title {
     display: flex;
     align-items: center;
@@ -138,7 +163,7 @@ const handleTextError = (error: string) => {
     font-weight: 600;
     color: $primary-color;
     margin: 0;
-    
+
     .el-icon {
       font-size: $font-size-extra-large;
     }
@@ -175,7 +200,7 @@ const handleTextError = (error: string) => {
 
 .config-content {
   padding: $spacing-md;
-  
+
   .placeholder-content {
     padding: $spacing-xl;
     text-align: center;
@@ -191,19 +216,19 @@ const handleTextError = (error: string) => {
   .app-header {
     padding: 0 $spacing-md;
   }
-  
+
   .app-main {
     padding: $spacing-md;
   }
-  
+
   .app-title {
     font-size: $font-size-medium;
-    
+
     .el-icon {
       font-size: $font-size-large;
     }
   }
-  
+
   .test-panels,
   .result-panels {
     gap: $spacing-md;

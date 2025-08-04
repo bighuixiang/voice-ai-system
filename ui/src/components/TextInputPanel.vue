@@ -124,6 +124,7 @@ interface Emits {
   (e: 'submit', data: TextInputData): void
   (e: 'success', response: TextProcessResponse): void
   (e: 'error', error: string): void
+  (e: 'streamChunk', chunk: any): void
 }
 
 const emit = defineEmits<Emits>()
@@ -214,8 +215,14 @@ const handleSubmit = async () => {
     // 触发提交事件
     emit('submit', submitData)
     
-    // 调用API
-    const response = await apiStore.processText(submitData)
+    // 使用流式处理
+    const response = await apiStore.processTextStream(
+      submitData,
+      (chunk) => {
+        // 触发流式数据块事件
+        emit('streamChunk', chunk)
+      }
+    )
     
     // 成功提示
     ElMessage.success('文本处理完成')

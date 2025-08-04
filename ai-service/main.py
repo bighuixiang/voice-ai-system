@@ -1,8 +1,10 @@
 import asyncio
 import uvicorn
 import time
+import json
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from typing import Optional, List
@@ -194,6 +196,50 @@ async def process_text(request: TextProcessRequest):
             timestamp=str(time.time()),
             error=str(e)
         )
+
+@app.post("/api/process/text/stream")
+async def process_text_stream(request: TextProcessRequest):
+    """Process text input with streaming response using Server-Sent Events"""
+    try:
+        if not ai_processing_service or not ai_processing_service.is_ready():
+            raise HTTPException(status_code=503, detail="AI processing service not available")
+        
+        async def generate_stream():
+            """Generate Server-Sent Events stream"""
+            try:
+                async for chunk in ai_processing_service.process_text_stream(request.content):
+                    # Format as Server-Sent Events
+                    chunk_json = f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+                    yield chunk_json.encode('utf-8')
+                
+                # Send completion marker
+                yield "data: [DONE]\n\n".encode('utf-8')
+                
+            except Exception as e:
+                logger.error(f"Stream generation failed: {e}")
+                error_chunk = {
+                    "type": "error",
+                    "data": {"message": str(e)},
+                    "timestamp": str(time.time())
+                }
+                yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n".encode('utf-8')
+                yield "data: [DONE]\n\n".encode('utf-8')
+        
+        return StreamingResponse(
+            generate_stream(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Methods": "*"
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Streaming text processing endpoint failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Knowledge base management endpoints
 class KnowledgeSearchRequest(BaseModel):

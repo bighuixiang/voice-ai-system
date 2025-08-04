@@ -1,276 +1,96 @@
-@use "sass:color";
-@use "../styles/variables" as *;
-@use "../styles/mixins" as *;
-
 .textInputPanel {
-  @include card-style;
-  margin-bottom: $spacing-lg;
-  
   .header {
-    @include flex-between;
-    margin-bottom: $spacing-md;
-    padding-bottom: $spacing-sm;
-    border-bottom: 1px solid $border-color-light;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
     
     .title {
-      @include flex-center;
-      gap: $spacing-xs;
-      font-size: $font-size-large;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
       font-weight: 600;
-      color: $text-color-primary;
+      color: var(--el-text-color-primary);
       margin: 0;
-      
-      .el-icon {
-        color: $primary-color;
-      }
     }
     
     .actions {
       display: flex;
-      gap: $spacing-sm;
+      gap: 8px;
     }
   }
   
   .content {
-    .inputArea {
-      margin-bottom: $spacing-md;
-      
-      .errorMessage {
-        @include flex-center;
-        gap: $spacing-xs;
-        margin-top: $spacing-xs;
-        padding: $spacing-xs $spacing-sm;
-        background-color: rgba($danger-color, 0.1);
-        color: $danger-color;
-        border-radius: $border-radius-base;
-        font-size: $font-size-small;
-        
-        .el-icon {
-          font-size: 14px;
-        }
-      }
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .inputArea {
+    position: relative;
     
-    .configOptions {
+    .errorMessage {
       display: flex;
-      flex-direction: column;
-      gap: $spacing-md;
-      margin-bottom: $spacing-lg;
-      padding: $spacing-md;
-      background-color: $bg-color-page;
-      border-radius: $border-radius-base;
-      border: 1px solid $border-color-lighter;
-      
-      @include tablet {
-        flex-direction: row;
-        align-items: flex-start;
-      }
-      
-      .option {
-        flex: 1;
-        
-        .label {
-          display: block;
-          margin-bottom: $spacing-xs;
-          font-size: $font-size-small;
-          font-weight: 500;
-          color: $text-color-regular;
-        }
-        
-        .optionHint {
-          margin-top: $spacing-xs;
-          font-size: $font-size-extra-small;
-          color: $text-color-secondary;
-          line-height: 1.4;
-        }
-        
-        // 复选框选项特殊样式
-        &:has(.el-checkbox) {
-          .optionHint {
-            margin-left: 24px; // 对齐复选框文本
-          }
-        }
-      }
+      align-items: center;
+      gap: 4px;
+      color: var(--el-color-danger);
+      font-size: 12px;
+      margin-top: 8px;
     }
+  }
+  
+  .configOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     
-    .submitButton {
-      width: 100%;
-      height: 48px;
-      font-size: $font-size-base;
-      font-weight: 600;
-      
-      .el-icon {
-        margin-right: $spacing-xs;
+    .option {
+      .label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--el-text-color-regular);
+        margin-bottom: 6px;
       }
       
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-      
-      @include mobile {
-        height: 44px;
-        font-size: $font-size-small;
+      .optionHint {
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        margin-top: 4px;
+        line-height: 1.4;
       }
     }
-    
-    .errorAlert {
-      margin-top: $spacing-md;
-    }
+  }
+  
+  .submitButton {
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .errorAlert {
+    margin-top: 16px;
   }
 }
 
-// 响应式适配
-@include mobile {
+// 响应式调整
+@media (max-width: 768px) {
   .textInputPanel {
     .header {
       flex-direction: column;
       align-items: flex-start;
-      gap: $spacing-sm;
+      gap: 12px;
       
       .actions {
-        align-self: flex-end;
+        width: 100%;
+        justify-content: flex-end;
       }
     }
     
-    .content {
-      .configOptions {
-        padding: $spacing-sm;
-        
-        .option {
-          .label {
-            font-size: $font-size-extra-small;
-          }
-        }
-      }
-    }
-  }
-}
-
-// 深色主题适配
-:global(.dark) {
-  .textInputPanel {
-    background-color: #1f1f1f;
-    border-color: #404040;
-    
-    .header {
-      border-bottom-color: #404040;
-      
-      .title {
-        color: #ffffff;
-      }
-    }
-    
-    .content {
-      .inputArea {
-        .errorMessage {
-          background-color: rgba($danger-color, 0.2);
-          color: #ff7875;
-        }
-      }
-      
-      .configOptions {
-        background-color: #262626;
-        border-color: #404040;
-        
-        .option {
-          .label {
-            color: #d9d9d9;
-          }
-          
-          .optionHint {
-            color: #8c8c8c;
-          }
-        }
-      }
-    }
-  }
-}
-
-// 加载状态样式
-.textInputPanel {
-  &:has(.submitButton.is-loading) {
-    .inputArea,
     .configOptions {
-      opacity: 0.7;
-      pointer-events: none;
-    }
-  }
-}
-
-// 动画效果
-.textInputPanel {
-  .content {
-    .inputArea {
-      .errorMessage {
-        animation: slideDown 0.3s ease-out;
-      }
-    }
-    
-    .errorAlert {
-      animation: slideDown 0.3s ease-out;
-    }
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Element Plus 组件样式覆盖
-.textInputPanel {
-  :global(.el-textarea__inner) {
-    font-family: inherit;
-    line-height: 1.6;
-    resize: vertical;
-    min-height: 120px;
-    
-    &:focus {
-      border-color: $primary-color;
-      box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
-    }
-  }
-  
-  :global(.el-input__count) {
-    background-color: transparent;
-    color: $text-color-secondary;
-    font-size: $font-size-extra-small;
-  }
-  
-  :global(.el-checkbox__label) {
-    font-size: $font-size-base;
-    color: $text-color-regular;
-    font-weight: 500;
-  }
-  
-  :global(.el-button--primary) {
-    background-color: $primary-color;
-    border-color: $primary-color;
-    
-    &:hover {
-      background-color: color.adjust($primary-color, $lightness: 10%);
-      border-color: color.adjust($primary-color, $lightness: 10%);
-    }
-    
-    &:active {
-      background-color: color.adjust($primary-color, $lightness: -10%);
-      border-color: color.adjust($primary-color, $lightness: -10%);
-    }
-  }
-  
-  :global(.el-alert--error) {
-    background-color: rgba($danger-color, 0.1);
-    border-color: rgba($danger-color, 0.3);
-    
-    :global(.el-alert__title) {
-      color: $danger-color;
+      gap: 16px;
     }
   }
 }
