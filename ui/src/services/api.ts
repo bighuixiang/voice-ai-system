@@ -59,9 +59,11 @@ export interface AppError {
   originalError?: any;
 }
 
-// 默认配置
+// 默认配置 - 连接Python AI服务
 const defaultConfig: APIConfig = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  // 开发环境使用代理，生产环境直连
+  baseURL: import.meta.env.VITE_API_BASE_URL || 
+    (import.meta.env.DEV ? "" : ""),
   timeout: 30000,
   maxFileSize: 52428800, // 50MB
   supportedAudioFormats: ["wav", "mp3", "m4a", "flac"],
@@ -354,28 +356,26 @@ export class VoiceAIClient {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  // 文本处理
+  // 文本处理 - 直接连接Python AI服务
   async processText(
     data: TextInputData,
     options: RequestOptions = {}
   ): Promise<TextProcessResponse> {
-    return this.requestWithRetry<any>(async () => {
-      const cancelToken = options.cancelToken || this.createCancelToken();
-      const requestId =
-        Date.now().toString() + Math.random().toString(36).substring(2, 11);
+    const cancelToken = options.cancelToken || this.createCancelToken();
+    const requestId =
+      Date.now().toString() + Math.random().toString(36).substring(2, 11);
 
-      if (options.cancelToken) {
-        this.activeCancelTokens.set(requestId, options.cancelToken);
-      }
+    if (options.cancelToken) {
+      this.activeCancelTokens.set(requestId, options.cancelToken);
+    }
 
-      // 转换前端数据格式到后端期望的格式
-      const requestData: ProcessTextRequest = {
-        content: data.text,
-        context: data.context,
-        language: "zh-CN", // 默认语言，可以从配置中获取
-      };
+    // Python AI服务期望的简单格式
+    const requestData = {
+      content: data.text
+    };
 
-      const response = await this.client.post<any>(
+    const response = await this.requestWithRetry<any>(async () => {
+      return this.client.post<any>(
         "/api/process/text",
         requestData,
         {
@@ -383,36 +383,43 @@ export class VoiceAIClient {
           metadata: { requestId },
         }
       );
-
-      // 转换后端响应格式到前端期望的格式
-      return this.transformBackendResponse(response.data, data.text);
     }, options);
+
+    // 转换Python AI服务响应格式到前端期望的格式
+    return this.transformBackendResponse(response, data.text);
   }
 
-  // 转换后端响应格式到前端期望的格式
+  // 转换Python AI服务响应格式到前端期望的格式
   private transformBackendResponse(
     backendResponse: any,
     originalText: string
   ): TextProcessResponse {
-    // 检查后端是否返回了错误
+    // 检查Python AI服务是否返回了错误
     if (!backendResponse.success && backendResponse.error) {
       throw new Error(backendResponse.error);
     }
 
-    // 后端返回的是 ProcessResult 格式，需要转换为前端期望的 TextProcessResponse 格式
+    // Python AI服务返回格式转换为前端期望的 TextProcessResponse 格式
+    // Python返回格式: {success, understanding: {intent, entities, sentiment, confidence, summary}, actions, processing_time, timestamp, error}
+    const understanding = backendResponse.understanding || {};
+    
     return {
-      id: backendResponse.id || Date.now().toString(),
+      id: Date.now().toString(), // Python服务没有返回ID，生成一个
       text: originalText,
       understanding: {
-        intent: backendResponse.understanding?.intent || "unknown",
-        entities: backendResponse.understanding?.entities || [],
-        confidence: backendResponse.understanding?.confidence || 0,
+        intent: understanding.intent || "unknown",
+        entities: understanding.entities || [],
+        confidence: understanding.confidence || 0,
       },
-      actions: backendResponse.actions || [],
-      suggestions: [], // 后端暂时没有这个字段，可以从 actions 中提取建议
-      processing_time: backendResponse.processingTime || 0,
-      timestamp: backendResponse.timestamp
-        ? new Date(backendResponse.timestamp).toISOString()
+      actions: (backendResponse.actions || []).map((action: any) => ({
+        type: typeof action === 'string' ? action : action.type || action,
+        parameters: typeof action === 'object' && action.parameters ? action.parameters : {},
+        priority: typeof action === 'object' && action.priority ? action.priority : 1
+      })),
+      suggestions: [], // Python服务暂时没有这个字段
+      processing_time: backendResponse.processing_time || 0,
+      timestamp: backendResponse.timestamp 
+        ? new Date(parseFloat(backendResponse.timestamp) * 1000).toISOString()
         : new Date().toISOString(),
     };
   }

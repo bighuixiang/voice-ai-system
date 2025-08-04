@@ -17,6 +17,7 @@ class ProcessingResult:
     transcription: Optional[str] = None
     understanding: Dict[str, Any] = None
     actions: List[str] = None
+    response_content: Optional[str] = None  # 添加生成的回答内容
     processing_time: float = 0.0
     timestamp: str = ""
     error: Optional[str] = None
@@ -147,16 +148,32 @@ class AIProcessingService:
             logger.info(f"Processing text: '{text[:100]}{'...' if len(text) > 100 else ''}'")
             
             # Step 1: Text understanding
+            step1_start = time.time()
             logger.info("Step 1: Text understanding")
             understanding = await self.llm_service.understand(text)
+            step1_time = time.time() - step1_start
+            logger.info(f"Step 1 completed in {step1_time:.2f}s")
             
             # Step 2: Knowledge retrieval
+            step2_start = time.time()
             logger.info("Step 2: Knowledge base search")
             context = await self._search_knowledge_context(text, understanding)
+            step2_time = time.time() - step2_start
+            logger.info(f"Step 2 completed in {step2_time:.2f}s")
             
-            # Step 3: Decision generation
-            logger.info("Step 3: Decision generation")
+            # Step 3: Content generation
+            step3_start = time.time()
+            logger.info("Step 3: Content generation")
+            response_content = await self.llm_service.generate_response(text, understanding, context)
+            step3_time = time.time() - step3_start
+            logger.info(f"Step 3 completed in {step3_time:.2f}s")
+            
+            # Step 4: Decision generation (simplified)
+            step4_start = time.time()
+            logger.info("Step 4: Decision generation")
             decision = await self.llm_service.decide(understanding, context)
+            step4_time = time.time() - step4_start
+            logger.info(f"Step 4 completed in {step4_time:.2f}s")
             
             processing_time = time.time() - start_time
             self._processing_stats['successful_requests'] += 1
@@ -168,13 +185,15 @@ class AIProcessingService:
                 success=True,
                 understanding=understanding,
                 actions=decision.get("actions", []),
+                response_content=response_content,  # 将生成的内容放在主字段中
                 processing_time=processing_time,
                 timestamp=str(time.time()),
                 metadata={
                     'input_length': len(text),
                     'decision_confidence': decision.get("confidence", 0.0),
                     'context_documents': len(context),
-                    'processing_steps': ['understanding', 'knowledge_search', 'decision']
+                    'processing_steps': ['understanding', 'knowledge_search', 'content_generation', 'decision'],
+                    'response_length': len(response_content)
                 }
             )
             

@@ -7,7 +7,7 @@ import type { TextInputData, VoiceOptions } from '@/services/api'
 vi.mock('@/services/api', () => ({
   getApiClient: () => ({
     getConfig: () => ({
-      baseURL: 'http://localhost:3000',
+      baseURL: 'http://localhost:8000',
       timeout: 30000,
       maxFileSize: 52428800,
       supportedAudioFormats: ['wav', 'mp3', 'm4a', 'flac'],

@@ -13,15 +13,28 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    cors: true,
     proxy: {
+      // 代理所有 /api 请求到 Python AI 服务
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        },
       },
+      // 代理健康检查请求
       '/health': {
-        target: 'http://localhost:3000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
       },

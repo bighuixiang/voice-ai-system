@@ -27,8 +27,7 @@
                   @error="handleTextError"
                 />
                 
-                <!-- 配置测试组件 -->
-                <ConfigTest />
+        
                 
                 <el-card class="panel-card" header="语音测试">
                   <div class="placeholder-content">
@@ -52,6 +51,12 @@
                   </div>
                 </el-card>
               </div>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+                      <!-- 配置测试组件 -->
+                      <ConfigTest />
             </el-col>
           </el-row>
         </div>

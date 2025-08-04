@@ -83,6 +83,7 @@ class ProcessingResponse(BaseModel):
     transcription: Optional[str] = None
     understanding: dict
     actions: list
+    response_content: Optional[str] = None  # 添加生成的回答内容字段
     processing_time: float
     timestamp: str
     error: Optional[str] = None
@@ -176,6 +177,7 @@ async def process_text(request: TextProcessRequest):
             transcription=result.transcription,
             understanding=result.understanding,
             actions=result.actions,
+            response_content=result.response_content,  # 添加生成的回答内容
             processing_time=result.processing_time,
             timestamp=result.timestamp,
             error=result.error
