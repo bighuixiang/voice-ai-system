@@ -1,3 +1,11 @@
+<!--
+ * @Author: Aaron Xiang Aaron.xiang@SZZY.COM
+ * @Date: 2026-03-05 14:29:50
+ * @LastEditors: Aaron Xiang Aaron.xiang@SZZY.COM
+ * @LastEditTime: 2026-05-25 15:44:45
+ * @FilePath: \voice-ai-system\README.md
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
 # 《魔道尸祖：我带着僵尸王勇闯异界》小说项目
 
 ## 项目简介
@@ -30,3 +38,14 @@
 
  假设你现在是一个资深小说读者，你帮忙看看当前爽文小说的第章，爽点，整体逻辑是否合理，你可以来一篇观后感，并且提出意
   见。
+
+
+  - LLM：GPT
+  - 生图：GPT Images
+  - AI 视频：RunningHub API
+  - 自动化编排：n8n / Python 脚本
+  - 合成渲染：Remotion + FFmpeg
+  - 配音：FishAudio 或 ElevenLabs（二选一主推荐 FishAudio，旁边备注 ElevenLabs 备用）
+  - 音效/BGM：Suno 生成 BGM + Freesound/商用音效库补充
+  - 字幕：WhisperX / 自动时间轴
+  - 发布：抖音、快手、小红书、B站、YouTube Shorts，以文字显示，不放平台 Logo
