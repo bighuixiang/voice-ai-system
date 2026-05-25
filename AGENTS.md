@@ -1,31 +1,42 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+## 项目结构与模块组织
+本仓库是中文小说创作仓库，不是可执行代码工程，按内容类型分层管理：
 
-This repository is a Chinese fantasy novel and adaptation workspace. Core reference material lives in `00-世界观设定/`, including world rules, cultivation systems, writing guides, and special mechanics. Character files are grouped under `01-角色设定/` by role, such as `主角/`, `双女主/`, `小伙伴/`, `反派/`, and `魔兽/`. Main plot planning is in `02-故事大纲/主线剧情/`; drafted prose is in `03-章节正文/`; script adaptations are in `04-剧本/`; chronology is in `05-事件年表/`; notes are in `06-素材笔记/`; image references are in `07-角色图片/`.
+- `00-世界观设定/`：世界观、修炼体系、写作规范。
+- `01-角色设定/`：角色档案，按主角/双女主/反派/小伙伴等子目录拆分。
+- `02-故事大纲/主线剧情/`：主线规划与剧情骨架，`整体规划.md` 为主参考。
+- `03-章节正文/`：按卷组织的章节正文。
+- `04-剧本/`：章节对应的剧本化版本。
+- `05-事件年表/`：`时间线.md` 与 `大事记.md` 等时序资料。
+- `06-素材笔记/`：灵感与素材碎片。
+- `07-角色图片/`：角色与场景图片资产。
 
-## Build, Test, and Development Commands
+## 构建、测试与开发命令
+本项目无编译与自动化测试流程，日常以编辑与一致性校验为主：
 
-There is no software build pipeline, package manifest, or automated test suite in this repository. Use Git and text review commands instead:
+- `git status -sb`：查看当前改动。
+- `git log --oneline -n 20`：查看最近提交风格与粒度。
+- `Get-ChildItem -Recurse -File 03-章节正文`：检查章节文件是否齐全。
+- `Select-String -Path "03-章节正文\\**\\*.md" -Pattern "TODO|待补"`：定位待补内容。
 
-- `git status --short`: check pending content changes.
-- `git diff -- path/to/file.md`: review edits before committing.
-- `git log -5 --pretty=format:"%s"`: inspect recent commit wording.
+## 编写风格与命名规范
+- 统一使用 Markdown，标题层级清晰，段落简短直接。
+- 文件名优先中文语义化命名，避免无必要重命名。
+- 章节命名建议：`第X章-章节标题.md`（沿用现有卷内风格）。
+- 角色文件建议：`角色名.md` 或 `角色名-完整版.md`。
+- 内容归档要严格遵循目录语义：设定放 `00`，角色放 `01`，正文放 `03`。
 
-For consistency checks, manually compare changed chapters against `00-世界观设定/编写指南_完整版.md`, `00-世界观设定/写作风格统一指南.md`, and the relevant character files.
+## 校验与审阅指南
+无自动测试时，提交前至少完成以下人工校验：
 
-## Coding Style & Naming Conventions
+- 与 `02-故事大纲/主线剧情/整体规划.md` 对齐剧情走向。
+- 与 `00-世界观设定/编写指南_完整版.md` 对齐写作规则与禁忌。
+- 与 `05-事件年表/时间线.md` 对齐时间线和事件顺序。
+- 对照上一章检查人物状态、称谓、能力与情节连续性。
 
-Write Markdown files in UTF-8. Keep headings descriptive, use short paragraphs, and preserve the Chinese narrative voice already established in the project. Prefer numbered or role-based directory placement over creating loose root files. Use clear filenames such as `第4章-章节主题.md`, `角色名-完整版.md`, or `设定主题.md`. Avoid temporary report files unless they capture durable canon decisions.
-
-## Testing Guidelines
-
-Content validation is editorial. Before finalizing changes, verify that new scenes do not conflict with the world background, cultivation levels, timeline, character relationships, or existing chapter continuity. For chapter edits, check both prose in `03-章节正文/` and any matching script file in `04-剧本/` when applicable.
-
-## Commit & Pull Request Guidelines
-
-Recent commits use short Chinese summaries with a `feat:` prefix, for example `feat: 优化剧本` or `feat: 优化第二第三章内容`. Keep commits focused on one content area or revision goal. Pull requests should describe the changed files, summarize plot or canon impacts, mention any timeline or character updates, and include images only when changes affect `07-角色图片/` or visual references.
-
-## Agent-Specific Instructions
-
-Read `CLAUDE.md` before substantial writing edits. Preserve established canon, dialogue habits, and style rules. Do not delete legacy planning files without checking whether their content has already been merged into current world, outline, or chapter documents.
+## 提交与 PR 规范
+- 历史提交以 `feat:` 为主，可延续 `feat|fix|docs: 简短说明` 格式。
+- 一次提交只做一类改动（例如“优化第3章”或“更新角色设定”）。
+- PR 描述需写清：改动内容、改动原因、影响路径、连续性核对结果。
+- 仅在更新 `07-角色图片/` 时附图片预览或说明。
