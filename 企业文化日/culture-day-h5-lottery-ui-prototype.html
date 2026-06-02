@@ -1,0 +1,1543 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>企业文化日运动会抽奖 H5 原型</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23e84b3c'/%3E%3Cpath d='M14 36c9-14 23-14 36 0' fill='none' stroke='%23fff8e8' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M32 12v40' stroke='%23ffc83d' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;600;700;800;900&display=swap");
+
+    :root {
+      --track: #dc2626;
+      --track-deep: #7f1d1d;
+      --track-soft: #fef2f2;
+      --field: #16a34a;
+      --field-deep: #14532d;
+      --lime: #d9f45f;
+      --gold: #fbbf24;
+      --cream: #fff8e8;
+      --paper: #fffdf7;
+      --cyan: #0891b2;
+      --ink: #1f2937;
+      --muted: #52606d;
+      --line: rgba(32, 33, 36, .12);
+      --shadow: 0 24px 70px rgba(32, 33, 36, .18);
+      --radius: 8px;
+      --z-base: 1;
+      --z-raised: 10;
+      --z-nav: 20;
+      --z-modal: 50;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Source Sans 3", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(220, 38, 38, .08) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(0deg, rgba(22, 163, 74, .08) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(120deg, rgba(232, 75, 60, .08), transparent 34%),
+        linear-gradient(300deg, rgba(31, 159, 102, .12), transparent 42%),
+        #f7efe1;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button,
+    .mini-card,
+    .round,
+    .ticket,
+    .claim-card {
+      transition: border-color .22s ease, box-shadow .22s ease, transform .22s ease, background .22s ease;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    .mini-card:focus-visible,
+    .round:focus-visible {
+      outline: 3px solid rgba(251, 191, 36, .75);
+      outline-offset: 3px;
+    }
+
+    .board {
+      min-height: 100vh;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) 1fr;
+      gap: 28px;
+    }
+
+    .panel {
+      position: sticky;
+      top: 28px;
+      height: calc(100vh - 56px);
+      padding: 22px;
+      border: 1px solid rgba(32, 33, 36, .1);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 247, .86);
+      box-shadow: 0 20px 60px rgba(32, 33, 36, .12);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .brand-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background:
+        linear-gradient(90deg, transparent 46%, rgba(255, 255, 255, .85) 46% 54%, transparent 54%),
+        repeating-radial-gradient(circle at 50% 50%, var(--track) 0 19px, #fff6 19px 22px, var(--track-deep) 22px 32px);
+      box-shadow: inset 0 0 0 6px #fff, 0 12px 24px rgba(184, 50, 42, .28);
+    }
+
+    .panel h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .panel-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .meta-card {
+      min-height: 78px;
+      padding: 11px;
+      border-radius: var(--radius);
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, .12), transparent 50%),
+        var(--track-deep);
+      box-shadow: inset 0 -5px 0 rgba(0, 0, 0, .12);
+      display: grid;
+      align-content: end;
+      gap: 2px;
+    }
+
+    .meta-card:nth-child(2) {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, .12), transparent 50%),
+        var(--field-deep);
+    }
+
+    .meta-card b {
+      font-family: "Bebas Neue", "Source Sans 3", sans-serif;
+      font-size: 28px;
+      line-height: .95;
+      letter-spacing: 0;
+    }
+
+    .meta-card span {
+      color: rgba(255, 255, 255, .78);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .design-note {
+      padding: 13px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(251, 191, 36, .36), transparent),
+        #fff;
+      border: 1px solid rgba(251, 191, 36, .42);
+      color: #664500;
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    .control-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .label {
+      color: #3e4146;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 4px;
+      border-radius: var(--radius);
+      background: #ece4d5;
+    }
+
+    .segmented button {
+      min-height: 38px;
+      border-radius: 6px;
+      color: #4c4f55;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 800;
+      transition: transform .2s ease, background .2s ease, color .2s ease;
+    }
+
+    .segmented button.active {
+      color: #fff;
+      background: var(--ink);
+      box-shadow: 0 8px 18px rgba(32, 33, 36, .16);
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .legend span {
+      min-height: 34px;
+      padding: 8px 9px;
+      border-radius: 6px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex: 0 0 auto;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(230px, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .phone-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    .caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+      color: #4b4f54;
+      font-weight: 900;
+      padding-left: 4px;
+    }
+
+    .caption::after {
+      content: "375 H5";
+      padding: 4px 7px;
+      border-radius: 99px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .phone {
+      width: 100%;
+      min-width: 0;
+      aspect-ratio: 390 / 844;
+      border-radius: 34px;
+      padding: 10px;
+      background: #151719;
+      box-shadow: var(--shadow);
+    }
+
+    .screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden auto;
+      border-radius: 26px;
+      background: var(--cream);
+      isolation: isolate;
+      scrollbar-width: none;
+    }
+
+    .screen::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    .screen::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px 66px auto;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      border: 28px solid rgba(22, 163, 74, .12);
+      z-index: -1;
+    }
+
+    .screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, .28) 1px, transparent 1px) 0 0 / 34px 34px,
+        linear-gradient(0deg, rgba(255, 255, 255, .22) 1px, transparent 1px) 0 0 / 34px 34px,
+        linear-gradient(150deg, #f9f0d5 0 38%, #f4fff4 38% 100%);
+    }
+
+    .track-band {
+      position: absolute;
+      left: -18%;
+      right: -18%;
+      top: 0;
+      height: 244px;
+      background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, .68) 0 2px, transparent 2px 54px),
+        linear-gradient(135deg, var(--track), var(--track-deep));
+      clip-path: polygon(0 0, 100% 0, 96% 70%, 8% 100%);
+      z-index: -1;
+    }
+
+    .track-band::after {
+      content: "";
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      bottom: 22px;
+      height: 56px;
+      border-top: 3px solid rgba(255, 255, 255, .74);
+      border-bottom: 3px solid rgba(255, 255, 255, .74);
+      transform: skewX(-14deg);
+    }
+
+    .app-top {
+      height: 42px;
+      padding: 12px 18px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .18);
+    }
+
+    .pill-mini {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .2);
+      border: 1px solid rgba(255, 255, 255, .35);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .content {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      padding-bottom: 88px;
+    }
+
+    .hero {
+      color: #fff;
+      padding: 14px 18px 8px;
+      min-height: 158px;
+      display: grid;
+      align-content: end;
+      gap: 8px;
+    }
+
+    .hero-kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-family: "Bebas Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: clamp(28px, 2.45vw, 38px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+    }
+
+    .hero p {
+      max-width: 220px;
+      margin: 0;
+      color: rgba(255, 255, 255, .88);
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    .race-tag {
+      width: fit-content;
+      padding: 6px 9px;
+      border-radius: 5px;
+      background: var(--lime);
+      color: #173d24;
+      font-size: 11px;
+      font-weight: 950;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, .16);
+    }
+
+    .field-card,
+    .white-card,
+    .ticket,
+    .modal-card {
+      border-radius: var(--radius);
+      border: 1px solid rgba(32, 33, 36, .1);
+      background: var(--paper);
+      box-shadow: 0 14px 34px rgba(32, 33, 36, .1);
+    }
+
+    .login-card {
+      margin-top: -8px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: #3b3e43;
+      font-weight: 900;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input {
+      min-width: 0;
+      width: 100%;
+      height: 44px;
+      border: 1px solid rgba(32, 33, 36, .18);
+      border-radius: 7px;
+      padding: 0 12px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input:focus {
+      border-color: var(--field);
+      box-shadow: 0 0 0 3px rgba(31, 159, 102, .16);
+    }
+
+    .code-btn {
+      height: 44px;
+      padding: 0 11px;
+      border-radius: 7px;
+      background: #202124;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .primary {
+      height: 48px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--track), #ff7d4b);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 950;
+      box-shadow: 0 16px 30px rgba(232, 75, 60, .32);
+    }
+
+    .primary:hover,
+    .draw-button:hover,
+    .secondary:hover,
+    .code-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .secondary {
+      height: 42px;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid rgba(32, 33, 36, .12);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .quick-rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .quick-rules div {
+      min-height: 74px;
+      padding: 9px;
+      border-radius: 7px;
+      background: #fff7dc;
+      border: 1px solid rgba(255, 200, 61, .45);
+      display: grid;
+      align-content: center;
+      gap: 3px;
+    }
+
+    .quick-rules b {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .quick-rules span {
+      color: #6f5a18;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .start-list {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .76);
+      border: 1px solid rgba(32, 33, 36, .1);
+    }
+
+    .start-item {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      align-items: center;
+      color: #3a3f45;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .check-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--field);
+      position: relative;
+      box-shadow: 0 7px 14px rgba(22, 163, 74, .24);
+    }
+
+    .check-icon::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 6px;
+      width: 8px;
+      height: 5px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg);
+    }
+
+    .status-card {
+      margin-top: -18px;
+      padding: 14px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .96), rgba(255, 251, 231, .96));
+    }
+
+    .status-head,
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .status-head strong,
+    .card-head strong {
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .status-head small,
+    .card-head small {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .timer {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .timer div {
+      min-height: 54px;
+      border-radius: 7px;
+      background: #202124;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      font-size: 20px;
+      box-shadow: inset 0 -4px 0 rgba(255, 255, 255, .08);
+    }
+
+    .timer span {
+      display: block;
+      margin-top: -16px;
+      color: rgba(255, 255, 255, .68);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .rounds {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .round {
+      min-height: 58px;
+      padding: 8px 4px;
+      border-radius: 7px;
+      background: #fff;
+      border: 1px solid rgba(32, 33, 36, .1);
+      text-align: center;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+
+    .round.active {
+      color: #fff;
+      background: var(--field);
+      border-color: var(--field);
+      box-shadow: 0 12px 22px rgba(31, 159, 102, .25);
+    }
+
+    .round b {
+      font-size: 13px;
+    }
+
+    .round small {
+      font-size: 10px;
+      font-weight: 800;
+      color: inherit;
+      opacity: .78;
+    }
+
+    .eligibility-card {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      background:
+        linear-gradient(135deg, rgba(8, 145, 178, .14), transparent 56%),
+        #fff;
+    }
+
+    .meter {
+      display: grid;
+      gap: 7px;
+    }
+
+    .meter-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .progress {
+      height: 10px;
+      border-radius: 99px;
+      overflow: hidden;
+      background: rgba(32, 33, 36, .1);
+    }
+
+    .progress i {
+      display: block;
+      width: 86%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--field), var(--lime));
+    }
+
+    .direct-copy .progress i,
+    [data-mode="direct"] .progress i {
+      width: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--track));
+    }
+
+    .ticket {
+      position: relative;
+      min-height: 168px;
+      padding: 18px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, #fffdf7 0 58%, #efffe7 58%),
+        #fff;
+    }
+
+    .ticket::before,
+    .ticket::after {
+      content: "";
+      position: absolute;
+      top: 58%;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 1px solid rgba(32, 33, 36, .08);
+    }
+
+    .ticket::before {
+      left: -13px;
+    }
+
+    .ticket::after {
+      right: -13px;
+    }
+
+    .ticket h3 {
+      margin: 8px 0 5px;
+      font-size: 22px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .ticket p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    .ticket-action {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .draw-button {
+      height: 54px;
+      border-radius: 7px;
+      background: var(--gold);
+      color: #3d2700;
+      font-size: 17px;
+      font-weight: 950;
+      box-shadow: 0 16px 28px rgba(255, 200, 61, .32);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .button-icon {
+      width: 18px;
+      height: 18px;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .button-icon.run::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 7px;
+      width: 12px;
+      height: 4px;
+      border-radius: 99px;
+      background: currentColor;
+      transform: rotate(-18deg);
+    }
+
+    .button-icon.run::after {
+      content: "";
+      position: absolute;
+      right: 1px;
+      top: 3px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: -7px 12px 0 -2px currentColor;
+    }
+
+    .draw-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 7px;
+      background:
+        radial-gradient(circle at 50% 42%, #fff 0 8px, transparent 9px),
+        linear-gradient(135deg, var(--field), var(--field-deep));
+      position: relative;
+    }
+
+    .draw-icon::before,
+    .draw-icon::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      height: 5px;
+      border-radius: 99px;
+      background: #fff;
+    }
+
+    .draw-icon::before {
+      top: 17px;
+      transform: rotate(24deg);
+    }
+
+    .draw-icon::after {
+      top: 30px;
+      transform: rotate(-24deg);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .mini-card {
+      min-height: 76px;
+      padding: 11px;
+      border-radius: 7px;
+      background: #fff;
+      border: 1px solid rgba(32, 33, 36, .1);
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+
+    .mini-card b {
+      font-size: 18px;
+    }
+
+    .mini-card span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .modal-screen .content {
+      filter: blur(3px);
+      transform: scale(.98);
+      opacity: .58;
+    }
+
+    .shade {
+      position: absolute;
+      inset: 0;
+      z-index: var(--z-modal);
+      background: rgba(32, 33, 36, .46);
+      display: flex;
+      align-items: flex-end;
+      padding: 18px;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-height: 78%;
+      padding: 16px;
+      overflow: hidden;
+      animation: slideUp .5s cubic-bezier(.2, .9, .2, 1) both;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(18px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title h3 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .close {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--ink);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .rule-list {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .rule-list li {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: var(--track);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .rule-list b {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+
+    .rule-list span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    .prize-hero {
+      position: relative;
+      margin-top: -12px;
+      padding: 16px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(32, 33, 36, .72), rgba(32, 33, 36, .28)),
+        repeating-linear-gradient(135deg, var(--field) 0 18px, var(--field-deep) 18px 36px);
+    }
+
+    .prize-hero h3 {
+      margin: 10px 0 4px;
+      font-size: 24px;
+      line-height: 1.08;
+    }
+
+    .prize-hero p {
+      margin: 0;
+      color: rgba(255, 255, 255, .84);
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    .medal {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 42%, #fff6c8 0 18px, var(--gold) 19px 35px, #c98316 36px);
+      box-shadow: inset 0 0 0 6px rgba(255, 255, 255, .38), 0 18px 30px rgba(0, 0, 0, .22);
+      position: relative;
+    }
+
+    .medal::before,
+    .medal::after {
+      content: "";
+      position: absolute;
+      top: -18px;
+      width: 18px;
+      height: 32px;
+      background: var(--track);
+      border-radius: 4px;
+    }
+
+    .medal::before {
+      left: 19px;
+      transform: rotate(-18deg);
+    }
+
+    .medal::after {
+      right: 19px;
+      transform: rotate(18deg);
+      background: var(--cyan);
+    }
+
+    .prize-hero::before,
+    .prize-hero::after {
+      content: "";
+      position: absolute;
+      right: 16px;
+      width: 42px;
+      height: 10px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .36);
+      transform: rotate(-24deg);
+    }
+
+    .prize-hero::before {
+      top: 20px;
+      box-shadow: -46px 32px 0 rgba(251, 191, 36, .48);
+    }
+
+    .prize-hero::after {
+      top: 52px;
+      right: 42px;
+      background: rgba(217, 244, 95, .5);
+    }
+
+    .claim-card {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .code-box {
+      padding: 14px;
+      border-radius: 7px;
+      background:
+        linear-gradient(90deg, rgba(32, 33, 36, .06) 1px, transparent 1px) 0 0 / 12px 12px,
+        #fff;
+      border: 1px dashed rgba(32, 33, 36, .28);
+      text-align: center;
+    }
+
+    .code-box b {
+      display: block;
+      font-size: 24px;
+      letter-spacing: 2px;
+    }
+
+    .code-box span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 10px 1fr;
+      gap: 10px;
+      align-items: start;
+      font-size: 12px;
+      font-weight: 800;
+      color: #4c5055;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      margin-top: 3px;
+      border-radius: 50%;
+      background: var(--field);
+    }
+
+    .dot.pending {
+      background: #c8cbd0;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 12px;
+      z-index: var(--z-nav);
+      height: 58px;
+      border-radius: 14px;
+      background: rgba(255, 253, 247, .92);
+      border: 1px solid rgba(32, 33, 36, .08);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      box-shadow: 0 14px 36px rgba(32, 33, 36, .16);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-item {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 4px;
+      color: #6b6f76;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      position: relative;
+    }
+
+    .nav-icon.home::before {
+      content: "";
+      position: absolute;
+      inset: 4px 3px 2px;
+      border: 2px solid currentColor;
+      border-top: 0;
+    }
+
+    .nav-icon.home::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 12px;
+      height: 12px;
+      border-left: 2px solid currentColor;
+      border-top: 2px solid currentColor;
+      transform: rotate(45deg);
+    }
+
+    .nav-icon.rule::before,
+    .nav-icon.gift::before {
+      content: "";
+      position: absolute;
+      inset: 2px 4px;
+      border: 2px solid currentColor;
+      border-radius: 3px;
+    }
+
+    .nav-icon.rule::after {
+      content: "";
+      position: absolute;
+      left: 7px;
+      right: 7px;
+      top: 7px;
+      height: 2px;
+      background: currentColor;
+      box-shadow: 0 5px 0 currentColor;
+    }
+
+    .nav-icon.gift::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      top: 8px;
+      height: 2px;
+      background: currentColor;
+      box-shadow: 6px -5px 0 -1px currentColor, -6px -5px 0 -1px currentColor;
+    }
+
+    .nav-item.active {
+      color: var(--track);
+    }
+
+    [data-mode="direct"] .game-copy,
+    [data-mode="direct"] .game-only {
+      display: none;
+    }
+
+    [data-mode="game"] .direct-copy,
+    [data-mode="game"] .direct-only {
+      display: none;
+    }
+
+    @media (max-width: 1240px) {
+      .board {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        position: relative;
+        top: auto;
+        height: auto;
+      }
+
+      .stage {
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .board {
+        padding: 14px;
+      }
+
+      .stage {
+        grid-template-columns: 1fr;
+      }
+
+      .phone {
+        max-width: 390px;
+        margin: 0 auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body data-mode="game">
+  <main class="board">
+    <aside class="panel">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <h1>运动会抽奖 H5 视觉原型</h1>
+        <p>移动端四页：员工登录、抽奖首页、规则弹窗、中奖信息。整体方向是红色跑道、绿色赛场、黄色奖牌，强调现场感和冲刺感。</p>
+      </div>
+
+      <div class="panel-meta" aria-label="设计系统摘要">
+        <div class="meta-card"><b>H5</b><span>移动端活动入口</span></div>
+        <div class="meta-card"><b>4R</b><span>四轮抽奖赛程</span></div>
+      </div>
+
+      <div class="control-group">
+        <div class="label">方案类型</div>
+        <div class="segmented" role="group" aria-label="切换抽奖方案">
+          <button type="button" data-mode-button="game" class="active">小游戏达标</button>
+          <button type="button" data-mode-button="direct">直接抽奖</button>
+        </div>
+      </div>
+
+      <div class="design-note">
+        UI UX PRO 方向：高对比块面、赛事型大标题、44px 以上触控目标、清晰焦点态、减少持续装饰动效。
+      </div>
+
+      <div class="legend">
+        <span><i class="swatch" style="background: var(--track)"></i>跑道红</span>
+        <span><i class="swatch" style="background: var(--field)"></i>赛场绿</span>
+        <span><i class="swatch" style="background: var(--gold)"></i>奖牌金</span>
+        <span><i class="swatch" style="background: var(--cyan)"></i>记分青</span>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="H5 页面设计稿">
+      <article class="phone-wrap">
+        <div class="caption">01 员工登录页</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="track-band" aria-hidden="true"></div>
+            <div class="app-top">
+              <span>09:30</span>
+              <span class="pill-mini">企业文化日</span>
+            </div>
+            <section class="hero">
+              <div class="hero-kicker">
+                <span>SPORTS DAY 2026</span>
+                <span>RUN 01</span>
+              </div>
+              <h2>上场前<br />先领取你的号码牌</h2>
+              <p>手机号校验员工身份，绑定后进入今日抽奖赛道。</p>
+            </section>
+            <section class="content">
+              <div class="login-card white-card">
+                <div class="race-tag">员工身份校验</div>
+                <div class="field">
+                  <label for="phone">手机号</label>
+                  <input id="phone" value="138 0000 2026" inputmode="tel" />
+                </div>
+                <div class="field">
+                  <label for="code">验证码</label>
+                  <div class="input-row">
+                    <input id="code" value="2602" inputmode="numeric" />
+                    <button class="code-btn" type="button">获取</button>
+                  </div>
+                </div>
+                <button class="primary" type="button"><span class="button-icon run" aria-hidden="true"></span>进入赛场</button>
+              </div>
+              <div class="quick-rules">
+                <div><b>4</b><span>轮抽奖时段</span></div>
+                <div><b>1</b><span>每轮最多抽一次</span></div>
+                <div><b>1</b><span>全场最多中一次</span></div>
+              </div>
+              <div class="start-list" aria-label="登录校验状态">
+                <div class="start-item"><i class="check-icon" aria-hidden="true"></i><span>名单校验通过后进入活动首页</span></div>
+                <div class="start-item"><i class="check-icon" aria-hidden="true"></i><span>手机号只绑定一个员工身份</span></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone-wrap">
+        <div class="caption">02 抽奖首页</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="track-band" aria-hidden="true"></div>
+            <div class="app-top">
+              <span>10:12</span>
+              <span class="pill-mini">第 2 轮开放</span>
+            </div>
+            <section class="hero">
+              <div class="hero-kicker">
+                <span>上午场冲刺</span>
+                <span>剩余奖品 36</span>
+              </div>
+              <h2 class="game-copy">完成小游戏<br />冲线后抽奖</h2>
+              <h2 class="direct-copy">登录即冲刺<br />当前轮可抽奖</h2>
+              <p class="game-copy">当前成绩已达标，抽奖资格已点亮。</p>
+              <p class="direct-copy">当前处于开放时段，可直接进入抽奖池。</p>
+            </section>
+            <section class="content">
+              <div class="status-card field-card">
+                <div class="status-head">
+                  <div>
+                    <strong>距离本轮结束</strong><br />
+                    <small>10:00 - 11:30</small>
+                  </div>
+                  <span class="race-tag">可抽</span>
+                </div>
+                <div class="timer">
+                  <div>01<span>小时</span></div>
+                  <div>17<span>分钟</span></div>
+                  <div>44<span>秒</span></div>
+                </div>
+              </div>
+
+              <div class="rounds">
+                <div class="round"><b>第 1 轮</b><small>已结束</small></div>
+                <div class="round active"><b>第 2 轮</b><small>开放中</small></div>
+                <div class="round"><b>第 3 轮</b><small>14:00</small></div>
+                <div class="round"><b>第 4 轮</b><small>16:30</small></div>
+              </div>
+
+              <div class="eligibility-card white-card">
+                <div class="card-head">
+                  <div>
+                    <strong class="game-copy">本轮达标进度</strong>
+                    <strong class="direct-copy">本轮抽奖资格</strong><br />
+                    <small class="game-copy">目标 600 分，当前 860 分</small>
+                    <small class="direct-copy">已登录，当前轮次开放中</small>
+                  </div>
+                  <span class="race-tag">READY</span>
+                </div>
+                <div class="meter">
+                  <div class="meter-head">
+                    <span class="game-copy">资格进度 86%</span>
+                    <span class="direct-copy">入口状态 100%</span>
+                    <span>可进入抽奖</span>
+                  </div>
+                  <div class="progress"><i aria-hidden="true"></i></div>
+                </div>
+              </div>
+
+              <div class="ticket">
+                <span class="race-tag game-copy">达标资格：已获得</span>
+                <span class="race-tag direct-copy">抽奖资格：已获得</span>
+                <h3>第 2 轮幸运冲线券</h3>
+                <p class="game-copy">小游戏分数 860，已超过本轮门槛 600。</p>
+                <p class="direct-copy">本轮尚未抽奖，点击后写入服务端抽奖记录。</p>
+                <div class="ticket-action">
+                  <button class="draw-button" type="button"><span class="button-icon run" aria-hidden="true"></span>立即抽奖</button>
+                  <div class="draw-icon" aria-hidden="true"></div>
+                </div>
+              </div>
+            </section>
+            <nav class="bottom-nav" aria-label="底部导航">
+              <div class="nav-item active"><i class="nav-icon home"></i>首页</div>
+              <div class="nav-item"><i class="nav-icon rule"></i>规则</div>
+              <div class="nav-item"><i class="nav-icon gift"></i>奖品</div>
+            </nav>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone-wrap">
+        <div class="caption">03 规则弹窗</div>
+        <div class="phone">
+          <div class="screen modal-screen">
+            <div class="track-band" aria-hidden="true"></div>
+            <div class="app-top">
+              <span>10:18</span>
+              <span class="pill-mini">活动规则</span>
+            </div>
+            <section class="hero">
+              <div class="hero-kicker">
+                <span>RULE BOOK</span>
+                <span>4 ROUNDS</span>
+              </div>
+              <h2>公平开跑<br />中奖不重复</h2>
+              <p>清晰说明轮次、资格、中奖上限和领奖方式。</p>
+            </section>
+            <section class="content">
+              <div class="mini-grid">
+                <div class="mini-card"><b>4 轮</b><span>指定时段开放</span></div>
+                <div class="mini-card"><b>1 次</b><span>每轮最多抽奖</span></div>
+                <div class="mini-card"><b>1 奖</b><span>全活动中奖上限</span></div>
+                <div class="mini-card"><b>可不中</b><span>每轮保留谢谢参与</span></div>
+              </div>
+            </section>
+            <div class="shade">
+              <section class="modal-card">
+                <div class="modal-title">
+                  <div>
+                    <h3>活动规则</h3>
+                    <span class="pill-mini" style="margin-top:8px;background:var(--field)">运动会抽奖</span>
+                  </div>
+                  <button class="close" type="button" aria-label="关闭">×</button>
+                </div>
+                <ol class="rule-list">
+                  <li>
+                    <span class="num">1</span>
+                    <div><b>参与对象</b><span>仅限员工名单内人员，手机号登录后绑定唯一身份。</span></div>
+                  </li>
+                  <li>
+                    <span class="num">2</span>
+                    <div><b>抽奖轮次</b><span>活动共 4 轮，每轮在指定时间段开放，错过不自动补抽。</span></div>
+                  </li>
+                  <li>
+                    <span class="num">3</span>
+                    <div><b class="game-copy">资格获取</b><b class="direct-copy">资格获取</b><span class="game-copy">完成当轮小游戏并达标后，才可获得该轮抽奖机会。</span><span class="direct-copy">登录且处于开放时段，即可获得当前轮抽奖机会。</span></div>
+                  </li>
+                  <li>
+                    <span class="num">4</span>
+                    <div><b>中奖限制</b><span>每名员工全活动最多中奖 1 次；后续轮次仍可查看活动，但不再进入中奖池。</span></div>
+                  </li>
+                  <li>
+                    <span class="num">5</span>
+                    <div><b>领奖核销</b><span>中奖后请在“我的奖品”查看核销码，并按现场指引领取。</span></div>
+                  </li>
+                </ol>
+              </section>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phone-wrap">
+        <div class="caption">04 中奖信息页</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="track-band" aria-hidden="true"></div>
+            <div class="app-top">
+              <span>10:26</span>
+              <span class="pill-mini">我的奖品</span>
+            </div>
+            <section class="hero">
+              <div class="hero-kicker">
+                <span>WINNER LANE</span>
+                <span>已中奖</span>
+              </div>
+              <h2>恭喜冲线<br />奖牌已入袋</h2>
+              <p>请保留核销码，前往现场领奖区完成领取。</p>
+            </section>
+            <section class="content">
+              <div class="prize-hero field-card">
+                <div class="medal" aria-hidden="true"></div>
+                <h3>运动能量补给礼包</h3>
+                <p>第 2 轮 · 上午场冲刺抽奖<br />中奖时间：2026-06-02 10:25</p>
+              </div>
+
+              <div class="claim-card white-card">
+                <div class="card-head">
+                  <div>
+                    <strong>领奖核销码</strong><br />
+                    <small>现场工作人员核销后奖品状态会更新</small>
+                  </div>
+                  <span class="race-tag">待领取</span>
+                </div>
+                <div class="code-box">
+                  <b>A8K6-2026</b>
+                  <span>领奖区出示此码</span>
+                </div>
+                <button class="secondary" type="button">查看领奖说明</button>
+              </div>
+
+              <div class="timeline white-card" style="padding:14px">
+                <div class="step"><i class="dot"></i><span>已生成中奖记录</span></div>
+                <div class="step"><i class="dot"></i><span>等待现场核销领取</span></div>
+                <div class="step"><i class="dot pending"></i><span>领取完成后更新状态</span></div>
+              </div>
+            </section>
+            <nav class="bottom-nav" aria-label="底部导航">
+              <div class="nav-item"><i class="nav-icon home"></i>首页</div>
+              <div class="nav-item"><i class="nav-icon rule"></i>规则</div>
+              <div class="nav-item active"><i class="nav-icon gift"></i>奖品</div>
+            </nav>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const body = document.body;
+    const buttons = document.querySelectorAll("[data-mode-button]");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        body.dataset.mode = button.dataset.modeButton;
+        buttons.forEach((item) => item.classList.toggle("active", item === button));
+      });
+    });
+  </script>
+</body>
+</html>

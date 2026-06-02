@@ -1,0 +1,54 @@
+flowchart LR
+    title["企业文化日 H5 抽奖流程对比图"]
+
+    start["员工打开 H5"] --> login{"是否已登录"}
+    login -- 否 --> phone["手机号登录"]
+    phone --> verify{"是否在员工名单内"}
+    verify -- 否 --> reject["提示不可参与\n联系活动组处理"]
+    verify -- 是 --> home["进入活动首页"]
+    login -- 是 --> home
+
+    home --> round{"当前是否有开放轮次"}
+    round -- 否 --> wait["展示下一轮开放时间"]
+    round -- 是 --> choose{"方案类型"}
+
+    choose -- 小游戏达标后抽奖 --> gameEntry["进入当轮小游戏"]
+    gameEntry --> play["完成小游戏\n生成当轮成绩"]
+    play --> pass{"是否达到当轮门槛"}
+    pass -- 否 --> retry["提示未达标\n可按规则再次挑战"]
+    retry --> gameEntry
+    pass -- 是 --> eligible["获得本轮抽奖资格"]
+
+    choose -- 直接抽奖 --> directEligible["登录且处于开放时间\n获得本轮抽奖入口"]
+
+    eligible --> lotteryCheck["进入抽奖页\n服务端二次校验"]
+    directEligible --> lotteryCheck
+
+    lotteryCheck --> conditions{"是否满足抽奖条件"}
+    conditions -- 否 --> blocked["展示原因\n未开始/已结束/已抽过/已中奖/库存不足"]
+    conditions -- 是 --> draw["点击抽奖\n写入本轮抽奖记录"]
+
+    draw --> result{"抽奖结果"}
+    result -- 中奖 --> win["展示中奖奖品\n生成中奖记录"]
+    result -- 未中奖 --> lose["展示谢谢参与\n生成未中奖记录"]
+
+    win --> wonLimit["标记全活动已中奖\n后续轮次不再进入中奖池"]
+    lose --> nextRound["可等待下一轮\n最多 4 轮均可未中奖"]
+    wonLimit --> prize["我的奖品/领奖说明/核销"]
+    nextRound --> home
+    prize --> ops["运营后台支撑\n名单/轮次/奖品/排重/导出/核销"]
+    blocked --> home
+    reject --> ops
+
+    classDef shared fill:#EEF4FF,stroke:#3867D6,color:#172B4D,stroke-width:1px;
+    classDef game fill:#EAF7F1,stroke:#2E8B57,color:#173B2F,stroke-width:1px;
+    classDef direct fill:#FFF3E6,stroke:#C77800,color:#4A2D00,stroke-width:1px;
+    classDef danger fill:#FFF0F0,stroke:#D64545,color:#5F1717,stroke-width:1px;
+    classDef ops fill:#F4F0FF,stroke:#725AC1,color:#2A1F4F,stroke-width:1px;
+
+    class start,login,phone,verify,home,round,wait,choose,lotteryCheck,conditions,draw,result,lose,nextRound shared;
+    class gameEntry,play,pass,retry,eligible game;
+    class directEligible direct;
+    class reject,blocked danger;
+    class win,wonLimit,prize,ops ops;
+
