@@ -1,2 +1,0 @@
-# This file ensures the vector_db directory is tracked by Git
-# Vector database files will be generated at runtime and should not be committed
