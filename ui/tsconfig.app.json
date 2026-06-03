@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/main.ts",
+    "src/App.vue",
+    "src/components/novel/**/*.vue",
+    "src/services/novel*.ts",
+    "src/stores/novel.ts",
+    "src/types/novel.ts"
+  ],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
+}

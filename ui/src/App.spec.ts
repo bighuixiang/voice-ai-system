@@ -1,24 +1,31 @@
-import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
-import App from './App.vue'
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { mount } from "@vue/test-utils";
+import { createPinia } from "pinia";
+import App from "./App.vue";
 
-describe('App.vue', () => {
-  it('renders properly', () => {
-    const wrapper = mount(App)
-    expect(wrapper.text()).toContain('Voice AI Test UI')
-  })
+describe("App.vue", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ projects: [] })
+      })
+    );
+  });
 
-  it('has config button', () => {
-    const wrapper = mount(App)
-    const configButton = wrapper.find('[data-test="config-button"]')
-    expect(wrapper.text()).toContain('配置')
-  })
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
 
-  it('shows placeholder content for panels', () => {
-    const wrapper = mount(App)
-    expect(wrapper.text()).toContain('文本输入面板 - 待实现')
-    expect(wrapper.text()).toContain('语音输入面板 - 待实现')
-    expect(wrapper.text()).toContain('结果展示面板 - 待实现')
-    expect(wrapper.text()).toContain('请求日志面板 - 待实现')
-  })
-})
+  it("renders the novel workbench entry", () => {
+    const wrapper = mount(App, {
+      global: {
+        plugins: [createPinia()]
+      }
+    });
+
+    expect(wrapper.text()).toContain("小说 Codex 创作工作台");
+    expect(wrapper.text()).toContain("从一个粗略想法开始");
+  });
+});
