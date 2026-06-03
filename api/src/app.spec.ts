@@ -37,12 +37,16 @@ describe("novel API routes", () => {
   beforeEach(async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-api-routes-"));
     process.env.NOVELS_ROOT = tempRoot;
+    process.env.PLATFORM_ROOT = path.join(tempRoot, "platform");
+    process.env.NOVEL_DB_PATH = path.join(tempRoot, "data", "creative-platform.sqlite");
     await startServer();
   });
 
   afterEach(async () => {
     await stopServer();
     delete process.env.NOVELS_ROOT;
+    delete process.env.PLATFORM_ROOT;
+    delete process.env.NOVEL_DB_PATH;
     await fs.rm(tempRoot, { recursive: true, force: true });
   });
 
@@ -63,6 +67,10 @@ describe("novel API routes", () => {
     const listed = await jsonFetch<{ projects: Array<{ slug: string }> }>("/api/novel/projects");
     expect(listed.data.projects.map((project) => project.slug)).toContain("demo-novel");
 
+    const database = await jsonFetch<{ database: { exists: boolean; projectCount: number } }>("/api/platform/database");
+    expect(database.data.database.exists).toBe(true);
+    expect(database.data.database.projectCount).toBe(1);
+
     const filePath = created.data.project.chapters[0].contentPath;
     const readBefore = await jsonFetch<{ content: string }>(`/api/novel/projects/demo-novel/files/${filePath}`);
     expect(readBefore.data.content.length).toBeGreaterThan(0);
@@ -76,6 +84,134 @@ describe("novel API routes", () => {
 
     const readAfter = await jsonFetch<{ content: string }>(`/api/novel/projects/demo-novel/files/${filePath}`);
     expect(readAfter.data.content).toBe("manual draft");
+  });
+
+  it("keeps duplicate project titles in separate folders", async () => {
+    const body = JSON.stringify({
+      title: "Demo Novel",
+      genre: "fantasy",
+      roughIdea: "A cautious apprentice finds a sealed room."
+    });
+
+    const first = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body
+    });
+    const second = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body
+    });
+
+    expect(first.data.project.slug).toBe("demo-novel");
+    expect(second.data.project.slug).toBe("demo-novel-2");
+    await expect(fs.readFile(path.join(tempRoot, "demo-novel", "project.json"), "utf8")).resolves.toContain("Demo Novel");
+    await expect(fs.readFile(path.join(tempRoot, "demo-novel-2", "project.json"), "utf8")).resolves.toContain("Demo Novel");
+  });
+
+  it("seeds the platform library and links shared assets across projects", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Project One", roughIdea: "First project." })
+    });
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Project Two", roughIdea: "Second project." })
+    });
+
+    const library = await jsonFetch<{ library: { prompts: Array<{ id: string; title: string }>; roles: Array<{ id: string }> } }>(
+      "/api/platform/library"
+    );
+    expect(library.data.library.prompts.map((prompt) => prompt.id)).toContain("prompt-novel-outline");
+    expect(library.data.library.prompts.find((prompt) => prompt.id === "prompt-novel-outline")?.title).toBe(
+      "长篇小说大纲"
+    );
+    expect(library.data.library.roles.map((role) => role.id)).toContain("role-storyboard-director");
+
+    const createdAsset = await jsonFetch<{ asset: { id: string; linkedProjects: string[] } }>("/api/platform/assets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Shared Sword", type: "prop", projectSlug: "project-one" })
+    });
+    expect(createdAsset.status).toBe(201);
+    expect(createdAsset.data.asset.linkedProjects).toEqual(["project-one"]);
+
+    const linkedAsset = await jsonFetch<{ asset: { linkedProjects: string[] } }>(
+      `/api/platform/assets/${createdAsset.data.asset.id}/link`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectSlug: "project-two" })
+      }
+    );
+    expect(linkedAsset.data.asset.linkedProjects).toEqual(["project-one", "project-two"]);
+
+    const relations = await jsonFetch<{ linkedAssets: Array<{ name: string }> }>("/api/novel/projects/project-two/relations");
+    expect(relations.data.linkedAssets).toEqual([expect.objectContaining({ name: "Shared Sword" })]);
+  });
+
+  it("imports a local folder into a managed novel project", async () => {
+    const sourceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-import-source-"));
+    await fs.writeFile(path.join(sourceRoot, "chapter-01.md"), "# First Gate\n\nThe draft opens here.", "utf8");
+    await fs.writeFile(path.join(sourceRoot, "outline.md"), "# Volume Outline\n\nA grounded escalation.", "utf8");
+    await fs.writeFile(path.join(sourceRoot, "characters.md"), "# Characters\n\n- Lin: careful.", "utf8");
+
+    const imported = await jsonFetch<{ project: { slug: string; chapters: Array<{ contentPath: string; title: string }> } }>(
+      "/api/novel/import",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sourcePath: sourceRoot, title: "Imported Demo", genre: "fantasy" })
+      }
+    );
+
+    expect(imported.status).toBe(201);
+    expect(imported.data.project.slug).toBe("imported-demo");
+    expect(imported.data.project.chapters).toHaveLength(1);
+    expect(imported.data.project.chapters[0].title).toBe("First Gate");
+
+    const chapter = await jsonFetch<{ content: string }>(
+      `/api/novel/projects/imported-demo/files/${imported.data.project.chapters[0].contentPath}`
+    );
+    const outline = await jsonFetch<{ content: string }>("/api/novel/projects/imported-demo/files/outline/volume-01.md");
+
+    expect(chapter.data.content).toContain("The draft opens here.");
+    expect(outline.data.content).toContain("A grounded escalation.");
+
+    await fs.rm(sourceRoot, { recursive: true, force: true });
+  });
+
+  it("rejects unsafe paths and protected project metadata writes", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Safety Demo", roughIdea: "Validate guarded file writes." })
+    });
+
+    const unsafe = await jsonFetch<{ error: string }>("/api/novel/projects/safety-demo/files/%2e%2e%5csecret.md");
+    expect(unsafe.status).toBe(400);
+    expect(unsafe.data.error).toContain("Unsafe file path");
+
+    const metadataSave = await jsonFetch<{ error: string }>("/api/novel/projects/safety-demo/files/project.json", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: "{}" })
+    });
+    expect(metadataSave.status).toBe(403);
+    expect(metadataSave.data.error).toContain("Protected project metadata");
+
+    const metadataPatch = await jsonFetch<{ error: string }>("/api/novel/projects/safety-demo/patches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        patches: [{ target: "project.json", mode: "replace-file", content: "{}" }]
+      })
+    });
+    expect(metadataPatch.status).toBe(403);
+    expect(metadataPatch.data.error).toContain("Protected project metadata");
   });
 
   it("applies replace-selection patches only inside the project", async () => {

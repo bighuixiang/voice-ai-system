@@ -34,7 +34,7 @@ export async function assembleContext(
     { title: "力量体系", content: await readOptional(root, "bible/power-system.md") }
   ];
 
-  if (["outline.generate", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest"].includes(type)) {
+  if (["outline.generate", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"].includes(type)) {
     blocks.push(
       { title: "卷纲", content: await readOptional(root, "outline/volume-01.md") },
       { title: "伏笔账本", content: await readOptional(root, "ledger/foreshadowing.md") },
@@ -44,7 +44,7 @@ export async function assembleContext(
 
   const chapterId = String(payload.chapterId || project.lastOpenedChapterId || "chapter-001");
   const chapter = project.chapters.find((item) => item.id === chapterId);
-  if (chapter && ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest"].includes(type)) {
+  if (chapter && ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"].includes(type)) {
     blocks.push(
       { title: "目标章纲", content: await readOptional(root, chapter.outlinePath) },
       { title: "目标正文", content: await readOptional(root, chapter.contentPath) }

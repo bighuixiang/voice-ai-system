@@ -1,0 +1,36 @@
+{
+  "id": "novel-1780473478439",
+  "slug": "novel-1780473478439",
+  "title": "仙王重生成牛马",
+  "genre": "都市玄幻",
+  "roughIdea": "从仙王渡劫失败转世成都市小牛马上班族，利用前世记忆重修，重新走上顶峰",
+  "createdAt": "2026-06-03T07:57:58.439Z",
+  "updatedAt": "2026-06-03T11:39:15.480Z",
+  "lastOpenedChapterId": "chapter-001",
+  "codex": {
+    "command": "codex"
+  },
+  "chapters": [
+    {
+      "id": "chapter-001",
+      "title": "第 1 章",
+      "outlinePath": "outline/chapter-001.md",
+      "contentPath": "chapters/chapter-001.md",
+      "status": "empty"
+    },
+    {
+      "id": "chapter-002",
+      "title": "第 2 章",
+      "outlinePath": "outline/chapter-002.md",
+      "contentPath": "chapters/chapter-002.md",
+      "status": "empty"
+    },
+    {
+      "id": "chapter-003",
+      "title": "第 3 章",
+      "outlinePath": "outline/chapter-003.md",
+      "contentPath": "chapters/chapter-003.md",
+      "status": "empty"
+    }
+  ]
+}

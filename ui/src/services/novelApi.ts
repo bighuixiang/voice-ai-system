@@ -1,4 +1,13 @@
-import type { CodexTaskType, EditorSelection, NovelFilePatch, NovelProject, NovelTask } from "@/types/novel";
+import type {
+  CodexTaskType,
+  EditorSelection,
+  NovelFilePatch,
+  NovelProject,
+  NovelTask,
+  PlatformAsset,
+  PlatformAssetType,
+  PlatformLibrary
+} from "@/types/novel";
 
 const jsonHeaders = { "Content-Type": "application/json" };
 
@@ -24,6 +33,45 @@ export const novelApi = {
       body: JSON.stringify(input)
     });
     return data.project;
+  },
+
+  async importProject(input: { sourcePath: string; title?: string; genre?: string; roughIdea?: string }): Promise<NovelProject> {
+    const data = await request<{ project: NovelProject }>("/api/novel/import", {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+    return data.project;
+  },
+
+  async readPlatformLibrary(): Promise<PlatformLibrary> {
+    const data = await request<{ library: PlatformLibrary }>("/api/platform/library");
+    return data.library;
+  },
+
+  async createPlatformAsset(input: {
+    name: string;
+    type?: PlatformAssetType;
+    scope?: "project" | "shared";
+    projectSlug?: string;
+    filePath?: string;
+    tags?: string[];
+  }): Promise<PlatformAsset> {
+    const data = await request<{ asset: PlatformAsset }>("/api/platform/assets", {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+    return data.asset;
+  },
+
+  async linkPlatformAsset(assetId: string, projectSlug: string): Promise<PlatformAsset> {
+    const data = await request<{ asset: PlatformAsset }>(`/api/platform/assets/${assetId}/link`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ projectSlug })
+    });
+    return data.asset;
   },
 
   async readFile(projectId: string, filePath: string): Promise<string> {

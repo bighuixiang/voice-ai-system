@@ -23,7 +23,7 @@ defineProps<{
   tasks: NovelTask[];
 }>();
 
-const labels: Record<CodexTaskType, string> = {
+const labels: Partial<Record<CodexTaskType, string>> = {
   "project.create": "创建项目",
   "outline.generate": "生成大纲",
   "chapter.plan": "规划章节",
@@ -32,6 +32,8 @@ const labels: Record<CodexTaskType, string> = {
   "continuity.check": "连续性检查",
   "idea.suggest": "补灵感"
 };
+
+labels["assistant.free"] = "自由指令";
 </script>
 
 <style scoped lang="scss">

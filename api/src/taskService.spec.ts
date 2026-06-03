@@ -31,12 +31,14 @@ describe("taskService", () => {
   beforeEach(async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-api-"));
     process.env.NOVELS_ROOT = tempRoot;
+    process.env.NOVEL_DB_PATH = path.join(tempRoot, "data", "creative-platform.sqlite");
     const project = createProjectSkeleton({ title: "Demo", roughIdea: "少年修行。" });
     await createProjectFiles(project);
   });
 
   afterEach(async () => {
     delete process.env.NOVELS_ROOT;
+    delete process.env.NOVEL_DB_PATH;
     await fs.rm(tempRoot, { recursive: true, force: true });
   });
 
@@ -47,6 +49,52 @@ describe("taskService", () => {
 
     const history = await fs.readFile(path.join(tempRoot, "demo", "tasks", "history.jsonl"), "utf8");
     expect(history).toContain("outline.generate");
+  });
+
+  it("ignores Codex command values stored in project files", async () => {
+    const projectPath = path.join(tempRoot, "demo", "project.json");
+    const project = JSON.parse(await fs.readFile(projectPath, "utf8"));
+    project.codex.command = "malicious-command";
+    project.codex.model = "test-model";
+    await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+
+    const originalCommand = process.env.CODEX_COMMAND;
+    delete process.env.CODEX_COMMAND;
+    let commandFromRunner = "";
+    let modelFromRunner = "";
+    const capturingRunner: ProcessRunner = {
+      async run(_prompt, _root, config) {
+        commandFromRunner = config.command;
+        modelFromRunner = config.model || "";
+        return {
+          stdout: "",
+          stderr: "",
+          exitCode: 0,
+          durationMs: 12,
+          finalMessage: JSON.stringify({
+            summary: "task done",
+            content: "",
+            changes: [],
+            risks: [],
+            questions: [],
+            patches: []
+          })
+        };
+      }
+    };
+
+    try {
+      await runNovelTask("demo", "outline.generate", {}, capturingRunner);
+    } finally {
+      if (originalCommand === undefined) {
+        delete process.env.CODEX_COMMAND;
+      } else {
+        process.env.CODEX_COMMAND = originalCommand;
+      }
+    }
+
+    expect(commandFromRunner).toBe("codex");
+    expect(modelFromRunner).toBe("test-model");
   });
 
   it("records a failed Codex exit with the stderr message", async () => {
@@ -100,6 +148,13 @@ describe("taskService", () => {
         content: "bad"
       })
     ).rejects.toThrow("Unsafe file path");
+    await expect(
+      applyPatch(root, {
+        target: "project.json",
+        mode: "replace-file",
+        content: "{}"
+      })
+    ).rejects.toThrow("Protected project metadata");
 
     const content = await fs.readFile(path.join(root, "outline", "chapter-001.md"), "utf8");
     expect(content).toBe("# 精修章纲\n");

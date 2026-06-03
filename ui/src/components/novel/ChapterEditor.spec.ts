@@ -11,36 +11,46 @@ const chapter = {
   status: "drafted" as const
 };
 
+function mountEditor(overrides = {}) {
+  return mount(ChapterEditor, {
+    props: {
+      chapter,
+      documentKind: "content",
+      documentLabel: "章节正文",
+      filePath: chapter.contentPath,
+      content: "旧正文",
+      hasUnsavedChanges: false,
+      saveStateLabel: "已保存",
+      isSaving: false,
+      ...overrides
+    },
+    global: {
+      stubs: ["el-button", "el-icon", "DocumentChecked"]
+    }
+  });
+}
+
 describe("ChapterEditor", () => {
   it("emits edited markdown content", async () => {
-    const wrapper = mount(ChapterEditor, {
-      props: {
-        chapter,
-        filePath: chapter.contentPath,
-        content: "旧正文",
-        hasUnsavedChanges: false
-      },
-      global: {
-        stubs: ["el-button", "el-icon", "el-tag", "DocumentChecked"]
-      }
-    });
+    const wrapper = mountEditor();
 
     await wrapper.find("textarea").setValue("新正文");
 
     expect(wrapper.emitted("update:content")?.[0]).toEqual(["新正文"]);
   });
 
+  it("emits document switches without mutating the draft", async () => {
+    const wrapper = mountEditor();
+
+    await wrapper.findAll(".segment-option")[1].trigger("click");
+
+    expect(wrapper.emitted("switch-document")?.[0]).toEqual(["outline"]);
+    expect(wrapper.find("textarea").element.value).toBe("旧正文");
+  });
+
   it("captures the selected region without changing content", async () => {
-    const wrapper = mount(ChapterEditor, {
-      props: {
-        chapter,
-        filePath: chapter.contentPath,
-        content: "山风忽然停住，少年听见阵石低鸣。",
-        hasUnsavedChanges: false
-      },
-      global: {
-        stubs: ["el-button", "el-icon", "el-tag", "DocumentChecked"]
-      }
+    const wrapper = mountEditor({
+      content: "山风忽然停住，少年听见阵石低鸣。"
     });
     const textarea = wrapper.find("textarea").element as HTMLTextAreaElement;
 

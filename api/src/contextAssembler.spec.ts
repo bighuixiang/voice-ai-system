@@ -11,10 +11,12 @@ describe("contextAssembler", () => {
   beforeEach(async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-context-"));
     process.env.NOVELS_ROOT = tempRoot;
+    process.env.NOVEL_DB_PATH = path.join(tempRoot, "data", "creative-platform.sqlite");
   });
 
   afterEach(async () => {
     delete process.env.NOVELS_ROOT;
+    delete process.env.NOVEL_DB_PATH;
     await fs.rm(tempRoot, { recursive: true, force: true });
   });
 

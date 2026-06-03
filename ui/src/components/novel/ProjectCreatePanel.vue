@@ -1,9 +1,9 @@
 <template>
   <section class="project-create" aria-labelledby="project-create-title">
     <div class="intro">
-      <p class="eyebrow">Novel Codex Workbench</p>
-      <h2 id="project-create-title">从一个粗略想法开始</h2>
-      <p>先创建故事骨架，再逐步生成故事圣经、大纲、章节和局部润色。</p>
+      <p class="eyebrow">Novel MVP</p>
+      <h2 id="project-create-title">创建小说项目</h2>
+      <p>先建立故事骨架；素材、剧本、图片和视频模块会跟随项目一起扩展。</p>
     </div>
 
     <el-form class="create-form" label-position="top" @submit.prevent="handleSubmit">
@@ -18,12 +18,12 @@
           v-model="roughIdea"
           type="textarea"
           :autosize="{ minRows: 6, maxRows: 10 }"
-          placeholder="写下主角、世界、核心矛盾或你脑子里最先出现的画面。"
+          placeholder="写下主角、世界、核心矛盾，或你脑子里最先出现的画面。"
         />
       </el-form-item>
       <el-button class="create-button" type="primary" :loading="isLoading" @click="handleSubmit">
         <el-icon><Plus /></el-icon>
-        创建项目
+        创建并进入工作台
       </el-button>
     </el-form>
   </section>
@@ -54,7 +54,7 @@ async function handleSubmit() {
       genre: genre.value,
       roughIdea: roughIdea.value
     });
-    ElMessage.success("小说项目已创建。");
+    ElMessage.success("项目已创建。");
   } finally {
     isLoading.value = false;
   }
@@ -65,30 +65,31 @@ async function handleSubmit() {
 .project-create {
   width: min(760px, 100%);
   margin: 0 auto;
-  padding: 32px;
+  padding: 28px;
   background: #ffffff;
   border: 1px solid #d8dee8;
   border-radius: 8px;
 }
 
 .intro {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 
   .eyebrow {
     color: #2563eb;
     font-weight: 700;
     font-size: 12px;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
   }
 
   h2 {
-    font-size: 26px;
-    margin-bottom: 8px;
+    font-size: 22px;
+    margin: 0 0 8px;
     color: #111827;
   }
 
   p {
+    margin: 0;
     color: #4b5563;
   }
 }

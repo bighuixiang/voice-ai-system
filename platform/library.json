@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "assets": [],
+  "prompts": [
+    {
+      "id": "prompt-novel-outline",
+      "title": "长篇小说大纲",
+      "category": "novel",
+      "roleId": "role-novel-architect",
+      "prompt": "根据作者粗略想法生成卷纲和章节路线。必须写清因果链、伏笔与回收、人物动机、可信代价、阶段性升级和每一章的推进目的。",
+      "tags": [
+        "outline",
+        "causality",
+        "foreshadowing"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "prompt-scene-polish",
+      "title": "POV 安全润色",
+      "category": "novel",
+      "roleId": "role-continuity-auditor",
+      "prompt": "润色选区时不得添加当前视角不知道的信息。保留事实，优先修复因果不清、人物动机不稳、节奏跳跃和连续性风险。",
+      "tags": [
+        "polish",
+        "pov",
+        "continuity"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "prompt-character-image",
+      "title": "角色形象提示词",
+      "category": "image",
+      "roleId": "role-character-image-director",
+      "prompt": "根据角色档案生成可复用中文形象提示词。包含身份特征、外形轮廓、服装材质、表情姿态、光线、风格约束和一致性关键词。",
+      "tags": [
+        "character",
+        "image",
+        "prompt"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "prompt-prop-scene-image",
+      "title": "道具或场景提示词",
+      "category": "image",
+      "roleId": "role-scene-art-director",
+      "prompt": "生成可检查的道具或场景中文提示词。包含尺度、材质、环境、用途、叙事意义、镜头、色彩氛围和负面提示建议。",
+      "tags": [
+        "scene",
+        "prop",
+        "image"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "prompt-first-last-frame-video",
+      "title": "首尾帧视频方案",
+      "category": "video",
+      "roleId": "role-storyboard-director",
+      "prompt": "规划从首帧到尾帧的视频镜头。定义画面连续性、主体动作、镜头运动、节奏时长，以及生成过程中绝不能改变的元素。",
+      "tags": [
+        "video",
+        "shot",
+        "frames"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "prompt-multi-reference-video",
+      "title": "多图参考视频提示词",
+      "category": "video",
+      "roleId": "role-video-prompt-optimizer",
+      "prompt": "优化多图参考生视频中文提示词。拆分主体身份、环境、动作、镜头、风格、时长和负面约束，确保参考图之间关系清晰。",
+      "tags": [
+        "video",
+        "reference",
+        "comfyui"
+      ],
+      "isSystem": true
+    }
+  ],
+  "roles": [
+    {
+      "id": "role-novel-architect",
+      "name": "长篇小说结构师",
+      "domain": "novel",
+      "systemPrompt": "负责把粗略创意设计成长篇小说结构。优先保证因果逻辑、POV 诚实、人物动机可信、伏笔可回收、升级一步一步来，不追求浮夸爽点。",
+      "defaultPromptIds": [
+        "prompt-novel-outline"
+      ]
+    },
+    {
+      "id": "role-continuity-auditor",
+      "name": "连续性审稿人",
+      "domain": "novel",
+      "systemPrompt": "对照故事圣经、时间线、角色已知信息、力量进阶和未回收伏笔检查章节问题。先指出具体逻辑风险，再给文采建议。",
+      "defaultPromptIds": [
+        "prompt-scene-polish"
+      ]
+    },
+    {
+      "id": "role-character-image-director",
+      "name": "角色形象导演",
+      "domain": "image",
+      "systemPrompt": "把角色设定转成可复用的中文视觉提示词，明确轮廓、服装、材质、表情、姿态、光线和保持角色一致性的关键词。",
+      "defaultPromptIds": [
+        "prompt-character-image"
+      ]
+    },
+    {
+      "id": "role-scene-art-director",
+      "name": "场景美术导演",
+      "domain": "image",
+      "systemPrompt": "把世界观和章节上下文转成可检查的场景提示词，包含空间布局、道具、氛围、镜头、色彩和连续性锚点。",
+      "defaultPromptIds": [
+        "prompt-prop-scene-image"
+      ]
+    },
+    {
+      "id": "role-storyboard-director",
+      "name": "分镜导演",
+      "domain": "video",
+      "systemPrompt": "规划图生视频镜头，明确首帧、尾帧、动作节拍、镜头运动、时长和不能破坏连续性的动作边界。",
+      "defaultPromptIds": [
+        "prompt-first-last-frame-video"
+      ]
+    },
+    {
+      "id": "role-video-prompt-optimizer",
+      "name": "视频提示词优化师",
+      "domain": "video",
+      "systemPrompt": "为本地 ComfyUI 或在线平台优化多图参考生视频提示词，重点控制主体一致性、动作约束、镜头语言和负面提示。",
+      "defaultPromptIds": [
+        "prompt-multi-reference-video"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-novel-continuity-check",
+      "name": "novel-continuity-check",
+      "scope": "system",
+      "description": "检查故事圣经、时间线、POV 已知信息、伏笔回收和升级节奏一致性。",
+      "tags": [
+        "novel",
+        "continuity"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "skill-image-prompt-optimizer",
+      "name": "image-prompt-optimizer",
+      "scope": "system",
+      "description": "把小说上下文转成角色、道具和场景可复用图片提示词。",
+      "tags": [
+        "image",
+        "prompt"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "skill-video-shot-planner",
+      "name": "video-shot-planner",
+      "scope": "system",
+      "description": "规划视频生成所需的首帧、尾帧、镜头运动和参考图约束。",
+      "tags": [
+        "video",
+        "storyboard"
+      ],
+      "enabled": true
+    }
+  ],
+  "updatedAt": "2026-06-03T11:38:49.583Z"
+}

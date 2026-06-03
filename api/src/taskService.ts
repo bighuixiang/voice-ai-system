@@ -6,7 +6,7 @@ import { buildTaskPrompt } from "./taskTemplates.js";
 import { parseCodexResult } from "./resultParser.js";
 import { assembleContext } from "./contextAssembler.js";
 import { readProject, projectRoot, writeProject } from "./novelProject.js";
-import { resolveInside } from "./pathSafety.js";
+import { assertSafeNovelPath, resolveInside } from "./pathSafety.js";
 import { CodexProcessRunner, type ProcessRunner } from "./codexRunner.js";
 
 function taskId(): string {
@@ -20,7 +20,12 @@ async function appendHistory(root: string, task: NovelTask): Promise<void> {
 }
 
 export async function applyPatch(root: string, patch: NovelFilePatch): Promise<void> {
-  const target = resolveInside(root, patch.target);
+  const safeTarget = assertSafeNovelPath(patch.target);
+  if (safeTarget === "project.json") {
+    throw new Error("Protected project metadata cannot be patched");
+  }
+
+  const target = resolveInside(root, safeTarget);
   if (patch.mode === "replace-file") {
     await fs.writeFile(target, patch.content, "utf8");
     return;
@@ -63,7 +68,7 @@ export async function runNovelTask(
       contextBlocks,
       payload
     });
-    const config = resolveCodexCommand(project.codex);
+    const config = resolveCodexCommand({ model: project.codex.model });
     const output = await runner.run(prompt, root, config);
     const result = parseCodexResult(output.finalMessage);
     task.status = output.exitCode === 0 ? "success" : "error";

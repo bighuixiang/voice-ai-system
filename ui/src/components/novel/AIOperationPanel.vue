@@ -14,6 +14,28 @@
       </el-button>
     </div>
 
+    <el-form class="free-task" label-position="top" @submit.prevent="submitFreeTask">
+      <el-form-item label="随时交给 AI">
+        <el-input
+          v-model="freePrompt"
+          type="textarea"
+          :autosize="{ minRows: 3, maxRows: 6 }"
+          placeholder="例如：检查这一章的升级节奏，或帮我补一个更合理的转折。"
+        />
+      </el-form-item>
+      <el-button class="free-task-button" :loading="loading" @click="submitFreeTask">
+        <el-icon><MagicStick /></el-icon>
+        执行指令
+      </el-button>
+    </el-form>
+
+    <ol v-if="progress.length" class="task-progress" aria-label="AI 执行进度">
+      <li v-for="step in progress" :key="step.id" :class="step.status">
+        <span class="progress-dot" />
+        <span>{{ step.label }}</span>
+      </li>
+    </ol>
+
     <div v-if="task?.error" class="task-error" role="alert">{{ task.error }}</div>
 
     <div v-if="task?.result" class="task-result">
@@ -27,18 +49,33 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
+import { ElMessage } from "element-plus";
 import { Collection, DataAnalysis, Edit, Finished, MagicStick } from "@element-plus/icons-vue";
-import type { CodexTaskType, NovelTask } from "@/types/novel";
+import type { CodexTaskType, NovelTask, TaskProgressStep } from "@/types/novel";
 
 defineProps<{
   task: NovelTask | null;
+  progress: TaskProgressStep[];
   loading: boolean;
 }>();
 
-defineEmits<{
-  "run-task": [type: CodexTaskType];
+const emit = defineEmits<{
+  "run-task": [type: CodexTaskType, payload?: Record<string, unknown>];
   "apply-patches": [];
 }>();
+
+const freePrompt = ref("");
+
+function submitFreeTask() {
+  const prompt = freePrompt.value.trim();
+  if (!prompt) {
+    ElMessage.warning("先写一句要交给 AI 的任务。");
+    return;
+  }
+
+  emit("run-task", "assistant.free", { instruction: prompt });
+}
 
 const actions: Array<{ type: CodexTaskType; label: string; icon: unknown }> = [
   { type: "outline.generate", label: "生成大纲", icon: Collection },
@@ -69,6 +106,54 @@ const actions: Array<{ type: CodexTaskType; label: string; icon: unknown }> = [
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.free-task {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.free-task-button {
+  width: 100%;
+}
+
+.task-progress {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  margin: 12px 0 0;
+  list-style: none;
+  border-radius: 6px;
+  background: #f8fafc;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6b7280;
+    font-size: 13px;
+  }
+
+  .running {
+    color: #1d4ed8;
+  }
+
+  .done {
+    color: #047857;
+  }
+
+  .error {
+    color: #b91c1c;
+  }
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  flex: 0 0 auto;
 }
 
 .task-error,
