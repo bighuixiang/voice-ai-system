@@ -10,6 +10,7 @@
         <p>{{ filePath || "选择章节后开始写作" }}</p>
       </div>
       <div class="editor-actions">
+        <span class="word-count" aria-label="当前字数">{{ wordCount }} 字</span>
         <span class="save-state" :class="{ dirty: hasUnsavedChanges }">{{ saveStateLabel }}</span>
         <el-button class="save-button" :disabled="!filePath || isSaving" :loading="isSaving" @click="$emit('save')">
           <el-icon><DocumentChecked /></el-icon>
@@ -33,6 +34,7 @@
       class="editor-textarea"
       :value="content"
       spellcheck="false"
+      wrap="soft"
       :aria-label="`Markdown ${documentLabel}`"
       @input="handleInput"
       @select="emitSelection"
@@ -48,7 +50,8 @@ import { DocumentChecked, Notebook, Reading } from "@element-plus/icons-vue";
 import WorkbenchSegmentedControl from "@/components/common/WorkbenchSegmentedControl.vue";
 import type { ChapterDocumentKind, EditorSelection, NovelChapter } from "@/types/novel";
 
-const props = defineProps<{
+const props = withDefaults(
+  defineProps<{
   chapter: NovelChapter | null;
   documentKind: ChapterDocumentKind;
   documentLabel: string;
@@ -57,7 +60,12 @@ const props = defineProps<{
   hasUnsavedChanges: boolean;
   saveStateLabel: string;
   isSaving: boolean;
-}>();
+  wordCount?: number;
+  }>(),
+  {
+    wordCount: 0
+  }
+);
 
 const emit = defineEmits<{
   "update:content": [content: string];
@@ -227,6 +235,20 @@ function emitSelection() {
   }
 }
 
+.word-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .save-button {
   min-width: 84px;
 }
@@ -238,13 +260,16 @@ function emitSelection() {
 }
 
 .editor-textarea {
+  box-sizing: border-box;
   flex: 1;
   width: 100%;
   min-height: 480px;
+  max-width: 100%;
   resize: none;
   border: 0;
   outline: none;
   padding: 22px 28px;
+  overflow-x: hidden;
   font-size: 16px;
   line-height: 1.86;
   color: #111827;

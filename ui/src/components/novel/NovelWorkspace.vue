@@ -6,7 +6,7 @@
         <p>从小说项目开始，逐步扩展到素材、剧本、图片和视频生成管理。</p>
       </div>
       <div class="header-actions">
-        <el-button v-if="store.hasProject" @click="store.showProjectHub">
+        <el-button v-if="isProjectRoute" @click="goProjectHub">
           <el-icon><Folder /></el-icon>
           项目大厅
         </el-button>
@@ -24,16 +24,16 @@
         class="workspace-tab"
         :class="{ active: store.currentProject?.slug === project.slug }"
         type="button"
-        @click="store.openProject(project)"
+        @click="goWorkspace(project.slug)"
       >
         <span>{{ project.title }}</span>
-        <el-button circle size="small" aria-label="关闭工作台" @click.stop="store.closeWorkspace(project.slug)">
+        <el-button circle size="small" aria-label="关闭工作台" @click.stop="closeWorkspace(project.slug)">
           <el-icon><Close /></el-icon>
         </el-button>
       </button>
     </nav>
 
-    <main v-if="!store.hasProject" class="project-hub">
+    <main v-if="!isProjectRoute" class="project-hub">
       <section class="hub-copy" aria-labelledby="hub-title">
         <p class="eyebrow">Creative Production Platform</p>
         <h2 id="hub-title">先选项目，再进入工作台</h2>
@@ -53,10 +53,10 @@
           :current-project="store.currentProject"
           :loading="store.isLoading"
           @refresh="store.loadProjects"
-          @open="store.openProject"
-          @import-project="store.importProject"
+          @open="goWorkspace($event.slug)"
+          @import-project="importProjectAndOpen"
         />
-        <ProjectCreatePanel />
+        <ProjectCreatePanel @created="goWorkspace($event.slug)" />
         <PlatformLibraryPanel
           :library="store.platformLibrary"
           :loading="store.isLoading"
@@ -67,8 +67,8 @@
       </div>
     </main>
 
-    <main v-else class="workspace-grid">
-      <aside class="left-rail">
+    <main v-else-if="store.hasProject" class="workspace-grid" :class="`mode-${store.writingMode}`">
+      <aside v-if="store.writingMode !== 'focus'" class="left-rail">
         <ChapterTree
           v-if="store.currentProject"
           :project="store.currentProject"
@@ -77,40 +77,78 @@
         />
       </aside>
 
-      <ChapterEditor
-        class="editor-area"
-        :chapter="store.currentChapter"
-        :document-kind="store.currentDocumentKind"
-        :document-label="store.currentDocumentLabel"
-        :file-path="store.currentFilePath"
-        :content="store.currentContent"
-        :has-unsaved-changes="store.hasUnsavedChanges"
-        :save-state-label="store.currentSaveStateLabel"
-        :is-saving="store.isSavingContent"
-        @update:content="store.updateContent"
-        @switch-document="store.openChapterDocument"
-        @selection="store.updateSelection"
-        @save="handleSaveCurrentContent"
-      />
+      <section class="center-stage">
+        <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
+        <div v-if="store.writingMode === 'focus'" class="focus-dashboard-summary" aria-label="专注写作摘要">
+          <span>目标：{{ store.currentDashboard?.goal || "未设置" }}</span>
+          <span>POV：{{ store.currentDashboard?.pov || "未设置" }}</span>
+          <span>字数：{{ editorWordCount }}</span>
+        </div>
+        <ChapterDashboardPanel
+          v-if="store.writingMode === 'structure'"
+          :dashboard="store.currentDashboard"
+          :is-saving="store.isSavingDashboard"
+          @update:dashboard="store.updateDashboard"
+          @save="store.saveCurrentDashboard"
+        />
+        <SceneCardPanel
+          v-if="store.writingMode === 'structure'"
+          :cards="store.sceneCards"
+          :is-saving="store.isSavingScenes"
+          @update:cards="store.updateSceneCards"
+          @save="store.saveCurrentSceneCards"
+        />
+        <ChapterEditor
+          class="editor-area"
+          :chapter="store.currentChapter"
+          :document-kind="store.currentDocumentKind"
+          :document-label="store.currentDocumentLabel"
+          :file-path="store.currentFilePath"
+          :content="store.currentContent"
+          :has-unsaved-changes="store.hasUnsavedChanges"
+          :save-state-label="store.currentSaveStateLabel"
+          :is-saving="store.isSavingContent"
+          :word-count="editorWordCount"
+          @update:content="store.updateContent"
+          @switch-document="store.openChapterDocument"
+          @selection="store.updateSelection"
+          @save="handleSaveCurrentContent"
+        />
+      </section>
 
-      <aside class="right-rail">
-        <SelectionToolbar :selection="store.selection" :loading="store.isLoading" @polish="store.polishSelection" />
+      <aside v-if="store.writingMode !== 'focus'" class="right-rail">
+        <SelectionToolbar
+          v-if="store.writingMode === 'review'"
+          :selection="store.selection"
+          :loading="store.isLoading"
+          @polish="store.polishSelection"
+        />
         <RewriteComparison
+          v-if="store.writingMode === 'review'"
           :result="store.rewriteCandidate"
+          :original-text="store.selection?.selectedText"
           @accept="store.acceptRewrite"
           @reject="store.rejectRewrite"
           @apply-patches="store.applyTaskPatches"
         />
         <AIOperationPanel
+          v-if="store.writingMode === 'structure'"
           :task="store.currentTask"
           :progress="store.taskProgress"
           :loading="store.isLoading"
           @run-task="store.runTask"
           @apply-patches="store.applyTaskPatches"
         />
-        <TaskHistoryPanel :tasks="store.taskHistory" />
-        <ContextPanel :project="store.currentProject" :chapter="store.currentChapter" />
+        <WritingRecapPanel
+          v-if="store.writingMode === 'review'"
+          :candidate="store.recapCandidate"
+          @accept="store.acceptWritingRecap"
+          @reject="store.rejectWritingRecap"
+        />
+        <TaskHistoryPanel v-if="store.writingMode === 'review'" :tasks="store.taskHistory" />
+        <ContextPanel v-if="store.writingMode === 'structure'" :project="store.currentProject" :chapter="store.currentChapter" />
         <PlatformLibraryPanel
+          v-if="store.writingMode === 'structure'"
           :library="store.platformLibrary"
           :project-slug="store.currentProject?.slug"
           :loading="store.isLoading"
@@ -119,6 +157,7 @@
           @link-asset="store.linkSharedAsset"
         />
         <SupportFilePanel
+          v-if="store.writingMode === 'structure'"
           :files="store.supportFiles"
           :current-path="store.currentSupportPath"
           :content="store.supportContent"
@@ -127,32 +166,112 @@
           @update:content="store.updateSupportContent"
           @save="store.saveSupportContent"
         />
-        <LedgerPanel />
+        <LedgerPanel
+          v-if="store.writingMode === 'review'"
+          :entries="store.ledgerEntries"
+          :active-kind="store.activeLedgerKind"
+          :loading="store.isLoading"
+          @change-kind="store.loadLedger"
+          @update:entries="store.updateLedgerEntries"
+          @save="store.saveLedger"
+        />
         <div v-if="store.error" class="workspace-error" role="alert">{{ store.error }}</div>
       </aside>
+    </main>
+    <main v-else class="workspace-loading" aria-live="polite">
+      <el-icon class="is-loading"><Loading /></el-icon>
+      <span>{{ store.error || "正在载入工作台" }}</span>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
-import { Close, Folder, Refresh } from "@element-plus/icons-vue";
+import { Close, Folder, Loading, Refresh } from "@element-plus/icons-vue";
+import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
 import ProjectManagerPanel from "./ProjectManagerPanel.vue";
 import ProjectCreatePanel from "./ProjectCreatePanel.vue";
 import ChapterTree from "./ChapterTree.vue";
+import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
+import SceneCardPanel from "./SceneCardPanel.vue";
 import ChapterEditor from "./ChapterEditor.vue";
 import SelectionToolbar from "./SelectionToolbar.vue";
 import RewriteComparison from "./RewriteComparison.vue";
 import AIOperationPanel from "./AIOperationPanel.vue";
+import WritingRecapPanel from "./WritingRecapPanel.vue";
+import WritingModeSwitcher from "./WritingModeSwitcher.vue";
 import TaskHistoryPanel from "./TaskHistoryPanel.vue";
 import ContextPanel from "./ContextPanel.vue";
 import SupportFilePanel from "./SupportFilePanel.vue";
 import LedgerPanel from "./LedgerPanel.vue";
 import PlatformLibraryPanel from "./PlatformLibraryPanel.vue";
 
+defineOptions({
+  name: "NovelWorkspace"
+});
+
 const store = useNovelStore();
+const route = useRoute();
+const router = useRouter();
+const isProjectRoute = computed(() => route.name === "project-workspace");
+const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
+
+function routeProjectSlug() {
+  const slug = route.params.slug;
+  return typeof slug === "string" ? slug : "";
+}
+
+async function syncWorkspaceFromRoute() {
+  if (!store.projects.length) {
+    await store.loadProjects();
+  }
+  await store.loadPlatformLibrary().catch(() => {
+    // Platform library is optional until the API service is running.
+  });
+
+  if (!isProjectRoute.value) {
+    store.showProjectHub({ skipLeaveCheck: true });
+    return;
+  }
+
+  const slug = routeProjectSlug();
+  const project = store.projects.find((item) => item.slug === slug);
+  if (!project) {
+    store.error = `找不到项目：${slug}`;
+    await router.replace({ name: "project-hub" });
+    return;
+  }
+
+  await store.openProject(project, { skipLeaveCheck: true });
+}
+
+function goProjectHub() {
+  router.push({ name: "project-hub" });
+}
+
+function goWorkspace(projectSlug: string) {
+  router.push({ name: "project-workspace", params: { slug: projectSlug } });
+}
+
+async function importProjectAndOpen(input: { sourcePath: string; title?: string; genre?: string }) {
+  const project = await store.importProject(input);
+  if (project) {
+    goWorkspace(project.slug);
+  }
+}
+
+async function closeWorkspace(projectSlug: string) {
+  await store.closeWorkspace(projectSlug);
+  const nextProject = store.currentProject;
+  if (nextProject) {
+    goWorkspace(nextProject.slug);
+    return;
+  }
+
+  goProjectHub();
+}
 
 async function handleSaveCurrentContent() {
   const hadChanges = store.hasUnsavedChanges;
@@ -165,13 +284,19 @@ async function handleSaveCurrentContent() {
 }
 
 onMounted(() => {
-  store.loadProjects().catch(() => {
+  syncWorkspaceFromRoute().catch(() => {
     // Initial load can fail if the API service has not been started yet.
   });
-  store.loadPlatformLibrary().catch(() => {
-    // Platform library is optional until the API service is running.
-  });
 });
+
+watch(
+  () => route.fullPath,
+  () => {
+    syncWorkspaceFromRoute().catch(() => {
+      // Keep the cached workspace visible if the API is temporarily unavailable.
+    });
+  }
+);
 </script>
 
 <style scoped lang="scss">
@@ -309,6 +434,15 @@ onMounted(() => {
   gap: 14px;
   height: calc(100vh - 116px);
   padding: 14px;
+
+  &.mode-focus {
+    grid-template-columns: minmax(0, 980px);
+    justify-content: center;
+  }
+
+  &.mode-review {
+    grid-template-columns: minmax(220px, 280px) minmax(420px, 1fr) minmax(320px, 420px);
+  }
 }
 
 .left-rail,
@@ -320,8 +454,48 @@ onMounted(() => {
   overflow: auto;
 }
 
-.editor-area {
+.center-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.center-stage > :not(.editor-area) {
+  flex: 0 0 auto;
+}
+
+.focus-dashboard-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 700;
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.editor-area {
+  min-height: 560px;
+  flex: 1 0 560px;
+}
+
+.mode-focus .editor-area {
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 .workspace-error {
@@ -329,6 +503,15 @@ onMounted(() => {
   border-radius: 6px;
   background: #fef2f2;
   color: #991b1b;
+}
+
+.workspace-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: calc(100vh - 116px);
+  color: #475569;
 }
 
 @media (max-width: 1100px) {
@@ -361,6 +544,10 @@ onMounted(() => {
 
   .workspace-grid {
     height: auto;
+  }
+
+  .focus-dashboard-summary span {
+    white-space: normal;
   }
 
   .right-rail {

@@ -6,6 +6,8 @@ export type CodexTaskType =
   | "selection.polish"
   | "continuity.check"
   | "idea.suggest"
+  | "writing.briefing"
+  | "writing.recap"
   | "assistant.free";
 
 export type NovelTaskStatus = "pending" | "running" | "success" | "error" | "cancelled";
@@ -24,6 +26,72 @@ export interface NovelChapter {
   outlinePath: string;
   contentPath: string;
   status: "empty" | "planned" | "drafted" | "checked";
+}
+
+export interface ChapterDashboard {
+  chapterId: string;
+  goal: string;
+  pov: string;
+  mainConflict: string;
+  endingHook: string;
+  wordCount: number;
+  status: "empty" | "planned" | "drafting" | "drafted" | "reviewing" | "checked";
+  unresolvedForeshadowingIds: string[];
+  continuityRiskIds: string[];
+  updatedAt: string;
+}
+
+export interface SceneCard {
+  id: string;
+  chapterId: string;
+  order: number;
+  title: string;
+  time: string;
+  location: string;
+  pov: string;
+  characters: string[];
+  conflict: string;
+  turn: string;
+  informationReleased: string[];
+  foreshadowingIds: string[];
+  powerProgression: string;
+  draftAnchor?: string;
+  updatedAt: string;
+}
+
+export interface LedgerEntry {
+  id: string;
+  kind: "foreshadowing" | "continuity" | "power" | "character" | "risk";
+  title: string;
+  status: "open" | "watch" | "resolved" | "blocked";
+  severity: "low" | "medium" | "high";
+  chapterIds: string[];
+  relatedEntities: string[];
+  note: string;
+  expectedResolutionChapterId?: string;
+  updatedAt: string;
+}
+
+export interface WritingBriefing {
+  chapterId: string;
+  previousChapterEnding: string;
+  currentGoal: string;
+  povLimits: string[];
+  mustRemember: string[];
+  mustNotReveal: string[];
+  unresolvedForeshadowing: LedgerEntry[];
+  risks: LedgerEntry[];
+}
+
+export interface WritingRecapCandidate {
+  chapterId: string;
+  summary: string;
+  newFacts: string[];
+  characterStateChanges: string[];
+  foreshadowingUpdates: LedgerEntry[];
+  continuityRisks: LedgerEntry[];
+  powerProgressionUpdates: LedgerEntry[];
+  createdAt: string;
 }
 
 export interface NovelProject {

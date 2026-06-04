@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { NovelChapter, NovelProject } from "./types.js";
+import type { ChapterDashboard, NovelChapter, NovelProject } from "./types.js";
 import { getNovelsRoot } from "./workspace.js";
 import { resolveInside } from "./pathSafety.js";
 import { upsertProjectRecord } from "./database.js";
@@ -46,6 +46,21 @@ export function createDefaultModules() {
     { key: "image-generation" as const, label: "Image Generation", status: "planned" as const },
     { key: "video-generation" as const, label: "Video Generation", status: "planned" as const }
   ];
+}
+
+function createDefaultChapterDashboard(chapterId: string): ChapterDashboard {
+  return {
+    chapterId,
+    goal: "",
+    pov: "",
+    mainConflict: "",
+    endingHook: "",
+    wordCount: 0,
+    status: "empty",
+    unresolvedForeshadowingIds: [],
+    continuityRiskIds: [],
+    updatedAt: nowIso()
+  };
 }
 
 export function createProjectSkeleton(input: { title?: string; roughIdea: string; genre?: string }): NovelProject {
@@ -120,6 +135,8 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "bible",
     "outline",
     "chapters",
+    "dashboard",
+    "scenes",
     "ledger",
     "style",
     "tasks",
@@ -146,12 +163,18 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "ledger/foreshadowing.md": "# 伏笔账本\n\n| 伏笔 | 埋设章节 | 回收章节 | 状态 |\n| --- | --- | --- | --- |\n",
     "ledger/continuity.md": "# 连续性检查\n\n暂无记录。\n",
     "ledger/power-progression.md": "# 升级节奏账本\n\n| 阶段 | 能力 | 触发 | 代价 | 限制 |\n| --- | --- | --- | --- | --- |\n",
+    "ledger/foreshadowing.json": "[]\n",
+    "ledger/continuity.json": "[]\n",
+    "ledger/power-progression.json": "[]\n",
+    "ledger/character-state.json": "[]\n",
+    "ledger/risks.json": "[]\n",
     "assets/README.md": "# Asset Management\n\nCharacters, props, scenes, frame references, and generated media will be managed here in later platform modules.\n",
     "scripts/README.md": "# Script Production\n\nScripts and shot plans will be managed here in later platform modules.\n",
     "relations/asset-links.json": `${JSON.stringify({ projectSlug: project.slug, links: [] }, null, 2)}\n`,
     "relations/story-asset-map.md": "# Story Asset Map\n\nTrack how characters, props, scenes, and generated media relate to chapters and plot beats.\n",
     "prompts/project-prompts.md": "# Project Prompts\n\nProject-specific prompt notes, expert role overrides, and reusable generation instructions.\n",
-    "tasks/history.jsonl": ""
+    "tasks/history.jsonl": "",
+    "tasks/recaps.jsonl": ""
   };
 
   for (const [relativePath, content] of Object.entries(defaults)) {
@@ -161,6 +184,12 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
   for (const chapter of project.chapters) {
     await fs.writeFile(resolveInside(root, chapter.outlinePath), `# ${chapter.title}章纲\n\n待规划。\n`, "utf8");
     await fs.writeFile(resolveInside(root, chapter.contentPath), `# ${chapter.title}\n\n`, "utf8");
+    await fs.writeFile(
+      resolveInside(root, `dashboard/${chapter.id}.json`),
+      `${JSON.stringify(createDefaultChapterDashboard(chapter.id), null, 2)}\n`,
+      "utf8"
+    );
+    await fs.writeFile(resolveInside(root, `scenes/${chapter.id}.json`), "[]\n", "utf8");
   }
 }
 

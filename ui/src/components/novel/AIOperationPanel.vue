@@ -81,6 +81,8 @@ const actions: Array<{ type: CodexTaskType; label: string; icon: unknown }> = [
   { type: "outline.generate", label: "生成大纲", icon: Collection },
   { type: "chapter.plan", label: "规划章节", icon: DataAnalysis },
   { type: "chapter.draft", label: "起草正文", icon: Edit },
+  { type: "writing.briefing", label: "写前简报", icon: DataAnalysis },
+  { type: "writing.recap", label: "写后复盘", icon: Finished },
   { type: "idea.suggest", label: "补灵感", icon: MagicStick },
   { type: "continuity.check", label: "连续性检查", icon: Finished }
 ];

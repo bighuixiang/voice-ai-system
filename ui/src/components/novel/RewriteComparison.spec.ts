@@ -5,8 +5,9 @@ import type { CodexTaskResult } from "@/types/novel";
 
 const stubs = {
   "el-button": {
+    props: ["disabled"],
     emits: ["click"],
-    template: `<button @click="$emit('click')"><slot /></button>`
+    template: `<button :disabled="disabled" @click="$emit('click')"><slot /></button>`
   },
   "el-tag": { template: "<span><slot /></span>" }
 };
@@ -32,7 +33,7 @@ describe("RewriteComparison", () => {
 
   it("shows risks and emits accept, reject, and patch events", async () => {
     const wrapper = mount(RewriteComparison, {
-      props: { result },
+      props: { result, originalText: "Original selected line." },
       global: { stubs }
     });
     const buttons = wrapper.findAll("button");
@@ -41,10 +42,23 @@ describe("RewriteComparison", () => {
     await buttons[1].trigger("click");
     await buttons[2].trigger("click");
 
+    expect(wrapper.text()).toContain("原文");
+    expect(wrapper.text()).toContain("建议稿");
+    expect(wrapper.text()).toContain("Original selected line.");
     expect(wrapper.text()).toContain("May alter tone");
     expect(wrapper.text()).toContain("Keep the image?");
     expect(wrapper.emitted("reject")).toHaveLength(1);
     expect(wrapper.emitted("accept")).toHaveLength(1);
     expect(wrapper.emitted("apply-patches")).toHaveLength(1);
+  });
+
+  it("disables selected rewrite acceptance when there is no active selection", () => {
+    const wrapper = mount(RewriteComparison, {
+      props: { result, originalText: "" },
+      global: { stubs }
+    });
+
+    expect(wrapper.text()).toContain("当前没有选区");
+    expect(wrapper.findAll("button")[1].attributes("disabled")).toBeDefined();
   });
 });

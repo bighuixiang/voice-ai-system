@@ -36,6 +36,9 @@ import { Plus } from "@element-plus/icons-vue";
 import { useNovelStore } from "@/stores/novel";
 
 const store = useNovelStore();
+const emit = defineEmits<{
+  created: [project: { slug: string }];
+}>();
 const title = ref("");
 const genre = ref("");
 const roughIdea = ref("");
@@ -49,11 +52,14 @@ async function handleSubmit() {
 
   isLoading.value = true;
   try {
-    await store.createProject({
+    const project = await store.createProject({
       title: title.value,
       genre: genre.value,
       roughIdea: roughIdea.value
     });
+    if (project) {
+      emit("created", project);
+    }
     ElMessage.success("项目已创建。");
   } finally {
     isLoading.value = false;

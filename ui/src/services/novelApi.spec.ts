@@ -131,6 +131,84 @@ describe("novelApi", () => {
     );
   });
 
+  it("reads and saves writing cockpit resources", async () => {
+    const dashboard = {
+      chapterId: "chapter-001",
+      goal: "Make the choice unavoidable.",
+      pov: "Hero",
+      mainConflict: "Stay hidden or act.",
+      endingHook: "The seal answers.",
+      wordCount: 1200,
+      status: "drafting",
+      unresolvedForeshadowingIds: [],
+      continuityRiskIds: [],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const scenes = [
+      {
+        id: "scene-1",
+        chapterId: "chapter-001",
+        order: 1,
+        title: "Pressure",
+        time: "night",
+        location: "Gate",
+        pov: "Hero",
+        characters: ["Hero"],
+        conflict: "Stay quiet.",
+        turn: "A sound exposes him.",
+        informationReleased: [],
+        foreshadowingIds: [],
+        powerProgression: "",
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    ];
+    const entries = [
+      {
+        id: "risk-1",
+        kind: "risk",
+        title: "Information boundary",
+        status: "open",
+        severity: "medium",
+        chapterIds: ["chapter-001"],
+        relatedEntities: ["Hero"],
+        note: "Avoid omniscient labels.",
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    ];
+    mockJson({ dashboard });
+    mockJson({ dashboard });
+    mockJson({ scenes });
+    mockJson({ scenes });
+    mockJson({ entries });
+    mockJson({ entries });
+
+    await expect(novelApi.readChapterDashboard("demo", "chapter-001")).resolves.toEqual(dashboard);
+    await expect(novelApi.saveChapterDashboard("demo", dashboard)).resolves.toEqual(dashboard);
+    await expect(novelApi.readSceneCards("demo", "chapter-001")).resolves.toEqual(scenes);
+    await expect(novelApi.saveSceneCards("demo", "chapter-001", scenes)).resolves.toEqual(scenes);
+    await expect(novelApi.readLedgerEntries("demo", "risk")).resolves.toEqual(entries);
+    await expect(novelApi.saveLedgerEntries("demo", "risk", entries)).resolves.toEqual(entries);
+
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/dashboard/chapter-001", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      2,
+      "/api/novel/projects/demo/dashboard/chapter-001",
+      expect.objectContaining({ method: "PUT", body: JSON.stringify({ dashboard }) })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(3, "/api/novel/projects/demo/scenes/chapter-001", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      4,
+      "/api/novel/projects/demo/scenes/chapter-001",
+      expect.objectContaining({ method: "PUT", body: JSON.stringify({ scenes }) })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(5, "/api/novel/projects/demo/ledger/risk", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      6,
+      "/api/novel/projects/demo/ledger/risk",
+      expect.objectContaining({ method: "PUT", body: JSON.stringify({ entries }) })
+    );
+  });
+
   it("runs Codex tasks and selection polish requests", async () => {
     mockJson({ task: { id: "task-1", type: "idea.suggest", status: "success" } });
     mockJson({ task: { id: "task-2", type: "selection.polish", status: "success" } });

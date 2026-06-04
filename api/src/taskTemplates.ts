@@ -19,8 +19,41 @@ const taskGoals: Partial<Record<CodexTaskType, string>> = {
   "assistant.free": "根据作者随时交代的临时指令，在当前小说上下文中给出分析、建议、改写或安全补丁。"
 };
 
+function buildTaskContract(type: CodexTaskType) {
+  if (type === "writing.briefing") {
+    return [
+      {
+        title: "Prewriting Briefing Contract",
+        content:
+          "Return a WritingBriefing JSON. It must cover previous chapter ending, current chapter goal, POV limits, must remember, must not reveal, unresolved foreshadowing, and risks."
+      }
+    ];
+  }
+
+  if (type === "writing.recap") {
+    return [
+      {
+        title: "Post-save Recap Contract",
+        content:
+          "Return a WritingRecapCandidate JSON with new facts, character state changes, foreshadowing updates, continuity risks, and power progression updates. Do not auto-apply ledger updates."
+      }
+    ];
+  }
+
+  return [];
+}
+
 export function buildTaskPrompt(type: CodexTaskType, context: PromptContext): string {
-  const blocks = context.contextBlocks
+  const cockpitInstruction = ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "writing.briefing", "writing.recap"].includes(type)
+    ? [
+        {
+          title: "Cockpit Boundaries",
+          content:
+            "Respect the Chapter Dashboard, Scene Cards, and structured ledgers before proposing prose, structure, continuity risks, or next moves."
+        }
+      ]
+    : [];
+  const blocks = [...cockpitInstruction, ...buildTaskContract(type), ...context.contextBlocks]
     .map((block) => `## ${block.title}\n${block.content || "(empty)"}`)
     .join("\n\n");
   const taskGoal = taskGoals[type] || taskGoals["assistant.free"]!;

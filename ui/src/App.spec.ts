@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import App from "./App.vue";
+import { router } from "./router";
 
 describe("App.vue", () => {
   beforeEach(() => {
@@ -25,10 +26,13 @@ describe("App.vue", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders the creative platform project hub", () => {
+  it("renders the creative platform project hub", async () => {
+    await router.push("/");
+    await router.isReady();
+
     const wrapper = mount(App, {
       global: {
-        plugins: [createPinia()]
+        plugins: [createPinia(), router]
       }
     });
 

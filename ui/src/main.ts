@@ -4,6 +4,7 @@ import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 import App from './App.vue'
+import { router } from './router'
 
 // 样式导入
 import 'element-plus/dist/index.css'
@@ -23,5 +24,6 @@ const pinia = createPinia()
 // 使用插件
 app.use(pinia)
 app.use(ElementPlus)
+app.use(router)
 
 app.mount('#app')

@@ -14,8 +14,16 @@ import {
 import { getNovelsRoot } from "./workspace.js";
 import { createPlatformAsset, linkAssetToProject, readPlatformLibrary } from "./platformLibrary.js";
 import { applyPatch, fallbackProjectCreateResult, runNovelTask } from "./taskService.js";
-import type { CodexTaskType, NovelFilePatch } from "./types.js";
+import type { CodexTaskType, LedgerEntry, NovelFilePatch } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
+import {
+  readChapterDashboard,
+  readLedgerEntries,
+  readSceneCards,
+  saveChapterDashboard,
+  saveLedgerEntries,
+  saveSceneCards
+} from "./writingCockpit.js";
 
 const taskTypes: CodexTaskType[] = [
   "project.create",
@@ -25,10 +33,13 @@ const taskTypes: CodexTaskType[] = [
   "selection.polish",
   "continuity.check",
   "idea.suggest",
+  "writing.briefing",
+  "writing.recap",
   "assistant.free"
 ];
 
 const protectedWritePaths = new Set(["project.json"]);
+const ledgerKinds = new Set<LedgerEntry["kind"]>(["foreshadowing", "continuity", "power", "character", "risk"]);
 
 function asyncRoute(handler: RequestHandler): RequestHandler {
   return (req, res, next) => {
@@ -38,6 +49,10 @@ function asyncRoute(handler: RequestHandler): RequestHandler {
 
 function isProtectedWritePath(relativePath: string): boolean {
   return protectedWritePaths.has(relativePath);
+}
+
+function isLedgerKind(kind: string): kind is LedgerEntry["kind"] {
+  return ledgerKinds.has(kind as LedgerEntry["kind"]);
 }
 
 function allowedOrigins(): Set<string> {
@@ -200,6 +215,58 @@ export function createApp() {
       storyAssetMap,
       linkedAssets
     });
+  }));
+
+  app.get("/api/novel/projects/:projectId/dashboard/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const dashboard = await readChapterDashboard(projectRoot(project.slug), req.params.chapterId);
+    res.json({ dashboard });
+  }));
+
+  app.put("/api/novel/projects/:projectId/dashboard/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const dashboardInput = req.body.dashboard || req.body || {};
+    const dashboard = await saveChapterDashboard(projectRoot(project.slug), {
+      ...dashboardInput,
+      chapterId: req.params.chapterId
+    });
+    res.json({ dashboard });
+  }));
+
+  app.get("/api/novel/projects/:projectId/scenes/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const scenes = await readSceneCards(projectRoot(project.slug), req.params.chapterId);
+    res.json({ scenes });
+  }));
+
+  app.put("/api/novel/projects/:projectId/scenes/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const scenesInput = Array.isArray(req.body.scenes) ? req.body.scenes : [];
+    const scenes = await saveSceneCards(projectRoot(project.slug), req.params.chapterId, scenesInput);
+    res.json({ scenes });
+  }));
+
+  app.get("/api/novel/projects/:projectId/ledger/:kind", asyncRoute(async (req, res) => {
+    if (!isLedgerKind(req.params.kind)) {
+      res.status(400).json({ error: `Unsupported ledger kind: ${req.params.kind}` });
+      return;
+    }
+
+    const project = await readProject(req.params.projectId);
+    const entries = await readLedgerEntries(projectRoot(project.slug), req.params.kind);
+    res.json({ entries });
+  }));
+
+  app.put("/api/novel/projects/:projectId/ledger/:kind", asyncRoute(async (req, res) => {
+    if (!isLedgerKind(req.params.kind)) {
+      res.status(400).json({ error: `Unsupported ledger kind: ${req.params.kind}` });
+      return;
+    }
+
+    const project = await readProject(req.params.projectId);
+    const entriesInput = Array.isArray(req.body.entries) ? req.body.entries : [];
+    const entries = await saveLedgerEntries(projectRoot(project.slug), req.params.kind, entriesInput);
+    res.json({ entries });
   }));
 
   app.get("/api/novel/projects/:projectId/files/*", asyncRoute(async (req, res) => {

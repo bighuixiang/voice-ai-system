@@ -51,8 +51,12 @@ describe("AIOperationPanel", () => {
     });
 
     await wrapper.findAll("button")[0].trigger("click");
+    await wrapper.findAll("button")[3].trigger("click");
+    await wrapper.findAll("button")[4].trigger("click");
 
     expect(wrapper.emitted("run-task")?.[0]).toEqual(["outline.generate"]);
+    expect(wrapper.emitted("run-task")?.[1]).toEqual(["writing.briefing"]);
+    expect(wrapper.emitted("run-task")?.[2]).toEqual(["writing.recap"]);
   });
 
   it("shows task output and emits patch application", async () => {

@@ -1,7 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useNovelStore } from "./novel";
-import type { NovelProject, NovelTask } from "@/types/novel";
+import type {
+  ChapterDashboard,
+  LedgerEntry,
+  NovelProject,
+  NovelTask,
+  SceneCard,
+  WritingBriefing,
+  WritingRecapCandidate
+} from "@/types/novel";
 
 const mockNovelApi = vi.hoisted(() => ({
   listProjects: vi.fn(),
@@ -12,6 +20,12 @@ const mockNovelApi = vi.hoisted(() => ({
   linkPlatformAsset: vi.fn(),
   readFile: vi.fn(),
   saveFile: vi.fn(),
+  readChapterDashboard: vi.fn(),
+  saveChapterDashboard: vi.fn(),
+  readSceneCards: vi.fn(),
+  saveSceneCards: vi.fn(),
+  readLedgerEntries: vi.fn(),
+  saveLedgerEntries: vi.fn(),
   runTask: vi.fn(),
   polishSelection: vi.fn(),
   applyPatches: vi.fn()
@@ -101,6 +115,23 @@ describe("useNovelStore", () => {
       return `support:${filePath}`;
     });
     mockNovelApi.saveFile.mockResolvedValue(undefined);
+    mockNovelApi.readChapterDashboard.mockImplementation(async (_projectId: string, chapterId: string) => ({
+      chapterId,
+      goal: "",
+      pov: "",
+      mainConflict: "",
+      endingHook: "",
+      wordCount: 0,
+      status: "planned",
+      unresolvedForeshadowingIds: [],
+      continuityRiskIds: [],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }));
+    mockNovelApi.saveChapterDashboard.mockImplementation(async (_projectId: string, dashboard: ChapterDashboard) => dashboard);
+    mockNovelApi.readSceneCards.mockResolvedValue([]);
+    mockNovelApi.saveSceneCards.mockImplementation(async (_projectId: string, _chapterId: string, cards: SceneCard[]) => cards);
+    mockNovelApi.readLedgerEntries.mockResolvedValue([]);
+    mockNovelApi.saveLedgerEntries.mockImplementation(async (_projectId: string, _kind: LedgerEntry["kind"], entries: LedgerEntry[]) => entries);
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
     mockNovelApi.createPlatformAsset.mockResolvedValue({
@@ -124,6 +155,72 @@ describe("useNovelStore", () => {
     expect(store.projects).toEqual([project]);
     expect(store.currentProject).toBeNull();
     expect(store.openWorkspaceProjects).toEqual([]);
+  });
+
+  it("accepts writing cockpit data contract fixtures", () => {
+    const dashboard: ChapterDashboard = {
+      chapterId: "chapter-001",
+      goal: "Make the price of the clue visible.",
+      pov: "主角",
+      mainConflict: "Leave safely or inspect the seal.",
+      endingHook: "The mark answers.",
+      wordCount: 900,
+      status: "reviewing",
+      unresolvedForeshadowingIds: ["foreshadowing-1"],
+      continuityRiskIds: ["risk-1"],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const scene: SceneCard = {
+      id: "scene-1",
+      chapterId: "chapter-001",
+      order: 1,
+      title: "Seal response",
+      time: "night",
+      location: "九连山",
+      pov: "主角",
+      characters: ["主角"],
+      conflict: "The seal demands a cost.",
+      turn: "The clue appears only after pain.",
+      informationReleased: ["The seal reacts to blood."],
+      foreshadowingIds: ["foreshadowing-1"],
+      powerProgression: "First controlled response.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const ledgerEntry: LedgerEntry = {
+      id: "risk-1",
+      kind: "continuity",
+      title: "Known information boundary",
+      status: "open",
+      severity: "medium",
+      chapterIds: ["chapter-001"],
+      relatedEntities: ["主角"],
+      note: "Use felt experience instead of cosmic labels.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const briefing: WritingBriefing = {
+      chapterId: "chapter-001",
+      previousChapterEnding: "The gate moved.",
+      currentGoal: dashboard.goal,
+      povLimits: ["主角不能知道幕后势力"],
+      mustRemember: ["伤口未愈"],
+      mustNotReveal: ["封印源头"],
+      unresolvedForeshadowing: [ledgerEntry],
+      risks: [ledgerEntry]
+    };
+    const recap: WritingRecapCandidate = {
+      chapterId: "chapter-001",
+      summary: "A cost was paid for the clue.",
+      newFacts: ["Blood can wake the mark."],
+      characterStateChanges: ["主角对封印更警惕"],
+      foreshadowingUpdates: [ledgerEntry],
+      continuityRisks: [ledgerEntry],
+      powerProgressionUpdates: [{ ...ledgerEntry, kind: "power" }],
+      createdAt: "2026-06-04T00:00:00.000Z"
+    };
+
+    expect(scene.chapterId).toBe(dashboard.chapterId);
+    expect(briefing.risks).toHaveLength(1);
+    expect(recap.foreshadowingUpdates[0].status).toBe("open");
   });
 
   it("loads the platform library for shared assets, prompts, roles, and skills", async () => {
@@ -174,6 +271,107 @@ describe("useNovelStore", () => {
     expect(store.currentContent).toBe("draft:chapters/chapter-002.md");
     expect(store.supportContent).toBe("support:bible/characters.md");
     expect(store.hasUnsavedChanges).toBe(false);
+  });
+
+  it("loads dashboard, scene cards, and ledger data for the active workspace", async () => {
+    const scenes: SceneCard[] = [
+      {
+        id: "scene-1",
+        chapterId: "chapter-002",
+        order: 1,
+        title: "Quiet pressure",
+        time: "night",
+        location: "Gate",
+        pov: "Hero",
+        characters: ["Hero"],
+        conflict: "Stay hidden.",
+        turn: "The gate reacts.",
+        informationReleased: [],
+        foreshadowingIds: [],
+        powerProgression: "",
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    ];
+    mockNovelApi.readSceneCards.mockResolvedValueOnce(scenes);
+
+    const store = useNovelStore();
+    store.projects = [project];
+    await store.openProject(project);
+
+    expect(mockNovelApi.readChapterDashboard).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readSceneCards).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
+    expect(store.currentDashboard?.chapterId).toBe("chapter-002");
+    expect(store.sceneCards).toEqual(scenes);
+    expect(store.activeLedgerKind).toBe("foreshadowing");
+  });
+
+  it("keeps each opened workspace cached while switching projects", async () => {
+    const otherProject: NovelProject = {
+      ...project,
+      id: "other",
+      slug: "other",
+      title: "Other Novel",
+      lastOpenedChapterId: "chapter-001"
+    };
+    const store = useNovelStore();
+    store.projects = [project, otherProject];
+
+    await store.openProject(project);
+    store.updateContent("dirty cached draft");
+    store.updateSupportContent("dirty support notes");
+    store.updateDashboard({ goal: "Cached chapter goal" });
+    store.updateSceneCards([
+      {
+        id: "scene-cached",
+        chapterId: "chapter-002",
+        order: 1,
+        title: "Cached scene",
+        time: "night",
+        location: "Gate",
+        pov: "Hero",
+        characters: ["Hero"],
+        conflict: "Keep the clue.",
+        turn: "The clue changes hands.",
+        informationReleased: [],
+        foreshadowingIds: [],
+        powerProgression: "",
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    ]);
+
+    await store.openProject(otherProject, { skipLeaveCheck: true });
+    expect(store.currentProject?.slug).toBe("other");
+
+    await store.openProject(project, { skipLeaveCheck: true });
+
+    expect(store.currentProject?.slug).toBe("demo");
+    expect(store.currentContent).toBe("dirty cached draft");
+    expect(store.supportContent).toBe("dirty support notes");
+    expect(store.currentDashboard?.goal).toBe("Cached chapter goal");
+    expect(store.sceneCards.map((scene) => scene.id)).toEqual(["scene-cached"]);
+    expect(store.hasUnsavedChanges).toBe(true);
+    expect(store.openWorkspaceProjects.map((item) => item.slug)).toEqual(["demo", "other"]);
+  });
+
+  it("switches writing mode and restores it with the workspace cache", async () => {
+    const otherProject: NovelProject = {
+      ...project,
+      id: "other",
+      slug: "other",
+      title: "Other Novel",
+      lastOpenedChapterId: "chapter-001"
+    };
+    const store = useNovelStore();
+    store.projects = [project, otherProject];
+
+    await store.openProject(project);
+    store.setWritingMode("review");
+    await store.openProject(otherProject, { skipLeaveCheck: true });
+    store.setWritingMode("focus");
+    await store.openProject(project, { skipLeaveCheck: true });
+
+    expect(store.writingMode).toBe("review");
   });
 
   it("switches between chapter body and chapter outline documents", async () => {
@@ -292,6 +490,51 @@ describe("useNovelStore", () => {
     expect(store.hasUnsavedChanges).toBe(false);
   });
 
+  it("keeps the dashboard word count synchronized with draft saves", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+
+    store.updateContent("abc def");
+    expect(store.currentDashboard?.wordCount).toBe(6);
+
+    await store.saveCurrentContent();
+
+    expect(mockNovelApi.saveChapterDashboard).toHaveBeenCalledWith(
+      "demo",
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        wordCount: 6
+      })
+    );
+  });
+
+  it("loads and saves ledger entries for the selected project", async () => {
+    const entries: LedgerEntry[] = [
+      {
+        id: "risk-1",
+        kind: "risk",
+        title: "Information boundary",
+        status: "open",
+        severity: "medium",
+        chapterIds: ["chapter-001"],
+        relatedEntities: ["Hero"],
+        note: "Avoid omniscient labels.",
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    ];
+    mockNovelApi.readLedgerEntries.mockResolvedValueOnce(entries);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await store.loadLedger("risk");
+    expect(store.activeLedgerKind).toBe("risk");
+    expect(store.ledgerEntries).toEqual(entries);
+
+    await store.saveLedger("risk", entries);
+    expect(mockNovelApi.saveLedgerEntries).toHaveBeenCalledWith("demo", "risk", entries);
+  });
+
   it("saves support files independently from chapter content", async () => {
     const store = useNovelStore();
     store.currentProject = project;
@@ -328,6 +571,95 @@ describe("useNovelStore", () => {
     expect(store.taskHistory).toHaveLength(1);
     expect(store.rewriteCandidate?.summary).toBe("Generated ideas");
     expect(store.taskProgress.every((step) => step.status === "done")).toBe(true);
+  });
+
+  it("requests a writing recap candidate and keeps it out of rewrite flow", async () => {
+    const recap: WritingRecapCandidate = {
+      chapterId: "chapter-002",
+      summary: "The clue now has a cost.",
+      newFacts: ["Blood wakes the mark."],
+      characterStateChanges: ["Hero distrusts the gate."],
+      foreshadowingUpdates: [],
+      continuityRisks: [
+        {
+          id: "risk-1",
+          kind: "risk",
+          title: "POV boundary",
+          status: "open",
+          severity: "high",
+          chapterIds: ["chapter-002"],
+          relatedEntities: ["Hero"],
+          note: "Avoid knowledge outside the hero's senses.",
+          updatedAt: "2026-06-04T00:00:00.000Z"
+        }
+      ],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-04T00:00:00.000Z"
+    };
+    mockNovelApi.runTask.mockResolvedValue(
+      taskWithResult({
+        type: "writing.recap",
+        result: {
+          summary: "Recap candidate",
+          content: JSON.stringify(recap),
+          changes: [],
+          risks: [],
+          questions: [],
+          patches: []
+        }
+      })
+    );
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[1];
+    store.currentFilePath = project.chapters[1].contentPath;
+
+    await store.requestWritingRecap();
+
+    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+      "demo",
+      "writing.recap",
+      expect.objectContaining({
+        chapterId: "chapter-002",
+        filePath: "chapters/chapter-002.md"
+      })
+    );
+    expect(store.recapCandidate?.summary).toBe("The clue now has a cost.");
+    expect(store.rewriteCandidate).toBeNull();
+  });
+
+  it("accepts recap ledger updates only after author confirmation", async () => {
+    const update: LedgerEntry = {
+      id: "risk-1",
+      kind: "risk",
+      title: "POV boundary",
+      status: "open",
+      severity: "high",
+      chapterIds: ["chapter-002"],
+      relatedEntities: ["Hero"],
+      note: "Avoid knowledge outside the hero's senses.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.activeLedgerKind = "risk";
+    store.ledgerEntries = [];
+    store.recapCandidate = {
+      chapterId: "chapter-002",
+      summary: "The clue now has a cost.",
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [update],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-04T00:00:00.000Z"
+    };
+
+    await store.acceptWritingRecap();
+
+    expect(mockNovelApi.saveLedgerEntries).toHaveBeenCalledWith("demo", "risk", [update]);
+    expect(store.ledgerEntries).toEqual([update]);
+    expect(store.recapCandidate).toBeNull();
   });
 
   it("routes chapter planning to the outline document before calling AI", async () => {
@@ -442,6 +774,25 @@ describe("useNovelStore", () => {
     expect(store.currentContent).toBe("before a sharper line after");
     expect(store.selection).toBeNull();
     expect(store.rewriteCandidate).toBeNull();
+  });
+
+  it("does not accept a selected rewrite when the original selection is gone", () => {
+    const store = useNovelStore();
+    store.currentContent = "before plain line after";
+    store.selection = null;
+    store.rewriteCandidate = {
+      summary: "Polished",
+      content: "a sharper line",
+      changes: [],
+      risks: [],
+      questions: [],
+      patches: []
+    };
+
+    store.acceptRewrite();
+
+    expect(store.currentContent).toBe("before plain line after");
+    expect(store.rewriteCandidate?.content).toBe("a sharper line");
   });
 
   it("rejects a rewrite without mutating the draft", () => {

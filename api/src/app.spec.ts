@@ -184,6 +184,126 @@ describe("novel API routes", () => {
     await fs.rm(sourceRoot, { recursive: true, force: true });
   });
 
+  it("reads and saves writing cockpit dashboard, scenes, and ledger entries", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Cockpit Demo", roughIdea: "Build a faster writing desk." })
+    });
+
+    const dashboardBefore = await jsonFetch<{ dashboard: { chapterId: string; status: string; wordCount: number } }>(
+      "/api/novel/projects/cockpit-demo/dashboard/chapter-001"
+    );
+    expect(dashboardBefore.data.dashboard).toMatchObject({
+      chapterId: "chapter-001",
+      status: "empty",
+      wordCount: 0
+    });
+
+    const dashboardAfter = await jsonFetch<{ dashboard: { chapterId: string; goal: string; wordCount: number } }>(
+      "/api/novel/projects/cockpit-demo/dashboard/chapter-001",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dashboard: {
+            chapterId: "../unsafe",
+            goal: "Make the choice unavoidable.",
+            pov: "Hero",
+            mainConflict: "Stay hidden or act.",
+            endingHook: "The seal answers.",
+            wordCount: 1200,
+            status: "drafting",
+            unresolvedForeshadowingIds: [],
+            continuityRiskIds: [],
+            updatedAt: "2026-06-04T00:00:00.000Z"
+          }
+        })
+      }
+    );
+    expect(dashboardAfter.data.dashboard).toMatchObject({
+      chapterId: "chapter-001",
+      goal: "Make the choice unavoidable.",
+      wordCount: 1200
+    });
+
+    const scenesAfter = await jsonFetch<{ scenes: Array<{ chapterId: string; id: string; order: number }> }>(
+      "/api/novel/projects/cockpit-demo/scenes/chapter-001",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scenes: [
+            {
+              id: "scene-late",
+              chapterId: "wrong",
+              order: 9,
+              title: "Late turn",
+              time: "night",
+              location: "Gate",
+              pov: "Hero",
+              characters: ["Hero"],
+              conflict: "Lose the clue.",
+              turn: "The clue moves.",
+              informationReleased: [],
+              foreshadowingIds: [],
+              powerProgression: "",
+              updatedAt: "2026-06-04T00:00:00.000Z"
+            },
+            {
+              id: "scene-early",
+              chapterId: "wrong",
+              order: 2,
+              title: "Early pressure",
+              time: "night",
+              location: "Gate",
+              pov: "Hero",
+              characters: ["Hero"],
+              conflict: "Stay quiet.",
+              turn: "A sound exposes him.",
+              informationReleased: [],
+              foreshadowingIds: [],
+              powerProgression: "",
+              updatedAt: "2026-06-04T00:00:00.000Z"
+            }
+          ]
+        })
+      }
+    );
+    expect(scenesAfter.data.scenes.map((scene) => [scene.id, scene.chapterId, scene.order])).toEqual([
+      ["scene-early", "chapter-001", 1],
+      ["scene-late", "chapter-001", 2]
+    ]);
+
+    const ledgerAfter = await jsonFetch<{ entries: Array<{ id: string; kind: string }> }>(
+      "/api/novel/projects/cockpit-demo/ledger/risk",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entries: [
+            {
+              id: "risk-1",
+              kind: "continuity",
+              title: "Information boundary",
+              status: "open",
+              severity: "medium",
+              chapterIds: ["chapter-001"],
+              relatedEntities: ["Hero"],
+              note: "Avoid omniscient labels.",
+              updatedAt: "2026-06-04T00:00:00.000Z"
+            }
+          ]
+        })
+      }
+    );
+    expect(ledgerAfter.data.entries).toEqual([expect.objectContaining({ id: "risk-1", kind: "risk" })]);
+
+    const invalidLedger = await jsonFetch<{ error: string }>("/api/novel/projects/cockpit-demo/ledger/unknown");
+    expect(invalidLedger.status).toBe(400);
+    expect(invalidLedger.data.error).toContain("Unsupported ledger kind");
+  });
+
   it("rejects unsafe paths and protected project metadata writes", async () => {
     await jsonFetch("/api/novel/projects", {
       method: "POST",

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "scene-1780555844743-2",
+    "chapterId": "chapter-001",
+    "order": 1,
+    "title": "隐蔽观察",
+    "time": "",
+    "location": "旧石阶旁",
+    "pov": "主角",
+    "characters": [],
+    "conflict": "必须判断异象是否针对自己。",
+    "turn": "旁人看不见那道纹路。",
+    "informationReleased": [],
+    "foreshadowingIds": [],
+    "powerProgression": "意识到自身感知异常。",
+    "updatedAt": "2026-06-04T06:51:13.723Z"
+  },
+  {
+    "id": "scene-1780555831627-1",
+    "chapterId": "chapter-001",
+    "order": 2,
+    "title": "异象初现",
+    "time": "",
+    "location": "山门外",
+    "pov": "主角",
+    "characters": [],
+    "conflict": "想靠近又怕暴露。",
+    "turn": "地面印记开始回应。",
+    "informationReleased": [],
+    "foreshadowingIds": [],
+    "powerProgression": "第一次感到灵息牵引。",
+    "updatedAt": "2026-06-04T06:51:13.556Z"
+  },
+  {
+    "id": "scene-1780555846142-3",
+    "chapterId": "chapter-001",
+    "order": 3,
+    "title": "钩子落下",
+    "time": "",
+    "location": "山门阴影",
+    "pov": "主角",
+    "characters": [],
+    "conflict": "是否承认自己听见了回应。",
+    "turn": "无声问题被回答。",
+    "informationReleased": [],
+    "foreshadowingIds": [],
+    "powerProgression": "埋下后续追问。",
+    "updatedAt": "2026-06-04T06:51:13.912Z"
+  }
+]

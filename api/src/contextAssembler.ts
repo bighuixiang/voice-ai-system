@@ -16,6 +16,18 @@ function trimContext(content: string, limit = 6000): string {
   return `${content.slice(0, Math.floor(limit / 2))}\n\n[...中间内容已压缩...]\n\n${content.slice(-Math.floor(limit / 2))}`;
 }
 
+const broadContextTypes: CodexTaskType[] = [
+  "outline.generate",
+  "chapter.plan",
+  "chapter.draft",
+  "continuity.check",
+  "idea.suggest",
+  "assistant.free"
+];
+
+const targetChapterTypes: CodexTaskType[] = ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
+const cockpitContextTypes: CodexTaskType[] = ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
+
 export async function assembleContext(
   type: CodexTaskType,
   root: string,
@@ -34,7 +46,7 @@ export async function assembleContext(
     { title: "力量体系", content: await readOptional(root, "bible/power-system.md") }
   ];
 
-  if (["outline.generate", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"].includes(type)) {
+  if (broadContextTypes.includes(type)) {
     blocks.push(
       { title: "卷纲", content: await readOptional(root, "outline/volume-01.md") },
       { title: "伏笔账本", content: await readOptional(root, "ledger/foreshadowing.md") },
@@ -44,7 +56,19 @@ export async function assembleContext(
 
   const chapterId = String(payload.chapterId || project.lastOpenedChapterId || "chapter-001");
   const chapter = project.chapters.find((item) => item.id === chapterId);
-  if (chapter && ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"].includes(type)) {
+  if (chapter && cockpitContextTypes.includes(type)) {
+    blocks.push(
+      { title: "章节仪表盘", content: await readOptional(root, `dashboard/${chapter.id}.json`) },
+      { title: "场景卡", content: await readOptional(root, `scenes/${chapter.id}.json`) },
+      { title: "结构化伏笔账本", content: await readOptional(root, "ledger/foreshadowing.json") },
+      { title: "结构化连续性风险", content: await readOptional(root, "ledger/continuity.json") },
+      { title: "结构化升级节奏", content: await readOptional(root, "ledger/power-progression.json") },
+      { title: "结构化角色状态", content: await readOptional(root, "ledger/character-state.json") },
+      { title: "结构化风险账本", content: await readOptional(root, "ledger/risks.json") }
+    );
+  }
+
+  if (chapter && targetChapterTypes.includes(type)) {
     blocks.push(
       { title: "目标章纲", content: await readOptional(root, chapter.outlinePath) },
       { title: "目标正文", content: await readOptional(root, chapter.contentPath) }

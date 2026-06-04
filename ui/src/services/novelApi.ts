@@ -1,12 +1,15 @@
 import type {
+  ChapterDashboard,
   CodexTaskType,
   EditorSelection,
+  LedgerEntry,
   NovelFilePatch,
   NovelProject,
   NovelTask,
   PlatformAsset,
   PlatformAssetType,
-  PlatformLibrary
+  PlatformLibrary,
+  SceneCard
 } from "@/types/novel";
 
 const jsonHeaders = { "Content-Type": "application/json" };
@@ -85,6 +88,51 @@ export const novelApi = {
       headers: jsonHeaders,
       body: JSON.stringify({ content })
     });
+  },
+
+  async readChapterDashboard(projectId: string, chapterId: string): Promise<ChapterDashboard> {
+    const data = await request<{ dashboard: ChapterDashboard }>(`/api/novel/projects/${projectId}/dashboard/${chapterId}`);
+    return data.dashboard;
+  },
+
+  async saveChapterDashboard(projectId: string, dashboard: ChapterDashboard): Promise<ChapterDashboard> {
+    const data = await request<{ dashboard: ChapterDashboard }>(
+      `/api/novel/projects/${projectId}/dashboard/${dashboard.chapterId}`,
+      {
+        method: "PUT",
+        headers: jsonHeaders,
+        body: JSON.stringify({ dashboard })
+      }
+    );
+    return data.dashboard;
+  },
+
+  async readSceneCards(projectId: string, chapterId: string): Promise<SceneCard[]> {
+    const data = await request<{ scenes: SceneCard[] }>(`/api/novel/projects/${projectId}/scenes/${chapterId}`);
+    return data.scenes;
+  },
+
+  async saveSceneCards(projectId: string, chapterId: string, scenes: SceneCard[]): Promise<SceneCard[]> {
+    const data = await request<{ scenes: SceneCard[] }>(`/api/novel/projects/${projectId}/scenes/${chapterId}`, {
+      method: "PUT",
+      headers: jsonHeaders,
+      body: JSON.stringify({ scenes })
+    });
+    return data.scenes;
+  },
+
+  async readLedgerEntries(projectId: string, kind: LedgerEntry["kind"]): Promise<LedgerEntry[]> {
+    const data = await request<{ entries: LedgerEntry[] }>(`/api/novel/projects/${projectId}/ledger/${kind}`);
+    return data.entries;
+  },
+
+  async saveLedgerEntries(projectId: string, kind: LedgerEntry["kind"], entries: LedgerEntry[]): Promise<LedgerEntry[]> {
+    const data = await request<{ entries: LedgerEntry[] }>(`/api/novel/projects/${projectId}/ledger/${kind}`, {
+      method: "PUT",
+      headers: jsonHeaders,
+      body: JSON.stringify({ entries })
+    });
+    return data.entries;
   },
 
   async runTask(projectId: string, type: CodexTaskType, payload: Record<string, unknown>): Promise<NovelTask> {

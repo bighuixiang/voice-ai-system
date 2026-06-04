@@ -2,22 +2,58 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import { novelApi } from "@/services/novelApi";
 import type {
+  ChapterDashboard,
   CodexTaskResult,
   CodexTaskType,
   ChapterDocumentKind,
   EditorSelection,
+  LedgerEntry,
   NovelChapter,
   NovelProject,
   NovelTask,
   PlatformAsset,
   PlatformAssetType,
   PlatformLibrary,
-  TaskProgressStep
+  SceneCard,
+  TaskProgressStep,
+  WritingMode,
+  WritingRecapCandidate
 } from "@/types/novel";
+
+type LedgerKind = LedgerEntry["kind"];
+
+interface WorkspaceCache {
+  project: NovelProject;
+  chapterId: string | null;
+  documentKind: ChapterDocumentKind;
+  filePath: string;
+  content: string;
+  savedContent: string;
+  lastSavedAt: string;
+  selection: EditorSelection | null;
+  currentTask: NovelTask | null;
+  taskProgress: TaskProgressStep[];
+  taskHistory: NovelTask[];
+  rewriteCandidate: CodexTaskResult | null;
+  recapCandidate: WritingRecapCandidate | null;
+  dashboard: ChapterDashboard | null;
+  sceneCards: SceneCard[];
+  ledgerKind: LedgerKind;
+  ledgerEntries: LedgerEntry[];
+  writingMode: WritingMode;
+  supportPath: string;
+  supportContent: string;
+  savedSupportContent: string;
+}
+
+interface WorkspaceSwitchOptions {
+  skipLeaveCheck?: boolean;
+}
 
 export const useNovelStore = defineStore("novel", () => {
   const projects = ref<NovelProject[]>([]);
   const openWorkspaceSlugs = ref<string[]>([]);
+  const workspaceCache = ref<Record<string, WorkspaceCache>>({});
   const currentProject = ref<NovelProject | null>(null);
   const currentChapter = ref<NovelChapter | null>(null);
   const currentDocumentKind = ref<ChapterDocumentKind>("content");
@@ -31,6 +67,14 @@ export const useNovelStore = defineStore("novel", () => {
   const taskProgress = ref<TaskProgressStep[]>([]);
   const taskHistory = ref<NovelTask[]>([]);
   const rewriteCandidate = ref<CodexTaskResult | null>(null);
+  const recapCandidate = ref<WritingRecapCandidate | null>(null);
+  const currentDashboard = ref<ChapterDashboard | null>(null);
+  const sceneCards = ref<SceneCard[]>([]);
+  const activeLedgerKind = ref<LedgerKind>("foreshadowing");
+  const ledgerEntries = ref<LedgerEntry[]>([]);
+  const writingMode = ref<WritingMode>("structure");
+  const isSavingDashboard = ref(false);
+  const isSavingScenes = ref(false);
   const platformLibrary = ref<PlatformLibrary | null>(null);
   const supportFiles = [
     { label: "角色", path: "bible/characters.md" },
@@ -81,19 +125,65 @@ export const useNovelStore = defineStore("novel", () => {
   function canLeaveCurrentChapter() {
     return (
       !hasUnsavedChanges.value ||
-      confirmDiscard("当前章节有未保存内容，继续切换会丢失这些修改。是否继续？")
+      confirmDiscard("当前章节有未保存内容，切换工作台会先保留在本次会话缓存中；刷新页面前仍建议保存。是否继续？")
     );
   }
 
   function canLeaveCurrentSupportFile() {
     return (
       !hasUnsavedSupportChanges.value ||
-      confirmDiscard("当前资料文件有未保存内容，继续切换会丢失这些修改。是否继续？")
+      confirmDiscard("当前资料文件有未保存内容，切换工作台会先保留在本次会话缓存中；刷新页面前仍建议保存。是否继续？")
     );
   }
 
   function canLeaveCurrentWorkspace() {
     return canLeaveCurrentChapter() && canLeaveCurrentSupportFile();
+  }
+
+  function countDraftWords(content: string) {
+    return content.replace(/\s+/g, "").length;
+  }
+
+  function syncDashboardWordCount(content = currentContent.value) {
+    if (!currentDashboard.value) return;
+    currentDashboard.value = {
+      ...currentDashboard.value,
+      wordCount: countDraftWords(content),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function parseRecapCandidate(content?: string) {
+    if (!content) return null;
+
+    try {
+      const parsed = JSON.parse(content) as Partial<WritingRecapCandidate>;
+      if (!parsed || typeof parsed.summary !== "string" || !parsed.chapterId) return null;
+      return {
+        chapterId: parsed.chapterId,
+        summary: parsed.summary,
+        newFacts: Array.isArray(parsed.newFacts) ? parsed.newFacts : [],
+        characterStateChanges: Array.isArray(parsed.characterStateChanges) ? parsed.characterStateChanges : [],
+        foreshadowingUpdates: Array.isArray(parsed.foreshadowingUpdates) ? parsed.foreshadowingUpdates : [],
+        continuityRisks: Array.isArray(parsed.continuityRisks) ? parsed.continuityRisks : [],
+        powerProgressionUpdates: Array.isArray(parsed.powerProgressionUpdates) ? parsed.powerProgressionUpdates : [],
+        createdAt: parsed.createdAt || new Date().toISOString()
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function mergeLedgerEntries(existing: LedgerEntry[], updates: LedgerEntry[]) {
+    const merged = new Map(existing.map((entry) => [entry.id, entry]));
+    updates.forEach((entry) => {
+      merged.set(entry.id, {
+        ...merged.get(entry.id),
+        ...entry,
+        updatedAt: entry.updatedAt || new Date().toISOString()
+      });
+    });
+    return Array.from(merged.values());
   }
 
   function startTaskProgress() {
@@ -126,8 +216,73 @@ export const useNovelStore = defineStore("novel", () => {
     lastSavedAt.value = "";
     selection.value = null;
     rewriteCandidate.value = null;
+    recapCandidate.value = null;
+    currentDashboard.value = null;
+    sceneCards.value = [];
+    activeLedgerKind.value = "foreshadowing";
+    ledgerEntries.value = [];
+    writingMode.value = "structure";
     supportContent.value = "";
     savedSupportContent.value = "";
+  }
+
+  function cacheCurrentWorkspace() {
+    if (!currentProject.value) return;
+
+    workspaceCache.value = {
+      ...workspaceCache.value,
+      [currentProject.value.slug]: {
+        project: currentProject.value,
+        chapterId: currentChapter.value?.id || null,
+        documentKind: currentDocumentKind.value,
+        filePath: currentFilePath.value,
+        content: currentContent.value,
+        savedContent: savedContent.value,
+        lastSavedAt: lastSavedAt.value,
+        selection: selection.value,
+        currentTask: currentTask.value,
+        taskProgress: taskProgress.value,
+        taskHistory: taskHistory.value,
+        rewriteCandidate: rewriteCandidate.value,
+        recapCandidate: recapCandidate.value,
+        dashboard: currentDashboard.value,
+        sceneCards: sceneCards.value,
+        ledgerKind: activeLedgerKind.value,
+        ledgerEntries: ledgerEntries.value,
+        writingMode: writingMode.value,
+        supportPath: currentSupportPath.value,
+        supportContent: supportContent.value,
+        savedSupportContent: savedSupportContent.value
+      }
+    };
+  }
+
+  function restoreCachedWorkspace(project: NovelProject) {
+    const cached = workspaceCache.value[project.slug];
+    if (!cached) return false;
+
+    currentProject.value = project;
+    currentChapter.value = project.chapters.find((chapter) => chapter.id === cached.chapterId) || project.chapters[0] || null;
+    currentDocumentKind.value = cached.documentKind;
+    currentFilePath.value = cached.filePath;
+    currentContent.value = cached.content;
+    savedContent.value = cached.savedContent;
+    lastSavedAt.value = cached.lastSavedAt;
+    selection.value = cached.selection;
+    currentTask.value = cached.currentTask;
+    taskProgress.value = cached.taskProgress;
+    taskHistory.value = cached.taskHistory;
+    rewriteCandidate.value = cached.rewriteCandidate;
+    recapCandidate.value = cached.recapCandidate;
+    currentDashboard.value = cached.dashboard;
+    sceneCards.value = cached.sceneCards;
+    activeLedgerKind.value = cached.ledgerKind;
+    ledgerEntries.value = cached.ledgerEntries;
+    writingMode.value = cached.writingMode || "structure";
+    currentSupportPath.value = cached.supportPath;
+    supportContent.value = cached.supportContent;
+    savedSupportContent.value = cached.savedSupportContent;
+    return true;
   }
 
   async function loadProjects() {
@@ -150,6 +305,7 @@ export const useNovelStore = defineStore("novel", () => {
       const project = await novelApi.createProject(input);
       projects.value = [project, ...projects.value.filter((item) => item.slug !== project.slug)];
       await openProject(project);
+      return project;
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err);
       throw err;
@@ -167,6 +323,7 @@ export const useNovelStore = defineStore("novel", () => {
       const project = await novelApi.importProject(input);
       projects.value = [project, ...projects.value.filter((item) => item.slug !== project.slug)];
       await openProject(project);
+      return project;
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err);
       throw err;
@@ -204,45 +361,155 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  async function openProject(project: NovelProject) {
-    if (currentProject.value?.slug !== project.slug && !canLeaveCurrentWorkspace()) return;
+  async function loadChapterCockpit(chapterId: string) {
+    if (!currentProject.value) return;
+    const [dashboard, cards] = await Promise.all([
+      novelApi.readChapterDashboard(currentProject.value.slug, chapterId),
+      novelApi.readSceneCards(currentProject.value.slug, chapterId)
+    ]);
+    currentDashboard.value = {
+      ...dashboard,
+      wordCount: countDraftWords(currentContent.value)
+    };
+    sceneCards.value = cards;
+  }
 
+  function updateDashboard(patch: Partial<ChapterDashboard>) {
+    if (!currentDashboard.value) return;
+    currentDashboard.value = {
+      ...currentDashboard.value,
+      ...patch,
+      chapterId: currentDashboard.value.chapterId,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async function saveCurrentDashboard() {
+    if (!currentProject.value || !currentDashboard.value) return;
+    isSavingDashboard.value = true;
+    try {
+      currentDashboard.value = await novelApi.saveChapterDashboard(currentProject.value.slug, currentDashboard.value);
+    } finally {
+      isSavingDashboard.value = false;
+    }
+  }
+
+  function updateSceneCards(cards: SceneCard[]) {
+    sceneCards.value = cards;
+  }
+
+  async function saveCurrentSceneCards() {
+    if (!currentProject.value || !currentChapter.value) return;
+    isSavingScenes.value = true;
+    try {
+      sceneCards.value = await novelApi.saveSceneCards(currentProject.value.slug, currentChapter.value.id, sceneCards.value);
+    } finally {
+      isSavingScenes.value = false;
+    }
+  }
+
+  async function loadLedger(kind: LedgerKind = activeLedgerKind.value) {
+    if (!currentProject.value) return;
+    activeLedgerKind.value = kind;
+    ledgerEntries.value = await novelApi.readLedgerEntries(currentProject.value.slug, kind);
+  }
+
+  async function saveLedger(kind: LedgerKind = activeLedgerKind.value, entries: LedgerEntry[] = ledgerEntries.value) {
+    if (!currentProject.value) return;
+    activeLedgerKind.value = kind;
+    ledgerEntries.value = await novelApi.saveLedgerEntries(currentProject.value.slug, kind, entries);
+  }
+
+  function updateLedgerEntries(entries: LedgerEntry[]) {
+    ledgerEntries.value = entries;
+  }
+
+  function setWritingMode(mode: WritingMode) {
+    writingMode.value = mode;
+  }
+
+  async function requestWritingRecap() {
+    await runTask("writing.recap");
+  }
+
+  async function acceptWritingRecap() {
+    if (!currentProject.value || !recapCandidate.value) return;
+    const updates = [
+      ...recapCandidate.value.foreshadowingUpdates,
+      ...recapCandidate.value.continuityRisks,
+      ...recapCandidate.value.powerProgressionUpdates
+    ];
+    const updatesByKind = updates.reduce<Partial<Record<LedgerKind, LedgerEntry[]>>>((groups, entry) => {
+      groups[entry.kind] = [...(groups[entry.kind] || []), entry];
+      return groups;
+    }, {});
+
+    for (const [kind, entries] of Object.entries(updatesByKind) as Array<[LedgerKind, LedgerEntry[]]>) {
+      const existing = kind === activeLedgerKind.value ? ledgerEntries.value : await novelApi.readLedgerEntries(currentProject.value.slug, kind);
+      const saved = await novelApi.saveLedgerEntries(currentProject.value.slug, kind, mergeLedgerEntries(existing, entries));
+      if (kind === activeLedgerKind.value) {
+        ledgerEntries.value = saved;
+      }
+    }
+
+    recapCandidate.value = null;
+  }
+
+  function rejectWritingRecap() {
+    recapCandidate.value = null;
+  }
+
+  async function openProject(project: NovelProject, options: WorkspaceSwitchOptions = {}) {
+    if (currentProject.value?.slug !== project.slug && !options.skipLeaveCheck && !canLeaveCurrentWorkspace()) return;
+
+    cacheCurrentWorkspace();
     if (!openWorkspaceSlugs.value.includes(project.slug)) {
       openWorkspaceSlugs.value = [...openWorkspaceSlugs.value, project.slug];
     }
+
+    if (restoreCachedWorkspace(project)) return;
+
     currentProject.value = project;
     currentDocumentKind.value = "content";
     const chapter = project.chapters.find((item) => item.id === project.lastOpenedChapterId) || project.chapters[0];
     if (chapter) {
-      await openChapter(chapter);
+      await openChapter(chapter, currentDocumentKind.value, { skipLeaveCheck: true });
     }
-    await openSupportFile(currentSupportPath.value);
+    await openSupportFile(currentSupportPath.value, { skipLeaveCheck: true });
+    await loadLedger(activeLedgerKind.value);
   }
 
-  function showProjectHub() {
-    if (!canLeaveCurrentWorkspace()) return;
+  function showProjectHub(options: WorkspaceSwitchOptions = {}) {
+    if (!options.skipLeaveCheck && !canLeaveCurrentWorkspace()) return;
+    cacheCurrentWorkspace();
     resetActiveWorkspace();
   }
 
-  async function closeWorkspace(projectSlug: string) {
-    if (currentProject.value?.slug === projectSlug && !canLeaveCurrentWorkspace()) return;
+  async function closeWorkspace(projectSlug: string, options: WorkspaceSwitchOptions = {}) {
+    if (currentProject.value?.slug === projectSlug && !options.skipLeaveCheck && !canLeaveCurrentWorkspace()) return;
 
     openWorkspaceSlugs.value = openWorkspaceSlugs.value.filter((slug) => slug !== projectSlug);
+    const { [projectSlug]: _closedWorkspace, ...restCache } = workspaceCache.value;
+    workspaceCache.value = restCache;
     if (currentProject.value?.slug !== projectSlug) return;
 
     const nextProject = openWorkspaceProjects.value[0];
     if (nextProject) {
-      await openProject(nextProject);
+      await openProject(nextProject, { skipLeaveCheck: true });
       return;
     }
 
     resetActiveWorkspace();
   }
 
-  async function openChapter(chapter: NovelChapter, documentKind: ChapterDocumentKind = currentDocumentKind.value) {
+  async function openChapter(
+    chapter: NovelChapter,
+    documentKind: ChapterDocumentKind = currentDocumentKind.value,
+    options: WorkspaceSwitchOptions = {}
+  ) {
     if (!currentProject.value) return;
     const nextFilePath = documentKind === "outline" ? chapter.outlinePath : chapter.contentPath;
-    if (currentFilePath.value !== nextFilePath && !canLeaveCurrentChapter()) return;
+    if (currentFilePath.value !== nextFilePath && !options.skipLeaveCheck && !canLeaveCurrentChapter()) return;
 
     currentChapter.value = chapter;
     currentDocumentKind.value = documentKind;
@@ -253,6 +520,8 @@ export const useNovelStore = defineStore("novel", () => {
     lastSavedAt.value = "";
     selection.value = null;
     rewriteCandidate.value = null;
+    recapCandidate.value = null;
+    await loadChapterCockpit(chapter.id);
   }
 
   async function openChapterDocument(documentKind: ChapterDocumentKind) {
@@ -266,6 +535,7 @@ export const useNovelStore = defineStore("novel", () => {
 
   function updateContent(content: string) {
     currentContent.value = content;
+    syncDashboardWordCount(content);
   }
 
   function updateSelection(nextSelection: EditorSelection | null) {
@@ -279,6 +549,8 @@ export const useNovelStore = defineStore("novel", () => {
     try {
       await novelApi.saveFile(currentProject.value.slug, currentFilePath.value, currentContent.value);
       savedContent.value = currentContent.value;
+      syncDashboardWordCount();
+      await saveCurrentDashboard();
       lastSavedAt.value = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err);
@@ -288,9 +560,9 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  async function openSupportFile(filePath: string) {
+  async function openSupportFile(filePath: string, options: WorkspaceSwitchOptions = {}) {
     if (!currentProject.value) return;
-    if (currentSupportPath.value !== filePath && !canLeaveCurrentSupportFile()) return;
+    if (currentSupportPath.value !== filePath && !options.skipLeaveCheck && !canLeaveCurrentSupportFile()) return;
 
     currentSupportPath.value = filePath;
     const content = await novelApi.readFile(currentProject.value.slug, filePath);
@@ -336,7 +608,12 @@ export const useNovelStore = defineStore("novel", () => {
       currentTask.value = task;
       taskHistory.value.unshift(task);
       if (task.result) {
-        rewriteCandidate.value = task.result;
+        if (type === "writing.recap") {
+          recapCandidate.value = parseRecapCandidate(task.result.content);
+          rewriteCandidate.value = null;
+        } else if (type !== "writing.briefing") {
+          rewriteCandidate.value = task.result;
+        }
       }
       setTaskProgress("parse", task.status === "error" ? "error" : "done");
     } catch (err) {
@@ -380,6 +657,7 @@ export const useNovelStore = defineStore("novel", () => {
     if (!selection.value || !rewriteCandidate.value?.content) return;
     currentContent.value = `${currentContent.value.slice(0, selection.value.start)}${rewriteCandidate.value.content}${currentContent.value.slice(selection.value.end)}`;
     savedContent.value = savedContent.value === currentContent.value ? currentContent.value : savedContent.value;
+    syncDashboardWordCount();
     selection.value = null;
     rewriteCandidate.value = null;
   }
@@ -402,6 +680,7 @@ export const useNovelStore = defineStore("novel", () => {
     projects,
     openWorkspaceSlugs,
     openWorkspaceProjects,
+    workspaceCache,
     currentProject,
     currentChapter,
     currentDocumentKind,
@@ -415,6 +694,14 @@ export const useNovelStore = defineStore("novel", () => {
     taskProgress,
     taskHistory,
     rewriteCandidate,
+    recapCandidate,
+    currentDashboard,
+    sceneCards,
+    activeLedgerKind,
+    ledgerEntries,
+    writingMode,
+    isSavingDashboard,
+    isSavingScenes,
     platformLibrary,
     supportFiles,
     currentSupportPath,
@@ -426,12 +713,25 @@ export const useNovelStore = defineStore("novel", () => {
     hasUnsavedSupportChanges,
     canUseSelection,
     currentProjectAssets,
+    canLeaveCurrentWorkspace,
     loadProjects,
     loadPlatformLibrary,
     createProject,
     importProject,
     createSharedAsset,
     linkSharedAsset,
+    loadChapterCockpit,
+    updateDashboard,
+    saveCurrentDashboard,
+    updateSceneCards,
+    saveCurrentSceneCards,
+    loadLedger,
+    saveLedger,
+    updateLedgerEntries,
+    setWritingMode,
+    requestWritingRecap,
+    acceptWritingRecap,
+    rejectWritingRecap,
     openProject,
     showProjectHub,
     closeWorkspace,
