@@ -127,6 +127,7 @@ export const useNovelStore = defineStore("novel", () => {
   const canReverseEngineerStructure = computed(
     () => currentDocumentKind.value === "content" && currentContent.value.replace(/\s+/g, "").length >= 20
   );
+  const canRequestFocusDraft = computed(() => Boolean(currentProject.value && currentChapter.value && !isLoading.value));
   const currentWordCount = computed(() => countDraftWords(currentContent.value));
   const focusProgressPercent = computed(() => {
     if (!focusTargetWords.value) return 0;
@@ -847,6 +848,50 @@ export const useNovelStore = defineStore("novel", () => {
     focusTargetWords.value = Math.max(300, Math.min(12000, Math.round(nextValue)));
   }
 
+  async function requestFocusDraft() {
+    if (!currentProject.value || !currentChapter.value || !canRequestFocusDraft.value) return;
+    const guide = focusWritingGuide.value;
+    await runTask("chapter.draft", {
+      mode: "focus.next-draft",
+      feedback: [
+        guide.prompt,
+        "",
+        "请只生成可以直接接在当前正文后面的一段或数段候选正文。",
+        "不要重写已有正文，不要输出整章，不要解释写作方法。",
+        "候选正文需要自然承接当前章尾，优先推进下一笔，不要提前泄露 POV 角色不知道的信息。"
+      ].join("\n"),
+      focusGuide: guide,
+      appendAfterCurrentDraft: true,
+      currentTail: currentContent.value.slice(-1200)
+    });
+  }
+
+  async function requestFocusDraftRevision(direction: string) {
+    if (!currentProject.value || !currentChapter.value || !canRequestFocusDraft.value || !rewriteCandidate.value?.content.trim()) {
+      return false;
+    }
+    const guide = focusWritingGuide.value;
+    await runTask("chapter.draft", {
+      mode: "focus.refine-draft",
+      feedback: [
+        guide.prompt,
+        "",
+        `请基于当前候选正文再改一版，调校方向：${direction}。`,
+        "保留候选正文承接章尾和推进下一笔的功能，不要改写已有正文，不要输出整章。",
+        "只输出可以直接追加到正文末尾的候选正文，不要解释写作方法。",
+        "",
+        "当前候选正文：",
+        rewriteCandidate.value.content
+      ].join("\n"),
+      focusGuide: guide,
+      revisionDirection: direction,
+      currentCandidate: rewriteCandidate.value.content,
+      appendAfterCurrentDraft: true,
+      currentTail: currentContent.value.slice(-1200)
+    });
+    return true;
+  }
+
   async function requestWritingRecap() {
     await runTask("writing.recap");
   }
@@ -1084,6 +1129,18 @@ export const useNovelStore = defineStore("novel", () => {
     rewriteCandidate.value = null;
   }
 
+  function acceptFocusDraft() {
+    const addition = rewriteCandidate.value?.content.trim();
+    if (!addition) return false;
+    const base = currentContent.value.replace(/\s+$/g, "");
+    currentContent.value = base ? `${base}\n\n${addition}` : addition;
+    currentQualityReport.value = null;
+    syncDashboardWordCount();
+    selection.value = null;
+    rewriteCandidate.value = null;
+    return true;
+  }
+
   function rejectRewrite() {
     rewriteCandidate.value = null;
   }
@@ -1146,6 +1203,7 @@ export const useNovelStore = defineStore("novel", () => {
     canTuneSelection,
     canDiagnoseChapter,
     canReverseEngineerStructure,
+    canRequestFocusDraft,
     currentProjectAssets,
     canLeaveCurrentWorkspace,
     loadProjects,
@@ -1168,6 +1226,8 @@ export const useNovelStore = defineStore("novel", () => {
     updateLedgerEntries,
     setWritingMode,
     updateFocusTargetWords,
+    requestFocusDraft,
+    requestFocusDraftRevision,
     diagnoseCurrentChapter,
     updateStyleTone,
     tuneSelectionStyle,
@@ -1188,6 +1248,7 @@ export const useNovelStore = defineStore("novel", () => {
     runTask,
     polishSelection,
     acceptRewrite,
+    acceptFocusDraft,
     rejectRewrite,
     applyTaskPatches
   };

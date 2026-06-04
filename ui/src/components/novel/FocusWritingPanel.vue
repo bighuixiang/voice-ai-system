@@ -45,6 +45,10 @@
     </div>
 
     <footer class="panel-actions">
+      <el-button type="primary" size="small" :disabled="!canGenerate" :loading="isGenerating" @click="$emit('generate-draft')">
+        <el-icon><MagicStick /></el-icon>
+        AI 写下一段
+      </el-button>
       <el-button size="small" @click="$emit('open-structure')">
         <el-icon><DataAnalysis /></el-icon>
         调结构
@@ -58,15 +62,21 @@
 </template>
 
 <script setup lang="ts">
-import { Aim, DataAnalysis, Finished } from "@element-plus/icons-vue";
+import { Aim, DataAnalysis, Finished, MagicStick } from "@element-plus/icons-vue";
 import type { FocusWritingGuide } from "@/types/novel";
 
-defineProps<{
+withDefaults(defineProps<{
   guide: FocusWritingGuide;
-}>();
+  canGenerate?: boolean;
+  isGenerating?: boolean;
+}>(), {
+  canGenerate: true,
+  isGenerating: false
+});
 
 const emit = defineEmits<{
   "update-target": [value: number];
+  "generate-draft": [];
   "open-structure": [];
   "open-review": [];
 }>();

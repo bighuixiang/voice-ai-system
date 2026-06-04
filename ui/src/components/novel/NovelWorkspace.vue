@@ -82,9 +82,26 @@
         <FocusWritingPanel
           v-if="store.writingMode === 'focus'"
           :guide="store.focusWritingGuide"
+          :can-generate="store.canRequestFocusDraft"
+          :is-generating="store.isLoading"
           @update-target="store.updateFocusTargetWords"
+          @generate-draft="store.requestFocusDraft"
           @open-structure="store.setWritingMode('structure')"
           @open-review="store.setWritingMode('review')"
+        />
+        <RewriteComparison
+          v-if="store.writingMode === 'focus' && store.rewriteCandidate"
+          :result="store.rewriteCandidate"
+          original-text="当前章节末尾"
+          empty-original-text="AI 会把建议稿追加到当前正文末尾。"
+          accept-label="追加到正文"
+          :can-accept="Boolean(store.rewriteCandidate?.content)"
+          :can-tune="store.canRequestFocusDraft"
+          :tune-options="focusDraftTuneOptions"
+          @accept="store.acceptFocusDraft"
+          @reject="store.rejectRewrite"
+          @tune="store.requestFocusDraftRevision"
+          @apply-patches="store.applyTaskPatches"
         />
         <StructureQuickStartPanel
           v-if="store.writingMode === 'structure'"
@@ -152,6 +169,7 @@
           v-if="store.writingMode === 'review'"
           :result="store.rewriteCandidate"
           :original-text="store.selection?.selectedText"
+          :can-accept="Boolean(store.selection?.selectedText && store.rewriteCandidate?.content)"
           @accept="store.acceptRewrite"
           @reject="store.rejectRewrite"
           @apply-patches="store.applyTaskPatches"
@@ -245,6 +263,12 @@ const route = useRoute();
 const router = useRouter();
 const isProjectRoute = computed(() => route.name === "project-workspace");
 const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
+const focusDraftTuneOptions = [
+  { label: "更有压迫感", value: "增强压迫感，让角色被更明确的危险、代价或时间压力推动" },
+  { label: "更优雅", value: "提升文笔质感，保留清晰动作线，减少直白说明" },
+  { label: "更快推进", value: "压缩铺垫，更快进入下一笔关键动作或转折" },
+  { label: "更克制", value: "降低煽情和夸张表达，保持冷静、可信、有限视角" }
+];
 
 function routeProjectSlug() {
   const slug = route.params.slug;

@@ -906,6 +906,142 @@ describe("useNovelStore", () => {
     expect(store.focusTargetWords).toBe(12000);
   });
 
+  it("requests a focus draft from the next beat guide", async () => {
+    mockNovelApi.runTask.mockResolvedValue(
+      taskWithResult({
+        type: "chapter.draft",
+        result: {
+          summary: "下一段候选",
+          content: "雨声压低，他终于听见门后的回音。",
+          changes: ["承接下一笔"],
+          risks: [],
+          questions: [],
+          patches: []
+        }
+      })
+    );
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateDashboard({
+      goal: "让主角发现线索并付出代价。",
+      pov: "主角有限视角",
+      mainConflict: "靠近线索会暴露身份。"
+    });
+    store.updateSceneCards([
+      {
+        id: "scene-1",
+        chapterId: "chapter-001",
+        order: 1,
+        title: "雨夜线索",
+        time: "",
+        location: "",
+        pov: "主角有限视角",
+        characters: [],
+        conflict: "靠近线索会暴露身份。",
+        turn: "主角听见门后回应，却不能立刻退走。",
+        informationReleased: [],
+        foreshadowingIds: [],
+        powerProgression: "",
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    ]);
+    store.updateContent("他停在门前。");
+
+    await store.requestFocusDraft();
+
+    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+      "demo",
+      "chapter.draft",
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        mode: "focus.next-draft",
+        appendAfterCurrentDraft: true,
+        feedback: expect.stringContaining("请只生成可以直接接在当前正文后面的一段或数段候选正文。"),
+        focusGuide: expect.objectContaining({
+          nextBeat: "主角听见门后回应，却不能立刻退走。"
+        })
+      })
+    );
+    expect(store.rewriteCandidate?.content).toBe("雨声压低，他终于听见门后的回音。");
+  });
+
+  it("requests a tuned focus draft revision from the current candidate", async () => {
+    mockNovelApi.runTask.mockResolvedValue(
+      taskWithResult({
+        type: "chapter.draft",
+        result: {
+          summary: "Revised next paragraph",
+          content: "A tighter candidate paragraph.",
+          changes: ["Raised pressure"],
+          risks: [],
+          questions: [],
+          patches: []
+        }
+      })
+    );
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateContent("Current chapter tail.");
+    store.rewriteCandidate = {
+      summary: "Next paragraph",
+      content: "Candidate paragraph.",
+      changes: [],
+      risks: [],
+      questions: [],
+      patches: []
+    };
+
+    const requested = await store.requestFocusDraftRevision("增强压迫感");
+
+    expect(requested).toBe(true);
+    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+      "demo",
+      "chapter.draft",
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        mode: "focus.refine-draft",
+        revisionDirection: "增强压迫感",
+        currentCandidate: "Candidate paragraph.",
+        feedback: expect.stringContaining("当前候选正文：\nCandidate paragraph.")
+      })
+    );
+    expect(store.rewriteCandidate?.content).toBe("A tighter candidate paragraph.");
+  });
+
+  it("accepts a focus draft by appending it to the current chapter", () => {
+    const store = useNovelStore();
+    store.currentContent = "他停在门前。  \n";
+    store.currentDashboard = {
+      chapterId: "chapter-001",
+      goal: "",
+      pov: "",
+      mainConflict: "",
+      endingHook: "",
+      wordCount: 0,
+      status: "drafting",
+      unresolvedForeshadowingIds: [],
+      continuityRiskIds: [],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    store.rewriteCandidate = {
+      summary: "下一段候选",
+      content: "雨声压低，他终于听见门后的回音。",
+      changes: [],
+      risks: [],
+      questions: [],
+      patches: []
+    };
+
+    const accepted = store.acceptFocusDraft();
+
+    expect(accepted).toBe(true);
+    expect(store.currentContent).toBe("他停在门前。\n\n雨声压低，他终于听见门后的回音。");
+    expect(store.currentDashboard.wordCount).toBe(store.currentContent.replace(/\s+/g, "").length);
+    expect(store.rewriteCandidate).toBeNull();
+  });
+
   it("accepts a rewrite by replacing only the original selection", () => {
     const store = useNovelStore();
     store.currentContent = "before plain line after";

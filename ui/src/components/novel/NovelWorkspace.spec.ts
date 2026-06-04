@@ -99,6 +99,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
       prompt: "Focus prompt",
       updatedAt: "2026-06-04T00:00:00.000Z"
     },
+    canRequestFocusDraft: true,
     canDiagnoseChapter: true,
     canTuneSelection: false,
     currentTask: null,
@@ -133,10 +134,13 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     saveCurrentContent: vi.fn(),
     polishSelection: vi.fn(),
     updateFocusTargetWords: vi.fn(),
+    requestFocusDraft: vi.fn(),
+    requestFocusDraftRevision: vi.fn(),
     diagnoseCurrentChapter: vi.fn(),
     updateStyleTone: vi.fn(),
     tuneSelectionStyle: vi.fn(),
     acceptRewrite: vi.fn(),
+    acceptFocusDraft: vi.fn(),
     rejectRewrite: vi.fn(),
     applyTaskPatches: vi.fn(),
     runTask: vi.fn(),
@@ -169,14 +173,21 @@ const stubs = {
   PlatformLibraryPanel: { template: "<div class='platform-stub'>platform</div>" },
   ChapterTree: { template: "<div class='tree-stub'>tree</div>" },
   WritingModeSwitcher: { props: ["mode"], template: "<div class='mode-switcher-stub'>{{ mode }}</div>" },
-  FocusWritingPanel: { template: "<div class='focus-stub'>focus guide</div>" },
+  FocusWritingPanel: {
+    emits: ["generate-draft"],
+    template: "<button class='focus-stub' @click='$emit(\"generate-draft\")'>focus guide</button>"
+  },
   StructureQuickStartPanel: { template: "<div class='quick-start-stub'>quick start</div>" },
   ChapterDashboardPanel: { template: "<div class='dashboard-stub'>dashboard</div>" },
   SceneCardPanel: { template: "<div class='scene-stub'>scene</div>" },
   ChapterEditor: { template: "<div class='editor-stub'>editor</div>" },
   SelectionToolbar: { template: "<div class='selection-stub'>selection</div>" },
   ReviewQualityPanel: { template: "<div class='quality-stub'>quality</div>" },
-  RewriteComparison: { template: "<div class='rewrite-stub'>rewrite</div>" },
+  RewriteComparison: {
+    props: ["tuneOptions"],
+    emits: ["tune"],
+    template: "<button class='rewrite-stub' @click='$emit(\"tune\", tuneOptions?.[0]?.value)'>rewrite</button>"
+  },
   AIOperationPanel: { template: "<div class='ai-stub'>ai</div>" },
   WritingRecapPanel: { template: "<div class='recap-stub'>recap</div>" },
   TaskHistoryPanel: { template: "<div class='history-stub'>history</div>" },
@@ -200,6 +211,52 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".focus-stub").exists()).toBe(true);
     expect(wrapper.find(".dashboard-stub").exists()).toBe(false);
     expect(wrapper.find(".editor-stub").exists()).toBe(true);
+  });
+
+  it("routes focus guide generation to the store", async () => {
+    storeRef.value = makeStore("focus");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".focus-stub").trigger("click");
+
+    expect(storeRef.value.requestFocusDraft).toHaveBeenCalled();
+  });
+
+  it("shows focus draft candidate when AI continues the next beat", () => {
+    storeRef.value = {
+      ...makeStore("focus"),
+      rewriteCandidate: {
+        summary: "下一段候选",
+        content: "雨声压低，他终于听见门后的回音。",
+        changes: [],
+        risks: [],
+        questions: [],
+        patches: []
+      }
+    };
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+
+    expect(wrapper.find(".rewrite-stub").exists()).toBe(true);
+  });
+
+  it("routes focus draft tuning to the store", async () => {
+    storeRef.value = {
+      ...makeStore("focus"),
+      rewriteCandidate: {
+        summary: "Next draft",
+        content: "Candidate paragraph.",
+        changes: [],
+        risks: [],
+        questions: [],
+        patches: []
+      }
+    };
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".rewrite-stub").trigger("click");
+
+    expect(storeRef.value.requestFocusDraftRevision).toHaveBeenCalledWith(expect.stringContaining("增强压迫感"));
   });
 
   it("shows review tools without structure planning panels in review mode", () => {

@@ -8,7 +8,7 @@
     <div class="diff-grid">
       <div class="diff-pane">
         <span class="pane-label">原文</span>
-        <div class="pane-content">{{ originalText || "当前没有选区，不能直接接受为选区改写。" }}</div>
+        <div class="pane-content">{{ originalText || emptyOriginalText }}</div>
       </div>
       <div class="diff-pane suggested">
         <span class="pane-label">建议稿</span>
@@ -31,8 +31,17 @@
     </div>
 
     <footer>
+      <el-button
+        v-for="option in tuneOptions"
+        :key="option.value"
+        size="small"
+        :disabled="!canTune"
+        @click="$emit('tune', option.value)"
+      >
+        {{ option.label }}
+      </el-button>
       <el-button @click="$emit('reject')">拒绝</el-button>
-      <el-button v-if="result.content" type="primary" :disabled="!originalText" @click="$emit('accept')">接受选区改写</el-button>
+      <el-button v-if="result.content" type="primary" :disabled="!canAccept" @click="$emit('accept')">{{ acceptLabel }}</el-button>
       <el-button v-if="result.patches.length" type="success" @click="$emit('apply-patches')">应用补丁</el-button>
     </footer>
   </section>
@@ -41,14 +50,32 @@
 <script setup lang="ts">
 import type { CodexTaskResult } from "@/types/novel";
 
-defineProps<{
+interface TuneOption {
+  label: string;
+  value: string;
+}
+
+withDefaults(defineProps<{
   result: CodexTaskResult | null;
   originalText?: string;
-}>();
+  emptyOriginalText?: string;
+  acceptLabel?: string;
+  canAccept?: boolean;
+  canTune?: boolean;
+  tuneOptions?: TuneOption[];
+}>(), {
+  originalText: "",
+  emptyOriginalText: "当前没有选区，不能直接接受为选区改写。",
+  acceptLabel: "接受选区改写",
+  canAccept: false,
+  canTune: false,
+  tuneOptions: () => []
+});
 
 defineEmits<{
   accept: [];
   reject: [];
+  tune: [direction: string];
   "apply-patches": [];
 }>();
 </script>
