@@ -509,6 +509,70 @@ describe("useNovelStore", () => {
     );
   });
 
+  it("reverse engineers dashboard and scene cards from the current draft", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateContent("主角在山门外发现异常印记，但他不能立刻靠近。印记突然回应了他的血。");
+
+    const generated = store.reverseEngineerStructureFromDraft();
+
+    expect(generated).toBe(true);
+    expect(store.currentDashboard).toMatchObject({
+      chapterId: "chapter-001",
+      pov: "主角限知视角",
+      status: "drafting"
+    });
+    expect(store.currentDashboard?.goal).toContain("反写");
+    expect(store.sceneCards.length).toBeGreaterThan(0);
+    expect(store.sceneCards[0]).toMatchObject({
+      chapterId: "chapter-001",
+      order: 1
+    });
+    expect(store.structureDraftVersion).toBe(1);
+  });
+
+  it("generates dashboard and scene cards from a rough chapter idea", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateStructureIdeaInput("主角在雨夜发现师门留下的旧符，想追查又怕暴露身份。");
+
+    const generated = store.generateStructureFromIdea();
+
+    expect(generated).toBe(true);
+    expect(store.currentDashboard).toMatchObject({
+      chapterId: "chapter-001",
+      pov: "主角限知视角",
+      status: "planned",
+      mainConflict: "主角必须在目标、阻力和代价之间做选择。"
+    });
+    expect(store.currentDashboard?.goal).toContain("根据想法搭建");
+    expect(store.sceneCards.map((scene) => scene.title)).toEqual(["开场抓手", "冲突升级", "钩子落点"]);
+  });
+
+  it("saves generated structure in one action", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.generateStructureFromIdea("主角发现封印回应了他的血。");
+
+    await store.saveCurrentStructure();
+
+    expect(mockNovelApi.saveChapterDashboard).toHaveBeenCalledWith(
+      "demo",
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        status: "planned"
+      })
+    );
+    expect(mockNovelApi.saveSceneCards).toHaveBeenCalledWith(
+      "demo",
+      "chapter-001",
+      expect.arrayContaining([expect.objectContaining({ title: "开场抓手" })])
+    );
+  });
+
   it("loads and saves ledger entries for the selected project", async () => {
     const entries: LedgerEntry[] = [
       {
@@ -747,6 +811,99 @@ describe("useNovelStore", () => {
       expect.objectContaining({ chapterId: "chapter-001", mode: "polish", selectedText: "plain line" })
     );
     expect(store.rewriteCandidate?.content).toBe("a sharper line");
+  });
+
+  it("diagnoses the current chapter with quality metrics", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateContent("他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然传来回应，他必须选择是否暴露身份。");
+
+    const diagnosed = store.diagnoseCurrentChapter();
+
+    expect(diagnosed).toBe(true);
+    expect(store.currentQualityReport).toMatchObject({
+      chapterId: "chapter-001",
+      metrics: expect.arrayContaining([expect.objectContaining({ key: "conflict" })])
+    });
+    expect(store.currentQualityReport?.metrics).toHaveLength(6);
+    expect(store.currentQualityReport?.fixes.length).toBeGreaterThan(0);
+  });
+
+  it("creates a style-tuned rewrite candidate for the selected text", () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
+    store.currentContent = "他非常害怕，却还是向前。";
+    store.selection = {
+      filePath: "chapters/chapter-001.md",
+      selectedText: "他非常害怕，却还是向前。",
+      beforeText: "",
+      afterText: "",
+      start: 0,
+      end: 11
+    };
+
+    const tuned = store.tuneSelectionStyle("tense");
+
+    expect(tuned).toBe(true);
+    expect(store.styleTone).toBe("tense");
+    expect(store.rewriteCandidate).toMatchObject({
+      summary: "文风调音：压迫感",
+      changes: expect.arrayContaining(["调整为压迫感"])
+    });
+    expect(store.rewriteCandidate?.content).toContain("危险显得更近");
+  });
+
+  it("builds a focus writing guide from dashboard and scene cards", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateFocusTargetWords(1600);
+    store.updateDashboard({
+      goal: "让主角发现线索并付出代价。",
+      pov: "主角有限视角",
+      mainConflict: "靠近线索会暴露身份。",
+      endingHook: "门后有人回应。"
+    });
+    store.updateSceneCards([
+      {
+        id: "scene-1",
+        chapterId: "chapter-001",
+        order: 1,
+        title: "雨夜线索",
+        time: "",
+        location: "",
+        pov: "主角有限视角",
+        characters: [],
+        conflict: "靠近线索会暴露身份。",
+        turn: "主角听见门后回应，却不能立刻退走。",
+        informationReleased: [],
+        foreshadowingIds: [],
+        powerProgression: "",
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    ]);
+    store.updateContent("他在雨夜发现封印，却不能靠近。");
+
+    expect(store.focusWritingGuide).toMatchObject({
+      chapterId: "chapter-001",
+      targetWords: 1600,
+      sceneTitle: "雨夜线索",
+      nextBeat: "主角听见门后回应，却不能立刻退走。"
+    });
+    expect(store.focusWritingGuide.guardrails).toContain("目标：让主角发现线索并付出代价。");
+    expect(store.focusWritingGuide.prompt).toContain("保持主角有限视角");
+  });
+
+  it("clamps focus target words to a practical range", () => {
+    const store = useNovelStore();
+
+    store.updateFocusTargetWords(80);
+    expect(store.focusTargetWords).toBe(300);
+
+    store.updateFocusTargetWords(20000);
+    expect(store.focusTargetWords).toBe(12000);
   });
 
   it("accepts a rewrite by replacing only the original selection", () => {

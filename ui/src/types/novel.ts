@@ -13,6 +13,8 @@ export type CodexTaskType =
 export type CreativeModuleKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
 export type ChapterDocumentKind = "content" | "outline";
 export type WritingMode = "focus" | "structure" | "review";
+export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook";
+export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
 
 export interface CreativeProjectModule {
   key: CreativeModuleKey;
@@ -92,6 +94,36 @@ export interface WritingRecapCandidate {
   continuityRisks: LedgerEntry[];
   powerProgressionUpdates: LedgerEntry[];
   createdAt: string;
+}
+
+export interface ChapterQualityMetric {
+  key: QualityMetricKey;
+  label: string;
+  score: number;
+  note: string;
+}
+
+export interface ChapterQualityReport {
+  chapterId: string;
+  overallScore: number;
+  summary: string;
+  metrics: ChapterQualityMetric[];
+  strengths: string[];
+  fixes: string[];
+  updatedAt: string;
+}
+
+export interface FocusWritingGuide {
+  chapterId: string;
+  targetWords: number;
+  currentWords: number;
+  progressPercent: number;
+  stageLabel: string;
+  sceneTitle: string;
+  nextBeat: string;
+  guardrails: string[];
+  prompt: string;
+  updatedAt: string;
 }
 
 export interface NovelProject {

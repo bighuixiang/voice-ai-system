@@ -76,6 +76,7 @@ import type { SceneCard } from "@/types/novel";
 const props = defineProps<{
   cards: SceneCard[];
   isSaving?: boolean;
+  revision?: number;
   confirmDelete?: (card: SceneCard) => boolean;
 }>();
 
@@ -94,6 +95,14 @@ watch(
     localCards.value = normalizeCards(cards, true);
   },
   { deep: true }
+);
+
+watch(
+  () => props.revision,
+  () => {
+    localCards.value = normalizeCards(props.cards, true);
+    isDirty.value = false;
+  }
 );
 
 function normalizeCards(cards: SceneCard[], sortByOrder = false) {

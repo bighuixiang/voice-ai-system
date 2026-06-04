@@ -73,6 +73,9 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
       updatedAt: "2026-06-04T00:00:00.000Z"
     },
     sceneCards: [],
+    structureIdeaInput: "",
+    structureDraftVersion: 0,
+    canReverseEngineerStructure: true,
     currentDocumentKind: "content",
     currentDocumentLabel: "章节正文",
     currentFilePath: "chapters/chapter-001.md",
@@ -81,6 +84,23 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     currentSaveStateLabel: "已保存",
     selection: null,
     rewriteCandidate: null,
+    currentQualityReport: null,
+    styleTone: "elegant",
+    focusTargetWords: 2000,
+    focusWritingGuide: {
+      chapterId: "chapter-001",
+      targetWords: 2000,
+      currentWords: 1200,
+      progressPercent: 60,
+      stageLabel: "冲突升级",
+      sceneTitle: "Chapter 1",
+      nextBeat: "Keep pushing the clue.",
+      guardrails: ["目标：Keep the clue grounded."],
+      prompt: "Focus prompt",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    },
+    canDiagnoseChapter: true,
+    canTuneSelection: false,
     currentTask: null,
     taskProgress: [],
     recapCandidate: null,
@@ -103,11 +123,19 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     saveCurrentDashboard: vi.fn(),
     updateSceneCards: vi.fn(),
     saveCurrentSceneCards: vi.fn(),
+    saveCurrentStructure: vi.fn(),
+    updateStructureIdeaInput: vi.fn(),
+    reverseEngineerStructureFromDraft: vi.fn(),
+    generateStructureFromIdea: vi.fn(),
     updateContent: vi.fn(),
     openChapterDocument: vi.fn(),
     updateSelection: vi.fn(),
     saveCurrentContent: vi.fn(),
     polishSelection: vi.fn(),
+    updateFocusTargetWords: vi.fn(),
+    diagnoseCurrentChapter: vi.fn(),
+    updateStyleTone: vi.fn(),
+    tuneSelectionStyle: vi.fn(),
     acceptRewrite: vi.fn(),
     rejectRewrite: vi.fn(),
     applyTaskPatches: vi.fn(),
@@ -141,10 +169,13 @@ const stubs = {
   PlatformLibraryPanel: { template: "<div class='platform-stub'>platform</div>" },
   ChapterTree: { template: "<div class='tree-stub'>tree</div>" },
   WritingModeSwitcher: { props: ["mode"], template: "<div class='mode-switcher-stub'>{{ mode }}</div>" },
+  FocusWritingPanel: { template: "<div class='focus-stub'>focus guide</div>" },
+  StructureQuickStartPanel: { template: "<div class='quick-start-stub'>quick start</div>" },
   ChapterDashboardPanel: { template: "<div class='dashboard-stub'>dashboard</div>" },
   SceneCardPanel: { template: "<div class='scene-stub'>scene</div>" },
   ChapterEditor: { template: "<div class='editor-stub'>editor</div>" },
   SelectionToolbar: { template: "<div class='selection-stub'>selection</div>" },
+  ReviewQualityPanel: { template: "<div class='quality-stub'>quality</div>" },
   RewriteComparison: { template: "<div class='rewrite-stub'>rewrite</div>" },
   AIOperationPanel: { template: "<div class='ai-stub'>ai</div>" },
   WritingRecapPanel: { template: "<div class='recap-stub'>recap</div>" },
@@ -159,15 +190,14 @@ describe("NovelWorkspace writing modes", () => {
     vi.clearAllMocks();
   });
 
-  it("keeps focus mode centered on the editor and dashboard summary", () => {
+  it("keeps focus mode centered on the editor and focus guide", () => {
     storeRef.value = makeStore("focus");
 
     const wrapper = mount(NovelWorkspace, { global: { stubs } });
 
     expect(wrapper.find(".left-rail").exists()).toBe(false);
     expect(wrapper.find(".right-rail").exists()).toBe(false);
-    expect(wrapper.find(".focus-dashboard-summary").exists()).toBe(true);
-    expect(wrapper.text()).toContain("字数：1200");
+    expect(wrapper.find(".focus-stub").exists()).toBe(true);
     expect(wrapper.find(".dashboard-stub").exists()).toBe(false);
     expect(wrapper.find(".editor-stub").exists()).toBe(true);
   });
@@ -178,9 +208,21 @@ describe("NovelWorkspace writing modes", () => {
     const wrapper = mount(NovelWorkspace, { global: { stubs } });
 
     expect(wrapper.find(".rewrite-stub").exists()).toBe(true);
+    expect(wrapper.find(".quality-stub").exists()).toBe(true);
     expect(wrapper.find(".ledger-stub").exists()).toBe(true);
     expect(wrapper.find(".history-stub").exists()).toBe(true);
     expect(wrapper.find(".scene-stub").exists()).toBe(false);
     expect(wrapper.find(".ai-stub").exists()).toBe(false);
+  });
+
+  it("shows quick structure generation tools in structure mode", () => {
+    storeRef.value = makeStore("structure");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+
+    expect(wrapper.find(".quick-start-stub").exists()).toBe(true);
+    expect(wrapper.find(".dashboard-stub").exists()).toBe(true);
+    expect(wrapper.find(".scene-stub").exists()).toBe(true);
+    expect(wrapper.find(".editor-stub").exists()).toBe(true);
   });
 });

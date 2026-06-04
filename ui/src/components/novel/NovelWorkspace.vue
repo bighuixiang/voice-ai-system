@@ -79,15 +79,29 @@
 
       <section class="center-stage">
         <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
-        <div v-if="store.writingMode === 'focus'" class="focus-dashboard-summary" aria-label="专注写作摘要">
-          <span>目标：{{ store.currentDashboard?.goal || "未设置" }}</span>
-          <span>POV：{{ store.currentDashboard?.pov || "未设置" }}</span>
-          <span>字数：{{ editorWordCount }}</span>
-        </div>
+        <FocusWritingPanel
+          v-if="store.writingMode === 'focus'"
+          :guide="store.focusWritingGuide"
+          @update-target="store.updateFocusTargetWords"
+          @open-structure="store.setWritingMode('structure')"
+          @open-review="store.setWritingMode('review')"
+        />
+        <StructureQuickStartPanel
+          v-if="store.writingMode === 'structure'"
+          :idea="store.structureIdeaInput"
+          :can-reverse-engineer="store.canReverseEngineerStructure"
+          :can-save-structure="Boolean(store.currentDashboard)"
+          :is-saving="store.isSavingDashboard || store.isSavingScenes"
+          @update:idea="store.updateStructureIdeaInput"
+          @reverse-from-draft="store.reverseEngineerStructureFromDraft"
+          @generate-from-idea="store.generateStructureFromIdea"
+          @save-structure="handleSaveCurrentStructure"
+        />
         <ChapterDashboardPanel
           v-if="store.writingMode === 'structure'"
           :dashboard="store.currentDashboard"
           :is-saving="store.isSavingDashboard"
+          :revision="store.structureDraftVersion"
           @update:dashboard="store.updateDashboard"
           @save="store.saveCurrentDashboard"
         />
@@ -95,6 +109,7 @@
           v-if="store.writingMode === 'structure'"
           :cards="store.sceneCards"
           :is-saving="store.isSavingScenes"
+          :revision="store.structureDraftVersion"
           @update:cards="store.updateSceneCards"
           @save="store.saveCurrentSceneCards"
         />
@@ -122,6 +137,16 @@
           :selection="store.selection"
           :loading="store.isLoading"
           @polish="store.polishSelection"
+        />
+        <ReviewQualityPanel
+          v-if="store.writingMode === 'review'"
+          :report="store.currentQualityReport"
+          :selected-tone="store.styleTone"
+          :can-diagnose="store.canDiagnoseChapter"
+          :can-tune-selection="store.canTuneSelection"
+          @diagnose="store.diagnoseCurrentChapter"
+          @update:tone="store.updateStyleTone"
+          @tune-selection="store.tuneSelectionStyle"
         />
         <RewriteComparison
           v-if="store.writingMode === 'review'"
@@ -194,10 +219,13 @@ import { useNovelStore } from "@/stores/novel";
 import ProjectManagerPanel from "./ProjectManagerPanel.vue";
 import ProjectCreatePanel from "./ProjectCreatePanel.vue";
 import ChapterTree from "./ChapterTree.vue";
+import FocusWritingPanel from "./FocusWritingPanel.vue";
+import StructureQuickStartPanel from "./StructureQuickStartPanel.vue";
 import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
 import SceneCardPanel from "./SceneCardPanel.vue";
 import ChapterEditor from "./ChapterEditor.vue";
 import SelectionToolbar from "./SelectionToolbar.vue";
+import ReviewQualityPanel from "./ReviewQualityPanel.vue";
 import RewriteComparison from "./RewriteComparison.vue";
 import AIOperationPanel from "./AIOperationPanel.vue";
 import WritingRecapPanel from "./WritingRecapPanel.vue";
@@ -280,6 +308,15 @@ async function handleSaveCurrentContent() {
     ElMessage.success(hadChanges ? "当前文档已保存" : "当前文档已是最新");
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : "保存失败");
+  }
+}
+
+async function handleSaveCurrentStructure() {
+  try {
+    await store.saveCurrentStructure();
+    ElMessage.success("章节结构已保存");
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "保存结构失败");
   }
 }
 
@@ -467,27 +504,6 @@ watch(
   flex: 0 0 auto;
 }
 
-.focus-dashboard-summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 8px 10px;
-  border: 1px solid #d8dee8;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 12px;
-  font-weight: 700;
-
-  span {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
 .editor-area {
   min-height: 560px;
   flex: 1 0 560px;
@@ -544,10 +560,6 @@ watch(
 
   .workspace-grid {
     height: auto;
-  }
-
-  .focus-dashboard-summary span {
-    white-space: normal;
   }
 
   .right-rail {

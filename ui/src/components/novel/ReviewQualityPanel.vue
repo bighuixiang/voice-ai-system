@@ -1,0 +1,254 @@
+<template>
+  <section class="review-quality-panel" aria-label="章节体检与文风调音">
+    <header>
+      <div>
+        <div class="panel-title">章节体检</div>
+        <p>看冲突、节奏、情绪、信息、文笔和钩子。</p>
+      </div>
+      <el-button :disabled="!canDiagnose" @click="$emit('diagnose')">
+        <el-icon><DataAnalysis /></el-icon>
+        体检当前章
+      </el-button>
+    </header>
+
+    <div v-if="report" class="report-body">
+      <div class="score-line">
+        <strong>{{ report.overallScore }}</strong>
+        <span>{{ report.summary }}</span>
+      </div>
+      <div class="metric-list">
+        <div v-for="metric in report.metrics" :key="metric.key" class="metric-item">
+          <div class="metric-head">
+            <span>{{ metric.label }}</span>
+            <b>{{ metric.score }}</b>
+          </div>
+          <div class="metric-track" aria-hidden="true">
+            <span :style="{ width: `${metric.score}%` }" />
+          </div>
+          <p>{{ metric.note }}</p>
+        </div>
+      </div>
+
+      <div class="advice-grid">
+        <div>
+          <strong>亮点</strong>
+          <ul>
+            <li v-for="item in report.strengths" :key="item">{{ item }}</li>
+          </ul>
+        </div>
+        <div>
+          <strong>优先修</strong>
+          <ul>
+            <li v-for="item in report.fixes" :key="item">{{ item }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <p v-else class="empty-state">切到正文后，可先体检一章再精修。</p>
+
+    <div class="tone-box">
+      <div class="tone-head">
+        <div>
+          <div class="panel-title small">文风调音台</div>
+          <p>选中文本后，把这一段调到目标质感。</p>
+        </div>
+      </div>
+
+      <div class="tone-controls">
+        <el-select :model-value="selectedTone" @update:model-value="updateTone">
+          <el-option v-for="tone in toneOptions" :key="tone.value" :label="tone.label" :value="tone.value" />
+        </el-select>
+        <el-button type="primary" :disabled="!canTuneSelection" @click="$emit('tune-selection')">
+          <el-icon><MagicStick /></el-icon>
+          调音选区
+        </el-button>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { DataAnalysis, MagicStick } from "@element-plus/icons-vue";
+import type { ChapterQualityReport, StyleToneKey } from "@/types/novel";
+
+defineProps<{
+  report: ChapterQualityReport | null;
+  selectedTone: StyleToneKey;
+  canDiagnose: boolean;
+  canTuneSelection: boolean;
+}>();
+
+const emit = defineEmits<{
+  diagnose: [];
+  "update:tone": [tone: StyleToneKey];
+  "tune-selection": [];
+}>();
+
+const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
+  { value: "elegant", label: "优雅留白" },
+  { value: "restrained", label: "克制冷峻" },
+  { value: "tense", label: "压迫感" },
+  { value: "cinematic", label: "镜头感" },
+  { value: "web-serial", label: "网文爽感" },
+  { value: "lower-ai", label: "降低 AI 味" }
+];
+
+function updateTone(value: string) {
+  emit("update:tone", value as StyleToneKey);
+}
+</script>
+
+<style scoped lang="scss">
+.review-quality-panel {
+  padding: 12px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+header,
+.tone-head,
+.metric-head,
+.tone-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+header {
+  margin-bottom: 10px;
+}
+
+.panel-title {
+  font-weight: 800;
+
+  &.small {
+    font-size: 13px;
+  }
+}
+
+p {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.report-body {
+  display: grid;
+  gap: 10px;
+}
+
+.score-line {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 7px;
+  background: #f8fafc;
+
+  strong {
+    color: #0f766e;
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  span {
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+.metric-list {
+  display: grid;
+  gap: 8px;
+}
+
+.metric-item {
+  display: grid;
+  gap: 4px;
+}
+
+.metric-head {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.metric-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e7eb;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #0f766e;
+  }
+}
+
+.advice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  > div {
+    padding: 9px;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    background: #fbfcfe;
+  }
+
+  strong {
+    color: #334155;
+    font-size: 12px;
+  }
+
+  ul {
+    display: grid;
+    gap: 5px;
+    padding-left: 16px;
+    margin: 6px 0 0;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+.empty-state {
+  padding: 10px;
+  border-radius: 7px;
+  background: #f8fafc;
+}
+
+.tone-box {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.tone-controls {
+  align-items: stretch;
+
+  :deep(.el-select) {
+    min-width: 150px;
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 760px) {
+  header,
+  .tone-controls,
+  .advice-grid {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+</style>

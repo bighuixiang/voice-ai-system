@@ -60,6 +60,7 @@ import type { ChapterDashboard } from "@/types/novel";
 const props = defineProps<{
   dashboard: ChapterDashboard | null;
   isSaving?: boolean;
+  revision?: number;
 }>();
 
 const emit = defineEmits<{
@@ -95,6 +96,14 @@ watch(
       ...localDashboard.value,
       wordCount: props.dashboard.wordCount
     };
+  }
+);
+
+watch(
+  () => props.revision,
+  () => {
+    localDashboard.value = props.dashboard ? { ...props.dashboard } : null;
+    isDirty.value = false;
   }
 );
 
