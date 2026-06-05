@@ -15,6 +15,7 @@ import type {
   NovelChapter,
   NovelProject,
   NovelTask,
+  PlatformAiConfig,
   PlatformAsset,
   PlatformAssetType,
   PlatformLibrary,
@@ -28,6 +29,7 @@ import type {
 
 type LedgerKind = LedgerEntry["kind"];
 const DEFAULT_FOCUS_TARGET_WORDS = 3000;
+const aiScenarioKeys = ["novel", "assets", "script", "image-generation", "video-generation"] as const;
 
 interface WorkspaceCache {
   project: NovelProject;
@@ -61,6 +63,21 @@ interface WorkspaceCache {
 
 interface WorkspaceSwitchOptions {
   skipLeaveCheck?: boolean;
+}
+
+function makeDefaultPlatformAiConfig(): PlatformAiConfig {
+  return {
+    version: 1,
+    defaultScenario: "novel",
+    scenarios: aiScenarioKeys.reduce(
+      (scenarios, key) => ({
+        ...scenarios,
+        [key]: { profileId: "codex-cli" }
+      }),
+      {} as PlatformAiConfig["scenarios"]
+    ),
+    updatedAt: new Date().toISOString()
+  };
 }
 
 export const useNovelStore = defineStore("novel", () => {
@@ -99,6 +116,7 @@ export const useNovelStore = defineStore("novel", () => {
   const agentChecks = ref<AiAgentCheckResult[]>([]);
   const defaultAgentProfileId = ref("codex-cli");
   const isSavingAiConfig = ref(false);
+  const platformAiConfig = ref<PlatformAiConfig>(makeDefaultPlatformAiConfig());
   const platformLibrary = ref<PlatformLibrary | null>(null);
   const supportFiles = [
     { label: "角色", path: "bible/characters.md" },
@@ -140,6 +158,19 @@ export const useNovelStore = defineStore("novel", () => {
   );
   const canRequestFocusDraft = computed(() => Boolean(currentProject.value && currentChapter.value && !isLoading.value));
   const canRequestStoryOrchestration = computed(() => Boolean(currentProject.value && storyControl.value && !isLoading.value));
+  const activeNovelAiConfig = computed(() => platformAiConfig.value.scenarios.novel);
+  const activeNovelAgentProfile = computed(() =>
+    agentProfiles.value.find((profile) => profile.id === activeNovelAiConfig.value.profileId)
+  );
+  const activeNovelAgentCheck = computed(() => agentChecks.value.find((check) => check.profileId === activeNovelAiConfig.value.profileId));
+  const activeNovelAiSummary = computed(() => {
+    const profileLabel = activeNovelAgentProfile.value?.label || activeNovelAiConfig.value.profileId || "Codex CLI";
+    const modelLabel =
+      activeNovelAgentProfile.value?.models.find((model) => model.id === activeNovelAiConfig.value.modelId)?.label ||
+      activeNovelAiConfig.value.modelId ||
+      "默认模型";
+    return `${profileLabel} · ${modelLabel}`;
+  });
   const currentWordCount = computed(() => countDraftWords(currentContent.value));
   const focusProgressPercent = computed(() => {
     if (!focusTargetWords.value) return 0;
@@ -689,6 +720,10 @@ export const useNovelStore = defineStore("novel", () => {
     defaultAgentProfileId.value = data.defaultProfileId;
   }
 
+  async function loadPlatformAiConfig() {
+    platformAiConfig.value = await novelApi.readPlatformAiConfig();
+  }
+
   async function checkAgentProfile(profileId: string, modelId?: string) {
     const result = await novelApi.checkAgentProfile(profileId, modelId);
     agentChecks.value = [...agentChecks.value.filter((item) => item.profileId !== result.profileId), result];
@@ -709,6 +744,16 @@ export const useNovelStore = defineStore("novel", () => {
         };
       }
       return project;
+    } finally {
+      isSavingAiConfig.value = false;
+    }
+  }
+
+  async function savePlatformAiConfig(config: PlatformAiConfig) {
+    isSavingAiConfig.value = true;
+    try {
+      platformAiConfig.value = await novelApi.savePlatformAiConfig(config);
+      return platformAiConfig.value;
     } finally {
       isSavingAiConfig.value = false;
     }
@@ -1298,6 +1343,11 @@ export const useNovelStore = defineStore("novel", () => {
     agentChecks,
     defaultAgentProfileId,
     isSavingAiConfig,
+    platformAiConfig,
+    activeNovelAiConfig,
+    activeNovelAgentProfile,
+    activeNovelAgentCheck,
+    activeNovelAiSummary,
     platformLibrary,
     supportFiles,
     currentSupportPath,
@@ -1317,9 +1367,11 @@ export const useNovelStore = defineStore("novel", () => {
     canLeaveCurrentWorkspace,
     loadProjects,
     loadPlatformLibrary,
+    loadPlatformAiConfig,
     loadAgentProfiles,
     checkAgentProfile,
     updateProjectAiConfig,
+    savePlatformAiConfig,
     createProject,
     importProject,
     createSharedAsset,

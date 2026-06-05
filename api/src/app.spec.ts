@@ -152,6 +152,54 @@ describe("novel API routes", () => {
     expect(invalidModel.data.error).toContain("Model id can only contain");
   });
 
+  it("saves global AI configuration by creative scenario", async () => {
+    const current = await jsonFetch<{
+      config: {
+        defaultScenario: string;
+        scenarios: { novel: { profileId: string; modelId?: string } };
+      };
+    }>("/api/platform/ai-config");
+
+    expect(current.data.config.defaultScenario).toBe("novel");
+    expect(current.data.config.scenarios.novel.profileId).toBe("codex-cli");
+
+    const nextConfig = {
+      ...current.data.config,
+      scenarios: {
+        ...current.data.config.scenarios,
+        novel: { profileId: "claude-code", modelId: "sonnet" }
+      }
+    };
+    const saved = await jsonFetch<{
+      config: {
+        scenarios: { novel: { profileId: string; modelId: string } };
+      };
+    }>("/api/platform/ai-config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ config: nextConfig })
+    });
+
+    expect(saved.data.config.scenarios.novel).toEqual({ profileId: "claude-code", modelId: "sonnet" });
+
+    const rejected = await jsonFetch<{ error: string }>("/api/platform/ai-config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        config: {
+          ...nextConfig,
+          scenarios: {
+            ...nextConfig.scenarios,
+            novel: { profileId: "codex-cli", modelId: "gpt-5.5 && run" }
+          }
+        }
+      })
+    });
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.data.error).toContain("Model id can only contain");
+  });
+
   it("seeds the platform library and links shared assets across projects", async () => {
     await jsonFetch("/api/novel/projects", {
       method: "POST",

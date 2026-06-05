@@ -6,6 +6,10 @@
         <p>从小说项目开始，逐步扩展到素材、剧本、图片和视频生成管理。</p>
       </div>
       <div class="header-actions">
+        <el-button @click="aiConfigDialogOpen = true">
+          <el-icon><Setting /></el-icon>
+          AI 配置
+        </el-button>
         <el-button v-if="isProjectRoute && store.hasProject" @click="storyControlDialogOpen = true">
           <el-icon><Collection /></el-icon>
           故事总控
@@ -212,12 +216,9 @@
           v-if="store.writingMode === 'structure'"
           :project="store.currentProject"
           :chapter="store.currentChapter"
-          :profiles="store.agentProfiles"
-          :checks="store.agentChecks"
-          :saving="store.isSavingAiConfig"
-          :checking="store.isLoading"
-          @update-ai="handleUpdateAiConfig"
-          @check-agent="handleCheckAgent"
+          :ai-summary="store.activeNovelAiSummary"
+          :ai-status="store.activeNovelAgentCheck?.available ? store.activeNovelAgentCheck.version || '连接正常' : store.activeNovelAgentCheck?.error"
+          :ai-available="store.activeNovelAgentCheck?.available"
         />
         <PlatformLibraryPanel
           v-if="store.writingMode === 'structure'"
@@ -265,17 +266,30 @@
         @orchestrate="store.requestStoryOrchestration"
       />
     </el-dialog>
+    <el-dialog v-model="aiConfigDialogOpen" title="AI 配置" width="min(980px, 96vw)" destroy-on-close>
+      <AiConfigPanel
+        :config="store.platformAiConfig"
+        :profiles="store.agentProfiles"
+        :checks="store.agentChecks"
+        :saving="store.isSavingAiConfig"
+        :checking="store.isLoading"
+        @save="handleSaveAiConfig"
+        @check="handleCheckAgent"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
-import { Close, Collection, Folder, Loading, Refresh } from "@element-plus/icons-vue";
+import { Close, Collection, Folder, Loading, Refresh, Setting } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
+import type { PlatformAiConfig } from "@/types/novel";
 import ProjectManagerPanel from "./ProjectManagerPanel.vue";
 import ProjectCreatePanel from "./ProjectCreatePanel.vue";
+import AiConfigPanel from "./AiConfigPanel.vue";
 import ChapterTree from "./ChapterTree.vue";
 import FocusWritingPanel from "./FocusWritingPanel.vue";
 import StructureQuickStartPanel from "./StructureQuickStartPanel.vue";
@@ -305,6 +319,7 @@ const route = useRoute();
 const router = useRouter();
 const sampleStarterIdea = "一个被逐出山门的少年在雨夜发现旧封印松动；他想证明自己还能修行，却必须在救人和暴露身份之间做选择。";
 const starterIdea = ref("");
+const aiConfigDialogOpen = ref(false);
 const storyControlDialogOpen = ref(false);
 const isProjectRoute = computed(() => route.name === "project-workspace");
 const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
@@ -328,6 +343,9 @@ async function syncWorkspaceFromRoute() {
   }
   await store.loadAgentProfiles().catch(() => {
     // AI profiles are optional while the API service is booting.
+  });
+  await store.loadPlatformAiConfig().catch(() => {
+    // Global AI config falls back to Codex CLI until the API service is ready.
   });
   await store.loadPlatformLibrary().catch(() => {
     // Platform library is optional until the API service is running.
@@ -415,9 +433,9 @@ async function handleSaveStoryControl() {
   }
 }
 
-async function handleUpdateAiConfig(config: { profileId: string; modelId?: string }) {
+async function handleSaveAiConfig(config: PlatformAiConfig) {
   try {
-    await store.updateProjectAiConfig(config);
+    await store.savePlatformAiConfig(config);
     ElMessage.success("AI 配置已保存");
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : "AI 配置保存失败");

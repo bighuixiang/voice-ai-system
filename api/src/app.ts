@@ -13,9 +13,10 @@ import {
   writeProject
 } from "./novelProject.js";
 import { getNovelsRoot } from "./workspace.js";
+import { aiScenarioKeys, mergePlatformAiConfig, readPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 import { createPlatformAsset, linkAssetToProject, readPlatformLibrary } from "./platformLibrary.js";
 import { applyPatch, fallbackProjectCreateResult, runNovelTask } from "./taskService.js";
-import type { CodexTaskType, LedgerEntry, NovelFilePatch } from "./types.js";
+import type { AiScenarioConfig, CodexTaskType, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
   readChapterDashboard,
@@ -68,6 +69,41 @@ function allowedOrigins(): Set<string> {
   );
 }
 
+function validateAiScenarioConfig(config: AiScenarioConfig): AiScenarioConfig {
+  const profileId = String(config.profileId || "").trim();
+  const profile = listAgentProfiles().find((item) => item.id === profileId);
+  if (!profile) {
+    throw new Error(`Unsupported AI agent profile: ${profileId}`);
+  }
+
+  const modelId = normalizeAgentModelId(typeof config.modelId === "string" ? config.modelId : undefined);
+  if (modelId && !profile.allowCustomModel && !profile.models.some((model) => model.id === modelId)) {
+    throw new Error(`Unsupported model for ${profile.label}: ${modelId}`);
+  }
+
+  return {
+    profileId,
+    modelId
+  };
+}
+
+function validatePlatformAiConfig(input: PlatformAiConfig): PlatformAiConfig {
+  const merged = mergePlatformAiConfig(input);
+  const scenarioKeys = aiScenarioKeys();
+  return {
+    version: 1,
+    defaultScenario: scenarioKeys.includes(merged.defaultScenario) ? merged.defaultScenario : "novel",
+    scenarios: scenarioKeys.reduce(
+      (scenarios, key) => ({
+        ...scenarios,
+        [key]: validateAiScenarioConfig(merged.scenarios[key])
+      }),
+      {} as PlatformAiConfig["scenarios"]
+    ),
+    updatedAt: merged.updatedAt || new Date().toISOString()
+  };
+}
+
 const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   const message = error instanceof Error ? error.message : String(error);
   const status =
@@ -118,6 +154,20 @@ export function createApp() {
 
   app.post("/api/novel/agents/check", asyncRoute(async (req, res) => {
     res.json(await checkAgentAvailability({ profileId: req.body.profileId, modelId: req.body.modelId }));
+  }));
+
+  app.get("/api/platform/ai-config", asyncRoute(async (_req, res) => {
+    res.json({ config: await readPlatformAiConfig() });
+  }));
+
+  app.put("/api/platform/ai-config", asyncRoute(async (req, res) => {
+    const input = (req.body.config || req.body) as PlatformAiConfig;
+    try {
+      const config = validatePlatformAiConfig(input);
+      res.json({ config: await writePlatformAiConfig(config) });
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : String(error) });
+    }
   }));
 
   app.get("/api/platform/library", asyncRoute(async (_req, res) => {

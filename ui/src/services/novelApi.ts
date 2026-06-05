@@ -1,6 +1,7 @@
 import type {
   AiAgentCheckResult,
   AiAgentProfile,
+  PlatformAiConfig,
   ChapterDashboard,
   CodexTaskType,
   EditorSelection,
@@ -69,6 +70,20 @@ export const novelApi = {
       headers: jsonHeaders,
       body: JSON.stringify({ profileId, modelId })
     });
+  },
+
+  async readPlatformAiConfig(): Promise<PlatformAiConfig> {
+    const data = await request<{ config: PlatformAiConfig }>("/api/platform/ai-config");
+    return data.config;
+  },
+
+  async savePlatformAiConfig(config: PlatformAiConfig): Promise<PlatformAiConfig> {
+    const data = await request<{ config: PlatformAiConfig }>("/api/platform/ai-config", {
+      method: "PUT",
+      headers: jsonHeaders,
+      body: JSON.stringify({ config })
+    });
+    return data.config;
   },
 
   async updateProjectAiConfig(projectId: string, input: { profileId: string; modelId?: string }): Promise<NovelProject> {

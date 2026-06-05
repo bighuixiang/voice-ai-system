@@ -8,37 +8,13 @@
       <dd>{{ project.genre }}</dd>
       <dt>当前章节</dt>
       <dd>{{ chapter?.title || "未选择" }}</dd>
-      <dt>AI 执行器</dt>
-      <dd>{{ activeProfile?.label || project.ai?.profileId || "codex-cli" }}</dd>
+      <dt>AI 场景</dt>
+      <dd>小说创作</dd>
+      <dt>执行配置</dt>
+      <dd>{{ aiSummary || "Codex CLI · 默认模型" }}</dd>
     </dl>
-    <div v-if="project" class="ai-config" aria-label="AI 执行器配置">
-      <label>
-        <span>执行器</span>
-        <el-select v-model="selectedProfileId" size="small" placeholder="选择执行器">
-          <el-option v-for="profile in profiles" :key="profile.id" :label="profile.label" :value="profile.id" />
-        </el-select>
-      </label>
-      <label>
-        <span>模型</span>
-        <el-select
-          v-model="selectedModelId"
-          size="small"
-          filterable
-          :allow-create="activeProfile?.allowCustomModel ?? true"
-          default-first-option
-          placeholder="选择或输入模型，如 gpt-5.5"
-        >
-          <el-option label="默认模型" value="default" />
-          <el-option v-for="model in activeProfile?.models || []" :key="model.id" :label="model.label" :value="model.id" />
-        </el-select>
-      </label>
-      <div class="agent-status" :class="{ available: activeCheck?.available, unavailable: activeCheck && !activeCheck.available }">
-        {{ agentStatusLabel }}
-      </div>
-      <div class="ai-actions">
-        <el-button size="small" :loading="saving" @click="saveConfig">保存配置</el-button>
-        <el-button size="small" :loading="checking" @click="checkConfig">测试连接</el-button>
-      </div>
+    <div class="agent-status" :class="{ available: aiAvailable, unavailable: aiAvailable === false }">
+      {{ aiStatus || "可在顶部 AI 配置中测试连接" }}
     </div>
     <div class="context-note">
       任务会自动注入故事圣经、章纲、伏笔账本和升级节奏；局部润色只注入选区附近上下文。
@@ -47,56 +23,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import type { AiAgentCheckResult, AiAgentProfile, NovelChapter, NovelProject } from "@/types/novel";
+import type { NovelChapter, NovelProject } from "@/types/novel";
 
-const props = defineProps<{
+defineProps<{
   project: NovelProject | null;
   chapter: NovelChapter | null;
-  profiles: AiAgentProfile[];
-  checks: AiAgentCheckResult[];
-  saving: boolean;
-  checking: boolean;
+  aiSummary?: string;
+  aiStatus?: string;
+  aiAvailable?: boolean;
 }>();
-
-const emit = defineEmits<{
-  "update-ai": [config: { profileId: string; modelId?: string }];
-  "check-agent": [config: { profileId: string; modelId?: string }];
-}>();
-
-const selectedProfileId = ref("codex-cli");
-const selectedModelId = ref("default");
-const activeProfile = computed(() => props.profiles.find((profile) => profile.id === selectedProfileId.value));
-const activeCheck = computed(() => props.checks.find((check) => check.profileId === selectedProfileId.value));
-const agentStatusLabel = computed(() => {
-  if (!activeCheck.value) return "尚未测试";
-  if (activeCheck.value.available) return activeCheck.value.version || "连接正常";
-  return activeCheck.value.error || "连接失败";
-});
-
-watch(
-  () => [props.project?.ai?.profileId, props.project?.ai?.modelId, props.profiles.length] as const,
-  () => {
-    selectedProfileId.value = props.project?.ai?.profileId || props.profiles[0]?.id || "codex-cli";
-    selectedModelId.value = props.project?.ai?.modelId || "default";
-  },
-  { immediate: true }
-);
-
-function normalizedConfig() {
-  return {
-    profileId: selectedProfileId.value,
-    modelId: selectedModelId.value === "default" ? undefined : selectedModelId.value.trim()
-  };
-}
-
-function saveConfig() {
-  emit("update-ai", normalizedConfig());
-}
-
-function checkConfig() {
-  emit("check-agent", normalizedConfig());
-}
 </script>
 
 <style scoped lang="scss">
@@ -128,26 +63,9 @@ dd {
   color: #111827;
 }
 
-.ai-config {
-  display: grid;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-
-  label {
-    display: grid;
-    gap: 4px;
-
-    span {
-      color: #6b7280;
-      font-size: 12px;
-    }
-  }
-}
-
 .agent-status {
   min-height: 24px;
+  margin-top: 12px;
   padding: 5px 8px;
   border-radius: 6px;
   background: #f8fafc;
@@ -164,12 +82,6 @@ dd {
     background: #fef2f2;
     color: #991b1b;
   }
-}
-
-.ai-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
 }
 
 .context-note {

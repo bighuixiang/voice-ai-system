@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "defaultScenario": "novel",
+  "scenarios": {
+    "novel": {
+      "profileId": "codex-cli",
+      "modelId": "gpt-5.5"
+    },
+    "assets": {
+      "profileId": "codex-cli"
+    },
+    "script": {
+      "profileId": "codex-cli"
+    },
+    "image-generation": {
+      "profileId": "codex-cli"
+    },
+    "video-generation": {
+      "profileId": "codex-cli"
+    }
+  },
+  "updatedAt": "2026-06-05T08:26:33.749Z"
+}

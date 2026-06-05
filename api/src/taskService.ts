@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { CodexTaskType, CodexTaskResult, NovelFilePatch, NovelTask } from "./types.js";
 import { resolveAgentProfile } from "./agentConfig.js";
+import { readPlatformAiConfig } from "./platformAiConfig.js";
 import { buildTaskPrompt } from "./taskTemplates.js";
 import { parseCodexResult } from "./resultParser.js";
 import { assembleContext } from "./contextAssembler.js";
@@ -68,11 +69,13 @@ export async function runNovelTask(
       contextBlocks,
       payload
     });
-    const profileId = typeof payload.agentProfileId === "string" ? payload.agentProfileId : project.ai?.profileId;
+    const platformAiConfig = await readPlatformAiConfig();
+    const novelAiConfig = platformAiConfig.scenarios.novel;
+    const profileId = typeof payload.agentProfileId === "string" ? payload.agentProfileId : novelAiConfig.profileId || project.ai?.profileId;
     const payloadModel = typeof payload.modelId === "string" ? payload.modelId : undefined;
     const config = resolveAgentProfile({
       profileId,
-      modelId: payloadModel || project.ai?.modelId || project.codex.model
+      modelId: payloadModel || novelAiConfig.modelId || project.ai?.modelId || project.codex.model
     });
     const output = await runner.run(prompt, root, config);
     const result = parseCodexResult(output.finalMessage);

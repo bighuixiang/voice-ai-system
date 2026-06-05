@@ -14,6 +14,7 @@ export type NovelTaskStatus = "pending" | "running" | "success" | "error" | "can
 
 export type CreativeModuleKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
 export type AiAgentProvider = "codex" | "claude-code";
+export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
 
 export interface AiAgentModelOption {
   id: string;
@@ -37,6 +38,18 @@ export interface AiAgentProfile {
 export interface ProjectAiConfig {
   profileId?: string;
   modelId?: string;
+}
+
+export interface AiScenarioConfig {
+  profileId: string;
+  modelId?: string;
+}
+
+export interface PlatformAiConfig {
+  version: 1;
+  defaultScenario: AiUsageScenarioKey;
+  scenarios: Record<AiUsageScenarioKey, AiScenarioConfig>;
+  updatedAt: string;
 }
 
 export interface CreativeProjectModule {

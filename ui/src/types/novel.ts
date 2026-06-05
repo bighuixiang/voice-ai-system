@@ -16,6 +16,7 @@ export type WritingMode = "focus" | "structure" | "review";
 export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook";
 export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
 export type AiAgentProvider = "codex" | "claude-code";
+export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
 
 export interface AiAgentModelOption {
   id: string;
@@ -49,6 +50,18 @@ export interface AiAgentCheckResult {
 export interface ProjectAiConfig {
   profileId?: string;
   modelId?: string;
+}
+
+export interface AiScenarioConfig {
+  profileId: string;
+  modelId?: string;
+}
+
+export interface PlatformAiConfig {
+  version: 1;
+  defaultScenario: AiUsageScenarioKey;
+  scenarios: Record<AiUsageScenarioKey, AiScenarioConfig>;
+  updatedAt: string;
 }
 
 export interface CreativeProjectModule {

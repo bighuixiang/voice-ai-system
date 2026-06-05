@@ -120,10 +120,42 @@ describe("novelApi", () => {
       checks: []
     });
     mockJson({ available: true, profileId: "codex-cli", provider: "codex", label: "Codex CLI", command: "codex" });
+    mockJson({
+      config: {
+        version: 1,
+        defaultScenario: "novel",
+        scenarios: {
+          novel: { profileId: "codex-cli", modelId: "gpt-5" },
+          assets: { profileId: "codex-cli" },
+          script: { profileId: "codex-cli" },
+          "image-generation": { profileId: "codex-cli" },
+          "video-generation": { profileId: "codex-cli" }
+        },
+        updatedAt: "2026-06-05T00:00:00.000Z"
+      }
+    });
+    mockJson({
+      config: {
+        version: 1,
+        defaultScenario: "novel",
+        scenarios: {
+          novel: { profileId: "codex-cli", modelId: "gpt-5" },
+          assets: { profileId: "codex-cli" },
+          script: { profileId: "codex-cli" },
+          "image-generation": { profileId: "codex-cli" },
+          "video-generation": { profileId: "codex-cli" }
+        },
+        updatedAt: "2026-06-05T00:00:00.000Z"
+      }
+    });
     mockJson({ project: { slug: "demo", ai: { profileId: "codex-cli", modelId: "gpt-5" } } });
 
     await expect(novelApi.readAgentProfiles()).resolves.toMatchObject({ defaultProfileId: "codex-cli" });
     await expect(novelApi.checkAgentProfile("codex-cli", "gpt-5")).resolves.toMatchObject({ available: true });
+    const platformConfig = await novelApi.readPlatformAiConfig();
+    await expect(novelApi.savePlatformAiConfig(platformConfig)).resolves.toMatchObject({
+      scenarios: { novel: { modelId: "gpt-5" } }
+    });
     await expect(novelApi.updateProjectAiConfig("demo", { profileId: "codex-cli", modelId: "gpt-5" })).resolves.toMatchObject({
       ai: { modelId: "gpt-5" }
     });
@@ -139,6 +171,19 @@ describe("novelApi", () => {
     );
     expect(fetch).toHaveBeenNthCalledWith(
       3,
+      "/api/platform/ai-config",
+      {}
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      4,
+      "/api/platform/ai-config",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ config: platformConfig })
+      })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      5,
       "/api/novel/projects/demo/ai",
       expect.objectContaining({
         method: "PUT",

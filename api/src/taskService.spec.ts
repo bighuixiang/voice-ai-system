@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createProjectFiles, createProjectSkeleton } from "./novelProject.js";
+import { defaultPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 import { applyPatch, runNovelTask } from "./taskService.js";
 import type { ProcessRunner } from "./codexRunner.js";
 
@@ -31,6 +32,7 @@ describe("taskService", () => {
   beforeEach(async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-api-"));
     process.env.NOVELS_ROOT = tempRoot;
+    process.env.PLATFORM_ROOT = path.join(tempRoot, "platform");
     process.env.NOVEL_DB_PATH = path.join(tempRoot, "data", "creative-platform.sqlite");
     const project = createProjectSkeleton({ title: "Demo", roughIdea: "少年修行。" });
     await createProjectFiles(project);
@@ -38,6 +40,7 @@ describe("taskService", () => {
 
   afterEach(async () => {
     delete process.env.NOVELS_ROOT;
+    delete process.env.PLATFORM_ROOT;
     delete process.env.NOVEL_DB_PATH;
     await fs.rm(tempRoot, { recursive: true, force: true });
   });
@@ -98,12 +101,19 @@ describe("taskService", () => {
     expect(modelFromRunner).toBe("test-model");
   });
 
-  it("runs a task through the configured trusted AI agent profile", async () => {
+  it("runs a task through the global novel AI scenario profile", async () => {
     const projectPath = path.join(tempRoot, "demo", "project.json");
     const project = JSON.parse(await fs.readFile(projectPath, "utf8"));
     project.codex.command = "malicious-command";
-    project.ai = { profileId: "claude-code", modelId: "sonnet" };
+    project.ai = { profileId: "codex-cli", modelId: "gpt-5" };
     await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+    await writePlatformAiConfig({
+      ...defaultPlatformAiConfig(),
+      scenarios: {
+        ...defaultPlatformAiConfig().scenarios,
+        novel: { profileId: "claude-code", modelId: "sonnet" }
+      }
+    });
 
     let commandFromRunner = "";
     let providerFromRunner = "";
