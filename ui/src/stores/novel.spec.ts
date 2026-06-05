@@ -1010,8 +1010,33 @@ describe("useNovelStore", () => {
     expect(store.rewriteCandidate?.content).toBe("A tighter candidate paragraph.");
   });
 
-  it("accepts a focus draft by appending it to the current chapter", () => {
+  it("accepts a focus draft by appending it and requesting a recap", async () => {
+    const recap: WritingRecapCandidate = {
+      chapterId: "chapter-001",
+      summary: "The accepted paragraph adds a door response.",
+      newFacts: ["The sealed door responds to the hero."],
+      characterStateChanges: ["The hero realizes retreat has a cost."],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-04T00:00:00.000Z"
+    };
+    mockNovelApi.runTask.mockResolvedValue(
+      taskWithResult({
+        type: "writing.recap",
+        result: {
+          summary: "Post-save recap",
+          content: JSON.stringify(recap),
+          changes: [],
+          risks: [],
+          questions: [],
+          patches: []
+        }
+      })
+    );
     const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
     store.currentContent = "他停在门前。  \n";
     store.currentDashboard = {
       chapterId: "chapter-001",
@@ -1034,9 +1059,21 @@ describe("useNovelStore", () => {
       patches: []
     };
 
-    const accepted = store.acceptFocusDraft();
+    const accepted = await store.acceptFocusDraft();
 
     expect(accepted).toBe(true);
+    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+      "demo",
+      "writing.recap",
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        mode: "focus.accepted-draft",
+        acceptedDraft: expect.any(String),
+        previousTail: expect.any(String),
+        instruction: expect.stringContaining("WritingRecapCandidate JSON")
+      })
+    );
+    expect(store.recapCandidate?.summary).toBe("The accepted paragraph adds a door response.");
     expect(store.currentContent).toBe("他停在门前。\n\n雨声压低，他终于听见门后的回音。");
     expect(store.currentDashboard.wordCount).toBe(store.currentContent.replace(/\s+/g, "").length);
     expect(store.rewriteCandidate).toBeNull();

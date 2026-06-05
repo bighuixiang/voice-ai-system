@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import ProjectManagerPanel from "./ProjectManagerPanel.vue";
 import type { NovelProject } from "@/types/novel";
 
@@ -11,9 +11,9 @@ vi.mock("element-plus", () => ({
 
 const stubs = {
   "el-button": {
-    props: ["loading"],
+    props: ["loading", "nativeType"],
     emits: ["click"],
-    template: `<button :data-loading="loading" @click="$emit('click')"><slot /></button>`
+    template: `<button :type="nativeType || 'button'" :data-loading="loading" @click="$emit('click')"><slot /></button>`
   },
   "el-form": { template: "<form @submit.prevent><slot /></form>" },
   "el-form-item": { template: "<label><slot /></label>" },
@@ -22,7 +22,25 @@ const stubs = {
     emits: ["update:modelValue"],
     template: `<input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" />`
   },
+  "el-select": {
+    props: ["modelValue"],
+    emits: ["update:modelValue"],
+    template: `
+      <select
+        multiple
+        :value="modelValue"
+        @change="$emit('update:modelValue', Array.from($event.target.selectedOptions).map((option) => option.value))"
+      >
+        <slot />
+      </select>
+    `
+  },
+  "el-option": {
+    props: ["label", "value"],
+    template: `<option :value="value">{{ label }}</option>`
+  },
   "el-icon": { template: "<span><slot /></span>" },
+  CopyDocument: true,
   FolderOpened: true,
   Refresh: true,
   Upload: true
@@ -68,19 +86,39 @@ describe("ProjectManagerPanel", () => {
       props: { projects: [], currentProject: null, loading: false },
       global: { stubs }
     });
-    const inputs = wrapper.findAll("input");
+    const inputs = wrapper.findAll("input:not([type='file'])");
 
     await inputs[0].setValue("D:\\novels\\old-story");
     await inputs[1].setValue("Old Story");
-    await inputs[2].setValue("fantasy");
+    await wrapper.find("select").setValue(["玄幻", "悬疑"]);
     await wrapper.findAll("button").at(-1)?.trigger("click");
 
     expect(wrapper.emitted("import-project")?.[0]).toEqual([
       {
         sourcePath: "D:\\novels\\old-story",
         title: "Old Story",
-        genre: "fantasy"
+        genre: "玄幻 / 悬疑"
       }
     ]);
+  });
+
+  it("pastes a local directory path from the clipboard", async () => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        readText: vi.fn().mockResolvedValue('"D:\\novels\\clip-story"')
+      }
+    });
+    const wrapper = mount(ProjectManagerPanel, {
+      props: { projects: [], currentProject: null, loading: false },
+      global: { stubs }
+    });
+
+    await wrapper.find(".path-actions button:nth-child(2)").trigger("click");
+    await flushPromises();
+    const inputs = wrapper.findAll("input:not([type='file'])");
+
+    expect((inputs[0].element as HTMLInputElement).value).toBe("D:\\novels\\clip-story");
+    expect((inputs[1].element as HTMLInputElement).value).toBe("clip-story");
   });
 });

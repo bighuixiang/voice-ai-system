@@ -30,14 +30,43 @@
 
     <el-form class="import-form" label-position="top" @submit.prevent="handleImport">
       <el-form-item label="导入本地目录">
-        <el-input v-model="sourcePath" placeholder="D:\\novels\\my-story" />
+        <div class="path-picker">
+          <el-input v-model="sourcePath" placeholder="D:\\novels\\my-story" />
+          <div class="path-actions">
+            <el-button native-type="button" @click="openDirectoryPicker">
+              <el-icon><FolderOpened /></el-icon>
+              选择目录
+            </el-button>
+            <el-button native-type="button" @click="pasteSourcePath">
+              <el-icon><CopyDocument /></el-icon>
+              粘贴路径
+            </el-button>
+          </div>
+          <input
+            ref="directoryInput"
+            class="directory-input"
+            type="file"
+            webkitdirectory
+            directory
+            @change="handleDirectorySelected"
+          />
+        </div>
       </el-form-item>
       <div class="import-grid">
         <el-form-item label="新项目名">
           <el-input v-model="title" placeholder="可留空" />
         </el-form-item>
         <el-form-item label="题材">
-          <el-input v-model="genre" placeholder="玄幻 / 悬疑" />
+          <el-select
+            v-model="genres"
+            class="genre-select"
+            multiple
+            collapse-tags
+            collapse-tags-tooltip
+            placeholder="选择题材"
+          >
+            <el-option v-for="option in novelGenreOptions" :key="option" :label="option" :value="option" />
+          </el-select>
         </el-form-item>
       </div>
       <el-button class="import-button" :loading="loading" @click="handleImport">
@@ -51,8 +80,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
-import { FolderOpened, Refresh, Upload } from "@element-plus/icons-vue";
+import { CopyDocument, FolderOpened, Refresh, Upload } from "@element-plus/icons-vue";
 import type { NovelProject } from "@/types/novel";
+import { formatGenres, novelGenreOptions } from "./genreOptions";
 
 defineProps<{
   projects: NovelProject[];
@@ -68,12 +98,51 @@ const emit = defineEmits<{
 
 const sourcePath = ref("");
 const title = ref("");
-const genre = ref("");
+const genres = ref<string[]>([]);
+const directoryInput = ref<HTMLInputElement | null>(null);
 
 function moduleSummary(project: NovelProject) {
   const modules = project.modules || [{ key: "novel", label: "Novel Writing", status: "active" }];
   const activeCount = modules.filter((module) => module.status === "active").length;
   return `${activeCount}/${modules.length} 模块`;
+}
+
+function openDirectoryPicker() {
+  directoryInput.value?.click();
+}
+
+function guessTitleFromPath(pathValue: string) {
+  const normalized = pathValue.replace(/[\\/]+$/, "");
+  const parts = normalized.split(/[\\/]/).filter(Boolean);
+  return parts[parts.length - 1] || "";
+}
+
+function normalizePastedPath(pathValue: string) {
+  return pathValue.trim().replace(/^["']|["']$/g, "");
+}
+
+async function pasteSourcePath() {
+  const clipboardText = await navigator.clipboard?.readText?.().catch(() => "");
+  const pastedPath = normalizePastedPath(clipboardText || "");
+  if (!pastedPath) {
+    ElMessage.warning("剪贴板里没有可用路径。");
+    return;
+  }
+
+  sourcePath.value = pastedPath;
+  if (!title.value.trim()) {
+    title.value = guessTitleFromPath(pastedPath);
+  }
+}
+
+function handleDirectorySelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const firstFile = input.files?.[0] as (File & { webkitRelativePath?: string }) | undefined;
+  const directoryName = firstFile?.webkitRelativePath?.split(/[\\/]/)[0] || "";
+  if (directoryName && !title.value.trim()) {
+    title.value = directoryName;
+  }
+  input.value = "";
 }
 
 function handleImport() {
@@ -86,7 +155,7 @@ function handleImport() {
   emit("import-project", {
     sourcePath: trimmedSourcePath,
     title: title.value.trim() || undefined,
-    genre: genre.value.trim() || undefined
+    genre: formatGenres(genres.value) || undefined
   });
 }
 </script>
@@ -187,6 +256,26 @@ function handleImport() {
   padding-top: 12px;
 }
 
+.path-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.path-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.directory-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .import-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -197,8 +286,16 @@ function handleImport() {
   width: 100%;
 }
 
+.genre-select {
+  width: 100%;
+}
+
 @media (max-width: 760px) {
   .import-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .path-actions {
     grid-template-columns: 1fr;
   }
 }

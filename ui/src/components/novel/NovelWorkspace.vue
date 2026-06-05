@@ -103,6 +103,12 @@
           @tune="store.requestFocusDraftRevision"
           @apply-patches="store.applyTaskPatches"
         />
+        <WritingRecapPanel
+          v-if="store.writingMode === 'focus' && store.recapCandidate"
+          :candidate="store.recapCandidate"
+          @accept="store.acceptWritingRecap"
+          @reject="store.rejectWritingRecap"
+        />
         <StructureQuickStartPanel
           v-if="store.writingMode === 'structure'"
           :idea="store.structureIdeaInput"

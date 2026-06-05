@@ -11,7 +11,16 @@
         <el-input v-model="title" placeholder="例如：九连山" />
       </el-form-item>
       <el-form-item label="题材">
-        <el-input v-model="genre" placeholder="玄幻 / 都市 / 科幻 / 悬疑" />
+        <el-select
+          v-model="genres"
+          class="genre-select"
+          multiple
+          collapse-tags
+          collapse-tags-tooltip
+          placeholder="选择题材，可多选"
+        >
+          <el-option v-for="option in novelGenreOptions" :key="option" :label="option" :value="option" />
+        </el-select>
       </el-form-item>
       <el-form-item label="粗略想法">
         <el-input
@@ -34,13 +43,14 @@ import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
 import { useNovelStore } from "@/stores/novel";
+import { formatGenres, novelGenreOptions } from "./genreOptions";
 
 const store = useNovelStore();
 const emit = defineEmits<{
   created: [project: { slug: string }];
 }>();
 const title = ref("");
-const genre = ref("");
+const genres = ref<string[]>([]);
 const roughIdea = ref("");
 const isLoading = ref(false);
 
@@ -54,7 +64,7 @@ async function handleSubmit() {
   try {
     const project = await store.createProject({
       title: title.value,
-      genre: genre.value,
+      genre: formatGenres(genres.value),
       roughIdea: roughIdea.value
     });
     if (project) {
@@ -101,6 +111,10 @@ async function handleSubmit() {
 }
 
 .create-button {
+  width: 100%;
+}
+
+.genre-select {
   width: 100%;
 }
 </style>

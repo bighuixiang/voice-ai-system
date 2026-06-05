@@ -259,6 +259,26 @@ describe("NovelWorkspace writing modes", () => {
     expect(storeRef.value.requestFocusDraftRevision).toHaveBeenCalledWith(expect.stringContaining("增强压迫感"));
   });
 
+  it("shows accepted draft recap in focus mode", () => {
+    storeRef.value = {
+      ...makeStore("focus"),
+      recapCandidate: {
+        chapterId: "chapter-001",
+        summary: "New facts need ledger confirmation.",
+        newFacts: [],
+        characterStateChanges: [],
+        foreshadowingUpdates: [],
+        continuityRisks: [],
+        powerProgressionUpdates: [],
+        createdAt: "2026-06-04T00:00:00.000Z"
+      }
+    };
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+
+    expect(wrapper.find(".recap-stub").exists()).toBe(true);
+  });
+
   it("shows review tools without structure planning panels in review mode", () => {
     storeRef.value = makeStore("review");
 

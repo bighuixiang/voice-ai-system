@@ -37,6 +37,23 @@ const stubs = {
       />
     `
   },
+  "el-select": {
+    props: ["modelValue"],
+    emits: ["update:modelValue"],
+    template: `
+      <select
+        multiple
+        :value="modelValue"
+        @change="$emit('update:modelValue', Array.from($event.target.selectedOptions).map((option) => option.value))"
+      >
+        <slot />
+      </select>
+    `
+  },
+  "el-option": {
+    props: ["label", "value"],
+    template: `<option :value="value">{{ label }}</option>`
+  },
   "el-button": {
     props: ["loading"],
     emits: ["click"],
@@ -61,18 +78,18 @@ describe("ProjectCreatePanel", () => {
     expect(mockStore.createProject).not.toHaveBeenCalled();
   });
 
-  it("submits title, genre, and rough idea to the store", async () => {
+  it("submits title, selected genres, and rough idea to the store", async () => {
     const wrapper = mount(ProjectCreatePanel, { global: { stubs } });
     const fields = wrapper.findAll("input, textarea");
 
     await fields[0].setValue("Demo Novel");
-    await fields[1].setValue("fantasy");
-    await fields[2].setValue("A grounded progression story.");
+    await wrapper.find("select").setValue(["玄幻", "悬疑"]);
+    await fields[1].setValue("A grounded progression story.");
     await wrapper.find("button").trigger("click");
 
     expect(mockStore.createProject).toHaveBeenCalledWith({
       title: "Demo Novel",
-      genre: "fantasy",
+      genre: "玄幻 / 悬疑",
       roughIdea: "A grounded progression story."
     });
     expect(ElMessage.success).toHaveBeenCalled();

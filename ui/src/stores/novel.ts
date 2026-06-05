@@ -1129,15 +1129,29 @@ export const useNovelStore = defineStore("novel", () => {
     rewriteCandidate.value = null;
   }
 
-  function acceptFocusDraft() {
+  async function requestWritingRecapForAcceptedDraft(addition: string, previousTail: string) {
+    await runTask("writing.recap", {
+      mode: "focus.accepted-draft",
+      acceptedDraft: addition,
+      previousTail,
+      currentTail: currentContent.value.slice(-1600),
+      focusGuide: focusWritingGuide.value,
+      instruction:
+        "请只复盘本次新增候选正文带来的事实变化，生成可由作者确认后写入账本的 WritingRecapCandidate JSON；不要改写正文，也不要自动应用账本。"
+    });
+  }
+
+  async function acceptFocusDraft() {
     const addition = rewriteCandidate.value?.content.trim();
     if (!addition) return false;
+    const previousTail = currentContent.value.slice(-1200);
     const base = currentContent.value.replace(/\s+$/g, "");
     currentContent.value = base ? `${base}\n\n${addition}` : addition;
     currentQualityReport.value = null;
     syncDashboardWordCount();
     selection.value = null;
     rewriteCandidate.value = null;
+    await requestWritingRecapForAcceptedDraft(addition, previousTail);
     return true;
   }
 

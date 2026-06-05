@@ -8,7 +8,14 @@
     </div>
 
     <div class="action-grid">
-      <el-button v-for="action in actions" :key="action.type" :loading="loading" @click="$emit('run-task', action.type)">
+      <el-button
+        v-for="(action, index) in actions"
+        :key="action.type"
+        class="action-button"
+        :class="{ 'action-button--wide': isLastOddAction(index) }"
+        :loading="loading"
+        @click="$emit('run-task', action.type)"
+      >
         <el-icon><component :is="action.icon" /></el-icon>
         {{ action.label }}
       </el-button>
@@ -86,6 +93,10 @@ const actions: Array<{ type: CodexTaskType; label: string; icon: unknown }> = [
   { type: "idea.suggest", label: "补灵感", icon: MagicStick },
   { type: "continuity.check", label: "连续性检查", icon: Finished }
 ];
+
+function isLastOddAction(index: number) {
+  return actions.length % 2 === 1 && index === actions.length - 1;
+}
 </script>
 
 <style scoped lang="scss">
@@ -108,6 +119,20 @@ const actions: Array<{ type: CodexTaskType; label: string; icon: unknown }> = [
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+
+  :deep(.el-button + .el-button) {
+    margin-left: 0;
+  }
+}
+
+.action-button {
+  width: 100%;
+  min-width: 0;
+  justify-content: center;
+}
+
+.action-button--wide {
+  grid-column: 1 / -1;
 }
 
 .free-task {
