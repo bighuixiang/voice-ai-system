@@ -7,6 +7,7 @@ import type {
   NovelProject,
   NovelTask,
   SceneCard,
+  StoryControl,
   WritingBriefing,
   WritingRecapCandidate
 } from "@/types/novel";
@@ -24,6 +25,8 @@ const mockNovelApi = vi.hoisted(() => ({
   saveChapterDashboard: vi.fn(),
   readSceneCards: vi.fn(),
   saveSceneCards: vi.fn(),
+  readStoryControl: vi.fn(),
+  saveStoryControl: vi.fn(),
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
   runTask: vi.fn(),
@@ -84,6 +87,57 @@ const platformLibrary = {
   updatedAt: "2026-06-03T00:00:00.000Z"
 };
 
+const storyControl: StoryControl = {
+  version: 1,
+  premise: "A careful hero opens a sealed gate.",
+  currentArcId: "arc-1",
+  arcs: [
+    {
+      id: "arc-1",
+      title: "Opening pressure",
+      chapterRange: "1-5",
+      goal: "Make the first choice costly.",
+      stakes: "The hero loses shelter if he hesitates.",
+      payoff: "A credible first breakthrough.",
+      status: "planned",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
+  characters: [
+    {
+      id: "char-hero",
+      name: "Hero",
+      role: "Protagonist",
+      goal: "Survive the gate.",
+      currentState: "Cautious.",
+      knownSecrets: "Only what he has witnessed.",
+      relationshipNotes: "No team yet.",
+      powerLevel: "Novice",
+      status: "active",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
+  events: [
+    {
+      id: "event-gate",
+      type: "dungeon",
+      title: "Sealed gate",
+      trigger: "The clue answers blood.",
+      participants: ["Hero"],
+      location: "Old gate",
+      conflict: "Inspect or flee.",
+      reward: "A small technique clue.",
+      cost: "A watcher notices him.",
+      foreshadowing: "A broken seal mark.",
+      chapterRange: "2-4",
+      status: "planned",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
+  orchestrationNotes: "Keep upgrades causal.",
+  updatedAt: "2026-06-04T00:00:00.000Z"
+};
+
 function taskWithResult(overrides: Partial<NovelTask> = {}): NovelTask {
   return {
     id: "task-1",
@@ -130,6 +184,8 @@ describe("useNovelStore", () => {
     mockNovelApi.saveChapterDashboard.mockImplementation(async (_projectId: string, dashboard: ChapterDashboard) => dashboard);
     mockNovelApi.readSceneCards.mockResolvedValue([]);
     mockNovelApi.saveSceneCards.mockImplementation(async (_projectId: string, _chapterId: string, cards: SceneCard[]) => cards);
+    mockNovelApi.readStoryControl.mockResolvedValue(storyControl);
+    mockNovelApi.saveStoryControl.mockImplementation(async (_projectId: string, control: StoryControl) => control);
     mockNovelApi.readLedgerEntries.mockResolvedValue([]);
     mockNovelApi.saveLedgerEntries.mockImplementation(async (_projectId: string, _kind: LedgerEntry["kind"], entries: LedgerEntry[]) => entries);
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
@@ -304,6 +360,36 @@ describe("useNovelStore", () => {
     expect(store.currentDashboard?.chapterId).toBe("chapter-002");
     expect(store.sceneCards).toEqual(scenes);
     expect(store.activeLedgerKind).toBe("foreshadowing");
+  });
+
+  it("loads, saves, and requests story-level orchestration", async () => {
+    mockNovelApi.runTask.mockResolvedValue(taskWithResult());
+    const store = useNovelStore();
+    store.projects = [project];
+
+    await store.openProject(project);
+
+    expect(mockNovelApi.readStoryControl).toHaveBeenCalledWith("demo");
+    expect(store.storyControl?.premise).toBe("A careful hero opens a sealed gate.");
+
+    store.updateStoryControl({ premise: "Updated whole-novel premise." });
+    await store.saveStoryControl();
+
+    expect(mockNovelApi.saveStoryControl).toHaveBeenCalledWith(
+      "demo",
+      expect.objectContaining({ premise: "Updated whole-novel premise." })
+    );
+
+    await store.requestStoryOrchestration();
+
+    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+      "demo",
+      "idea.suggest",
+      expect.objectContaining({
+        mode: "story-control.orchestrate",
+        storyControl: expect.objectContaining({ premise: "Updated whole-novel premise." })
+      })
+    );
   });
 
   it("keeps each opened workspace cached while switching projects", async () => {

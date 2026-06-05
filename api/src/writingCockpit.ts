@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ChapterDashboard, LedgerEntry, SceneCard, WritingRecapCandidate } from "./types.js";
+import type { ChapterDashboard, LedgerEntry, SceneCard, StoryControl, WritingRecapCandidate } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 
 type LedgerKind = LedgerEntry["kind"];
@@ -32,6 +32,60 @@ function defaultDashboard(chapterId: string): ChapterDashboard {
   };
 }
 
+export function defaultStoryControl(): StoryControl {
+  const now = nowIso();
+  return {
+    version: 1,
+    premise: "",
+    currentArcId: "arc-main-01",
+    arcs: [
+      {
+        id: "arc-main-01",
+        title: "主线起步",
+        chapterRange: "第 1-10 章",
+        goal: "明确主角处境、核心目标和第一轮外部压力。",
+        stakes: "如果主角不行动，将失去当前最重要的资源或关系。",
+        payoff: "主角完成第一次可信突破，并留下下一阶段更大的问题。",
+        status: "seed",
+        updatedAt: now
+      }
+    ],
+    characters: [
+      {
+        id: "char-protagonist",
+        name: "主角",
+        role: "主角",
+        goal: "补全长期目标和短期目标。",
+        currentState: "初始状态待补充。",
+        knownSecrets: "只记录当前章节前已经知道的信息。",
+        relationshipNotes: "记录队友、竞争者、债主或师承关系。",
+        powerLevel: "初始能力待补充。",
+        status: "seed",
+        updatedAt: now
+      }
+    ],
+    events: [
+      {
+        id: "event-first-dungeon",
+        type: "dungeon",
+        title: "第一处特殊事件",
+        trigger: "主角达到第一个小目标，但需要外部压力迫使他组队行动。",
+        participants: ["主角"],
+        location: "待定地点",
+        conflict: "收益可观，但会暴露主角不该轻易暴露的信息。",
+        reward: "能力、资源、关系或线索上的小突破。",
+        cost: "留下代价、伤势、债务、敌意或更大的追踪风险。",
+        foreshadowing: "提前 2-3 章埋入异常物件、传闻或地图碎片。",
+        chapterRange: "待安排",
+        status: "seed",
+        updatedAt: now
+      }
+    ],
+    orchestrationNotes: "AI 编排未来章节时必须让事件由角色动机和代价触发，避免无因刷副本或突然升级。",
+    updatedAt: now
+  };
+}
+
 async function readJsonFile<T>(root: string, relativePath: string, fallback: T): Promise<T> {
   try {
     const raw = await fs.readFile(resolveInside(root, relativePath), "utf8");
@@ -56,6 +110,10 @@ function chapterDashboardPath(chapterId: string): string {
 
 function sceneCardsPath(chapterId: string): string {
   return `scenes/${chapterId}.json`;
+}
+
+function storyControlPath(): string {
+  return "story-control/story-control.json";
 }
 
 function ledgerPath(kind: LedgerKind): string {
@@ -90,6 +148,24 @@ export async function saveSceneCards(root: string, chapterId: string, cards: Sce
       updatedAt: card.updatedAt || nowIso()
     }));
   await writeJsonFile(root, sceneCardsPath(chapterId), normalized);
+  return normalized;
+}
+
+export async function readStoryControl(root: string): Promise<StoryControl> {
+  return readJsonFile(root, storyControlPath(), defaultStoryControl());
+}
+
+export async function saveStoryControl(root: string, storyControl: StoryControl): Promise<StoryControl> {
+  const normalized: StoryControl = {
+    ...storyControl,
+    version: 1,
+    arcs: storyControl.arcs || [],
+    characters: storyControl.characters || [],
+    events: storyControl.events || [],
+    orchestrationNotes: storyControl.orchestrationNotes || "",
+    updatedAt: nowIso()
+  };
+  await writeJsonFile(root, storyControlPath(), normalized);
   return normalized;
 }
 

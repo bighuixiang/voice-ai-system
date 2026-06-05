@@ -19,6 +19,7 @@ import type {
   PlatformAssetType,
   PlatformLibrary,
   SceneCard,
+  StoryControl,
   StyleToneKey,
   TaskProgressStep,
   WritingMode,
@@ -47,6 +48,7 @@ interface WorkspaceCache {
   focusTargetWords: number;
   dashboard: ChapterDashboard | null;
   sceneCards: SceneCard[];
+  storyControl: StoryControl | null;
   structureIdeaInput: string;
   structureDraftVersion: number;
   ledgerKind: LedgerKind;
@@ -84,6 +86,7 @@ export const useNovelStore = defineStore("novel", () => {
   const focusTargetWords = ref(DEFAULT_FOCUS_TARGET_WORDS);
   const currentDashboard = ref<ChapterDashboard | null>(null);
   const sceneCards = ref<SceneCard[]>([]);
+  const storyControl = ref<StoryControl | null>(null);
   const structureIdeaInput = ref("");
   const structureDraftVersion = ref(0);
   const activeLedgerKind = ref<LedgerKind>("foreshadowing");
@@ -91,6 +94,7 @@ export const useNovelStore = defineStore("novel", () => {
   const writingMode = ref<WritingMode>("structure");
   const isSavingDashboard = ref(false);
   const isSavingScenes = ref(false);
+  const isSavingStoryControl = ref(false);
   const agentProfiles = ref<AiAgentProfile[]>([]);
   const agentChecks = ref<AiAgentCheckResult[]>([]);
   const defaultAgentProfileId = ref("codex-cli");
@@ -135,6 +139,7 @@ export const useNovelStore = defineStore("novel", () => {
     () => currentDocumentKind.value === "content" && currentContent.value.replace(/\s+/g, "").length >= 20
   );
   const canRequestFocusDraft = computed(() => Boolean(currentProject.value && currentChapter.value && !isLoading.value));
+  const canRequestStoryOrchestration = computed(() => Boolean(currentProject.value && storyControl.value && !isLoading.value));
   const currentWordCount = computed(() => countDraftWords(currentContent.value));
   const focusProgressPercent = computed(() => {
     if (!focusTargetWords.value) return 0;
@@ -585,6 +590,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusTargetWords.value = DEFAULT_FOCUS_TARGET_WORDS;
     currentDashboard.value = null;
     sceneCards.value = [];
+    storyControl.value = null;
     structureIdeaInput.value = "";
     structureDraftVersion.value = 0;
     activeLedgerKind.value = "foreshadowing";
@@ -618,6 +624,7 @@ export const useNovelStore = defineStore("novel", () => {
         focusTargetWords: focusTargetWords.value,
         dashboard: currentDashboard.value,
         sceneCards: sceneCards.value,
+        storyControl: storyControl.value,
         structureIdeaInput: structureIdeaInput.value,
         structureDraftVersion: structureDraftVersion.value,
         ledgerKind: activeLedgerKind.value,
@@ -652,6 +659,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusTargetWords.value = cached.focusTargetWords || DEFAULT_FOCUS_TARGET_WORDS;
     currentDashboard.value = cached.dashboard;
     sceneCards.value = cached.sceneCards;
+    storyControl.value = cached.storyControl;
     structureIdeaInput.value = cached.structureIdeaInput || "";
     structureDraftVersion.value = cached.structureDraftVersion || 0;
     activeLedgerKind.value = cached.ledgerKind;
@@ -782,6 +790,31 @@ export const useNovelStore = defineStore("novel", () => {
       wordCount: countDraftWords(currentContent.value)
     };
     sceneCards.value = cards;
+  }
+
+  async function loadStoryControl() {
+    if (!currentProject.value) return;
+    storyControl.value = await novelApi.readStoryControl(currentProject.value.slug);
+  }
+
+  function updateStoryControl(patch: Partial<StoryControl>) {
+    if (!storyControl.value) return;
+    storyControl.value = {
+      ...storyControl.value,
+      ...patch,
+      version: 1,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async function saveStoryControl() {
+    if (!currentProject.value || !storyControl.value) return;
+    isSavingStoryControl.value = true;
+    try {
+      storyControl.value = await novelApi.saveStoryControl(currentProject.value.slug, storyControl.value);
+    } finally {
+      isSavingStoryControl.value = false;
+    }
   }
 
   function updateDashboard(patch: Partial<ChapterDashboard>) {
@@ -936,6 +969,20 @@ export const useNovelStore = defineStore("novel", () => {
     await runTask("writing.recap");
   }
 
+  async function requestStoryOrchestration() {
+    if (!currentProject.value || !storyControl.value || !canRequestStoryOrchestration.value) return;
+    await runTask("idea.suggest", {
+      mode: "story-control.orchestrate",
+      feedback: [
+        "请基于故事总控台、当前章节、角色状态、事件池、升级节奏和未回收伏笔，编排未来 3-8 章路线。",
+        "输出需要说明：每章目标、参与角色、触发事件或秘境、冲突、收益、代价、升级是否可信、需要提前埋的伏笔。",
+        "优先让事件由角色动机和代价触发，不要让主角无因刷副本，不要跳级，不要泄露 POV 角色尚不知道的信息。",
+        "如果某个事件池条目不适合当前阶段，请明确说明原因并给出替代安排。"
+      ].join("\n"),
+      storyControl: storyControl.value
+    });
+  }
+
   async function acceptWritingRecap() {
     if (!currentProject.value || !recapCandidate.value) return;
     const updates = [
@@ -980,6 +1027,7 @@ export const useNovelStore = defineStore("novel", () => {
       await openChapter(chapter, currentDocumentKind.value, { skipLeaveCheck: true });
     }
     await openSupportFile(currentSupportPath.value, { skipLeaveCheck: true });
+    await loadStoryControl();
     await loadLedger(activeLedgerKind.value);
   }
 
@@ -1237,6 +1285,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusWritingGuide,
     currentDashboard,
     sceneCards,
+    storyControl,
     structureIdeaInput,
     structureDraftVersion,
     activeLedgerKind,
@@ -1244,6 +1293,7 @@ export const useNovelStore = defineStore("novel", () => {
     writingMode,
     isSavingDashboard,
     isSavingScenes,
+    isSavingStoryControl,
     agentProfiles,
     agentChecks,
     defaultAgentProfileId,
@@ -1262,6 +1312,7 @@ export const useNovelStore = defineStore("novel", () => {
     canDiagnoseChapter,
     canReverseEngineerStructure,
     canRequestFocusDraft,
+    canRequestStoryOrchestration,
     currentProjectAssets,
     canLeaveCurrentWorkspace,
     loadProjects,
@@ -1274,10 +1325,13 @@ export const useNovelStore = defineStore("novel", () => {
     createSharedAsset,
     linkSharedAsset,
     loadChapterCockpit,
+    loadStoryControl,
     updateDashboard,
     saveCurrentDashboard,
     updateSceneCards,
     saveCurrentSceneCards,
+    updateStoryControl,
+    saveStoryControl,
     saveCurrentStructure,
     updateStructureIdeaInput,
     reverseEngineerStructureFromDraft,
@@ -1289,6 +1343,7 @@ export const useNovelStore = defineStore("novel", () => {
     updateFocusTargetWords,
     requestFocusDraft,
     requestFocusDraftRevision,
+    requestStoryOrchestration,
     diagnoseCurrentChapter,
     updateStyleTone,
     tuneSelectionStyle,

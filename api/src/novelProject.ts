@@ -4,6 +4,7 @@ import type { ChapterDashboard, NovelChapter, NovelProject } from "./types.js";
 import { getNovelsRoot } from "./workspace.js";
 import { resolveInside } from "./pathSafety.js";
 import { upsertProjectRecord } from "./database.js";
+import { defaultStoryControl } from "./writingCockpit.js";
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -146,6 +147,7 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
   const root = projectRoot(project.slug);
   for (const dir of [
     "bible",
+    "story-control",
     "outline",
     "chapters",
     "dashboard",
@@ -187,7 +189,8 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "relations/story-asset-map.md": "# Story Asset Map\n\nTrack how characters, props, scenes, and generated media relate to chapters and plot beats.\n",
     "prompts/project-prompts.md": "# Project Prompts\n\nProject-specific prompt notes, expert role overrides, and reusable generation instructions.\n",
     "tasks/history.jsonl": "",
-    "tasks/recaps.jsonl": ""
+    "tasks/recaps.jsonl": "",
+    "story-control/story-control.json": `${JSON.stringify(defaultStoryControl(), null, 2)}\n`
   };
 
   for (const [relativePath, content] of Object.entries(defaults)) {

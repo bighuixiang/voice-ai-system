@@ -11,7 +11,8 @@ import type {
   PlatformAsset,
   PlatformAssetType,
   PlatformLibrary,
-  SceneCard
+  SceneCard,
+  StoryControl
 } from "@/types/novel";
 
 const jsonHeaders = { "Content-Type": "application/json" };
@@ -146,6 +147,20 @@ export const novelApi = {
       body: JSON.stringify({ scenes })
     });
     return data.scenes;
+  },
+
+  async readStoryControl(projectId: string): Promise<StoryControl> {
+    const data = await request<{ storyControl: StoryControl }>(`/api/novel/projects/${projectId}/story-control`);
+    return data.storyControl;
+  },
+
+  async saveStoryControl(projectId: string, storyControl: StoryControl): Promise<StoryControl> {
+    const data = await request<{ storyControl: StoryControl }>(`/api/novel/projects/${projectId}/story-control`, {
+      method: "PUT",
+      headers: jsonHeaders,
+      body: JSON.stringify({ storyControl })
+    });
+    return data.storyControl;
   },
 
   async readLedgerEntries(projectId: string, kind: LedgerEntry["kind"]): Promise<LedgerEntry[]> {

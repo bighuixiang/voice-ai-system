@@ -6,6 +6,10 @@
         <p>从小说项目开始，逐步扩展到素材、剧本、图片和视频生成管理。</p>
       </div>
       <div class="header-actions">
+        <el-button v-if="isProjectRoute && store.hasProject" @click="storyControlDialogOpen = true">
+          <el-icon><Collection /></el-icon>
+          故事总控
+        </el-button>
         <el-button v-if="isProjectRoute" @click="goProjectHub">
           <el-icon><Folder /></el-icon>
           项目大厅
@@ -250,13 +254,24 @@
       <el-icon class="is-loading"><Loading /></el-icon>
       <span>{{ store.error || "正在载入工作台" }}</span>
     </main>
+    <el-dialog v-model="storyControlDialogOpen" title="故事总控台" width="min(1180px, 96vw)" destroy-on-close>
+      <StoryControlPanel
+        :story-control="store.storyControl"
+        :is-saving="store.isSavingStoryControl"
+        :is-generating="store.isLoading"
+        :can-generate="store.canRequestStoryOrchestration"
+        @update:story-control="store.updateStoryControl"
+        @save="handleSaveStoryControl"
+        @orchestrate="store.requestStoryOrchestration"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
-import { Close, Folder, Loading, Refresh } from "@element-plus/icons-vue";
+import { Close, Collection, Folder, Loading, Refresh } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
 import ProjectManagerPanel from "./ProjectManagerPanel.vue";
@@ -264,6 +279,7 @@ import ProjectCreatePanel from "./ProjectCreatePanel.vue";
 import ChapterTree from "./ChapterTree.vue";
 import FocusWritingPanel from "./FocusWritingPanel.vue";
 import StructureQuickStartPanel from "./StructureQuickStartPanel.vue";
+import StoryControlPanel from "./StoryControlPanel.vue";
 import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
 import SceneCardPanel from "./SceneCardPanel.vue";
 import ChapterEditor from "./ChapterEditor.vue";
@@ -289,6 +305,7 @@ const route = useRoute();
 const router = useRouter();
 const sampleStarterIdea = "一个被逐出山门的少年在雨夜发现旧封印松动；他想证明自己还能修行，却必须在救人和暴露身份之间做选择。";
 const starterIdea = ref("");
+const storyControlDialogOpen = ref(false);
 const isProjectRoute = computed(() => route.name === "project-workspace");
 const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
 const hasWorkspaceStructure = computed(() => Boolean(store.currentDashboard?.goal || store.sceneCards.length));
@@ -386,6 +403,15 @@ async function handleSaveCurrentStructure() {
     ElMessage.success("章节结构已保存");
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : "保存结构失败");
+  }
+}
+
+async function handleSaveStoryControl() {
+  try {
+    await store.saveStoryControl();
+    ElMessage.success("故事总控台已保存");
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "保存故事总控台失败");
   }
 }
 

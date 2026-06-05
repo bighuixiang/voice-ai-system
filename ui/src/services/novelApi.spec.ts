@@ -196,6 +196,16 @@ describe("novelApi", () => {
         updatedAt: "2026-06-04T00:00:00.000Z"
       }
     ];
+    const storyControl = {
+      version: 1 as const,
+      premise: "A careful hero opens a sealed gate.",
+      currentArcId: "arc-1",
+      arcs: [],
+      characters: [],
+      events: [],
+      orchestrationNotes: "Keep upgrades causal.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
     const entries = [
       {
         id: "risk-1",
@@ -213,6 +223,8 @@ describe("novelApi", () => {
     mockJson({ dashboard });
     mockJson({ scenes });
     mockJson({ scenes });
+    mockJson({ storyControl });
+    mockJson({ storyControl });
     mockJson({ entries });
     mockJson({ entries });
 
@@ -220,6 +232,8 @@ describe("novelApi", () => {
     await expect(novelApi.saveChapterDashboard("demo", dashboard)).resolves.toEqual(dashboard);
     await expect(novelApi.readSceneCards("demo", "chapter-001")).resolves.toEqual(scenes);
     await expect(novelApi.saveSceneCards("demo", "chapter-001", scenes)).resolves.toEqual(scenes);
+    await expect(novelApi.readStoryControl("demo")).resolves.toEqual(storyControl);
+    await expect(novelApi.saveStoryControl("demo", storyControl)).resolves.toEqual(storyControl);
     await expect(novelApi.readLedgerEntries("demo", "risk")).resolves.toEqual(entries);
     await expect(novelApi.saveLedgerEntries("demo", "risk", entries)).resolves.toEqual(entries);
 
@@ -235,9 +249,15 @@ describe("novelApi", () => {
       "/api/novel/projects/demo/scenes/chapter-001",
       expect.objectContaining({ method: "PUT", body: JSON.stringify({ scenes }) })
     );
-    expect(fetch).toHaveBeenNthCalledWith(5, "/api/novel/projects/demo/ledger/risk", {});
+    expect(fetch).toHaveBeenNthCalledWith(5, "/api/novel/projects/demo/story-control", {});
     expect(fetch).toHaveBeenNthCalledWith(
       6,
+      "/api/novel/projects/demo/story-control",
+      expect.objectContaining({ method: "PUT", body: JSON.stringify({ storyControl }) })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(7, "/api/novel/projects/demo/ledger/risk", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      8,
       "/api/novel/projects/demo/ledger/risk",
       expect.objectContaining({ method: "PUT", body: JSON.stringify({ entries }) })
     );

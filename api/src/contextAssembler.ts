@@ -43,7 +43,8 @@ export async function assembleContext(
     { title: "文风规则", content: await readOptional(root, "style/style-guide.md") },
     { title: "角色档案", content: await readOptional(root, "bible/characters.md") },
     { title: "世界观", content: await readOptional(root, "bible/world.md") },
-    { title: "力量体系", content: await readOptional(root, "bible/power-system.md") }
+    { title: "力量体系", content: await readOptional(root, "bible/power-system.md") },
+    { title: "故事总控台", content: await readOptional(root, "story-control/story-control.json") }
   ];
 
   if (broadContextTypes.includes(type)) {

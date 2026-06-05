@@ -21,9 +21,11 @@ import {
   readChapterDashboard,
   readLedgerEntries,
   readSceneCards,
+  readStoryControl,
   saveChapterDashboard,
   saveLedgerEntries,
-  saveSceneCards
+  saveSceneCards,
+  saveStoryControl
 } from "./writingCockpit.js";
 
 const taskTypes: CodexTaskType[] = [
@@ -260,6 +262,20 @@ export function createApp() {
       storyAssetMap,
       linkedAssets
     });
+  }));
+
+  app.get("/api/novel/projects/:projectId/story-control", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const storyControl = await readStoryControl(projectRoot(project.slug));
+    res.json({ storyControl });
+  }));
+
+  app.put("/api/novel/projects/:projectId/story-control", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const storyControl = await saveStoryControl(projectRoot(project.slug), req.body.storyControl || req.body || {});
+    project.updatedAt = new Date().toISOString();
+    await writeProject(project);
+    res.json({ storyControl });
   }));
 
   app.get("/api/novel/projects/:projectId/dashboard/:chapterId", asyncRoute(async (req, res) => {

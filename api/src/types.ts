@@ -84,6 +84,62 @@ export interface SceneCard {
   updatedAt: string;
 }
 
+export type StoryEventType = "event" | "dungeon" | "team-fight" | "training" | "reveal";
+export type StoryControlStatus = "seed" | "planned" | "active" | "resolved" | "blocked";
+
+export interface StoryArc {
+  id: string;
+  title: string;
+  chapterRange: string;
+  goal: string;
+  stakes: string;
+  payoff: string;
+  status: StoryControlStatus;
+  updatedAt: string;
+}
+
+export interface StoryCharacterProfile {
+  id: string;
+  name: string;
+  role: string;
+  goal: string;
+  currentState: string;
+  knownSecrets: string;
+  relationshipNotes: string;
+  powerLevel: string;
+  firstChapterId?: string;
+  lastSeenChapterId?: string;
+  status: StoryControlStatus;
+  updatedAt: string;
+}
+
+export interface StoryEventCard {
+  id: string;
+  type: StoryEventType;
+  title: string;
+  trigger: string;
+  participants: string[];
+  location: string;
+  conflict: string;
+  reward: string;
+  cost: string;
+  foreshadowing: string;
+  chapterRange: string;
+  status: StoryControlStatus;
+  updatedAt: string;
+}
+
+export interface StoryControl {
+  version: 1;
+  premise: string;
+  currentArcId?: string;
+  arcs: StoryArc[];
+  characters: StoryCharacterProfile[];
+  events: StoryEventCard[];
+  orchestrationNotes: string;
+  updatedAt: string;
+}
+
 export interface LedgerEntry {
   id: string;
   kind: "foreshadowing" | "continuity" | "power" | "character" | "risk";

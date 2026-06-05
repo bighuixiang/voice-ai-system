@@ -76,6 +76,17 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     structureIdeaInput: "",
     structureDraftVersion: 0,
     canReverseEngineerStructure: true,
+    storyControl: {
+      version: 1,
+      premise: "A careful hero opens a sealed gate.",
+      arcs: [],
+      characters: [],
+      events: [],
+      orchestrationNotes: "Keep upgrades causal.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    },
+    isSavingStoryControl: false,
+    canRequestStoryOrchestration: true,
     currentDocumentKind: "content",
     currentDocumentLabel: "章节正文",
     currentFilePath: "chapters/chapter-001.md",
@@ -128,6 +139,9 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     updateStructureIdeaInput: vi.fn(),
     reverseEngineerStructureFromDraft: vi.fn(),
     generateStructureFromIdea: vi.fn(),
+    updateStoryControl: vi.fn(),
+    saveStoryControl: vi.fn(),
+    requestStoryOrchestration: vi.fn(),
     updateContent: vi.fn(),
     openChapterDocument: vi.fn(),
     updateSelection: vi.fn(),
@@ -163,7 +177,12 @@ const stubs = {
     emits: ["click"],
     template: `<button @click="$emit('click')"><slot /></button>`
   },
+  "el-dialog": {
+    props: ["modelValue"],
+    template: `<section v-if="modelValue" class="dialog-stub"><slot /></section>`
+  },
   "el-icon": { template: "<span><slot /></span>" },
+  Collection: true,
   Close: true,
   Folder: true,
   Loading: true,
@@ -178,6 +197,10 @@ const stubs = {
     template: "<button class='focus-stub' @click='$emit(\"generate-draft\")'>focus guide</button>"
   },
   StructureQuickStartPanel: { template: "<div class='quick-start-stub'>quick start</div>" },
+  StoryControlPanel: {
+    emits: ["orchestrate"],
+    template: "<button class='story-control-stub' @click='$emit(\"orchestrate\")'>story control</button>"
+  },
   ChapterDashboardPanel: { template: "<div class='dashboard-stub'>dashboard</div>" },
   SceneCardPanel: { template: "<div class='scene-stub'>scene</div>" },
   ChapterEditor: { template: "<div class='editor-stub'>editor</div>" },
@@ -301,5 +324,20 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".dashboard-stub").exists()).toBe(true);
     expect(wrapper.find(".scene-stub").exists()).toBe(true);
     expect(wrapper.find(".editor-stub").exists()).toBe(true);
+    expect(wrapper.find(".story-control-stub").exists()).toBe(false);
+  });
+
+  it("opens the global story control from the workspace header", async () => {
+    storeRef.value = makeStore("structure");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    const storyControlButton = wrapper.findAll("button").find((button) => button.text().includes("故事总控"));
+
+    expect(storyControlButton).toBeTruthy();
+    await storyControlButton?.trigger("click");
+
+    expect(wrapper.find(".story-control-stub").exists()).toBe(true);
+    await wrapper.find(".story-control-stub").trigger("click");
+    expect(storeRef.value.requestStoryOrchestration).toHaveBeenCalled();
   });
 });
