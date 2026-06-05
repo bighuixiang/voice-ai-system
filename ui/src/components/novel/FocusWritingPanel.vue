@@ -65,6 +65,8 @@
 import { Aim, DataAnalysis, Finished, MagicStick } from "@element-plus/icons-vue";
 import type { FocusWritingGuide } from "@/types/novel";
 
+const DEFAULT_TARGET_WORDS = 3000;
+
 withDefaults(defineProps<{
   guide: FocusWritingGuide;
   canGenerate?: boolean;
@@ -82,7 +84,7 @@ const emit = defineEmits<{
 }>();
 
 function updateTarget(value: number | null) {
-  emit("update-target", value || 2000);
+  emit("update-target", value || DEFAULT_TARGET_WORDS);
 }
 </script>
 

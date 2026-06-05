@@ -26,6 +26,7 @@ import type {
 } from "@/types/novel";
 
 type LedgerKind = LedgerEntry["kind"];
+const DEFAULT_FOCUS_TARGET_WORDS = 3000;
 
 interface WorkspaceCache {
   project: NovelProject;
@@ -80,7 +81,7 @@ export const useNovelStore = defineStore("novel", () => {
   const recapCandidate = ref<WritingRecapCandidate | null>(null);
   const currentQualityReport = ref<ChapterQualityReport | null>(null);
   const styleTone = ref<StyleToneKey>("elegant");
-  const focusTargetWords = ref(2000);
+  const focusTargetWords = ref(DEFAULT_FOCUS_TARGET_WORDS);
   const currentDashboard = ref<ChapterDashboard | null>(null);
   const sceneCards = ref<SceneCard[]>([]);
   const structureIdeaInput = ref("");
@@ -581,7 +582,7 @@ export const useNovelStore = defineStore("novel", () => {
     recapCandidate.value = null;
     currentQualityReport.value = null;
     styleTone.value = "elegant";
-    focusTargetWords.value = 2000;
+    focusTargetWords.value = DEFAULT_FOCUS_TARGET_WORDS;
     currentDashboard.value = null;
     sceneCards.value = [];
     structureIdeaInput.value = "";
@@ -648,7 +649,7 @@ export const useNovelStore = defineStore("novel", () => {
     recapCandidate.value = cached.recapCandidate;
     currentQualityReport.value = cached.qualityReport || null;
     styleTone.value = cached.styleTone || "elegant";
-    focusTargetWords.value = cached.focusTargetWords || 2000;
+    focusTargetWords.value = cached.focusTargetWords || DEFAULT_FOCUS_TARGET_WORDS;
     currentDashboard.value = cached.dashboard;
     sceneCards.value = cached.sceneCards;
     structureIdeaInput.value = cached.structureIdeaInput || "";
@@ -883,7 +884,7 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function updateFocusTargetWords(value: number) {
-    const nextValue = Number.isFinite(value) ? value : 2000;
+    const nextValue = Number.isFinite(value) ? value : DEFAULT_FOCUS_TARGET_WORDS;
     focusTargetWords.value = Math.max(300, Math.min(12000, Math.round(nextValue)));
   }
 

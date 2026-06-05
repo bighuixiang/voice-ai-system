@@ -5,7 +5,7 @@ import type { FocusWritingGuide } from "@/types/novel";
 
 const guide: FocusWritingGuide = {
   chapterId: "chapter-001",
-  targetWords: 2000,
+  targetWords: 3000,
   currentWords: 800,
   progressPercent: 40,
   stageLabel: "进入场景",
@@ -47,7 +47,7 @@ describe("FocusWritingPanel", () => {
     const wrapper = mountPanel();
 
     expect(wrapper.text()).toContain("今日写作推进器");
-    expect(wrapper.text()).toContain("800 / 2000 字");
+    expect(wrapper.text()).toContain("800 / 3000 字");
     expect(wrapper.text()).toContain("主角听见门后回应");
     expect(wrapper.find(".progress-fill").attributes("style")).toContain("width: 40%");
   });

@@ -1,5 +1,5 @@
 <template>
-  <section class="project-create" aria-labelledby="project-create-title">
+  <section id="project-create-panel" class="project-create" aria-labelledby="project-create-title">
     <div class="intro">
       <p class="eyebrow">Novel MVP</p>
       <h2 id="project-create-title">创建小说项目</h2>
@@ -39,11 +39,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
 import { useNovelStore } from "@/stores/novel";
 import { formatGenres, novelGenreOptions } from "./genreOptions";
+
+const props = defineProps<{
+  starterIdea?: string;
+}>();
 
 const store = useNovelStore();
 const emit = defineEmits<{
@@ -53,6 +57,15 @@ const title = ref("");
 const genres = ref<string[]>([]);
 const roughIdea = ref("");
 const isLoading = ref(false);
+
+watch(
+  () => props.starterIdea,
+  (idea) => {
+    if (!idea?.trim() || roughIdea.value.trim()) return;
+    roughIdea.value = idea;
+  },
+  { immediate: true }
+);
 
 async function handleSubmit() {
   if (!roughIdea.value.trim()) {

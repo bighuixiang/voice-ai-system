@@ -899,11 +899,16 @@ describe("useNovelStore", () => {
   it("clamps focus target words to a practical range", () => {
     const store = useNovelStore();
 
+    expect(store.focusTargetWords).toBe(3000);
+
     store.updateFocusTargetWords(80);
     expect(store.focusTargetWords).toBe(300);
 
     store.updateFocusTargetWords(20000);
     expect(store.focusTargetWords).toBe(12000);
+
+    store.updateFocusTargetWords(Number.NaN);
+    expect(store.focusTargetWords).toBe(3000);
   });
 
   it("requests a focus draft from the next beat guide", async () => {

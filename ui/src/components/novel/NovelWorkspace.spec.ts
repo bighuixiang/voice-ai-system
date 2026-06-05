@@ -86,10 +86,10 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     rewriteCandidate: null,
     currentQualityReport: null,
     styleTone: "elegant",
-    focusTargetWords: 2000,
+    focusTargetWords: 3000,
     focusWritingGuide: {
       chapterId: "chapter-001",
-      targetWords: 2000,
+      targetWords: 3000,
       currentWords: 1200,
       progressPercent: 60,
       stageLabel: "冲突升级",

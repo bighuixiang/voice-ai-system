@@ -94,4 +94,15 @@ describe("ProjectCreatePanel", () => {
     });
     expect(ElMessage.success).toHaveBeenCalled();
   });
+
+  it("prefills the rough idea from the beginner guide", async () => {
+    const wrapper = mount(ProjectCreatePanel, {
+      props: { starterIdea: "A young exile finds a broken seal." },
+      global: { stubs }
+    });
+
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find("textarea").element.value).toBe("A young exile finds a broken seal.");
+  });
 });

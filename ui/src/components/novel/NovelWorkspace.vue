@@ -47,6 +47,8 @@
         </div>
       </section>
 
+      <QuickStartGuidePanel variant="hub" @start-create="scrollToCreatePanel" @use-example="applyStarterIdea" />
+
       <div class="hub-grid">
         <ProjectManagerPanel
           :projects="store.projects"
@@ -56,7 +58,7 @@
           @open="goWorkspace($event.slug)"
           @import-project="importProjectAndOpen"
         />
-        <ProjectCreatePanel @created="goWorkspace($event.slug)" />
+        <ProjectCreatePanel :starter-idea="starterIdea" @created="goWorkspace($event.slug)" />
         <PlatformLibraryPanel
           :library="store.platformLibrary"
           :loading="store.isLoading"
@@ -79,6 +81,13 @@
 
       <section class="center-stage">
         <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
+        <QuickStartGuidePanel
+          variant="workspace"
+          :mode="store.writingMode"
+          :has-structure="hasWorkspaceStructure"
+          :has-draft="hasWorkspaceDraft"
+          @open-mode="store.setWritingMode"
+        />
         <FocusWritingPanel
           v-if="store.writingMode === 'focus'"
           :guide="store.focusWritingGuide"
@@ -245,7 +254,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { Close, Folder, Loading, Refresh } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
@@ -269,6 +278,7 @@ import ContextPanel from "./ContextPanel.vue";
 import SupportFilePanel from "./SupportFilePanel.vue";
 import LedgerPanel from "./LedgerPanel.vue";
 import PlatformLibraryPanel from "./PlatformLibraryPanel.vue";
+import QuickStartGuidePanel from "./QuickStartGuidePanel.vue";
 
 defineOptions({
   name: "NovelWorkspace"
@@ -277,8 +287,12 @@ defineOptions({
 const store = useNovelStore();
 const route = useRoute();
 const router = useRouter();
+const sampleStarterIdea = "一个被逐出山门的少年在雨夜发现旧封印松动；他想证明自己还能修行，却必须在救人和暴露身份之间做选择。";
+const starterIdea = ref("");
 const isProjectRoute = computed(() => route.name === "project-workspace");
 const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
+const hasWorkspaceStructure = computed(() => Boolean(store.currentDashboard?.goal || store.sceneCards.length));
+const hasWorkspaceDraft = computed(() => store.currentContent.replace(/\s+/g, "").length >= 30);
 const focusDraftTuneOptions = [
   { label: "更有压迫感", value: "增强压迫感，让角色被更明确的危险、代价或时间压力推动" },
   { label: "更优雅", value: "提升文笔质感，保留清晰动作线，减少直白说明" },
@@ -324,6 +338,18 @@ function goProjectHub() {
 
 function goWorkspace(projectSlug: string) {
   router.push({ name: "project-workspace", params: { slug: projectSlug } });
+}
+
+async function scrollToCreatePanel() {
+  await nextTick();
+  document.querySelector("#project-create-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function applyStarterIdea() {
+  starterIdea.value = "";
+  await nextTick();
+  starterIdea.value = sampleStarterIdea;
+  await scrollToCreatePanel();
 }
 
 async function importProjectAndOpen(input: { sourcePath: string; title?: string; genre?: string }) {
@@ -523,6 +549,12 @@ watch(
     color: #374151;
     font-size: 12px;
   }
+}
+
+.project-hub > .quick-start-guide {
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .hub-grid {
