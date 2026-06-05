@@ -63,6 +63,10 @@ export interface NovelChapter {
   outlinePath: string;
   contentPath: string;
   status: "empty" | "planned" | "drafted" | "checked";
+  order?: number;
+  volumeId?: string;
+  volumeTitle?: string;
+  volumeOrder?: number;
 }
 
 export interface ChapterDashboard {
