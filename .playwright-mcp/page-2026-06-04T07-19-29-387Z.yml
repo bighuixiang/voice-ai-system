@@ -1,0 +1,104 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "创作生产平台" [level=1] [ref=e6]
+      - paragraph [ref=e7]: 从小说项目开始，逐步扩展到素材、剧本、图片和视频生成管理。
+    - button "刷新项目" [ref=e9] [cursor=pointer]:
+      - generic [ref=e10]:
+        - img [ref=e12]
+        - text: 刷新项目
+  - main [ref=e14]:
+    - region "先选项目，再进入工作台" [ref=e15]:
+      - paragraph [ref=e16]: Creative Production Platform
+      - heading "先选项目，再进入工作台" [level=2] [ref=e17]
+      - paragraph [ref=e18]: MVP 先把小说创作跑通；项目结构已经为素材、剧本、图片生成和视频生成预留模块。
+      - generic "平台模块" [ref=e19]:
+        - generic [ref=e20]: 小说创作
+        - generic [ref=e21]: 素材管理
+        - generic [ref=e22]: 剧本生产
+        - generic [ref=e23]: 图片生成
+        - generic [ref=e24]: 视频生成
+    - generic [ref=e25]:
+      - region "项目列表" [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - heading "项目列表" [level=2] [ref=e29]
+            - paragraph [ref=e30]: 本地文件存储；后续可替换为 SQLite 或服务端项目库。
+          - button "刷新项目" [ref=e31] [cursor=pointer]:
+            - img [ref=e34]
+        - list [ref=e36]:
+          - button "验收测试 玄幻 · 3 章 · 1/1 模块" [ref=e37] [cursor=pointer]:
+            - img [ref=e40]
+            - generic [ref=e42]:
+              - strong [ref=e43]: 验收测试
+              - generic [ref=e44]: 玄幻 · 3 章 · 1/1 模块
+          - button "仙王重生成牛马 都市玄幻 · 3 章 · 1/1 模块" [ref=e45] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e50]:
+              - strong [ref=e51]: 仙王重生成牛马
+              - generic [ref=e52]: 都市玄幻 · 3 章 · 1/1 模块
+        - generic [ref=e53]:
+          - generic [ref=e54]:
+            - generic [ref=e55]: 导入本地目录
+            - textbox "导入本地目录" [ref=e59]:
+              - /placeholder: D:\\novels\\my-story
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]: 新项目名
+              - textbox "新项目名" [ref=e66]:
+                - /placeholder: 可留空
+            - generic [ref=e67]:
+              - generic [ref=e68]: 题材
+              - textbox "题材" [ref=e72]:
+                - /placeholder: 玄幻 / 悬疑
+          - button "导入为新项目" [ref=e73] [cursor=pointer]:
+            - generic [ref=e74]:
+              - img [ref=e76]
+              - text: 导入为新项目
+      - region "创建小说项目" [ref=e78]:
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: Novel MVP
+          - heading "创建小说项目" [level=2] [ref=e81]
+          - paragraph [ref=e82]: 先建立故事骨架；素材、剧本、图片和视频模块会跟随项目一起扩展。
+        - generic [ref=e83]:
+          - generic [ref=e84]:
+            - generic [ref=e85]: 作品名
+            - textbox "作品名" [ref=e89]:
+              - /placeholder: 例如：九连山
+          - generic [ref=e90]:
+            - generic [ref=e91]: 题材
+            - textbox "题材" [ref=e95]:
+              - /placeholder: 玄幻 / 都市 / 科幻 / 悬疑
+          - generic [ref=e96]:
+            - generic [ref=e97]: 粗略想法
+            - textbox "粗略想法" [ref=e100]:
+              - /placeholder: 写下主角、世界、核心矛盾，或你脑子里最先出现的画面。
+          - button "创建并进入工作台" [ref=e101] [cursor=pointer]:
+            - generic [ref=e102]:
+              - img [ref=e104]
+              - text: 创建并进入工作台
+      - region "平台资料库" [ref=e106]:
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - heading "平台资料库" [level=2] [ref=e109]
+            - paragraph [ref=e110]: 共享素材、提示词、专家角色和 Skills
+          - button "刷新平台资料库" [ref=e111] [cursor=pointer]:
+            - img [ref=e114]
+        - generic [ref=e116]:
+          - tablist [ref=e120]:
+            - tab "素材" [selected] [ref=e122]
+            - tab "提示词" [ref=e123]
+            - tab "角色" [ref=e124]
+            - tab "Skills" [ref=e125]
+          - tabpanel "素材" [ref=e127]:
+            - generic [ref=e128]:
+              - textbox "新共享素材名称" [ref=e131]
+              - generic [ref=e133] [cursor=pointer]:
+                - generic:
+                  - combobox "素材类型" [ref=e135]
+                  - generic [ref=e136]: 角色
+                - img [ref=e139]
+              - button [disabled] [ref=e141]:
+                - img [ref=e144]
+            - list [ref=e146]:
+              - paragraph [ref=e147]: 还没有共享素材。

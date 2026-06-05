@@ -110,6 +110,48 @@ describe("novel API routes", () => {
     await expect(fs.readFile(path.join(tempRoot, "demo-novel-2", "project.json"), "utf8")).resolves.toContain("Demo Novel");
   });
 
+  it("saves project AI profile and model without accepting command input", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Agent Demo",
+        genre: "fantasy",
+        roughIdea: "A configurable writing agent."
+      })
+    });
+
+    const updated = await jsonFetch<{ project: { ai: { profileId: string; modelId: string }; codex: { command: string } } }>(
+      "/api/novel/projects/agent-demo/ai",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileId: "claude-code", modelId: "claude-future-1.2", command: "malicious-command" })
+      }
+    );
+    const projectJson = JSON.parse(await fs.readFile(path.join(tempRoot, "agent-demo", "project.json"), "utf8"));
+
+    expect(updated.data.project.ai).toEqual({ profileId: "claude-code", modelId: "claude-future-1.2" });
+    expect(updated.data.project.codex.command).not.toBe("malicious-command");
+    expect(projectJson.codex.command).not.toBe("malicious-command");
+
+    const rejected = await jsonFetch<{ error: string }>("/api/novel/projects/agent-demo/ai", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profileId: "unknown-agent", modelId: "sonnet" })
+    });
+    expect(rejected.status).toBe(400);
+    expect(rejected.data.error).toContain("Unsupported AI agent profile");
+
+    const invalidModel = await jsonFetch<{ error: string }>("/api/novel/projects/agent-demo/ai", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profileId: "codex-cli", modelId: "gpt-5.5 && run" })
+    });
+    expect(invalidModel.status).toBe(400);
+    expect(invalidModel.data.error).toContain("Model id can only contain");
+  });
+
   it("seeds the platform library and links shared assets across projects", async () => {
     await jsonFetch("/api/novel/projects", {
       method: "POST",

@@ -2,6 +2,8 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import { novelApi } from "@/services/novelApi";
 import type {
+  AiAgentCheckResult,
+  AiAgentProfile,
   ChapterDashboard,
   ChapterQualityReport,
   CodexTaskResult,
@@ -88,6 +90,10 @@ export const useNovelStore = defineStore("novel", () => {
   const writingMode = ref<WritingMode>("structure");
   const isSavingDashboard = ref(false);
   const isSavingScenes = ref(false);
+  const agentProfiles = ref<AiAgentProfile[]>([]);
+  const agentChecks = ref<AiAgentCheckResult[]>([]);
+  const defaultAgentProfileId = ref("codex-cli");
+  const isSavingAiConfig = ref(false);
   const platformLibrary = ref<PlatformLibrary | null>(null);
   const supportFiles = [
     { label: "角色", path: "bible/characters.md" },
@@ -542,9 +548,10 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function startTaskProgress() {
+    const agentLabel = currentProject.value?.ai?.profileId === "claude-code" ? "调用 Claude Code CLI" : "调用 AI 执行器";
     taskProgress.value = [
       { id: "context", label: "准备项目上下文", status: "running" },
-      { id: "codex", label: "调用 Codex CLI", status: "pending" },
+      { id: "codex", label: agentLabel, status: "pending" },
       { id: "parse", label: "解析结构化结果", status: "pending" }
     ];
   }
@@ -664,6 +671,38 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function loadPlatformLibrary() {
     platformLibrary.value = await novelApi.readPlatformLibrary();
+  }
+
+  async function loadAgentProfiles() {
+    const data = await novelApi.readAgentProfiles();
+    agentProfiles.value = data.profiles;
+    agentChecks.value = data.checks;
+    defaultAgentProfileId.value = data.defaultProfileId;
+  }
+
+  async function checkAgentProfile(profileId: string, modelId?: string) {
+    const result = await novelApi.checkAgentProfile(profileId, modelId);
+    agentChecks.value = [...agentChecks.value.filter((item) => item.profileId !== result.profileId), result];
+    return result;
+  }
+
+  async function updateProjectAiConfig(input: { profileId: string; modelId?: string }) {
+    if (!currentProject.value) return null;
+    isSavingAiConfig.value = true;
+    try {
+      const project = await novelApi.updateProjectAiConfig(currentProject.value.slug, input);
+      currentProject.value = project;
+      projects.value = projects.value.map((item) => (item.slug === project.slug ? project : item));
+      if (workspaceCache.value[project.slug]) {
+        workspaceCache.value[project.slug] = {
+          ...workspaceCache.value[project.slug],
+          project
+        };
+      }
+      return project;
+    } finally {
+      isSavingAiConfig.value = false;
+    }
   }
 
   async function createProject(input: { title?: string; genre?: string; roughIdea: string }) {
@@ -1204,6 +1243,10 @@ export const useNovelStore = defineStore("novel", () => {
     writingMode,
     isSavingDashboard,
     isSavingScenes,
+    agentProfiles,
+    agentChecks,
+    defaultAgentProfileId,
+    isSavingAiConfig,
     platformLibrary,
     supportFiles,
     currentSupportPath,
@@ -1222,6 +1265,9 @@ export const useNovelStore = defineStore("novel", () => {
     canLeaveCurrentWorkspace,
     loadProjects,
     loadPlatformLibrary,
+    loadAgentProfiles,
+    checkAgentProfile,
+    updateProjectAiConfig,
     createProject,
     importProject,
     createSharedAsset,

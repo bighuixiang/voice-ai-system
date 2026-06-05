@@ -80,6 +80,10 @@ export function createProjectSkeleton(input: { title?: string; roughIdea: string
       command: process.env.CODEX_COMMAND || "codex",
       model: process.env.CODEX_MODEL
     },
+    ai: {
+      profileId: process.env.AI_AGENT_PROFILE_ID || "codex-cli",
+      modelId: process.env.CODEX_MODEL
+    },
     modules: createDefaultModules(),
     chapters: createDefaultChapters()
   };
@@ -119,7 +123,16 @@ export function projectRoot(projectId: string): string {
 export async function readProject(projectId: string): Promise<NovelProject> {
   const root = projectRoot(projectId);
   const raw = await fs.readFile(path.join(root, "project.json"), "utf8");
-  return JSON.parse(raw) as NovelProject;
+  const project = JSON.parse(raw) as NovelProject;
+  project.codex ||= {
+    command: process.env.CODEX_COMMAND || "codex",
+    model: process.env.CODEX_MODEL
+  };
+  project.ai ||= {
+    profileId: process.env.AI_AGENT_PROFILE_ID || "codex-cli",
+    modelId: project.codex.model
+  };
+  return project;
 }
 
 export async function writeProject(project: NovelProject): Promise<void> {

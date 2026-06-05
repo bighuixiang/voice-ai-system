@@ -195,7 +195,17 @@
           @reject="store.rejectWritingRecap"
         />
         <TaskHistoryPanel v-if="store.writingMode === 'review'" :tasks="store.taskHistory" />
-        <ContextPanel v-if="store.writingMode === 'structure'" :project="store.currentProject" :chapter="store.currentChapter" />
+        <ContextPanel
+          v-if="store.writingMode === 'structure'"
+          :project="store.currentProject"
+          :chapter="store.currentChapter"
+          :profiles="store.agentProfiles"
+          :checks="store.agentChecks"
+          :saving="store.isSavingAiConfig"
+          :checking="store.isLoading"
+          @update-ai="handleUpdateAiConfig"
+          @check-agent="handleCheckAgent"
+        />
         <PlatformLibraryPanel
           v-if="store.writingMode === 'structure'"
           :library="store.platformLibrary"
@@ -285,6 +295,9 @@ async function syncWorkspaceFromRoute() {
   if (!store.projects.length) {
     await store.loadProjects();
   }
+  await store.loadAgentProfiles().catch(() => {
+    // AI profiles are optional while the API service is booting.
+  });
   await store.loadPlatformLibrary().catch(() => {
     // Platform library is optional until the API service is running.
   });
@@ -347,6 +360,31 @@ async function handleSaveCurrentStructure() {
     ElMessage.success("章节结构已保存");
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : "保存结构失败");
+  }
+}
+
+async function handleUpdateAiConfig(config: { profileId: string; modelId?: string }) {
+  try {
+    await store.updateProjectAiConfig(config);
+    ElMessage.success("AI 配置已保存");
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "AI 配置保存失败");
+  }
+}
+
+async function handleCheckAgent(config: { profileId: string; modelId?: string }) {
+  store.isLoading = true;
+  try {
+    const result = await store.checkAgentProfile(config.profileId, config.modelId);
+    if (result.available) {
+      ElMessage.success(`${result.label} 连接正常`);
+      return;
+    }
+    ElMessage.error(result.error || `${result.label} 不可用`);
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "AI 执行器测试失败");
+  } finally {
+    store.isLoading = false;
   }
 }
 

@@ -8,6 +8,7 @@
       <el-button
         v-for="mode in modes"
         :key="mode.value"
+        class="mode-button"
         :disabled="!enabled || loading"
         size="small"
         @click="$emit('polish', mode.value)"
@@ -68,6 +69,16 @@ const modes = [
 .mode-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 8px 20px;
+
+  :deep(.el-button + .el-button) {
+    margin-left: 0;
+  }
+}
+
+.mode-button {
+  width: 100%;
+  min-width: 0;
+  justify-content: center;
 }
 </style>

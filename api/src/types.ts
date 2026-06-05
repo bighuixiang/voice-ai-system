@@ -13,6 +13,31 @@ export type CodexTaskType =
 export type NovelTaskStatus = "pending" | "running" | "success" | "error" | "cancelled";
 
 export type CreativeModuleKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
+export type AiAgentProvider = "codex" | "claude-code";
+
+export interface AiAgentModelOption {
+  id: string;
+  label: string;
+  provider: AiAgentProvider;
+  tags?: string[];
+}
+
+export interface AiAgentProfile {
+  id: string;
+  label: string;
+  provider: AiAgentProvider;
+  command: string;
+  model?: string;
+  allowCustomModel?: boolean;
+  enabled: boolean;
+  versionArgs: string[];
+  models: AiAgentModelOption[];
+}
+
+export interface ProjectAiConfig {
+  profileId?: string;
+  modelId?: string;
+}
 
 export interface CreativeProjectModule {
   key: CreativeModuleKey;
@@ -107,6 +132,7 @@ export interface NovelProject {
     command: string;
     model?: string;
   };
+  ai?: ProjectAiConfig;
   modules?: CreativeProjectModule[];
   chapters: NovelChapter[];
 }

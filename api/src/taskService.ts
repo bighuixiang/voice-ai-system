@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { CodexTaskType, CodexTaskResult, NovelFilePatch, NovelTask } from "./types.js";
-import { resolveCodexCommand } from "./codexConfig.js";
+import { resolveAgentProfile } from "./agentConfig.js";
 import { buildTaskPrompt } from "./taskTemplates.js";
 import { parseCodexResult } from "./resultParser.js";
 import { assembleContext } from "./contextAssembler.js";
 import { readProject, projectRoot, writeProject } from "./novelProject.js";
 import { assertSafeNovelPath, resolveInside } from "./pathSafety.js";
-import { CodexProcessRunner, type ProcessRunner } from "./codexRunner.js";
+import { AgentProcessRunner, type ProcessRunner } from "./codexRunner.js";
 
 function taskId(): string {
   return `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -45,7 +45,7 @@ export async function runNovelTask(
   projectId: string,
   type: CodexTaskType,
   payload: Record<string, unknown>,
-  runner: ProcessRunner = new CodexProcessRunner()
+  runner: ProcessRunner = new AgentProcessRunner()
 ): Promise<NovelTask> {
   const project = await readProject(projectId);
   const root = projectRoot(project.slug);
@@ -68,13 +68,18 @@ export async function runNovelTask(
       contextBlocks,
       payload
     });
-    const config = resolveCodexCommand({ model: project.codex.model });
+    const profileId = typeof payload.agentProfileId === "string" ? payload.agentProfileId : project.ai?.profileId;
+    const payloadModel = typeof payload.modelId === "string" ? payload.modelId : undefined;
+    const config = resolveAgentProfile({
+      profileId,
+      modelId: payloadModel || project.ai?.modelId || project.codex.model
+    });
     const output = await runner.run(prompt, root, config);
     const result = parseCodexResult(output.finalMessage);
     task.status = output.exitCode === 0 ? "success" : "error";
     task.result = result;
     task.outputSummary = result.summary;
-    task.error = output.exitCode === 0 ? undefined : output.stderr || `Codex exited with ${output.exitCode}`;
+    task.error = output.exitCode === 0 ? undefined : output.stderr || `${config.label} exited with ${output.exitCode}`;
     task.durationMs = output.durationMs;
   } catch (error) {
     task.status = "error";

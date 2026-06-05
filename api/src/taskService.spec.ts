@@ -56,6 +56,7 @@ describe("taskService", () => {
     const project = JSON.parse(await fs.readFile(projectPath, "utf8"));
     project.codex.command = "malicious-command";
     project.codex.model = "test-model";
+    project.ai = { profileId: "unknown-profile", modelId: "test-model" };
     await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
 
     const originalCommand = process.env.CODEX_COMMAND;
@@ -95,6 +96,45 @@ describe("taskService", () => {
 
     expect(commandFromRunner).toBe("codex");
     expect(modelFromRunner).toBe("test-model");
+  });
+
+  it("runs a task through the configured trusted AI agent profile", async () => {
+    const projectPath = path.join(tempRoot, "demo", "project.json");
+    const project = JSON.parse(await fs.readFile(projectPath, "utf8"));
+    project.codex.command = "malicious-command";
+    project.ai = { profileId: "claude-code", modelId: "sonnet" };
+    await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+
+    let commandFromRunner = "";
+    let providerFromRunner = "";
+    let modelFromRunner = "";
+    const capturingRunner: ProcessRunner = {
+      async run(_prompt, _root, config) {
+        commandFromRunner = config.command;
+        providerFromRunner = config.provider;
+        modelFromRunner = config.model || "";
+        return {
+          stdout: "",
+          stderr: "",
+          exitCode: 0,
+          durationMs: 12,
+          finalMessage: JSON.stringify({
+            summary: "task done",
+            content: "",
+            changes: [],
+            risks: [],
+            questions: [],
+            patches: []
+          })
+        };
+      }
+    };
+
+    await runNovelTask("demo", "outline.generate", {}, capturingRunner);
+
+    expect(commandFromRunner).toBe(process.env.CLAUDE_CODE_COMMAND || "claude");
+    expect(providerFromRunner).toBe("claude-code");
+    expect(modelFromRunner).toBe("sonnet");
   });
 
   it("records a failed Codex exit with the stderr message", async () => {

@@ -2,6 +2,7 @@ import express, { type ErrorRequestHandler, type RequestHandler } from "express"
 import cors from "cors";
 import fs from "node:fs/promises";
 import { checkCodexAvailability } from "./codexConfig.js";
+import { checkAllAgentAvailability, checkAgentAvailability, listAgentProfiles, normalizeAgentModelId } from "./agentConfig.js";
 import { assertSafeNovelPath, resolveInside } from "./pathSafety.js";
 import {
   createProjectFiles,
@@ -98,11 +99,23 @@ export function createApp() {
   app.use(express.json({ limit: "2mb" }));
 
   app.get("/health", asyncRoute(async (_req, res) => {
-    res.json({ status: "healthy", service: "novel-codex-api", codex: await checkCodexAvailability() });
+    res.json({ status: "healthy", service: "novel-codex-api", agents: await checkAllAgentAvailability() });
   }));
 
   app.get("/api/novel/codex", asyncRoute(async (_req, res) => {
     res.json(await checkCodexAvailability());
+  }));
+
+  app.get("/api/novel/agents", asyncRoute(async (_req, res) => {
+    res.json({
+      defaultProfileId: process.env.AI_AGENT_PROFILE_ID || "codex-cli",
+      profiles: listAgentProfiles(),
+      checks: await checkAllAgentAvailability()
+    });
+  }));
+
+  app.post("/api/novel/agents/check", asyncRoute(async (req, res) => {
+    res.json(await checkAgentAvailability({ profileId: req.body.profileId, modelId: req.body.modelId }));
   }));
 
   app.get("/api/platform/library", asyncRoute(async (_req, res) => {
@@ -178,6 +191,38 @@ export function createApp() {
 
   app.get("/api/novel/projects/:projectId", asyncRoute(async (req, res) => {
     res.json({ project: await readProject(req.params.projectId) });
+  }));
+
+  app.put("/api/novel/projects/:projectId/ai", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const profileId = String(req.body.profileId || "").trim();
+    let modelId: string | undefined;
+    try {
+      modelId = normalizeAgentModelId(typeof req.body.modelId === "string" ? req.body.modelId : undefined);
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : String(error) });
+      return;
+    }
+    const profile = listAgentProfiles().find((item) => item.id === profileId);
+    if (!profile) {
+      res.status(400).json({ error: `Unsupported AI agent profile: ${profileId}` });
+      return;
+    }
+    if (modelId && !profile.allowCustomModel && !profile.models.some((model) => model.id === modelId)) {
+      res.status(400).json({ error: `Unsupported model for ${profile.label}: ${modelId}` });
+      return;
+    }
+
+    project.ai = {
+      profileId,
+      modelId
+    };
+    if (profile.provider === "codex") {
+      project.codex.model = project.ai.modelId;
+    }
+    project.updatedAt = new Date().toISOString();
+    await writeProject(project);
+    res.json({ project });
   }));
 
   app.get("/api/novel/projects/:projectId/files", asyncRoute(async (req, res) => {

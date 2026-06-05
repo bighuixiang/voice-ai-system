@@ -5,10 +5,11 @@
   "genre": "都市玄幻",
   "roughIdea": "从仙王渡劫失败转世成都市小牛马上班族，利用前世记忆重修，重新走上顶峰",
   "createdAt": "2026-06-03T07:57:58.439Z",
-  "updatedAt": "2026-06-03T11:39:15.480Z",
+  "updatedAt": "2026-06-05T04:31:11.174Z",
   "lastOpenedChapterId": "chapter-001",
   "codex": {
-    "command": "codex"
+    "command": "codex",
+    "model": "gpt-5.5"
   },
   "chapters": [
     {
@@ -32,5 +33,9 @@
       "contentPath": "chapters/chapter-003.md",
       "status": "empty"
     }
-  ]
+  ],
+  "ai": {
+    "profileId": "codex-cli",
+    "modelId": "gpt-5.5"
+  }
 }

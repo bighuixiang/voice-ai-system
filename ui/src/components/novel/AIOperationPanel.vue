@@ -12,7 +12,7 @@
         v-for="(action, index) in actions"
         :key="action.type"
         class="action-button"
-        :class="{ 'action-button--wide': isLastOddAction(index) }"
+        :class="{ 'action-button--centered': isLastOddAction(index) }"
         :loading="loading"
         @click="$emit('run-task', action.type)"
       >
@@ -131,8 +131,10 @@ function isLastOddAction(index: number) {
   justify-content: center;
 }
 
-.action-button--wide {
+.action-button--centered {
   grid-column: 1 / -1;
+  justify-self: center;
+  width: calc((100% - 8px) / 2);
 }
 
 .free-task {

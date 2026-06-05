@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CodexProcessRunner } from "./codexRunner.js";
+import { ClaudeCodeProcessRunner, CodexProcessRunner } from "./codexRunner.js";
 
 const spawnMock = vi.hoisted(() => vi.fn());
 
@@ -37,7 +37,7 @@ describe("CodexProcessRunner", () => {
     });
 
     const runner = new CodexProcessRunner();
-    const output = await runner.run("Return JSON", process.cwd(), { command: "codex" });
+    const output = await runner.run("Return JSON", process.cwd(), { command: "codex", label: "Codex CLI", provider: "codex" });
     const [, args, options] = spawnMock.mock.calls[0];
 
     expect(args).toContain("exec");
@@ -47,6 +47,48 @@ describe("CodexProcessRunner", () => {
     expect(args).toContain("--output-last-message");
     expect(args).not.toContain("--ask-for-approval");
     expect(options).toMatchObject({ shell: true });
+    expect(child.stdin.write).toHaveBeenCalledWith("Return JSON");
+    expect(output.exitCode).toBe(0);
+    expect(output.finalMessage).toContain('"summary":"ok"');
+  });
+
+  it("runs Claude Code in non-interactive print mode", async () => {
+    const child = new EventEmitter() as EventEmitter & {
+      stdout: EventEmitter;
+      stderr: EventEmitter;
+      stdin: { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn> };
+    };
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.stdin = { write: vi.fn(), end: vi.fn() };
+    spawnMock.mockImplementation(() => {
+      setTimeout(() => {
+        child.stdout.emit(
+          "data",
+          JSON.stringify({ summary: "ok", content: "ok", changes: [], risks: [], questions: [], patches: [] })
+        );
+        child.emit("close", 0);
+      }, 0);
+      return child;
+    });
+
+    const runner = new ClaudeCodeProcessRunner();
+    const output = await runner.run("Return JSON", process.cwd(), {
+      command: "claude",
+      label: "Claude Code CLI",
+      provider: "claude-code",
+      model: "sonnet"
+    });
+    const [, args, options] = spawnMock.mock.calls[0];
+
+    expect(args).toContain("--print");
+    expect(args).toContain("--output-format");
+    expect(args).toContain("text");
+    expect(args).toContain("--permission-mode");
+    expect(args).toContain("dontAsk");
+    expect(args).toContain("--model");
+    expect(args).toContain("sonnet");
+    expect(options).toMatchObject({ cwd: process.cwd(), shell: true });
     expect(child.stdin.write).toHaveBeenCalledWith("Return JSON");
     expect(output.exitCode).toBe(0);
     expect(output.finalMessage).toContain('"summary":"ok"');

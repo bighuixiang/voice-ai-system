@@ -1,4 +1,6 @@
 import type {
+  AiAgentCheckResult,
+  AiAgentProfile,
   ChapterDashboard,
   CodexTaskType,
   EditorSelection,
@@ -50,6 +52,31 @@ export const novelApi = {
   async readPlatformLibrary(): Promise<PlatformLibrary> {
     const data = await request<{ library: PlatformLibrary }>("/api/platform/library");
     return data.library;
+  },
+
+  async readAgentProfiles(): Promise<{
+    defaultProfileId: string;
+    profiles: AiAgentProfile[];
+    checks: AiAgentCheckResult[];
+  }> {
+    return request("/api/novel/agents");
+  },
+
+  async checkAgentProfile(profileId: string, modelId?: string): Promise<AiAgentCheckResult> {
+    return request("/api/novel/agents/check", {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ profileId, modelId })
+    });
+  },
+
+  async updateProjectAiConfig(projectId: string, input: { profileId: string; modelId?: string }): Promise<NovelProject> {
+    const data = await request<{ project: NovelProject }>(`/api/novel/projects/${projectId}/ai`, {
+      method: "PUT",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+    return data.project;
   },
 
   async createPlatformAsset(input: {

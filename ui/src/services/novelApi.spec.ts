@@ -113,6 +113,40 @@ describe("novelApi", () => {
     );
   });
 
+  it("reads, checks, and saves AI agent configuration", async () => {
+    mockJson({
+      defaultProfileId: "codex-cli",
+      profiles: [{ id: "codex-cli", label: "Codex CLI", provider: "codex", command: "codex", models: [] }],
+      checks: []
+    });
+    mockJson({ available: true, profileId: "codex-cli", provider: "codex", label: "Codex CLI", command: "codex" });
+    mockJson({ project: { slug: "demo", ai: { profileId: "codex-cli", modelId: "gpt-5" } } });
+
+    await expect(novelApi.readAgentProfiles()).resolves.toMatchObject({ defaultProfileId: "codex-cli" });
+    await expect(novelApi.checkAgentProfile("codex-cli", "gpt-5")).resolves.toMatchObject({ available: true });
+    await expect(novelApi.updateProjectAiConfig("demo", { profileId: "codex-cli", modelId: "gpt-5" })).resolves.toMatchObject({
+      ai: { modelId: "gpt-5" }
+    });
+
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/agents", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      2,
+      "/api/novel/agents/check",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ profileId: "codex-cli", modelId: "gpt-5" })
+      })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      3,
+      "/api/novel/projects/demo/ai",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ profileId: "codex-cli", modelId: "gpt-5" })
+      })
+    );
+  });
+
   it("reads and saves project files", async () => {
     mockJson({ content: "# Chapter 1\n" });
     mockJson({ saved: true });
