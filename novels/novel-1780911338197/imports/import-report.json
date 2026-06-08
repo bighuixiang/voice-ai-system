@@ -1,0 +1,27 @@
+{
+  "sourceRoot": "voice-ai-system",
+  "importedAt": "2026-06-08T09:35:41.007Z",
+  "files": 149,
+  "chapters": 198,
+  "draftedChapters": 70,
+  "plannedChapters": 128,
+  "supportTargets": [
+    "bible/characters.md",
+    "bible/power-system.md",
+    "bible/world.md",
+    "imports/03-章节正文/第一卷-穿越前夕/第1卷精修清单-v6.md",
+    "imports/04-剧本/第1章-尸王破封-天狗食月_剧本.md",
+    "imports/06-素材笔记/前五十章毒舌辣评.md",
+    "imports/06-素材笔记/灵感碎片.md",
+    "imports/AGENTS.md",
+    "imports/CLAUDE.md",
+    "imports/文件结构说明.md",
+    "ledger/continuity.md",
+    "outline/volume-01.md"
+  ],
+  "storyControl": {
+    "arcs": 24,
+    "characters": 22,
+    "events": 2
+  }
+}

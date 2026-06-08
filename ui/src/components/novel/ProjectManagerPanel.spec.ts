@@ -75,7 +75,7 @@ describe("ProjectManagerPanel", () => {
     });
 
     await wrapper.find("button[aria-label='刷新项目']").trigger("click");
-    await wrapper.find(".project-item").trigger("click");
+    await wrapper.find(".project-open").trigger("click");
 
     expect(wrapper.emitted("refresh")).toHaveLength(1);
     expect(wrapper.emitted("open")?.[0]).toEqual([project]);
@@ -120,5 +120,46 @@ describe("ProjectManagerPanel", () => {
 
     expect((inputs[0].element as HTMLInputElement).value).toBe("D:\\novels\\clip-story");
     expect((inputs[1].element as HTMLInputElement).value).toBe("clip-story");
+  });
+
+  it("writes the selected browser directory back to the path field and emits uploaded files", async () => {
+    const wrapper = mount(ProjectManagerPanel, {
+      props: { projects: [], currentProject: null, loading: false },
+      global: { stubs }
+    });
+    const file = new File(["# Uploaded Chapter\n\nBody."], "chapter-001.md", { type: "text/markdown" }) as File & {
+      webkitRelativePath?: string;
+    };
+    Object.defineProperty(file, "webkitRelativePath", {
+      configurable: true,
+      value: "upload-story/03-chapters/chapter-001.md"
+    });
+    Object.defineProperty(file, "text", {
+      configurable: true,
+      value: vi.fn().mockResolvedValue("# Uploaded Chapter\n\nBody.")
+    });
+    const input = wrapper.find("input[type='file']");
+    Object.defineProperty(input.element, "files", {
+      configurable: true,
+      value: [file]
+    });
+
+    await input.trigger("change");
+    await flushPromises();
+    const inputs = wrapper.findAll("input:not([type='file'])");
+
+    expect((inputs[0].element as HTMLInputElement).value).toBe("已选择目录：upload-story（1 个文件）");
+    expect((inputs[1].element as HTMLInputElement).value).toBe("upload-story");
+
+    await wrapper.findAll("button").at(-1)?.trigger("click");
+
+    expect(wrapper.emitted("import-project")?.[0]).toEqual([
+      {
+        sourcePath: "upload-story",
+        title: "upload-story",
+        genre: undefined,
+        files: [{ relativePath: "upload-story/03-chapters/chapter-001.md", content: "# Uploaded Chapter\n\nBody." }]
+      }
+    ]);
   });
 });

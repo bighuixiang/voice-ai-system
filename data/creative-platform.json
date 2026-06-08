@@ -1,0 +1,2450 @@
+{
+  "projects": {
+    "novel-1780473478439": {
+      "projectRoot": "D:\\work\\model\\voice-ai-system\\novels\\novel-1780473478439",
+      "project": {
+        "id": "novel-1780473478439",
+        "slug": "novel-1780473478439",
+        "title": "仙王重生成牛马",
+        "genre": "都市玄幻",
+        "roughIdea": "从仙王渡劫失败转世成都市小牛马上班族，利用前世记忆重修，重新走上顶峰",
+        "createdAt": "2026-06-03T07:57:58.439Z",
+        "updatedAt": "2026-06-05T04:31:11.174Z",
+        "lastOpenedChapterId": "chapter-001",
+        "codex": {
+          "command": "codex",
+          "model": "gpt-5.5"
+        },
+        "chapters": [
+          {
+            "id": "chapter-001",
+            "title": "第 1 章",
+            "outlinePath": "outline/chapter-001.md",
+            "contentPath": "chapters/chapter-001.md",
+            "status": "empty"
+          },
+          {
+            "id": "chapter-002",
+            "title": "第 2 章",
+            "outlinePath": "outline/chapter-002.md",
+            "contentPath": "chapters/chapter-002.md",
+            "status": "empty"
+          },
+          {
+            "id": "chapter-003",
+            "title": "第 3 章",
+            "outlinePath": "outline/chapter-003.md",
+            "contentPath": "chapters/chapter-003.md",
+            "status": "empty"
+          }
+        ],
+        "ai": {
+          "profileId": "codex-cli",
+          "modelId": "gpt-5.5"
+        }
+      }
+    },
+    "novel-1780911338197": {
+      "projectRoot": "D:\\work\\model\\voice-ai-system\\novels\\novel-1780911338197",
+      "project": {
+        "id": "novel-1780911338197",
+        "slug": "novel-1780911338197",
+        "title": "异界",
+        "genre": "东方玄幻",
+        "roughIdea": "Imported from browser directory upload: voice-ai-system",
+        "createdAt": "2026-06-08T09:35:38.196Z",
+        "updatedAt": "2026-06-08T09:35:41.009Z",
+        "lastOpenedChapterId": "chapter-001",
+        "codex": {
+          "command": "codex"
+        },
+        "ai": {
+          "profileId": "codex-cli"
+        },
+        "modules": [
+          {
+            "key": "novel",
+            "label": "Novel Writing",
+            "status": "active"
+          },
+          {
+            "key": "assets",
+            "label": "Asset Management",
+            "status": "planned"
+          },
+          {
+            "key": "script",
+            "label": "Script Production",
+            "status": "planned"
+          },
+          {
+            "key": "image-generation",
+            "label": "Image Generation",
+            "status": "planned"
+          },
+          {
+            "key": "video-generation",
+            "label": "Video Generation",
+            "status": "planned"
+          }
+        ],
+        "chapters": [
+          {
+            "id": "chapter-001",
+            "title": "第1章 尸王破封·天狗食月",
+            "outlinePath": "outline/chapter-001.md",
+            "contentPath": "chapters/chapter-001.md",
+            "status": "drafted",
+            "order": 1,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-002",
+            "title": "第2章 空间乱流·师徒失散",
+            "outlinePath": "outline/chapter-002.md",
+            "contentPath": "chapters/chapter-002.md",
+            "status": "drafted",
+            "order": 2,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-003",
+            "title": "第3章 异界苏醒·将臣认主",
+            "outlinePath": "outline/chapter-003.md",
+            "contentPath": "chapters/chapter-003.md",
+            "status": "drafted",
+            "order": 3,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-004",
+            "title": "第4章 星辰学院·异界来客",
+            "outlinePath": "outline/chapter-004.md",
+            "contentPath": "chapters/chapter-004.md",
+            "status": "drafted",
+            "order": 4,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-005",
+            "title": "第5章 师徒之约·前往学院",
+            "outlinePath": "outline/chapter-005.md",
+            "contentPath": "chapters/chapter-005.md",
+            "status": "drafted",
+            "order": 5,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-006",
+            "title": "第6章 异界货币·初次狩猎",
+            "outlinePath": "outline/chapter-006.md",
+            "contentPath": "chapters/chapter-006.md",
+            "status": "drafted",
+            "order": 6,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-007",
+            "title": "第7章 玉佩的发热·初次感应",
+            "outlinePath": "outline/chapter-007.md",
+            "contentPath": "chapters/chapter-007.md",
+            "status": "drafted",
+            "order": 7,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-008",
+            "title": "第8章 学院歧视·三连打脸",
+            "outlinePath": "outline/chapter-008.md",
+            "contentPath": "chapters/chapter-008.md",
+            "status": "drafted",
+            "order": 8,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-009",
+            "title": "第9章 结识伙伴·四人相遇",
+            "outlinePath": "outline/chapter-009.md",
+            "contentPath": "chapters/chapter-009.md",
+            "status": "drafted",
+            "order": 9,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-010",
+            "title": "第10章 炼器惊艳·尸骨炼狱枪",
+            "outlinePath": "outline/chapter-010.md",
+            "contentPath": "chapters/chapter-010.md",
+            "status": "drafted",
+            "order": 10,
+            "volumeId": "第一卷-穿越前夕",
+            "volumeTitle": "第一卷-穿越前夕",
+            "volumeOrder": 1
+          },
+          {
+            "id": "chapter-011",
+            "title": "第11章 校花索菲亚·挡箭牌",
+            "outlinePath": "outline/chapter-011.md",
+            "contentPath": "chapters/chapter-011.md",
+            "status": "drafted",
+            "order": 11,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-012",
+            "title": "第12章 第一次约会·伊莎贝拉的关注",
+            "outlinePath": "outline/chapter-012.md",
+            "contentPath": "chapters/chapter-012.md",
+            "status": "drafted",
+            "order": 12,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-013",
+            "title": "第13章 双女主初遇·秩序与直球",
+            "outlinePath": "outline/chapter-013.md",
+            "contentPath": "chapters/chapter-013.md",
+            "status": "drafted",
+            "order": 13,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-014",
+            "title": "第14章 家族困境·债务与底牌",
+            "outlinePath": "outline/chapter-014.md",
+            "contentPath": "chapters/chapter-014.md",
+            "status": "drafted",
+            "order": 14,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-015",
+            "title": "第15章 魔兽岭历练·艾德里安的阴谋",
+            "outlinePath": "outline/chapter-015.md",
+            "contentPath": "chapters/chapter-015.md",
+            "status": "drafted",
+            "order": 15,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-016",
+            "title": "第16章 索菲亚动心·代价先于告白",
+            "outlinePath": "outline/chapter-016.md",
+            "contentPath": "chapters/chapter-016.md",
+            "status": "drafted",
+            "order": 16,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-017",
+            "title": "第17章 办公室风波·导师的底线",
+            "outlinePath": "outline/chapter-017.md",
+            "contentPath": "chapters/chapter-017.md",
+            "status": "drafted",
+            "order": 17,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-018",
+            "title": "第18章 索菲亚追问·你到底在瞒谁",
+            "outlinePath": "outline/chapter-018.md",
+            "contentPath": "chapters/chapter-018.md",
+            "status": "drafted",
+            "order": 18,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-019",
+            "title": "第19章 两人独处·伊莎贝拉的判断",
+            "outlinePath": "outline/chapter-019.md",
+            "contentPath": "chapters/chapter-019.md",
+            "status": "drafted",
+            "order": 19,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-020",
+            "title": "第20章 索菲亚爆发·协议撕毁",
+            "outlinePath": "outline/chapter-020.md",
+            "contentPath": "chapters/chapter-020.md",
+            "status": "drafted",
+            "order": 20,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-021",
+            "title": "第21章 深夜停战·先活人再争人",
+            "outlinePath": "outline/chapter-021.md",
+            "contentPath": "chapters/chapter-021.md",
+            "status": "drafted",
+            "order": 21,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-022",
+            "title": "第22章 魔兽岭第二次·心意与战损",
+            "outlinePath": "outline/chapter-022.md",
+            "contentPath": "chapters/chapter-022.md",
+            "status": "drafted",
+            "order": 22,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-023",
+            "title": "第23章 战场停战条约·先活下来",
+            "outlinePath": "outline/chapter-023.md",
+            "contentPath": "chapters/chapter-023.md",
+            "status": "drafted",
+            "order": 23,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-024",
+            "title": "第24章 三人共餐·协作测试",
+            "outlinePath": "outline/chapter-024.md",
+            "contentPath": "chapters/chapter-024.md",
+            "status": "drafted",
+            "order": 24,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-025",
+            "title": "第25章 拍卖行风云·抵押换线索",
+            "outlinePath": "outline/chapter-025.md",
+            "contentPath": "chapters/chapter-025.md",
+            "status": "drafted",
+            "order": 25,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-026",
+            "title": "第26章 月光下的转身·优先级确认",
+            "outlinePath": "outline/chapter-026.md",
+            "contentPath": "chapters/chapter-026.md",
+            "status": "drafted",
+            "order": 26,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-027",
+            "title": "第27章 第一次团队战·惨败复盘",
+            "outlinePath": "outline/chapter-027.md",
+            "contentPath": "chapters/chapter-027.md",
+            "status": "drafted",
+            "order": 27,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-028",
+            "title": "第28章 磨合开始·每个人交作业",
+            "outlinePath": "outline/chapter-028.md",
+            "contentPath": "chapters/chapter-028.md",
+            "status": "drafted",
+            "order": 28,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-029",
+            "title": "第29章 矮人王子瑟莱恩·技术同盟",
+            "outlinePath": "outline/chapter-029.md",
+            "contentPath": "chapters/chapter-029.md",
+            "status": "drafted",
+            "order": 29,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-030",
+            "title": "第30章 险胜高年级·赛场污染初证",
+            "outlinePath": "outline/chapter-030.md",
+            "contentPath": "chapters/chapter-030.md",
+            "status": "drafted",
+            "order": 30,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-031",
+            "title": "第31章 禁区邀约·一个人来",
+            "outlinePath": "outline/chapter-031.md",
+            "contentPath": "chapters/chapter-031.md",
+            "status": "drafted",
+            "order": 31,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-032",
+            "title": "第32章 格蕾丝的日记·未寄出的信",
+            "outlinePath": "outline/chapter-032.md",
+            "contentPath": "chapters/chapter-032.md",
+            "status": "drafted",
+            "order": 32,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-033",
+            "title": "第33章 凯尔的过去·守护者的代价",
+            "outlinePath": "outline/chapter-033.md",
+            "contentPath": "chapters/chapter-033.md",
+            "status": "drafted",
+            "order": 33,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-034",
+            "title": "第34章 弗拉姆的梦想·兄弟酒馆",
+            "outlinePath": "outline/chapter-034.md",
+            "contentPath": "chapters/chapter-034.md",
+            "status": "drafted",
+            "order": 34,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-035",
+            "title": "第35章 艾米莉亚的成长·终于念对了",
+            "outlinePath": "outline/chapter-035.md",
+            "contentPath": "chapters/chapter-035.md",
+            "status": "drafted",
+            "order": 35,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-036",
+            "title": "第36章 伊莎贝拉的关心·诱饵计划",
+            "outlinePath": "outline/chapter-036.md",
+            "contentPath": "chapters/chapter-036.md",
+            "status": "drafted",
+            "order": 36,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-037",
+            "title": "第37章 索菲亚的理解·我不想逼你",
+            "outlinePath": "outline/chapter-037.md",
+            "contentPath": "chapters/chapter-037.md",
+            "status": "drafted",
+            "order": 37,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-038",
+            "title": "第38章 聚餐夜袭·名单暴露",
+            "outlinePath": "outline/chapter-038.md",
+            "contentPath": "chapters/chapter-038.md",
+            "status": "drafted",
+            "order": 38,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-039",
+            "title": "第39章 三合一成功·技术泄露",
+            "outlinePath": "outline/chapter-039.md",
+            "contentPath": "chapters/chapter-039.md",
+            "status": "drafted",
+            "order": 39,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-040",
+            "title": "第40章 暴风雨前的宁静·双证同开",
+            "outlinePath": "outline/chapter-040.md",
+            "contentPath": "chapters/chapter-040.md",
+            "status": "drafted",
+            "order": 40,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-041",
+            "title": "第41章 学院大比开始·名震学院的契机",
+            "outlinePath": "outline/chapter-041.md",
+            "contentPath": "chapters/chapter-041.md",
+            "status": "drafted",
+            "order": 41,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-042",
+            "title": "第42章 个人赛·一鸣惊人",
+            "outlinePath": "outline/chapter-042.md",
+            "contentPath": "chapters/chapter-042.md",
+            "status": "drafted",
+            "order": 42,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-043",
+            "title": "第43章 团队赛·五元归一初现",
+            "outlinePath": "outline/chapter-043.md",
+            "contentPath": "chapters/chapter-043.md",
+            "status": "drafted",
+            "order": 43,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-044",
+            "title": "第44章 进入决赛·最后的挑战",
+            "outlinePath": "outline/chapter-044.md",
+            "contentPath": "chapters/chapter-044.md",
+            "status": "drafted",
+            "order": 44,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-045",
+            "title": "第45章 缺页古籍·被删改的真相",
+            "outlinePath": "outline/chapter-045.md",
+            "contentPath": "chapters/chapter-045.md",
+            "status": "drafted",
+            "order": 45,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-046",
+            "title": "第46章 决赛开始·全面劣势",
+            "outlinePath": "outline/chapter-046.md",
+            "contentPath": "chapters/chapter-046.md",
+            "status": "drafted",
+            "order": 46,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-047",
+            "title": "第47章 绝境中的觉醒·五元归一",
+            "outlinePath": "outline/chapter-047.md",
+            "contentPath": "chapters/chapter-047.md",
+            "status": "drafted",
+            "order": 47,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-048",
+            "title": "第48章 逆转夺冠·名震学院",
+            "outlinePath": "outline/chapter-048.md",
+            "contentPath": "chapters/chapter-048.md",
+            "status": "drafted",
+            "order": 48,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-049",
+            "title": "第49章 庆功宴·同盟与裂纹",
+            "outlinePath": "outline/chapter-049.md",
+            "contentPath": "chapters/chapter-049.md",
+            "status": "drafted",
+            "order": 49,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-050",
+            "title": "第50章 暴风雨来临·兽潮警报",
+            "outlinePath": "outline/chapter-050.md",
+            "contentPath": "chapters/chapter-050.md",
+            "status": "drafted",
+            "order": 50,
+            "volumeId": "第二卷-学院-伙伴-双凤",
+            "volumeTitle": "第二卷-学院·伙伴·双凤",
+            "volumeOrder": 2
+          },
+          {
+            "id": "chapter-051",
+            "title": "第51章 北线初见·黑潮不是兽潮",
+            "outlinePath": "outline/chapter-051.md",
+            "contentPath": "chapters/chapter-051.md",
+            "status": "drafted",
+            "order": 51,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-052",
+            "title": "第52章 师徒重逢·右臂黑纹",
+            "outlinePath": "outline/chapter-052.md",
+            "contentPath": "chapters/chapter-052.md",
+            "status": "drafted",
+            "order": 52,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-053",
+            "title": "第53章 营火夜谈·别复活我",
+            "outlinePath": "outline/chapter-053.md",
+            "contentPath": "chapters/chapter-053.md",
+            "status": "drafted",
+            "order": 53,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-054",
+            "title": "第54章 半张符图·壳核魂线索",
+            "outlinePath": "outline/chapter-054.md",
+            "contentPath": "chapters/chapter-054.md",
+            "status": "drafted",
+            "order": 54,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-055",
+            "title": "第55章 暗潮井口·第一次误判",
+            "outlinePath": "outline/chapter-055.md",
+            "contentPath": "chapters/chapter-055.md",
+            "status": "drafted",
+            "order": 55,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-056",
+            "title": "第56章 战后听证·你害死了谁",
+            "outlinePath": "outline/chapter-056.md",
+            "contentPath": "chapters/chapter-056.md",
+            "status": "drafted",
+            "order": 56,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-057",
+            "title": "第57章 名单泄露·谁在卖我们",
+            "outlinePath": "outline/chapter-057.md",
+            "contentPath": "chapters/chapter-057.md",
+            "status": "drafted",
+            "order": 57,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-058",
+            "title": "第58章 军需仓大火·证据与补给",
+            "outlinePath": "outline/chapter-058.md",
+            "contentPath": "chapters/chapter-058.md",
+            "status": "drafted",
+            "order": 58,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-059",
+            "title": "第59章 向守一失控前兆·第二禁令",
+            "outlinePath": "outline/chapter-059.md",
+            "contentPath": "chapters/chapter-059.md",
+            "status": "drafted",
+            "order": 59,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-060",
+            "title": "第60章 隔离令下达·师徒分线",
+            "outlinePath": "outline/chapter-060.md",
+            "contentPath": "chapters/chapter-060.md",
+            "status": "drafted",
+            "order": 60,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-061",
+            "title": "第61章 北隘口坐标·追与不追",
+            "outlinePath": "outline/chapter-061.md",
+            "contentPath": "chapters/chapter-061.md",
+            "status": "drafted",
+            "order": 61,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-062",
+            "title": "第62章 黑雨区·凯尔倒下",
+            "outlinePath": "outline/chapter-062.md",
+            "contentPath": "chapters/chapter-062.md",
+            "status": "drafted",
+            "order": 62,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-063",
+            "title": "第63章 临时主帅·你不是他",
+            "outlinePath": "outline/chapter-063.md",
+            "contentPath": "chapters/chapter-063.md",
+            "status": "drafted",
+            "order": 63,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-064",
+            "title": "第64章 旧城档案库·莫尔甘原始记录",
+            "outlinePath": "outline/chapter-064.md",
+            "contentPath": "chapters/chapter-064.md",
+            "status": "drafted",
+            "order": 64,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-065",
+            "title": "第65章 师徒再会·最后授课",
+            "outlinePath": "outline/chapter-065.md",
+            "contentPath": "chapters/chapter-065.md",
+            "status": "drafted",
+            "order": 65,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-066",
+            "title": "第66章 背着师命·主动违约",
+            "outlinePath": "outline/chapter-066.md",
+            "contentPath": "chapters/chapter-066.md",
+            "status": "drafted",
+            "order": 66,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-067",
+            "title": "第67章 主塔急令·弃线方案",
+            "outlinePath": "outline/chapter-067.md",
+            "contentPath": "chapters/chapter-067.md",
+            "status": "drafted",
+            "order": 67,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-068",
+            "title": "第68章 隘口守夜·六人最后齐阵",
+            "outlinePath": "outline/chapter-068.md",
+            "contentPath": "chapters/chapter-068.md",
+            "status": "drafted",
+            "order": 68,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-069",
+            "title": "第69章 黑潮主核现形·师父选边",
+            "outlinePath": "outline/chapter-069.md",
+            "contentPath": "chapters/chapter-069.md",
+            "status": "drafted",
+            "order": 69,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-070",
+            "title": "第70章 师父牺牲·活下去不是命令",
+            "outlinePath": "outline/chapter-070.md",
+            "contentPath": "chapters/chapter-070.md",
+            "status": "drafted",
+            "order": 70,
+            "volumeId": "第三卷-北线-师徒-黑潮",
+            "volumeTitle": "第三卷-北线·师徒·黑潮",
+            "volumeOrder": 3
+          },
+          {
+            "id": "chapter-071",
+            "title": "第71章 北隘余烬·空出来的位置",
+            "outlinePath": "outline/chapter-071.md",
+            "contentPath": "chapters/chapter-071.md",
+            "status": "planned",
+            "order": 71,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-072",
+            "title": "第72章 旧矿区追踪·第一个错误目标",
+            "outlinePath": "outline/chapter-072.md",
+            "contentPath": "chapters/chapter-072.md",
+            "status": "planned",
+            "order": 72,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-073",
+            "title": "第73章 战损会·谁来背锅",
+            "outlinePath": "outline/chapter-073.md",
+            "contentPath": "chapters/chapter-073.md",
+            "status": "planned",
+            "order": 73,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-074",
+            "title": "第74章 黑账第二层·军需幽灵单",
+            "outlinePath": "outline/chapter-074.md",
+            "contentPath": "chapters/chapter-074.md",
+            "status": "planned",
+            "order": 74,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-075",
+            "title": "第75章 补给断档·火线配比",
+            "outlinePath": "outline/chapter-075.md",
+            "contentPath": "chapters/chapter-075.md",
+            "status": "planned",
+            "order": 75,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-076",
+            "title": "第76章 兄弟酒馆未开业·弗拉姆之死",
+            "outlinePath": "outline/chapter-076.md",
+            "contentPath": "chapters/chapter-076.md",
+            "status": "planned",
+            "order": 76,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-077",
+            "title": "第77章 空页账本·第一条新规则",
+            "outlinePath": "outline/chapter-077.md",
+            "contentPath": "chapters/chapter-077.md",
+            "status": "planned",
+            "order": 77,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-078",
+            "title": "第78章 预算战第一场·丑赢",
+            "outlinePath": "outline/chapter-078.md",
+            "contentPath": "chapters/chapter-078.md",
+            "status": "planned",
+            "order": 78,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-079",
+            "title": "第79章 前线听审Ⅱ·情绪无罪吗",
+            "outlinePath": "outline/chapter-079.md",
+            "contentPath": "chapters/chapter-079.md",
+            "status": "planned",
+            "order": 79,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-080",
+            "title": "第80章 停职期出战·非法胜利",
+            "outlinePath": "outline/chapter-080.md",
+            "contentPath": "chapters/chapter-080.md",
+            "status": "planned",
+            "order": 80,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-081",
+            "title": "第81章 医站崩口·先救谁",
+            "outlinePath": "outline/chapter-081.md",
+            "contentPath": "chapters/chapter-081.md",
+            "status": "planned",
+            "order": 81,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-082",
+            "title": "第82章 白灯不灭·格蕾丝之死",
+            "outlinePath": "outline/chapter-082.md",
+            "contentPath": "chapters/chapter-082.md",
+            "status": "planned",
+            "order": 82,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-083",
+            "title": "第83章 分诊手册·第二条新规则",
+            "outlinePath": "outline/chapter-083.md",
+            "contentPath": "chapters/chapter-083.md",
+            "status": "planned",
+            "order": 83,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-084",
+            "title": "第84章 凯尔接剑·前排最后一课",
+            "outlinePath": "outline/chapter-084.md",
+            "contentPath": "chapters/chapter-084.md",
+            "status": "planned",
+            "order": 84,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-085",
+            "title": "第85章 双链首战·互不救援条款",
+            "outlinePath": "outline/chapter-085.md",
+            "contentPath": "chapters/chapter-085.md",
+            "status": "planned",
+            "order": 85,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-086",
+            "title": "第86章 旧城桥头·凯尔断后",
+            "outlinePath": "outline/chapter-086.md",
+            "contentPath": "chapters/chapter-086.md",
+            "status": "planned",
+            "order": 86,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-087",
+            "title": "第87章 失联回传·第三层污染",
+            "outlinePath": "outline/chapter-087.md",
+            "contentPath": "chapters/chapter-087.md",
+            "status": "planned",
+            "order": 87,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-088",
+            "title": "第88章 守护者的代价·凯尔之死",
+            "outlinePath": "outline/chapter-088.md",
+            "contentPath": "chapters/chapter-088.md",
+            "status": "planned",
+            "order": 88,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-089",
+            "title": "第89章 佩剑与空位·第三条新规则",
+            "outlinePath": "outline/chapter-089.md",
+            "contentPath": "chapters/chapter-089.md",
+            "status": "planned",
+            "order": 89,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-090",
+            "title": "第90章 白噪预兆·艾米的第七拍",
+            "outlinePath": "outline/chapter-090.md",
+            "contentPath": "chapters/chapter-090.md",
+            "status": "planned",
+            "order": 90,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-091",
+            "title": "第91章 反诱捕行动·主核假门",
+            "outlinePath": "outline/chapter-091.md",
+            "contentPath": "chapters/chapter-091.md",
+            "status": "planned",
+            "order": 91,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-092",
+            "title": "第92章 时域撕裂·救与留",
+            "outlinePath": "outline/chapter-092.md",
+            "contentPath": "chapters/chapter-092.md",
+            "status": "planned",
+            "order": 92,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-093",
+            "title": "第93章 将臣的拒绝·别再拿人换时间",
+            "outlinePath": "outline/chapter-093.md",
+            "contentPath": "chapters/chapter-093.md",
+            "status": "planned",
+            "order": 93,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-094",
+            "title": "第94章 最后定标·艾米莉亚之死",
+            "outlinePath": "outline/chapter-094.md",
+            "contentPath": "chapters/chapter-094.md",
+            "status": "planned",
+            "order": 94,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-095",
+            "title": "第95章 空编制·孤狼前夜",
+            "outlinePath": "outline/chapter-095.md",
+            "contentPath": "chapters/chapter-095.md",
+            "status": "planned",
+            "order": 95,
+            "volumeId": "第71-95章",
+            "volumeTitle": "第71-95章",
+            "volumeOrder": 71
+          },
+          {
+            "id": "chapter-096",
+            "title": "第96章 注销后第一夜·单兵协议",
+            "outlinePath": "outline/chapter-096.md",
+            "contentPath": "chapters/chapter-096.md",
+            "status": "planned",
+            "order": 96,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-097",
+            "title": "第97章 黑市医站·第一次赊命",
+            "outlinePath": "outline/chapter-097.md",
+            "contentPath": "chapters/chapter-097.md",
+            "status": "planned",
+            "order": 97,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-098",
+            "title": "第98章 孤袭矿脊·一人拆阵",
+            "outlinePath": "outline/chapter-098.md",
+            "contentPath": "chapters/chapter-098.md",
+            "status": "planned",
+            "order": 98,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-099",
+            "title": "第99章 将臣的沉默条款",
+            "outlinePath": "outline/chapter-099.md",
+            "contentPath": "chapters/chapter-099.md",
+            "status": "planned",
+            "order": 99,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-100",
+            "title": "第100章 百章节点·不再回头",
+            "outlinePath": "outline/chapter-100.md",
+            "contentPath": "chapters/chapter-100.md",
+            "status": "planned",
+            "order": 100,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-101",
+            "title": "第101章 限制接触令·远程协作",
+            "outlinePath": "outline/chapter-101.md",
+            "contentPath": "chapters/chapter-101.md",
+            "status": "planned",
+            "order": 101,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-102",
+            "title": "第102章 清场窗口·诱杀局中局",
+            "outlinePath": "outline/chapter-102.md",
+            "contentPath": "chapters/chapter-102.md",
+            "status": "planned",
+            "order": 102,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-103",
+            "title": "第103章 止损胜利·你赢了但没拿到真相",
+            "outlinePath": "outline/chapter-103.md",
+            "contentPath": "chapters/chapter-103.md",
+            "status": "planned",
+            "order": 103,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-104",
+            "title": "第104章 深区首探·魂层回声",
+            "outlinePath": "outline/chapter-104.md",
+            "contentPath": "chapters/chapter-104.md",
+            "status": "planned",
+            "order": 104,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-105",
+            "title": "第105章 重叠语音·第四条新规则",
+            "outlinePath": "outline/chapter-105.md",
+            "contentPath": "chapters/chapter-105.md",
+            "status": "planned",
+            "order": 105,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-106",
+            "title": "第106章 半静默后遗症·一秒慢",
+            "outlinePath": "outline/chapter-106.md",
+            "contentPath": "chapters/chapter-106.md",
+            "status": "planned",
+            "order": 106,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-107",
+            "title": "第107章 残废预警·以左手重构",
+            "outlinePath": "outline/chapter-107.md",
+            "contentPath": "chapters/chapter-107.md",
+            "status": "planned",
+            "order": 107,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-108",
+            "title": "第108章 断桥回收·四件遗物",
+            "outlinePath": "outline/chapter-108.md",
+            "contentPath": "chapters/chapter-108.md",
+            "status": "planned",
+            "order": 108,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-109",
+            "title": "第109章 碎码解锁·A17只是门卫",
+            "outlinePath": "outline/chapter-109.md",
+            "contentPath": "chapters/chapter-109.md",
+            "status": "planned",
+            "order": 109,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-110",
+            "title": "第110章 孤狼卷终·去主战场之外开战",
+            "outlinePath": "outline/chapter-110.md",
+            "contentPath": "chapters/chapter-110.md",
+            "status": "planned",
+            "order": 110,
+            "volumeId": "第96-110章",
+            "volumeTitle": "第96-110章",
+            "volumeOrder": 96
+          },
+          {
+            "id": "chapter-111",
+            "title": "第111章 魔兽岭门槛·不欢迎人类",
+            "outlinePath": "outline/chapter-111.md",
+            "contentPath": "chapters/chapter-111.md",
+            "status": "planned",
+            "order": 111,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-112",
+            "title": "第112章 雷皇庭前·先还旧债",
+            "outlinePath": "outline/chapter-112.md",
+            "contentPath": "chapters/chapter-112.md",
+            "status": "planned",
+            "order": 112,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-113",
+            "title": "第113章 四皇第一问·你要救谁",
+            "outlinePath": "outline/chapter-113.md",
+            "contentPath": "chapters/chapter-113.md",
+            "status": "planned",
+            "order": 113,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-114",
+            "title": "第114章 炎皇试火·不靠血统靠代价",
+            "outlinePath": "outline/chapter-114.md",
+            "contentPath": "chapters/chapter-114.md",
+            "status": "planned",
+            "order": 114,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-115",
+            "title": "第115章 冰皇问责·复活的伦理",
+            "outlinePath": "outline/chapter-115.md",
+            "contentPath": "chapters/chapter-115.md",
+            "status": "planned",
+            "order": 115,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-116",
+            "title": "第116章 暗皇阴影·我们曾经一样",
+            "outlinePath": "outline/chapter-116.md",
+            "contentPath": "chapters/chapter-116.md",
+            "status": "planned",
+            "order": 116,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-117",
+            "title": "第117章 四皇第二问·你敢交权吗",
+            "outlinePath": "outline/chapter-117.md",
+            "contentPath": "chapters/chapter-117.md",
+            "status": "planned",
+            "order": 117,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-118",
+            "title": "第118章 中层遗迹·守护者原罪碑",
+            "outlinePath": "outline/chapter-118.md",
+            "contentPath": "chapters/chapter-118.md",
+            "status": "planned",
+            "order": 118,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-119",
+            "title": "第119章 最小圈层·第一次站队分裂",
+            "outlinePath": "outline/chapter-119.md",
+            "contentPath": "chapters/chapter-119.md",
+            "status": "planned",
+            "order": 119,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-120",
+            "title": "第120章 回城前夜·不再同路",
+            "outlinePath": "outline/chapter-120.md",
+            "contentPath": "chapters/chapter-120.md",
+            "status": "planned",
+            "order": 120,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-121",
+            "title": "第121章 主城入检·带密者通道",
+            "outlinePath": "outline/chapter-121.md",
+            "contentPath": "chapters/chapter-121.md",
+            "status": "planned",
+            "order": 121,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-122",
+            "title": "第122章 删改听证·谁在定义真相",
+            "outlinePath": "outline/chapter-122.md",
+            "contentPath": "chapters/chapter-122.md",
+            "status": "planned",
+            "order": 122,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-123",
+            "title": "第123章 舆论战·英雄转嫌疑",
+            "outlinePath": "outline/chapter-123.md",
+            "contentPath": "chapters/chapter-123.md",
+            "status": "planned",
+            "order": 123,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-124",
+            "title": "第124章 院务会闭门·伊莎贝拉投反对票",
+            "outlinePath": "outline/chapter-124.md",
+            "contentPath": "chapters/chapter-124.md",
+            "status": "planned",
+            "order": 124,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-125",
+            "title": "第125章 血脉封印Ⅰ·不是奖励是枷锁",
+            "outlinePath": "outline/chapter-125.md",
+            "contentPath": "chapters/chapter-125.md",
+            "status": "planned",
+            "order": 125,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-126",
+            "title": "第126章 倒计时公开·我也在怕",
+            "outlinePath": "outline/chapter-126.md",
+            "contentPath": "chapters/chapter-126.md",
+            "status": "planned",
+            "order": 126,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-127",
+            "title": "第127章 跨族混编·第一支共生队",
+            "outlinePath": "outline/chapter-127.md",
+            "contentPath": "chapters/chapter-127.md",
+            "status": "planned",
+            "order": 127,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-128",
+            "title": "第128章 首战失控·友军误伤",
+            "outlinePath": "outline/chapter-128.md",
+            "contentPath": "chapters/chapter-128.md",
+            "status": "planned",
+            "order": 128,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-129",
+            "title": "第129章 语义协议·第四皇缺席",
+            "outlinePath": "outline/chapter-129.md",
+            "contentPath": "chapters/chapter-129.md",
+            "status": "planned",
+            "order": 129,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-130",
+            "title": "第130章 外环渗透·城内已开门",
+            "outlinePath": "outline/chapter-130.md",
+            "contentPath": "chapters/chapter-130.md",
+            "status": "planned",
+            "order": 130,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-131",
+            "title": "第131章 内鬼清单·不是一个人是系统",
+            "outlinePath": "outline/chapter-131.md",
+            "contentPath": "chapters/chapter-131.md",
+            "status": "planned",
+            "order": 131,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-132",
+            "title": "第132章 拟制逮捕令·合法围猎",
+            "outlinePath": "outline/chapter-132.md",
+            "contentPath": "chapters/chapter-132.md",
+            "status": "planned",
+            "order": 132,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-133",
+            "title": "第133章 罗兰家封库·索菲亚的代价",
+            "outlinePath": "outline/chapter-133.md",
+            "contentPath": "chapters/chapter-133.md",
+            "status": "planned",
+            "order": 133,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-134",
+            "title": "第134章 学院分裂投票·伊莎贝拉辞位",
+            "outlinePath": "outline/chapter-134.md",
+            "contentPath": "chapters/chapter-134.md",
+            "status": "planned",
+            "order": 134,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-135",
+            "title": "第135章 地下协调线·三城密约",
+            "outlinePath": "outline/chapter-135.md",
+            "contentPath": "chapters/chapter-135.md",
+            "status": "planned",
+            "order": 135,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-136",
+            "title": "第136章 机理外泄·第五条新规则",
+            "outlinePath": "outline/chapter-136.md",
+            "contentPath": "chapters/chapter-136.md",
+            "status": "planned",
+            "order": 136,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-137",
+            "title": "第137章 上限下降后的第一战",
+            "outlinePath": "outline/chapter-137.md",
+            "contentPath": "chapters/chapter-137.md",
+            "status": "planned",
+            "order": 137,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-138",
+            "title": "第138章 暗皇残军接触·停火十五分钟",
+            "outlinePath": "outline/chapter-138.md",
+            "contentPath": "chapters/chapter-138.md",
+            "status": "planned",
+            "order": 138,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-139",
+            "title": "第139章 通敌指控·我认停火不认叛城",
+            "outlinePath": "outline/chapter-139.md",
+            "contentPath": "chapters/chapter-139.md",
+            "status": "planned",
+            "order": 139,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-140",
+            "title": "第140章 工坊一号爆破·证据比辩解有效",
+            "outlinePath": "outline/chapter-140.md",
+            "contentPath": "chapters/chapter-140.md",
+            "status": "planned",
+            "order": 140,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-141",
+            "title": "第141章 证据公开·谁该先死",
+            "outlinePath": "outline/chapter-141.md",
+            "contentPath": "chapters/chapter-141.md",
+            "status": "planned",
+            "order": 141,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-142",
+            "title": "第142章 猎巫夜·真相的副作用",
+            "outlinePath": "outline/chapter-142.md",
+            "contentPath": "chapters/chapter-142.md",
+            "status": "planned",
+            "order": 142,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-143",
+            "title": "第143章 战时审理庭·程序抢修",
+            "outlinePath": "outline/chapter-143.md",
+            "contentPath": "chapters/chapter-143.md",
+            "status": "planned",
+            "order": 143,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-144",
+            "title": "第144章 外廷最后通牒·交人交权",
+            "outlinePath": "outline/chapter-144.md",
+            "contentPath": "chapters/chapter-144.md",
+            "status": "planned",
+            "order": 144,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-145",
+            "title": "第145章 见证会斩首局·活着走出会场",
+            "outlinePath": "outline/chapter-145.md",
+            "contentPath": "chapters/chapter-145.md",
+            "status": "planned",
+            "order": 145,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-146",
+            "title": "第146章 失控倒计时加速·第六条新规则",
+            "outlinePath": "outline/chapter-146.md",
+            "contentPath": "chapters/chapter-146.md",
+            "status": "planned",
+            "order": 146,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-147",
+            "title": "第147章 联盟会战草案·谁当总指挥",
+            "outlinePath": "outline/chapter-147.md",
+            "contentPath": "chapters/chapter-147.md",
+            "status": "planned",
+            "order": 147,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-148",
+            "title": "第148章 联席第一次决裂",
+            "outlinePath": "outline/chapter-148.md",
+            "contentPath": "chapters/chapter-148.md",
+            "status": "planned",
+            "order": 148,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-149",
+            "title": "第149章 提前波次·战争已开始",
+            "outlinePath": "outline/chapter-149.md",
+            "contentPath": "chapters/chapter-149.md",
+            "status": "planned",
+            "order": 149,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-150",
+            "title": "第150章 六卷终·没有人还能中立",
+            "outlinePath": "outline/chapter-150.md",
+            "contentPath": "chapters/chapter-150.md",
+            "status": "planned",
+            "order": 150,
+            "volumeId": "第111-150章",
+            "volumeTitle": "第111-150章",
+            "volumeOrder": 111
+          },
+          {
+            "id": "chapter-151",
+            "title": "第151章 战争日零·联军集结",
+            "outlinePath": "outline/chapter-151.md",
+            "contentPath": "chapters/chapter-151.md",
+            "status": "planned",
+            "order": 151,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-152",
+            "title": "第152章 灰谷会战·第一道防线",
+            "outlinePath": "outline/chapter-152.md",
+            "contentPath": "chapters/chapter-152.md",
+            "status": "planned",
+            "order": 152,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-153",
+            "title": "第153章 战后算账·谁偷走了预备队",
+            "outlinePath": "outline/chapter-153.md",
+            "contentPath": "chapters/chapter-153.md",
+            "status": "planned",
+            "order": 153,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-154",
+            "title": "第154章 二线崩口·平民撤离战",
+            "outlinePath": "outline/chapter-154.md",
+            "contentPath": "chapters/chapter-154.md",
+            "status": "planned",
+            "order": 154,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-155",
+            "title": "第155章 作秀指控·战地直播反击",
+            "outlinePath": "outline/chapter-155.md",
+            "contentPath": "chapters/chapter-155.md",
+            "status": "planned",
+            "order": 155,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-156",
+            "title": "第156章 炎皇献晶·第一批共生补给",
+            "outlinePath": "outline/chapter-156.md",
+            "contentPath": "chapters/chapter-156.md",
+            "status": "planned",
+            "order": 156,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-157",
+            "title": "第157章 冰原针线·联军缝合战",
+            "outlinePath": "outline/chapter-157.md",
+            "contentPath": "chapters/chapter-157.md",
+            "status": "planned",
+            "order": 157,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-158",
+            "title": "第158章 弃土听证·谁有资格决定",
+            "outlinePath": "outline/chapter-158.md",
+            "contentPath": "chapters/chapter-158.md",
+            "status": "planned",
+            "order": 158,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-159",
+            "title": "第159章 紧急权第一案·误判阵亡",
+            "outlinePath": "outline/chapter-159.md",
+            "contentPath": "chapters/chapter-159.md",
+            "status": "planned",
+            "order": 159,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-160",
+            "title": "第160章 第一战役群终局·守住地表",
+            "outlinePath": "outline/chapter-160.md",
+            "contentPath": "chapters/chapter-160.md",
+            "status": "planned",
+            "order": 160,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-161",
+            "title": "第161章 工坊链地图·三钥同开",
+            "outlinePath": "outline/chapter-161.md",
+            "contentPath": "chapters/chapter-161.md",
+            "status": "planned",
+            "order": 161,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-162",
+            "title": "第162章 第一工坊斩首·左手成名",
+            "outlinePath": "outline/chapter-162.md",
+            "contentPath": "chapters/chapter-162.md",
+            "status": "planned",
+            "order": 162,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-163",
+            "title": "第163章 红色预警·强制静默",
+            "outlinePath": "outline/chapter-163.md",
+            "contentPath": "chapters/chapter-163.md",
+            "status": "planned",
+            "order": 163,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-164",
+            "title": "第164章 没有向德豪的一战",
+            "outlinePath": "outline/chapter-164.md",
+            "contentPath": "chapters/chapter-164.md",
+            "status": "planned",
+            "order": 164,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-165",
+            "title": "第165章 可被替代的恐惧",
+            "outlinePath": "outline/chapter-165.md",
+            "contentPath": "chapters/chapter-165.md",
+            "status": "planned",
+            "order": 165,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-166",
+            "title": "第166章 终局上限·还打不打",
+            "outlinePath": "outline/chapter-166.md",
+            "contentPath": "chapters/chapter-166.md",
+            "status": "planned",
+            "order": 166,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-167",
+            "title": "第167章 第四工坊·强制剥权预演",
+            "outlinePath": "outline/chapter-167.md",
+            "contentPath": "chapters/chapter-167.md",
+            "status": "planned",
+            "order": 167,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-168",
+            "title": "第168章 第二层记忆封印·莫尔甘起点",
+            "outlinePath": "outline/chapter-168.md",
+            "contentPath": "chapters/chapter-168.md",
+            "status": "planned",
+            "order": 168,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-169",
+            "title": "第169章 主动惧怕·第七条新规则",
+            "outlinePath": "outline/chapter-169.md",
+            "contentPath": "chapters/chapter-169.md",
+            "status": "planned",
+            "order": 169,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-170",
+            "title": "第170章 第二战役群终局·斩首完成",
+            "outlinePath": "outline/chapter-170.md",
+            "contentPath": "chapters/chapter-170.md",
+            "status": "planned",
+            "order": 170,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-171",
+            "title": "第171章 主核前夜·遗书与权限",
+            "outlinePath": "outline/chapter-171.md",
+            "contentPath": "chapters/chapter-171.md",
+            "status": "planned",
+            "order": 171,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-172",
+            "title": "第172章 主核外环·三线并突",
+            "outlinePath": "outline/chapter-172.md",
+            "contentPath": "chapters/chapter-172.md",
+            "status": "planned",
+            "order": 172,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-173",
+            "title": "第173章 无情报决战·凭规则打",
+            "outlinePath": "outline/chapter-173.md",
+            "contentPath": "chapters/chapter-173.md",
+            "status": "planned",
+            "order": 173,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-174",
+            "title": "第174章 主核内门·强控方案再现",
+            "outlinePath": "outline/chapter-174.md",
+            "contentPath": "chapters/chapter-174.md",
+            "status": "planned",
+            "order": 174,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-175",
+            "title": "第175章 击败黑暗·赢法即命运",
+            "outlinePath": "outline/chapter-175.md",
+            "contentPath": "chapters/chapter-175.md",
+            "status": "planned",
+            "order": 175,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-176",
+            "title": "第176章 位面认可·不是王座是重担",
+            "outlinePath": "outline/chapter-176.md",
+            "contentPath": "chapters/chapter-176.md",
+            "status": "planned",
+            "order": 176,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-177",
+            "title": "第177章 战后清算·谁该负责",
+            "outlinePath": "outline/chapter-177.md",
+            "contentPath": "chapters/chapter-177.md",
+            "status": "planned",
+            "order": 177,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-178",
+            "title": "第178章 联军是否解散",
+            "outlinePath": "outline/chapter-178.md",
+            "contentPath": "chapters/chapter-178.md",
+            "status": "planned",
+            "order": 178,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-179",
+            "title": "第179章 反扑夜·最后一次内战边缘",
+            "outlinePath": "outline/chapter-179.md",
+            "contentPath": "chapters/chapter-179.md",
+            "status": "planned",
+            "order": 179,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-180",
+            "title": "第180章 七卷终·胜利不是终点",
+            "outlinePath": "outline/chapter-180.md",
+            "contentPath": "chapters/chapter-180.md",
+            "status": "planned",
+            "order": 180,
+            "volumeId": "第151-180章",
+            "volumeTitle": "第151-180章",
+            "volumeOrder": 151
+          },
+          {
+            "id": "chapter-181",
+            "title": "第181章 复活殿雨夜·先写谁的名字",
+            "outlinePath": "outline/chapter-181.md",
+            "contentPath": "chapters/chapter-181.md",
+            "status": "planned",
+            "order": 181,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-182",
+            "title": "第182章 第一复活位·向守一",
+            "outlinePath": "outline/chapter-182.md",
+            "contentPath": "chapters/chapter-182.md",
+            "status": "planned",
+            "order": 182,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-183",
+            "title": "第183章 师徒重见·不是抱头痛哭",
+            "outlinePath": "outline/chapter-183.md",
+            "contentPath": "chapters/chapter-183.md",
+            "status": "planned",
+            "order": 183,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-184",
+            "title": "第184章 弗拉姆复活·兄弟账本补页",
+            "outlinePath": "outline/chapter-184.md",
+            "contentPath": "chapters/chapter-184.md",
+            "status": "planned",
+            "order": 184,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-185",
+            "title": "第185章 格蕾丝复活·分诊者的回声",
+            "outlinePath": "outline/chapter-185.md",
+            "contentPath": "chapters/chapter-185.md",
+            "status": "planned",
+            "order": 185,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-186",
+            "title": "第186章 凯尔复活·剑不再只向前",
+            "outlinePath": "outline/chapter-186.md",
+            "contentPath": "chapters/chapter-186.md",
+            "status": "planned",
+            "order": 186,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-187",
+            "title": "第187章 四皇请命·复活同胞",
+            "outlinePath": "outline/chapter-187.md",
+            "contentPath": "chapters/chapter-187.md",
+            "status": "planned",
+            "order": 187,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-188",
+            "title": "第188章 统一等价规则·第一次执行",
+            "outlinePath": "outline/chapter-188.md",
+            "contentPath": "chapters/chapter-188.md",
+            "status": "planned",
+            "order": 188,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-189",
+            "title": "第189章 精神透支·停机线",
+            "outlinePath": "outline/chapter-189.md",
+            "contentPath": "chapters/chapter-189.md",
+            "status": "planned",
+            "order": 189,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-190",
+            "title": "第190章 停机期治理·谁来拍板",
+            "outlinePath": "outline/chapter-190.md",
+            "contentPath": "chapters/chapter-190.md",
+            "status": "planned",
+            "order": 190,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-191",
+            "title": "第191章 复活重启·降阶真相公开",
+            "outlinePath": "outline/chapter-191.md",
+            "contentPath": "chapters/chapter-191.md",
+            "status": "planned",
+            "order": 191,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-192",
+            "title": "第192章 共生契约重签·不是同盟是共同体",
+            "outlinePath": "outline/chapter-192.md",
+            "contentPath": "chapters/chapter-192.md",
+            "status": "planned",
+            "order": 192,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-193",
+            "title": "第193章 父母净化前夜·你要不要见他们",
+            "outlinePath": "outline/chapter-193.md",
+            "contentPath": "chapters/chapter-193.md",
+            "status": "planned",
+            "order": 193,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-194",
+            "title": "第194章 父母净化·把人还给人间",
+            "outlinePath": "outline/chapter-194.md",
+            "contentPath": "chapters/chapter-194.md",
+            "status": "planned",
+            "order": 194,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-195",
+            "title": "第195章 家庭重组·谢谢与对不起",
+            "outlinePath": "outline/chapter-195.md",
+            "contentPath": "chapters/chapter-195.md",
+            "status": "planned",
+            "order": 195,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-196",
+            "title": "第196章 婚约不是庆典·是共同治理协议",
+            "outlinePath": "outline/chapter-196.md",
+            "contentPath": "chapters/chapter-196.md",
+            "status": "planned",
+            "order": 196,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-197",
+            "title": "第197章 位面权柄归还·拆王座",
+            "outlinePath": "outline/chapter-197.md",
+            "contentPath": "chapters/chapter-197.md",
+            "status": "planned",
+            "order": 197,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          },
+          {
+            "id": "chapter-198",
+            "title": "第198章 终章·守护不是掌控",
+            "outlinePath": "outline/chapter-198.md",
+            "contentPath": "chapters/chapter-198.md",
+            "status": "planned",
+            "order": 198,
+            "volumeId": "第181-198章",
+            "volumeTitle": "第181-198章",
+            "volumeOrder": 181
+          }
+        ]
+      }
+    }
+  },
+  "library": {
+    "version": 1,
+    "assets": [],
+    "roles": [
+      {
+        "id": "role-novel-architect",
+        "name": "长篇小说结构师",
+        "domain": "novel",
+        "systemPrompt": "负责把粗略创意设计成长篇小说结构。优先保证因果逻辑、POV 诚实、人物动机可信、伏笔可回收、升级一步一步来，不追求浮夸爽点。",
+        "defaultPromptIds": [
+          "prompt-novel-outline"
+        ]
+      },
+      {
+        "id": "role-continuity-auditor",
+        "name": "连续性审稿人",
+        "domain": "novel",
+        "systemPrompt": "对照故事圣经、时间线、角色已知信息、力量进阶和未回收伏笔检查章节问题。先指出具体逻辑风险，再给文采建议。",
+        "defaultPromptIds": [
+          "prompt-scene-polish"
+        ]
+      },
+      {
+        "id": "role-character-image-director",
+        "name": "角色形象导演",
+        "domain": "image",
+        "systemPrompt": "把角色设定转成可复用的中文视觉提示词，明确轮廓、服装、材质、表情、姿态、光线和保持角色一致性的关键词。",
+        "defaultPromptIds": [
+          "prompt-character-image"
+        ]
+      },
+      {
+        "id": "role-scene-art-director",
+        "name": "场景美术导演",
+        "domain": "image",
+        "systemPrompt": "把世界观和章节上下文转成可检查的场景提示词，包含空间布局、道具、氛围、镜头、色彩和连续性锚点。",
+        "defaultPromptIds": [
+          "prompt-prop-scene-image"
+        ]
+      },
+      {
+        "id": "role-storyboard-director",
+        "name": "分镜导演",
+        "domain": "video",
+        "systemPrompt": "规划图生视频镜头，明确首帧、尾帧、动作节拍、镜头运动、时长和不能破坏连续性的动作边界。",
+        "defaultPromptIds": [
+          "prompt-first-last-frame-video"
+        ]
+      },
+      {
+        "id": "role-video-prompt-optimizer",
+        "name": "视频提示词优化师",
+        "domain": "video",
+        "systemPrompt": "为本地 ComfyUI 或在线平台优化多图参考生视频提示词，重点控制主体一致性、动作约束、镜头语言和负面提示。",
+        "defaultPromptIds": [
+          "prompt-multi-reference-video"
+        ]
+      }
+    ],
+    "prompts": [
+      {
+        "id": "prompt-novel-outline",
+        "title": "长篇小说大纲",
+        "category": "novel",
+        "roleId": "role-novel-architect",
+        "prompt": "根据作者粗略想法生成卷纲和章节路线。必须写清因果链、伏笔与回收、人物动机、可信代价、阶段性升级和每一章的推进目的。",
+        "tags": [
+          "outline",
+          "causality",
+          "foreshadowing"
+        ],
+        "isSystem": true
+      },
+      {
+        "id": "prompt-scene-polish",
+        "title": "POV 安全润色",
+        "category": "novel",
+        "roleId": "role-continuity-auditor",
+        "prompt": "润色选区时不得添加当前视角不知道的信息。保留事实，优先修复因果不清、人物动机不稳、节奏跳跃和连续性风险。",
+        "tags": [
+          "polish",
+          "pov",
+          "continuity"
+        ],
+        "isSystem": true
+      },
+      {
+        "id": "prompt-character-image",
+        "title": "角色形象提示词",
+        "category": "image",
+        "roleId": "role-character-image-director",
+        "prompt": "根据角色档案生成可复用中文形象提示词。包含身份特征、外形轮廓、服装材质、表情姿态、光线、风格约束和一致性关键词。",
+        "tags": [
+          "character",
+          "image",
+          "prompt"
+        ],
+        "isSystem": true
+      },
+      {
+        "id": "prompt-prop-scene-image",
+        "title": "道具或场景提示词",
+        "category": "image",
+        "roleId": "role-scene-art-director",
+        "prompt": "生成可检查的道具或场景中文提示词。包含尺度、材质、环境、用途、叙事意义、镜头、色彩氛围和负面提示建议。",
+        "tags": [
+          "scene",
+          "prop",
+          "image"
+        ],
+        "isSystem": true
+      },
+      {
+        "id": "prompt-first-last-frame-video",
+        "title": "首尾帧视频方案",
+        "category": "video",
+        "roleId": "role-storyboard-director",
+        "prompt": "规划从首帧到尾帧的视频镜头。定义画面连续性、主体动作、镜头运动、节奏时长，以及生成过程中绝不能改变的元素。",
+        "tags": [
+          "video",
+          "shot",
+          "frames"
+        ],
+        "isSystem": true
+      },
+      {
+        "id": "prompt-multi-reference-video",
+        "title": "多图参考视频提示词",
+        "category": "video",
+        "roleId": "role-video-prompt-optimizer",
+        "prompt": "优化多图参考生视频中文提示词。拆分主体身份、环境、动作、镜头、风格、时长和负面约束，确保参考图之间关系清晰。",
+        "tags": [
+          "video",
+          "reference",
+          "comfyui"
+        ],
+        "isSystem": true
+      }
+    ],
+    "skills": [
+      {
+        "id": "skill-novel-continuity-check",
+        "name": "novel-continuity-check",
+        "scope": "system",
+        "description": "检查故事圣经、时间线、POV 已知信息、伏笔回收和升级节奏一致性。",
+        "tags": [
+          "novel",
+          "continuity"
+        ],
+        "enabled": true
+      },
+      {
+        "id": "skill-image-prompt-optimizer",
+        "name": "image-prompt-optimizer",
+        "scope": "system",
+        "description": "把小说上下文转成角色、道具和场景可复用图片提示词。",
+        "tags": [
+          "image",
+          "prompt"
+        ],
+        "enabled": true
+      },
+      {
+        "id": "skill-video-shot-planner",
+        "name": "video-shot-planner",
+        "scope": "system",
+        "description": "规划视频生成所需的首帧、尾帧、镜头运动和参考图约束。",
+        "tags": [
+          "video",
+          "storyboard"
+        ],
+        "enabled": true
+      }
+    ],
+    "updatedAt": "2026-06-08T09:35:41.999Z"
+  }
+}

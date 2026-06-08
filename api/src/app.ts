@@ -7,7 +7,9 @@ import { assertSafeNovelPath, resolveInside } from "./pathSafety.js";
 import {
   createProjectFiles,
   createUniqueProjectSkeleton,
+  deleteProject,
   importLocalProject,
+  importUploadedProject,
   projectRoot,
   readProject,
   writeProject
@@ -106,14 +108,14 @@ function validatePlatformAiConfig(input: PlatformAiConfig): PlatformAiConfig {
 
 const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   const message = error instanceof Error ? error.message : String(error);
-  const status =
-    message.includes("Protected project metadata")
-      ? 403
-      : message.includes("Origin is not allowed")
-        ? 403
-      : message.includes("Unsafe file path") || message.includes("escapes project root")
-        ? 400
-        : 500;
+  let status = 500;
+  if (message.includes("Protected project metadata") || message.includes("Origin is not allowed")) {
+    status = 403;
+  } else if (message.includes("Project not found")) {
+    status = 404;
+  } else if (message.includes("Unsafe file path") || message.includes("escapes project root")) {
+    status = 400;
+  }
 
   res.status(status).json({ error: message });
 };
@@ -134,7 +136,7 @@ export function createApp() {
       }
     })
   );
-  app.use(express.json({ limit: "2mb" }));
+  app.use(express.json({ limit: "50mb" }));
 
   app.get("/health", asyncRoute(async (_req, res) => {
     res.json({ status: "healthy", service: "novel-codex-api", agents: await checkAllAgentAvailability() });
@@ -180,7 +182,6 @@ export function createApp() {
     res.json({
       database: {
         ...databaseInfo(),
-        engine: "node:sqlite",
         projectCount: projects.length,
         assetCount: library.assets.length,
         promptCount: library.prompts.length,
@@ -232,13 +233,26 @@ export function createApp() {
   }));
 
   app.post("/api/novel/import", asyncRoute(async (req, res) => {
-    const project = await importLocalProject({
-      sourcePath: req.body.sourcePath,
-      title: req.body.title,
-      genre: req.body.genre,
-      roughIdea: req.body.roughIdea
-    });
+    const project = Array.isArray(req.body.files)
+      ? await importUploadedProject({
+          files: req.body.files,
+          sourceLabel: req.body.sourcePath,
+          title: req.body.title,
+          genre: req.body.genre,
+          roughIdea: req.body.roughIdea
+        })
+      : await importLocalProject({
+          sourcePath: req.body.sourcePath,
+          title: req.body.title,
+          genre: req.body.genre,
+          roughIdea: req.body.roughIdea
+        });
     res.status(201).json({ project });
+  }));
+
+  app.delete("/api/novel/projects/:projectId", asyncRoute(async (req, res) => {
+    const deletedSlug = await deleteProject(req.params.projectId);
+    res.json({ deletedSlug });
   }));
 
   app.get("/api/novel/projects/:projectId", asyncRoute(async (req, res) => {

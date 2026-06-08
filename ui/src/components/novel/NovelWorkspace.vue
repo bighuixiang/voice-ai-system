@@ -64,6 +64,7 @@
           :loading="store.isLoading"
           @refresh="store.loadProjects"
           @open="goWorkspace($event.slug)"
+          @delete-project="confirmDeleteProject"
           @import-project="importProjectAndOpen"
         />
         <ProjectCreatePanel :starter-idea="starterIdea" @created="goWorkspace($event.slug)" />
@@ -79,80 +80,130 @@
 
     <main v-else-if="store.hasProject" class="workspace-grid" :class="`mode-${store.writingMode}`">
       <aside v-if="store.writingMode !== 'focus'" class="left-rail">
-        <ChapterTree
+        <CollapsiblePanel
           v-if="store.currentProject"
-          :project="store.currentProject"
-          :active-chapter-id="store.currentChapter?.id"
-          @open="store.openChapter"
-        />
+          title="章节导航"
+          :subtitle="`${store.currentProject.chapters.length} 章`"
+          :collapsed="panelCollapsed('chapter-tree')"
+          @update:collapsed="setPanelCollapsed('chapter-tree', $event)"
+        >
+          <ChapterTree
+            :project="store.currentProject"
+            :active-chapter-id="store.currentChapter?.id"
+            @open="store.openChapter"
+          />
+        </CollapsiblePanel>
       </aside>
 
       <section class="center-stage">
         <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
-        <QuickStartGuidePanel
-          variant="workspace"
-          :mode="store.writingMode"
-          :has-structure="hasWorkspaceStructure"
-          :has-draft="hasWorkspaceDraft"
-          @open-mode="store.setWritingMode"
-        />
-        <FocusWritingPanel
+        <CollapsiblePanel
+          title="快速指引"
+          :collapsed="panelCollapsed('quick-start', hasWorkspaceDraft || hasWorkspaceStructure)"
+          @update:collapsed="setPanelCollapsed('quick-start', $event)"
+        >
+          <QuickStartGuidePanel
+            variant="workspace"
+            :mode="store.writingMode"
+            :has-structure="hasWorkspaceStructure"
+            :has-draft="hasWorkspaceDraft"
+            @open-mode="store.setWritingMode"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'focus'"
-          :guide="store.focusWritingGuide"
-          :can-generate="store.canRequestFocusDraft"
-          :is-generating="store.isLoading"
-          @update-target="store.updateFocusTargetWords"
-          @generate-draft="store.requestFocusDraft"
-          @open-structure="store.setWritingMode('structure')"
-          @open-review="store.setWritingMode('review')"
-        />
-        <RewriteComparison
+          title="专注写作"
+          :collapsed="panelCollapsed('focus-writing')"
+          @update:collapsed="setPanelCollapsed('focus-writing', $event)"
+        >
+          <FocusWritingPanel
+            :guide="store.focusWritingGuide"
+            :can-generate="store.canRequestFocusDraft"
+            :is-generating="store.isLoading"
+            @update-target="store.updateFocusTargetWords"
+            @generate-draft="store.requestFocusDraft"
+            @open-structure="store.setWritingMode('structure')"
+            @open-review="store.setWritingMode('review')"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'focus' && store.rewriteCandidate"
-          :result="store.rewriteCandidate"
-          original-text="当前章节末尾"
-          empty-original-text="AI 会把建议稿追加到当前正文末尾。"
-          accept-label="追加到正文"
-          :can-accept="Boolean(store.rewriteCandidate?.content)"
-          :can-tune="store.canRequestFocusDraft"
-          :tune-options="focusDraftTuneOptions"
-          @accept="store.acceptFocusDraft"
-          @reject="store.rejectRewrite"
-          @tune="store.requestFocusDraftRevision"
-          @apply-patches="store.applyTaskPatches"
-        />
-        <WritingRecapPanel
+          title="候选改写"
+          :collapsed="panelCollapsed('focus-rewrite')"
+          @update:collapsed="setPanelCollapsed('focus-rewrite', $event)"
+        >
+          <RewriteComparison
+            :result="store.rewriteCandidate"
+            original-text="当前章节末尾"
+            empty-original-text="AI 会把建议稿追加到当前正文末尾。"
+            accept-label="追加到正文"
+            :can-accept="Boolean(store.rewriteCandidate?.content)"
+            :can-tune="store.canRequestFocusDraft"
+            :tune-options="focusDraftTuneOptions"
+            @accept="store.acceptFocusDraft"
+            @reject="store.rejectRewrite"
+            @tune="store.requestFocusDraftRevision"
+            @apply-patches="store.applyTaskPatches"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'focus' && store.recapCandidate"
-          :candidate="store.recapCandidate"
-          @accept="store.acceptWritingRecap"
-          @reject="store.rejectWritingRecap"
-        />
-        <StructureQuickStartPanel
+          title="写作回顾"
+          :collapsed="panelCollapsed('focus-recap')"
+          @update:collapsed="setPanelCollapsed('focus-recap', $event)"
+        >
+          <WritingRecapPanel
+            :candidate="store.recapCandidate"
+            @accept="store.acceptWritingRecap"
+            @reject="store.rejectWritingRecap"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'structure'"
-          :idea="store.structureIdeaInput"
-          :can-reverse-engineer="store.canReverseEngineerStructure"
-          :can-save-structure="Boolean(store.currentDashboard)"
-          :is-saving="store.isSavingDashboard || store.isSavingScenes"
-          @update:idea="store.updateStructureIdeaInput"
-          @reverse-from-draft="store.reverseEngineerStructureFromDraft"
-          @generate-from-idea="store.generateStructureFromIdea"
-          @save-structure="handleSaveCurrentStructure"
-        />
-        <ChapterDashboardPanel
+          title="结构生成"
+          :collapsed="panelCollapsed('structure-quick-start')"
+          @update:collapsed="setPanelCollapsed('structure-quick-start', $event)"
+        >
+          <StructureQuickStartPanel
+            :idea="store.structureIdeaInput"
+            :can-reverse-engineer="store.canReverseEngineerStructure"
+            :can-save-structure="Boolean(store.currentDashboard)"
+            :is-saving="store.isSavingDashboard || store.isSavingScenes"
+            @update:idea="store.updateStructureIdeaInput"
+            @reverse-from-draft="store.reverseEngineerStructureFromDraft"
+            @generate-from-idea="store.generateStructureFromIdea"
+            @save-structure="handleSaveCurrentStructure"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'structure'"
-          :dashboard="store.currentDashboard"
-          :is-saving="store.isSavingDashboard"
-          :revision="store.structureDraftVersion"
-          @update:dashboard="store.updateDashboard"
-          @save="store.saveCurrentDashboard"
-        />
-        <SceneCardPanel
+          title="章节仪表盘"
+          :collapsed="panelCollapsed('chapter-dashboard')"
+          @update:collapsed="setPanelCollapsed('chapter-dashboard', $event)"
+        >
+          <ChapterDashboardPanel
+            :dashboard="store.currentDashboard"
+            :is-saving="store.isSavingDashboard"
+            :revision="store.structureDraftVersion"
+            @update:dashboard="store.updateDashboard"
+            @save="store.saveCurrentDashboard"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'structure'"
-          :cards="store.sceneCards"
-          :is-saving="store.isSavingScenes"
-          :revision="store.structureDraftVersion"
-          @update:cards="store.updateSceneCards"
-          @save="store.saveCurrentSceneCards"
-        />
+          title="场景卡"
+          :subtitle="`${store.sceneCards.length} 张`"
+          :collapsed="panelCollapsed('scene-cards', store.sceneCards.length === 0)"
+          @update:collapsed="setPanelCollapsed('scene-cards', $event)"
+        >
+          <SceneCardPanel
+            :cards="store.sceneCards"
+            :is-saving="store.isSavingScenes"
+            :revision="store.structureDraftVersion"
+            @update:cards="store.updateSceneCards"
+            @save="store.saveCurrentSceneCards"
+          />
+        </CollapsiblePanel>
         <ChapterEditor
           class="editor-area"
           :chapter="store.currentChapter"
@@ -172,82 +223,144 @@
       </section>
 
       <aside v-if="store.writingMode !== 'focus'" class="right-rail">
-        <SelectionToolbar
+        <CollapsiblePanel
           v-if="store.writingMode === 'review'"
-          :selection="store.selection"
-          :loading="store.isLoading"
-          @polish="store.polishSelection"
-        />
-        <ReviewQualityPanel
+          title="选区工具"
+          :collapsed="panelCollapsed('selection-toolbar')"
+          @update:collapsed="setPanelCollapsed('selection-toolbar', $event)"
+        >
+          <SelectionToolbar
+            :selection="store.selection"
+            :loading="store.isLoading"
+            @polish="store.polishSelection"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'review'"
-          :report="store.currentQualityReport"
-          :selected-tone="store.styleTone"
-          :can-diagnose="store.canDiagnoseChapter"
-          :can-tune-selection="store.canTuneSelection"
-          @diagnose="store.diagnoseCurrentChapter"
-          @update:tone="store.updateStyleTone"
-          @tune-selection="store.tuneSelectionStyle"
-        />
-        <RewriteComparison
+          title="质量诊断"
+          :collapsed="panelCollapsed('review-quality')"
+          @update:collapsed="setPanelCollapsed('review-quality', $event)"
+        >
+          <ReviewQualityPanel
+            :report="store.currentQualityReport"
+            :selected-tone="store.styleTone"
+            :can-diagnose="store.canDiagnoseChapter"
+            :can-tune-selection="store.canTuneSelection"
+            @diagnose="store.diagnoseCurrentChapter"
+            @update:tone="store.updateStyleTone"
+            @tune-selection="store.tuneSelectionStyle"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'review'"
-          :result="store.rewriteCandidate"
-          :original-text="store.selection?.selectedText"
-          :can-accept="Boolean(store.selection?.selectedText && store.rewriteCandidate?.content)"
-          @accept="store.acceptRewrite"
-          @reject="store.rejectRewrite"
-          @apply-patches="store.applyTaskPatches"
-        />
-        <AIOperationPanel
+          title="改写对比"
+          :collapsed="panelCollapsed('review-rewrite', !store.rewriteCandidate)"
+          @update:collapsed="setPanelCollapsed('review-rewrite', $event)"
+        >
+          <RewriteComparison
+            :result="store.rewriteCandidate"
+            :original-text="store.selection?.selectedText"
+            :can-accept="Boolean(store.selection?.selectedText && store.rewriteCandidate?.content)"
+            @accept="store.acceptRewrite"
+            @reject="store.rejectRewrite"
+            @apply-patches="store.applyTaskPatches"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'structure'"
-          :task="store.currentTask"
-          :progress="store.taskProgress"
-          :loading="store.isLoading"
-          @run-task="store.runTask"
-          @apply-patches="store.applyTaskPatches"
-        />
-        <WritingRecapPanel
+          title="AI 操作"
+          :collapsed="panelCollapsed('ai-operation')"
+          @update:collapsed="setPanelCollapsed('ai-operation', $event)"
+        >
+          <AIOperationPanel
+            :task="store.currentTask"
+            :progress="store.taskProgress"
+            :loading="store.isLoading"
+            @run-task="store.runTask"
+            @apply-patches="store.applyTaskPatches"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'review'"
-          :candidate="store.recapCandidate"
-          @accept="store.acceptWritingRecap"
-          @reject="store.rejectWritingRecap"
-        />
-        <TaskHistoryPanel v-if="store.writingMode === 'review'" :tasks="store.taskHistory" />
-        <ContextPanel
-          v-if="store.writingMode === 'structure'"
-          :project="store.currentProject"
-          :chapter="store.currentChapter"
-          :ai-summary="store.activeNovelAiSummary"
-          :ai-status="store.activeNovelAgentCheck?.available ? store.activeNovelAgentCheck.version || '连接正常' : store.activeNovelAgentCheck?.error"
-          :ai-available="store.activeNovelAgentCheck?.available"
-        />
-        <PlatformLibraryPanel
-          v-if="store.writingMode === 'structure'"
-          :library="store.platformLibrary"
-          :project-slug="store.currentProject?.slug"
-          :loading="store.isLoading"
-          @refresh="store.loadPlatformLibrary"
-          @create-asset="store.createSharedAsset"
-          @link-asset="store.linkSharedAsset"
-        />
-        <SupportFilePanel
-          v-if="store.writingMode === 'structure'"
-          :files="store.supportFiles"
-          :current-path="store.currentSupportPath"
-          :content="store.supportContent"
-          :has-unsaved-changes="store.hasUnsavedSupportChanges"
-          @open="store.openSupportFile"
-          @update:content="store.updateSupportContent"
-          @save="store.saveSupportContent"
-        />
-        <LedgerPanel
+          title="写作回顾"
+          :collapsed="panelCollapsed('review-recap', !store.recapCandidate)"
+          @update:collapsed="setPanelCollapsed('review-recap', $event)"
+        >
+          <WritingRecapPanel
+            :candidate="store.recapCandidate"
+            @accept="store.acceptWritingRecap"
+            @reject="store.rejectWritingRecap"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
           v-if="store.writingMode === 'review'"
-          :entries="store.ledgerEntries"
-          :active-kind="store.activeLedgerKind"
-          :loading="store.isLoading"
-          @change-kind="store.loadLedger"
-          @update:entries="store.updateLedgerEntries"
-          @save="store.saveLedger"
-        />
+          title="任务历史"
+          :subtitle="`${store.taskHistory.length} 条`"
+          :collapsed="panelCollapsed('task-history', store.taskHistory.length === 0)"
+          @update:collapsed="setPanelCollapsed('task-history', $event)"
+        >
+          <TaskHistoryPanel :tasks="store.taskHistory" />
+        </CollapsiblePanel>
+        <CollapsiblePanel
+          v-if="store.writingMode === 'structure'"
+          title="上下文"
+          :collapsed="panelCollapsed('context-panel', true)"
+          @update:collapsed="setPanelCollapsed('context-panel', $event)"
+        >
+          <ContextPanel
+            :project="store.currentProject"
+            :chapter="store.currentChapter"
+            :ai-summary="store.activeNovelAiSummary"
+            :ai-status="store.activeNovelAgentCheck?.available ? store.activeNovelAgentCheck.version || '连接正常' : store.activeNovelAgentCheck?.error"
+            :ai-available="store.activeNovelAgentCheck?.available"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
+          v-if="store.writingMode === 'structure'"
+          title="平台资料库"
+          :collapsed="panelCollapsed('platform-library', true)"
+          @update:collapsed="setPanelCollapsed('platform-library', $event)"
+        >
+          <PlatformLibraryPanel
+            :library="store.platformLibrary"
+            :project-slug="store.currentProject?.slug"
+            :loading="store.isLoading"
+            @refresh="store.loadPlatformLibrary"
+            @create-asset="store.createSharedAsset"
+            @link-asset="store.linkSharedAsset"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
+          v-if="store.writingMode === 'structure'"
+          title="支撑文件"
+          :collapsed="panelCollapsed('support-files', true)"
+          @update:collapsed="setPanelCollapsed('support-files', $event)"
+        >
+          <SupportFilePanel
+            :files="store.supportFiles"
+            :current-path="store.currentSupportPath"
+            :content="store.supportContent"
+            :has-unsaved-changes="store.hasUnsavedSupportChanges"
+            @open="store.openSupportFile"
+            @update:content="store.updateSupportContent"
+            @save="store.saveSupportContent"
+          />
+        </CollapsiblePanel>
+        <CollapsiblePanel
+          v-if="store.writingMode === 'review'"
+          title="账本"
+          :collapsed="panelCollapsed('ledger-panel', true)"
+          @update:collapsed="setPanelCollapsed('ledger-panel', $event)"
+        >
+          <LedgerPanel
+            :entries="store.ledgerEntries"
+            :active-kind="store.activeLedgerKind"
+            :loading="store.isLoading"
+            @change-kind="store.loadLedger"
+            @update:entries="store.updateLedgerEntries"
+            @save="store.saveLedger"
+          />
+        </CollapsiblePanel>
         <div v-if="store.error" class="workspace-error" role="alert">{{ store.error }}</div>
       </aside>
     </main>
@@ -282,11 +395,11 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { Close, Collection, Folder, Loading, Refresh, Setting } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
-import type { PlatformAiConfig } from "@/types/novel";
+import type { NovelProject, PlatformAiConfig } from "@/types/novel";
 import ProjectManagerPanel from "./ProjectManagerPanel.vue";
 import ProjectCreatePanel from "./ProjectCreatePanel.vue";
 import AiConfigPanel from "./AiConfigPanel.vue";
@@ -309,6 +422,7 @@ import SupportFilePanel from "./SupportFilePanel.vue";
 import LedgerPanel from "./LedgerPanel.vue";
 import PlatformLibraryPanel from "./PlatformLibraryPanel.vue";
 import QuickStartGuidePanel from "./QuickStartGuidePanel.vue";
+import CollapsiblePanel from "./CollapsiblePanel.vue";
 
 defineOptions({
   name: "NovelWorkspace"
@@ -321,10 +435,14 @@ const sampleStarterIdea = "一个被逐出山门的少年在雨夜发现旧封�
 const starterIdea = ref("");
 const aiConfigDialogOpen = ref(false);
 const storyControlDialogOpen = ref(false);
+const collapsedPanels = ref<Record<string, boolean>>({});
 const isProjectRoute = computed(() => route.name === "project-workspace");
 const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
 const hasWorkspaceStructure = computed(() => Boolean(store.currentDashboard?.goal || store.sceneCards.length));
 const hasWorkspaceDraft = computed(() => store.currentContent.replace(/\s+/g, "").length >= 30);
+const collapseStorageKey = computed(
+  () => `novel-workspace:${store.currentProject?.slug || "hub"}:${store.writingMode}:collapsed-panels`
+);
 const focusDraftTuneOptions = [
   { label: "更有压迫感", value: "增强压迫感，让角色被更明确的危险、代价或时间压力推动" },
   { label: "更优雅", value: "提升文笔质感，保留清晰动作线，减少直白说明" },
@@ -394,6 +512,30 @@ async function importProjectAndOpen(input: { sourcePath: string; title?: string;
   }
 }
 
+async function confirmDeleteProject(project: NovelProject) {
+  const projectTitle = project.title || project.slug;
+  try {
+    await ElMessageBox.confirm(
+      `确认删除项目「${projectTitle}」？项目文件、分析结果和当前工作区缓存都会被移除，删除后不可恢复。`,
+      "删除项目",
+      {
+        type: "warning",
+        confirmButtonText: "删除",
+        cancelButtonText: "取消",
+        confirmButtonClass: "el-button--danger"
+      }
+    );
+    await store.deleteProject(project);
+    if (routeProjectSlug() === project.slug) {
+      await router.replace({ name: "project-hub" });
+    }
+    ElMessage.success(`已删除项目：${projectTitle}`);
+  } catch (err) {
+    if (err === "cancel" || err === "close") return;
+    ElMessage.error(err instanceof Error ? err.message : "删除项目失败");
+  }
+}
+
 async function closeWorkspace(projectSlug: string) {
   await store.closeWorkspace(projectSlug);
   const nextProject = store.currentProject;
@@ -457,6 +599,35 @@ async function handleCheckAgent(config: { profileId: string; modelId?: string })
     store.isLoading = false;
   }
 }
+
+function panelCollapsed(key: string, defaultCollapsed = false) {
+  return typeof collapsedPanels.value[key] === "boolean" ? collapsedPanels.value[key] : defaultCollapsed;
+}
+
+function setPanelCollapsed(key: string, collapsed: boolean) {
+  collapsedPanels.value = {
+    ...collapsedPanels.value,
+    [key]: collapsed
+  };
+}
+
+function loadCollapsedPanels() {
+  try {
+    collapsedPanels.value = JSON.parse(window.localStorage.getItem(collapseStorageKey.value) || "{}") as Record<string, boolean>;
+  } catch {
+    collapsedPanels.value = {};
+  }
+}
+
+watch(collapseStorageKey, loadCollapsedPanels, { immediate: true });
+
+watch(
+  collapsedPanels,
+  (value) => {
+    window.localStorage.setItem(collapseStorageKey.value, JSON.stringify(value));
+  },
+  { deep: true }
+);
 
 onMounted(() => {
   syncWorkspaceFromRoute().catch(() => {

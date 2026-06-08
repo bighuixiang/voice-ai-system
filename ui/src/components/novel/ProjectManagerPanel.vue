@@ -11,27 +11,41 @@
     </div>
 
     <div class="project-list" role="list">
-      <button
+      <div
         v-for="project in projects"
         :key="project.slug"
         class="project-item"
         :class="{ active: currentProject?.slug === project.slug }"
-        type="button"
-        @click="$emit('open', project)"
+        role="listitem"
       >
-        <span class="project-icon"><el-icon><FolderOpened /></el-icon></span>
-        <span class="project-copy">
-          <strong>{{ project.title }}</strong>
+        <button class="project-open" type="button" @click="$emit('open', project)">
+          <span class="project-icon"><el-icon><FolderOpened /></el-icon></span>
+          <span class="project-copy">
+            <strong>{{ project.title }}</strong>
           <small>{{ project.genre }} · {{ project.chapters.length }} 章 · {{ moduleSummary(project) }}</small>
-        </span>
-      </button>
+          </span>
+        </button>
+        <el-tooltip content="删除项目" placement="top">
+          <el-button
+            class="project-delete"
+            type="danger"
+            plain
+            circle
+            :disabled="loading"
+            aria-label="删除项目"
+            @click.stop="$emit('delete-project', project)"
+          >
+            <el-icon><Delete /></el-icon>
+          </el-button>
+        </el-tooltip>
+      </div>
       <p v-if="projects.length === 0" class="empty-copy">还没有项目。先创建或导入一个。</p>
     </div>
 
     <el-form class="import-form" label-position="top" @submit.prevent="handleImport">
       <el-form-item label="导入本地目录">
         <div class="path-picker">
-          <el-input v-model="sourcePath" placeholder="D:\\novels\\my-story" />
+          <el-input :model-value="sourcePath" placeholder="D:\\novels\\my-story" @update:model-value="handleSourcePathInput" />
           <div class="path-actions">
             <el-button native-type="button" @click="openDirectoryPicker">
               <el-icon><FolderOpened /></el-icon>
@@ -80,7 +94,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
-import { CopyDocument, FolderOpened, Refresh, Upload } from "@element-plus/icons-vue";
+import { CopyDocument, Delete, FolderOpened, Refresh, Upload } from "@element-plus/icons-vue";
 import type { NovelProject } from "@/types/novel";
 import { formatGenres, novelGenreOptions } from "./genreOptions";
 
@@ -93,13 +107,23 @@ defineProps<{
 const emit = defineEmits<{
   refresh: [];
   open: [project: NovelProject];
-  "import-project": [input: { sourcePath: string; title?: string; genre?: string }];
+  "delete-project": [project: NovelProject];
+  "import-project": [
+    input: {
+      sourcePath: string;
+      title?: string;
+      genre?: string;
+      files?: Array<{ relativePath: string; content: string }>;
+    }
+  ];
 }>();
 
 const sourcePath = ref("");
 const title = ref("");
 const genres = ref<string[]>([]);
 const directoryInput = ref<HTMLInputElement | null>(null);
+const selectedDirectoryFiles = ref<Array<{ relativePath: string; content: string }>>([]);
+const selectedDirectoryName = ref("");
 
 function moduleSummary(project: NovelProject) {
   const modules = project.modules || [{ key: "novel", label: "Novel Writing", status: "active" }];
@@ -109,6 +133,12 @@ function moduleSummary(project: NovelProject) {
 
 function openDirectoryPicker() {
   directoryInput.value?.click();
+}
+
+function handleSourcePathInput(value: string | number) {
+  sourcePath.value = String(value || "");
+  selectedDirectoryFiles.value = [];
+  selectedDirectoryName.value = "";
 }
 
 function guessTitleFromPath(pathValue: string) {
@@ -129,16 +159,40 @@ async function pasteSourcePath() {
     return;
   }
 
+  selectedDirectoryFiles.value = [];
+  selectedDirectoryName.value = "";
   sourcePath.value = pastedPath;
   if (!title.value.trim()) {
     title.value = guessTitleFromPath(pastedPath);
   }
 }
 
-function handleDirectorySelected(event: Event) {
+function isImportableBrowserFile(file: File & { webkitRelativePath?: string }) {
+  const relativePath = file.webkitRelativePath || file.name;
+  return /\.(md|txt)$/i.test(relativePath) && file.size <= 500 * 1024;
+}
+
+async function handleDirectorySelected(event: Event) {
   const input = event.target as HTMLInputElement;
-  const firstFile = input.files?.[0] as (File & { webkitRelativePath?: string }) | undefined;
+  const files = Array.from(input.files || []) as Array<File & { webkitRelativePath?: string }>;
+  const firstFile = files[0];
   const directoryName = firstFile?.webkitRelativePath?.split(/[\\/]/)[0] || "";
+  const importableFiles = files.filter(isImportableBrowserFile);
+  if (!importableFiles.length) {
+    ElMessage.warning("选择的目录里没有可导入的 .md 或 .txt 文件。");
+    input.value = "";
+    return;
+  }
+
+  const uploadedFiles = await Promise.all(
+    importableFiles.map(async (file) => ({
+      relativePath: file.webkitRelativePath || file.name,
+      content: await file.text()
+    }))
+  );
+  selectedDirectoryFiles.value = uploadedFiles;
+  selectedDirectoryName.value = directoryName || guessTitleFromPath(uploadedFiles[0]?.relativePath || "");
+  sourcePath.value = `已选择目录：${selectedDirectoryName.value || "本地目录"}（${uploadedFiles.length} 个文件）`;
   if (directoryName && !title.value.trim()) {
     title.value = directoryName;
   }
@@ -147,15 +201,17 @@ function handleDirectorySelected(event: Event) {
 
 function handleImport() {
   const trimmedSourcePath = sourcePath.value.trim();
-  if (!trimmedSourcePath) {
+  const uploadedFiles = selectedDirectoryFiles.value;
+  if (!trimmedSourcePath && uploadedFiles.length === 0) {
     ElMessage.warning("请填写要导入的本地目录。");
     return;
   }
 
   emit("import-project", {
-    sourcePath: trimmedSourcePath,
+    sourcePath: uploadedFiles.length ? selectedDirectoryName.value || trimmedSourcePath : trimmedSourcePath,
     title: title.value.trim() || undefined,
-    genre: formatGenres(genres.value) || undefined
+    genre: formatGenres(genres.value) || undefined,
+    files: uploadedFiles.length ? uploadedFiles : undefined
   });
 }
 </script>
@@ -196,17 +252,14 @@ function handleImport() {
 
 .project-item {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 32px;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
-  padding: 9px;
   border: 1px solid transparent;
   border-radius: 6px;
   background: #f8fafc;
   color: #111827;
-  text-align: left;
-  cursor: pointer;
 
   &:hover,
   &:focus-visible {
@@ -218,6 +271,30 @@ function handleImport() {
     border-color: #2563eb;
     background: #eff6ff;
   }
+}
+
+.project-open {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  padding: 9px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: -2px;
+  }
+}
+
+.project-delete {
+  margin-right: 6px;
 }
 
 .project-icon {

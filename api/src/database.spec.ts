@@ -2,7 +2,14 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { databaseInfo, listProjectRecords, readPlatformLibraryFromDatabase, replacePlatformLibrary, upsertProjectRecord } from "./database.js";
+import {
+  databaseInfo,
+  deleteProjectRecord,
+  listProjectRecords,
+  readPlatformLibraryFromDatabase,
+  replacePlatformLibrary,
+  upsertProjectRecord
+} from "./database.js";
 import type { NovelProject, PlatformLibrary } from "./types.js";
 
 let tempRoot = "";
@@ -69,5 +76,13 @@ describe("SQLite database", () => {
     expect(readPlatformLibraryFromDatabase({ ...library, assets: [] }).assets).toEqual([
       expect.objectContaining({ id: "asset-1", linkedProjects: ["demo"] })
     ]);
+  });
+
+  it("deletes a project index record", () => {
+    upsertProjectRecord(project, path.join(tempRoot, "novels", "demo"));
+
+    deleteProjectRecord(project.slug);
+
+    expect(listProjectRecords()).toEqual([]);
   });
 });

@@ -146,7 +146,7 @@ const rows = computed<VirtualRow[]>(() => {
   const source = filteredChapters.value;
   if (!source.length) return [];
   if (normalizedQuery.value || !groupEnabled.value) {
-    return withIndexes(source.map((chapter) => ({ kind: "chapter", key: chapter.id, chapter })));
+    return withIndexes(source.map((chapter, index) => ({ kind: "chapter", key: chapterRowKey(chapter, index), chapter })));
   }
 
   const groupedRows: VirtualRowDraft[] = [];
@@ -157,7 +157,13 @@ const rows = computed<VirtualRow[]>(() => {
       title: group.title,
       count: group.chapters.length
     });
-    groupedRows.push(...group.chapters.map((chapter) => ({ kind: "chapter" as const, key: chapter.id, chapter })));
+    groupedRows.push(
+      ...group.chapters.map((chapter, index) => ({
+        kind: "chapter" as const,
+        key: `${group.key}-${chapterRowKey(chapter, index)}`,
+        chapter
+      }))
+    );
   }
   return withIndexes(groupedRows);
 });
@@ -184,6 +190,10 @@ function chapterOrder(chapter: NovelChapter, index: number) {
   const fromId = chapter.id.match(/(\d+)/g)?.at(-1);
   const fromTitle = chapter.title.match(/(\d+)/g)?.at(-1);
   return Number(fromTitle || fromId || index + 1);
+}
+
+function chapterRowKey(chapter: NovelChapter, index: number) {
+  return `${chapter.id}-${chapterOrder(chapter, index)}-${index}`;
 }
 
 function statusLabel(status: NovelChapter["status"]) {
@@ -295,12 +305,19 @@ async function scrollToActive(behavior: ScrollBehavior = "auto") {
 function setViewportScroll(top: number, behavior: ScrollBehavior = "auto") {
   const viewport = viewportRef.value;
   if (!viewport) return;
+  const maxTop = Math.max(0, totalHeight.value - viewportHeight.value);
+  const nextTop = Math.min(Math.max(0, top), maxTop);
   if (typeof viewport.scrollTo === "function") {
-    viewport.scrollTo({ top, behavior });
+    viewport.scrollTo({ top: nextTop, behavior });
   } else {
-    viewport.scrollTop = top;
+    viewport.scrollTop = nextTop;
   }
-  scrollTop.value = top;
+  scrollTop.value = nextTop;
+}
+
+function clampViewportScroll() {
+  if (!viewportRef.value) return;
+  setViewportScroll(scrollTop.value);
 }
 
 onMounted(() => {
@@ -324,6 +341,14 @@ watch(
   () => {
     setViewportScroll(0);
   }
+);
+
+watch(
+  () => [rows.value.length, viewportHeight.value],
+  () => {
+    nextTick(clampViewportScroll);
+  },
+  { flush: "post" }
 );
 
 onBeforeUnmount(() => {

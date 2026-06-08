@@ -42,13 +42,25 @@ export const novelApi = {
     return data.project;
   },
 
-  async importProject(input: { sourcePath: string; title?: string; genre?: string; roughIdea?: string }): Promise<NovelProject> {
+  async importProject(input: {
+    sourcePath: string;
+    title?: string;
+    genre?: string;
+    roughIdea?: string;
+    files?: Array<{ relativePath: string; content: string }>;
+  }): Promise<NovelProject> {
     const data = await request<{ project: NovelProject }>("/api/novel/import", {
       method: "POST",
       headers: jsonHeaders,
       body: JSON.stringify(input)
     });
     return data.project;
+  },
+
+  async deleteProject(projectId: string): Promise<void> {
+    await request(`/api/novel/projects/${encodeURIComponent(projectId)}`, {
+      method: "DELETE"
+    });
   },
 
   async readPlatformLibrary(): Promise<PlatformLibrary> {

@@ -81,6 +81,40 @@ describe("novelApi", () => {
     );
   });
 
+  it("imports browser selected directory files", async () => {
+    mockJson({
+      project: {
+        id: "uploaded",
+        slug: "uploaded",
+        title: "Uploaded",
+        genre: "fantasy",
+        roughIdea: "Uploaded source",
+        chapters: [],
+        createdAt: "2026-06-03T00:00:00.000Z",
+        updatedAt: "2026-06-03T00:00:00.000Z"
+      }
+    });
+
+    await novelApi.importProject({
+      sourcePath: "uploaded-story",
+      title: "Uploaded",
+      files: [{ relativePath: "uploaded-story/chapter-001.md", content: "# Uploaded" }]
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/import",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sourcePath: "uploaded-story",
+          title: "Uploaded",
+          files: [{ relativePath: "uploaded-story/chapter-001.md", content: "# Uploaded" }]
+        })
+      })
+    );
+  });
+
   it("reads the platform library and manages shared asset links", async () => {
     mockJson({ library: { version: 1, assets: [], prompts: [], roles: [], skills: [], updatedAt: "now" } });
     mockJson({ asset: { id: "asset-1", name: "Shared Sword", type: "prop", linkedProjects: ["demo"] } });

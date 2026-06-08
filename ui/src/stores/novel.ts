@@ -777,7 +777,13 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  async function importProject(input: { sourcePath: string; title?: string; genre?: string; roughIdea?: string }) {
+  async function importProject(input: {
+    sourcePath: string;
+    title?: string;
+    genre?: string;
+    roughIdea?: string;
+    files?: Array<{ relativePath: string; content: string }>;
+  }) {
     if (!canLeaveCurrentWorkspace()) return;
 
     isLoading.value = true;
@@ -787,6 +793,27 @@ export const useNovelStore = defineStore("novel", () => {
       projects.value = [project, ...projects.value.filter((item) => item.slug !== project.slug)];
       await openProject(project);
       return project;
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : String(err);
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function deleteProject(project: NovelProject) {
+    isLoading.value = true;
+    error.value = "";
+    try {
+      await novelApi.deleteProject(project.slug);
+      projects.value = projects.value.filter((item) => item.slug !== project.slug);
+      openWorkspaceSlugs.value = openWorkspaceSlugs.value.filter((slug) => slug !== project.slug);
+      const { [project.slug]: _deletedWorkspace, ...restCache } = workspaceCache.value;
+      workspaceCache.value = restCache;
+      if (currentProject.value?.slug === project.slug) {
+        resetActiveWorkspace();
+      }
+      return true;
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err);
       throw err;
@@ -1374,6 +1401,7 @@ export const useNovelStore = defineStore("novel", () => {
     savePlatformAiConfig,
     createProject,
     importProject,
+    deleteProject,
     createSharedAsset,
     linkSharedAsset,
     loadChapterCockpit,

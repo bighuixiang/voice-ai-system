@@ -274,6 +274,44 @@ describe("novel API routes", () => {
     await fs.rm(sourceRoot, { recursive: true, force: true });
   });
 
+  it("imports browser selected directory files into a managed novel project", async () => {
+    const imported = await jsonFetch<{ project: { slug: string; chapters: Array<{ contentPath: string; title: string }> } }>(
+      "/api/novel/import",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sourcePath: "uploaded-story",
+          title: "Uploaded Story",
+          genre: "fantasy",
+          files: [
+            {
+              relativePath: "uploaded-story/03-chapters/chapter-001.md",
+              content: "# Uploaded Gate\n\nThe uploaded draft opens here."
+            },
+            {
+              relativePath: "uploaded-story/02-outline/outline.md",
+              content: "# Uploaded Outline\n\nA browser selected outline."
+            }
+          ]
+        })
+      }
+    );
+
+    expect(imported.status).toBe(201);
+    expect(imported.data.project.slug).toBe("uploaded-story");
+    expect(imported.data.project.chapters).toHaveLength(1);
+    expect(imported.data.project.chapters[0].title).toBe("Uploaded Gate");
+
+    const chapter = await jsonFetch<{ content: string }>(
+      `/api/novel/projects/uploaded-story/files/${imported.data.project.chapters[0].contentPath}`
+    );
+    const outline = await jsonFetch<{ content: string }>("/api/novel/projects/uploaded-story/files/outline/volume-01.md");
+
+    expect(chapter.data.content).toContain("The uploaded draft opens here.");
+    expect(outline.data.content).toContain("A browser selected outline.");
+  });
+
   it("reads and saves writing cockpit dashboard, scenes, and ledger entries", async () => {
     await jsonFetch("/api/novel/projects", {
       method: "POST",

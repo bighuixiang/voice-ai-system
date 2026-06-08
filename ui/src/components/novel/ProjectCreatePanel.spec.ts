@@ -95,6 +95,16 @@ describe("ProjectCreatePanel", () => {
     expect(ElMessage.success).toHaveBeenCalled();
   });
 
+  it("includes common web novel genre options", () => {
+    const wrapper = mount(ProjectCreatePanel, { global: { stubs } });
+    const options = wrapper.findAll("option").map((option) => option.text());
+
+    expect(options).toContain("异界");
+    expect(options).toContain("穿越");
+    expect(options).toContain("重生");
+    expect(options).toContain("系统");
+  });
+
   it("prefills the rough idea from the beginner guide", async () => {
     const wrapper = mount(ProjectCreatePanel, {
       props: { starterIdea: "A young exile finds a broken seal." },

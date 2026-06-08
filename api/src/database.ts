@@ -13,7 +13,23 @@ import type {
 import { getDatabasePath } from "./workspace.js";
 
 const require = createRequire(import.meta.url);
-const { DatabaseSync } = require("node:sqlite") as { DatabaseSync: new (path: string) => DatabaseSyncType };
+const DatabaseSync = loadDatabaseSync();
+
+interface JsonDatabaseState {
+  projects: Record<string, { projectRoot: string; project: NovelProject }>;
+  library?: PlatformLibrary;
+}
+
+function loadDatabaseSync(): (new (path: string) => DatabaseSyncType) | null {
+  try {
+    return (require("node:sqlite") as { DatabaseSync: new (path: string) => DatabaseSyncType }).DatabaseSync;
+  } catch (error) {
+    if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ERR_UNKNOWN_BUILTIN_MODULE") {
+      return null;
+    }
+    throw error;
+  }
+}
 
 function json<T>(value: T): string {
   return JSON.stringify(value);
@@ -37,6 +53,9 @@ function intToBool(value: unknown): boolean {
 }
 
 export function openDatabase(): DatabaseSyncType {
+  if (!DatabaseSync) {
+    throw new Error("node:sqlite is not available in this Node.js runtime");
+  }
   const dbPath = getDatabasePath();
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   const database = new DatabaseSync(dbPath);
@@ -122,15 +141,24 @@ export function migrateDatabase(database = openDatabase()): void {
   `);
 }
 
-export function databaseInfo(): { path: string; exists: boolean } {
+export function databaseInfo(): { path: string; exists: boolean; engine: "node:sqlite" | "json-fallback" } {
   const dbPath = getDatabasePath();
+  const fallbackPath = jsonDatabasePath();
   return {
-    path: dbPath,
-    exists: fs.existsSync(dbPath)
+    path: DatabaseSync ? dbPath : fallbackPath,
+    exists: fs.existsSync(dbPath) || fs.existsSync(fallbackPath),
+    engine: DatabaseSync ? "node:sqlite" : "json-fallback"
   };
 }
 
 export function upsertProjectRecord(project: NovelProject, projectRoot: string): void {
+  if (!DatabaseSync) {
+    const state = readJsonDatabase();
+    state.projects[project.slug] = { projectRoot, project };
+    writeJsonDatabase(state);
+    return;
+  }
+
   const database = openDatabase();
   try {
     database
@@ -167,6 +195,15 @@ export function upsertProjectRecord(project: NovelProject, projectRoot: string):
 }
 
 export function listProjectRecords(): NovelProject[] {
+  if (!DatabaseSync) {
+    return Object.values(readJsonDatabase().projects)
+      .map((record) => record.project)
+      .sort((left, right) => {
+        const updated = right.updatedAt.localeCompare(left.updatedAt);
+        return updated || right.createdAt.localeCompare(left.createdAt);
+      });
+  }
+
   const database = openDatabase();
   try {
     return database
@@ -179,7 +216,30 @@ export function listProjectRecords(): NovelProject[] {
   }
 }
 
+export function deleteProjectRecord(slug: string): void {
+  if (!DatabaseSync) {
+    const state = readJsonDatabase();
+    delete state.projects[slug];
+    writeJsonDatabase(state);
+    return;
+  }
+
+  const database = openDatabase();
+  try {
+    database.prepare("DELETE FROM projects WHERE slug = ?").run(slug);
+  } finally {
+    database.close();
+  }
+}
+
 export function replacePlatformLibrary(library: PlatformLibrary): void {
+  if (!DatabaseSync) {
+    const state = readJsonDatabase();
+    state.library = library;
+    writeJsonDatabase(state);
+    return;
+  }
+
   const database = openDatabase();
   try {
     database.exec("BEGIN;");
@@ -308,6 +368,10 @@ function upsertSkillEntryInDatabase(database: DatabaseSyncType, skill: SkillEntr
 }
 
 export function readPlatformLibraryFromDatabase(defaultLibrary: PlatformLibrary): PlatformLibrary {
+  if (!DatabaseSync) {
+    return readJsonDatabase().library || defaultLibrary;
+  }
+
   const database = openDatabase();
   try {
     const roleRows = database.prepare("SELECT * FROM expert_roles ORDER BY id").all();
@@ -380,6 +444,11 @@ export function readPlatformLibraryFromDatabase(defaultLibrary: PlatformLibrary)
 }
 
 export function hasPlatformLibraryData(): boolean {
+  if (!DatabaseSync) {
+    const library = readJsonDatabase().library;
+    return Boolean(library && (library.assets.length || library.prompts.length || library.roles.length || library.skills.length));
+  }
+
   const database = openDatabase();
   try {
     const row = database
@@ -400,10 +469,62 @@ export function hasPlatformLibraryData(): boolean {
 }
 
 export function upsertPlatformAsset(asset: PlatformAsset): void {
+  if (!DatabaseSync) {
+    const state = readJsonDatabase();
+    const timestamp = new Date().toISOString();
+    const library = state.library || {
+      version: 1,
+      assets: [],
+      prompts: [],
+      roles: [],
+      skills: [],
+      updatedAt: timestamp
+    };
+    const existingIndex = library.assets.findIndex((item) => item.id === asset.id);
+    if (existingIndex >= 0) {
+      library.assets[existingIndex] = asset;
+    } else {
+      library.assets.unshift(asset);
+    }
+    state.library = { ...library, updatedAt: asset.updatedAt || timestamp };
+    writeJsonDatabase(state);
+    return;
+  }
+
   const database = openDatabase();
   try {
     upsertPlatformAssetInDatabase(database, asset);
   } finally {
     database.close();
   }
+}
+
+function jsonDatabasePath(): string {
+  const dbPath = getDatabasePath();
+  return dbPath.endsWith(".sqlite") ? dbPath.replace(/\.sqlite$/, ".json") : `${dbPath}.json`;
+}
+
+function emptyJsonDatabase(): JsonDatabaseState {
+  return { projects: {} };
+}
+
+function readJsonDatabase(): JsonDatabaseState {
+  const dbPath = jsonDatabasePath();
+  if (!fs.existsSync(dbPath)) return emptyJsonDatabase();
+
+  try {
+    const parsed = JSON.parse(fs.readFileSync(dbPath, "utf8")) as Partial<JsonDatabaseState>;
+    return {
+      projects: parsed.projects || {},
+      library: parsed.library
+    };
+  } catch {
+    return emptyJsonDatabase();
+  }
+}
+
+function writeJsonDatabase(state: JsonDatabaseState): void {
+  const dbPath = jsonDatabasePath();
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  fs.writeFileSync(dbPath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
