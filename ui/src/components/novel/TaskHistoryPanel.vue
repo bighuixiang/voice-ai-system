@@ -3,14 +3,15 @@
     <div class="panel-title">任务历史</div>
     <el-empty v-if="!tasks.length" description="暂无任务" :image-size="48" />
     <ol v-else>
-      <li v-for="task in tasks.slice(0, 8)" :key="task.id">
+      <li v-for="task in tasks.slice(0, 10)" :key="task.id">
         <div class="row">
           <strong>{{ labels[task.type] || task.type }}</strong>
-          <el-tag size="small" :type="task.status === 'success' ? 'success' : task.status === 'error' ? 'danger' : 'info'">
-            {{ task.status }}
+          <el-tag size="small" :type="statusType(task.status)">
+            {{ statusLabel(task.status) }}
           </el-tag>
         </div>
         <p>{{ task.outputSummary || task.inputSummary || task.error }}</p>
+        <small>{{ formatTime(task.finishedAt || task.startedAt) }}</small>
       </li>
     </ol>
   </section>
@@ -30,10 +31,40 @@ const labels: Partial<Record<CodexTaskType, string>> = {
   "chapter.draft": "起草正文",
   "selection.polish": "选区润色",
   "continuity.check": "连续性检查",
-  "idea.suggest": "补灵感"
+  "idea.suggest": "补灵感",
+  "writing.briefing": "写前简报",
+  "writing.recap": "写后复盘",
+  "assistant.free": "自由指令"
 };
 
-labels["assistant.free"] = "自由指令";
+function statusType(status: NovelTask["status"]) {
+  if (status === "success") return "success";
+  if (status === "error") return "danger";
+  return "info";
+}
+
+function statusLabel(status: NovelTask["status"]) {
+  const labels: Record<NovelTask["status"], string> = {
+    pending: "等待",
+    running: "运行中",
+    success: "成功",
+    error: "失败",
+    cancelled: "已取消"
+  };
+  return labels[status];
+}
+
+function formatTime(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
 </script>
 
 <style scoped lang="scss">
@@ -78,5 +109,12 @@ p {
   margin: 4px 0 0;
   color: #6b7280;
   font-size: 12px;
+}
+
+small {
+  display: block;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 11px;
 }
 </style>

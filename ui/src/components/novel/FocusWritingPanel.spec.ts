@@ -32,6 +32,12 @@ function mountPanel() {
           emits: ["update:modelValue"],
           template: `<input class="target-input" :value="modelValue" @input="$emit('update:modelValue', Number($event.target.value))" />`
         },
+        "el-input": {
+          inheritAttrs: false,
+          props: ["modelValue"],
+          emits: ["update:modelValue"],
+          template: `<textarea class="instruction-input" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" />`
+        },
         "el-button": {
           props: ["disabled", "loading"],
           emits: ["click"],
@@ -56,11 +62,13 @@ describe("FocusWritingPanel", () => {
     const wrapper = mountPanel();
 
     await wrapper.find(".target-input").setValue("2600");
+    await wrapper.find(".instruction-input").setValue("让动作更直接，少解释设定。");
     await wrapper.findAll("button")[0].trigger("click");
     await wrapper.findAll("button")[1].trigger("click");
     await wrapper.findAll("button")[2].trigger("click");
 
     expect(wrapper.emitted("update-target")?.[0]).toEqual([2600]);
+    expect(wrapper.emitted("update-instruction")?.[0]).toEqual(["让动作更直接，少解释设定。"]);
     expect(wrapper.emitted("generate-draft")).toHaveLength(1);
     expect(wrapper.emitted("open-structure")).toHaveLength(1);
     expect(wrapper.emitted("open-review")).toHaveLength(1);
@@ -77,6 +85,7 @@ describe("FocusWritingPanel", () => {
           Finished: true,
           MagicStick: true,
           "el-input-number": true,
+          "el-input": true,
           "el-button": {
             props: ["disabled", "loading"],
             emits: ["click"],

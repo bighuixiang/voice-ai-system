@@ -406,6 +406,7 @@ describe("useNovelStore", () => {
     await store.openProject(project);
     store.updateContent("dirty cached draft");
     store.updateSupportContent("dirty support notes");
+    store.updateFocusDraftInstruction("保留这个项目的专注写作指令。");
     store.updateDashboard({ goal: "Cached chapter goal" });
     store.updateSceneCards([
       {
@@ -434,6 +435,7 @@ describe("useNovelStore", () => {
     expect(store.currentProject?.slug).toBe("demo");
     expect(store.currentContent).toBe("dirty cached draft");
     expect(store.supportContent).toBe("dirty support notes");
+    expect(store.focusDraftInstruction).toBe("保留这个项目的专注写作指令。");
     expect(store.currentDashboard?.goal).toBe("Cached chapter goal");
     expect(store.sceneCards.map((scene) => scene.id)).toEqual(["scene-cached"]);
     expect(store.hasUnsavedChanges).toBe(true);
@@ -997,6 +999,16 @@ describe("useNovelStore", () => {
     expect(store.focusTargetWords).toBe(3000);
   });
 
+  it("stores focus draft micro-command with a bounded length", () => {
+    const store = useNovelStore();
+
+    store.updateFocusDraftInstruction("让动作更直接，少解释设定。");
+    expect(store.focusDraftInstruction).toBe("让动作更直接，少解释设定。");
+
+    store.updateFocusDraftInstruction("微".repeat(260));
+    expect(store.focusDraftInstruction).toHaveLength(240);
+  });
+
   it("requests a focus draft from the next beat guide", async () => {
     mockNovelApi.runTask.mockResolvedValue(
       taskWithResult({
@@ -1038,6 +1050,7 @@ describe("useNovelStore", () => {
       }
     ]);
     store.updateContent("他停在门前。");
+    store.updateFocusDraftInstruction("让动作更直接，少解释设定。");
 
     await store.requestFocusDraft();
 
@@ -1048,6 +1061,7 @@ describe("useNovelStore", () => {
         chapterId: "chapter-001",
         mode: "focus.next-draft",
         appendAfterCurrentDraft: true,
+        authorInstruction: "让动作更直接，少解释设定。",
         feedback: expect.stringContaining("请只生成可以直接接在当前正文后面的一段或数段候选正文。"),
         focusGuide: expect.objectContaining({
           nextBeat: "主角听见门后回应，却不能立刻退走。"
@@ -1083,6 +1097,7 @@ describe("useNovelStore", () => {
       questions: [],
       patches: []
     };
+    store.updateFocusDraftInstruction("更冷一点，不要煽情。");
 
     const requested = await store.requestFocusDraftRevision("增强压迫感");
 
@@ -1094,6 +1109,7 @@ describe("useNovelStore", () => {
         chapterId: "chapter-001",
         mode: "focus.refine-draft",
         revisionDirection: "增强压迫感",
+        authorInstruction: "更冷一点，不要煽情。",
         currentCandidate: "Candidate paragraph.",
         feedback: expect.stringContaining("当前候选正文：\nCandidate paragraph.")
       })

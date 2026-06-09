@@ -44,6 +44,20 @@
       </article>
     </div>
 
+    <label class="micro-command">
+      <span>AI 微调指令</span>
+      <el-input
+        :model-value="instruction"
+        type="textarea"
+        :rows="2"
+        maxlength="240"
+        show-word-limit
+        resize="none"
+        placeholder="例如：多写一点心理活动；冲突更直接；少解释设定，保持主角有限视角。"
+        @update:model-value="updateInstruction"
+      />
+    </label>
+
     <footer class="panel-actions">
       <el-button type="primary" size="small" :disabled="!canGenerate" :loading="isGenerating" @click="$emit('generate-draft')">
         <el-icon><MagicStick /></el-icon>
@@ -71,13 +85,16 @@ withDefaults(defineProps<{
   guide: FocusWritingGuide;
   canGenerate?: boolean;
   isGenerating?: boolean;
+  instruction?: string;
 }>(), {
   canGenerate: true,
-  isGenerating: false
+  isGenerating: false,
+  instruction: ""
 });
 
 const emit = defineEmits<{
   "update-target": [value: number];
+  "update-instruction": [value: string];
   "generate-draft": [];
   "open-structure": [];
   "open-review": [];
@@ -85,6 +102,10 @@ const emit = defineEmits<{
 
 function updateTarget(value: number | null) {
   emit("update-target", value || DEFAULT_TARGET_WORDS);
+}
+
+function updateInstruction(value: string | number) {
+  emit("update-instruction", String(value));
 }
 </script>
 
@@ -192,6 +213,17 @@ function updateTarget(value: number | null) {
   color: #111827;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.micro-command {
+  display: grid;
+  gap: 6px;
+
+  span {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 800;
+  }
 }
 
 .panel-actions {

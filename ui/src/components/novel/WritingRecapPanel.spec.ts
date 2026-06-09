@@ -54,12 +54,14 @@ describe("WritingRecapPanel", () => {
     expect(wrapper.emitted("reject")).toHaveLength(1);
   });
 
-  it("stays hidden without a candidate", () => {
+  it("shows a request action without a candidate", async () => {
     const wrapper = mount(WritingRecapPanel, {
-      props: { candidate: null },
+      props: { candidate: null, canRequest: true },
       global: { stubs }
     });
 
-    expect(wrapper.html()).toBe("<!--v-if-->");
+    expect(wrapper.text()).toContain("暂无写作回顾");
+    await wrapper.find("button").trigger("click");
+    expect(wrapper.emitted("request")).toHaveLength(1);
   });
 });

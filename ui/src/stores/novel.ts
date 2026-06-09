@@ -48,6 +48,7 @@ interface WorkspaceCache {
   qualityReport: ChapterQualityReport | null;
   styleTone: StyleToneKey;
   focusTargetWords: number;
+  focusDraftInstruction: string;
   dashboard: ChapterDashboard | null;
   sceneCards: SceneCard[];
   storyControl: StoryControl | null;
@@ -101,6 +102,7 @@ export const useNovelStore = defineStore("novel", () => {
   const currentQualityReport = ref<ChapterQualityReport | null>(null);
   const styleTone = ref<StyleToneKey>("elegant");
   const focusTargetWords = ref(DEFAULT_FOCUS_TARGET_WORDS);
+  const focusDraftInstruction = ref("");
   const currentDashboard = ref<ChapterDashboard | null>(null);
   const sceneCards = ref<SceneCard[]>([]);
   const storyControl = ref<StoryControl | null>(null);
@@ -572,6 +574,32 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
+  function parseTaskHistoryContent(content: string): NovelTask[] {
+    return content
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        try {
+          return JSON.parse(line) as NovelTask;
+        } catch {
+          return null;
+        }
+      })
+      .filter((task): task is NovelTask => Boolean(task?.id && task.type && task.status))
+      .sort((left, right) => Date.parse(right.startedAt || "") - Date.parse(left.startedAt || ""));
+  }
+
+  async function loadTaskHistory() {
+    if (!currentProject.value) return;
+    try {
+      const content = await novelApi.readFile(currentProject.value.slug, "tasks/history.jsonl");
+      taskHistory.value = parseTaskHistoryContent(content);
+    } catch {
+      taskHistory.value = [];
+    }
+  }
+
   function mergeLedgerEntries(existing: LedgerEntry[], updates: LedgerEntry[]) {
     const merged = new Map(existing.map((entry) => [entry.id, entry]));
     updates.forEach((entry) => {
@@ -614,11 +642,15 @@ export const useNovelStore = defineStore("novel", () => {
     savedContent.value = "";
     lastSavedAt.value = "";
     selection.value = null;
+    currentTask.value = null;
+    taskProgress.value = [];
+    taskHistory.value = [];
     rewriteCandidate.value = null;
     recapCandidate.value = null;
     currentQualityReport.value = null;
     styleTone.value = "elegant";
     focusTargetWords.value = DEFAULT_FOCUS_TARGET_WORDS;
+    focusDraftInstruction.value = "";
     currentDashboard.value = null;
     sceneCards.value = [];
     storyControl.value = null;
@@ -653,6 +685,7 @@ export const useNovelStore = defineStore("novel", () => {
         qualityReport: currentQualityReport.value,
         styleTone: styleTone.value,
         focusTargetWords: focusTargetWords.value,
+        focusDraftInstruction: focusDraftInstruction.value,
         dashboard: currentDashboard.value,
         sceneCards: sceneCards.value,
         storyControl: storyControl.value,
@@ -688,6 +721,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentQualityReport.value = cached.qualityReport || null;
     styleTone.value = cached.styleTone || "elegant";
     focusTargetWords.value = cached.focusTargetWords || DEFAULT_FOCUS_TARGET_WORDS;
+    focusDraftInstruction.value = cached.focusDraftInstruction || "";
     currentDashboard.value = cached.dashboard;
     sceneCards.value = cached.sceneCards;
     storyControl.value = cached.storyControl;
@@ -993,19 +1027,26 @@ export const useNovelStore = defineStore("novel", () => {
     focusTargetWords.value = Math.max(300, Math.min(12000, Math.round(nextValue)));
   }
 
+  function updateFocusDraftInstruction(value: string) {
+    focusDraftInstruction.value = value.slice(0, 240);
+  }
+
   async function requestFocusDraft() {
     if (!currentProject.value || !currentChapter.value || !canRequestFocusDraft.value) return;
     const guide = focusWritingGuide.value;
+    const authorInstruction = focusDraftInstruction.value.trim();
     await runTask("chapter.draft", {
       mode: "focus.next-draft",
       feedback: [
         guide.prompt,
+        authorInstruction ? `作者微调指令：${authorInstruction}` : "",
         "",
         "请只生成可以直接接在当前正文后面的一段或数段候选正文。",
         "不要重写已有正文，不要输出整章，不要解释写作方法。",
         "候选正文需要自然承接当前章尾，优先推进下一笔，不要提前泄露 POV 角色不知道的信息。"
       ].join("\n"),
       focusGuide: guide,
+      authorInstruction,
       appendAfterCurrentDraft: true,
       currentTail: currentContent.value.slice(-1200)
     });
@@ -1016,10 +1057,12 @@ export const useNovelStore = defineStore("novel", () => {
       return false;
     }
     const guide = focusWritingGuide.value;
+    const authorInstruction = focusDraftInstruction.value.trim();
     await runTask("chapter.draft", {
       mode: "focus.refine-draft",
       feedback: [
         guide.prompt,
+        authorInstruction ? `作者微调指令：${authorInstruction}` : "",
         "",
         `请基于当前候选正文再改一版，调校方向：${direction}。`,
         "保留候选正文承接章尾和推进下一笔的功能，不要改写已有正文，不要输出整章。",
@@ -1029,6 +1072,7 @@ export const useNovelStore = defineStore("novel", () => {
         rewriteCandidate.value.content
       ].join("\n"),
       focusGuide: guide,
+      authorInstruction,
       revisionDirection: direction,
       currentCandidate: rewriteCandidate.value.content,
       appendAfterCurrentDraft: true,
@@ -1101,6 +1145,7 @@ export const useNovelStore = defineStore("novel", () => {
     await openSupportFile(currentSupportPath.value, { skipLeaveCheck: true });
     await loadStoryControl();
     await loadLedger(activeLedgerKind.value);
+    await loadTaskHistory();
   }
 
   function showProjectHub(options: WorkspaceSwitchOptions = {}) {
@@ -1351,6 +1396,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentQualityReport,
     styleTone,
     focusTargetWords,
+    focusDraftInstruction,
     currentWordCount,
     focusProgressPercent,
     activeSceneCard,
@@ -1421,6 +1467,7 @@ export const useNovelStore = defineStore("novel", () => {
     updateLedgerEntries,
     setWritingMode,
     updateFocusTargetWords,
+    updateFocusDraftInstruction,
     requestFocusDraft,
     requestFocusDraftRevision,
     requestStoryOrchestration,

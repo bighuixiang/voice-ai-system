@@ -22,13 +22,15 @@ const result: CodexTaskResult = {
 };
 
 describe("RewriteComparison", () => {
-  it("renders nothing when there is no AI result", () => {
+  it("shows an actionable empty state when there is no AI result", async () => {
     const wrapper = mount(RewriteComparison, {
-      props: { result: null },
+      props: { result: null, canRequest: true },
       global: { stubs }
     });
 
-    expect(wrapper.html()).toBe("<!--v-if-->");
+    expect(wrapper.text()).toContain("暂无改写结果");
+    await wrapper.find("button").trigger("click");
+    expect(wrapper.emitted("request")).toHaveLength(1);
   });
 
   it("shows risks and emits accept, reject, and patch events", async () => {

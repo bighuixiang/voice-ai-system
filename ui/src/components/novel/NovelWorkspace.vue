@@ -118,9 +118,11 @@
         >
           <FocusWritingPanel
             :guide="store.focusWritingGuide"
+            :instruction="store.focusDraftInstruction"
             :can-generate="store.canRequestFocusDraft"
             :is-generating="store.isLoading"
             @update-target="store.updateFocusTargetWords"
+            @update-instruction="store.updateFocusDraftInstruction"
             @generate-draft="store.requestFocusDraft"
             @open-structure="store.setWritingMode('structure')"
             @open-review="store.setWritingMode('review')"
@@ -144,6 +146,7 @@
             @reject="store.rejectRewrite"
             @tune="store.requestFocusDraftRevision"
             @apply-patches="store.applyTaskPatches"
+            @request="store.requestFocusDraft"
           />
         </CollapsiblePanel>
         <CollapsiblePanel
@@ -154,8 +157,11 @@
         >
           <WritingRecapPanel
             :candidate="store.recapCandidate"
+            :can-request="Boolean(store.currentChapter && store.currentContent.trim())"
+            :loading="store.isLoading"
             @accept="store.acceptWritingRecap"
             @reject="store.rejectWritingRecap"
+            @request="store.requestWritingRecap"
           />
         </CollapsiblePanel>
         <CollapsiblePanel
@@ -261,9 +267,11 @@
             :result="store.rewriteCandidate"
             :original-text="store.selection?.selectedText"
             :can-accept="Boolean(store.selection?.selectedText && store.rewriteCandidate?.content)"
+            :can-request="Boolean(store.selection?.selectedText && !store.isLoading)"
             @accept="store.acceptRewrite"
             @reject="store.rejectRewrite"
             @apply-patches="store.applyTaskPatches"
+            @request="store.polishSelection('polish')"
           />
         </CollapsiblePanel>
         <CollapsiblePanel
@@ -288,8 +296,11 @@
         >
           <WritingRecapPanel
             :candidate="store.recapCandidate"
+            :can-request="Boolean(store.currentChapter && store.currentContent.trim())"
+            :loading="store.isLoading"
             @accept="store.acceptWritingRecap"
             @reject="store.rejectWritingRecap"
+            @request="store.requestWritingRecap"
           />
         </CollapsiblePanel>
         <CollapsiblePanel

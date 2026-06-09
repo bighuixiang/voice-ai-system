@@ -98,6 +98,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     currentQualityReport: null,
     styleTone: "elegant",
     focusTargetWords: 3000,
+    focusDraftInstruction: "",
     focusWritingGuide: {
       chapterId: "chapter-001",
       targetWords: 3000,
@@ -170,6 +171,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     saveCurrentContent: vi.fn(),
     polishSelection: vi.fn(),
     updateFocusTargetWords: vi.fn(),
+    updateFocusDraftInstruction: vi.fn(),
     requestFocusDraft: vi.fn(),
     requestFocusDraftRevision: vi.fn(),
     diagnoseCurrentChapter: vi.fn(),
@@ -217,8 +219,14 @@ const stubs = {
   ChapterTree: { template: "<div class='tree-stub'>tree</div>" },
   WritingModeSwitcher: { props: ["mode"], template: "<div class='mode-switcher-stub'>{{ mode }}</div>" },
   FocusWritingPanel: {
-    emits: ["generate-draft"],
-    template: "<button class='focus-stub' @click='$emit(\"generate-draft\")'>focus guide</button>"
+    props: ["instruction"],
+    emits: ["generate-draft", "update-instruction"],
+    template: `
+      <div>
+        <input class="focus-instruction-stub" :value="instruction" @input="$emit('update-instruction', $event.target.value)" />
+        <button class="focus-stub" @click="$emit('generate-draft')">focus guide</button>
+      </div>
+    `
   },
   StructureQuickStartPanel: { template: "<div class='quick-start-stub'>quick start</div>" },
   StoryControlPanel: {
@@ -267,6 +275,15 @@ describe("NovelWorkspace writing modes", () => {
     await wrapper.find(".focus-stub").trigger("click");
 
     expect(storeRef.value.requestFocusDraft).toHaveBeenCalled();
+  });
+
+  it("syncs focus micro-command input to the store", async () => {
+    storeRef.value = makeStore("focus");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".focus-instruction-stub").setValue("多写一点压迫感，别解释设定。");
+
+    expect(storeRef.value.updateFocusDraftInstruction).toHaveBeenCalledWith("多写一点压迫感，别解释设定。");
   });
 
   it("shows focus draft candidate when AI continues the next beat", () => {

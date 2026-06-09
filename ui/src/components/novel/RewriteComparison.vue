@@ -1,49 +1,59 @@
 <template>
-  <section v-if="result" class="rewrite-comparison" aria-label="AI 结果对比">
-    <header>
-      <h3>{{ result.summary || "AI 结果" }}</h3>
-      <el-tag v-if="result.parseError" type="danger">解析失败</el-tag>
-    </header>
-
-    <div class="diff-grid">
-      <div class="diff-pane">
-        <span class="pane-label">原文</span>
-        <div class="pane-content">{{ originalText || emptyOriginalText }}</div>
-      </div>
-      <div class="diff-pane suggested">
-        <span class="pane-label">建议稿</span>
-        <div class="pane-content">{{ result.content }}</div>
-      </div>
-    </div>
-
-    <div v-if="result.risks.length" class="notice risk">
-      <strong>风险</strong>
-      <ul>
-        <li v-for="risk in result.risks" :key="risk">{{ risk }}</li>
-      </ul>
-    </div>
-
-    <div v-if="result.questions.length" class="notice">
-      <strong>待确认</strong>
-      <ul>
-        <li v-for="question in result.questions" :key="question">{{ question }}</li>
-      </ul>
-    </div>
-
-    <footer>
-      <el-button
-        v-for="option in tuneOptions"
-        :key="option.value"
-        size="small"
-        :disabled="!canTune"
-        @click="$emit('tune', option.value)"
-      >
-        {{ option.label }}
+  <section class="rewrite-comparison" aria-label="AI 改写对比">
+    <div v-if="!result" class="empty-state">
+      <strong>{{ emptyTitle }}</strong>
+      <p>{{ emptyText }}</p>
+      <el-button size="small" type="primary" :disabled="!canRequest" @click="$emit('request')">
+        {{ requestLabel }}
       </el-button>
-      <el-button @click="$emit('reject')">拒绝</el-button>
-      <el-button v-if="result.content" type="primary" :disabled="!canAccept" @click="$emit('accept')">{{ acceptLabel }}</el-button>
-      <el-button v-if="result.patches.length" type="success" @click="$emit('apply-patches')">应用补丁</el-button>
-    </footer>
+    </div>
+
+    <template v-else>
+      <header>
+        <h3>{{ result.summary || "AI 结果" }}</h3>
+        <el-tag v-if="result.parseError" type="danger">解析失败</el-tag>
+      </header>
+
+      <div class="diff-grid">
+        <div class="diff-pane">
+          <span class="pane-label">原文</span>
+          <div class="pane-content">{{ originalText || emptyOriginalText }}</div>
+        </div>
+        <div class="diff-pane suggested">
+          <span class="pane-label">建议稿</span>
+          <div class="pane-content">{{ result.content }}</div>
+        </div>
+      </div>
+
+      <div v-if="result.risks.length" class="notice risk">
+        <strong>风险</strong>
+        <ul>
+          <li v-for="risk in result.risks" :key="risk">{{ risk }}</li>
+        </ul>
+      </div>
+
+      <div v-if="result.questions.length" class="notice">
+        <strong>待确认</strong>
+        <ul>
+          <li v-for="question in result.questions" :key="question">{{ question }}</li>
+        </ul>
+      </div>
+
+      <footer>
+        <el-button
+          v-for="option in tuneOptions"
+          :key="option.value"
+          size="small"
+          :disabled="!canTune"
+          @click="$emit('tune', option.value)"
+        >
+          {{ option.label }}
+        </el-button>
+        <el-button @click="$emit('reject')">拒绝</el-button>
+        <el-button v-if="result.content" type="primary" :disabled="!canAccept" @click="$emit('accept')">{{ acceptLabel }}</el-button>
+        <el-button v-if="result.patches.length" type="success" @click="$emit('apply-patches')">应用补丁</el-button>
+      </footer>
+    </template>
   </section>
 </template>
 
@@ -63,13 +73,21 @@ withDefaults(defineProps<{
   canAccept?: boolean;
   canTune?: boolean;
   tuneOptions?: TuneOption[];
+  emptyTitle?: string;
+  emptyText?: string;
+  requestLabel?: string;
+  canRequest?: boolean;
 }>(), {
   originalText: "",
   emptyOriginalText: "当前没有选区，不能直接接受为选区改写。",
   acceptLabel: "接受选区改写",
   canAccept: false,
   canTune: false,
-  tuneOptions: () => []
+  tuneOptions: () => [],
+  emptyTitle: "暂无改写结果",
+  emptyText: "选中正文后可生成候选改写。",
+  requestLabel: "润色选区",
+  canRequest: false
 });
 
 defineEmits<{
@@ -77,6 +95,7 @@ defineEmits<{
   reject: [];
   tune: [direction: string];
   "apply-patches": [];
+  request: [];
 }>();
 </script>
 
@@ -103,6 +122,22 @@ defineEmits<{
     font-size: 15px;
     margin: 0;
     color: #1e3a8a;
+  }
+}
+
+.empty-state {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+
+  strong {
+    color: #1e3a8a;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
   }
 }
 

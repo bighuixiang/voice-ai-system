@@ -1,49 +1,65 @@
 <template>
-  <section v-if="candidate" class="recap-panel" aria-label="写后复盘候选">
-    <div class="panel-title">
-      <span>写后复盘候选</span>
-      <el-tag size="small">待确认</el-tag>
+  <section class="recap-panel" aria-label="写后复盘候选">
+    <div v-if="!candidate" class="empty-state">
+      <strong>暂无写作回顾</strong>
+      <p>当前章节保存后可生成一份账本候选。</p>
+      <el-button size="small" type="primary" :loading="loading" :disabled="!canRequest" @click="$emit('request')">
+        生成回顾
+      </el-button>
     </div>
 
-    <p class="summary">{{ candidate.summary }}</p>
+    <template v-else>
+      <div class="panel-title">
+        <span>写后复盘候选</span>
+        <el-tag size="small">待确认</el-tag>
+      </div>
 
-    <div class="recap-section">
-      <h3>新增事实</h3>
-      <ul>
-        <li v-for="fact in candidate.newFacts" :key="fact">{{ fact }}</li>
-      </ul>
-    </div>
+      <p class="summary">{{ candidate.summary }}</p>
 
-    <div class="recap-section">
-      <h3>人物状态变化</h3>
-      <ul>
-        <li v-for="change in candidate.characterStateChanges" :key="change">{{ change }}</li>
-      </ul>
-    </div>
+      <div class="recap-section">
+        <h3>新增事实</h3>
+        <ul>
+          <li v-for="fact in candidate.newFacts" :key="fact">{{ fact }}</li>
+        </ul>
+      </div>
 
-    <div class="ledger-preview">
-      <span>伏笔 {{ candidate.foreshadowingUpdates.length }}</span>
-      <span>风险 {{ candidate.continuityRisks.length }}</span>
-      <span>升级 {{ candidate.powerProgressionUpdates.length }}</span>
-    </div>
+      <div class="recap-section">
+        <h3>人物状态变化</h3>
+        <ul>
+          <li v-for="change in candidate.characterStateChanges" :key="change">{{ change }}</li>
+        </ul>
+      </div>
 
-    <div class="panel-actions">
-      <el-button type="success" size="small" @click="$emit('accept')">接受到账本</el-button>
-      <el-button size="small" @click="$emit('reject')">忽略</el-button>
-    </div>
+      <div class="ledger-preview">
+        <span>伏笔 {{ candidate.foreshadowingUpdates.length }}</span>
+        <span>风险 {{ candidate.continuityRisks.length }}</span>
+        <span>升级 {{ candidate.powerProgressionUpdates.length }}</span>
+      </div>
+
+      <div class="panel-actions">
+        <el-button type="success" size="small" @click="$emit('accept')">接受到账本</el-button>
+        <el-button size="small" @click="$emit('reject')">忽略</el-button>
+      </div>
+    </template>
   </section>
 </template>
 
 <script setup lang="ts">
 import type { WritingRecapCandidate } from "@/types/novel";
 
-defineProps<{
+withDefaults(defineProps<{
   candidate: WritingRecapCandidate | null;
-}>();
+  canRequest?: boolean;
+  loading?: boolean;
+}>(), {
+  canRequest: false,
+  loading: false
+});
 
 defineEmits<{
   accept: [];
   reject: [];
+  request: [];
 }>();
 </script>
 
@@ -53,6 +69,22 @@ defineEmits<{
   border: 1px solid #bfdbfe;
   border-radius: 8px;
   background: #eff6ff;
+}
+
+.empty-state {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+
+  strong {
+    color: #1e3a8a;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+  }
 }
 
 .panel-title {
