@@ -419,6 +419,34 @@ describe("novelApi", () => {
     );
   });
 
+  it("reads AI invocation audit sessions", async () => {
+    mockJson({
+      invocations: [
+        {
+          id: "invocation-1",
+          taskId: "task-1",
+          taskType: "idea.suggest",
+          status: "success",
+          promptSnapshot: { length: 100, preview: "prompt", contextTitles: [] },
+          contextSnapshot: { blockCount: 0, totalChars: 0, blocks: [] },
+          attempt: { index: 1, startedAt: "2026-06-11T00:00:00.000Z" },
+          adoptionDecision: "not-required",
+          proposedPatchTargets: [],
+          acceptedPatchTargets: [],
+          commitResult: { historyAppended: true, invocationAppended: true },
+          createdAt: "2026-06-11T00:00:00.000Z",
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        }
+      ]
+    });
+
+    await expect(novelApi.readAiInvocations("demo")).resolves.toEqual([
+      expect.objectContaining({ id: "invocation-1", taskId: "task-1" })
+    ]);
+
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/tasks/invocations", {});
+  });
+
   it("applies file patches after user confirmation", async () => {
     mockJson({ applied: 1 });
 

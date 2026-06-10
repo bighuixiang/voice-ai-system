@@ -17,7 +17,7 @@ import {
 import { getNovelsRoot } from "./workspace.js";
 import { aiScenarioKeys, mergePlatformAiConfig, readPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 import { createPlatformAsset, linkAssetToProject, readPlatformLibrary } from "./platformLibrary.js";
-import { applyPatch, fallbackProjectCreateResult, runNovelTask } from "./taskService.js";
+import { applyPatch, fallbackProjectCreateResult, readInvocationSessions, runNovelTask } from "./taskService.js";
 import type { AiScenarioConfig, CodexTaskType, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
@@ -450,6 +450,12 @@ export function createApp() {
       return;
     }
     res.json({ task: await runNovelTask(req.params.projectId, type, req.body.payload || {}) });
+  }));
+
+  app.get("/api/novel/projects/:projectId/tasks/invocations", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const invocations = await readInvocationSessions(projectRoot(project.slug));
+    res.json({ invocations });
   }));
 
   app.post("/api/novel/projects/:projectId/selection/polish", asyncRoute(async (req, res) => {

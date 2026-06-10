@@ -352,6 +352,47 @@ export interface NovelTask {
   durationMs?: number;
 }
 
+export type AiInvocationAdoptionDecision = "pending" | "accepted" | "rejected" | "not-required";
+
+export interface AiInvocationSession {
+  id: string;
+  taskId: string;
+  projectId: string;
+  taskType: CodexTaskType;
+  stageKey: string;
+  status: NovelTask["status"];
+  agentProfileId?: string;
+  agentProvider?: AiAgentProvider;
+  modelId?: string;
+  promptSnapshot: {
+    length: number;
+    preview: string;
+    contextTitles: string[];
+  };
+  contextSnapshot: {
+    blockCount: number;
+    totalChars: number;
+    blocks: Array<{ title: string; length: number }>;
+  };
+  attempt: {
+    index: number;
+    startedAt: string;
+    finishedAt?: string;
+    durationMs?: number;
+    exitCode?: number | null;
+    error?: string;
+  };
+  adoptionDecision: AiInvocationAdoptionDecision;
+  proposedPatchTargets: string[];
+  acceptedPatchTargets: string[];
+  commitResult: {
+    historyAppended: boolean;
+    invocationAppended: boolean;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface EditorSelection {
   filePath: string;
   selectedText: string;

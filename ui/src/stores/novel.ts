@@ -4,6 +4,7 @@ import { novelApi } from "@/services/novelApi";
 import type {
   AiAgentCheckResult,
   AiAgentProfile,
+  AiInvocationSession,
   ChapterDashboard,
   ChapterSummary,
   ChapterQualityReport,
@@ -48,6 +49,7 @@ interface WorkspaceCache {
   currentTask: NovelTask | null;
   taskProgress: TaskProgressStep[];
   taskHistory: NovelTask[];
+  aiInvocations: AiInvocationSession[];
   rewriteCandidate: CodexTaskResult | null;
   recapCandidate: WritingRecapCandidate | null;
   qualityReport: ChapterQualityReport | null;
@@ -110,6 +112,7 @@ export const useNovelStore = defineStore("novel", () => {
   const currentTask = ref<NovelTask | null>(null);
   const taskProgress = ref<TaskProgressStep[]>([]);
   const taskHistory = ref<NovelTask[]>([]);
+  const aiInvocations = ref<AiInvocationSession[]>([]);
   const rewriteCandidate = ref<CodexTaskResult | null>(null);
   const recapCandidate = ref<WritingRecapCandidate | null>(null);
   const currentQualityReport = ref<ChapterQualityReport | null>(null);
@@ -797,6 +800,24 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
+  async function loadAiInvocations() {
+    if (!currentProject.value) return;
+    try {
+      aiInvocations.value = await novelApi.readAiInvocations(currentProject.value.slug);
+    } catch {
+      aiInvocations.value = [];
+    }
+  }
+
+  async function refreshAiInvocations() {
+    if (!currentProject.value) return;
+    try {
+      aiInvocations.value = await novelApi.readAiInvocations(currentProject.value.slug);
+    } catch {
+      // Keep the completed task visible even if the audit log cannot be refreshed.
+    }
+  }
+
   function startTaskProgress() {
     const agentLabel = currentProject.value?.ai?.profileId === "claude-code" ? "调用 Claude Code CLI" : "调用 AI 执行器";
     taskProgress.value = [
@@ -854,6 +875,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentTask.value = null;
     taskProgress.value = [];
     taskHistory.value = [];
+    aiInvocations.value = [];
     rewriteCandidate.value = null;
     recapCandidate.value = null;
     currentQualityReport.value = null;
@@ -891,6 +913,7 @@ export const useNovelStore = defineStore("novel", () => {
         currentTask: currentTask.value,
         taskProgress: taskProgress.value,
         taskHistory: taskHistory.value,
+        aiInvocations: aiInvocations.value,
         rewriteCandidate: rewriteCandidate.value,
         recapCandidate: recapCandidate.value,
         qualityReport: currentQualityReport.value,
@@ -929,6 +952,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentTask.value = cached.currentTask;
     taskProgress.value = cached.taskProgress;
     taskHistory.value = cached.taskHistory;
+    aiInvocations.value = cached.aiInvocations || [];
     rewriteCandidate.value = cached.rewriteCandidate;
     recapCandidate.value = cached.recapCandidate;
     currentQualityReport.value = cached.qualityReport || null;
@@ -1227,6 +1251,7 @@ export const useNovelStore = defineStore("novel", () => {
       setTaskProgress("parse", "running");
       currentTask.value = task;
       taskHistory.value.unshift(task);
+      await refreshAiInvocations();
 
       const parsed = task.result ? parseReverseStructureResult(task.result.content, chapterId) : null;
       if (!parsed || task.status === "error") {
@@ -1431,6 +1456,7 @@ export const useNovelStore = defineStore("novel", () => {
     await loadStoryControl();
     await loadLedger(activeLedgerKind.value);
     await loadTaskHistory();
+    await loadAiInvocations();
   }
 
   function showProjectHub(options: WorkspaceSwitchOptions = {}) {
@@ -1564,6 +1590,7 @@ export const useNovelStore = defineStore("novel", () => {
       setTaskProgress("parse", "running");
       currentTask.value = task;
       taskHistory.value.unshift(task);
+      await refreshAiInvocations();
       if (task.result) {
         if (type === "writing.recap") {
           recapCandidate.value = parseRecapCandidate(task.result.content);
@@ -1602,6 +1629,7 @@ export const useNovelStore = defineStore("novel", () => {
       setTaskProgress("parse", "running");
       currentTask.value = task;
       taskHistory.value.unshift(task);
+      await refreshAiInvocations();
       rewriteCandidate.value = task.result || null;
       rewriteSelection.value = task.result ? selectionAnchor : null;
       setTaskProgress("parse", task.status === "error" ? "error" : "done");
@@ -1687,6 +1715,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentTask,
     taskProgress,
     taskHistory,
+    aiInvocations,
     rewriteCandidate,
     recapCandidate,
     currentQualityReport,

@@ -1,6 +1,7 @@
 import type {
   AiAgentCheckResult,
   AiAgentProfile,
+  AiInvocationSession,
   PlatformAiConfig,
   ChapterDashboard,
   ChapterSummary,
@@ -243,6 +244,11 @@ export const novelApi = {
       body: JSON.stringify({ type, payload })
     });
     return data.task;
+  },
+
+  async readAiInvocations(projectId: string): Promise<AiInvocationSession[]> {
+    const data = await request<{ invocations: AiInvocationSession[] }>(`/api/novel/projects/${projectId}/tasks/invocations`);
+    return data.invocations;
   },
 
   async polishSelection(projectId: string, selection: EditorSelection & { chapterId: string; mode: string }): Promise<NovelTask> {

@@ -86,6 +86,49 @@ describe("novel API routes", () => {
     expect(readAfter.data.content).toBe("manual draft");
   });
 
+  it("reads AI invocation audit sessions", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Audit Demo",
+        roughIdea: "Track every AI call."
+      })
+    });
+    const slug = created.data.project.slug;
+    const invocation = {
+      id: "invocation-1",
+      taskId: "task-1",
+      projectId: slug,
+      taskType: "chapter.plan",
+      stageKey: "chapter.plan",
+      status: "success",
+      promptSnapshot: { length: 100, preview: "Plan chapter", contextTitles: ["Project"] },
+      contextSnapshot: { blockCount: 1, totalChars: 20, blocks: [{ title: "Project", length: 20 }] },
+      attempt: { index: 1, startedAt: "2026-06-11T00:00:00.000Z", durationMs: 12, exitCode: 0 },
+      adoptionDecision: "pending",
+      proposedPatchTargets: ["outline/chapter-001.md"],
+      acceptedPatchTargets: [],
+      commitResult: { historyAppended: true, invocationAppended: true },
+      createdAt: "2026-06-11T00:00:00.000Z",
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    };
+    await fs.appendFile(path.join(tempRoot, slug, "tasks", "invocations.jsonl"), `${JSON.stringify(invocation)}\nnot-json\n`, "utf8");
+
+    const response = await jsonFetch<{ invocations: Array<{ id: string; taskType: string; proposedPatchTargets: string[] }> }>(
+      `/api/novel/projects/${slug}/tasks/invocations`
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.invocations).toEqual([
+      expect.objectContaining({
+        id: "invocation-1",
+        taskType: "chapter.plan",
+        proposedPatchTargets: ["outline/chapter-001.md"]
+      })
+    ]);
+  });
+
   it("keeps duplicate project titles in separate folders", async () => {
     const body = JSON.stringify({
       title: "Demo Novel",

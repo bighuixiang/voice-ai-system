@@ -324,7 +324,7 @@
           :collapsed="panelCollapsed('task-history', store.taskHistory.length === 0)"
           @update:collapsed="setPanelCollapsed('task-history', $event)"
         >
-          <TaskHistoryPanel :tasks="store.taskHistory" />
+          <TaskHistoryPanel :tasks="store.taskHistory" :invocations="store.aiInvocations" />
         </CollapsiblePanel>
         <CollapsiblePanel
           v-if="store.writingMode === 'structure'"

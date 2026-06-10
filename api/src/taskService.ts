@@ -30,6 +30,30 @@ async function appendInvocationSession(root: string, session: AiInvocationSessio
   await fs.appendFile(invocationPath, `${JSON.stringify(session)}\n`, "utf8");
 }
 
+export async function readInvocationSessions(root: string): Promise<AiInvocationSession[]> {
+  const invocationPath = resolveInside(root, "tasks/invocations.jsonl");
+  let content = "";
+  try {
+    content = await fs.readFile(invocationPath, "utf8");
+  } catch {
+    return [];
+  }
+
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line) as AiInvocationSession;
+      } catch {
+        return null;
+      }
+    })
+    .filter((session): session is AiInvocationSession => Boolean(session?.id && session.taskId && session.taskType))
+    .sort((left, right) => Date.parse(right.attempt.startedAt || right.createdAt) - Date.parse(left.attempt.startedAt || left.createdAt));
+}
+
 function previewText(input: string, limit = 240): string {
   const normalized = input.replace(/\s+/g, " ").trim();
   return normalized.length > limit ? `${normalized.slice(0, limit)}...` : normalized;

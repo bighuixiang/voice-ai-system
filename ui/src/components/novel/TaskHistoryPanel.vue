@@ -11,6 +11,7 @@
           </el-tag>
         </div>
         <p>{{ task.outputSummary || task.inputSummary || task.error }}</p>
+        <small v-if="auditSummary(task)" class="audit">{{ auditSummary(task) }}</small>
         <small>{{ formatTime(task.finishedAt || task.startedAt) }}</small>
       </li>
     </ol>
@@ -18,10 +19,11 @@
 </template>
 
 <script setup lang="ts">
-import type { CodexTaskType, NovelTask } from "@/types/novel";
+import type { AiInvocationSession, CodexTaskType, NovelTask } from "@/types/novel";
 
-defineProps<{
+const props = defineProps<{
   tasks: NovelTask[];
+  invocations?: AiInvocationSession[];
 }>();
 
 const labels: Partial<Record<CodexTaskType, string>> = {
@@ -64,6 +66,31 @@ function formatTime(value?: string) {
     hour: "2-digit",
     minute: "2-digit"
   });
+}
+
+function formatCount(value: number) {
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
+  return String(value);
+}
+
+function decisionLabel(value: AiInvocationSession["adoptionDecision"]) {
+  const labels: Record<AiInvocationSession["adoptionDecision"], string> = {
+    pending: "pending",
+    accepted: "accepted",
+    rejected: "rejected",
+    "not-required": "no patch"
+  };
+  return labels[value];
+}
+
+function auditSummary(task: NovelTask) {
+  const invocation = props.invocations?.find((item) => item.taskId === task.id);
+  if (!invocation) return "";
+  const agent = [invocation.agentProvider, invocation.modelId].filter(Boolean).join("/");
+  const patches = invocation.proposedPatchTargets.length ? ` · patches ${invocation.proposedPatchTargets.length}` : "";
+  return `${agent || "agent"} · ctx ${invocation.contextSnapshot.blockCount} · prompt ${formatCount(
+    invocation.promptSnapshot.length
+  )}${patches} · ${decisionLabel(invocation.adoptionDecision)}`;
 }
 </script>
 
@@ -118,5 +145,9 @@ small {
   margin-top: 3px;
   color: var(--app-text-muted);
   font-size: 11px;
+}
+
+.audit {
+  color: var(--app-text-primary);
 }
 </style>

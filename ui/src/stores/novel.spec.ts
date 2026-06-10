@@ -2,6 +2,7 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useNovelStore } from "./novel";
 import type {
+  AiInvocationSession,
   ChapterDashboard,
   ChapterFactPatch,
   ChapterSummary,
@@ -35,6 +36,7 @@ const mockNovelApi = vi.hoisted(() => ({
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
   acceptWritingRecap: vi.fn(),
+  readAiInvocations: vi.fn(),
   runTask: vi.fn(),
   polishSelection: vi.fn(),
   applyPatches: vi.fn()
@@ -162,6 +164,29 @@ function taskWithResult(overrides: Partial<NovelTask> = {}): NovelTask {
       patches: []
     },
     ...overrides
+  };
+}
+
+function invocationForTask(taskId = "task-1"): AiInvocationSession {
+  return {
+    id: "invocation-1",
+    taskId,
+    projectId: "demo",
+    taskType: "idea.suggest",
+    stageKey: "idea.suggest",
+    status: "success",
+    agentProfileId: "codex-cli",
+    agentProvider: "codex",
+    modelId: "gpt-5",
+    promptSnapshot: { length: 1200, preview: "prompt", contextTitles: ["Project"] },
+    contextSnapshot: { blockCount: 1, totalChars: 80, blocks: [{ title: "Project", length: 80 }] },
+    attempt: { index: 1, startedAt: "2026-06-03T00:00:00.000Z", durationMs: 12, exitCode: 0 },
+    adoptionDecision: "not-required",
+    proposedPatchTargets: [],
+    acceptedPatchTargets: [],
+    commitResult: { historyAppended: true, invocationAppended: true },
+    createdAt: "2026-06-03T00:00:00.000Z",
+    updatedAt: "2026-06-03T00:00:00.000Z"
   };
 }
 
@@ -300,6 +325,7 @@ describe("useNovelStore", () => {
         updatedAt: "2026-06-04T00:00:00.000Z"
       }
     }));
+    mockNovelApi.readAiInvocations.mockResolvedValue([]);
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
     mockNovelApi.createPlatformAsset.mockResolvedValue({
@@ -952,6 +978,7 @@ describe("useNovelStore", () => {
 
   it("runs an AI task with current chapter context and stores the result", async () => {
     mockNovelApi.runTask.mockResolvedValue(taskWithResult());
+    mockNovelApi.readAiInvocations.mockResolvedValue([invocationForTask()]);
     const store = useNovelStore();
     store.currentProject = project;
     store.currentChapter = project.chapters[1];
@@ -970,6 +997,8 @@ describe("useNovelStore", () => {
     );
     expect(store.currentTask?.id).toBe("task-1");
     expect(store.taskHistory).toHaveLength(1);
+    expect(mockNovelApi.readAiInvocations).toHaveBeenCalledWith("demo");
+    expect(store.aiInvocations).toEqual([invocationForTask()]);
     expect(store.rewriteCandidate?.summary).toBe("Generated ideas");
     expect(store.taskProgress.every((step) => step.status === "done")).toBe(true);
   });
