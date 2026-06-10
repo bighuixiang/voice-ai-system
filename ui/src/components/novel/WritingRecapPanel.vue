@@ -16,10 +16,28 @@
 
       <p class="summary">{{ candidate.summary }}</p>
 
+      <div v-if="candidate.summaryPatch" class="recap-section">
+        <h3>章节摘要补丁</h3>
+        <p class="patch-note">{{ candidate.summaryPatch.summary || candidate.summary }}</p>
+        <ul v-if="candidate.summaryPatch.keyEvents?.length">
+          <li v-for="event in candidate.summaryPatch.keyEvents" :key="event">{{ event }}</li>
+        </ul>
+      </div>
+
       <div class="recap-section">
         <h3>新增事实</h3>
         <ul>
           <li v-for="fact in candidate.newFacts" :key="fact">{{ fact }}</li>
+        </ul>
+      </div>
+
+      <div v-if="candidate.factPatches?.length" class="recap-section">
+        <h3>事实补丁</h3>
+        <ul>
+          <li v-for="fact in candidate.factPatches" :key="fact.id">
+            <strong>{{ fact.fact }}</strong>
+            <span v-if="fact.relatedEntities.length"> - {{ fact.relatedEntities.join(" / ") }}</span>
+          </li>
         </ul>
       </div>
 
@@ -30,10 +48,32 @@
         </ul>
       </div>
 
+      <div v-if="candidate.characterStatePatches?.length" class="recap-section">
+        <h3>人物状态补丁</h3>
+        <ul>
+          <li v-for="change in candidate.characterStatePatches" :key="change.id">
+            <strong>{{ change.characterName }}</strong>
+            <span> - {{ change.after }}</span>
+            <small v-if="change.cause">{{ change.cause }}</small>
+          </li>
+        </ul>
+      </div>
+
       <div class="ledger-preview">
         <span>伏笔 {{ candidate.foreshadowingUpdates.length }}</span>
         <span>风险 {{ candidate.continuityRisks.length }}</span>
         <span>升级 {{ candidate.powerProgressionUpdates.length }}</span>
+      </div>
+
+      <div v-if="ledgerPatchItems.length" class="recap-section">
+        <h3>账本补丁</h3>
+        <ul>
+          <li v-for="entry in ledgerPatchItems" :key="entry.id">
+            <strong>{{ entry.title }}</strong>
+            <span> - {{ entry.kind }} / {{ entry.status }} / {{ entry.severity }}</span>
+            <small>{{ entry.note }}</small>
+          </li>
+        </ul>
       </div>
 
       <div class="panel-actions">
@@ -45,9 +85,10 @@
 </template>
 
 <script setup lang="ts">
-import type { WritingRecapCandidate } from "@/types/novel";
+import { computed } from "vue";
+import type { LedgerEntry, WritingRecapCandidate } from "@/types/novel";
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   candidate: WritingRecapCandidate | null;
   canRequest?: boolean;
   loading?: boolean;
@@ -55,6 +96,11 @@ withDefaults(defineProps<{
   canRequest: false,
   loading: false
 });
+
+const ledgerPatchItems = computed<LedgerEntry[]>(() => [
+  ...(props.candidate?.ledgerPatches || []),
+  ...(props.candidate?.riskPatches || [])
+]);
 
 defineEmits<{
   accept: [];
@@ -117,6 +163,18 @@ defineEmits<{
     color: var(--app-text-secondary);
     line-height: 1.6;
   }
+
+  small {
+    display: block;
+    color: var(--app-text-muted);
+    font-size: 12px;
+  }
+}
+
+.patch-note {
+  margin: 0 0 6px;
+  color: var(--app-text-secondary);
+  line-height: 1.5;
 }
 
 .ledger-preview {

@@ -23,7 +23,48 @@ const candidate: WritingRecapCandidate = {
   ],
   continuityRisks: [],
   powerProgressionUpdates: [],
-  createdAt: "2026-06-04T00:00:00.000Z"
+  createdAt: "2026-06-04T00:00:00.000Z",
+  summaryPatch: {
+    summary: "The chapter memory records the blood cost.",
+    keyEvents: ["The gate answered blood."]
+  },
+  factPatches: [
+    {
+      id: "fact-1",
+      chapterId: "chapter-001",
+      fact: "The seal responds to blood.",
+      relatedEntities: ["seal"],
+      status: "pending",
+      createdAt: "2026-06-04T00:00:00.000Z",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
+  characterStatePatches: [
+    {
+      id: "character-state-1",
+      chapterId: "chapter-001",
+      characterName: "Hero",
+      after: "Wounded and wary.",
+      cause: "Paid blood to test the gate.",
+      relatedEntities: ["Hero"],
+      status: "pending",
+      createdAt: "2026-06-04T00:00:00.000Z",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
+  riskPatches: [
+    {
+      id: "risk-1",
+      kind: "risk",
+      title: "POV boundary",
+      status: "watch",
+      severity: "medium",
+      chapterIds: ["chapter-001"],
+      relatedEntities: ["Hero"],
+      note: "Do not reveal hidden lore.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ]
 };
 
 const stubs = {
@@ -44,6 +85,10 @@ describe("WritingRecapPanel", () => {
     expect(wrapper.text()).toContain("A cost was paid for the clue.");
     expect(wrapper.text()).toContain("Blood can wake the mark.");
     expect(wrapper.text()).toContain("The hero is more wary.");
+    expect(wrapper.text()).toContain("The chapter memory records the blood cost.");
+    expect(wrapper.text()).toContain("The seal responds to blood.");
+    expect(wrapper.text()).toContain("Wounded and wary.");
+    expect(wrapper.text()).toContain("POV boundary");
     expect(wrapper.text()).toContain("伏笔 1");
 
     const buttons = wrapper.findAll("button");
