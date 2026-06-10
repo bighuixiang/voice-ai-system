@@ -1,5 +1,8 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import type { LedgerEntry, NovelChapter, NovelProject, StoryGraphEdge, StoryGraphNode, StoryGraphProjection } from "./types.js";
 import { readLedgerEntries, readStoryControl } from "./writingCockpit.js";
+import { resolveInside } from "./pathSafety.js";
 
 const ledgerKinds: LedgerEntry["kind"][] = ["foreshadowing", "continuity", "power", "character", "risk"];
 
@@ -172,10 +175,14 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
     }
   }
 
-  return {
+  const projection = {
     projectSlug: project.slug,
     nodes: [...nodes.values()],
     edges: [...edges.values()],
     updatedAt: nowIso()
   };
+  const target = resolveInside(root, "story-graph/storyline.json");
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.writeFile(target, `${JSON.stringify(projection, null, 2)}\n`, "utf8");
+  return projection;
 }

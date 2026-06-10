@@ -264,9 +264,11 @@ describe("novelProject", () => {
     const risks = JSON.parse(await fs.readFile(path.join(root, "ledger", "risks.json"), "utf8"));
     const memoryDir = await fs.stat(path.join(root, "memory", "chapter-summaries"));
     const knowledgeDir = await fs.stat(path.join(root, "knowledge"));
+    const storyGraphDir = await fs.stat(path.join(root, "story-graph"));
     const facts = await fs.readFile(path.join(root, "knowledge", "facts.jsonl"), "utf8");
     const triples = await fs.readFile(path.join(root, "knowledge", "triples.jsonl"), "utf8");
     const chapterIndex = JSON.parse(await fs.readFile(path.join(root, "memory", "chapter-index.json"), "utf8"));
+    const storyline = JSON.parse(await fs.readFile(path.join(root, "story-graph", "storyline.json"), "utf8"));
     const chapterSummary = JSON.parse(
       await fs.readFile(path.join(root, "memory", "chapter-summaries", "chapter-001.json"), "utf8")
     );
@@ -294,10 +296,13 @@ describe("novelProject", () => {
     expect(risks).toEqual([]);
     expect(memoryDir.isDirectory()).toBe(true);
     expect(knowledgeDir.isDirectory()).toBe(true);
+    expect(storyGraphDir.isDirectory()).toBe(true);
     expect(facts).toBe("");
     expect(triples).toBe("");
     expect(chapterIndex).toEqual(expect.objectContaining({ projectSlug: "cockpit-demo", chapters: [], keywords: {} }));
     expect(chapterIndex.updatedAt).toEqual(expect.any(String));
+    expect(storyline).toEqual(expect.objectContaining({ projectSlug: "cockpit-demo", nodes: [], edges: [] }));
+    expect(storyline.updatedAt).toEqual(expect.any(String));
     expect(chapterSummary).toEqual(
       expect.objectContaining({
         chapterId: "chapter-001",

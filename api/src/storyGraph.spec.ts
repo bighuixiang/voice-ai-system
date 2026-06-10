@@ -92,6 +92,7 @@ describe("storyGraph", () => {
     ]);
 
     const graph = await buildStoryGraphProjection(root, project);
+    const saved = JSON.parse(await fs.readFile(path.join(root, "story-graph", "storyline.json"), "utf8"));
 
     expect(graph.nodes).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "arc:arc-main", type: "arc" }),
@@ -105,5 +106,10 @@ describe("storyGraph", () => {
       expect.objectContaining({ source: "ledger:foreshadow-1", target: "chapter:chapter-001", type: "tracks" }),
       expect.objectContaining({ source: "ledger:foreshadow-1", target: "character:hero", type: "references" })
     ]));
+    expect(saved).toMatchObject({
+      projectSlug: project.slug,
+      nodes: expect.arrayContaining([expect.objectContaining({ id: "event:gate-opens" })]),
+      edges: expect.arrayContaining([expect.objectContaining({ source: "event:gate-opens", target: "character:hero" })])
+    });
   });
 });

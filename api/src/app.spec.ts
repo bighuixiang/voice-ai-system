@@ -156,6 +156,9 @@ describe("novel API routes", () => {
     expect(response.data.graph.projectSlug).toBe("graph-route-demo");
     expect(response.data.graph.nodes).toEqual(expect.arrayContaining([expect.objectContaining({ type: "chapter" })]));
     expect(response.data.graph.edges).toEqual(expect.any(Array));
+    await expect(
+      fs.readFile(path.join(tempRoot, "graph-route-demo", "story-graph", "storyline.json"), "utf8")
+    ).resolves.toContain('"projectSlug": "graph-route-demo"');
   });
 
   it("reads and rebuilds a project knowledge index", async () => {
