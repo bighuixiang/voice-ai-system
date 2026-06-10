@@ -241,6 +241,7 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "scenes",
     "ledger",
     "memory/chapter-summaries",
+    "quality",
     "style",
     "tasks",
     "assets/characters",

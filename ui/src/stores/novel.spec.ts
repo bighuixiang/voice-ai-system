@@ -5,6 +5,7 @@ import type {
   AiInvocationSession,
   ChapterDashboard,
   ChapterFactPatch,
+  ChapterQualityReport,
   ChapterSummary,
   CharacterStatePatch,
   LedgerEntry,
@@ -31,6 +32,8 @@ const mockNovelApi = vi.hoisted(() => ({
   saveSceneCards: vi.fn(),
   readChapterSummary: vi.fn(),
   saveChapterSummary: vi.fn(),
+  readChapterQualityReport: vi.fn(),
+  saveChapterQualityReport: vi.fn(),
   readStoryControl: vi.fn(),
   saveStoryControl: vi.fn(),
   readLedgerEntries: vi.fn(),
@@ -307,6 +310,8 @@ describe("useNovelStore", () => {
       updatedAt: "2026-06-04T00:00:00.000Z"
     }));
     mockNovelApi.saveChapterSummary.mockImplementation(async (_projectId: string, _chapterId: string, summary: ChapterSummary) => summary);
+    mockNovelApi.readChapterQualityReport.mockResolvedValue(null);
+    mockNovelApi.saveChapterQualityReport.mockImplementation(async (_projectId: string, report: ChapterQualityReport) => report);
     mockNovelApi.readStoryControl.mockResolvedValue(storyControl);
     mockNovelApi.saveStoryControl.mockImplementation(async (_projectId: string, control: StoryControl) => control);
     mockNovelApi.readLedgerEntries.mockResolvedValue([]);
@@ -487,6 +492,15 @@ describe("useNovelStore", () => {
       }
     ];
     mockNovelApi.readSceneCards.mockResolvedValueOnce(scenes);
+    mockNovelApi.readChapterQualityReport.mockResolvedValueOnce({
+      chapterId: "chapter-002",
+      overallScore: 78,
+      summary: "Saved report.",
+      metrics: [],
+      strengths: [],
+      fixes: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
 
     const store = useNovelStore();
     store.projects = [project];
@@ -495,9 +509,11 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readChapterDashboard).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readSceneCards).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readChapterSummary).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readChapterQualityReport).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
     expect(store.currentDashboard?.chapterId).toBe("chapter-002");
     expect(store.currentChapterSummary?.chapterId).toBe("chapter-002");
+    expect(store.currentQualityReport?.overallScore).toBe(78);
     expect(store.sceneCards).toEqual(scenes);
     expect(store.activeLedgerKind).toBe("foreshadowing");
   });
@@ -1242,9 +1258,13 @@ describe("useNovelStore", () => {
     await store.openChapter(project.chapters[0]);
     store.updateContent("他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然传来回应，他必须选择是否暴露身份。");
 
-    const diagnosed = store.diagnoseCurrentChapter();
+    const diagnosed = await store.diagnoseCurrentChapter();
 
     expect(diagnosed).toBe(true);
+    expect(mockNovelApi.saveChapterQualityReport).toHaveBeenCalledWith(
+      "demo",
+      expect.objectContaining({ chapterId: "chapter-001" })
+    );
     expect(store.currentQualityReport).toMatchObject({
       chapterId: "chapter-001",
       metrics: expect.arrayContaining([expect.objectContaining({ key: "conflict" })])

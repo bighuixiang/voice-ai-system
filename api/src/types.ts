@@ -16,6 +16,7 @@ export type NovelTaskStatus = "pending" | "running" | "success" | "error" | "can
 export type CreativeModuleKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
 export type AiAgentProvider = "codex" | "claude-code";
 export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
+export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook";
 
 export interface AiAgentModelOption {
   id: string;
@@ -81,6 +82,23 @@ export interface ChapterDashboard {
   status: "empty" | "planned" | "drafting" | "drafted" | "reviewing" | "checked";
   unresolvedForeshadowingIds: string[];
   continuityRiskIds: string[];
+  updatedAt: string;
+}
+
+export interface ChapterQualityMetric {
+  key: QualityMetricKey;
+  label: string;
+  score: number;
+  note: string;
+}
+
+export interface ChapterQualityReport {
+  chapterId: string;
+  overallScore: number;
+  summary: string;
+  metrics: ChapterQualityMetric[];
+  strengths: string[];
+  fixes: string[];
   updatedAt: string;
 }
 

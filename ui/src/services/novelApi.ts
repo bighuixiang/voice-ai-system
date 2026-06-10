@@ -4,6 +4,7 @@ import type {
   AiInvocationSession,
   PlatformAiConfig,
   ChapterDashboard,
+  ChapterQualityReport,
   ChapterSummary,
   CodexTaskType,
   EditorSelection,
@@ -224,6 +225,20 @@ export const novelApi = {
       }
     );
     return data.summary;
+  },
+
+  async readChapterQualityReport(projectId: string, chapterId: string): Promise<ChapterQualityReport | null> {
+    const data = await request<{ report: ChapterQualityReport | null }>(`/api/novel/projects/${projectId}/quality/${chapterId}`);
+    return data.report;
+  },
+
+  async saveChapterQualityReport(projectId: string, report: ChapterQualityReport): Promise<ChapterQualityReport> {
+    const data = await request<{ report: ChapterQualityReport }>(`/api/novel/projects/${projectId}/quality/${report.chapterId}`, {
+      method: "PUT",
+      headers: jsonHeaders,
+      body: JSON.stringify({ report })
+    });
+    return data.report;
   },
 
   async acceptWritingRecap(

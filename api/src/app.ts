@@ -23,11 +23,13 @@ import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./databas
 import {
   acceptWritingRecapPatches,
   readChapterDashboard,
+  readChapterQualityReport,
   readChapterSummary,
   readLedgerEntries,
   readSceneCards,
   readStoryControl,
   saveChapterDashboard,
+  saveChapterQualityReport,
   saveChapterSummary,
   saveLedgerEntries,
   saveSceneCards,
@@ -389,6 +391,22 @@ export function createApp() {
       chapterId: req.params.chapterId
     });
     res.json({ summary });
+  }));
+
+  app.get("/api/novel/projects/:projectId/quality/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const report = await readChapterQualityReport(projectRoot(project.slug), req.params.chapterId);
+    res.json({ report });
+  }));
+
+  app.put("/api/novel/projects/:projectId/quality/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const reportInput = req.body.report || req.body || {};
+    const report = await saveChapterQualityReport(projectRoot(project.slug), {
+      ...reportInput,
+      chapterId: req.params.chapterId
+    });
+    res.json({ report });
   }));
 
   app.post("/api/novel/projects/:projectId/recaps/accept", asyncRoute(async (req, res) => {

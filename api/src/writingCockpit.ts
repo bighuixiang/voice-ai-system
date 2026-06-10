@@ -3,6 +3,7 @@ import path from "node:path";
 import type {
   ChapterDashboard,
   ChapterFactPatch,
+  ChapterQualityReport,
   ChapterSummary,
   CharacterStatePatch,
   LedgerEntry,
@@ -140,6 +141,10 @@ function chapterSummaryPath(chapterId: string): string {
   return `memory/chapter-summaries/${chapterId}.json`;
 }
 
+function chapterQualityPath(chapterId: string): string {
+  return `quality/${chapterId}.json`;
+}
+
 function storyControlPath(): string {
   return "story-control/story-control.json";
 }
@@ -236,6 +241,22 @@ export async function saveChapterSummary(root: string, summary: ChapterSummary):
     updatedAt: summary.updatedAt || nowIso()
   };
   await writeJsonFile(root, chapterSummaryPath(summary.chapterId), normalized);
+  return normalized;
+}
+
+export async function readChapterQualityReport(root: string, chapterId: string): Promise<ChapterQualityReport | null> {
+  return readJsonFile<ChapterQualityReport | null>(root, chapterQualityPath(chapterId), null);
+}
+
+export async function saveChapterQualityReport(root: string, report: ChapterQualityReport): Promise<ChapterQualityReport> {
+  const normalized: ChapterQualityReport = {
+    ...report,
+    metrics: report.metrics || [],
+    strengths: report.strengths || [],
+    fixes: report.fixes || [],
+    updatedAt: report.updatedAt || nowIso()
+  };
+  await writeJsonFile(root, chapterQualityPath(report.chapterId), normalized);
   return normalized;
 }
 

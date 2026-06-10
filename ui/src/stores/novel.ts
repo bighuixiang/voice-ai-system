@@ -604,7 +604,7 @@ export const useNovelStore = defineStore("novel", () => {
     };
   }
 
-  function diagnoseCurrentChapter() {
+  async function diagnoseCurrentChapter() {
     const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
     const content = currentContent.value.trim();
     if (!chapterId || !content || !canDiagnoseChapter.value) return false;
@@ -662,7 +662,7 @@ export const useNovelStore = defineStore("novel", () => {
     const lowMetrics = [...metrics].sort((left, right) => left.score - right.score).slice(0, 2);
     const highMetrics = metrics.filter((metric) => metric.score >= 72).slice(0, 2);
 
-    currentQualityReport.value = {
+    const report: ChapterQualityReport = {
       chapterId,
       overallScore,
       summary:
@@ -674,6 +674,10 @@ export const useNovelStore = defineStore("novel", () => {
       fixes: lowMetrics.map((metric) => `${metric.label}：${metric.note}`),
       updatedAt: new Date().toISOString()
     };
+    currentQualityReport.value = report;
+    if (currentProject.value) {
+      currentQualityReport.value = await novelApi.saveChapterQualityReport(currentProject.value.slug, report);
+    }
     return true;
   }
 
@@ -1125,10 +1129,11 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function loadChapterCockpit(chapterId: string) {
     if (!currentProject.value) return;
-    const [dashboard, cards, summary] = await Promise.all([
+    const [dashboard, cards, summary, qualityReport] = await Promise.all([
       novelApi.readChapterDashboard(currentProject.value.slug, chapterId),
       novelApi.readSceneCards(currentProject.value.slug, chapterId),
-      novelApi.readChapterSummary(currentProject.value.slug, chapterId)
+      novelApi.readChapterSummary(currentProject.value.slug, chapterId),
+      novelApi.readChapterQualityReport(currentProject.value.slug, chapterId)
     ]);
     currentDashboard.value = {
       ...dashboard,
@@ -1136,6 +1141,7 @@ export const useNovelStore = defineStore("novel", () => {
     };
     sceneCards.value = cards;
     currentChapterSummary.value = summary;
+    currentQualityReport.value = qualityReport;
   }
 
   async function loadStoryControl() {
@@ -1398,7 +1404,7 @@ export const useNovelStore = defineStore("novel", () => {
     }
     if (action === "diagnose") {
       setWritingMode("review");
-      diagnoseCurrentChapter();
+      await diagnoseCurrentChapter();
       return;
     }
     if (action === "request-recap") {

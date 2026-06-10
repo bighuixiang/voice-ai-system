@@ -518,6 +518,33 @@ describe("novel API routes", () => {
       keyEvents: ["The hero bleeds."]
     });
 
+    const qualityBefore = await jsonFetch<{ report: null }>("/api/novel/projects/memory-demo/quality/chapter-001");
+    expect(qualityBefore.data.report).toBeNull();
+
+    const qualityAfter = await jsonFetch<{ report: { chapterId: string; overallScore: number; metrics: unknown[] } }>(
+      "/api/novel/projects/memory-demo/quality/chapter-001",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          report: {
+            chapterId: "../unsafe",
+            overallScore: 82,
+            summary: "The chapter has readable pressure.",
+            metrics: [{ key: "conflict", label: "Conflict", score: 82, note: "Clear enough." }],
+            strengths: ["Clear pressure"],
+            fixes: ["Sharpen the hook"],
+            updatedAt: "2026-06-11T00:00:00.000Z"
+          }
+        })
+      }
+    );
+    expect(qualityAfter.data.report).toMatchObject({
+      chapterId: "chapter-001",
+      overallScore: 82,
+      metrics: [expect.objectContaining({ key: "conflict", score: 82 })]
+    });
+
     const accepted = await jsonFetch<{ summary: { chapterId: string; summary: string; keyEvents: string[] } }>(
       "/api/novel/projects/memory-demo/recaps/accept",
       {
