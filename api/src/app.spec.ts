@@ -146,6 +146,57 @@ describe("novel API routes", () => {
     expect(response.data.graph.edges).toEqual(expect.any(Array));
   });
 
+  it("reads and rebuilds a project knowledge index", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Knowledge Route Demo", roughIdea: "Expose searchable project memory." })
+    });
+    const slug = created.data.project.slug;
+    const summary = {
+      chapterId: "chapter-001",
+      summary: "The sealed gate responds to blood.",
+      keyEvents: ["The talisman burns."],
+      newFacts: [
+        {
+          id: "fact-gate",
+          chapterId: "chapter-001",
+          fact: "The gate responds to blood.",
+          relatedEntities: ["Hero"],
+          status: "accepted",
+          createdAt: "2026-06-11T00:00:00.000Z",
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        }
+      ],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    };
+    await jsonFetch(`/api/novel/projects/${slug}/memory/chapter-summaries/chapter-001`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ summary })
+    });
+
+    const before = await jsonFetch<{ index: { facts: unknown[]; chapterIndex: { chapters: unknown[] } } }>(
+      `/api/novel/projects/${slug}/knowledge/index`
+    );
+    const rebuilt = await jsonFetch<{
+      index: { facts: Array<{ id: string }>; triples: unknown[]; chapterIndex: { keywords: Record<string, string[]> } };
+    }>(`/api/novel/projects/${slug}/knowledge/index/rebuild`, { method: "POST" });
+
+    expect(before.status).toBe(200);
+    expect(before.data.index.facts).toEqual([]);
+    expect(before.data.index.chapterIndex.chapters).toEqual([]);
+    expect(rebuilt.status).toBe(200);
+    expect(rebuilt.data.index.facts).toEqual(expect.arrayContaining([expect.objectContaining({ id: "fact:fact-gate" })]));
+    expect(rebuilt.data.index.triples).toEqual(expect.any(Array));
+    expect(rebuilt.data.index.chapterIndex.keywords.blood).toContain("chapter-001");
+  });
+
   it("keeps duplicate project titles in separate folders", async () => {
     const body = JSON.stringify({
       title: "Demo Novel",

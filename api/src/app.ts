@@ -19,6 +19,7 @@ import { aiScenarioKeys, mergePlatformAiConfig, readPlatformAiConfig, writePlatf
 import { createPlatformAsset, linkAssetToProject, readPlatformLibrary } from "./platformLibrary.js";
 import { applyPatch, fallbackProjectCreateResult, readInvocationSessions, runNovelTask } from "./taskService.js";
 import { buildStoryGraphProjection } from "./storyGraph.js";
+import { readKnowledgeIndex, rebuildKnowledgeIndex } from "./knowledgeIndex.js";
 import type { AiScenarioConfig, CodexTaskType, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
@@ -420,6 +421,18 @@ export function createApp() {
     const project = await readProject(req.params.projectId);
     const summary = await acceptWritingRecapPatches(projectRoot(project.slug), req.body.recap || req.body || {});
     res.json({ summary });
+  }));
+
+  app.get("/api/novel/projects/:projectId/knowledge/index", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const index = await readKnowledgeIndex(projectRoot(project.slug), project);
+    res.json({ index });
+  }));
+
+  app.post("/api/novel/projects/:projectId/knowledge/index/rebuild", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const index = await rebuildKnowledgeIndex(projectRoot(project.slug), project);
+    res.json({ index });
   }));
 
   app.get("/api/novel/projects/:projectId/ledger/:kind", asyncRoute(async (req, res) => {

@@ -9,6 +9,9 @@ import type {
   ChapterDashboard,
   ChapterSummary,
   CharacterStatePatch,
+  KnowledgeFact,
+  KnowledgeIndexProjection,
+  KnowledgeTriple,
   LedgerEntry,
   SceneCard,
   WritingBriefing,
@@ -146,12 +149,54 @@ describe("novelProject", () => {
       characterStatePatches: [characterPatch],
       riskPatches: [ledgerEntry]
     };
+    const knowledgeFact: KnowledgeFact = {
+      id: "fact-seal-blood",
+      text: "The seal responds to blood.",
+      chapterIds: ["chapter-001"],
+      relatedEntities: ["sealed gate"],
+      keywords: ["seal", "blood"],
+      source: { type: "chapter-summary", id: "fact-1" },
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const knowledgeTriple: KnowledgeTriple = {
+      id: "triple-hero-state",
+      subject: "涓昏",
+      predicate: "state_after",
+      object: "Wounded but aware the seal is alive.",
+      chapterIds: ["chapter-001"],
+      sourceFactIds: ["fact-seal-blood"],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const knowledgeProjection: KnowledgeIndexProjection = {
+      projectSlug: "demo",
+      facts: [knowledgeFact],
+      triples: [knowledgeTriple],
+      chapterIndex: {
+        projectSlug: "demo",
+        chapters: [
+          {
+            chapterId: "chapter-001",
+            title: "Chapter 1",
+            keywords: ["seal", "blood"],
+            factIds: ["fact-seal-blood"],
+            tripleIds: ["triple-hero-state"],
+            entityNames: ["涓昏"],
+            updatedAt: "2026-06-04T00:00:00.000Z"
+          }
+        ],
+        keywords: { seal: ["chapter-001"] },
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      },
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
 
     expect(scene.chapterId).toBe(dashboard.chapterId);
     expect(briefing.unresolvedForeshadowing[0].id).toBe("risk-1");
     expect(chapterSummary.newFacts[0].status).toBe("pending");
     expect(recap.factPatches?.[0].fact).toBe("The seal responds to blood.");
     expect(recap.powerProgressionUpdates[0].kind).toBe("power");
+    expect(knowledgeProjection.facts[0].source.type).toBe("chapter-summary");
+    expect(knowledgeProjection.triples[0].predicate).toBe("state_after");
   });
 
   it("falls back to a generated slug for non-ascii titles", () => {
@@ -218,6 +263,10 @@ describe("novelProject", () => {
     const characterState = JSON.parse(await fs.readFile(path.join(root, "ledger", "character-state.json"), "utf8"));
     const risks = JSON.parse(await fs.readFile(path.join(root, "ledger", "risks.json"), "utf8"));
     const memoryDir = await fs.stat(path.join(root, "memory", "chapter-summaries"));
+    const knowledgeDir = await fs.stat(path.join(root, "knowledge"));
+    const facts = await fs.readFile(path.join(root, "knowledge", "facts.jsonl"), "utf8");
+    const triples = await fs.readFile(path.join(root, "knowledge", "triples.jsonl"), "utf8");
+    const chapterIndex = JSON.parse(await fs.readFile(path.join(root, "memory", "chapter-index.json"), "utf8"));
     const chapterSummary = JSON.parse(
       await fs.readFile(path.join(root, "memory", "chapter-summaries", "chapter-001.json"), "utf8")
     );
@@ -244,6 +293,11 @@ describe("novelProject", () => {
     expect(characterState).toEqual([]);
     expect(risks).toEqual([]);
     expect(memoryDir.isDirectory()).toBe(true);
+    expect(knowledgeDir.isDirectory()).toBe(true);
+    expect(facts).toBe("");
+    expect(triples).toBe("");
+    expect(chapterIndex).toEqual(expect.objectContaining({ projectSlug: "cockpit-demo", chapters: [], keywords: {} }));
+    expect(chapterIndex.updatedAt).toEqual(expect.any(String));
     expect(chapterSummary).toEqual(
       expect.objectContaining({
         chapterId: "chapter-001",

@@ -283,6 +283,60 @@ export interface WritingRecapCandidate {
   riskPatches?: LedgerEntry[];
 }
 
+export type KnowledgeSourceType = "chapter-summary" | "ledger" | "story-control";
+
+export interface KnowledgeSourceRef {
+  type: KnowledgeSourceType;
+  id: string;
+  label?: string;
+}
+
+export interface KnowledgeFact {
+  id: string;
+  text: string;
+  chapterIds: string[];
+  relatedEntities: string[];
+  keywords: string[];
+  source: KnowledgeSourceRef;
+  updatedAt: string;
+}
+
+export interface KnowledgeTriple {
+  id: string;
+  subject: string;
+  predicate: string;
+  object: string;
+  chapterIds: string[];
+  sourceFactIds: string[];
+  updatedAt: string;
+}
+
+export interface ChapterIndexEntry {
+  chapterId: string;
+  title: string;
+  order?: number;
+  keywords: string[];
+  factIds: string[];
+  tripleIds: string[];
+  entityNames: string[];
+  updatedAt: string;
+}
+
+export interface ChapterMemoryIndex {
+  projectSlug: string;
+  chapters: ChapterIndexEntry[];
+  keywords: Record<string, string[]>;
+  updatedAt: string;
+}
+
+export interface KnowledgeIndexProjection {
+  projectSlug: string;
+  facts: KnowledgeFact[];
+  triples: KnowledgeTriple[];
+  chapterIndex: ChapterMemoryIndex;
+  updatedAt: string;
+}
+
 export interface NovelProject {
   id: string;
   slug: string;
