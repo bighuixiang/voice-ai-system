@@ -598,6 +598,39 @@ describe("novelApi", () => {
     expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/tasks/invocations", {});
   });
 
+  it("starts and reads project background jobs", async () => {
+    const job = {
+      id: "job-1",
+      projectId: "demo",
+      type: "knowledge.index.rebuild",
+      status: "success",
+      inputSummary: "{}",
+      outputSummary: "1 facts / 0 relations",
+      resultRef: "/api/novel/projects/demo/knowledge/index",
+      startedAt: "2026-06-11T00:00:00.000Z",
+      finishedAt: "2026-06-11T00:00:01.000Z",
+      updatedAt: "2026-06-11T00:00:01.000Z"
+    };
+    mockJson({ job });
+    mockJson({ job });
+    mockJson({ jobs: [job] });
+
+    await expect(novelApi.startBackgroundJob("demo", "knowledge.index.rebuild", { reason: "manual" })).resolves.toEqual(job);
+    await expect(novelApi.readBackgroundJob("demo", "job-1")).resolves.toEqual(job);
+    await expect(novelApi.listBackgroundJobs("demo")).resolves.toEqual([job]);
+
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      "/api/novel/projects/demo/jobs",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ type: "knowledge.index.rebuild", payload: { reason: "manual" } })
+      })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/novel/projects/demo/jobs/job-1", {});
+    expect(fetch).toHaveBeenNthCalledWith(3, "/api/novel/projects/demo/jobs", {});
+  });
+
   it("applies file patches after user confirmation", async () => {
     mockJson({ applied: 1 });
 

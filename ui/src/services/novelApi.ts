@@ -3,6 +3,8 @@ import type {
   AiAgentProfile,
   AiInvocationSession,
   AiStageDefinition,
+  BackgroundJob,
+  BackgroundJobType,
   PlatformAiConfig,
   ChapterDashboard,
   ChapterQualityReport,
@@ -320,6 +322,25 @@ export const novelApi = {
   async readProjectAuditReport(projectId: string): Promise<ProjectAuditReport> {
     const data = await request<{ report: ProjectAuditReport }>(`/api/novel/projects/${projectId}/audit-report`);
     return data.report;
+  },
+
+  async listBackgroundJobs(projectId: string): Promise<BackgroundJob[]> {
+    const data = await request<{ jobs: BackgroundJob[] }>(`/api/novel/projects/${projectId}/jobs`);
+    return data.jobs;
+  },
+
+  async readBackgroundJob(projectId: string, jobId: string): Promise<BackgroundJob> {
+    const data = await request<{ job: BackgroundJob }>(`/api/novel/projects/${projectId}/jobs/${jobId}`);
+    return data.job;
+  },
+
+  async startBackgroundJob(projectId: string, type: BackgroundJobType, payload: Record<string, unknown> = {}): Promise<BackgroundJob> {
+    const data = await request<{ job: BackgroundJob }>(`/api/novel/projects/${projectId}/jobs`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ type, payload })
+    });
+    return data.job;
   },
 
   async polishSelection(projectId: string, selection: EditorSelection & { chapterId: string; mode: string }): Promise<NovelTask> {

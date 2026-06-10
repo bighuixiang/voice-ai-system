@@ -23,7 +23,8 @@ import { buildStoryGraphProjection } from "./storyGraph.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
 import { buildCreationRuntimeSnapshot } from "./runtimeSnapshot.js";
 import { buildProjectAuditReport } from "./auditReport.js";
-import type { AiScenarioConfig, CodexTaskType, KnowledgeSearchQuery, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
+import { enqueueProjectBackgroundJob, listProjectBackgroundJobs, readBackgroundJob } from "./backgroundJobs.js";
+import type { AiScenarioConfig, BackgroundJobType, CodexTaskType, KnowledgeSearchQuery, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
   acceptWritingRecapPatches,
@@ -59,6 +60,7 @@ const taskTypes: CodexTaskType[] = [
 
 const protectedWritePaths = new Set(["project.json"]);
 const ledgerKinds = new Set<LedgerEntry["kind"]>(["foreshadowing", "continuity", "power", "character", "risk"]);
+const backgroundJobTypes = new Set<BackgroundJobType>(["knowledge.index.rebuild", "quality.series.rebuild", "story.graph.rebuild"]);
 
 function asyncRoute(handler: RequestHandler): RequestHandler {
   return (req, res, next) => {
@@ -72,6 +74,10 @@ function isProtectedWritePath(relativePath: string): boolean {
 
 function isLedgerKind(kind: string): kind is LedgerEntry["kind"] {
   return ledgerKinds.has(kind as LedgerEntry["kind"]);
+}
+
+function isBackgroundJobType(type: string): type is BackgroundJobType {
+  return backgroundJobTypes.has(type as BackgroundJobType);
 }
 
 function allowedOrigins(): Set<string> {
@@ -461,6 +467,56 @@ export function createApp() {
     const project = await readProject(req.params.projectId);
     const result = await searchKnowledgeIndex(projectRoot(project.slug), project, (req.body || {}) as KnowledgeSearchQuery);
     res.json({ result });
+  }));
+
+  app.get("/api/novel/projects/:projectId/jobs", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    res.json({ jobs: listProjectBackgroundJobs(project.slug) });
+  }));
+
+  app.get("/api/novel/projects/:projectId/jobs/:jobId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const job = readBackgroundJob(project.slug, req.params.jobId);
+    if (!job) {
+      res.status(404).json({ error: "Background job not found" });
+      return;
+    }
+    res.json({ job });
+  }));
+
+  app.post("/api/novel/projects/:projectId/jobs", asyncRoute(async (req, res) => {
+    const type = String(req.body.type || "");
+    if (!isBackgroundJobType(type)) {
+      res.status(400).json({ error: `Unsupported background job type: ${type}` });
+      return;
+    }
+
+    const project = await readProject(req.params.projectId);
+    const root = projectRoot(project.slug);
+    const job = enqueueProjectBackgroundJob(project, type, JSON.stringify(req.body.payload || {}).slice(0, 500), async () => {
+      if (type === "knowledge.index.rebuild") {
+        const index = await rebuildKnowledgeIndex(root, project);
+        return {
+          outputSummary: `${index.facts.length} facts / ${index.triples.length} relations`,
+          resultRef: `/api/novel/projects/${project.slug}/knowledge/index`
+        };
+      }
+      if (type === "quality.series.rebuild") {
+        const metrics = await buildSeriesQualityMetrics(root, project);
+        return {
+          outputSummary: `${metrics.reportCount}/${metrics.chapterCount} chapters reviewed, average ${metrics.averageOverallScore}`,
+          resultRef: `/api/novel/projects/${project.slug}/quality/series-metrics`
+        };
+      }
+
+      const graph = await buildStoryGraphProjection(root, project);
+      return {
+        outputSummary: `${graph.nodes.length} nodes / ${graph.edges.length} relations`,
+        resultRef: `/api/novel/projects/${project.slug}/story-graph`
+      };
+    });
+
+    res.status(202).json({ job });
   }));
 
   app.get("/api/novel/projects/:projectId/ledger/:kind", asyncRoute(async (req, res) => {

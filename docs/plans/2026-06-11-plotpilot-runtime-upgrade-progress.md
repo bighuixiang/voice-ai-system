@@ -48,12 +48,17 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Reports include chapters, persisted quality metrics and trends, task summaries, and AI invocation adoption summaries.
   - Task history UI can download the report as JSON.
 
+- Background job orchestration:
+  - `/api/novel/projects/:projectId/jobs` starts and lists project background jobs.
+  - Jobs support knowledge index rebuilds, series quality rebuilds, and story graph rebuilds.
+  - UI API clients can start jobs and poll job status.
+
 ## Verification
 
 Latest full verification passed:
 
-- API tests: 72 passed, 1 real Codex integration skipped.
-- UI tests: 144 passed.
+- API tests: 73 passed, 1 real Codex integration skipped.
+- UI tests: 145 passed.
 - API build passed.
 - UI build passed.
 
@@ -72,6 +77,7 @@ Known warnings remain unchanged:
 - `497c52e feat: add series tension curve`
 - `08e6c46 feat: export project audit report`
 - `b71198d feat: project quality trends`
+- `1c67938 feat: expand story graph visualization`
 
 Earlier supporting commits in this branch:
 
@@ -83,4 +89,3 @@ Earlier supporting commits in this branch:
 ## Remaining Work
 
 - P2 real vector search or embedding-backed recall.
-- Background job orchestration for heavy indexing and analysis.

@@ -643,6 +643,24 @@ export interface ProjectAuditReport {
   aiInvocations: AiInvocationSession[];
 }
 
+export type BackgroundJobType = "knowledge.index.rebuild" | "quality.series.rebuild" | "story.graph.rebuild";
+export type BackgroundJobStatus = "pending" | "running" | "success" | "error";
+
+export interface BackgroundJob {
+  id: string;
+  projectId: string;
+  type: BackgroundJobType;
+  status: BackgroundJobStatus;
+  inputSummary: string;
+  outputSummary?: string;
+  resultRef?: string;
+  error?: string;
+  startedAt: string;
+  finishedAt?: string;
+  durationMs?: number;
+  updatedAt: string;
+}
+
 export interface EditorSelection {
   filePath: string;
   selectedText: string;

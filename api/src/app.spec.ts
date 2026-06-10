@@ -33,6 +33,19 @@ async function jsonFetch<T>(url: string, init?: RequestInit): Promise<{ status: 
   return { status: response.status, data };
 }
 
+async function waitForJob(projectId: string, jobId: string): Promise<{ job: { status: string; outputSummary?: string; resultRef?: string } }> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const response = await jsonFetch<{ job: { status: string; outputSummary?: string; resultRef?: string } }>(
+      `/api/novel/projects/${projectId}/jobs/${jobId}`
+    );
+    if (response.data.job.status === "success" || response.data.job.status === "error") {
+      return response.data;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  throw new Error(`Background job did not finish: ${jobId}`);
+}
+
 describe("novel API routes", () => {
   beforeEach(async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-api-routes-"));
@@ -318,6 +331,50 @@ describe("novel API routes", () => {
     expect(searched.status).toBe(200);
     expect(searched.data.result.facts).toEqual(expect.arrayContaining([expect.objectContaining({ id: "fact:fact-gate" })]));
     expect(searched.data.result.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001" }));
+  });
+
+  it("runs heavy project work as a background job", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Job Route Demo", roughIdea: "Queue expensive project work." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/memory/chapter-summaries/chapter-001`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        summary: {
+          chapterId: "chapter-001",
+          summary: "The gate answers blood.",
+          keyEvents: [],
+          newFacts: [],
+          characterStateChanges: [],
+          foreshadowingUpdates: [],
+          continuityRisks: [],
+          powerProgressionUpdates: [],
+          acceptedRecapIds: [],
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        }
+      })
+    });
+
+    const started = await jsonFetch<{ job: { id: string; status: string; type: string } }>(`/api/novel/projects/${slug}/jobs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "knowledge.index.rebuild", payload: { reason: "manual" } })
+    });
+    const finished = await waitForJob(slug, started.data.job.id);
+    const listed = await jsonFetch<{ jobs: Array<{ id: string; status: string }> }>(`/api/novel/projects/${slug}/jobs`);
+
+    expect(started.status).toBe(202);
+    expect(started.data.job).toMatchObject({ type: "knowledge.index.rebuild" });
+    expect(finished.job).toMatchObject({
+      status: "success",
+      resultRef: `/api/novel/projects/${slug}/knowledge/index`
+    });
+    expect(finished.job.outputSummary).toContain("facts");
+    expect(listed.data.jobs).toEqual([expect.objectContaining({ id: started.data.job.id, status: "success" })]);
   });
 
   it("returns a creation runtime snapshot for a chapter", async () => {
