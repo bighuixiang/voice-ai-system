@@ -61,8 +61,8 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
 
 Latest full verification passed:
 
-- API tests: 73 passed, 1 real Codex integration skipped.
-- UI tests: 145 passed.
+- API tests: 74 passed, 1 real Codex integration skipped.
+- UI tests: 147 passed.
 - API build passed.
 - UI build passed.
 
@@ -85,6 +85,8 @@ Known warnings remain unchanged:
 - `617e60d feat: orchestrate project background jobs`
 - `e644a79 feat: add local vector recall`
 - `54a05b1 feat: rebuild knowledge index in background`
+- `b09d915 feat: support external knowledge embeddings`
+- `de71927 feat: surface background rebuild actions`
 
 Earlier supporting commits in this branch:
 
