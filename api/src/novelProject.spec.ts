@@ -197,7 +197,7 @@ describe("novelProject", () => {
     expect(listProjectRecords()).toEqual([]);
   });
 
-  it("creates writing cockpit dashboard, scenes, ledgers, and recap files", async () => {
+  it("creates writing cockpit dashboard, scenes, ledgers, memory, and recap files", async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-project-cockpit-"));
     process.env.NOVELS_ROOT = tempRoot;
     process.env.NOVEL_DB_PATH = path.join(tempRoot, "data", "creative-platform.sqlite");
@@ -217,6 +217,10 @@ describe("novelProject", () => {
     const powerProgression = JSON.parse(await fs.readFile(path.join(root, "ledger", "power-progression.json"), "utf8"));
     const characterState = JSON.parse(await fs.readFile(path.join(root, "ledger", "character-state.json"), "utf8"));
     const risks = JSON.parse(await fs.readFile(path.join(root, "ledger", "risks.json"), "utf8"));
+    const memoryDir = await fs.stat(path.join(root, "memory", "chapter-summaries"));
+    const chapterSummary = JSON.parse(
+      await fs.readFile(path.join(root, "memory", "chapter-summaries", "chapter-001.json"), "utf8")
+    );
     const recaps = await fs.readFile(path.join(root, "tasks", "recaps.jsonl"), "utf8");
 
     expect(dashboard).toEqual(
@@ -239,6 +243,26 @@ describe("novelProject", () => {
     expect(powerProgression).toEqual([]);
     expect(characterState).toEqual([]);
     expect(risks).toEqual([]);
+    expect(memoryDir.isDirectory()).toBe(true);
+    expect(chapterSummary).toEqual(
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        summary: "",
+        keyEvents: [],
+        newFacts: [],
+        characterStateChanges: [],
+        foreshadowingUpdates: [],
+        continuityRisks: [],
+        powerProgressionUpdates: [],
+        acceptedRecapIds: []
+      })
+    );
+    expect(chapterSummary.updatedAt).toEqual(expect.any(String));
+    for (const chapter of project.chapters) {
+      await expect(
+        fs.readFile(path.join(root, "memory", "chapter-summaries", `${chapter.id}.json`), "utf8")
+      ).resolves.toContain(`"chapterId": "${chapter.id}"`);
+    }
     expect(recaps).toBe("");
   });
 

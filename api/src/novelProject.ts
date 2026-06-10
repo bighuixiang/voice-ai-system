@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type {
   ChapterDashboard,
+  ChapterSummary,
   NovelChapter,
   NovelProject,
   StoryArc,
@@ -121,6 +122,21 @@ function createDefaultChapterDashboard(chapterId: string): ChapterDashboard {
   };
 }
 
+function createDefaultChapterSummary(chapterId: string): ChapterSummary {
+  return {
+    chapterId,
+    summary: "",
+    keyEvents: [],
+    newFacts: [],
+    characterStateChanges: [],
+    foreshadowingUpdates: [],
+    continuityRisks: [],
+    powerProgressionUpdates: [],
+    acceptedRecapIds: [],
+    updatedAt: nowIso()
+  };
+}
+
 export function createProjectSkeleton(input: { title?: string; roughIdea: string; genre?: string }): NovelProject {
   const title = input.title?.trim() || "未命名小说";
   const timestamp = nowIso();
@@ -224,6 +240,7 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "dashboard",
     "scenes",
     "ledger",
+    "memory/chapter-summaries",
     "style",
     "tasks",
     "assets/characters",
@@ -277,6 +294,11 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
       "utf8"
     );
     await fs.writeFile(resolveInside(root, `scenes/${chapter.id}.json`), "[]\n", "utf8");
+    await fs.writeFile(
+      resolveInside(root, `memory/chapter-summaries/${chapter.id}.json`),
+      `${JSON.stringify(createDefaultChapterSummary(chapter.id), null, 2)}\n`,
+      "utf8"
+    );
   }
 }
 
