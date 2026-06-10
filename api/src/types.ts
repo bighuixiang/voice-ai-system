@@ -120,6 +120,33 @@ export interface ChapterQualityReport {
   updatedAt: string;
 }
 
+export interface SeriesQualityMetricAverage {
+  key: QualityMetricKey;
+  label: string;
+  averageScore: number;
+  reportCount: number;
+}
+
+export interface SeriesQualityChapterSignal {
+  chapterId: string;
+  chapterTitle: string;
+  overallScore: number;
+  weakestMetricKey?: QualityMetricKey;
+  weakestMetricLabel?: string;
+  weakestMetricScore?: number;
+  updatedAt: string;
+}
+
+export interface SeriesQualityMetrics {
+  projectSlug: string;
+  chapterCount: number;
+  reportCount: number;
+  averageOverallScore: number;
+  metricAverages: SeriesQualityMetricAverage[];
+  weakestChapters: SeriesQualityChapterSignal[];
+  updatedAt: string;
+}
+
 export interface SceneCard {
   id: string;
   chapterId: string;

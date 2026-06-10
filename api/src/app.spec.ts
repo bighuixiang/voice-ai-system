@@ -679,7 +679,10 @@ describe("novel API routes", () => {
     const qualityBefore = await jsonFetch<{ report: null }>("/api/novel/projects/memory-demo/quality/chapter-001");
     expect(qualityBefore.data.report).toBeNull();
 
-    const qualityAfter = await jsonFetch<{ report: { chapterId: string; overallScore: number; metrics: unknown[] } }>(
+    const qualityAfter = await jsonFetch<{
+      report: { chapterId: string; overallScore: number; metrics: unknown[] };
+      seriesMetrics: { projectSlug: string; reportCount: number; averageOverallScore: number; metricAverages: Array<{ key: string; averageScore: number }> };
+    }>(
       "/api/novel/projects/memory-demo/quality/chapter-001",
       {
         method: "PUT",
@@ -701,6 +704,22 @@ describe("novel API routes", () => {
       chapterId: "chapter-001",
       overallScore: 82,
       metrics: [expect.objectContaining({ key: "conflict", score: 82 })]
+    });
+    expect(qualityAfter.data.seriesMetrics).toMatchObject({
+      projectSlug: "memory-demo",
+      reportCount: 1,
+      averageOverallScore: 82
+    });
+    expect(qualityAfter.data.seriesMetrics.metricAverages).toEqual([
+      expect.objectContaining({ key: "conflict", averageScore: 82 })
+    ]);
+
+    const seriesQuality = await jsonFetch<{ seriesMetrics: { reportCount: number; averageOverallScore: number } }>(
+      "/api/novel/projects/memory-demo/quality/series-metrics"
+    );
+    expect(seriesQuality.data.seriesMetrics).toMatchObject({
+      reportCount: 1,
+      averageOverallScore: 82
     });
 
     const accepted = await jsonFetch<{ summary: { chapterId: string; summary: string; keyEvents: string[] } }>(

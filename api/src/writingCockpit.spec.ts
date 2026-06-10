@@ -2,15 +2,28 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { ChapterDashboard, ChapterFactPatch, CharacterStatePatch, LedgerEntry, SceneCard, WritingRecapCandidate } from "./types.js";
+import type {
+  ChapterDashboard,
+  ChapterFactPatch,
+  ChapterQualityReport,
+  CharacterStatePatch,
+  LedgerEntry,
+  NovelProject,
+  SceneCard,
+  WritingRecapCandidate
+} from "./types.js";
 import {
   acceptWritingRecapPatches,
   appendWritingRecap,
+  buildSeriesQualityMetrics,
   readChapterDashboard,
+  readChapterQualityReport,
   readChapterSummary,
   readLedgerEntries,
   readSceneCards,
+  readSeriesQualityMetrics,
   saveChapterDashboard,
+  saveChapterQualityReport,
   saveChapterSummary,
   saveLedgerEntries,
   saveSceneCards
@@ -72,6 +85,53 @@ function ledgerEntry(overrides: Partial<LedgerEntry> = {}): LedgerEntry {
     relatedEntities: ["主角"],
     note: "Do not reveal the cosmic label.",
     updatedAt: "2026-06-04T00:00:00.000Z",
+    ...overrides
+  };
+}
+
+function qualityReport(overrides: Partial<ChapterQualityReport> = {}): ChapterQualityReport {
+  return {
+    chapterId: "chapter-001",
+    overallScore: 82,
+    summary: "Readable pressure.",
+    metrics: [
+      { key: "conflict", label: "Conflict", score: 82, note: "Clear." },
+      { key: "rhythm", label: "Rhythm", score: 68, note: "Uneven." }
+    ],
+    strengths: ["Clear pressure"],
+    fixes: ["Sharpen rhythm"],
+    updatedAt: "2026-06-11T00:00:00.000Z",
+    ...overrides
+  };
+}
+
+function project(overrides: Partial<NovelProject> = {}): NovelProject {
+  return {
+    id: "demo",
+    slug: "demo",
+    title: "Demo",
+    genre: "fantasy",
+    roughIdea: "",
+    createdAt: "2026-06-11T00:00:00.000Z",
+    updatedAt: "2026-06-11T00:00:00.000Z",
+    lastOpenedChapterId: "chapter-001",
+    codex: { command: "codex" },
+    chapters: [
+      {
+        id: "chapter-001",
+        title: "Chapter 1",
+        outlinePath: "outline/chapter-001.md",
+        contentPath: "chapters/chapter-001.md",
+        status: "drafted"
+      },
+      {
+        id: "chapter-002",
+        title: "Chapter 2",
+        outlinePath: "outline/chapter-002.md",
+        contentPath: "chapters/chapter-002.md",
+        status: "drafted"
+      }
+    ],
     ...overrides
   };
 }
@@ -179,6 +239,56 @@ describe("writingCockpit", () => {
 
     const saved = JSON.parse(await fs.readFile(path.join(tempRoot, "memory", "chapter-summaries", "chapter-001.json"), "utf8"));
     expect(saved.summary).toBe("The clue cost blood.");
+  });
+
+  it("saves chapter quality reports and rejects unsafe chapter ids", async () => {
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "writing-cockpit-save-quality-"));
+
+    await saveChapterQualityReport(tempRoot, qualityReport());
+    await expect(saveChapterQualityReport(tempRoot, qualityReport({ chapterId: "../secret" }))).rejects.toThrow(/Unsafe/);
+
+    const report = await readChapterQualityReport(tempRoot, "chapter-001");
+    expect(report).toMatchObject({ chapterId: "chapter-001", overallScore: 82 });
+  });
+
+  it("builds and caches series quality metrics from chapter reports", async () => {
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "writing-cockpit-series-quality-"));
+    await saveChapterQualityReport(tempRoot, qualityReport());
+    await saveChapterQualityReport(
+      tempRoot,
+      qualityReport({
+        chapterId: "chapter-002",
+        overallScore: 70,
+        metrics: [
+          { key: "conflict", label: "Conflict", score: 74, note: "Serviceable." },
+          { key: "rhythm", label: "Rhythm", score: 58, note: "Slow." }
+        ],
+        updatedAt: "2026-06-12T00:00:00.000Z"
+      })
+    );
+
+    const metrics = await buildSeriesQualityMetrics(tempRoot, project());
+
+    expect(metrics).toMatchObject({
+      projectSlug: "demo",
+      chapterCount: 2,
+      reportCount: 2,
+      averageOverallScore: 76
+    });
+    expect(metrics.metricAverages).toEqual([
+      expect.objectContaining({ key: "rhythm", averageScore: 63, reportCount: 2 }),
+      expect.objectContaining({ key: "conflict", averageScore: 78, reportCount: 2 })
+    ]);
+    expect(metrics.weakestChapters[0]).toMatchObject({
+      chapterId: "chapter-002",
+      chapterTitle: "Chapter 2",
+      weakestMetricKey: "rhythm",
+      weakestMetricScore: 58
+    });
+
+    const saved = JSON.parse(await fs.readFile(path.join(tempRoot, "quality", "series-metrics.json"), "utf8"));
+    expect(saved.averageOverallScore).toBe(76);
+    await expect(readSeriesQualityMetrics(tempRoot, project())).resolves.toMatchObject({ reportCount: 2 });
   });
 
   it("reads scene cards sorted by order", async () => {

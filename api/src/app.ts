@@ -26,11 +26,13 @@ import type { AiScenarioConfig, CodexTaskType, KnowledgeSearchQuery, LedgerEntry
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
   acceptWritingRecapPatches,
+  buildSeriesQualityMetrics,
   readChapterDashboard,
   readChapterQualityReport,
   readChapterSummary,
   readLedgerEntries,
   readSceneCards,
+  readSeriesQualityMetrics,
   readStoryControl,
   saveChapterDashboard,
   saveChapterQualityReport,
@@ -413,6 +415,12 @@ export function createApp() {
     res.json({ summary });
   }));
 
+  app.get("/api/novel/projects/:projectId/quality/series-metrics", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const seriesMetrics = await readSeriesQualityMetrics(projectRoot(project.slug), project);
+    res.json({ seriesMetrics });
+  }));
+
   app.get("/api/novel/projects/:projectId/quality/:chapterId", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
     const report = await readChapterQualityReport(projectRoot(project.slug), req.params.chapterId);
@@ -426,7 +434,8 @@ export function createApp() {
       ...reportInput,
       chapterId: req.params.chapterId
     });
-    res.json({ report });
+    const seriesMetrics = await buildSeriesQualityMetrics(projectRoot(project.slug), project);
+    res.json({ report, seriesMetrics });
   }));
 
   app.post("/api/novel/projects/:projectId/recaps/accept", asyncRoute(async (req, res) => {

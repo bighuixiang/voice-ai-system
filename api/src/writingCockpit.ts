@@ -7,7 +7,10 @@ import type {
   ChapterSummary,
   CharacterStatePatch,
   LedgerEntry,
+  NovelProject,
   SceneCard,
+  SeriesQualityMetricAverage,
+  SeriesQualityMetrics,
   StoryControl,
   WritingRecapCandidate
 } from "./types.js";
@@ -145,6 +148,10 @@ function chapterQualityPath(chapterId: string): string {
   return `quality/${chapterId}.json`;
 }
 
+function seriesQualityPath(): string {
+  return "quality/series-metrics.json";
+}
+
 function storyControlPath(): string {
   return "story-control/story-control.json";
 }
@@ -258,6 +265,79 @@ export async function saveChapterQualityReport(root: string, report: ChapterQual
   };
   await writeJsonFile(root, chapterQualityPath(report.chapterId), normalized);
   return normalized;
+}
+
+function roundScore(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function weakestMetric(report: ChapterQualityReport): ChapterQualityReport["metrics"][number] | undefined {
+  return [...report.metrics].sort((left, right) => left.score - right.score)[0];
+}
+
+export async function buildSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
+  const reports = (
+    await Promise.all(
+      project.chapters.map(async (chapter) => ({
+        chapter,
+        report: await readChapterQualityReport(root, chapter.id)
+      }))
+    )
+  ).filter((item): item is { chapter: NovelProject["chapters"][number]; report: ChapterQualityReport } => Boolean(item.report));
+
+  const metricGroups = new Map<string, { key: ChapterQualityReport["metrics"][number]["key"]; label: string; scores: number[] }>();
+  reports.forEach(({ report }) => {
+    report.metrics.forEach((metric) => {
+      const existing = metricGroups.get(metric.key) || { key: metric.key, label: metric.label, scores: [] };
+      existing.scores.push(metric.score);
+      metricGroups.set(metric.key, existing);
+    });
+  });
+
+  const metricAverages: SeriesQualityMetricAverage[] = Array.from(metricGroups.values())
+    .map((group) => ({
+      key: group.key,
+      label: group.label,
+      averageScore: roundScore(group.scores.reduce((sum, score) => sum + score, 0) / group.scores.length),
+      reportCount: group.scores.length
+    }))
+    .sort((left, right) => left.averageScore - right.averageScore || left.key.localeCompare(right.key));
+
+  const weakestChapters = reports
+    .map(({ chapter, report }) => {
+      const weak = weakestMetric(report);
+      return {
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        overallScore: report.overallScore,
+        weakestMetricKey: weak?.key,
+        weakestMetricLabel: weak?.label,
+        weakestMetricScore: weak?.score,
+        updatedAt: report.updatedAt
+      };
+    })
+    .sort((left, right) => left.overallScore - right.overallScore)
+    .slice(0, 5);
+
+  const metrics: SeriesQualityMetrics = {
+    projectSlug: project.slug,
+    chapterCount: project.chapters.length,
+    reportCount: reports.length,
+    averageOverallScore: reports.length
+      ? roundScore(reports.reduce((sum, item) => sum + item.report.overallScore, 0) / reports.length)
+      : 0,
+    metricAverages,
+    weakestChapters,
+    updatedAt: nowIso()
+  };
+
+  await writeJsonFile(root, seriesQualityPath(), metrics);
+  return metrics;
+}
+
+export async function readSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
+  const cached = await readJsonFile<SeriesQualityMetrics | null>(root, seriesQualityPath(), null);
+  return cached || buildSeriesQualityMetrics(root, project);
 }
 
 export async function readSceneCards(root: string, chapterId: string): Promise<SceneCard[]> {
