@@ -21,11 +21,14 @@ import { applyPatch, fallbackProjectCreateResult, runNovelTask } from "./taskSer
 import type { AiScenarioConfig, CodexTaskType, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
+  acceptWritingRecapPatches,
   readChapterDashboard,
+  readChapterSummary,
   readLedgerEntries,
   readSceneCards,
   readStoryControl,
   saveChapterDashboard,
+  saveChapterSummary,
   saveLedgerEntries,
   saveSceneCards,
   saveStoryControl
@@ -370,6 +373,28 @@ export function createApp() {
     const scenesInput = Array.isArray(req.body.scenes) ? req.body.scenes : [];
     const scenes = await saveSceneCards(projectRoot(project.slug), req.params.chapterId, scenesInput);
     res.json({ scenes });
+  }));
+
+  app.get("/api/novel/projects/:projectId/memory/chapter-summaries/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const summary = await readChapterSummary(projectRoot(project.slug), req.params.chapterId);
+    res.json({ summary });
+  }));
+
+  app.put("/api/novel/projects/:projectId/memory/chapter-summaries/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const summaryInput = req.body.summary || req.body || {};
+    const summary = await saveChapterSummary(projectRoot(project.slug), {
+      ...summaryInput,
+      chapterId: req.params.chapterId
+    });
+    res.json({ summary });
+  }));
+
+  app.post("/api/novel/projects/:projectId/recaps/accept", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const summary = await acceptWritingRecapPatches(projectRoot(project.slug), req.body.recap || req.body || {});
+    res.json({ summary });
   }));
 
   app.get("/api/novel/projects/:projectId/ledger/:kind", asyncRoute(async (req, res) => {

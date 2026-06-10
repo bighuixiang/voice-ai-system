@@ -432,6 +432,99 @@ describe("novel API routes", () => {
     expect(invalidLedger.data.error).toContain("Unsupported ledger kind");
   });
 
+  it("reads, saves, and accepts chapter memory recap patches", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Memory Demo", roughIdea: "Make chapter memory explicit." })
+    });
+
+    const summaryBefore = await jsonFetch<{ summary: { chapterId: string; summary: string; keyEvents: string[] } }>(
+      "/api/novel/projects/memory-demo/memory/chapter-summaries/chapter-001"
+    );
+    expect(summaryBefore.data.summary).toMatchObject({
+      chapterId: "chapter-001",
+      summary: "",
+      keyEvents: []
+    });
+
+    const summaryAfter = await jsonFetch<{ summary: { chapterId: string; summary: string; keyEvents: string[] } }>(
+      "/api/novel/projects/memory-demo/memory/chapter-summaries/chapter-001",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          summary: {
+            chapterId: "../unsafe",
+            summary: "The seal has a price.",
+            keyEvents: ["The hero bleeds."],
+            newFacts: [],
+            characterStateChanges: [],
+            foreshadowingUpdates: [],
+            continuityRisks: [],
+            powerProgressionUpdates: [],
+            acceptedRecapIds: [],
+            updatedAt: "2026-06-10T00:00:00.000Z"
+          }
+        })
+      }
+    );
+    expect(summaryAfter.data.summary).toMatchObject({
+      chapterId: "chapter-001",
+      summary: "The seal has a price.",
+      keyEvents: ["The hero bleeds."]
+    });
+
+    const accepted = await jsonFetch<{ summary: { chapterId: string; summary: string; keyEvents: string[] } }>(
+      "/api/novel/projects/memory-demo/recaps/accept",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recap: {
+            chapterId: "chapter-001",
+            summary: "The protagonist pays a cost.",
+            newFacts: [],
+            characterStateChanges: [],
+            foreshadowingUpdates: [],
+            continuityRisks: [],
+            powerProgressionUpdates: [],
+            createdAt: "2026-06-10T00:00:00.000Z",
+            summaryPatch: {
+              summary: "The protagonist pays a cost.",
+              keyEvents: ["The seal weakens."]
+            },
+            ledgerPatches: [
+              {
+                id: "foreshadowing-memory-1",
+                kind: "foreshadowing",
+                title: "Blood price",
+                status: "open",
+                severity: "medium",
+                chapterIds: ["chapter-001"],
+                relatedEntities: ["Hero"],
+                note: "The price should echo later.",
+                updatedAt: "2026-06-10T00:00:00.000Z"
+              }
+            ]
+          }
+        })
+      }
+    );
+    expect(accepted.data.summary).toMatchObject({
+      chapterId: "chapter-001",
+      summary: "The protagonist pays a cost.",
+      keyEvents: ["The seal weakens."]
+    });
+
+    const ledger = await jsonFetch<{ entries: Array<{ id: string; kind: string }> }>(
+      "/api/novel/projects/memory-demo/ledger/foreshadowing"
+    );
+    expect(ledger.data.entries).toEqual([
+      expect.objectContaining({ id: "foreshadowing-memory-1", kind: "foreshadowing" })
+    ]);
+  });
+
   it("rejects unsafe paths and protected project metadata writes", async () => {
     await jsonFetch("/api/novel/projects", {
       method: "POST",
