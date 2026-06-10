@@ -26,6 +26,7 @@ import type {
   PlatformLibrary,
   SceneCard,
   StoryControl,
+  StoryGraphProjection,
   StyleToneKey,
   TaskProgressStep,
   WritingMode,
@@ -60,6 +61,7 @@ interface WorkspaceCache {
   chapterSummary: ChapterSummary | null;
   sceneCards: SceneCard[];
   storyControl: StoryControl | null;
+  storyGraph: StoryGraphProjection | null;
   structureIdeaInput: string;
   structureDraftVersion: number;
   ledgerKind: LedgerKind;
@@ -123,6 +125,7 @@ export const useNovelStore = defineStore("novel", () => {
   const currentChapterSummary = ref<ChapterSummary | null>(null);
   const sceneCards = ref<SceneCard[]>([]);
   const storyControl = ref<StoryControl | null>(null);
+  const storyGraph = ref<StoryGraphProjection | null>(null);
   const structureIdeaInput = ref("");
   const structureDraftVersion = ref(0);
   const activeLedgerKind = ref<LedgerKind>("foreshadowing");
@@ -890,6 +893,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentChapterSummary.value = null;
     sceneCards.value = [];
     storyControl.value = null;
+    storyGraph.value = null;
     structureIdeaInput.value = "";
     structureDraftVersion.value = 0;
     activeLedgerKind.value = "foreshadowing";
@@ -928,6 +932,7 @@ export const useNovelStore = defineStore("novel", () => {
         chapterSummary: currentChapterSummary.value,
         sceneCards: sceneCards.value,
         storyControl: storyControl.value,
+        storyGraph: storyGraph.value,
         structureIdeaInput: structureIdeaInput.value,
         structureDraftVersion: structureDraftVersion.value,
         ledgerKind: activeLedgerKind.value,
@@ -967,6 +972,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentChapterSummary.value = cached.chapterSummary || null;
     sceneCards.value = cached.sceneCards;
     storyControl.value = cached.storyControl;
+    storyGraph.value = cached.storyGraph || null;
     structureIdeaInput.value = cached.structureIdeaInput || "";
     structureDraftVersion.value = cached.structureDraftVersion || 0;
     activeLedgerKind.value = cached.ledgerKind;
@@ -1149,6 +1155,15 @@ export const useNovelStore = defineStore("novel", () => {
     storyControl.value = await novelApi.readStoryControl(currentProject.value.slug);
   }
 
+  async function loadStoryGraph() {
+    if (!currentProject.value) return;
+    try {
+      storyGraph.value = await novelApi.readStoryGraph(currentProject.value.slug);
+    } catch {
+      storyGraph.value = null;
+    }
+  }
+
   function updateStoryControl(patch: Partial<StoryControl>) {
     if (!storyControl.value) return;
     storyControl.value = {
@@ -1164,6 +1179,7 @@ export const useNovelStore = defineStore("novel", () => {
     isSavingStoryControl.value = true;
     try {
       storyControl.value = await novelApi.saveStoryControl(currentProject.value.slug, storyControl.value);
+      await loadStoryGraph();
     } finally {
       isSavingStoryControl.value = false;
     }
@@ -1460,6 +1476,7 @@ export const useNovelStore = defineStore("novel", () => {
     }
     await openSupportFile(currentSupportPath.value, { skipLeaveCheck: true });
     await loadStoryControl();
+    await loadStoryGraph();
     await loadLedger(activeLedgerKind.value);
     await loadTaskHistory();
     await loadAiInvocations();
@@ -1737,6 +1754,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentChapterSummary,
     sceneCards,
     storyControl,
+    storyGraph,
     structureIdeaInput,
     structureDraftVersion,
     activeLedgerKind,
@@ -1786,6 +1804,7 @@ export const useNovelStore = defineStore("novel", () => {
     linkSharedAsset,
     loadChapterCockpit,
     loadStoryControl,
+    loadStoryGraph,
     updateDashboard,
     saveCurrentDashboard,
     updateSceneCards,

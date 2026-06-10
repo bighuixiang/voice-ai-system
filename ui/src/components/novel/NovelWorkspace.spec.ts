@@ -95,6 +95,12 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
       orchestrationNotes: "Keep upgrades causal.",
       updatedAt: "2026-06-04T00:00:00.000Z"
     },
+    storyGraph: {
+      projectSlug: "demo",
+      nodes: [{ id: "chapter:chapter-001", type: "chapter", label: "Chapter 1" }],
+      edges: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    },
     isSavingStoryControl: false,
     canRequestStoryOrchestration: true,
     currentDocumentKind: "content",
@@ -175,6 +181,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     generateStructureFromIdea: vi.fn(),
     updateStoryControl: vi.fn(),
     saveStoryControl: vi.fn(),
+    loadStoryGraph: vi.fn().mockResolvedValue(undefined),
     requestStoryOrchestration: vi.fn(),
     updateContent: vi.fn(),
     openChapterDocument: vi.fn(),
@@ -250,6 +257,7 @@ const stubs = {
     emits: ["orchestrate"],
     template: "<button class='story-control-stub' @click='$emit(\"orchestrate\")'>story control</button>"
   },
+  StoryGraphPanel: { template: "<div class='story-graph-stub'>story graph</div>" },
   ChapterDashboardPanel: { template: "<div class='dashboard-stub'>dashboard</div>" },
   SceneCardPanel: { template: "<div class='scene-stub'>scene</div>" },
   ChapterEditor: { template: "<div class='editor-stub'>editor</div>" },
@@ -438,6 +446,7 @@ describe("NovelWorkspace writing modes", () => {
     await storyControlButton?.trigger("click");
 
     expect(wrapper.find(".story-control-stub").exists()).toBe(true);
+    expect(wrapper.find(".story-graph-stub").exists()).toBe(true);
     await wrapper.find(".story-control-stub").trigger("click");
     expect(storeRef.value.requestStoryOrchestration).toHaveBeenCalled();
   });

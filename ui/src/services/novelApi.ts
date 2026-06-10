@@ -17,6 +17,7 @@ import type {
   PlatformLibrary,
   SceneCard,
   StoryControl,
+  StoryGraphProjection,
   WritingRecapCandidate
 } from "@/types/novel";
 
@@ -192,6 +193,11 @@ export const novelApi = {
       body: JSON.stringify({ storyControl })
     });
     return data.storyControl;
+  },
+
+  async readStoryGraph(projectId: string): Promise<StoryGraphProjection> {
+    const data = await request<{ graph: StoryGraphProjection }>(`/api/novel/projects/${projectId}/story-graph`);
+    return data.graph;
   },
 
   async readLedgerEntries(projectId: string, kind: LedgerEntry["kind"]): Promise<LedgerEntry[]> {

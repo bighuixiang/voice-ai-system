@@ -394,15 +394,18 @@
       <span>{{ store.error || "正在载入工作台" }}</span>
     </main>
     <el-dialog v-model="storyControlDialogOpen" title="故事总控台" width="min(1180px, 96vw)" destroy-on-close>
-      <StoryControlPanel
-        :story-control="store.storyControl"
-        :is-saving="store.isSavingStoryControl"
-        :is-generating="store.isLoading"
-        :can-generate="store.canRequestStoryOrchestration"
-        @update:story-control="store.updateStoryControl"
-        @save="handleSaveStoryControl"
-        @orchestrate="store.requestStoryOrchestration"
-      />
+      <div class="story-control-dialog-body">
+        <StoryControlPanel
+          :story-control="store.storyControl"
+          :is-saving="store.isSavingStoryControl"
+          :is-generating="store.isLoading"
+          :can-generate="store.canRequestStoryOrchestration"
+          @update:story-control="store.updateStoryControl"
+          @save="handleSaveStoryControl"
+          @orchestrate="store.requestStoryOrchestration"
+        />
+        <StoryGraphPanel :graph="store.storyGraph" @refresh="store.loadStoryGraph" />
+      </div>
     </el-dialog>
     <el-dialog v-model="aiConfigDialogOpen" title="AI 配置" width="min(980px, 96vw)" destroy-on-close>
       <AiConfigPanel
@@ -433,6 +436,7 @@ import ChapterTree from "./ChapterTree.vue";
 import FocusWritingPanel from "./FocusWritingPanel.vue";
 import StructureQuickStartPanel from "./StructureQuickStartPanel.vue";
 import StoryControlPanel from "./StoryControlPanel.vue";
+import StoryGraphPanel from "./StoryGraphPanel.vue";
 import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
 import SceneCardPanel from "./SceneCardPanel.vue";
 import ChapterEditor from "./ChapterEditor.vue";
@@ -767,6 +771,11 @@ watch(
     background: var(--app-primary-soft);
     color: var(--app-primary-text);
   }
+}
+
+.story-control-dialog-body {
+  display: grid;
+  gap: 12px;
 }
 
 .project-hub {

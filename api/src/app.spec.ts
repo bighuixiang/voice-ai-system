@@ -129,6 +129,23 @@ describe("novel API routes", () => {
     ]);
   });
 
+  it("returns a story graph projection for a project", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Graph Route Demo", roughIdea: "Project story state into a graph." })
+    });
+
+    const response = await jsonFetch<{ graph: { projectSlug: string; nodes: Array<{ type: string }>; edges: unknown[] } }>(
+      `/api/novel/projects/${created.data.project.slug}/story-graph`
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.graph.projectSlug).toBe("graph-route-demo");
+    expect(response.data.graph.nodes).toEqual(expect.arrayContaining([expect.objectContaining({ type: "chapter" })]));
+    expect(response.data.graph.edges).toEqual(expect.any(Array));
+  });
+
   it("keeps duplicate project titles in separate folders", async () => {
     const body = JSON.stringify({
       title: "Demo Novel",

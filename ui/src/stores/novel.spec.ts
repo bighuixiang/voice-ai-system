@@ -36,6 +36,7 @@ const mockNovelApi = vi.hoisted(() => ({
   saveChapterQualityReport: vi.fn(),
   readStoryControl: vi.fn(),
   saveStoryControl: vi.fn(),
+  readStoryGraph: vi.fn(),
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
   acceptWritingRecap: vi.fn(),
@@ -314,6 +315,12 @@ describe("useNovelStore", () => {
     mockNovelApi.saveChapterQualityReport.mockImplementation(async (_projectId: string, report: ChapterQualityReport) => report);
     mockNovelApi.readStoryControl.mockResolvedValue(storyControl);
     mockNovelApi.saveStoryControl.mockImplementation(async (_projectId: string, control: StoryControl) => control);
+    mockNovelApi.readStoryGraph.mockResolvedValue({
+      projectSlug: "demo",
+      nodes: [{ id: "chapter:chapter-001", type: "chapter", label: "Chapter 1" }],
+      edges: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
     mockNovelApi.readLedgerEntries.mockResolvedValue([]);
     mockNovelApi.saveLedgerEntries.mockImplementation(async (_projectId: string, _kind: LedgerEntry["kind"], entries: LedgerEntry[]) => entries);
     mockNovelApi.acceptWritingRecap.mockImplementation(async (_projectId: string, recap: WritingRecapCandidate) => ({
@@ -510,10 +517,12 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readSceneCards).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readChapterSummary).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readChapterQualityReport).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
     expect(store.currentDashboard?.chapterId).toBe("chapter-002");
     expect(store.currentChapterSummary?.chapterId).toBe("chapter-002");
     expect(store.currentQualityReport?.overallScore).toBe(78);
+    expect(store.storyGraph?.nodes).toEqual([expect.objectContaining({ type: "chapter" })]);
     expect(store.sceneCards).toEqual(scenes);
     expect(store.activeLedgerKind).toBe("foreshadowing");
   });

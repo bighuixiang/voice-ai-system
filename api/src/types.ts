@@ -176,6 +176,33 @@ export interface StoryControl {
   updatedAt: string;
 }
 
+export type StoryGraphNodeType = "arc" | "character" | "event" | "chapter" | "ledger";
+export type StoryGraphEdgeType = "contains" | "involves" | "tracks" | "references";
+
+export interface StoryGraphNode {
+  id: string;
+  type: StoryGraphNodeType;
+  label: string;
+  subtitle?: string;
+  status?: string;
+  chapterIds?: string[];
+}
+
+export interface StoryGraphEdge {
+  id: string;
+  source: string;
+  target: string;
+  type: StoryGraphEdgeType;
+  label?: string;
+}
+
+export interface StoryGraphProjection {
+  projectSlug: string;
+  nodes: StoryGraphNode[];
+  edges: StoryGraphEdge[];
+  updatedAt: string;
+}
+
 export interface LedgerEntry {
   id: string;
   kind: "foreshadowing" | "continuity" | "power" | "character" | "risk";
