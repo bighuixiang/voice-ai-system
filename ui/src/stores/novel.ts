@@ -797,18 +797,6 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  function mergeLedgerEntries(existing: LedgerEntry[], updates: LedgerEntry[]) {
-    const merged = new Map(existing.map((entry) => [entry.id, entry]));
-    updates.forEach((entry) => {
-      merged.set(entry.id, {
-        ...merged.get(entry.id),
-        ...entry,
-        updatedAt: entry.updatedAt || new Date().toISOString()
-      });
-    });
-    return Array.from(merged.values());
-  }
-
   function startTaskProgress() {
     const agentLabel = currentProject.value?.ai?.profileId === "claude-code" ? "调用 Claude Code CLI" : "调用 AI 执行器";
     taskProgress.value = [
