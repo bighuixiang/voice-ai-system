@@ -406,6 +406,29 @@ export interface SeriesQualityChapterSignal {
   updatedAt: string;
 }
 
+export interface SeriesRhythmSignal {
+  chapterId: string;
+  chapterTitle: string;
+  rhythmScore?: number;
+  overallScore?: number;
+  wordCount: number;
+  sceneCount: number;
+  beatCount: number;
+  note: string;
+  updatedAt: string;
+}
+
+export interface CharacterArcSignal {
+  characterName: string;
+  changeCount: number;
+  chapterIds: string[];
+  firstChapterId: string;
+  lastChapterId: string;
+  latestState: string;
+  latestCause: string;
+  updatedAt: string;
+}
+
 export interface SeriesQualityMetrics {
   projectSlug: string;
   chapterCount: number;
@@ -413,6 +436,8 @@ export interface SeriesQualityMetrics {
   averageOverallScore: number;
   metricAverages: SeriesQualityMetricAverage[];
   weakestChapters: SeriesQualityChapterSignal[];
+  rhythmSignals?: SeriesRhythmSignal[];
+  characterArcSignals?: CharacterArcSignal[];
   updatedAt: string;
 }
 

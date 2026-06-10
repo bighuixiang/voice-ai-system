@@ -253,7 +253,43 @@ describe("writingCockpit", () => {
 
   it("builds and caches series quality metrics from chapter reports", async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "writing-cockpit-series-quality-"));
+    await saveChapterDashboard(tempRoot, dashboard({ wordCount: 1200 }));
+    await saveSceneCards(tempRoot, "chapter-001", [scene()]);
+    await saveChapterSummary(tempRoot, {
+      chapterId: "chapter-001",
+      summary: "The clue cost blood.",
+      keyEvents: ["The seal answered.", "The protagonist hid the wound."],
+      newFacts: [],
+      characterStateChanges: [characterPatch({ status: "accepted", after: "Wounded but alert." })],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: ["recap-1"],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
     await saveChapterQualityReport(tempRoot, qualityReport());
+    await saveChapterDashboard(tempRoot, dashboard({ chapterId: "chapter-002", wordCount: 900 }));
+    await saveChapterSummary(tempRoot, {
+      chapterId: "chapter-002",
+      summary: "The protagonist tests the cost again.",
+      keyEvents: ["The wound changes his choices."],
+      newFacts: [],
+      characterStateChanges: [
+        characterPatch({
+          id: "character-state-2",
+          chapterId: "chapter-002",
+          status: "accepted",
+          after: "More cautious about the seal.",
+          cause: "The second test proved the clue has a recurring price.",
+          updatedAt: "2026-06-12T00:00:00.000Z"
+        })
+      ],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: ["recap-2"],
+      updatedAt: "2026-06-12T00:00:00.000Z"
+    });
     await saveChapterQualityReport(
       tempRoot,
       qualityReport({
@@ -285,9 +321,25 @@ describe("writingCockpit", () => {
       weakestMetricKey: "rhythm",
       weakestMetricScore: 58
     });
+    expect(metrics.rhythmSignals?.[0]).toMatchObject({
+      chapterId: "chapter-001",
+      rhythmScore: 68,
+      wordCount: 1200,
+      sceneCount: 1,
+      beatCount: 2
+    });
+    expect(metrics.characterArcSignals?.[0]).toMatchObject({
+      characterName: "主角",
+      changeCount: 2,
+      firstChapterId: "chapter-001",
+      lastChapterId: "chapter-002",
+      latestState: "More cautious about the seal."
+    });
 
     const saved = JSON.parse(await fs.readFile(path.join(tempRoot, "quality", "series-metrics.json"), "utf8"));
     expect(saved.averageOverallScore).toBe(76);
+    expect(saved.rhythmSignals[0].chapterId).toBe("chapter-001");
+    expect(saved.characterArcSignals[0].characterName).toBe("主角");
     await expect(readSeriesQualityMetrics(tempRoot, project())).resolves.toMatchObject({ reportCount: 2 });
   });
 

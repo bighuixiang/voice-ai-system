@@ -56,6 +56,31 @@ const seriesMetrics: SeriesQualityMetrics = {
       updatedAt: "2026-06-04T00:00:00.000Z"
     }
   ],
+  rhythmSignals: [
+    {
+      chapterId: "chapter-001",
+      chapterTitle: "Chapter 1",
+      rhythmScore: 80,
+      overallScore: 78,
+      wordCount: 2400,
+      sceneCount: 3,
+      beatCount: 5,
+      note: "推进感较稳。",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
+  characterArcSignals: [
+    {
+      characterName: "林澈",
+      changeCount: 2,
+      chapterIds: ["chapter-001", "chapter-002"],
+      firstChapterId: "chapter-001",
+      lastChapterId: "chapter-002",
+      latestState: "更谨慎地处理血符。",
+      latestCause: "第二次代价验证成立。",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
   updatedAt: "2026-06-04T00:00:00.000Z"
 };
 
@@ -78,6 +103,11 @@ describe("ReviewQualityPanel", () => {
     expect(wrapper.text()).toContain("1 / 2 章已体检");
     expect(wrapper.text()).toContain("最弱章节：Chapter 1 · 78 分");
     expect(wrapper.text()).toContain("钩子");
+    expect(wrapper.text()).toContain("章节节奏");
+    expect(wrapper.text()).toContain("80 分 · 2400 字 · 3 场 · 5 事件");
+    expect(wrapper.text()).toContain("角色弧");
+    expect(wrapper.text()).toContain("林澈");
+    expect(wrapper.text()).toContain("2 次 · 更谨慎地处理血符。");
 
     await wrapper.findAll("button")[0].trigger("click");
     expect(wrapper.emitted("diagnose")).toHaveLength(1);

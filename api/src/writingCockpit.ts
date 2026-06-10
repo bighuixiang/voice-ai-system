@@ -5,11 +5,13 @@ import type {
   ChapterFactPatch,
   ChapterQualityReport,
   ChapterSummary,
+  CharacterArcSignal,
   CharacterStatePatch,
   LedgerEntry,
   NovelProject,
   SceneCard,
   SeriesQualityMetricAverage,
+  SeriesRhythmSignal,
   SeriesQualityMetrics,
   StoryControl,
   WritingRecapCandidate
@@ -275,15 +277,96 @@ function weakestMetric(report: ChapterQualityReport): ChapterQualityReport["metr
   return [...report.metrics].sort((left, right) => left.score - right.score)[0];
 }
 
+function rhythmMetric(report?: ChapterQualityReport | null): ChapterQualityReport["metrics"][number] | undefined {
+  return report?.metrics.find((metric) => metric.key === "rhythm");
+}
+
+function hasRhythmSignal(input: {
+  report: ChapterQualityReport | null;
+  dashboard: ChapterDashboard;
+  scenes: SceneCard[];
+  summary: ChapterSummary;
+}): boolean {
+  return Boolean(rhythmMetric(input.report) || input.dashboard.wordCount || input.scenes.length || input.summary.keyEvents.length);
+}
+
+function buildRhythmSignals(
+  chapters: Array<{
+    chapter: NovelProject["chapters"][number];
+    report: ChapterQualityReport | null;
+    dashboard: ChapterDashboard;
+    scenes: SceneCard[];
+    summary: ChapterSummary;
+  }>
+): SeriesRhythmSignal[] {
+  return chapters
+    .filter(hasRhythmSignal)
+    .map(({ chapter, report, dashboard, scenes, summary }) => {
+      const rhythm = rhythmMetric(report);
+      return {
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        rhythmScore: rhythm?.score,
+        overallScore: report?.overallScore,
+        wordCount: dashboard.wordCount || 0,
+        sceneCount: scenes.length,
+        beatCount: summary.keyEvents.length,
+        note: rhythm?.note || summary.summary || dashboard.goal || "暂无节奏摘要。",
+        updatedAt: report?.updatedAt || summary.updatedAt || dashboard.updatedAt
+      };
+    });
+}
+
+function buildCharacterArcSignals(summaries: ChapterSummary[]): CharacterArcSignal[] {
+  const grouped = new Map<string, CharacterStatePatch[]>();
+  for (const summary of summaries) {
+    for (const change of summary.characterStateChanges) {
+      if (change.status !== "accepted") continue;
+      const name = change.characterName.trim();
+      if (!name) continue;
+      grouped.set(name, [...(grouped.get(name) || []), change]);
+    }
+  }
+
+  return Array.from(grouped.entries())
+    .map(([characterName, changes]) => {
+      const ordered = [...changes].sort((left, right) => left.updatedAt.localeCompare(right.updatedAt));
+      const latest = ordered[ordered.length - 1];
+      const chapterIds = Array.from(new Set(ordered.map((change) => change.chapterId)));
+      return {
+        characterName,
+        changeCount: ordered.length,
+        chapterIds,
+        firstChapterId: chapterIds[0] || latest.chapterId,
+        lastChapterId: chapterIds[chapterIds.length - 1] || latest.chapterId,
+        latestState: latest.after,
+        latestCause: latest.cause,
+        updatedAt: latest.updatedAt
+      };
+    })
+    .sort((left, right) => right.changeCount - left.changeCount || right.updatedAt.localeCompare(left.updatedAt))
+    .slice(0, 8);
+}
+
 export async function buildSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
-  const reports = (
-    await Promise.all(
-      project.chapters.map(async (chapter) => ({
-        chapter,
-        report: await readChapterQualityReport(root, chapter.id)
-      }))
-    )
-  ).filter((item): item is { chapter: NovelProject["chapters"][number]; report: ChapterQualityReport } => Boolean(item.report));
+  const chapterSignals = await Promise.all(
+    project.chapters.map(async (chapter) => {
+      const [report, dashboard, scenes, summary] = await Promise.all([
+        readChapterQualityReport(root, chapter.id),
+        readChapterDashboard(root, chapter.id),
+        readSceneCards(root, chapter.id),
+        readChapterSummary(root, chapter.id)
+      ]);
+      return { chapter, report, dashboard, scenes, summary };
+    })
+  );
+
+  const reports = chapterSignals
+    .map(({ chapter, report }) => ({
+      chapter,
+      report
+    }))
+    .filter((item): item is { chapter: NovelProject["chapters"][number]; report: ChapterQualityReport } => Boolean(item.report));
 
   const metricGroups = new Map<string, { key: ChapterQualityReport["metrics"][number]["key"]; label: string; scores: number[] }>();
   reports.forEach(({ report }) => {
@@ -328,6 +411,8 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
       : 0,
     metricAverages,
     weakestChapters,
+    rhythmSignals: buildRhythmSignals(chapterSignals),
+    characterArcSignals: buildCharacterArcSignals(chapterSignals.map((item) => item.summary)),
     updatedAt: nowIso()
   };
 
@@ -337,7 +422,7 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
 
 export async function readSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
   const cached = await readJsonFile<SeriesQualityMetrics | null>(root, seriesQualityPath(), null);
-  return cached || buildSeriesQualityMetrics(root, project);
+  return cached?.rhythmSignals && cached.characterArcSignals ? cached : buildSeriesQualityMetrics(root, project);
 }
 
 export async function readSceneCards(root: string, chapterId: string): Promise<SceneCard[]> {

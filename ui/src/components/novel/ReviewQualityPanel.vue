@@ -66,6 +66,26 @@
       <p v-if="seriesMetrics.weakestChapters.length" class="series-warning">
         最弱章节：{{ seriesMetrics.weakestChapters[0].chapterTitle }} · {{ seriesMetrics.weakestChapters[0].overallScore }} 分
       </p>
+
+      <div v-if="visibleRhythmSignals.length" class="signal-block">
+        <strong>章节节奏</strong>
+        <div class="signal-list">
+          <div v-for="signal in visibleRhythmSignals" :key="signal.chapterId" class="signal-row">
+            <span>{{ signal.chapterTitle }}</span>
+            <em>{{ rhythmLabel(signal) }}</em>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="visibleCharacterArcSignals.length" class="signal-block">
+        <strong>角色弧</strong>
+        <div class="signal-list">
+          <div v-for="signal in visibleCharacterArcSignals" :key="signal.characterName" class="signal-row">
+            <span>{{ signal.characterName }}</span>
+            <em>{{ signal.changeCount }} 次 · {{ signal.latestState }}</em>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="tone-box">
@@ -118,9 +138,16 @@ const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
 ];
 
 const weakestSeriesMetrics = computed(() => props.seriesMetrics?.metricAverages.slice(0, 3) || []);
+const visibleRhythmSignals = computed(() => props.seriesMetrics?.rhythmSignals?.slice(0, 3) || []);
+const visibleCharacterArcSignals = computed(() => props.seriesMetrics?.characterArcSignals?.slice(0, 3) || []);
 
 function updateTone(value: string) {
   emit("update:tone", value as StyleToneKey);
+}
+
+function rhythmLabel(signal: NonNullable<SeriesQualityMetrics["rhythmSignals"]>[number]) {
+  const score = typeof signal.rhythmScore === "number" ? `${signal.rhythmScore} 分` : "未评分";
+  return `${score} · ${signal.wordCount} 字 · ${signal.sceneCount} 场 · ${signal.beatCount} 事件`;
 }
 </script>
 
@@ -310,6 +337,47 @@ p {
   color: var(--app-warning-text);
 }
 
+.signal-block {
+  display: grid;
+  gap: 6px;
+
+  > strong {
+    color: var(--app-text-primary);
+    font-size: 12px;
+  }
+}
+
+.signal-list {
+  display: grid;
+  gap: 5px;
+}
+
+.signal-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 8px;
+  padding: 6px 7px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: var(--app-bg);
+  color: var(--app-text-secondary);
+  font-size: 12px;
+
+  span,
+  em {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  em {
+    color: var(--app-primary);
+    font-style: normal;
+    font-weight: 700;
+  }
+}
+
 .tone-box {
   display: grid;
   gap: 10px;
@@ -331,7 +399,8 @@ p {
   header,
   .tone-controls,
   .advice-grid,
-  .series-list {
+  .series-list,
+  .signal-row {
     grid-template-columns: 1fr;
     align-items: stretch;
   }
