@@ -49,19 +49,20 @@ const modes = [
 <style scoped lang="scss">
 .selection-toolbar {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .toolbar-title {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
+  color: var(--app-text-primary);
   font-weight: 700;
 
   small {
-    color: #6b7280;
+    color: var(--app-text-muted);
     font-weight: 500;
   }
 }

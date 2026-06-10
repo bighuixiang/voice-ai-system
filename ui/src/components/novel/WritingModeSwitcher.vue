@@ -55,8 +55,8 @@ function updateMode(value: string) {
 <style scoped lang="scss">
 .writing-mode-switcher {
   padding: 10px 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 </style>

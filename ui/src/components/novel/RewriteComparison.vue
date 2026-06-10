@@ -102,9 +102,9 @@ defineEmits<{
 <style scoped lang="scss">
 .rewrite-comparison {
   padding: 12px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #eff6ff;
+  background: var(--app-bg-soft);
 
   header,
   footer {
@@ -121,7 +121,7 @@ defineEmits<{
   h3 {
     font-size: 15px;
     margin: 0;
-    color: #1e3a8a;
+    color: var(--app-text-primary);
   }
 }
 
@@ -131,12 +131,12 @@ defineEmits<{
   justify-items: start;
 
   strong {
-    color: #1e3a8a;
+    color: var(--app-text-primary);
   }
 
   p {
     margin: 0;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 13px;
   }
 }
@@ -156,7 +156,7 @@ defineEmits<{
 
 .pane-label {
   margin-bottom: 4px;
-  color: #1e3a8a;
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 700;
 }
@@ -168,21 +168,23 @@ defineEmits<{
   overflow: auto;
   padding: 12px;
   border-radius: 6px;
-  background: #ffffff;
-  color: #111827;
+  border: 1px solid var(--app-border);
+  background: var(--app-bg);
+  color: var(--app-text-primary);
   line-height: 1.7;
 }
 
 .suggested .pane-content {
-  border: 1px solid #bfdbfe;
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
 }
 
 .notice {
   margin-bottom: 10px;
-  color: #374151;
+  color: var(--app-text-secondary);
 
   &.risk {
-    color: #92400e;
+    color: var(--app-warning);
   }
 
   ul {

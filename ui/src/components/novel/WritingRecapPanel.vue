@@ -66,9 +66,9 @@ defineEmits<{
 <style scoped lang="scss">
 .recap-panel {
   padding: 12px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #eff6ff;
+  background: var(--app-bg-soft);
 }
 
 .empty-state {
@@ -77,12 +77,12 @@ defineEmits<{
   justify-items: start;
 
   strong {
-    color: #1e3a8a;
+    color: var(--app-text-primary);
   }
 
   p {
     margin: 0;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 13px;
   }
 }
@@ -91,13 +91,14 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: space-between;
+  color: var(--app-text-primary);
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .summary {
   margin: 0 0 10px;
-  color: #1f2937;
+  color: var(--app-text-secondary);
   line-height: 1.5;
 }
 
@@ -106,13 +107,14 @@ defineEmits<{
 
   h3 {
     margin: 0 0 4px;
+    color: var(--app-text-primary);
     font-size: 13px;
   }
 
   ul {
     margin: 0;
     padding-left: 18px;
-    color: #4b5563;
+    color: var(--app-text-secondary);
     line-height: 1.6;
   }
 }
@@ -125,10 +127,10 @@ defineEmits<{
 
   span {
     padding: 3px 7px;
-    border: 1px solid #93c5fd;
+    border: 1px solid var(--app-primary);
     border-radius: 6px;
-    background: #ffffff;
-    color: #1d4ed8;
+    background: var(--app-primary-soft);
+    color: var(--app-primary);
     font-size: 12px;
   }
 }

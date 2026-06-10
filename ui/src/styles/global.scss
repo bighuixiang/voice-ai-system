@@ -2,6 +2,55 @@
 @use "mixins" as *;
 @use "utilities";
 
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --app-bg-page: #f3f5f8;
+  --app-bg: #ffffff;
+  --app-bg-soft: #f8fafc;
+  --app-bg-muted: #eef2f7;
+  --app-bg-elevated: #ffffff;
+  --app-text-primary: #111827;
+  --app-text-secondary: #475569;
+  --app-text-muted: #64748b;
+  --app-border: #d8dee8;
+  --app-border-soft: #e5e7eb;
+  --app-primary: #2563eb;
+  --app-primary-soft: #eff6ff;
+  --app-primary-text: #1d4ed8;
+  --app-success-soft: #ecfdf5;
+  --app-success-text: #047857;
+  --app-danger-soft: #fef2f2;
+  --app-danger-text: #991b1b;
+  --app-warning-soft: #fff7ed;
+  --app-warning-text: #9a3412;
+  --app-shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg-page: #020617;
+  --app-bg: #0f172a;
+  --app-bg-soft: #111827;
+  --app-bg-muted: #1e293b;
+  --app-bg-elevated: #162033;
+  --app-text-primary: #f8fafc;
+  --app-text-secondary: #cbd5e1;
+  --app-text-muted: #94a3b8;
+  --app-border: #263449;
+  --app-border-soft: #334155;
+  --app-primary: #38bdf8;
+  --app-primary-soft: rgba(37, 99, 235, 0.16);
+  --app-primary-text: #bae6fd;
+  --app-success-soft: rgba(34, 197, 94, 0.14);
+  --app-success-text: #86efac;
+  --app-danger-soft: rgba(244, 63, 94, 0.14);
+  --app-danger-text: #fda4af;
+  --app-warning-soft: rgba(245, 158, 11, 0.14);
+  --app-warning-text: #fcd34d;
+  --app-shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.28);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -12,8 +61,8 @@ html, body {
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
   font-size: $font-size-base;
-  color: $text-color-primary;
-  background-color: $bg-color-page;
+  color: var(--app-text-primary);
+  background-color: var(--app-bg-page);
 }
 
 #app {
@@ -28,16 +77,16 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-  background: $bg-color;
+  background: var(--app-bg);
   border-radius: $border-radius-base;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $border-color;
+  background: var(--app-border);
   border-radius: $border-radius-base;
   
   &:hover {
-    background: $border-color-light;
+    background: var(--app-border-soft);
   }
 }
 
@@ -93,5 +142,108 @@ html, body {
 @media (min-width: 769px) {
   .desktop-hidden {
     display: none !important;
+  }
+}
+
+:root[data-theme="dark"] .novel-workspace {
+  :is(
+    .ai-panel,
+    .ai-config-panel,
+    .ai-operation-panel,
+    .chapter-dashboard-panel,
+    .chapter-editor,
+    .chapter-tree,
+    .creation-loop-panel,
+    .context-panel,
+    .focus-writing-panel,
+    .ledger-panel,
+    .platform-library-panel,
+    .project-create,
+    .project-create-panel,
+    .project-manager,
+    .project-manager-panel,
+    .quick-start-guide,
+    .review-quality-panel,
+    .scene-card-panel,
+    .selection-toolbar,
+    .structure-quick-start-panel,
+    .support-file-panel,
+    .task-history-panel,
+    .writing-mode-switcher
+  ) {
+    border-color: var(--app-border) !important;
+    background: var(--app-bg) !important;
+    color: var(--app-text-primary) !important;
+  }
+
+  :is(
+    .agent-card,
+    .asset-card,
+    .chapter-card,
+    .chapter-item,
+    .chapter-group,
+    .context-item,
+    .file-item,
+    .history-item,
+    .ledger-card,
+    .metric-card,
+    .mode-button,
+    .module-card,
+    .project-card,
+    .quick-action,
+    .scene-card,
+    .scene-item,
+    .status-card,
+    .template-card
+  ) {
+    border-color: var(--app-border) !important;
+    background: var(--app-bg-soft) !important;
+    color: var(--app-text-primary) !important;
+  }
+
+  :is(
+    .description,
+    .empty,
+    .hint,
+    .meta,
+    .muted,
+    .secondary,
+    .subtitle
+  ) {
+    color: var(--app-text-muted) !important;
+  }
+
+  textarea,
+  pre {
+    border-color: var(--app-border) !important;
+    background: var(--app-bg-soft) !important;
+    color: var(--app-text-primary) !important;
+  }
+
+  :is(
+    .brief-block,
+    .draft-preview,
+    .empty-copy,
+    .free-task,
+    .guide-card,
+    .ledger-item,
+    .quality-block,
+    .recap-card,
+    .result-block,
+    .rewrite-comparison,
+    .rewrite-block,
+    .recap-panel,
+    .section-card,
+    .story-card,
+    .task-progress,
+    .task-result
+  ) {
+    border-color: var(--app-border) !important;
+    background: var(--app-bg-soft) !important;
+    color: var(--app-text-secondary) !important;
+  }
+
+  :is(h1, h2, h3, h4, strong, label span, .panel-title) {
+    color: var(--app-text-primary);
   }
 }

@@ -102,9 +102,9 @@ function updateTone(value: string) {
 <style scoped lang="scss">
 .review-quality-panel {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 header,
@@ -122,6 +122,7 @@ header {
 }
 
 .panel-title {
+  color: var(--app-text-primary);
   font-weight: 800;
 
   &.small {
@@ -131,7 +132,7 @@ header {
 
 p {
   margin: 3px 0 0;
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -147,16 +148,16 @@ p {
   gap: 10px;
   padding: 10px;
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 
   strong {
-    color: #0f766e;
+    color: var(--app-success);
     font-size: 28px;
     line-height: 1;
   }
 
   span {
-    color: #334155;
+    color: var(--app-text-secondary);
     font-size: 13px;
     line-height: 1.5;
   }
@@ -173,7 +174,7 @@ p {
 }
 
 .metric-head {
-  color: #334155;
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 700;
 }
@@ -182,13 +183,13 @@ p {
   height: 6px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e5e7eb;
+  background: var(--app-bg-muted);
 
   span {
     display: block;
     height: 100%;
     border-radius: inherit;
-    background: #0f766e;
+    background: linear-gradient(90deg, var(--app-success), var(--app-primary));
   }
 }
 
@@ -199,13 +200,13 @@ p {
 
   > div {
     padding: 9px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--app-border);
     border-radius: 7px;
-    background: #fbfcfe;
+    background: var(--app-bg-soft);
   }
 
   strong {
-    color: #334155;
+    color: var(--app-text-primary);
     font-size: 12px;
   }
 
@@ -214,7 +215,7 @@ p {
     gap: 5px;
     padding-left: 16px;
     margin: 6px 0 0;
-    color: #475569;
+    color: var(--app-text-secondary);
     font-size: 12px;
     line-height: 1.5;
   }
@@ -222,8 +223,10 @@ p {
 
 .empty-state {
   padding: 10px;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
+  color: var(--app-text-secondary);
 }
 
 .tone-box {
@@ -231,7 +234,7 @@ p {
   gap: 10px;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--app-border);
 }
 
 .tone-controls {

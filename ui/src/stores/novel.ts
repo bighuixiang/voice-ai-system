@@ -9,6 +9,8 @@ import type {
   CodexTaskResult,
   CodexTaskType,
   ChapterDocumentKind,
+  CreationLoopAction,
+  CreationLoopStep,
   EditorSelection,
   FocusWritingGuide,
   LedgerEntry,
@@ -123,6 +125,7 @@ export const useNovelStore = defineStore("novel", () => {
   const isSavingDashboard = ref(false);
   const isSavingScenes = ref(false);
   const isSavingStoryControl = ref(false);
+  const isReverseEngineeringStructure = ref(false);
   const agentProfiles = ref<AiAgentProfile[]>([]);
   const agentChecks = ref<AiAgentCheckResult[]>([]);
   const defaultAgentProfileId = ref("codex-cli");
@@ -166,7 +169,11 @@ export const useNovelStore = defineStore("novel", () => {
   const activeRewriteSelection = computed(() => rewriteSelection.value || selection.value);
   const canDiagnoseChapter = computed(() => currentDocumentKind.value === "content" && countDraftWords(currentContent.value) >= 30);
   const canReverseEngineerStructure = computed(
-    () => currentDocumentKind.value === "content" && currentContent.value.replace(/\s+/g, "").length >= 20
+    () =>
+      currentDocumentKind.value === "content" &&
+      currentContent.value.replace(/\s+/g, "").length >= 20 &&
+      !isLoading.value &&
+      !isReverseEngineeringStructure.value
   );
   const canRequestFocusDraft = computed(() => Boolean(currentProject.value && currentChapter.value && !isLoading.value));
   const canRequestStoryOrchestration = computed(() => Boolean(currentProject.value && storyControl.value && !isLoading.value));
@@ -187,6 +194,99 @@ export const useNovelStore = defineStore("novel", () => {
   const focusProgressPercent = computed(() => {
     if (!focusTargetWords.value) return 0;
     return clampScore((currentWordCount.value / focusTargetWords.value) * 100);
+  });
+  const hasChapterStructure = computed(() =>
+    Boolean(
+      currentDashboard.value?.goal ||
+        currentDashboard.value?.pov ||
+        currentDashboard.value?.mainConflict ||
+        currentDashboard.value?.endingHook ||
+        sceneCards.value.length
+    )
+  );
+  const hasDraftContent = computed(() => currentWordCount.value >= 30);
+  const hasSavedDraftContent = computed(() => hasDraftContent.value && !hasUnsavedChanges.value);
+  const hasChapterQualityReport = computed(
+    () => Boolean(currentQualityReport.value && currentQualityReport.value.chapterId === (currentChapter.value?.id || currentDashboard.value?.chapterId))
+  );
+  const hasAcceptedLedgerForCurrentChapter = computed(() => {
+    const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
+    return Boolean(chapterId && ledgerEntries.value.some((entry) => entry.chapterIds.includes(chapterId)));
+  });
+  const hasWritingRecapTaskForCurrentChapter = computed(() => {
+    const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
+    return Boolean(
+      chapterId &&
+        taskHistory.value.some(
+          (task) =>
+            task.type === "writing.recap" &&
+            task.status === "success" &&
+            (task.inputSummary.includes(chapterId) || task.result?.content.includes(chapterId))
+        )
+    );
+  });
+  const creationLoopSteps = computed<CreationLoopStep[]>(() => {
+    const savedDraftBlocked = !hasSavedDraftContent.value;
+    return [
+      {
+        id: "structure",
+        label: "结构",
+        status: hasChapterStructure.value ? "done" : writingMode.value === "structure" ? "active" : "waiting",
+        detail: hasChapterStructure.value ? "仪表盘/场景卡已形成写作约束" : "先从想法或正文反写章节骨架",
+        metric: sceneCards.value.length ? `${sceneCards.value.length} 场` : currentDashboard.value?.status || "未建",
+        action: "open-structure",
+        actionLabel: hasChapterStructure.value ? "查看结构" : "补结构"
+      },
+      {
+        id: "draft",
+        label: "正文",
+        status: hasSavedDraftContent.value ? "done" : hasDraftContent.value ? "active" : writingMode.value === "focus" ? "active" : "waiting",
+        detail: hasDraftContent.value ? (hasUnsavedChanges.value ? "正文已有修改，保存后进入审稿/回顾" : "正文已保存，可进入审稿") : "按下一拍生成或手写正文",
+        metric: `${currentWordCount.value} 字`,
+        action: hasDraftContent.value && hasUnsavedChanges.value ? "save-draft" : "open-focus",
+        actionLabel: hasDraftContent.value && hasUnsavedChanges.value ? "保存正文" : "去写作"
+      },
+      {
+        id: "review",
+        label: "审稿",
+        status: hasChapterQualityReport.value ? "done" : writingMode.value === "review" ? "active" : savedDraftBlocked ? "blocked" : "waiting",
+        detail: hasChapterQualityReport.value ? "已有本章质量体检结果" : savedDraftBlocked ? "需要先保存可审正文" : "检查冲突、节奏、信息释放和文风风险",
+        metric: hasChapterQualityReport.value ? `${currentQualityReport.value?.overallScore || 0} 分` : "待体检",
+        action: hasChapterQualityReport.value ? "open-review" : "diagnose",
+        actionLabel: hasChapterQualityReport.value ? "看报告" : "体检本章"
+      },
+      {
+        id: "recap",
+        label: "章后回顾",
+        status: recapCandidate.value ? "active" : hasWritingRecapTaskForCurrentChapter.value ? "done" : savedDraftBlocked ? "blocked" : "waiting",
+        detail: recapCandidate.value ? "有待确认的状态补丁" : savedDraftBlocked ? "保存正文后再抽取事实变化" : "抽取摘要、事实、人物变化和账本候选",
+        metric: recapCandidate.value
+          ? `${recapCandidate.value.newFacts.length + recapCandidate.value.characterStateChanges.length} 条`
+          : hasWritingRecapTaskForCurrentChapter.value
+            ? "已生成"
+            : "待生成",
+        action: recapCandidate.value ? "accept-recap" : "request-recap",
+        actionLabel: recapCandidate.value ? "入账" : "生成回顾"
+      },
+      {
+        id: "ledger",
+        label: "账本",
+        status: hasAcceptedLedgerForCurrentChapter.value ? "done" : recapCandidate.value ? "active" : savedDraftBlocked ? "blocked" : "waiting",
+        detail: hasAcceptedLedgerForCurrentChapter.value ? "本章已有账本状态沉淀" : recapCandidate.value ? "确认后写入伏笔/风险/升级账本" : "等待章后回顾产生可采纳条目",
+        metric: hasAcceptedLedgerForCurrentChapter.value ? `${ledgerEntries.value.length} 条` : "待入账",
+        action: recapCandidate.value ? "accept-recap" : "request-recap",
+        actionLabel: recapCandidate.value ? "确认入账" : "先回顾"
+      },
+      {
+        id: "next",
+        label: "下一章",
+        status: hasAcceptedLedgerForCurrentChapter.value || hasWritingRecapTaskForCurrentChapter.value ? "done" : "waiting",
+        detail: hasAcceptedLedgerForCurrentChapter.value || hasWritingRecapTaskForCurrentChapter.value ? "下一章可读取回顾与账本继续推进" : "完成回顾和账本后，下一章上下文更稳",
+        metric: currentChapter.value?.status || "当前章",
+        action: "open-structure",
+        actionLabel: "规划后续"
+      }
+    ];
   });
   const activeSceneCard = computed(() => {
     if (!sceneCards.value.length) return null;
@@ -1096,10 +1196,12 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   async function reverseEngineerStructureFromDraft() {
+    if (isReverseEngineeringStructure.value) return false;
     const content = currentContent.value.trim();
     const chapterId = currentDashboard.value?.chapterId || currentChapter.value?.id;
     if (!currentProject.value || !chapterId || !content || !canReverseEngineerStructure.value) return false;
 
+    isReverseEngineeringStructure.value = true;
     isLoading.value = true;
     error.value = "";
     startTaskProgress();
@@ -1144,6 +1246,7 @@ export const useNovelStore = defineStore("novel", () => {
       finishTaskProgress(false);
       return applyLocalReverseStructure(content, chapterId);
     } finally {
+      isReverseEngineeringStructure.value = false;
       isLoading.value = false;
     }
   }
@@ -1246,7 +1349,39 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   async function requestWritingRecap() {
+    if (isLoading.value) return;
     await runTask("writing.recap");
+  }
+
+  async function runCreationLoopAction(action: CreationLoopAction) {
+    if (action === "open-structure") {
+      setWritingMode("structure");
+      return;
+    }
+    if (action === "open-focus") {
+      setWritingMode("focus");
+      return;
+    }
+    if (action === "open-review") {
+      setWritingMode("review");
+      return;
+    }
+    if (action === "save-draft") {
+      await saveCurrentContent();
+      return;
+    }
+    if (action === "diagnose") {
+      setWritingMode("review");
+      diagnoseCurrentChapter();
+      return;
+    }
+    if (action === "request-recap") {
+      await requestWritingRecap();
+      return;
+    }
+    if (action === "accept-recap") {
+      await acceptWritingRecap();
+    }
   }
 
   async function requestStoryOrchestration() {
@@ -1576,6 +1711,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusProgressPercent,
     activeSceneCard,
     focusWritingGuide,
+    creationLoopSteps,
     currentDashboard,
     sceneCards,
     storyControl,
@@ -1587,6 +1723,7 @@ export const useNovelStore = defineStore("novel", () => {
     isSavingDashboard,
     isSavingScenes,
     isSavingStoryControl,
+    isReverseEngineeringStructure,
     agentProfiles,
     agentChecks,
     defaultAgentProfileId,
@@ -1650,6 +1787,7 @@ export const useNovelStore = defineStore("novel", () => {
     updateStyleTone,
     tuneSelectionStyle,
     requestWritingRecap,
+    runCreationLoopAction,
     acceptWritingRecap,
     rejectWritingRecap,
     openProject,

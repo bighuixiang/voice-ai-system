@@ -37,12 +37,13 @@ defineProps<{
 <style scoped lang="scss">
 .context-panel {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .panel-title {
+  color: var(--app-text-primary);
   font-weight: 700;
   margin-bottom: 10px;
 }
@@ -55,40 +56,43 @@ dl {
 }
 
 dt {
-  color: #6b7280;
+  color: var(--app-text-muted);
 }
 
 dd {
   margin: 0;
-  color: #111827;
+  color: var(--app-text-primary);
 }
 
 .agent-status {
   min-height: 24px;
   margin-top: 12px;
   padding: 5px 8px;
+  border: 1px solid var(--app-border);
   border-radius: 6px;
-  background: #f8fafc;
-  color: #64748b;
+  background: var(--app-bg-soft);
+  color: var(--app-text-muted);
   font-size: 12px;
   line-height: 1.3;
 
   &.available {
-    background: #ecfdf5;
-    color: #047857;
+    border-color: rgba(34, 197, 94, 0.35);
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--app-success);
   }
 
   &.unavailable {
-    background: #fef2f2;
-    color: #991b1b;
+    border-color: rgba(248, 113, 113, 0.35);
+    background: rgba(248, 113, 113, 0.12);
+    color: var(--app-danger);
   }
 }
 
 .context-note {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-  color: #4b5563;
+  border-top: 1px solid var(--app-border);
+  color: var(--app-text-secondary);
   line-height: 1.6;
 }
 </style>

@@ -102,9 +102,9 @@ function isLastOddAction(index: number) {
 <style scoped lang="scss">
 .ai-panel {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .panel-title {
@@ -140,7 +140,7 @@ function isLastOddAction(index: number) {
 .free-task {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--app-border);
 }
 
 .free-task-button {
@@ -154,26 +154,26 @@ function isLastOddAction(index: number) {
   margin: 12px 0 0;
   list-style: none;
   border-radius: 6px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 
   li {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #6b7280;
+    color: var(--app-text-muted);
     font-size: 13px;
   }
 
   .running {
-    color: #1d4ed8;
+    color: var(--app-primary);
   }
 
   .done {
-    color: #047857;
+    color: var(--app-success-text);
   }
 
   .error {
-    color: #b91c1c;
+    color: var(--app-danger-text);
   }
 }
 
@@ -193,13 +193,13 @@ function isLastOddAction(index: number) {
 }
 
 .task-error {
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--app-danger-soft);
+  color: var(--app-danger-text);
 }
 
 .task-result {
-  background: #f9fafb;
-  color: #374151;
+  background: var(--app-bg-soft);
+  color: var(--app-text-secondary);
 
   p {
     white-space: pre-wrap;

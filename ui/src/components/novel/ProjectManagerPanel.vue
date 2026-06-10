@@ -219,9 +219,9 @@ function handleImport() {
 <style scoped lang="scss">
 .project-manager {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .panel-title {
@@ -233,11 +233,12 @@ function handleImport() {
   h2 {
     margin: 0 0 2px;
     font-size: 16px;
+    color: var(--app-text-primary);
   }
 
   p {
     margin: 0;
-    color: #6b7280;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }
@@ -258,18 +259,18 @@ function handleImport() {
   width: 100%;
   border: 1px solid transparent;
   border-radius: 6px;
-  background: #f8fafc;
-  color: #111827;
+  background: var(--app-bg-soft);
+  color: var(--app-text-primary);
 
   &:hover,
   &:focus-visible {
-    border-color: #93c5fd;
+    border-color: var(--app-primary);
     outline: none;
   }
 
   &.active {
-    border-color: #2563eb;
-    background: #eff6ff;
+    border-color: var(--app-primary);
+    background: var(--app-primary-soft);
   }
 }
 
@@ -288,7 +289,7 @@ function handleImport() {
   cursor: pointer;
 
   &:focus-visible {
-    outline: 2px solid #93c5fd;
+    outline: 2px solid var(--app-primary);
     outline-offset: -2px;
   }
 }
@@ -300,7 +301,7 @@ function handleImport() {
 .project-icon {
   display: grid;
   place-items: center;
-  color: #2563eb;
+  color: var(--app-primary);
 }
 
 .project-copy {
@@ -315,7 +316,7 @@ function handleImport() {
   }
 
   small {
-    color: #6b7280;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }
@@ -323,13 +324,13 @@ function handleImport() {
 .empty-copy {
   margin: 0;
   padding: 8px;
-  color: #6b7280;
-  background: #f8fafc;
+  color: var(--app-text-muted);
+  background: var(--app-bg-soft);
   border-radius: 6px;
 }
 
 .import-form {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--app-border);
   padding-top: 12px;
 }
 

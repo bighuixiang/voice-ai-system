@@ -23,7 +23,11 @@
 
       <div class="quick-actions">
         <el-tooltip content="从当前章节正文反推出仪表盘和场景卡" placement="top">
-          <el-button :disabled="!canReverseEngineer" @click="$emit('reverse-from-draft')">
+          <el-button
+            :disabled="!canReverseEngineer || isReverseEngineering"
+            :loading="isReverseEngineering"
+            @click="$emit('reverse-from-draft')"
+          >
             <el-icon><Reading /></el-icon>
             从正文反写
           </el-button>
@@ -47,6 +51,7 @@ defineProps<{
   canReverseEngineer: boolean;
   canSaveStructure: boolean;
   isSaving?: boolean;
+  isReverseEngineering?: boolean;
 }>();
 
 defineEmits<{
@@ -60,9 +65,9 @@ defineEmits<{
 <style scoped lang="scss">
 .structure-quick-start-panel {
   padding: 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 header {
@@ -74,7 +79,7 @@ header {
 
   p {
     margin: 3px 0 0;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }

@@ -43,10 +43,10 @@ defineEmits<{
   width: 100%;
   min-height: 34px;
   padding: 6px 8px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #ffffff;
-  color: #1f2937;
+  background: var(--app-bg);
+  color: var(--app-text-primary);
   cursor: pointer;
   font: inherit;
   text-align: left;
@@ -62,7 +62,7 @@ defineEmits<{
 
   small {
     margin-left: auto;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
     white-space: nowrap;
   }

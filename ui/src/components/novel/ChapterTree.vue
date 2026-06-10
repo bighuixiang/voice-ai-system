@@ -371,7 +371,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   gap: 10px;
   padding: 0 4px 2px;
-  color: #111827;
+  color: var(--app-text-primary);
 
   div {
     display: grid;
@@ -383,7 +383,7 @@ onBeforeUnmount(() => {
   }
 
   small {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }
@@ -442,13 +442,13 @@ onBeforeUnmount(() => {
   margin: 4px 0;
   padding: 0 8px;
   border-radius: 6px;
-  background: #e8eef6;
-  color: #334155;
+  background: var(--app-bg-muted);
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 800;
 
   small {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-weight: 700;
   }
 }
@@ -462,23 +462,23 @@ onBeforeUnmount(() => {
   height: 40px;
   margin: 4px 0;
   padding: 0 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #ffffff;
-  color: #1f2937;
+  background: var(--app-bg);
+  color: var(--app-text-primary);
   cursor: pointer;
   text-align: left;
   transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 
   small {
-    color: #6b7280;
+    color: var(--app-text-muted);
     white-space: nowrap;
   }
 
   &:hover,
   &:focus-visible {
-    border-color: #93c5fd;
-    background: #f8fbff;
+    border-color: var(--app-primary);
+    background: var(--app-bg-soft);
     outline: none;
   }
 
@@ -487,9 +487,9 @@ onBeforeUnmount(() => {
   }
 
   &.active {
-    border-color: #2563eb;
-    background: #eff6ff;
-    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.18);
+    border-color: var(--app-primary);
+    background: var(--app-primary-soft);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.22);
   }
 }
 
@@ -504,8 +504,8 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 12px;
   border-radius: 7px;
-  background: #f8fafc;
-  color: #64748b;
+  background: var(--app-bg-soft);
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 

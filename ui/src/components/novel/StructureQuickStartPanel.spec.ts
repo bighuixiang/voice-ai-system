@@ -6,7 +6,7 @@ const stubs = {
   "el-button": {
     props: ["disabled", "loading", "type"],
     emits: ["click"],
-    template: `<button :disabled="disabled" @click="$emit('click')"><slot /></button>`
+    template: `<button :disabled="disabled" :data-loading="loading ? 'true' : 'false'" @click="$emit('click')"><slot /></button>`
   },
   "el-input": {
     props: ["modelValue"],
@@ -24,7 +24,8 @@ describe("StructureQuickStartPanel", () => {
         idea: "主角发现旧符回应了他的血。",
         canReverseEngineer: true,
         canSaveStructure: true,
-        isSaving: false
+        isSaving: false,
+        isReverseEngineering: false
       },
       global: { stubs }
     });
@@ -42,7 +43,8 @@ describe("StructureQuickStartPanel", () => {
         idea: "",
         canReverseEngineer: false,
         canSaveStructure: false,
-        isSaving: false
+        isSaving: false,
+        isReverseEngineering: false
       },
       global: { stubs }
     });
@@ -60,7 +62,8 @@ describe("StructureQuickStartPanel", () => {
         idea: "主角追查异常印记。",
         canReverseEngineer: true,
         canSaveStructure: true,
-        isSaving: false
+        isSaving: false,
+        isReverseEngineering: false
       },
       global: { stubs }
     });
@@ -71,5 +74,23 @@ describe("StructureQuickStartPanel", () => {
 
     expect(wrapper.emitted("save-structure")).toHaveLength(1);
     expect(wrapper.emitted("reverse-from-draft")).toHaveLength(1);
+  });
+
+  it("shows the reverse action as busy while reverse engineering is running", () => {
+    const wrapper = mount(StructureQuickStartPanel, {
+      props: {
+        idea: "",
+        canReverseEngineer: true,
+        canSaveStructure: true,
+        isSaving: false,
+        isReverseEngineering: true
+      },
+      global: { stubs }
+    });
+
+    const reverseButton = wrapper.findAll("button")[1];
+
+    expect(reverseButton.attributes("disabled")).toBeDefined();
+    expect(reverseButton.attributes("data-loading")).toBe("true");
   });
 });

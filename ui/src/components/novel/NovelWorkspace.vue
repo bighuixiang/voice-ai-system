@@ -6,6 +6,14 @@
         <p>从小说项目开始，逐步扩展到素材、剧本、图片和视频生成管理。</p>
       </div>
       <div class="header-actions">
+        <el-tooltip :content="themeStore.isDark ? '切换白色主题' : '切换黑暗主题'" placement="bottom">
+          <el-button circle aria-label="切换主题" @click="themeStore.toggleTheme">
+            <el-icon>
+              <Sunny v-if="themeStore.isDark" />
+              <Moon v-else />
+            </el-icon>
+          </el-button>
+        </el-tooltip>
         <el-button @click="aiConfigDialogOpen = true">
           <el-icon><Setting /></el-icon>
           AI 配置
@@ -97,6 +105,11 @@
 
       <section class="center-stage">
         <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
+        <CreationLoopPanel
+          :steps="store.creationLoopSteps"
+          :loading="store.isLoading || store.isSavingContent"
+          @action="handleCreationLoopAction"
+        />
         <CollapsiblePanel
           title="快速指引"
           :collapsed="panelCollapsed('quick-start', hasWorkspaceDraft || hasWorkspaceStructure)"
@@ -175,6 +188,7 @@
             :can-reverse-engineer="store.canReverseEngineerStructure"
             :can-save-structure="Boolean(store.currentDashboard)"
             :is-saving="store.isSavingDashboard || store.isSavingScenes"
+            :is-reverse-engineering="store.isReverseEngineeringStructure"
             @update:idea="store.updateStructureIdeaInput"
             @reverse-from-draft="store.reverseEngineerStructureFromDraft"
             @generate-from-idea="store.generateStructureFromIdea"
@@ -407,10 +421,11 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Close, Collection, Folder, Loading, Refresh, Setting } from "@element-plus/icons-vue";
+import { Close, Collection, Folder, Loading, Moon, Refresh, Setting, Sunny } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
-import type { NovelProject, PlatformAiConfig } from "@/types/novel";
+import { useThemeStore } from "@/stores/theme";
+import type { CreationLoopAction, NovelProject, PlatformAiConfig } from "@/types/novel";
 import ProjectManagerPanel from "./ProjectManagerPanel.vue";
 import ProjectCreatePanel from "./ProjectCreatePanel.vue";
 import AiConfigPanel from "./AiConfigPanel.vue";
@@ -434,12 +449,14 @@ import LedgerPanel from "./LedgerPanel.vue";
 import PlatformLibraryPanel from "./PlatformLibraryPanel.vue";
 import QuickStartGuidePanel from "./QuickStartGuidePanel.vue";
 import CollapsiblePanel from "./CollapsiblePanel.vue";
+import CreationLoopPanel from "./CreationLoopPanel.vue";
 
 defineOptions({
   name: "NovelWorkspace"
 });
 
 const store = useNovelStore();
+const themeStore = useThemeStore();
 const route = useRoute();
 const router = useRouter();
 const sampleStarterIdea = "一个被逐出山门的少年在雨夜发现旧封印松动；他想证明自己还能修行，却必须在救人和暴露身份之间做选择。";
@@ -568,6 +585,14 @@ async function handleSaveCurrentContent() {
   }
 }
 
+async function handleCreationLoopAction(action: CreationLoopAction) {
+  try {
+    await store.runCreationLoopAction(action);
+  } catch {
+    ElMessage.error("闭环动作执行失败，请检查当前章节状态。");
+  }
+}
+
 function isSaveShortcut(event: KeyboardEvent) {
   return (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "s";
 }
@@ -675,8 +700,8 @@ watch(
 <style scoped lang="scss">
 .novel-workspace {
   min-height: 100vh;
-  background: #f3f5f8;
-  color: #111827;
+  background: var(--app-bg-page);
+  color: var(--app-text-primary);
 }
 
 .workspace-header {
@@ -686,8 +711,8 @@ watch(
   gap: 16px;
   min-height: 72px;
   padding: 14px 20px;
-  border-bottom: 1px solid #d8dee8;
-  background: #ffffff;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-bg);
 
   h1 {
     font-size: 20px;
@@ -696,7 +721,7 @@ watch(
 
   p {
     margin: 0;
-    color: #6b7280;
+    color: var(--app-text-muted);
   }
 }
 
@@ -714,8 +739,8 @@ watch(
   gap: 8px;
   min-height: 44px;
   padding: 6px 14px;
-  border-bottom: 1px solid #d8dee8;
-  background: #ffffff;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-bg);
   overflow-x: auto;
 }
 
@@ -725,10 +750,10 @@ watch(
   gap: 6px;
   max-width: 240px;
   padding: 4px 4px 4px 10px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
-  color: #374151;
+  background: var(--app-bg-soft);
+  color: var(--app-text-secondary);
   cursor: pointer;
 
   span {
@@ -738,9 +763,9 @@ watch(
   }
 
   &.active {
-    border-color: #2563eb;
-    background: #eff6ff;
-    color: #1d4ed8;
+    border-color: var(--app-primary);
+    background: var(--app-primary-soft);
+    color: var(--app-primary-text);
   }
 }
 
@@ -759,7 +784,7 @@ watch(
 
   .eyebrow {
     margin: 0 0 6px;
-    color: #2563eb;
+    color: var(--app-primary);
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
@@ -773,7 +798,7 @@ watch(
   p {
     max-width: 720px;
     margin: 0;
-    color: #4b5563;
+    color: var(--app-text-secondary);
   }
 }
 
@@ -785,10 +810,10 @@ watch(
 
   span {
     padding: 5px 9px;
-    border: 1px solid #d8dee8;
+    border: 1px solid var(--app-border);
     border-radius: 6px;
-    background: #ffffff;
-    color: #374151;
+    background: var(--app-bg);
+    color: var(--app-text-secondary);
     font-size: 12px;
   }
 }
@@ -859,8 +884,8 @@ watch(
 .workspace-error {
   padding: 10px;
   border-radius: 6px;
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--app-danger-soft);
+  color: var(--app-danger-text);
 }
 
 .workspace-loading {
@@ -869,7 +894,7 @@ watch(
   justify-content: center;
   gap: 8px;
   min-height: calc(100vh - 116px);
-  color: #475569;
+  color: var(--app-text-secondary);
 }
 
 @media (max-width: 1100px) {

@@ -70,12 +70,13 @@ function formatTime(value?: string) {
 <style scoped lang="scss">
 .task-history-panel {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .panel-title {
+  color: var(--app-text-primary);
   font-weight: 700;
   margin-bottom: 10px;
 }
@@ -91,7 +92,7 @@ ol {
 
 li {
   padding-bottom: 8px;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid var(--app-border);
 
   &:last-child {
     border-bottom: 0;
@@ -103,18 +104,19 @@ li {
   display: flex;
   justify-content: space-between;
   gap: 8px;
+  color: var(--app-text-primary);
 }
 
 p {
   margin: 4px 0 0;
-  color: #6b7280;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
 small {
   display: block;
   margin-top: 3px;
-  color: #94a3b8;
+  color: var(--app-text-muted);
   font-size: 11px;
 }
 </style>

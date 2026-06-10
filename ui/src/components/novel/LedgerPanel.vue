@@ -116,9 +116,9 @@ function updateEntry(index: number, patch: Partial<LedgerEntry>) {
 <style scoped lang="scss">
 .ledger-panel {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .panel-title {
@@ -126,6 +126,7 @@ function updateEntry(index: number, patch: Partial<LedgerEntry>) {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  color: var(--app-text-primary);
   font-weight: 700;
   margin-bottom: 10px;
 }
@@ -138,17 +139,17 @@ function updateEntry(index: number, patch: Partial<LedgerEntry>) {
 
   button {
     min-height: 30px;
-    border: 1px solid #d8dee8;
+    border: 1px solid var(--app-border);
     border-radius: 6px;
-    background: #f8fafc;
-    color: #374151;
+    background: var(--app-bg-soft);
+    color: var(--app-text-secondary);
     cursor: pointer;
     font-size: 12px;
 
     &.active {
-      border-color: #2563eb;
-      background: #eff6ff;
-      color: #1d4ed8;
+      border-color: var(--app-primary);
+      background: var(--app-primary-soft);
+      color: var(--app-primary);
       font-weight: 700;
     }
   }
@@ -157,9 +158,10 @@ function updateEntry(index: number, patch: Partial<LedgerEntry>) {
 .risk-filter {
   margin-bottom: 8px;
   padding: 6px 8px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
   border-radius: 6px;
-  background: #fff7ed;
-  color: #9a3412;
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--app-warning);
   font-size: 12px;
   font-weight: 700;
 }
@@ -173,13 +175,13 @@ function updateEntry(index: number, patch: Partial<LedgerEntry>) {
   display: grid;
   gap: 8px;
   padding: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #f9fafb;
+  background: var(--app-bg-soft);
 
   &.priority {
-    border-color: #f97316;
-    background: #fff7ed;
+    border-color: var(--app-warning);
+    background: rgba(251, 191, 36, 0.12);
   }
 
   header {
@@ -195,14 +197,14 @@ function updateEntry(index: number, patch: Partial<LedgerEntry>) {
 
   small {
     margin-top: 3px;
-    color: #6b7280;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 
   label {
     display: grid;
     gap: 4px;
-    color: #374151;
+    color: var(--app-text-secondary);
     font-size: 12px;
     font-weight: 700;
   }
@@ -210,10 +212,10 @@ function updateEntry(index: number, patch: Partial<LedgerEntry>) {
   select,
   textarea {
     width: 100%;
-    border: 1px solid #d8dee8;
+    border: 1px solid var(--app-border);
     border-radius: 6px;
-    background: #ffffff;
-    color: #111827;
+    background: var(--app-bg);
+    color: var(--app-text-primary);
     font: inherit;
   }
 
@@ -232,8 +234,9 @@ function updateEntry(index: number, patch: Partial<LedgerEntry>) {
 .empty-state {
   margin: 0;
   padding: 10px;
+  border: 1px solid var(--app-border);
   border-radius: 6px;
-  background: #f8fafc;
-  color: #6b7280;
+  background: var(--app-bg-soft);
+  color: var(--app-text-muted);
 }
 </style>

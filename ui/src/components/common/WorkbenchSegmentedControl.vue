@@ -57,9 +57,9 @@ function selectOption(value: string) {
   gap: 8px;
   width: 100%;
   padding: 4px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 }
 
 .segment-option {
@@ -72,7 +72,7 @@ function selectOption(value: string) {
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
-  color: #475569;
+  color: var(--app-text-secondary);
   cursor: pointer;
   text-align: left;
   transition:
@@ -82,20 +82,20 @@ function selectOption(value: string) {
     color 160ms ease;
 
   &:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
+    background: var(--app-bg);
+    border-color: var(--app-border-soft);
   }
 
   &:focus-visible {
-    outline: 2px solid #2563eb;
+    outline: 2px solid var(--app-primary);
     outline-offset: 2px;
   }
 
   &.active {
-    background: #ffffff;
-    border-color: #2563eb;
-    color: #1d4ed8;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    background: var(--app-bg);
+    border-color: var(--app-primary);
+    color: var(--app-primary-text);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
   }
 
   &.active::before {
@@ -103,7 +103,7 @@ function selectOption(value: string) {
     inset: 8px auto 8px 0;
     width: 3px;
     border-radius: 999px;
-    background: #2563eb;
+    background: var(--app-primary);
     content: "";
   }
 
@@ -133,7 +133,7 @@ function selectOption(value: string) {
   width: 30px;
   height: 30px;
   border-radius: 7px;
-  background: #e2e8f0;
+  background: var(--app-bg-muted);
   color: currentColor;
 
   .el-icon {
@@ -143,7 +143,7 @@ function selectOption(value: string) {
 
 .segment-option.active .option-icon {
   background: currentColor;
-  color: #ffffff;
+  color: var(--app-bg);
 }
 
 .option-copy {
@@ -161,7 +161,7 @@ function selectOption(value: string) {
 
   small {
     overflow: hidden;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
     line-height: 1.25;
     text-overflow: ellipsis;

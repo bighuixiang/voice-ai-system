@@ -114,9 +114,9 @@ function updateInstruction(value: string | number) {
   display: grid;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .panel-header,
@@ -132,13 +132,13 @@ function updateInstruction(value: string | number) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #111827;
+  color: var(--app-text-primary);
   font-weight: 800;
 }
 
 .panel-header p {
   margin: 3px 0 0;
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -147,13 +147,13 @@ function updateInstruction(value: string | number) {
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
-  color: #475569;
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 700;
 }
 
 .progress-row {
-  color: #334155;
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 800;
 }
@@ -165,13 +165,13 @@ function updateInstruction(value: string | number) {
   flex: 1 1 auto;
   overflow: hidden;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--app-bg-muted);
 }
 
 .progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #2563eb, #059669);
+  background: linear-gradient(90deg, var(--app-primary), var(--app-success));
   transition: width 160ms ease;
 }
 
@@ -185,21 +185,21 @@ function updateInstruction(value: string | number) {
 .guardrails {
   min-width: 0;
   padding: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #fbfcfe;
+  background: var(--app-bg-soft);
 
   span {
     display: block;
     margin-bottom: 6px;
-    color: #475569;
+    color: var(--app-text-muted);
     font-size: 12px;
     font-weight: 800;
   }
 
   p {
     margin: 0;
-    color: #111827;
+    color: var(--app-text-primary);
     font-size: 13px;
     line-height: 1.6;
   }
@@ -210,7 +210,7 @@ function updateInstruction(value: string | number) {
   gap: 4px;
   margin: 0;
   padding-left: 16px;
-  color: #111827;
+  color: var(--app-text-primary);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -220,7 +220,7 @@ function updateInstruction(value: string | number) {
   gap: 6px;
 
   span {
-    color: #475569;
+    color: var(--app-text-secondary);
     font-size: 12px;
     font-weight: 800;
   }

@@ -28,6 +28,13 @@ vi.mock("@/stores/novel", () => ({
   useNovelStore: () => storeRef.value
 }));
 
+vi.mock("@/stores/theme", () => ({
+  useThemeStore: () => ({
+    isDark: true,
+    toggleTheme: vi.fn()
+  })
+}));
+
 const project = {
   id: "demo",
   slug: "demo",
@@ -61,6 +68,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     isLoading: false,
     isSavingDashboard: false,
     isSavingScenes: false,
+    isReverseEngineeringStructure: false,
     isSavingContent: false,
     currentDashboard: {
       chapterId: "chapter-001",
@@ -118,6 +126,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     canTuneSelection: false,
     currentTask: null,
     taskProgress: [],
+    creationLoopSteps: [],
     recapCandidate: null,
     taskHistory: [],
     agentProfiles: [],
@@ -184,6 +193,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     rejectRewrite: vi.fn(),
     applyTaskPatches: vi.fn(),
     runTask: vi.fn(),
+    runCreationLoopAction: vi.fn(),
     acceptWritingRecap: vi.fn(),
     rejectWritingRecap: vi.fn(),
     createSharedAsset: vi.fn(),
@@ -220,6 +230,11 @@ const stubs = {
   PlatformLibraryPanel: { template: "<div class='platform-stub'>platform</div>" },
   ChapterTree: { template: "<div class='tree-stub'>tree</div>" },
   WritingModeSwitcher: { props: ["mode"], template: "<div class='mode-switcher-stub'>{{ mode }}</div>" },
+  CreationLoopPanel: {
+    props: ["steps"],
+    emits: ["action"],
+    template: "<button class='creation-loop-stub' @click='$emit(\"action\", steps?.[0]?.action)'>loop</button>"
+  },
   FocusWritingPanel: {
     props: ["instruction"],
     emits: ["generate-draft", "update-instruction"],
@@ -277,6 +292,27 @@ describe("NovelWorkspace writing modes", () => {
     await wrapper.find(".focus-stub").trigger("click");
 
     expect(storeRef.value.requestFocusDraft).toHaveBeenCalled();
+  });
+
+  it("routes creation loop actions to the store", async () => {
+    storeRef.value = {
+      ...makeStore("focus"),
+      creationLoopSteps: [
+        {
+          id: "draft",
+          label: "正文",
+          status: "active",
+          detail: "保存后进入审稿",
+          action: "save-draft",
+          actionLabel: "保存正文"
+        }
+      ]
+    };
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".creation-loop-stub").trigger("click");
+
+    expect(storeRef.value.runCreationLoopAction).toHaveBeenCalledWith("save-draft");
   });
 
   it("syncs focus micro-command input to the store", async () => {

@@ -95,8 +95,8 @@ async function handleSubmit() {
   width: min(760px, 100%);
   margin: 0 auto;
   padding: 28px;
-  background: #ffffff;
-  border: 1px solid #d8dee8;
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
   border-radius: 8px;
 }
 
@@ -104,7 +104,7 @@ async function handleSubmit() {
   margin-bottom: 20px;
 
   .eyebrow {
-    color: #2563eb;
+    color: var(--app-primary);
     font-weight: 700;
     font-size: 12px;
     text-transform: uppercase;
@@ -114,12 +114,12 @@ async function handleSubmit() {
   h2 {
     font-size: 22px;
     margin: 0 0 8px;
-    color: #111827;
+    color: var(--app-text-primary);
   }
 
   p {
     margin: 0;
-    color: #4b5563;
+    color: var(--app-text-secondary);
   }
 }
 

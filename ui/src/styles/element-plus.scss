@@ -3,7 +3,8 @@
 @use "variables" as *;
 
 // 覆盖 Element Plus 默认变量
-:root {
+:root,
+:root[data-theme="light"] {
   // 主色调
   --el-color-primary: #{$primary-color};
   --el-color-success: #{$success-color};
@@ -49,9 +50,76 @@
   --el-font-size-extra-large: #{$font-size-extra-large};
 }
 
+:root[data-theme="dark"] {
+  --el-color-primary: #38bdf8;
+  --el-color-success: #22c55e;
+  --el-color-warning: #fbbf24;
+  --el-color-danger: #fb7185;
+  --el-color-info: #94a3b8;
+
+  --el-bg-color: var(--app-bg);
+  --el-bg-color-page: var(--app-bg-page);
+  --el-bg-color-overlay: var(--app-bg-elevated);
+
+  --el-text-color-primary: var(--app-text-primary);
+  --el-text-color-regular: var(--app-text-secondary);
+  --el-text-color-secondary: var(--app-text-muted);
+  --el-text-color-placeholder: #64748b;
+  --el-text-color-disabled: #475569;
+
+  --el-border-color: var(--app-border);
+  --el-border-color-light: var(--app-border-soft);
+  --el-border-color-lighter: #202938;
+  --el-border-color-extra-light: #1c2432;
+
+  --el-fill-color: var(--app-bg-soft);
+  --el-fill-color-light: var(--app-bg-muted);
+  --el-fill-color-lighter: #243247;
+  --el-fill-color-extra-light: #0b1220;
+  --el-fill-color-blank: var(--app-bg);
+  --el-mask-color: rgba(3, 7, 18, 0.72);
+  --el-box-shadow: var(--app-shadow-soft);
+  --el-box-shadow-light: var(--app-shadow-soft);
+  --el-box-shadow-dark: 0 22px 56px rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="dark"] {
+  .el-input__wrapper,
+  .el-textarea__inner,
+  .el-select__wrapper {
+    background-color: var(--app-bg-soft);
+    box-shadow: 0 0 0 1px var(--app-border) inset;
+  }
+
+  .el-input__inner,
+  .el-textarea__inner,
+  .el-select__placeholder,
+  .el-select__selected-item {
+    color: var(--app-text-primary);
+  }
+
+  .el-input__wrapper:hover,
+  .el-textarea__inner:hover,
+  .el-select__wrapper:hover {
+    box-shadow: 0 0 0 1px var(--app-border-soft) inset;
+  }
+
+  .el-input__wrapper.is-focus,
+  .el-textarea__inner:focus,
+  .el-select__wrapper.is-focused {
+    box-shadow: 0 0 0 1px var(--app-primary) inset;
+  }
+}
+
 // Element Plus 组件样式定制
 .el-button {
   font-weight: 500;
+  --el-button-bg-color: var(--app-bg);
+  --el-button-border-color: var(--app-border);
+  --el-button-text-color: var(--app-text-secondary);
+  --el-button-hover-bg-color: var(--app-bg-soft);
+  --el-button-hover-border-color: var(--app-primary);
+  --el-button-hover-text-color: var(--app-primary);
   
   &.el-button--primary {
     --el-button-hover-bg-color: #{color.adjust($primary-color, $lightness: 10%)};

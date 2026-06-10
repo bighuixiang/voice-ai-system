@@ -14,6 +14,15 @@ export type CodexTaskType =
 export type CreativeModuleKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
 export type ChapterDocumentKind = "content" | "outline";
 export type WritingMode = "focus" | "structure" | "review";
+export type CreationLoopStepStatus = "done" | "active" | "waiting" | "blocked";
+export type CreationLoopAction =
+  | "open-structure"
+  | "open-focus"
+  | "save-draft"
+  | "open-review"
+  | "diagnose"
+  | "request-recap"
+  | "accept-recap";
 export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook";
 export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
 export type AiAgentProvider = "codex" | "claude-code";
@@ -233,6 +242,16 @@ export interface FocusWritingGuide {
   guardrails: string[];
   prompt: string;
   updatedAt: string;
+}
+
+export interface CreationLoopStep {
+  id: "structure" | "draft" | "review" | "recap" | "ledger" | "next";
+  label: string;
+  status: CreationLoopStepStatus;
+  detail: string;
+  metric?: string;
+  action?: CreationLoopAction;
+  actionLabel?: string;
 }
 
 export interface NovelProject {

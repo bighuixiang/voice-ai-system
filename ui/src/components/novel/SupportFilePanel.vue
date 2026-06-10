@@ -51,9 +51,9 @@ defineEmits<{
   flex-direction: column;
   min-height: 300px;
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 header {
@@ -65,7 +65,7 @@ header {
 
   p {
     margin: 3px 0 0;
-    color: #6b7280;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }
@@ -82,10 +82,11 @@ header {
 .support-textarea {
   min-height: 240px;
   resize: vertical;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--app-border);
   border-radius: 6px;
   padding: 10px;
-  color: #111827;
+  color: var(--app-text-primary);
+  background: var(--app-bg-soft);
   line-height: 1.7;
   font-family: "Microsoft YaHei", "PingFang SC", "Source Han Sans SC", sans-serif;
 }

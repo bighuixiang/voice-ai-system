@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+﻿import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useNovelStore } from "./novel";
 import type {
@@ -157,6 +157,16 @@ function taskWithResult(overrides: Partial<NovelTask> = {}): NovelTask {
     },
     ...overrides
   };
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, resolve, reject };
 }
 
 describe("useNovelStore", () => {
@@ -578,6 +588,42 @@ describe("useNovelStore", () => {
     expect(store.hasUnsavedChanges).toBe(false);
   });
 
+  it("builds chapter creation loop steps from structure, draft, review, and recap state", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+
+    store.updateDashboard({ goal: "让主角带着代价发现线索。" });
+    store.updateContent("他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然传来回应，他必须选择是否暴露身份。");
+
+    expect(store.creationLoopSteps.find((step) => step.id === "structure")).toMatchObject({
+      status: "done",
+      action: "open-structure"
+    });
+    expect(store.creationLoopSteps.find((step) => step.id === "draft")).toMatchObject({
+      status: "active",
+      action: "save-draft"
+    });
+    expect(store.creationLoopSteps.find((step) => step.id === "review")).toMatchObject({
+      status: "blocked"
+    });
+
+    await store.runCreationLoopAction("save-draft");
+
+    expect(store.creationLoopSteps.find((step) => step.id === "draft")).toMatchObject({
+      status: "done",
+      action: "open-focus"
+    });
+    expect(store.creationLoopSteps.find((step) => step.id === "review")).toMatchObject({
+      status: "waiting",
+      action: "diagnose"
+    });
+    expect(store.creationLoopSteps.find((step) => step.id === "recap")).toMatchObject({
+      status: "waiting",
+      action: "request-recap"
+    });
+  });
+
   it("keeps the dashboard word count synchronized with draft saves", async () => {
     const store = useNovelStore();
     store.currentProject = project;
@@ -672,6 +718,51 @@ describe("useNovelStore", () => {
     expect(store.rewriteCandidate).toBeNull();
     expect(store.currentTask?.type).toBe("structure.reverse");
     expect(store.structureDraftVersion).toBe(1);
+  });
+
+  it("prevents duplicate reverse engineering requests while one is running", async () => {
+    const pendingTask = deferred<NovelTask>();
+    mockNovelApi.runTask.mockReturnValue(pendingTask.promise);
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateContent("The hero finds a seal outside the mountain gate, waits, and watches it answer his blood.");
+
+    const firstRun = store.reverseEngineerStructureFromDraft();
+
+    expect(store.isReverseEngineeringStructure).toBe(true);
+    expect(store.canReverseEngineerStructure).toBe(false);
+
+    const secondRun = await store.reverseEngineerStructureFromDraft();
+
+    expect(secondRun).toBe(false);
+    expect(mockNovelApi.runTask).toHaveBeenCalledTimes(1);
+
+    pendingTask.resolve(
+      taskWithResult({
+        type: "structure.reverse",
+        result: {
+          summary: "Reverse structure complete",
+          content: JSON.stringify({
+            dashboard: {
+              goal: "Reverse current chapter structure",
+              pov: "First person",
+              mainConflict: "The hero must choose between approaching the seal and hiding his identity.",
+              endingHook: "The seal answers his blood.",
+              status: "drafted"
+            },
+            scenes: []
+          }),
+          changes: [],
+          risks: [],
+          questions: [],
+          patches: []
+        }
+      })
+    );
+
+    await expect(firstRun).resolves.toBe(true);
+    expect(store.isReverseEngineeringStructure).toBe(false);
   });
 
   it("generates dashboard and scene cards from a rough chapter idea", async () => {

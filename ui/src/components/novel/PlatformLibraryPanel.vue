@@ -118,9 +118,9 @@ function submitAsset() {
 <style scoped lang="scss">
 .platform-panel {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .panel-header {
@@ -137,7 +137,7 @@ function submitAsset() {
 
   p {
     margin: 0;
-    color: #6b7280;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }
@@ -161,9 +161,9 @@ function submitAsset() {
 .prompt-item,
 .skill-item {
   padding: 9px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f9fafb;
+  background: var(--app-bg-soft);
 }
 
 .asset-item,
@@ -185,12 +185,12 @@ function submitAsset() {
 .prompt-item p,
 .skill-item p {
   margin: 0;
-  color: #6b7280;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
 .prompt-item span {
-  color: #374151;
+  color: var(--app-text-secondary);
   font-size: 12px;
   line-height: 1.45;
 }
@@ -203,7 +203,7 @@ function submitAsset() {
 
 .empty-text {
   margin: 8px 0 0;
-  color: #6b7280;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 </style>

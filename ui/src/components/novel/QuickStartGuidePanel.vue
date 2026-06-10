@@ -168,9 +168,9 @@ const steps = computed(() => {
 <style scoped lang="scss">
 .quick-start-guide {
   padding: 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .guide-header {
@@ -183,12 +183,12 @@ const steps = computed(() => {
   h2 {
     margin: 0 0 5px;
     font-size: 18px;
-    color: #111827;
+    color: var(--app-text-primary);
   }
 
   p {
     margin: 0;
-    color: #475569;
+    color: var(--app-text-secondary);
     font-size: 13px;
     line-height: 1.55;
   }
@@ -196,7 +196,7 @@ const steps = computed(() => {
 
 .eyebrow {
   margin: 0 0 5px;
-  color: #2563eb;
+  color: var(--app-primary);
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -221,18 +221,18 @@ const steps = computed(() => {
   gap: 8px;
   min-height: 86px;
   padding: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 
   &.active {
-    border-color: #2563eb;
-    background: #eff6ff;
+    border-color: var(--app-primary);
+    background: var(--app-primary-soft);
   }
 
   &.done {
-    border-color: #10b981;
-    background: #ecfdf5;
+    border-color: rgba(34, 197, 94, 0.5);
+    background: var(--app-success-soft);
   }
 }
 
@@ -242,8 +242,8 @@ const steps = computed(() => {
   width: 24px;
   height: 24px;
   border-radius: 999px;
-  background: #111827;
-  color: #ffffff;
+  background: var(--app-primary);
+  color: var(--app-bg);
   font-size: 12px;
   font-weight: 800;
 }
@@ -258,12 +258,12 @@ const steps = computed(() => {
 
   strong {
     margin-bottom: 4px;
-    color: #111827;
+    color: var(--app-text-primary);
     font-size: 13px;
   }
 
   small {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
     line-height: 1.45;
   }

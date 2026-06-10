@@ -133,8 +133,8 @@ function emitSelection() {
   flex-direction: column;
   min-height: 0;
   height: 100%;
-  background: #ffffff;
-  border: 1px solid #d8dee8;
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -145,19 +145,19 @@ function emitSelection() {
   justify-content: space-between;
   gap: 18px;
   padding: 14px 16px 10px;
-  border-bottom: 1px solid #edf0f5;
-  background: #ffffff;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-bg);
 
   h2 {
     margin: 3px 0 4px;
-    color: #111827;
+    color: var(--app-text-primary);
     font-size: 20px;
     line-height: 1.25;
   }
 
   p {
     margin: 0;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }
@@ -192,19 +192,19 @@ function emitSelection() {
 
 .mode-kicker {
   padding: 0 7px;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--app-bg-muted);
+  color: var(--app-text-secondary);
 }
 
 .mode-name {
   padding: 0 8px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-text);
 }
 
 .mode-outline .mode-name {
-  background: #ecfdf5;
-  color: #047857;
+  background: var(--app-success-soft);
+  color: var(--app-success-text);
 }
 
 .editor-actions {
@@ -220,18 +220,18 @@ function emitSelection() {
   align-items: center;
   min-height: 28px;
   padding: 0 8px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid rgba(34, 197, 94, 0.35);
   border-radius: 6px;
-  background: #f0fdf4;
-  color: #166534;
+  background: var(--app-success-soft);
+  color: var(--app-success-text);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
 
   &.dirty {
-    border-color: #fed7aa;
-    background: #fff7ed;
-    color: #9a3412;
+    border-color: rgba(245, 158, 11, 0.35);
+    background: var(--app-warning-soft);
+    color: var(--app-warning-text);
   }
 }
 
@@ -240,10 +240,10 @@ function emitSelection() {
   align-items: center;
   min-height: 28px;
   padding: 0 8px;
-  border: 1px solid #dbeafe;
+  border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: 6px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-text);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
@@ -255,8 +255,8 @@ function emitSelection() {
 
 .document-mode-strip {
   padding: 8px 16px 10px;
-  border-bottom: 1px solid #edf0f5;
-  background: #fbfcfe;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-bg-soft);
 }
 
 .editor-textarea {
@@ -272,13 +272,13 @@ function emitSelection() {
   overflow-x: hidden;
   font-size: 16px;
   line-height: 1.86;
-  color: #111827;
-  background: #ffffff;
+  color: var(--app-text-primary);
+  background: var(--app-bg);
   font-family: "Microsoft YaHei", "PingFang SC", "Source Han Sans SC", sans-serif;
 }
 
 .editor-textarea:focus {
-  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.16);
+  box-shadow: inset 0 0 0 2px rgba(56, 189, 248, 0.22);
 }
 
 @media (max-width: 760px) {

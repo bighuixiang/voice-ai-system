@@ -141,9 +141,9 @@ function save() {
 <style scoped lang="scss">
 .chapter-dashboard-panel {
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 header {
@@ -155,7 +155,7 @@ header {
 
   p {
     margin: 3px 0 0;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }
@@ -176,7 +176,7 @@ label {
   min-width: 0;
 
   span {
-    color: #475569;
+    color: var(--app-text-secondary);
     font-size: 12px;
     font-weight: 700;
   }
@@ -192,7 +192,7 @@ label {
 
 .empty-state {
   margin: 0;
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 13px;
 }
 
