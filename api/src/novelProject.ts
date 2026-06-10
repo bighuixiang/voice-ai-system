@@ -277,6 +277,7 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "relations/story-asset-map.md": "# Story Asset Map\n\nTrack how characters, props, scenes, and generated media relate to chapters and plot beats.\n",
     "prompts/project-prompts.md": "# Project Prompts\n\nProject-specific prompt notes, expert role overrides, and reusable generation instructions.\n",
     "tasks/history.jsonl": "",
+    "tasks/invocations.jsonl": "",
     "tasks/recaps.jsonl": "",
     "story-control/story-control.json": `${JSON.stringify(defaultStoryControl(), null, 2)}\n`
   };

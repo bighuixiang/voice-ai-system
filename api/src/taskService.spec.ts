@@ -6,6 +6,7 @@ import { createProjectFiles, createProjectSkeleton } from "./novelProject.js";
 import { defaultPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 import { applyPatch, runNovelTask } from "./taskService.js";
 import type { ProcessRunner } from "./codexRunner.js";
+import type { AiInvocationSession } from "./types.js";
 
 let tempRoot = "";
 
@@ -27,6 +28,15 @@ const mockRunner: ProcessRunner = {
     };
   }
 };
+
+async function readInvocations(projectSlug = "demo"): Promise<AiInvocationSession[]> {
+  const content = await fs.readFile(path.join(tempRoot, projectSlug, "tasks", "invocations.jsonl"), "utf8");
+  return content
+    .trim()
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as AiInvocationSession);
+}
 
 describe("taskService", () => {
   beforeEach(async () => {
@@ -52,6 +62,54 @@ describe("taskService", () => {
 
     const history = await fs.readFile(path.join(tempRoot, "demo", "tasks", "history.jsonl"), "utf8");
     expect(history).toContain("outline.generate");
+
+    const [invocation] = await readInvocations();
+    expect(invocation.taskId).toBe(task.id);
+    expect(invocation.taskType).toBe("outline.generate");
+    expect(invocation.stageKey).toBe("outline.generate");
+    expect(invocation.status).toBe("success");
+    expect(invocation.agentProfileId).toBe("codex-cli");
+    expect(invocation.agentProvider).toBe("codex");
+    expect(invocation.promptSnapshot.length).toBeGreaterThan(0);
+    expect(invocation.promptSnapshot.contextTitles.length).toBeGreaterThan(0);
+    expect(invocation.contextSnapshot.blockCount).toBeGreaterThan(0);
+    expect(invocation.adoptionDecision).toBe("not-required");
+    expect(invocation.commitResult).toEqual({ historyAppended: true, invocationAppended: true });
+  });
+
+  it("records proposed patch targets in the AI invocation audit log", async () => {
+    const patchRunner: ProcessRunner = {
+      async run() {
+        return {
+          stdout: "",
+          stderr: "",
+          exitCode: 0,
+          durationMs: 15,
+          finalMessage: JSON.stringify({
+            summary: "patch ready",
+            content: "",
+            changes: ["updated outline"],
+            risks: [],
+            questions: [],
+            patches: [
+              {
+                target: "outline/chapter-001.md",
+                mode: "replace-file",
+                content: "# patched\n"
+              }
+            ]
+          })
+        };
+      }
+    };
+
+    const task = await runNovelTask("demo", "chapter.plan", { chapterId: "chapter-001" }, patchRunner);
+
+    expect(task.status).toBe("success");
+    const [invocation] = await readInvocations();
+    expect(invocation.adoptionDecision).toBe("pending");
+    expect(invocation.proposedPatchTargets).toEqual(["outline/chapter-001.md"]);
+    expect(invocation.acceptedPatchTargets).toEqual([]);
   });
 
   it("ignores Codex command values stored in project files", async () => {
@@ -175,6 +233,11 @@ describe("taskService", () => {
     const history = await fs.readFile(path.join(tempRoot, "demo", "tasks", "history.jsonl"), "utf8");
     expect(history).toContain("chapter.draft");
     expect(history).toContain("network unavailable");
+
+    const [invocation] = await readInvocations();
+    expect(invocation.status).toBe("error");
+    expect(invocation.attempt.exitCode).toBe(1);
+    expect(invocation.attempt.error).toContain("network unavailable");
   });
 
   it("applies replace-file and replace-selection patches inside the project", async () => {

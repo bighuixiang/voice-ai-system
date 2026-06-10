@@ -291,6 +291,56 @@ export interface NovelTask {
   durationMs?: number;
 }
 
+export type AiInvocationAdoptionDecision = "pending" | "accepted" | "rejected" | "not-required";
+
+export interface AiInvocationPromptSnapshot {
+  length: number;
+  preview: string;
+  contextTitles: string[];
+}
+
+export interface AiInvocationContextBlockSnapshot {
+  title: string;
+  length: number;
+}
+
+export interface AiInvocationContextSnapshot {
+  blockCount: number;
+  totalChars: number;
+  blocks: AiInvocationContextBlockSnapshot[];
+}
+
+export interface AiInvocationSession {
+  id: string;
+  taskId: string;
+  projectId: string;
+  taskType: CodexTaskType;
+  stageKey: string;
+  status: NovelTaskStatus;
+  agentProfileId?: string;
+  agentProvider?: AiAgentProvider;
+  modelId?: string;
+  promptSnapshot: AiInvocationPromptSnapshot;
+  contextSnapshot: AiInvocationContextSnapshot;
+  attempt: {
+    index: number;
+    startedAt: string;
+    finishedAt?: string;
+    durationMs?: number;
+    exitCode?: number | null;
+    error?: string;
+  };
+  adoptionDecision: AiInvocationAdoptionDecision;
+  proposedPatchTargets: string[];
+  acceptedPatchTargets: string[];
+  commitResult: {
+    historyAppended: boolean;
+    invocationAppended: boolean;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SelectionPayload {
   chapterId: string;
   filePath: string;

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { CodexTaskType, CodexTaskResult, NovelFilePatch, NovelTask } from "./types.js";
+import type { AiInvocationSession, CodexTaskType, CodexTaskResult, NovelFilePatch, NovelTask } from "./types.js";
 import { resolveAgentProfile } from "./agentConfig.js";
 import { readPlatformAiConfig } from "./platformAiConfig.js";
 import { buildTaskPrompt } from "./taskTemplates.js";
@@ -14,10 +14,78 @@ function taskId(): string {
   return `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function invocationId(): string {
+  return `invocation-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 async function appendHistory(root: string, task: NovelTask): Promise<void> {
   const historyPath = resolveInside(root, "tasks/history.jsonl");
   await fs.mkdir(path.dirname(historyPath), { recursive: true });
   await fs.appendFile(historyPath, `${JSON.stringify(task)}\n`, "utf8");
+}
+
+async function appendInvocationSession(root: string, session: AiInvocationSession): Promise<void> {
+  const invocationPath = resolveInside(root, "tasks/invocations.jsonl");
+  await fs.mkdir(path.dirname(invocationPath), { recursive: true });
+  await fs.appendFile(invocationPath, `${JSON.stringify(session)}\n`, "utf8");
+}
+
+function previewText(input: string, limit = 240): string {
+  const normalized = input.replace(/\s+/g, " ").trim();
+  return normalized.length > limit ? `${normalized.slice(0, limit)}...` : normalized;
+}
+
+function promptSnapshot(prompt: string, contextBlocks: Array<{ title: string; content: string }>) {
+  return {
+    length: prompt.length,
+    preview: previewText(prompt),
+    contextTitles: contextBlocks.map((block) => block.title)
+  };
+}
+
+function contextSnapshot(contextBlocks: Array<{ title: string; content: string }>) {
+  return {
+    blockCount: contextBlocks.length,
+    totalChars: contextBlocks.reduce((total, block) => total + block.content.length, 0),
+    blocks: contextBlocks.map((block) => ({
+      title: block.title,
+      length: block.content.length
+    }))
+  };
+}
+
+function createInvocationSession(task: NovelTask): AiInvocationSession {
+  return {
+    id: invocationId(),
+    taskId: task.id,
+    projectId: task.projectId,
+    taskType: task.type,
+    stageKey: task.type,
+    status: "running",
+    promptSnapshot: {
+      length: 0,
+      preview: "",
+      contextTitles: []
+    },
+    contextSnapshot: {
+      blockCount: 0,
+      totalChars: 0,
+      blocks: []
+    },
+    attempt: {
+      index: 1,
+      startedAt: task.startedAt
+    },
+    adoptionDecision: "pending",
+    proposedPatchTargets: [],
+    acceptedPatchTargets: [],
+    commitResult: {
+      historyAppended: false,
+      invocationAppended: false
+    },
+    createdAt: task.startedAt,
+    updatedAt: task.startedAt
+  };
 }
 
 export async function applyPatch(root: string, patch: NovelFilePatch): Promise<void> {
@@ -59,6 +127,7 @@ export async function runNovelTask(
     inputSummary: JSON.stringify(payload).slice(0, 500),
     startedAt: new Date(started).toISOString()
   };
+  const invocation = createInvocationSession(task);
 
   try {
     const contextBlocks = await assembleContext(type, root, project, payload);
@@ -69,6 +138,8 @@ export async function runNovelTask(
       contextBlocks,
       payload
     });
+    invocation.promptSnapshot = promptSnapshot(prompt, contextBlocks);
+    invocation.contextSnapshot = contextSnapshot(contextBlocks);
     const platformAiConfig = await readPlatformAiConfig();
     const novelAiConfig = platformAiConfig.scenarios.novel;
     const profileId = typeof payload.agentProfileId === "string" ? payload.agentProfileId : novelAiConfig.profileId || project.ai?.profileId;
@@ -77,6 +148,9 @@ export async function runNovelTask(
       profileId,
       modelId: payloadModel || novelAiConfig.modelId || project.ai?.modelId || project.codex.model
     });
+    invocation.agentProfileId = config.id;
+    invocation.agentProvider = config.provider;
+    invocation.modelId = config.model;
     const output = await runner.run(prompt, root, config);
     const result = parseCodexResult(output.finalMessage);
     task.status = output.exitCode === 0 ? "success" : "error";
@@ -84,13 +158,26 @@ export async function runNovelTask(
     task.outputSummary = result.summary;
     task.error = output.exitCode === 0 ? undefined : output.stderr || `${config.label} exited with ${output.exitCode}`;
     task.durationMs = output.durationMs;
+    invocation.attempt.exitCode = output.exitCode;
+    invocation.proposedPatchTargets = result.patches.map((patch) => patch.target);
+    invocation.adoptionDecision = result.patches.length ? "pending" : "not-required";
   } catch (error) {
     task.status = "error";
     task.error = error instanceof Error ? error.message : String(error);
     task.durationMs = Date.now() - started;
   } finally {
     task.finishedAt = new Date().toISOString();
+    invocation.status = task.status;
+    invocation.updatedAt = task.finishedAt;
+    invocation.attempt.finishedAt = task.finishedAt;
+    invocation.attempt.durationMs = task.durationMs;
+    if (task.error) {
+      invocation.attempt.error = task.error;
+    }
     await appendHistory(root, task);
+    invocation.commitResult.historyAppended = true;
+    invocation.commitResult.invocationAppended = true;
+    await appendInvocationSession(root, invocation);
   }
 
   project.updatedAt = new Date().toISOString();
