@@ -35,8 +35,75 @@ function buildTaskContract(type: CodexTaskType) {
     return [
       {
         title: "Post-save Recap Contract",
-        content:
-          "Return a WritingRecapCandidate JSON with new facts, character state changes, foreshadowing updates, continuity risks, and power progression updates. Do not auto-apply ledger updates."
+        content: [
+          "Return a WritingRecapCandidate JSON with reviewable state patches for author approval before merge.",
+          "Include `chapterId`, `summary`, `newFacts`, `characterStateChanges`, `foreshadowingUpdates`, `continuityRisks`, `powerProgressionUpdates`, and `createdAt` for backward compatibility.",
+          "Also include these patch fields when applicable:",
+          JSON.stringify(
+            {
+              summaryPatch: {
+                summary: "Concise chapter memory summary.",
+                keyEvents: ["Major irreversible events from the saved chapter."]
+              },
+              factPatches: [
+                {
+                  id: "fact-chapter-001-001",
+                  chapterId: "chapter-001",
+                  fact: "A durable story fact introduced or confirmed in this chapter.",
+                  relatedEntities: ["character/location/item/faction"],
+                  sourceAnchor: "Short quote or scene anchor.",
+                  status: "pending",
+                  createdAt: "ISO timestamp",
+                  updatedAt: "ISO timestamp"
+                }
+              ],
+              characterStatePatches: [
+                {
+                  id: "char-state-chapter-001-001",
+                  chapterId: "chapter-001",
+                  characterName: "Character name",
+                  before: "Known prior state if context provides it.",
+                  after: "New observable state after this chapter.",
+                  cause: "Concrete event that changed the state.",
+                  relatedEntities: ["character/location/item/faction"],
+                  status: "pending",
+                  createdAt: "ISO timestamp",
+                  updatedAt: "ISO timestamp"
+                }
+              ],
+              ledgerPatches: [
+                {
+                  id: "foreshadowing-chapter-001-001",
+                  kind: "foreshadowing",
+                  title: "Trackable setup/payoff/risk",
+                  status: "open",
+                  severity: "medium",
+                  chapterIds: ["chapter-001"],
+                  relatedEntities: ["entity"],
+                  note: "Why this belongs in the ledger.",
+                  updatedAt: "ISO timestamp"
+                }
+              ],
+              riskPatches: [
+                {
+                  id: "risk-chapter-001-001",
+                  kind: "risk",
+                  title: "Continuity or POV risk needing review",
+                  status: "watch",
+                  severity: "medium",
+                  chapterIds: ["chapter-001"],
+                  relatedEntities: ["entity"],
+                  note: "Specific risk and suggested follow-up.",
+                  updatedAt: "ISO timestamp"
+                }
+              ]
+            },
+            null,
+            2
+          ),
+          "Patch ids must be stable, specific, and scoped to the chapter. Patch statuses must start as `pending`.",
+          "Do not auto-apply ledger updates. The application will merge accepted patches only after author approval before merge."
+        ].join("\n")
       }
     ];
   }

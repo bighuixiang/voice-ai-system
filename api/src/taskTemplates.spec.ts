@@ -58,6 +58,12 @@ describe("taskTemplates", () => {
     expect(briefingPrompt).toContain("must not reveal");
     expect(briefingPrompt).toContain("unresolved foreshadowing");
     expect(recapPrompt).toContain("WritingRecapCandidate");
+    expect(recapPrompt).toContain("summaryPatch");
+    expect(recapPrompt).toContain("factPatches");
+    expect(recapPrompt).toContain("ledgerPatches");
+    expect(recapPrompt).toContain("characterStatePatches");
+    expect(recapPrompt).toContain("riskPatches");
+    expect(recapPrompt).toContain("author approval before merge");
     expect(recapPrompt).toContain("Do not auto-apply ledger updates");
   });
 
