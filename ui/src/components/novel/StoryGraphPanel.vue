@@ -16,6 +16,46 @@
         </div>
       </div>
 
+      <div class="graph-map" aria-label="关系地图">
+        <div class="node-columns">
+          <div v-for="column in groupedNodeColumns" :key="column.type" class="node-column">
+            <div class="column-title">
+              <span>{{ column.label }}</span>
+              <strong>{{ column.nodes.length }}</strong>
+            </div>
+            <button
+              v-for="node in column.nodes"
+              :key="node.id"
+              class="node-chip"
+              :class="{ active: node.id === selectedNodeId }"
+              type="button"
+              @click="selectNode(node.id)"
+            >
+              <span>{{ node.label }}</span>
+              <small>{{ node.subtitle || node.status || "未备注" }}</small>
+            </button>
+            <p v-if="!column.nodes.length" class="compact-empty">暂无节点</p>
+          </div>
+        </div>
+
+        <aside v-if="selectedNode" class="node-detail" aria-label="选中节点关系">
+          <div class="detail-heading">
+            <span>{{ nodeTypeLabels[selectedNode.type] }}</span>
+            <strong>{{ selectedNode.label }}</strong>
+          </div>
+          <p>{{ selectedNode.subtitle || selectedNode.status || "暂无节点说明" }}</p>
+
+          <div class="relation-list">
+            <div v-for="row in selectedRelationRows" :key="row.id" class="relation-row">
+              <span>{{ row.direction }}</span>
+              <em>{{ row.relation }}</em>
+              <strong>{{ row.node }}</strong>
+            </div>
+            <p v-if="!selectedRelationRows.length" class="compact-empty">暂无相邻关系。</p>
+          </div>
+        </aside>
+      </div>
+
       <div class="edge-list">
         <div v-for="edge in visibleEdges" :key="edge.id" class="edge-row">
           <span>{{ labelFor(edge.source) }}</span>
@@ -30,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { Refresh } from "@element-plus/icons-vue";
 import type { StoryGraphNodeType, StoryGraphProjection } from "@/types/novel";
 
@@ -70,6 +110,50 @@ const nodeStats = computed(() =>
   }))
 );
 
+const selectedNodeId = ref<string | null>(null);
+
+const graphNodeIds = computed(() => props.graph?.nodes.map((node) => node.id) || []);
+
+watch(
+  graphNodeIds,
+  (ids) => {
+    if (!ids.length) {
+      selectedNodeId.value = null;
+      return;
+    }
+    if (!selectedNodeId.value || !ids.includes(selectedNodeId.value)) {
+      selectedNodeId.value = ids[0];
+    }
+  },
+  { immediate: true }
+);
+
+const groupedNodeColumns = computed(() =>
+  nodeTypes.map((type) => ({
+    type,
+    label: nodeTypeLabels[type],
+    nodes: props.graph?.nodes.filter((node) => node.type === type) || []
+  }))
+);
+
+const selectedNode = computed(() => props.graph?.nodes.find((node) => node.id === selectedNodeId.value) || null);
+
+const selectedRelationRows = computed(() => {
+  if (!props.graph || !selectedNodeId.value) return [];
+  return props.graph.edges
+    .filter((edge) => edge.source === selectedNodeId.value || edge.target === selectedNodeId.value)
+    .map((edge) => {
+      const isOutgoing = edge.source === selectedNodeId.value;
+      const adjacentId = isOutgoing ? edge.target : edge.source;
+      return {
+        id: edge.id,
+        direction: isOutgoing ? "指向" : "来自",
+        relation: edgeLabel(edge.label || edge.type),
+        node: labelFor(adjacentId)
+      };
+    });
+});
+
 const visibleEdges = computed(() => (props.graph?.edges || []).slice(0, 12));
 
 const summaryText = computed(() => {
@@ -83,6 +167,10 @@ function labelFor(id: string) {
 
 function edgeLabel(label: string) {
   return edgeLabels[label] || label;
+}
+
+function selectNode(id: string) {
+  selectedNodeId.value = id;
 }
 </script>
 
@@ -156,6 +244,150 @@ p {
   gap: 5px;
 }
 
+.graph-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.node-columns {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(110px, 1fr));
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.node-column {
+  display: grid;
+  align-content: start;
+  min-width: 110px;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #dbe4ef;
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.column-title,
+.detail-heading,
+.relation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.column-title {
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+
+  strong {
+    color: #0f172a;
+  }
+}
+
+.node-chip {
+  display: grid;
+  min-height: 48px;
+  min-width: 0;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #0f172a;
+  cursor: pointer;
+  text-align: left;
+
+  span,
+  small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  small {
+    color: #64748b;
+    font-size: 11px;
+  }
+
+  &.active {
+    border-color: #2563eb;
+    background: #eff6ff;
+  }
+}
+
+.node-detail {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #f8fafc;
+}
+
+.detail-heading {
+  span {
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  strong {
+    min-width: 0;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.relation-list {
+  display: grid;
+  gap: 6px;
+}
+
+.relation-row {
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 12px;
+
+  span,
+  em {
+    flex: 0 0 auto;
+    color: #64748b;
+  }
+
+  em {
+    color: #2563eb;
+    font-style: normal;
+    font-weight: 800;
+  }
+
+  strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 .edge-row {
   min-width: 0;
   min-height: 34px;
@@ -187,9 +419,28 @@ p {
   background: #f8fafc;
 }
 
+.compact-empty {
+  margin: 0;
+  padding: 7px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
 @media (max-width: 760px) {
   .node-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .graph-map {
+    grid-template-columns: 1fr;
+  }
+
+  .node-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow-x: visible;
   }
 }
 </style>

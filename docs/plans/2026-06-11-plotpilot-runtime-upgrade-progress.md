@@ -32,6 +32,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - New projects create `story-graph/storyline.json`.
   - Story graph is rebuilt from story control, scenes, chapters, and ledgers.
   - UI can inspect the generated projection.
+  - UI now groups graph nodes by type and shows selected-node adjacent relations.
 
 - Searchable memory layer:
   - Knowledge facts and triples persist under `knowledge/facts.jsonl` and `knowledge/triples.jsonl`.
@@ -51,8 +52,8 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
 
 Latest full verification passed:
 
-- API tests: 71 passed, 1 real Codex integration skipped.
-- UI tests: 142 passed.
+- API tests: 72 passed, 1 real Codex integration skipped.
+- UI tests: 144 passed.
 - API build passed.
 - UI build passed.
 
@@ -67,6 +68,10 @@ Known warnings remain unchanged:
 - `9e084b9 feat: add quick reference lookup`
 - `167cce7 feat: summarize rhythm and character arcs`
 - `7fb0af1 feat: expand ai invocation audit details`
+- `4319452 feat: flag style drift in quality metrics`
+- `497c52e feat: add series tension curve`
+- `08e6c46 feat: export project audit report`
+- `b71198d feat: project quality trends`
 
 Earlier supporting commits in this branch:
 
@@ -78,5 +83,4 @@ Earlier supporting commits in this branch:
 ## Remaining Work
 
 - P2 real vector search or embedding-backed recall.
-- Larger graph visualization for story relations.
 - Background job orchestration for heavy indexing and analysis.
