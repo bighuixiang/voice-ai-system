@@ -5,6 +5,8 @@ import type {
   ChapterSummary,
   KnowledgeFact,
   KnowledgeIndexProjection,
+  KnowledgeSearchQuery,
+  KnowledgeSearchResult,
   KnowledgeSourceRef,
   KnowledgeTriple,
   LedgerEntry,
@@ -45,6 +47,25 @@ function keywordsFrom(parts: string[], limit = 24): string[] {
   const ascii = text.match(/[a-z0-9][a-z0-9-]{2,}/gi) || [];
   const cjk = text.match(/[\u4e00-\u9fff]{2,12}/g) || [];
   return unique([...ascii, ...cjk].map((item) => item.toLowerCase())).slice(0, limit);
+}
+
+function searchTokens(input: string): string[] {
+  return keywordsFrom([input], 32);
+}
+
+function scoreText(tokens: string[], parts: string[], exactBoost = 0): number {
+  const text = parts.map(cleanText).filter(Boolean).join(" ").toLowerCase();
+  if (!text) return 0;
+  return tokens.reduce((score, token) => {
+    if (!token) return score;
+    const tokenScore = text.includes(token) ? 1 : 0;
+    return score + tokenScore;
+  }, exactBoost);
+}
+
+function clampLimit(limit?: number): number {
+  if (!Number.isFinite(limit)) return 12;
+  return Math.min(Math.max(Math.floor(limit as number), 1), 50);
 }
 
 function chapterOrder(chapter: NovelChapter, index: number): number {
@@ -391,4 +412,62 @@ export async function readKnowledgeIndex(root: string, project: NovelProject): P
     chapterIndex,
     updatedAt: chapterIndex.updatedAt
   };
+}
+
+export async function searchKnowledgeIndex(
+  root: string,
+  project: NovelProject,
+  input: KnowledgeSearchQuery
+): Promise<KnowledgeSearchResult> {
+  const query = cleanText(input.query || "");
+  const tokens = searchTokens(query);
+  const limit = clampLimit(input.limit);
+  if (!query || !tokens.length) {
+    return { query, tokens: [], facts: [], triples: [], chapters: [] };
+  }
+
+  const index = await readKnowledgeIndex(root, project);
+  const targetChapterId = cleanText(input.chapterId || "");
+  const chapterScores = new Map<string, number>();
+  const addChapterScore = (chapterIds: string[], score: number) => {
+    for (const chapterId of chapterIds) {
+      chapterScores.set(chapterId, (chapterScores.get(chapterId) || 0) + score);
+    }
+  };
+
+  const facts = index.facts
+    .map((fact) => {
+      const chapterBoost = targetChapterId && fact.chapterIds.includes(targetChapterId) ? 0.25 : 0;
+      const score = scoreText(tokens, [fact.text, ...fact.keywords, ...fact.relatedEntities, fact.source.label || ""], chapterBoost);
+      if (score > 0) addChapterScore(fact.chapterIds, score);
+      return { ...fact, score };
+    })
+    .filter((fact) => fact.score > 0)
+    .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
+    .slice(0, limit);
+
+  const triples = index.triples
+    .map((triple) => {
+      const chapterBoost = targetChapterId && triple.chapterIds.includes(targetChapterId) ? 0.25 : 0;
+      const score = scoreText(tokens, [triple.subject, triple.predicate, triple.object], chapterBoost);
+      if (score > 0) addChapterScore(triple.chapterIds, score);
+      return { ...triple, score };
+    })
+    .filter((triple) => triple.score > 0)
+    .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
+    .slice(0, limit);
+
+  const chapters = index.chapterIndex.chapters
+    .map((chapter) => {
+      const chapterBoost = targetChapterId && chapter.chapterId === targetChapterId ? 0.25 : 0;
+      const score =
+        (chapterScores.get(chapter.chapterId) || 0) +
+        scoreText(tokens, [chapter.title, ...chapter.keywords, ...chapter.entityNames], chapterBoost);
+      return { ...chapter, score };
+    })
+    .filter((chapter) => chapter.score > 0)
+    .sort((left, right) => right.score - left.score || (left.order || 0) - (right.order || 0) || left.chapterId.localeCompare(right.chapterId))
+    .slice(0, limit);
+
+  return { query, tokens, facts, triples, chapters };
 }

@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createProjectFiles, createProjectSkeleton, projectRoot } from "./novelProject.js";
-import { readKnowledgeIndex, rebuildKnowledgeIndex } from "./knowledgeIndex.js";
+import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
 import { saveChapterSummary, saveLedgerEntries, saveStoryControl } from "./writingCockpit.js";
 
 let tempRoot = "";
@@ -138,5 +138,57 @@ describe("knowledgeIndex", () => {
     expect(persisted.triples).toHaveLength(projection.triples.length);
     await expect(fs.readFile(path.join(root, "knowledge", "facts.jsonl"), "utf8")).resolves.toContain("fact-gate-blood");
     await expect(fs.readFile(path.join(root, "memory", "chapter-index.json"), "utf8")).resolves.toContain("chapter-001");
+  });
+
+  it("searches persisted knowledge by keyword and entity", async () => {
+    const project = createProjectSkeleton({ title: "Knowledge Search", roughIdea: "Search memory by entities." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await saveChapterSummary(root, {
+      chapterId: "chapter-001",
+      summary: "The sealed gate responds to blood.",
+      keyEvents: ["The talisman burns before the gate opens."],
+      newFacts: [
+        {
+          id: "fact-gate-blood",
+          chapterId: "chapter-001",
+          fact: "The sealed gate responds to blood.",
+          relatedEntities: ["Hero", "sealed gate"],
+          status: "accepted",
+          createdAt: "2026-06-11T00:00:00.000Z",
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        }
+      ],
+      characterStateChanges: [
+        {
+          id: "hero-wounded",
+          chapterId: "chapter-001",
+          characterName: "Hero",
+          after: "Wounded but aware the gate is alive.",
+          cause: "Paid blood to test the clue.",
+          relatedEntities: ["sealed gate"],
+          status: "accepted",
+          createdAt: "2026-06-11T00:00:00.000Z",
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        }
+      ],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
+    await rebuildKnowledgeIndex(root, project);
+
+    const result = await searchKnowledgeIndex(root, project, { query: "Hero blood gate", chapterId: "chapter-001", limit: 5 });
+
+    expect(result.tokens).toEqual(expect.arrayContaining(["hero", "blood", "gate"]));
+    expect(result.facts).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "fact:fact-gate-blood", score: expect.any(Number) })
+    ]));
+    expect(result.triples).toEqual(expect.arrayContaining([
+      expect.objectContaining({ subject: "Hero", predicate: "state_after", score: expect.any(Number) })
+    ]));
+    expect(result.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001", score: expect.any(Number) }));
   });
 });

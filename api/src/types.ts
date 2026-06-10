@@ -337,6 +337,20 @@ export interface KnowledgeIndexProjection {
   updatedAt: string;
 }
 
+export interface KnowledgeSearchQuery {
+  query: string;
+  chapterId?: string;
+  limit?: number;
+}
+
+export interface KnowledgeSearchResult {
+  query: string;
+  tokens: string[];
+  facts: Array<KnowledgeFact & { score: number }>;
+  triples: Array<KnowledgeTriple & { score: number }>;
+  chapters: Array<ChapterIndexEntry & { score: number }>;
+}
+
 export interface NovelProject {
   id: string;
   slug: string;

@@ -187,6 +187,17 @@ describe("novel API routes", () => {
     const rebuilt = await jsonFetch<{
       index: { facts: Array<{ id: string }>; triples: unknown[]; chapterIndex: { keywords: Record<string, string[]> } };
     }>(`/api/novel/projects/${slug}/knowledge/index/rebuild`, { method: "POST" });
+    const searched = await jsonFetch<{
+      result: {
+        query: string;
+        facts: Array<{ id: string; score: number }>;
+        chapters: Array<{ chapterId: string; score: number }>;
+      };
+    }>(`/api/novel/projects/${slug}/knowledge/search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: "Hero blood gate", chapterId: "chapter-001" })
+    });
 
     expect(before.status).toBe(200);
     expect(before.data.index.facts).toEqual([]);
@@ -195,6 +206,9 @@ describe("novel API routes", () => {
     expect(rebuilt.data.index.facts).toEqual(expect.arrayContaining([expect.objectContaining({ id: "fact:fact-gate" })]));
     expect(rebuilt.data.index.triples).toEqual(expect.any(Array));
     expect(rebuilt.data.index.chapterIndex.keywords.blood).toContain("chapter-001");
+    expect(searched.status).toBe(200);
+    expect(searched.data.result.facts).toEqual(expect.arrayContaining([expect.objectContaining({ id: "fact:fact-gate" })]));
+    expect(searched.data.result.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001" }));
   });
 
   it("keeps duplicate project titles in separate folders", async () => {
