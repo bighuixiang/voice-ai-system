@@ -21,6 +21,7 @@ import type {
   PlatformAssetType,
   PlatformLibrary,
   SceneCard,
+  SeriesQualityMetrics,
   StoryControl,
   StoryGraphProjection,
   WritingRecapCandidate
@@ -274,13 +275,20 @@ export const novelApi = {
     return data.report;
   },
 
-  async saveChapterQualityReport(projectId: string, report: ChapterQualityReport): Promise<ChapterQualityReport> {
-    const data = await request<{ report: ChapterQualityReport }>(`/api/novel/projects/${projectId}/quality/${report.chapterId}`, {
+  async readSeriesQualityMetrics(projectId: string): Promise<SeriesQualityMetrics> {
+    const data = await request<{ seriesMetrics: SeriesQualityMetrics }>(`/api/novel/projects/${projectId}/quality/series-metrics`);
+    return data.seriesMetrics;
+  },
+
+  async saveChapterQualityReport(
+    projectId: string,
+    report: ChapterQualityReport
+  ): Promise<{ report: ChapterQualityReport; seriesMetrics: SeriesQualityMetrics }> {
+    return request<{ report: ChapterQualityReport; seriesMetrics: SeriesQualityMetrics }>(`/api/novel/projects/${projectId}/quality/${report.chapterId}`, {
       method: "PUT",
       headers: jsonHeaders,
       body: JSON.stringify({ report })
     });
-    return data.report;
   },
 
   async acceptWritingRecap(

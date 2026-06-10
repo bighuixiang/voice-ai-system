@@ -34,6 +34,7 @@ const mockNovelApi = vi.hoisted(() => ({
   readChapterSummary: vi.fn(),
   saveChapterSummary: vi.fn(),
   readChapterQualityReport: vi.fn(),
+  readSeriesQualityMetrics: vi.fn(),
   saveChapterQualityReport: vi.fn(),
   readStoryControl: vi.fn(),
   saveStoryControl: vi.fn(),
@@ -333,7 +334,42 @@ describe("useNovelStore", () => {
     }));
     mockNovelApi.saveChapterSummary.mockImplementation(async (_projectId: string, _chapterId: string, summary: ChapterSummary) => summary);
     mockNovelApi.readChapterQualityReport.mockResolvedValue(null);
-    mockNovelApi.saveChapterQualityReport.mockImplementation(async (_projectId: string, report: ChapterQualityReport) => report);
+    mockNovelApi.readSeriesQualityMetrics.mockResolvedValue({
+      projectSlug: "demo",
+      chapterCount: 2,
+      reportCount: 0,
+      averageOverallScore: 0,
+      metricAverages: [],
+      weakestChapters: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
+    mockNovelApi.saveChapterQualityReport.mockImplementation(async (_projectId: string, report: ChapterQualityReport) => ({
+      report,
+      seriesMetrics: {
+        projectSlug: "demo",
+        chapterCount: 2,
+        reportCount: 1,
+        averageOverallScore: report.overallScore,
+        metricAverages: report.metrics.map((metric) => ({
+          key: metric.key,
+          label: metric.label,
+          averageScore: metric.score,
+          reportCount: 1
+        })),
+        weakestChapters: [
+          {
+            chapterId: report.chapterId,
+            chapterTitle: "Chapter",
+            overallScore: report.overallScore,
+            weakestMetricKey: report.metrics[0]?.key,
+            weakestMetricLabel: report.metrics[0]?.label,
+            weakestMetricScore: report.metrics[0]?.score,
+            updatedAt: report.updatedAt
+          }
+        ],
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      }
+    }));
     mockNovelApi.readStoryControl.mockResolvedValue(storyControl);
     mockNovelApi.saveStoryControl.mockImplementation(async (_projectId: string, control: StoryControl) => control);
     mockNovelApi.readStoryGraph.mockResolvedValue({
@@ -581,12 +617,14 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readChapterSummary).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readChapterQualityReport).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readCreationRuntimeSnapshot).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readSeriesQualityMetrics).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
     expect(store.currentDashboard?.chapterId).toBe("chapter-002");
     expect(store.currentChapterSummary?.chapterId).toBe("chapter-002");
     expect(store.currentRuntimeSnapshot?.chapterId).toBe("chapter-002");
+    expect(store.currentSeriesQualityMetrics?.projectSlug).toBe("demo");
     expect(store.currentQualityReport?.overallScore).toBe(78);
     expect(store.storyGraph?.nodes).toEqual([expect.objectContaining({ type: "chapter" })]);
     expect(store.knowledgeIndex?.facts).toEqual([expect.objectContaining({ id: "fact:gate" })]);
@@ -1368,6 +1406,11 @@ describe("useNovelStore", () => {
     });
     expect(store.currentQualityReport?.metrics).toHaveLength(6);
     expect(store.currentQualityReport?.fixes.length).toBeGreaterThan(0);
+    expect(store.currentSeriesQualityMetrics).toMatchObject({
+      projectSlug: "demo",
+      reportCount: 1,
+      averageOverallScore: store.currentQualityReport?.overallScore
+    });
   });
 
   it("creates a style-tuned rewrite candidate for the selected text", () => {

@@ -3,7 +3,7 @@
     <header>
       <div>
         <div class="panel-title">章节体检</div>
-        <p>看冲突、节奏、情绪、信息、文笔和钩子。</p>
+        <p>检查冲突、节奏、情绪、信息、文笔和钩子。</p>
       </div>
       <el-button :disabled="!canDiagnose" @click="$emit('diagnose')">
         <el-icon><DataAnalysis /></el-icon>
@@ -45,7 +45,28 @@
       </div>
     </div>
 
-    <p v-else class="empty-state">切到正文后，可先体检一章再精修。</p>
+    <p v-else class="empty-state">切到正文后，可以先体检一章再精修。</p>
+
+    <div v-if="seriesMetrics" class="series-quality">
+      <div class="series-head">
+        <div>
+          <div class="panel-title small">项目质量概览</div>
+          <p>{{ seriesMetrics.reportCount }} / {{ seriesMetrics.chapterCount }} 章已体检</p>
+        </div>
+        <strong>{{ seriesMetrics.averageOverallScore }}</strong>
+      </div>
+
+      <div v-if="weakestSeriesMetrics.length" class="series-list">
+        <div v-for="metric in weakestSeriesMetrics" :key="metric.key" class="series-item">
+          <span>{{ metric.label }}</span>
+          <b>{{ metric.averageScore }}</b>
+        </div>
+      </div>
+
+      <p v-if="seriesMetrics.weakestChapters.length" class="series-warning">
+        最弱章节：{{ seriesMetrics.weakestChapters[0].chapterTitle }} · {{ seriesMetrics.weakestChapters[0].overallScore }} 分
+      </p>
+    </div>
 
     <div class="tone-box">
       <div class="tone-head">
@@ -69,11 +90,13 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { DataAnalysis, MagicStick } from "@element-plus/icons-vue";
-import type { ChapterQualityReport, StyleToneKey } from "@/types/novel";
+import type { ChapterQualityReport, SeriesQualityMetrics, StyleToneKey } from "@/types/novel";
 
-defineProps<{
+const props = defineProps<{
   report: ChapterQualityReport | null;
+  seriesMetrics?: SeriesQualityMetrics | null;
   selectedTone: StyleToneKey;
   canDiagnose: boolean;
   canTuneSelection: boolean;
@@ -87,12 +110,14 @@ const emit = defineEmits<{
 
 const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
   { value: "elegant", label: "优雅留白" },
-  { value: "restrained", label: "克制冷峻" },
+  { value: "restrained", label: "克制冷系" },
   { value: "tense", label: "压迫感" },
   { value: "cinematic", label: "镜头感" },
   { value: "web-serial", label: "网文爽感" },
   { value: "lower-ai", label: "降低 AI 味" }
 ];
+
+const weakestSeriesMetrics = computed(() => props.seriesMetrics?.metricAverages.slice(0, 3) || []);
 
 function updateTone(value: string) {
   emit("update:tone", value as StyleToneKey);
@@ -229,6 +254,62 @@ p {
   color: var(--app-text-secondary);
 }
 
+.series-quality {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-bg-soft);
+}
+
+.series-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  strong {
+    color: var(--app-primary);
+    font-size: 24px;
+    line-height: 1;
+  }
+}
+
+.series-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.series-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 7px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: var(--app-bg);
+  color: var(--app-text-secondary);
+  font-size: 12px;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  b {
+    color: var(--app-text-primary);
+  }
+}
+
+.series-warning {
+  color: var(--app-warning-text);
+}
+
 .tone-box {
   display: grid;
   gap: 10px;
@@ -249,7 +330,8 @@ p {
 @media (max-width: 760px) {
   header,
   .tone-controls,
-  .advice-grid {
+  .advice-grid,
+  .series-list {
     grid-template-columns: 1fr;
     align-items: stretch;
   }

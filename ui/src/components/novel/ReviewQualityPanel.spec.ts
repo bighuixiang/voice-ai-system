@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import ReviewQualityPanel from "./ReviewQualityPanel.vue";
-import type { ChapterQualityReport } from "@/types/novel";
+import type { ChapterQualityReport, SeriesQualityMetrics } from "@/types/novel";
 
 const stubs = {
   "el-button": {
@@ -35,11 +35,36 @@ const report: ChapterQualityReport = {
   updatedAt: "2026-06-04T00:00:00.000Z"
 };
 
+const seriesMetrics: SeriesQualityMetrics = {
+  projectSlug: "demo",
+  chapterCount: 2,
+  reportCount: 1,
+  averageOverallScore: 78,
+  metricAverages: [
+    { key: "hook", label: "钩子", averageScore: 68, reportCount: 1 },
+    { key: "information", label: "信息", averageScore: 70, reportCount: 1 },
+    { key: "emotion", label: "情绪", averageScore: 72, reportCount: 1 }
+  ],
+  weakestChapters: [
+    {
+      chapterId: "chapter-001",
+      chapterTitle: "Chapter 1",
+      overallScore: 78,
+      weakestMetricKey: "hook",
+      weakestMetricLabel: "钩子",
+      weakestMetricScore: 68,
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
+  updatedAt: "2026-06-04T00:00:00.000Z"
+};
+
 describe("ReviewQualityPanel", () => {
-  it("renders a quality report and emits diagnose", async () => {
+  it("renders a quality report, series overview, and emits diagnose", async () => {
     const wrapper = mount(ReviewQualityPanel, {
       props: {
         report,
+        seriesMetrics,
         selectedTone: "elegant",
         canDiagnose: true,
         canTuneSelection: false
@@ -49,6 +74,10 @@ describe("ReviewQualityPanel", () => {
 
     expect(wrapper.text()).toContain("78");
     expect(wrapper.text()).toContain("钩子：结尾还可更锋利。");
+    expect(wrapper.text()).toContain("项目质量概览");
+    expect(wrapper.text()).toContain("1 / 2 章已体检");
+    expect(wrapper.text()).toContain("最弱章节：Chapter 1 · 78 分");
+    expect(wrapper.text()).toContain("钩子");
 
     await wrapper.findAll("button")[0].trigger("click");
     expect(wrapper.emitted("diagnose")).toHaveLength(1);

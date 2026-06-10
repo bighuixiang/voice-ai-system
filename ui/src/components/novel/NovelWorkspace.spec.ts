@@ -120,6 +120,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     selection: null,
     rewriteCandidate: null,
     currentQualityReport: null,
+    currentSeriesQualityMetrics: null,
     styleTone: "elegant",
     focusTargetWords: 3000,
     focusDraftInstruction: "",
@@ -273,7 +274,7 @@ const stubs = {
   SceneCardPanel: { template: "<div class='scene-stub'>scene</div>" },
   ChapterEditor: { template: "<div class='editor-stub'>editor</div>" },
   SelectionToolbar: { template: "<div class='selection-stub'>selection</div>" },
-  ReviewQualityPanel: { template: "<div class='quality-stub'>quality</div>" },
+  ReviewQualityPanel: { props: ["seriesMetrics"], template: "<div class='quality-stub'>quality</div>" },
   RewriteComparison: {
     props: ["tuneOptions"],
     emits: ["tune"],

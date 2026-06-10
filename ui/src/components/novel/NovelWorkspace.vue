@@ -264,6 +264,7 @@
         >
           <ReviewQualityPanel
             :report="store.currentQualityReport"
+            :series-metrics="store.currentSeriesQualityMetrics"
             :selected-tone="store.styleTone"
             :can-diagnose="store.canDiagnoseChapter"
             :can-tune-selection="store.canTuneSelection"

@@ -28,6 +28,7 @@ import type {
   PlatformAssetType,
   PlatformLibrary,
   SceneCard,
+  SeriesQualityMetrics,
   StoryControl,
   StoryGraphProjection,
   StyleToneKey,
@@ -57,6 +58,7 @@ interface WorkspaceCache {
   rewriteCandidate: CodexTaskResult | null;
   recapCandidate: WritingRecapCandidate | null;
   qualityReport: ChapterQualityReport | null;
+  seriesQualityMetrics: SeriesQualityMetrics | null;
   styleTone: StyleToneKey;
   focusTargetWords: number;
   focusDraftInstruction: string;
@@ -123,6 +125,7 @@ export const useNovelStore = defineStore("novel", () => {
   const rewriteCandidate = ref<CodexTaskResult | null>(null);
   const recapCandidate = ref<WritingRecapCandidate | null>(null);
   const currentQualityReport = ref<ChapterQualityReport | null>(null);
+  const currentSeriesQualityMetrics = ref<SeriesQualityMetrics | null>(null);
   const styleTone = ref<StyleToneKey>("elegant");
   const focusTargetWords = ref(DEFAULT_FOCUS_TARGET_WORDS);
   const focusDraftInstruction = ref("");
@@ -689,7 +692,9 @@ export const useNovelStore = defineStore("novel", () => {
     };
     currentQualityReport.value = report;
     if (currentProject.value) {
-      currentQualityReport.value = await novelApi.saveChapterQualityReport(currentProject.value.slug, report);
+      const saved = await novelApi.saveChapterQualityReport(currentProject.value.slug, report);
+      currentQualityReport.value = saved.report;
+      currentSeriesQualityMetrics.value = saved.seriesMetrics;
       await loadCreationRuntimeSnapshot(chapterId);
     }
     return true;
@@ -897,6 +902,7 @@ export const useNovelStore = defineStore("novel", () => {
     rewriteCandidate.value = null;
     recapCandidate.value = null;
     currentQualityReport.value = null;
+    currentSeriesQualityMetrics.value = null;
     styleTone.value = "elegant";
     focusTargetWords.value = DEFAULT_FOCUS_TARGET_WORDS;
     focusDraftInstruction.value = "";
@@ -939,6 +945,7 @@ export const useNovelStore = defineStore("novel", () => {
         rewriteCandidate: rewriteCandidate.value,
         recapCandidate: recapCandidate.value,
         qualityReport: currentQualityReport.value,
+        seriesQualityMetrics: currentSeriesQualityMetrics.value,
         styleTone: styleTone.value,
         focusTargetWords: focusTargetWords.value,
         focusDraftInstruction: focusDraftInstruction.value,
@@ -981,6 +988,7 @@ export const useNovelStore = defineStore("novel", () => {
     rewriteCandidate.value = cached.rewriteCandidate;
     recapCandidate.value = cached.recapCandidate;
     currentQualityReport.value = cached.qualityReport || null;
+    currentSeriesQualityMetrics.value = cached.seriesQualityMetrics || null;
     styleTone.value = cached.styleTone || "elegant";
     focusTargetWords.value = cached.focusTargetWords || DEFAULT_FOCUS_TARGET_WORDS;
     focusDraftInstruction.value = cached.focusDraftInstruction || "";
@@ -1153,12 +1161,13 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function loadChapterCockpit(chapterId: string) {
     if (!currentProject.value) return;
-    const [dashboard, cards, summary, qualityReport, runtimeSnapshot] = await Promise.all([
+    const [dashboard, cards, summary, qualityReport, runtimeSnapshot, seriesQualityMetrics] = await Promise.all([
       novelApi.readChapterDashboard(currentProject.value.slug, chapterId),
       novelApi.readSceneCards(currentProject.value.slug, chapterId),
       novelApi.readChapterSummary(currentProject.value.slug, chapterId),
       novelApi.readChapterQualityReport(currentProject.value.slug, chapterId),
-      novelApi.readCreationRuntimeSnapshot(currentProject.value.slug, chapterId)
+      novelApi.readCreationRuntimeSnapshot(currentProject.value.slug, chapterId),
+      novelApi.readSeriesQualityMetrics(currentProject.value.slug)
     ]);
     currentDashboard.value = {
       ...dashboard,
@@ -1168,6 +1177,12 @@ export const useNovelStore = defineStore("novel", () => {
     currentChapterSummary.value = summary;
     currentQualityReport.value = qualityReport;
     currentRuntimeSnapshot.value = runtimeSnapshot;
+    currentSeriesQualityMetrics.value = seriesQualityMetrics;
+  }
+
+  async function loadSeriesQualityMetrics() {
+    if (!currentProject.value) return;
+    currentSeriesQualityMetrics.value = await novelApi.readSeriesQualityMetrics(currentProject.value.slug);
   }
 
   async function loadCreationRuntimeSnapshot(chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId) {
@@ -1831,6 +1846,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentDashboard,
     currentChapterSummary,
     currentRuntimeSnapshot,
+    currentSeriesQualityMetrics,
     sceneCards,
     storyControl,
     storyGraph,
@@ -1887,6 +1903,7 @@ export const useNovelStore = defineStore("novel", () => {
     linkSharedAsset,
     loadChapterCockpit,
     loadCreationRuntimeSnapshot,
+    loadSeriesQualityMetrics,
     loadStoryControl,
     loadStoryGraph,
     loadKnowledgeIndex,
