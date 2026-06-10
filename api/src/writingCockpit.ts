@@ -12,6 +12,7 @@ import type {
   SceneCard,
   SeriesQualityMetricAverage,
   SeriesRhythmSignal,
+  SeriesQualityTrend,
   SeriesQualityMetrics,
   StoryControl,
   WritingRecapCandidate
@@ -348,6 +349,65 @@ function buildCharacterArcSignals(summaries: ChapterSummary[]): CharacterArcSign
     .slice(0, 8);
 }
 
+function buildQualityTrend(
+  key: SeriesQualityTrend["key"],
+  label: string,
+  points: SeriesQualityTrend["points"]
+): SeriesQualityTrend | null {
+  if (!points.length) return null;
+  const latest = points[points.length - 1];
+  const previous = points[points.length - 2];
+  return {
+    key,
+    label,
+    points,
+    averageScore: roundScore(points.reduce((sum, point) => sum + point.score, 0) / points.length),
+    latestScore: latest.score,
+    previousScore: previous?.score,
+    delta: previous ? roundScore(latest.score - previous.score) : undefined
+  };
+}
+
+function buildQualityTrends(
+  reports: Array<{ chapter: NovelProject["chapters"][number]; report: ChapterQualityReport }>
+): SeriesQualityTrend[] {
+  const overall = buildQualityTrend(
+    "overall",
+    "Overall",
+    reports.map(({ chapter, report }) => ({
+      chapterId: chapter.id,
+      chapterTitle: chapter.title,
+      score: report.overallScore,
+      updatedAt: report.updatedAt
+    }))
+  );
+
+  const metricGroups = new Map<
+    ChapterQualityReport["metrics"][number]["key"],
+    { key: ChapterQualityReport["metrics"][number]["key"]; label: string; points: SeriesQualityTrend["points"] }
+  >();
+
+  reports.forEach(({ chapter, report }) => {
+    report.metrics.forEach((metric) => {
+      const group = metricGroups.get(metric.key) || { key: metric.key, label: metric.label, points: [] };
+      group.points.push({
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        score: metric.score,
+        updatedAt: report.updatedAt
+      });
+      metricGroups.set(metric.key, group);
+    });
+  });
+
+  const metricTrends = Array.from(metricGroups.values())
+    .map((group) => buildQualityTrend(group.key, group.label, group.points))
+    .filter((trend): trend is SeriesQualityTrend => Boolean(trend))
+    .sort((left, right) => left.averageScore - right.averageScore || left.label.localeCompare(right.label));
+
+  return overall ? [overall, ...metricTrends] : metricTrends;
+}
+
 export async function buildSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
   const chapterSignals = await Promise.all(
     project.chapters.map(async (chapter) => {
@@ -413,6 +473,7 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
     weakestChapters,
     rhythmSignals: buildRhythmSignals(chapterSignals),
     characterArcSignals: buildCharacterArcSignals(chapterSignals.map((item) => item.summary)),
+    qualityTrends: buildQualityTrends(reports),
     updatedAt: nowIso()
   };
 
@@ -422,7 +483,7 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
 
 export async function readSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
   const cached = await readJsonFile<SeriesQualityMetrics | null>(root, seriesQualityPath(), null);
-  return cached?.rhythmSignals && cached.characterArcSignals ? cached : buildSeriesQualityMetrics(root, project);
+  return cached?.rhythmSignals && cached.characterArcSignals && cached.qualityTrends ? cached : buildSeriesQualityMetrics(root, project);
 }
 
 export async function readSceneCards(root: string, chapterId: string): Promise<SceneCard[]> {

@@ -56,6 +56,27 @@ const seriesMetrics: SeriesQualityMetrics = {
       updatedAt: "2026-06-04T00:00:00.000Z"
     }
   ],
+  qualityTrends: [
+    {
+      key: "overall",
+      label: "Overall",
+      averageScore: 74,
+      latestScore: 78,
+      previousScore: 70,
+      delta: 8,
+      points: [
+        { chapterId: "chapter-000", chapterTitle: "Chapter 0", score: 70, updatedAt: "2026-06-03T00:00:00.000Z" },
+        { chapterId: "chapter-001", chapterTitle: "Chapter 1", score: 78, updatedAt: "2026-06-04T00:00:00.000Z" }
+      ]
+    },
+    {
+      key: "hook",
+      label: "钩子",
+      averageScore: 68,
+      latestScore: 68,
+      points: [{ chapterId: "chapter-001", chapterTitle: "Chapter 1", score: 68, updatedAt: "2026-06-04T00:00:00.000Z" }]
+    }
+  ],
   rhythmSignals: [
     {
       chapterId: "chapter-001",
@@ -103,6 +124,9 @@ describe("ReviewQualityPanel", () => {
     expect(wrapper.text()).toContain("1 / 2 章已体检");
     expect(wrapper.text()).toContain("最弱章节：Chapter 1 · 78 分");
     expect(wrapper.text()).toContain("钩子");
+    expect(wrapper.text()).toContain("质量趋势");
+    expect(wrapper.text()).toContain("Overall");
+    expect(wrapper.text()).toContain("+8");
     expect(wrapper.text()).toContain("章节节奏");
     expect(wrapper.text()).toContain("80 分 · 2400 字 · 3 场 · 5 事件");
     expect(wrapper.text()).toContain("角色弧");

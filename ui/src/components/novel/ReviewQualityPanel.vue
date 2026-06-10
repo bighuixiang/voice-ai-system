@@ -67,6 +67,20 @@
         最弱章节：{{ seriesMetrics.weakestChapters[0].chapterTitle }} · {{ seriesMetrics.weakestChapters[0].overallScore }} 分
       </p>
 
+      <div v-if="visibleQualityTrends.length" class="signal-block">
+        <strong>质量趋势</strong>
+        <div class="quality-trend-list">
+          <div v-for="trend in visibleQualityTrends" :key="trend.key" class="quality-trend-row">
+            <div>
+              <span>{{ trend.label }}</span>
+              <em>{{ trend.points.length }} 章</em>
+            </div>
+            <b>{{ trend.latestScore }}</b>
+            <small>{{ trendLabel(trend) }}</small>
+          </div>
+        </div>
+      </div>
+
       <div v-if="visibleRhythmSignals.length" class="signal-block">
         <strong>章节节奏</strong>
         <div class="signal-list">
@@ -138,6 +152,7 @@ const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
 ];
 
 const weakestSeriesMetrics = computed(() => props.seriesMetrics?.metricAverages.slice(0, 3) || []);
+const visibleQualityTrends = computed(() => props.seriesMetrics?.qualityTrends?.slice(0, 4) || []);
 const visibleRhythmSignals = computed(() => props.seriesMetrics?.rhythmSignals?.slice(0, 3) || []);
 const visibleCharacterArcSignals = computed(() => props.seriesMetrics?.characterArcSignals?.slice(0, 3) || []);
 
@@ -148,6 +163,12 @@ function updateTone(value: string) {
 function rhythmLabel(signal: NonNullable<SeriesQualityMetrics["rhythmSignals"]>[number]) {
   const score = typeof signal.rhythmScore === "number" ? `${signal.rhythmScore} 分` : "未评分";
   return `${score} · ${signal.wordCount} 字 · ${signal.sceneCount} 场 · ${signal.beatCount} 事件`;
+}
+
+function trendLabel(trend: NonNullable<SeriesQualityMetrics["qualityTrends"]>[number]) {
+  if (typeof trend.delta !== "number") return "基线";
+  if (trend.delta === 0) return "持平";
+  return `${trend.delta > 0 ? "+" : ""}${trend.delta}`;
 }
 </script>
 
@@ -350,6 +371,60 @@ p {
 .signal-list {
   display: grid;
   gap: 5px;
+}
+
+.quality-trend-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.quality-trend-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  padding: 7px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: var(--app-bg);
+  color: var(--app-text-secondary);
+  font-size: 12px;
+
+  div {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  span,
+  em,
+  small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: var(--app-text-primary);
+    font-weight: 700;
+  }
+
+  em,
+  small {
+    font-style: normal;
+  }
+
+  b {
+    color: var(--app-primary);
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  small {
+    grid-column: 1 / -1;
+    color: var(--app-text-muted);
+  }
 }
 
 .signal-row {

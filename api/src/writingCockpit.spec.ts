@@ -335,11 +335,29 @@ describe("writingCockpit", () => {
       lastChapterId: "chapter-002",
       latestState: "More cautious about the seal."
     });
+    expect(metrics.qualityTrends?.[0]).toMatchObject({
+      key: "overall",
+      label: "Overall",
+      averageScore: 76,
+      latestScore: 70,
+      previousScore: 82,
+      delta: -12,
+      points: [
+        expect.objectContaining({ chapterId: "chapter-001", score: 82 }),
+        expect.objectContaining({ chapterId: "chapter-002", score: 70 })
+      ]
+    });
+    expect(metrics.qualityTrends?.find((trend) => trend.key === "rhythm")).toMatchObject({
+      averageScore: 63,
+      latestScore: 58,
+      delta: -10
+    });
 
     const saved = JSON.parse(await fs.readFile(path.join(tempRoot, "quality", "series-metrics.json"), "utf8"));
     expect(saved.averageOverallScore).toBe(76);
     expect(saved.rhythmSignals[0].chapterId).toBe("chapter-001");
     expect(saved.characterArcSignals[0].characterName).toBe("主角");
+    expect(saved.qualityTrends[0].key).toBe("overall");
     await expect(readSeriesQualityMetrics(tempRoot, project())).resolves.toMatchObject({ reportCount: 2 });
   });
 

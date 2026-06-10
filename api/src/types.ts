@@ -160,6 +160,23 @@ export interface CharacterArcSignal {
   updatedAt: string;
 }
 
+export interface SeriesQualityTrendPoint {
+  chapterId: string;
+  chapterTitle: string;
+  score: number;
+  updatedAt: string;
+}
+
+export interface SeriesQualityTrend {
+  key: QualityMetricKey | "overall";
+  label: string;
+  points: SeriesQualityTrendPoint[];
+  averageScore: number;
+  latestScore: number;
+  previousScore?: number;
+  delta?: number;
+}
+
 export interface SeriesQualityMetrics {
   projectSlug: string;
   chapterCount: number;
@@ -169,6 +186,7 @@ export interface SeriesQualityMetrics {
   weakestChapters: SeriesQualityChapterSignal[];
   rhythmSignals?: SeriesRhythmSignal[];
   characterArcSignals?: CharacterArcSignal[];
+  qualityTrends?: SeriesQualityTrend[];
   updatedAt: string;
 }
 
