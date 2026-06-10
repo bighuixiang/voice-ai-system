@@ -268,9 +268,11 @@
             :selected-tone="store.styleTone"
             :can-diagnose="store.canDiagnoseChapter"
             :can-tune-selection="store.canTuneSelection"
+            :is-rebuilding-series="store.isRebuildingSeriesQualityMetrics"
             @diagnose="store.diagnoseCurrentChapter"
             @update:tone="store.updateStyleTone"
             @tune-selection="store.tuneSelectionStyle"
+            @rebuild-series="store.rebuildSeriesQualityMetrics"
           />
         </CollapsiblePanel>
         <CollapsiblePanel
@@ -419,7 +421,7 @@
           :is-searching="store.isSearchingKnowledge"
           @search="store.searchKnowledgeIndex"
         />
-        <StoryGraphPanel :graph="store.storyGraph" @refresh="store.loadStoryGraph" />
+        <StoryGraphPanel :graph="store.storyGraph" :is-rebuilding="store.isRebuildingStoryGraph" @refresh="store.rebuildStoryGraph" />
         <KnowledgeIndexPanel
           :index="store.knowledgeIndex"
           :is-rebuilding="store.isRebuildingKnowledgeIndex"

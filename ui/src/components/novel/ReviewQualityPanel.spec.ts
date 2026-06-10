@@ -163,7 +163,9 @@ describe("ReviewQualityPanel", () => {
     expect(wrapper.text()).toContain("2 次 · 更谨慎地处理血符。");
 
     await wrapper.findAll("button")[0].trigger("click");
+    await wrapper.findAll("button")[1].trigger("click");
     expect(wrapper.emitted("diagnose")).toHaveLength(1);
+    expect(wrapper.emitted("rebuild-series")).toHaveLength(1);
   });
 
   it("updates tone and emits tune action for selected text", async () => {

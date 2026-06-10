@@ -5,7 +5,7 @@
         <div class="panel-title">故事图谱</div>
         <p>{{ summaryText }}</p>
       </div>
-      <el-button :icon="Refresh" :disabled="!graph" @click="$emit('refresh')">刷新</el-button>
+      <el-button :icon="Refresh" :loading="isRebuilding" :disabled="isRebuilding" @click="$emit('refresh')">刷新</el-button>
     </header>
 
     <div v-if="graph" class="graph-body">
@@ -76,6 +76,7 @@ import type { StoryGraphNodeType, StoryGraphProjection } from "@/types/novel";
 
 const props = defineProps<{
   graph: StoryGraphProjection | null;
+  isRebuilding?: boolean;
 }>();
 
 defineEmits<{

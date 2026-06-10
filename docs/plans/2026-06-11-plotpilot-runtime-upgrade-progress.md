@@ -55,6 +55,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Jobs support knowledge index rebuilds, series quality rebuilds, and story graph rebuilds.
   - UI API clients can start jobs and poll job status.
   - Workspace knowledge-index rebuilds now use background jobs before refreshing the index.
+  - Workspace quality overview and story graph rebuilds can also run through background jobs.
 
 ## Verification
 

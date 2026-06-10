@@ -16,6 +16,7 @@ import type {
   CreationLoopStep,
   EditorSelection,
   BackgroundJob,
+  BackgroundJobType,
   FocusWritingGuide,
   KnowledgeIndexProjection,
   KnowledgeSearchResult,
@@ -147,6 +148,8 @@ export const useNovelStore = defineStore("novel", () => {
   const isSavingScenes = ref(false);
   const isSavingStoryControl = ref(false);
   const isRebuildingKnowledgeIndex = ref(false);
+  const isRebuildingSeriesQualityMetrics = ref(false);
+  const isRebuildingStoryGraph = ref(false);
   const isSearchingKnowledge = ref(false);
   const isReverseEngineeringStructure = ref(false);
   const agentProfiles = ref<AiAgentProfile[]>([]);
@@ -1224,17 +1227,53 @@ export const useNovelStore = defineStore("novel", () => {
     isRebuildingKnowledgeIndex.value = true;
     try {
       const projectId = currentProject.value.slug;
-      const startedJob = await novelApi.startBackgroundJob(projectId, "knowledge.index.rebuild", { source: "workspace" });
-      const finishedJob = await waitForBackgroundJob(projectId, startedJob.id);
-      if (finishedJob.status === "error") {
-        throw new Error(finishedJob.error || "知识索引重建失败");
-      }
+      await runCurrentProjectBackgroundJob("knowledge.index.rebuild", { source: "workspace" }, "知识索引重建失败");
       knowledgeIndex.value = await novelApi.readKnowledgeIndex(projectId);
       knowledgeSearchResult.value = null;
       await loadStoryGraph();
     } finally {
       isRebuildingKnowledgeIndex.value = false;
     }
+  }
+
+  async function rebuildSeriesQualityMetrics() {
+    if (!currentProject.value) return;
+    isRebuildingSeriesQualityMetrics.value = true;
+    try {
+      const projectId = currentProject.value.slug;
+      await runCurrentProjectBackgroundJob("quality.series.rebuild", { source: "workspace" }, "全书质量指标重建失败");
+      currentSeriesQualityMetrics.value = await novelApi.readSeriesQualityMetrics(projectId);
+    } finally {
+      isRebuildingSeriesQualityMetrics.value = false;
+    }
+  }
+
+  async function rebuildStoryGraph() {
+    if (!currentProject.value) return;
+    isRebuildingStoryGraph.value = true;
+    try {
+      const projectId = currentProject.value.slug;
+      await runCurrentProjectBackgroundJob("story.graph.rebuild", { source: "workspace" }, "故事图谱重建失败");
+      storyGraph.value = await novelApi.readStoryGraph(projectId);
+    } finally {
+      isRebuildingStoryGraph.value = false;
+    }
+  }
+
+  async function runCurrentProjectBackgroundJob(
+    type: BackgroundJobType,
+    payload: Record<string, unknown>,
+    errorMessage: string
+  ): Promise<BackgroundJob> {
+    if (!currentProject.value) {
+      throw new Error("未打开项目");
+    }
+    const startedJob = await novelApi.startBackgroundJob(currentProject.value.slug, type, payload);
+    const finishedJob = await waitForBackgroundJob(currentProject.value.slug, startedJob.id);
+    if (finishedJob.status === "error") {
+      throw new Error(finishedJob.error || errorMessage);
+    }
+    return finishedJob;
   }
 
   async function waitForBackgroundJob(projectId: string, jobId: string): Promise<BackgroundJob> {
@@ -1908,6 +1947,8 @@ export const useNovelStore = defineStore("novel", () => {
     isSavingScenes,
     isSavingStoryControl,
     isRebuildingKnowledgeIndex,
+    isRebuildingSeriesQualityMetrics,
+    isRebuildingStoryGraph,
     isSearchingKnowledge,
     isReverseEngineeringStructure,
     isExportingAuditReport,
@@ -1956,6 +1997,8 @@ export const useNovelStore = defineStore("novel", () => {
     loadStoryGraph,
     loadKnowledgeIndex,
     rebuildKnowledgeIndex,
+    rebuildSeriesQualityMetrics,
+    rebuildStoryGraph,
     searchKnowledgeIndex,
     updateDashboard,
     saveCurrentDashboard,

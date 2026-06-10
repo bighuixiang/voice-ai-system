@@ -53,7 +53,12 @@
           <div class="panel-title small">项目质量概览</div>
           <p>{{ seriesMetrics.reportCount }} / {{ seriesMetrics.chapterCount }} 章已体检</p>
         </div>
-        <strong>{{ seriesMetrics.averageOverallScore }}</strong>
+        <div class="series-actions">
+          <strong>{{ seriesMetrics.averageOverallScore }}</strong>
+          <el-button :icon="Refresh" :loading="isRebuildingSeries" :disabled="isRebuildingSeries" @click="$emit('rebuild-series')">
+            重建
+          </el-button>
+        </div>
       </div>
 
       <div v-if="weakestSeriesMetrics.length" class="series-list">
@@ -145,7 +150,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { DataAnalysis, MagicStick } from "@element-plus/icons-vue";
+import { DataAnalysis, MagicStick, Refresh } from "@element-plus/icons-vue";
 import type { ChapterQualityReport, SeriesQualityMetrics, StyleToneKey } from "@/types/novel";
 
 const props = defineProps<{
@@ -154,12 +159,14 @@ const props = defineProps<{
   selectedTone: StyleToneKey;
   canDiagnose: boolean;
   canTuneSelection: boolean;
+  isRebuildingSeries?: boolean;
 }>();
 
 const emit = defineEmits<{
   diagnose: [];
   "update:tone": [tone: StyleToneKey];
   "tune-selection": [];
+  "rebuild-series": [];
 }>();
 
 const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
@@ -355,6 +362,13 @@ p {
     font-size: 24px;
     line-height: 1;
   }
+}
+
+.series-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .series-list {

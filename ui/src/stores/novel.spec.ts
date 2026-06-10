@@ -1439,6 +1439,32 @@ describe("useNovelStore", () => {
     });
   });
 
+  it("rebuilds series quality metrics through a background job", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await store.rebuildSeriesQualityMetrics();
+
+    expect(mockNovelApi.startBackgroundJob).toHaveBeenCalledWith("demo", "quality.series.rebuild", { source: "workspace" });
+    expect(mockNovelApi.readBackgroundJob).toHaveBeenCalledWith("demo", "job-knowledge-1");
+    expect(mockNovelApi.readSeriesQualityMetrics).toHaveBeenCalledWith("demo");
+    expect(store.currentSeriesQualityMetrics).toMatchObject({ projectSlug: "demo" });
+    expect(store.isRebuildingSeriesQualityMetrics).toBe(false);
+  });
+
+  it("rebuilds story graph through a background job", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await store.rebuildStoryGraph();
+
+    expect(mockNovelApi.startBackgroundJob).toHaveBeenCalledWith("demo", "story.graph.rebuild", { source: "workspace" });
+    expect(mockNovelApi.readBackgroundJob).toHaveBeenCalledWith("demo", "job-knowledge-1");
+    expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
+    expect(store.storyGraph).toMatchObject({ projectSlug: "demo" });
+    expect(store.isRebuildingStoryGraph).toBe(false);
+  });
+
   it("creates a style-tuned rewrite candidate for the selected text", () => {
     const store = useNovelStore();
     store.currentProject = project;
