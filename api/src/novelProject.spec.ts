@@ -5,7 +5,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createProjectFiles, createProjectSkeleton, deleteProject, importLocalProject, slugify } from "./novelProject.js";
 import { listProjectRecords } from "./database.js";
 import type {
+  ChapterFactPatch,
   ChapterDashboard,
+  ChapterSummary,
+  CharacterStatePatch,
   LedgerEntry,
   SceneCard,
   WritingBriefing,
@@ -93,6 +96,41 @@ describe("novelProject", () => {
       unresolvedForeshadowing: [ledgerEntry],
       risks: [ledgerEntry]
     };
+    const factPatch: ChapterFactPatch = {
+      id: "fact-1",
+      chapterId: "chapter-001",
+      fact: "The seal responds to blood.",
+      relatedEntities: ["sealed gate"],
+      sourceAnchor: "blood touched the gate",
+      status: "pending",
+      createdAt: "2026-06-04T00:00:00.000Z",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const characterPatch: CharacterStatePatch = {
+      id: "character-state-1",
+      chapterId: "chapter-001",
+      characterId: "char-protagonist",
+      characterName: "主角",
+      before: "Uninjured.",
+      after: "Wounded but aware the seal is alive.",
+      cause: "Paid blood to test the clue.",
+      relatedEntities: ["sealed gate"],
+      status: "pending",
+      createdAt: "2026-06-04T00:00:00.000Z",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const chapterSummary: ChapterSummary = {
+      chapterId: "chapter-001",
+      summary: "The protagonist paid blood to test the sealed gate.",
+      keyEvents: ["The talisman reacted early.", "The gate answered blood."],
+      newFacts: [factPatch],
+      characterStateChanges: [characterPatch],
+      foreshadowingUpdates: [ledgerEntry],
+      continuityRisks: [ledgerEntry],
+      powerProgressionUpdates: [{ ...ledgerEntry, kind: "power" }],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
     const recap: WritingRecapCandidate = {
       chapterId: "chapter-001",
       summary: "The protagonist paid a cost.",
@@ -101,11 +139,18 @@ describe("novelProject", () => {
       foreshadowingUpdates: [ledgerEntry],
       continuityRisks: [ledgerEntry],
       powerProgressionUpdates: [{ ...ledgerEntry, kind: "power" }],
-      createdAt: "2026-06-04T00:00:00.000Z"
+      createdAt: "2026-06-04T00:00:00.000Z",
+      summaryPatch: { summary: chapterSummary.summary, keyEvents: chapterSummary.keyEvents },
+      factPatches: [factPatch],
+      ledgerPatches: [ledgerEntry],
+      characterStatePatches: [characterPatch],
+      riskPatches: [ledgerEntry]
     };
 
     expect(scene.chapterId).toBe(dashboard.chapterId);
     expect(briefing.unresolvedForeshadowing[0].id).toBe("risk-1");
+    expect(chapterSummary.newFacts[0].status).toBe("pending");
+    expect(recap.factPatches?.[0].fact).toBe("The seal responds to blood.");
     expect(recap.powerProgressionUpdates[0].kind).toBe("power");
   });
 

@@ -3,6 +3,9 @@ import { createPinia, setActivePinia } from "pinia";
 import { useNovelStore } from "./novel";
 import type {
   ChapterDashboard,
+  ChapterFactPatch,
+  ChapterSummary,
+  CharacterStatePatch,
   LedgerEntry,
   NovelProject,
   NovelTask,
@@ -168,6 +171,75 @@ function deferred<T>() {
   });
   return { promise, resolve, reject };
 }
+
+describe("novel writing memory contracts", () => {
+  it("supports chapter summary and recap patch types", () => {
+    const ledgerEntry: LedgerEntry = {
+      id: "risk-1",
+      kind: "risk",
+      title: "POV may know too much",
+      status: "watch",
+      severity: "high",
+      chapterIds: ["chapter-001"],
+      relatedEntities: ["Hero"],
+      note: "Keep hidden lore out of narration.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const factPatch: ChapterFactPatch = {
+      id: "fact-1",
+      chapterId: "chapter-001",
+      fact: "The seal responds to blood.",
+      relatedEntities: ["sealed gate"],
+      sourceAnchor: "blood touched the gate",
+      status: "pending",
+      createdAt: "2026-06-04T00:00:00.000Z",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const characterPatch: CharacterStatePatch = {
+      id: "character-state-1",
+      chapterId: "chapter-001",
+      characterId: "char-hero",
+      characterName: "Hero",
+      before: "Uninjured.",
+      after: "Wounded but aware the seal is alive.",
+      cause: "Paid blood to test the clue.",
+      relatedEntities: ["sealed gate"],
+      status: "pending",
+      createdAt: "2026-06-04T00:00:00.000Z",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const chapterSummary: ChapterSummary = {
+      chapterId: "chapter-001",
+      summary: "The hero paid blood to test the sealed gate.",
+      keyEvents: ["The gate answered blood."],
+      newFacts: [factPatch],
+      characterStateChanges: [characterPatch],
+      foreshadowingUpdates: [],
+      continuityRisks: [ledgerEntry],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    };
+    const recap: WritingRecapCandidate = {
+      chapterId: "chapter-001",
+      summary: chapterSummary.summary,
+      newFacts: [factPatch.fact],
+      characterStateChanges: [characterPatch.after],
+      foreshadowingUpdates: [],
+      continuityRisks: [ledgerEntry],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-04T00:00:00.000Z",
+      summaryPatch: { summary: chapterSummary.summary, keyEvents: chapterSummary.keyEvents },
+      factPatches: [factPatch],
+      ledgerPatches: [ledgerEntry],
+      characterStatePatches: [characterPatch],
+      riskPatches: [ledgerEntry]
+    };
+
+    expect(chapterSummary.newFacts[0].status).toBe("pending");
+    expect(recap.characterStatePatches?.[0].characterName).toBe("Hero");
+  });
+});
 
 describe("useNovelStore", () => {
   beforeEach(() => {

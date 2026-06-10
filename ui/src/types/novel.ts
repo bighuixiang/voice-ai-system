@@ -192,6 +192,46 @@ export interface LedgerEntry {
   updatedAt: string;
 }
 
+export type RecapPatchStatus = "pending" | "accepted" | "rejected";
+
+export interface ChapterFactPatch {
+  id: string;
+  chapterId: string;
+  fact: string;
+  relatedEntities: string[];
+  sourceAnchor?: string;
+  status: RecapPatchStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CharacterStatePatch {
+  id: string;
+  chapterId: string;
+  characterId?: string;
+  characterName: string;
+  before?: string;
+  after: string;
+  cause: string;
+  relatedEntities: string[];
+  status: RecapPatchStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChapterSummary {
+  chapterId: string;
+  summary: string;
+  keyEvents: string[];
+  newFacts: ChapterFactPatch[];
+  characterStateChanges: CharacterStatePatch[];
+  foreshadowingUpdates: LedgerEntry[];
+  continuityRisks: LedgerEntry[];
+  powerProgressionUpdates: LedgerEntry[];
+  acceptedRecapIds: string[];
+  updatedAt: string;
+}
+
 export interface WritingBriefing {
   chapterId: string;
   previousChapterEnding: string;
@@ -212,6 +252,11 @@ export interface WritingRecapCandidate {
   continuityRisks: LedgerEntry[];
   powerProgressionUpdates: LedgerEntry[];
   createdAt: string;
+  summaryPatch?: Partial<ChapterSummary>;
+  factPatches?: ChapterFactPatch[];
+  ledgerPatches?: LedgerEntry[];
+  characterStatePatches?: CharacterStatePatch[];
+  riskPatches?: LedgerEntry[];
 }
 
 export interface ChapterQualityMetric {
