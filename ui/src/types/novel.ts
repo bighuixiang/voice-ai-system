@@ -412,6 +412,24 @@ export interface CreationLoopStep {
   actionLabel?: string;
 }
 
+export interface CreationRuntimeSnapshot {
+  projectSlug: string;
+  chapterId: string;
+  chapterTitle: string;
+  activeStepId?: CreationLoopStep["id"];
+  steps: Array<Omit<CreationLoopStep, "action" | "actionLabel">>;
+  signals: {
+    wordCount: number;
+    sceneCount: number;
+    hasDashboard: boolean;
+    hasChapterSummary: boolean;
+    hasQualityReport: boolean;
+    hasWritingRecap: boolean;
+    acceptedLedgerCount: number;
+  };
+  updatedAt: string;
+}
+
 export interface NovelProject {
   id: string;
   slug: string;

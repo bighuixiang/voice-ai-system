@@ -8,6 +8,7 @@ import type {
   ChapterDashboard,
   ChapterSummary,
   ChapterQualityReport,
+  CreationRuntimeSnapshot,
   CodexTaskResult,
   CodexTaskType,
   ChapterDocumentKind,
@@ -61,6 +62,7 @@ interface WorkspaceCache {
   focusDraftInstruction: string;
   dashboard: ChapterDashboard | null;
   chapterSummary: ChapterSummary | null;
+  runtimeSnapshot: CreationRuntimeSnapshot | null;
   sceneCards: SceneCard[];
   storyControl: StoryControl | null;
   storyGraph: StoryGraphProjection | null;
@@ -126,6 +128,7 @@ export const useNovelStore = defineStore("novel", () => {
   const focusDraftInstruction = ref("");
   const currentDashboard = ref<ChapterDashboard | null>(null);
   const currentChapterSummary = ref<ChapterSummary | null>(null);
+  const currentRuntimeSnapshot = ref<CreationRuntimeSnapshot | null>(null);
   const sceneCards = ref<SceneCard[]>([]);
   const storyControl = ref<StoryControl | null>(null);
   const storyGraph = ref<StoryGraphProjection | null>(null);
@@ -687,6 +690,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentQualityReport.value = report;
     if (currentProject.value) {
       currentQualityReport.value = await novelApi.saveChapterQualityReport(currentProject.value.slug, report);
+      await loadCreationRuntimeSnapshot(chapterId);
     }
     return true;
   }
@@ -898,6 +902,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusDraftInstruction.value = "";
     currentDashboard.value = null;
     currentChapterSummary.value = null;
+    currentRuntimeSnapshot.value = null;
     sceneCards.value = [];
     storyControl.value = null;
     storyGraph.value = null;
@@ -939,6 +944,7 @@ export const useNovelStore = defineStore("novel", () => {
         focusDraftInstruction: focusDraftInstruction.value,
         dashboard: currentDashboard.value,
         chapterSummary: currentChapterSummary.value,
+        runtimeSnapshot: currentRuntimeSnapshot.value,
         sceneCards: sceneCards.value,
         storyControl: storyControl.value,
         storyGraph: storyGraph.value,
@@ -980,6 +986,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusDraftInstruction.value = cached.focusDraftInstruction || "";
     currentDashboard.value = cached.dashboard;
     currentChapterSummary.value = cached.chapterSummary || null;
+    currentRuntimeSnapshot.value = cached.runtimeSnapshot || null;
     sceneCards.value = cached.sceneCards;
     storyControl.value = cached.storyControl;
     storyGraph.value = cached.storyGraph || null;
@@ -1146,11 +1153,12 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function loadChapterCockpit(chapterId: string) {
     if (!currentProject.value) return;
-    const [dashboard, cards, summary, qualityReport] = await Promise.all([
+    const [dashboard, cards, summary, qualityReport, runtimeSnapshot] = await Promise.all([
       novelApi.readChapterDashboard(currentProject.value.slug, chapterId),
       novelApi.readSceneCards(currentProject.value.slug, chapterId),
       novelApi.readChapterSummary(currentProject.value.slug, chapterId),
-      novelApi.readChapterQualityReport(currentProject.value.slug, chapterId)
+      novelApi.readChapterQualityReport(currentProject.value.slug, chapterId),
+      novelApi.readCreationRuntimeSnapshot(currentProject.value.slug, chapterId)
     ]);
     currentDashboard.value = {
       ...dashboard,
@@ -1159,6 +1167,12 @@ export const useNovelStore = defineStore("novel", () => {
     sceneCards.value = cards;
     currentChapterSummary.value = summary;
     currentQualityReport.value = qualityReport;
+    currentRuntimeSnapshot.value = runtimeSnapshot;
+  }
+
+  async function loadCreationRuntimeSnapshot(chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId) {
+    if (!currentProject.value || !chapterId) return;
+    currentRuntimeSnapshot.value = await novelApi.readCreationRuntimeSnapshot(currentProject.value.slug, chapterId);
   }
 
   async function loadStoryControl() {
@@ -1255,6 +1269,7 @@ export const useNovelStore = defineStore("novel", () => {
     isSavingDashboard.value = true;
     try {
       currentDashboard.value = await novelApi.saveChapterDashboard(currentProject.value.slug, currentDashboard.value);
+      await loadCreationRuntimeSnapshot(currentDashboard.value.chapterId);
     } finally {
       isSavingDashboard.value = false;
     }
@@ -1269,6 +1284,7 @@ export const useNovelStore = defineStore("novel", () => {
     isSavingScenes.value = true;
     try {
       sceneCards.value = await novelApi.saveSceneCards(currentProject.value.slug, currentChapter.value.id, sceneCards.value);
+      await loadCreationRuntimeSnapshot(currentChapter.value.id);
     } finally {
       isSavingScenes.value = false;
     }
@@ -1507,6 +1523,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentChapterSummary.value = accepted.summary;
     ledgerEntries.value = await novelApi.readLedgerEntries(currentProject.value.slug, activeLedgerKind.value);
     await rebuildKnowledgeIndex();
+    await loadCreationRuntimeSnapshot(accepted.summary.chapterId);
     recapCandidate.value = null;
   }
 
@@ -1613,7 +1630,11 @@ export const useNovelStore = defineStore("novel", () => {
       await novelApi.saveFile(currentProject.value.slug, currentFilePath.value, currentContent.value);
       savedContent.value = currentContent.value;
       syncDashboardWordCount();
+      const hasDashboardToSave = Boolean(currentDashboard.value);
       await saveCurrentDashboard();
+      if (!hasDashboardToSave) {
+        await loadCreationRuntimeSnapshot();
+      }
       lastSavedAt.value = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err);
@@ -1809,6 +1830,7 @@ export const useNovelStore = defineStore("novel", () => {
     creationLoopSteps,
     currentDashboard,
     currentChapterSummary,
+    currentRuntimeSnapshot,
     sceneCards,
     storyControl,
     storyGraph,
@@ -1864,6 +1886,7 @@ export const useNovelStore = defineStore("novel", () => {
     createSharedAsset,
     linkSharedAsset,
     loadChapterCockpit,
+    loadCreationRuntimeSnapshot,
     loadStoryControl,
     loadStoryGraph,
     loadKnowledgeIndex,

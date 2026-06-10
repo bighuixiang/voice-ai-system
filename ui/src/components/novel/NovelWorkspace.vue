@@ -107,6 +107,7 @@
         <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
         <CreationLoopPanel
           :steps="store.creationLoopSteps"
+          :runtime-snapshot="store.currentRuntimeSnapshot"
           :loading="store.isLoading || store.isSavingContent"
           @action="handleCreationLoopAction"
         />

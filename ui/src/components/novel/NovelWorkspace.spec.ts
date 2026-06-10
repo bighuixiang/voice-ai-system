@@ -141,6 +141,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     currentTask: null,
     taskProgress: [],
     creationLoopSteps: [],
+    currentRuntimeSnapshot: null,
     recapCandidate: null,
     taskHistory: [],
     agentProfiles: [],
@@ -247,7 +248,7 @@ const stubs = {
   ChapterTree: { template: "<div class='tree-stub'>tree</div>" },
   WritingModeSwitcher: { props: ["mode"], template: "<div class='mode-switcher-stub'>{{ mode }}</div>" },
   CreationLoopPanel: {
-    props: ["steps"],
+    props: ["steps", "runtimeSnapshot"],
     emits: ["action"],
     template: "<button class='creation-loop-stub' @click='$emit(\"action\", steps?.[0]?.action)'>loop</button>"
   },

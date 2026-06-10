@@ -5,7 +5,12 @@
         <p class="eyebrow">Chapter Loop</p>
         <h2>创作闭环</h2>
       </div>
-      <span class="loop-summary">{{ doneCount }} / {{ steps.length }} 已沉淀</span>
+      <div class="loop-meta">
+        <span v-if="runtimeSnapshot?.activeStepId" class="runtime-chip">
+          {{ runtimeSnapshot.activeStepId }} · {{ runtimeSnapshot.signals.wordCount }} 字
+        </span>
+        <span class="loop-summary">{{ doneCount }} / {{ steps.length }} 已沉淀</span>
+      </div>
     </div>
 
     <ol class="loop-steps">
@@ -41,15 +46,17 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { ArrowRight, CircleCheck, Loading, Warning } from "@element-plus/icons-vue";
-import type { CreationLoopAction, CreationLoopStep } from "@/types/novel";
+import type { CreationLoopAction, CreationLoopStep, CreationRuntimeSnapshot } from "@/types/novel";
 
 const props = withDefaults(
   defineProps<{
     steps: CreationLoopStep[];
     loading?: boolean;
+    runtimeSnapshot?: CreationRuntimeSnapshot | null;
   }>(),
   {
-    loading: false
+    loading: false,
+    runtimeSnapshot: null
   }
 );
 
@@ -97,7 +104,16 @@ const doneCount = computed(() => props.steps.filter((step) => step.status === "d
   text-transform: uppercase;
 }
 
-.loop-summary {
+.loop-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.loop-summary,
+.runtime-chip {
   flex: 0 0 auto;
   padding: 3px 8px;
   border: 1px solid var(--app-border);
@@ -105,6 +121,12 @@ const doneCount = computed(() => props.steps.filter((step) => step.status === "d
   background: var(--app-bg-soft);
   color: var(--app-text-muted);
   font-size: 12px;
+}
+
+.runtime-chip {
+  border-color: color-mix(in srgb, var(--app-primary) 38%, var(--app-border));
+  background: var(--app-primary-soft);
+  color: var(--app-primary-text);
 }
 
 .loop-steps {
@@ -220,6 +242,10 @@ const doneCount = computed(() => props.steps.filter((step) => step.status === "d
   .loop-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .loop-meta {
+    justify-content: flex-start;
   }
 
   .loop-steps {

@@ -8,6 +8,7 @@ import type {
   ChapterQualityReport,
   ChapterSummary,
   CodexTaskType,
+  CreationRuntimeSnapshot,
   EditorSelection,
   KnowledgeIndexProjection,
   KnowledgeSearchQuery,
@@ -162,6 +163,11 @@ export const novelApi = {
   async readChapterDashboard(projectId: string, chapterId: string): Promise<ChapterDashboard> {
     const data = await request<{ dashboard: ChapterDashboard }>(`/api/novel/projects/${projectId}/dashboard/${chapterId}`);
     return data.dashboard;
+  },
+
+  async readCreationRuntimeSnapshot(projectId: string, chapterId: string): Promise<CreationRuntimeSnapshot> {
+    const data = await request<{ snapshot: CreationRuntimeSnapshot }>(`/api/novel/projects/${projectId}/runtime/${chapterId}`);
+    return data.snapshot;
   },
 
   async saveChapterDashboard(projectId: string, dashboard: ChapterDashboard): Promise<ChapterDashboard> {

@@ -27,6 +27,7 @@ const mockNovelApi = vi.hoisted(() => ({
   readFile: vi.fn(),
   saveFile: vi.fn(),
   readChapterDashboard: vi.fn(),
+  readCreationRuntimeSnapshot: vi.fn(),
   saveChapterDashboard: vi.fn(),
   readSceneCards: vi.fn(),
   saveSceneCards: vi.fn(),
@@ -298,6 +299,23 @@ describe("useNovelStore", () => {
       continuityRiskIds: [],
       updatedAt: "2026-06-04T00:00:00.000Z"
     }));
+    mockNovelApi.readCreationRuntimeSnapshot.mockImplementation(async (_projectId: string, chapterId: string) => ({
+      projectSlug: "demo",
+      chapterId,
+      chapterTitle: "Chapter",
+      activeStepId: "review",
+      steps: [],
+      signals: {
+        wordCount: 120,
+        sceneCount: 0,
+        hasDashboard: true,
+        hasChapterSummary: false,
+        hasQualityReport: false,
+        hasWritingRecap: false,
+        acceptedLedgerCount: 0
+      },
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    }));
     mockNovelApi.saveChapterDashboard.mockImplementation(async (_projectId: string, dashboard: ChapterDashboard) => dashboard);
     mockNovelApi.readSceneCards.mockResolvedValue([]);
     mockNovelApi.saveSceneCards.mockImplementation(async (_projectId: string, _chapterId: string, cards: SceneCard[]) => cards);
@@ -562,11 +580,13 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readSceneCards).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readChapterSummary).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readChapterQualityReport).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readCreationRuntimeSnapshot).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
     expect(store.currentDashboard?.chapterId).toBe("chapter-002");
     expect(store.currentChapterSummary?.chapterId).toBe("chapter-002");
+    expect(store.currentRuntimeSnapshot?.chapterId).toBe("chapter-002");
     expect(store.currentQualityReport?.overallScore).toBe(78);
     expect(store.storyGraph?.nodes).toEqual([expect.objectContaining({ type: "chapter" })]);
     expect(store.knowledgeIndex?.facts).toEqual([expect.objectContaining({ id: "fact:gate" })]);
