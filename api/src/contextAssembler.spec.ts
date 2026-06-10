@@ -206,6 +206,14 @@ describe("contextAssembler", () => {
         source: { type: "chapter-summary", id: "fact-gate-blood" },
         updatedAt: "2026-06-11T00:00:00.000Z"
       })}\n${JSON.stringify({
+        id: "fact:future-gate-cost",
+        text: "The tenth chapter reveals that Hero's blood debt follows every sealed gate.",
+        chapterIds: ["chapter-010"],
+        relatedEntities: ["Hero", "sealed gate"],
+        keywords: ["gate", "blood"],
+        source: { type: "chapter-summary", id: "future-gate-cost" },
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      })}\n${JSON.stringify({
         id: "fact:other",
         text: "A distant unrelated fact.",
         chapterIds: ["chapter-003"],
@@ -258,6 +266,7 @@ describe("contextAssembler", () => {
     const knowledge = blocks.find((block) => block.title === "Knowledge Memory Index");
 
     expect(knowledge?.content).toContain("The sealed gate responds to blood.");
+    expect(knowledge?.content).toContain("The tenth chapter reveals that Hero's blood debt follows every sealed gate.");
     expect(knowledge?.content).toContain("state_after");
     expect(knowledge?.content).toContain("Wounded but alert.");
     expect(knowledge?.content).not.toContain("A distant unrelated fact.");

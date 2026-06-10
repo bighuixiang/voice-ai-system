@@ -12,6 +12,7 @@ import type {
   SelectionPayload
 } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
+import { searchKnowledgeIndex } from "./knowledgeIndex.js";
 
 async function readOptional(root: string, relativePath: string): Promise<string> {
   try {
@@ -159,7 +160,11 @@ async function buildChapterMemoryBlocks(
   return blocks;
 }
 
-async function buildKnowledgeMemoryBlocks(root: string, chapterId: string): Promise<Array<{ title: string; content: string }>> {
+async function buildKnowledgeMemoryBlocks(
+  root: string,
+  project: NovelProject,
+  chapterId: string
+): Promise<Array<{ title: string; content: string }>> {
   const chapterIndex = await readOptionalJson<ChapterMemoryIndex>(root, "memory/chapter-index.json");
   const indexEntry = chapterIndex?.chapters.find((entry) => entry.chapterId === chapterId);
   if (!indexEntry || (!indexEntry.factIds.length && !indexEntry.tripleIds.length)) return [];
@@ -191,8 +196,35 @@ async function buildKnowledgeMemoryBlocks(root: string, chapterId: string): Prom
       object: triple.object,
       chapterIds: triple.chapterIds
     }));
+  const relatedQuery = [...indexEntry.entityNames, ...indexEntry.keywords].join(" ");
+  const related = relatedQuery.trim()
+    ? await searchKnowledgeIndex(root, project, { query: relatedQuery, chapterId, limit: 24 })
+    : { facts: [], triples: [] };
+  const relatedFacts = related.facts
+    .filter((fact) => !factIds.has(fact.id))
+    .slice(0, 12)
+    .map((fact) => ({
+      id: fact.id,
+      text: fact.text,
+      chapterIds: fact.chapterIds,
+      relatedEntities: fact.relatedEntities,
+      keywords: fact.keywords.slice(0, 8),
+      source: fact.source,
+      score: fact.score
+    }));
+  const relatedTriples = related.triples
+    .filter((triple) => !tripleIds.has(triple.id))
+    .slice(0, 8)
+    .map((triple) => ({
+      id: triple.id,
+      subject: triple.subject,
+      predicate: triple.predicate,
+      object: triple.object,
+      chapterIds: triple.chapterIds,
+      score: triple.score
+    }));
 
-  if (!selectedFacts.length && !selectedTriples.length) return [];
+  if (!selectedFacts.length && !selectedTriples.length && !relatedFacts.length && !relatedTriples.length) return [];
   return [
     {
       title: "Knowledge Memory Index",
@@ -202,7 +234,9 @@ async function buildKnowledgeMemoryBlocks(root: string, chapterId: string): Prom
           keywords: indexEntry.keywords.slice(0, 24),
           entityNames: indexEntry.entityNames.slice(0, 24),
           facts: selectedFacts,
-          triples: selectedTriples
+          triples: selectedTriples,
+          relatedFacts,
+          relatedTriples
         },
         null,
         2
@@ -254,7 +288,7 @@ export async function assembleContext(
 
   if (chapter && memoryContextTypes.includes(type)) {
     blocks.push(...(await buildChapterMemoryBlocks(root, project, chapter.id)));
-    blocks.push(...(await buildKnowledgeMemoryBlocks(root, chapter.id)));
+    blocks.push(...(await buildKnowledgeMemoryBlocks(root, project, chapter.id)));
   }
 
   if (chapter && targetChapterTypes.includes(type)) {
