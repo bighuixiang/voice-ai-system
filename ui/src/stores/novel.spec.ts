@@ -41,6 +41,8 @@ const mockNovelApi = vi.hoisted(() => ({
   readStoryGraph: vi.fn(),
   readKnowledgeIndex: vi.fn(),
   rebuildKnowledgeIndex: vi.fn(),
+  startBackgroundJob: vi.fn(),
+  readBackgroundJob: vi.fn(),
   searchKnowledgeIndex: vi.fn(),
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
@@ -392,6 +394,27 @@ describe("useNovelStore", () => {
       updatedAt: "2026-06-11T00:00:00.000Z"
     });
     mockNovelApi.rebuildKnowledgeIndex.mockImplementation(async () => mockNovelApi.readKnowledgeIndex());
+    mockNovelApi.startBackgroundJob.mockResolvedValue({
+      id: "job-knowledge-1",
+      projectId: "demo",
+      type: "knowledge.index.rebuild",
+      status: "running",
+      inputSummary: "{}",
+      startedAt: "2026-06-11T00:00:00.000Z",
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
+    mockNovelApi.readBackgroundJob.mockResolvedValue({
+      id: "job-knowledge-1",
+      projectId: "demo",
+      type: "knowledge.index.rebuild",
+      status: "success",
+      inputSummary: "{}",
+      outputSummary: "1 facts / 0 relations",
+      resultRef: "/api/novel/projects/demo/knowledge/index",
+      startedAt: "2026-06-11T00:00:00.000Z",
+      finishedAt: "2026-06-11T00:00:01.000Z",
+      updatedAt: "2026-06-11T00:00:01.000Z"
+    });
     mockNovelApi.searchKnowledgeIndex.mockResolvedValue({
       query: "Hero gate",
       tokens: ["hero", "gate"],
@@ -1260,7 +1283,9 @@ describe("useNovelStore", () => {
     await store.acceptWritingRecap();
 
     expect(mockNovelApi.acceptWritingRecap).toHaveBeenCalledWith("demo", expect.objectContaining({ chapterId: "chapter-002" }));
-    expect(mockNovelApi.rebuildKnowledgeIndex).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.startBackgroundJob).toHaveBeenCalledWith("demo", "knowledge.index.rebuild", { source: "workspace" });
+    expect(mockNovelApi.readBackgroundJob).toHaveBeenCalledWith("demo", "job-knowledge-1");
+    expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.saveLedgerEntries).not.toHaveBeenCalled();
     expect(store.ledgerEntries).toEqual([update]);
     expect(store.currentChapterSummary?.summary).toBe("The clue now has a cost.");

@@ -15,6 +15,7 @@ import type {
   CreationLoopAction,
   CreationLoopStep,
   EditorSelection,
+  BackgroundJob,
   FocusWritingGuide,
   KnowledgeIndexProjection,
   KnowledgeSearchResult,
@@ -701,6 +702,10 @@ export const useNovelStore = defineStore("novel", () => {
     return true;
   }
 
+  function wait(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   function updateStyleTone(tone: StyleToneKey) {
     styleTone.value = tone;
   }
@@ -1218,12 +1223,29 @@ export const useNovelStore = defineStore("novel", () => {
     if (!currentProject.value) return;
     isRebuildingKnowledgeIndex.value = true;
     try {
-      knowledgeIndex.value = await novelApi.rebuildKnowledgeIndex(currentProject.value.slug);
+      const projectId = currentProject.value.slug;
+      const startedJob = await novelApi.startBackgroundJob(projectId, "knowledge.index.rebuild", { source: "workspace" });
+      const finishedJob = await waitForBackgroundJob(projectId, startedJob.id);
+      if (finishedJob.status === "error") {
+        throw new Error(finishedJob.error || "知识索引重建失败");
+      }
+      knowledgeIndex.value = await novelApi.readKnowledgeIndex(projectId);
       knowledgeSearchResult.value = null;
       await loadStoryGraph();
     } finally {
       isRebuildingKnowledgeIndex.value = false;
     }
+  }
+
+  async function waitForBackgroundJob(projectId: string, jobId: string): Promise<BackgroundJob> {
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const job = await novelApi.readBackgroundJob(projectId, jobId);
+      if (job.status === "success" || job.status === "error") {
+        return job;
+      }
+      await wait(500);
+    }
+    throw new Error("后台作业超时");
   }
 
   async function searchKnowledgeIndex(query: string) {

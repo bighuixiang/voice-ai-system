@@ -53,6 +53,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - `/api/novel/projects/:projectId/jobs` starts and lists project background jobs.
   - Jobs support knowledge index rebuilds, series quality rebuilds, and story graph rebuilds.
   - UI API clients can start jobs and poll job status.
+  - Workspace knowledge-index rebuilds now use background jobs before refreshing the index.
 
 ## Verification
 
@@ -80,6 +81,7 @@ Known warnings remain unchanged:
 - `b71198d feat: project quality trends`
 - `1c67938 feat: expand story graph visualization`
 - `617e60d feat: orchestrate project background jobs`
+- `e644a79 feat: add local vector recall`
 
 Earlier supporting commits in this branch:
 
