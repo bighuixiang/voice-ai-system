@@ -326,7 +326,13 @@
           :collapsed="panelCollapsed('task-history', store.taskHistory.length === 0)"
           @update:collapsed="setPanelCollapsed('task-history', $event)"
         >
-          <TaskHistoryPanel :tasks="store.taskHistory" :invocations="store.aiInvocations" />
+          <TaskHistoryPanel
+            :tasks="store.taskHistory"
+            :invocations="store.aiInvocations"
+            :can-export="Boolean(store.currentProject)"
+            :is-exporting="store.isExportingAuditReport"
+            @export-report="store.exportProjectAuditReport"
+          />
         </CollapsiblePanel>
         <CollapsiblePanel
           v-if="store.writingMode === 'structure'"

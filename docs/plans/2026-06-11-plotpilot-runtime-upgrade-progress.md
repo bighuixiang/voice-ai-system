@@ -42,6 +42,11 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Creation runtime snapshots include a stable fingerprint.
   - UI shows the current creation-loop snapshot and fingerprint.
 
+- Project audit export:
+  - `/api/novel/projects/:projectId/audit-report` returns a JSON audit report.
+  - Reports include chapters, persisted quality metrics and trends, task summaries, and AI invocation adoption summaries.
+  - Task history UI can download the report as JSON.
+
 ## Verification
 
 Latest full verification passed:
@@ -76,4 +81,3 @@ Earlier supporting commits in this branch:
 - Tension curve and style-drift metrics beyond the current persisted quality trend.
 - Larger graph visualization for story relations.
 - Background job orchestration for heavy indexing and analysis.
-- Optional export/report view for project audit and quality history.

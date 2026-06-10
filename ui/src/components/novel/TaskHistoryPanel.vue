@@ -1,6 +1,9 @@
 <template>
   <section class="task-history-panel" aria-label="任务历史">
-    <div class="panel-title">任务历史</div>
+    <div class="panel-head">
+      <div class="panel-title">任务历史</div>
+      <el-button v-if="canExport" size="small" :loading="isExporting" @click="$emit('export-report')">导出报告</el-button>
+    </div>
     <el-empty v-if="!tasks.length" description="暂无任务" :image-size="48" />
     <ol v-else>
       <li v-for="item in visibleHistory" :key="item.task.id">
@@ -45,6 +48,12 @@ import type { AiInvocationSession, CodexTaskType, NovelTask } from "@/types/nove
 const props = defineProps<{
   tasks: NovelTask[];
   invocations?: AiInvocationSession[];
+  canExport?: boolean;
+  isExporting?: boolean;
+}>();
+
+defineEmits<{
+  "export-report": [];
 }>();
 
 const labels: Partial<Record<CodexTaskType, string>> = {
@@ -135,10 +144,17 @@ function auditSummary(invocation: AiInvocationSession) {
   background: var(--app-bg);
 }
 
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
 .panel-title {
   color: var(--app-text-primary);
   font-weight: 700;
-  margin-bottom: 10px;
 }
 
 ol {

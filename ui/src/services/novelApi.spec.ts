@@ -380,6 +380,26 @@ describe("novelApi", () => {
         updatedAt: "2026-06-04T00:00:00.000Z"
       }
     ];
+    const auditReport = {
+      projectSlug: "demo",
+      projectTitle: "Demo",
+      generatedAt: "2026-06-11T00:00:00.000Z",
+      chapters: [{ id: "chapter-001", title: "Chapter 1", status: "drafting", contentPath: "content/chapter-001.md" }],
+      quality: seriesMetrics,
+      taskSummary: {
+        total: 1,
+        byStatus: { pending: 0, running: 0, success: 1, error: 0, cancelled: 0 },
+        byType: { "chapter.draft": 1 },
+        latestTasks: []
+      },
+      aiInvocationSummary: {
+        total: 1,
+        byDecision: { pending: 0, accepted: 1, rejected: 0, "not-required": 0 },
+        proposedPatchCount: 1,
+        acceptedPatchCount: 1
+      },
+      aiInvocations: []
+    };
     mockJson({ dashboard });
     mockJson({ snapshot: runtimeSnapshot });
     mockJson({ dashboard });
@@ -396,6 +416,7 @@ describe("novelApi", () => {
     mockJson({ report: qualityReport, seriesMetrics });
     mockJson({ entries });
     mockJson({ entries });
+    mockJson({ report: auditReport });
 
     await expect(novelApi.readChapterDashboard("demo", "chapter-001")).resolves.toEqual(dashboard);
     await expect(novelApi.readCreationRuntimeSnapshot("demo", "chapter-001")).resolves.toEqual(runtimeSnapshot);
@@ -415,6 +436,7 @@ describe("novelApi", () => {
     await expect(novelApi.saveChapterQualityReport("demo", qualityReport)).resolves.toEqual({ report: qualityReport, seriesMetrics });
     await expect(novelApi.readLedgerEntries("demo", "risk")).resolves.toEqual(entries);
     await expect(novelApi.saveLedgerEntries("demo", "risk", entries)).resolves.toEqual(entries);
+    await expect(novelApi.readProjectAuditReport("demo")).resolves.toEqual(auditReport);
 
     expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/dashboard/chapter-001", {});
     expect(fetch).toHaveBeenNthCalledWith(
@@ -467,6 +489,7 @@ describe("novelApi", () => {
       "/api/novel/projects/demo/ledger/risk",
       expect.objectContaining({ method: "PUT", body: JSON.stringify({ entries }) })
     );
+    expect(fetch).toHaveBeenNthCalledWith(17, "/api/novel/projects/demo/audit-report", {});
   });
 
   it("reads, saves, and accepts chapter memory recap patches", async () => {

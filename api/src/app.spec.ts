@@ -129,6 +129,100 @@ describe("novel API routes", () => {
     ]);
   });
 
+  it("exports a project audit report with quality and invocation summaries", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Report Demo",
+        roughIdea: "Export project state."
+      })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/quality/chapter-001`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        report: {
+          chapterId: "chapter-001",
+          overallScore: 84,
+          summary: "Readable.",
+          metrics: [{ key: "conflict", label: "Conflict", score: 84, note: "Clear pressure." }],
+          strengths: ["Clear pressure"],
+          fixes: [],
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        }
+      })
+    });
+    await fs.appendFile(
+      path.join(tempRoot, slug, "tasks", "history.jsonl"),
+      `${JSON.stringify({
+        id: "task-1",
+        type: "chapter.draft",
+        status: "success",
+        projectId: slug,
+        inputSummary: "Draft chapter.",
+        outputSummary: "Draft complete.",
+        startedAt: "2026-06-11T00:00:00.000Z",
+        finishedAt: "2026-06-11T00:01:00.000Z",
+        durationMs: 60000
+      })}\nnot-json\n`,
+      "utf8"
+    );
+    await fs.appendFile(
+      path.join(tempRoot, slug, "tasks", "invocations.jsonl"),
+      `${JSON.stringify({
+        id: "invocation-1",
+        taskId: "task-1",
+        projectId: slug,
+        taskType: "chapter.draft",
+        stageKey: "pipeline.chapter.prose",
+        status: "success",
+        promptSnapshot: { length: 200, preview: "Draft", contextTitles: ["Project"] },
+        contextSnapshot: { blockCount: 1, totalChars: 80, blocks: [{ title: "Project", length: 80 }] },
+        attempt: { index: 1, startedAt: "2026-06-11T00:00:00.000Z", durationMs: 60000, exitCode: 0 },
+        adoptionDecision: "accepted",
+        proposedPatchTargets: ["content/chapter-001.md"],
+        acceptedPatchTargets: ["content/chapter-001.md"],
+        commitResult: { historyAppended: true, invocationAppended: true },
+        createdAt: "2026-06-11T00:00:00.000Z",
+        updatedAt: "2026-06-11T00:01:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+
+    const response = await jsonFetch<{
+      report: {
+        projectSlug: string;
+        projectTitle: string;
+        quality: { reportCount: number; qualityTrends: Array<{ key: string; latestScore: number }> };
+        taskSummary: { total: number; byStatus: { success: number }; byType: { "chapter.draft": number } };
+        aiInvocationSummary: { total: number; byDecision: { accepted: number }; proposedPatchCount: number; acceptedPatchCount: number };
+      };
+    }>(`/api/novel/projects/${slug}/audit-report`);
+
+    expect(response.status).toBe(200);
+    expect(response.data.report).toMatchObject({
+      projectSlug: slug,
+      projectTitle: "Report Demo",
+      quality: {
+        reportCount: 1,
+        qualityTrends: expect.arrayContaining([expect.objectContaining({ key: "overall", latestScore: 84 })])
+      },
+      taskSummary: {
+        total: 1,
+        byStatus: expect.objectContaining({ success: 1 }),
+        byType: expect.objectContaining({ "chapter.draft": 1 })
+      },
+      aiInvocationSummary: {
+        total: 1,
+        byDecision: expect.objectContaining({ accepted: 1 }),
+        proposedPatchCount: 1,
+        acceptedPatchCount: 1
+      }
+    });
+  });
+
   it("exposes the shared AI stage dictionary", async () => {
     const response = await jsonFetch<{ stages: Array<{ key: string; taskTypes: string[] }> }>("/api/novel/ai-stages");
 

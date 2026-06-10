@@ -20,6 +20,7 @@ import type {
   PlatformAsset,
   PlatformAssetType,
   PlatformLibrary,
+  ProjectAuditReport,
   SceneCard,
   SeriesQualityMetrics,
   StoryControl,
@@ -314,6 +315,11 @@ export const novelApi = {
   async readAiInvocations(projectId: string): Promise<AiInvocationSession[]> {
     const data = await request<{ invocations: AiInvocationSession[] }>(`/api/novel/projects/${projectId}/tasks/invocations`);
     return data.invocations;
+  },
+
+  async readProjectAuditReport(projectId: string): Promise<ProjectAuditReport> {
+    const data = await request<{ report: ProjectAuditReport }>(`/api/novel/projects/${projectId}/audit-report`);
+    return data.report;
   },
 
   async polishSelection(projectId: string, selection: EditorSelection & { chapterId: string; mode: string }): Promise<NovelTask> {

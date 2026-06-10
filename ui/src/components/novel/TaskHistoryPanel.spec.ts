@@ -5,11 +5,16 @@ import type { AiInvocationSession, NovelTask } from "@/types/novel";
 
 const stubs = {
   "el-empty": { template: "<div />" },
+  "el-button": {
+    props: ["loading", "size"],
+    emits: ["click"],
+    template: `<button :data-loading="loading" @click="$emit('click')"><slot /></button>`
+  },
   "el-tag": { template: "<span><slot /></span>" }
 };
 
 describe("TaskHistoryPanel", () => {
-  it("renders the stable AI stage key from invocation audit", () => {
+  it("renders the stable AI stage key from invocation audit", async () => {
     const task: NovelTask = {
       id: "task-1",
       type: "chapter.draft",
@@ -49,7 +54,7 @@ describe("TaskHistoryPanel", () => {
     };
 
     const wrapper = mount(TaskHistoryPanel, {
-      props: { tasks: [task], invocations: [invocation] },
+      props: { tasks: [task], invocations: [invocation], canExport: true },
       global: { stubs }
     });
 
@@ -64,5 +69,8 @@ describe("TaskHistoryPanel", () => {
     expect(wrapper.text()).toContain("prompt preview");
     expect(wrapper.text()).toContain("chapters/chapter-001.md");
     expect(wrapper.text()).toContain("已采纳");
+
+    await wrapper.find("button").trigger("click");
+    expect(wrapper.emitted("export-report")).toHaveLength(1);
   });
 });

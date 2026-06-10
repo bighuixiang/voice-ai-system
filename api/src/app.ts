@@ -22,6 +22,7 @@ import { aiStageDefinitions } from "./aiStages.js";
 import { buildStoryGraphProjection } from "./storyGraph.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
 import { buildCreationRuntimeSnapshot } from "./runtimeSnapshot.js";
+import { buildProjectAuditReport } from "./auditReport.js";
 import type { AiScenarioConfig, CodexTaskType, KnowledgeSearchQuery, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
@@ -521,6 +522,12 @@ export function createApp() {
     const project = await readProject(req.params.projectId);
     const invocations = await readInvocationSessions(projectRoot(project.slug));
     res.json({ invocations });
+  }));
+
+  app.get("/api/novel/projects/:projectId/audit-report", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const report = await buildProjectAuditReport(projectRoot(project.slug), project);
+    res.json({ report });
   }));
 
   app.post("/api/novel/projects/:projectId/selection/polish", asyncRoute(async (req, res) => {

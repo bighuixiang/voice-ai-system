@@ -170,6 +170,7 @@ export const useNovelStore = defineStore("novel", () => {
   const savedSupportContent = ref("");
   const isLoading = ref(false);
   const error = ref("");
+  const isExportingAuditReport = ref(false);
 
   const hasProject = computed(() => currentProject.value !== null);
   const openWorkspaceProjects = computed(() =>
@@ -1813,6 +1814,29 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
+  async function exportProjectAuditReport() {
+    if (!currentProject.value || isExportingAuditReport.value) return false;
+    isExportingAuditReport.value = true;
+    try {
+      const report = await novelApi.readProjectAuditReport(currentProject.value.slug);
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${currentProject.value.slug}-audit-report.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (err) {
+      error.value = `导出审计报告失败：${err instanceof Error ? err.message : String(err)}`;
+      return false;
+    } finally {
+      isExportingAuditReport.value = false;
+    }
+  }
+
   return {
     projects,
     openWorkspaceSlugs,
@@ -1864,6 +1888,7 @@ export const useNovelStore = defineStore("novel", () => {
     isRebuildingKnowledgeIndex,
     isSearchingKnowledge,
     isReverseEngineeringStructure,
+    isExportingAuditReport,
     agentProfiles,
     agentChecks,
     defaultAgentProfileId,
@@ -1952,6 +1977,7 @@ export const useNovelStore = defineStore("novel", () => {
     acceptRewrite,
     acceptFocusDraft,
     rejectRewrite,
-    applyTaskPatches
+    applyTaskPatches,
+    exportProjectAuditReport
   };
 });

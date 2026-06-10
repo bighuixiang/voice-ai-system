@@ -25,6 +25,30 @@ async function appendHistory(root: string, task: NovelTask): Promise<void> {
   await fs.appendFile(historyPath, `${JSON.stringify(task)}\n`, "utf8");
 }
 
+export async function readTaskHistory(root: string): Promise<NovelTask[]> {
+  const historyPath = resolveInside(root, "tasks/history.jsonl");
+  let content = "";
+  try {
+    content = await fs.readFile(historyPath, "utf8");
+  } catch {
+    return [];
+  }
+
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line) as NovelTask;
+      } catch {
+        return null;
+      }
+    })
+    .filter((task): task is NovelTask => Boolean(task?.id && task.type && task.status))
+    .sort((left, right) => Date.parse(right.finishedAt || right.startedAt) - Date.parse(left.finishedAt || left.startedAt));
+}
+
 async function appendInvocationSession(root: string, session: AiInvocationSession): Promise<void> {
   const invocationPath = resolveInside(root, "tasks/invocations.jsonl");
   await fs.mkdir(path.dirname(invocationPath), { recursive: true });

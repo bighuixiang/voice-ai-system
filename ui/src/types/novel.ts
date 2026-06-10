@@ -596,6 +596,27 @@ export interface AiInvocationSession {
   updatedAt: string;
 }
 
+export interface ProjectAuditReport {
+  projectSlug: string;
+  projectTitle: string;
+  generatedAt: string;
+  chapters: Array<Pick<NovelChapter, "id" | "title" | "status" | "contentPath" | "outlinePath">>;
+  quality: SeriesQualityMetrics;
+  taskSummary: {
+    total: number;
+    byStatus: Record<NovelTask["status"], number>;
+    byType: Partial<Record<CodexTaskType, number>>;
+    latestTasks: Array<Pick<NovelTask, "id" | "type" | "status" | "inputSummary" | "outputSummary" | "error" | "startedAt" | "finishedAt" | "durationMs">>;
+  };
+  aiInvocationSummary: {
+    total: number;
+    byDecision: Record<AiInvocationAdoptionDecision, number>;
+    proposedPatchCount: number;
+    acceptedPatchCount: number;
+  };
+  aiInvocations: AiInvocationSession[];
+}
+
 export interface EditorSelection {
   filePath: string;
   selectedText: string;
