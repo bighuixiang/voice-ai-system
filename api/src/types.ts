@@ -30,6 +30,12 @@ export type AiStageKey =
   | "autopilot.post_chapter.recap"
   | "assistant.free";
 
+export interface AiStageDefinition {
+  key: AiStageKey;
+  label: string;
+  taskTypes: CodexTaskType[];
+}
+
 export interface AiAgentModelOption {
   id: string;
   label: string;

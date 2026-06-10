@@ -1,10 +1,4 @@
-import type { AiStageKey, CodexTaskType } from "./types.js";
-
-export interface AiStageDefinition {
-  key: AiStageKey;
-  label: string;
-  taskTypes: CodexTaskType[];
-}
+import type { AiStageDefinition, AiStageKey, CodexTaskType } from "./types.js";
 
 export const aiStageDefinitions: AiStageDefinition[] = [
   { key: "pipeline.project.create", label: "Project creation", taskTypes: ["project.create"] },

@@ -129,6 +129,18 @@ describe("novel API routes", () => {
     ]);
   });
 
+  it("exposes the shared AI stage dictionary", async () => {
+    const response = await jsonFetch<{ stages: Array<{ key: string; taskTypes: string[] }> }>("/api/novel/ai-stages");
+
+    expect(response.status).toBe(200);
+    expect(response.data.stages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "pipeline.chapter.prose", taskTypes: ["chapter.draft"] }),
+        expect.objectContaining({ key: "autopilot.post_chapter.recap", taskTypes: ["writing.recap"] })
+      ])
+    );
+  });
+
   it("returns a story graph projection for a project", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
       method: "POST",

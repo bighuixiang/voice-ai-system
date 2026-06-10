@@ -18,6 +18,7 @@ import { getNovelsRoot } from "./workspace.js";
 import { aiScenarioKeys, mergePlatformAiConfig, readPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 import { createPlatformAsset, linkAssetToProject, readPlatformLibrary } from "./platformLibrary.js";
 import { applyPatch, fallbackProjectCreateResult, readInvocationSessions, runNovelTask } from "./taskService.js";
+import { aiStageDefinitions } from "./aiStages.js";
 import { buildStoryGraphProjection } from "./storyGraph.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
 import type { AiScenarioConfig, CodexTaskType, KnowledgeSearchQuery, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
@@ -160,6 +161,10 @@ export function createApp() {
       profiles: listAgentProfiles(),
       checks: await checkAllAgentAvailability()
     });
+  }));
+
+  app.get("/api/novel/ai-stages", asyncRoute(async (_req, res) => {
+    res.json({ stages: aiStageDefinitions });
   }));
 
   app.post("/api/novel/agents/check", asyncRoute(async (req, res) => {

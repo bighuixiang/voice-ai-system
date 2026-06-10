@@ -153,6 +153,9 @@ describe("novelApi", () => {
       profiles: [{ id: "codex-cli", label: "Codex CLI", provider: "codex", command: "codex", models: [] }],
       checks: []
     });
+    mockJson({
+      stages: [{ key: "pipeline.chapter.prose", label: "Chapter prose drafting", taskTypes: ["chapter.draft"] }]
+    });
     mockJson({ available: true, profileId: "codex-cli", provider: "codex", label: "Codex CLI", command: "codex" });
     mockJson({
       config: {
@@ -185,6 +188,9 @@ describe("novelApi", () => {
     mockJson({ project: { slug: "demo", ai: { profileId: "codex-cli", modelId: "gpt-5" } } });
 
     await expect(novelApi.readAgentProfiles()).resolves.toMatchObject({ defaultProfileId: "codex-cli" });
+    await expect(novelApi.readAiStages()).resolves.toEqual([
+      { key: "pipeline.chapter.prose", label: "Chapter prose drafting", taskTypes: ["chapter.draft"] }
+    ]);
     await expect(novelApi.checkAgentProfile("codex-cli", "gpt-5")).resolves.toMatchObject({ available: true });
     const platformConfig = await novelApi.readPlatformAiConfig();
     await expect(novelApi.savePlatformAiConfig(platformConfig)).resolves.toMatchObject({
@@ -197,6 +203,11 @@ describe("novelApi", () => {
     expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/agents", {});
     expect(fetch).toHaveBeenNthCalledWith(
       2,
+      "/api/novel/ai-stages",
+      {}
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      3,
       "/api/novel/agents/check",
       expect.objectContaining({
         method: "POST",
@@ -204,12 +215,12 @@ describe("novelApi", () => {
       })
     );
     expect(fetch).toHaveBeenNthCalledWith(
-      3,
+      4,
       "/api/platform/ai-config",
       {}
     );
     expect(fetch).toHaveBeenNthCalledWith(
-      4,
+      5,
       "/api/platform/ai-config",
       expect.objectContaining({
         method: "PUT",
@@ -217,7 +228,7 @@ describe("novelApi", () => {
       })
     );
     expect(fetch).toHaveBeenNthCalledWith(
-      5,
+      6,
       "/api/novel/projects/demo/ai",
       expect.objectContaining({
         method: "PUT",

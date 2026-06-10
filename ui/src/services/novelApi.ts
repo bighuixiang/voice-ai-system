@@ -2,6 +2,7 @@ import type {
   AiAgentCheckResult,
   AiAgentProfile,
   AiInvocationSession,
+  AiStageDefinition,
   PlatformAiConfig,
   ChapterDashboard,
   ChapterQualityReport,
@@ -82,6 +83,11 @@ export const novelApi = {
     checks: AiAgentCheckResult[];
   }> {
     return request("/api/novel/agents");
+  },
+
+  async readAiStages(): Promise<AiStageDefinition[]> {
+    const data = await request<{ stages: AiStageDefinition[] }>("/api/novel/ai-stages");
+    return data.stages;
   },
 
   async checkAgentProfile(profileId: string, modelId?: string): Promise<AiAgentCheckResult> {
