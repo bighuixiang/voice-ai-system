@@ -406,6 +406,13 @@
           @save="handleSaveStoryControl"
           @orchestrate="store.requestStoryOrchestration"
         />
+        <QuickReferencePanel
+          :story-control="store.storyControl"
+          :knowledge-index="store.knowledgeIndex"
+          :search-result="store.knowledgeSearchResult"
+          :is-searching="store.isSearchingKnowledge"
+          @search="store.searchKnowledgeIndex"
+        />
         <StoryGraphPanel :graph="store.storyGraph" @refresh="store.loadStoryGraph" />
         <KnowledgeIndexPanel
           :index="store.knowledgeIndex"
@@ -446,6 +453,7 @@ import ChapterTree from "./ChapterTree.vue";
 import FocusWritingPanel from "./FocusWritingPanel.vue";
 import StructureQuickStartPanel from "./StructureQuickStartPanel.vue";
 import StoryControlPanel from "./StoryControlPanel.vue";
+import QuickReferencePanel from "./QuickReferencePanel.vue";
 import StoryGraphPanel from "./StoryGraphPanel.vue";
 import KnowledgeIndexPanel from "./KnowledgeIndexPanel.vue";
 import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
