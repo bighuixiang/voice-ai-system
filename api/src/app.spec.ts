@@ -223,6 +223,70 @@ describe("novel API routes", () => {
     expect(searched.data.result.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001" }));
   });
 
+  it("returns a creation runtime snapshot for a chapter", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Runtime Demo", roughIdea: "Project current chapter state." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/files/chapters/chapter-001.md`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: "A saved draft with enough words to enter review and recap safely." })
+    });
+    await jsonFetch(`/api/novel/projects/${slug}/quality/chapter-001`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        report: {
+          chapterId: "chapter-001",
+          overallScore: 82,
+          summary: "Ready.",
+          metrics: [],
+          strengths: [],
+          fixes: [],
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        }
+      })
+    });
+    await jsonFetch(`/api/novel/projects/${slug}/ledger/foreshadowing`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        entries: [
+          {
+            id: "mark",
+            kind: "foreshadowing",
+            title: "Mark",
+            status: "open",
+            severity: "medium",
+            chapterIds: ["chapter-001"],
+            relatedEntities: ["Hero"],
+            note: "Pay off later.",
+            updatedAt: "2026-06-11T00:00:00.000Z"
+          }
+        ]
+      })
+    });
+
+    const response = await jsonFetch<{
+      snapshot: { chapterId: string; signals: { wordCount: number; hasQualityReport: boolean }; steps: Array<{ id: string; status: string }> };
+    }>(`/api/novel/projects/${slug}/runtime/chapter-001`);
+
+    expect(response.status).toBe(200);
+    expect(response.data.snapshot.chapterId).toBe("chapter-001");
+    expect(response.data.snapshot.signals.wordCount).toBeGreaterThanOrEqual(30);
+    expect(response.data.snapshot.signals.hasQualityReport).toBe(true);
+    expect(response.data.snapshot.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "draft", status: "done" }),
+        expect.objectContaining({ id: "review", status: "done" }),
+        expect.objectContaining({ id: "ledger", status: "done" })
+      ])
+    );
+  });
+
   it("keeps duplicate project titles in separate folders", async () => {
     const body = JSON.stringify({
       title: "Demo Novel",

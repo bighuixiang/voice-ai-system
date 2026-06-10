@@ -21,6 +21,7 @@ import { applyPatch, fallbackProjectCreateResult, readInvocationSessions, runNov
 import { aiStageDefinitions } from "./aiStages.js";
 import { buildStoryGraphProjection } from "./storyGraph.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
+import { buildCreationRuntimeSnapshot } from "./runtimeSnapshot.js";
 import type { AiScenarioConfig, CodexTaskType, KnowledgeSearchQuery, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
@@ -365,6 +366,12 @@ export function createApp() {
     const project = await readProject(req.params.projectId);
     const dashboard = await readChapterDashboard(projectRoot(project.slug), req.params.chapterId);
     res.json({ dashboard });
+  }));
+
+  app.get("/api/novel/projects/:projectId/runtime/:chapterId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const snapshot = await buildCreationRuntimeSnapshot(projectRoot(project.slug), project, req.params.chapterId);
+    res.json({ snapshot });
   }));
 
   app.put("/api/novel/projects/:projectId/dashboard/:chapterId", asyncRoute(async (req, res) => {

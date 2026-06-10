@@ -369,6 +369,35 @@ export interface KnowledgeSearchResult {
   chapters: Array<ChapterIndexEntry & { score: number }>;
 }
 
+export type CreationLoopStepStatus = "done" | "active" | "waiting" | "blocked";
+export type CreationRuntimeStepId = "structure" | "draft" | "review" | "recap" | "ledger" | "next";
+
+export interface CreationRuntimeStep {
+  id: CreationRuntimeStepId;
+  label: string;
+  status: CreationLoopStepStatus;
+  detail: string;
+  metric?: string;
+}
+
+export interface CreationRuntimeSnapshot {
+  projectSlug: string;
+  chapterId: string;
+  chapterTitle: string;
+  activeStepId?: CreationRuntimeStepId;
+  steps: CreationRuntimeStep[];
+  signals: {
+    wordCount: number;
+    sceneCount: number;
+    hasDashboard: boolean;
+    hasChapterSummary: boolean;
+    hasQualityReport: boolean;
+    hasWritingRecap: boolean;
+    acceptedLedgerCount: number;
+  };
+  updatedAt: string;
+}
+
 export interface NovelProject {
   id: string;
   slug: string;
