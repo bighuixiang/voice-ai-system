@@ -90,6 +90,18 @@ const seriesMetrics: SeriesQualityMetrics = {
       updatedAt: "2026-06-04T00:00:00.000Z"
     }
   ],
+  styleDriftSignals: [
+    {
+      chapterId: "chapter-001",
+      chapterTitle: "Chapter 1",
+      proseScore: 70,
+      baselineScore: 80,
+      drift: -10,
+      severity: "watch",
+      note: "Voice softened.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
   rhythmSignals: [
     {
       chapterId: "chapter-001",
@@ -142,6 +154,8 @@ describe("ReviewQualityPanel", () => {
     expect(wrapper.text()).toContain("+8");
     expect(wrapper.text()).toContain("张力曲线");
     expect(wrapper.text()).toContain("78.2 分 · 3 场 · Clear pressure.");
+    expect(wrapper.text()).toContain("风格漂移");
+    expect(wrapper.text()).toContain("观察 · -10 · 70/80");
     expect(wrapper.text()).toContain("章节节奏");
     expect(wrapper.text()).toContain("80 分 · 2400 字 · 3 场 · 5 事件");
     expect(wrapper.text()).toContain("角色弧");

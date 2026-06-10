@@ -244,7 +244,16 @@ describe("writingCockpit", () => {
   it("saves chapter quality reports and rejects unsafe chapter ids", async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "writing-cockpit-save-quality-"));
 
-    await saveChapterQualityReport(tempRoot, qualityReport());
+    await saveChapterQualityReport(
+      tempRoot,
+      qualityReport({
+        metrics: [
+          { key: "conflict", label: "Conflict", score: 82, note: "Clear." },
+          { key: "rhythm", label: "Rhythm", score: 68, note: "Uneven." },
+          { key: "prose", label: "Prose", score: 90, note: "Distinct voice." }
+        ]
+      })
+    );
     await expect(saveChapterQualityReport(tempRoot, qualityReport({ chapterId: "../secret" }))).rejects.toThrow(/Unsafe/);
 
     const report = await readChapterQualityReport(tempRoot, "chapter-001");
@@ -267,7 +276,16 @@ describe("writingCockpit", () => {
       acceptedRecapIds: ["recap-1"],
       updatedAt: "2026-06-11T00:00:00.000Z"
     });
-    await saveChapterQualityReport(tempRoot, qualityReport());
+    await saveChapterQualityReport(
+      tempRoot,
+      qualityReport({
+        metrics: [
+          { key: "conflict", label: "Conflict", score: 82, note: "Clear." },
+          { key: "rhythm", label: "Rhythm", score: 68, note: "Uneven." },
+          { key: "prose", label: "Prose", score: 90, note: "Distinct voice." }
+        ]
+      })
+    );
     await saveChapterDashboard(tempRoot, dashboard({ chapterId: "chapter-002", wordCount: 900 }));
     await saveChapterSummary(tempRoot, {
       chapterId: "chapter-002",
@@ -297,7 +315,8 @@ describe("writingCockpit", () => {
         overallScore: 70,
         metrics: [
           { key: "conflict", label: "Conflict", score: 74, note: "Serviceable." },
-          { key: "rhythm", label: "Rhythm", score: 58, note: "Slow." }
+          { key: "rhythm", label: "Rhythm", score: 58, note: "Slow." },
+          { key: "prose", label: "Prose", score: 70, note: "Voice softened." }
         ],
         updatedAt: "2026-06-12T00:00:00.000Z"
       })
@@ -313,7 +332,8 @@ describe("writingCockpit", () => {
     });
     expect(metrics.metricAverages).toEqual([
       expect.objectContaining({ key: "rhythm", averageScore: 63, reportCount: 2 }),
-      expect.objectContaining({ key: "conflict", averageScore: 78, reportCount: 2 })
+      expect.objectContaining({ key: "conflict", averageScore: 78, reportCount: 2 }),
+      expect.objectContaining({ key: "prose", averageScore: 80, reportCount: 2 })
     ]);
     expect(metrics.weakestChapters[0]).toMatchObject({
       chapterId: "chapter-002",
@@ -363,6 +383,14 @@ describe("writingCockpit", () => {
       chapterId: "chapter-002",
       tensionScore: 69.6
     });
+    expect(metrics.styleDriftSignals?.[0]).toMatchObject({
+      chapterId: "chapter-002",
+      proseScore: 70,
+      baselineScore: 80,
+      drift: -10,
+      severity: "watch",
+      note: "Voice softened."
+    });
 
     const saved = JSON.parse(await fs.readFile(path.join(tempRoot, "quality", "series-metrics.json"), "utf8"));
     expect(saved.averageOverallScore).toBe(76);
@@ -370,6 +398,7 @@ describe("writingCockpit", () => {
     expect(saved.characterArcSignals[0].characterName).toBe("主角");
     expect(saved.qualityTrends[0].key).toBe("overall");
     expect(saved.tensionCurve[0].tensionScore).toBe(78.2);
+    expect(saved.styleDriftSignals[0].chapterId).toBe("chapter-002");
     await expect(readSeriesQualityMetrics(tempRoot, project())).resolves.toMatchObject({ reportCount: 2 });
   });
 

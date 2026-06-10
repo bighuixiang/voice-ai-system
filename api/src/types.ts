@@ -190,6 +190,17 @@ export interface SeriesTensionPoint {
   updatedAt: string;
 }
 
+export interface SeriesStyleDriftSignal {
+  chapterId: string;
+  chapterTitle: string;
+  proseScore: number;
+  baselineScore: number;
+  drift: number;
+  severity: "stable" | "watch" | "review";
+  note: string;
+  updatedAt: string;
+}
+
 export interface SeriesQualityMetrics {
   projectSlug: string;
   chapterCount: number;
@@ -201,6 +212,7 @@ export interface SeriesQualityMetrics {
   characterArcSignals?: CharacterArcSignal[];
   qualityTrends?: SeriesQualityTrend[];
   tensionCurve?: SeriesTensionPoint[];
+  styleDriftSignals?: SeriesStyleDriftSignal[];
   updatedAt: string;
 }
 

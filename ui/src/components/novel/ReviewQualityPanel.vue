@@ -91,6 +91,16 @@
         </div>
       </div>
 
+      <div v-if="visibleStyleDriftSignals.length" class="signal-block">
+        <strong>风格漂移</strong>
+        <div class="signal-list">
+          <div v-for="signal in visibleStyleDriftSignals" :key="signal.chapterId" class="signal-row">
+            <span>{{ signal.chapterTitle }}</span>
+            <em>{{ styleDriftLabel(signal) }}</em>
+          </div>
+        </div>
+      </div>
+
       <div v-if="visibleRhythmSignals.length" class="signal-block">
         <strong>章节节奏</strong>
         <div class="signal-list">
@@ -164,6 +174,7 @@ const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
 const weakestSeriesMetrics = computed(() => props.seriesMetrics?.metricAverages.slice(0, 3) || []);
 const visibleQualityTrends = computed(() => props.seriesMetrics?.qualityTrends?.slice(0, 4) || []);
 const visibleTensionCurve = computed(() => props.seriesMetrics?.tensionCurve?.slice(0, 4) || []);
+const visibleStyleDriftSignals = computed(() => props.seriesMetrics?.styleDriftSignals?.slice(0, 4) || []);
 const visibleRhythmSignals = computed(() => props.seriesMetrics?.rhythmSignals?.slice(0, 3) || []);
 const visibleCharacterArcSignals = computed(() => props.seriesMetrics?.characterArcSignals?.slice(0, 3) || []);
 
@@ -184,6 +195,12 @@ function trendLabel(trend: NonNullable<SeriesQualityMetrics["qualityTrends"]>[nu
 
 function tensionLabel(point: NonNullable<SeriesQualityMetrics["tensionCurve"]>[number]) {
   return `${point.tensionScore} 分 · ${point.sceneCount} 场 · ${point.note}`;
+}
+
+function styleDriftLabel(signal: NonNullable<SeriesQualityMetrics["styleDriftSignals"]>[number]) {
+  const drift = signal.drift > 0 ? `+${signal.drift}` : String(signal.drift);
+  const severity = signal.severity === "review" ? "需复核" : signal.severity === "watch" ? "观察" : "稳定";
+  return `${severity} · ${drift} · ${signal.proseScore}/${signal.baselineScore}`;
 }
 </script>
 

@@ -14,6 +14,7 @@ import type {
   SeriesRhythmSignal,
   SeriesQualityTrend,
   SeriesTensionPoint,
+  SeriesStyleDriftSignal,
   SeriesQualityMetrics,
   StoryControl,
   WritingRecapCandidate
@@ -432,6 +433,47 @@ function buildTensionCurve(
     });
 }
 
+function styleDriftSeverity(drift: number): SeriesStyleDriftSignal["severity"] {
+  const magnitude = Math.abs(drift);
+  if (magnitude >= 15) return "review";
+  if (magnitude >= 8) return "watch";
+  return "stable";
+}
+
+function buildStyleDriftSignals(
+  reports: Array<{ chapter: NovelProject["chapters"][number]; report: ChapterQualityReport }>
+): SeriesStyleDriftSignal[] {
+  const proseReports = reports
+    .map(({ chapter, report }) => ({
+      chapter,
+      report,
+      prose: qualityMetric(report, "prose")
+    }))
+    .filter((item): item is { chapter: NovelProject["chapters"][number]; report: ChapterQualityReport; prose: ChapterQualityReport["metrics"][number] } =>
+      Boolean(item.prose)
+    );
+
+  if (proseReports.length < 2) return [];
+
+  const baselineScore = roundScore(proseReports.reduce((sum, item) => sum + item.prose.score, 0) / proseReports.length);
+  return proseReports
+    .map(({ chapter, report, prose }) => {
+      const drift = roundScore(prose.score - baselineScore);
+      return {
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        proseScore: prose.score,
+        baselineScore,
+        drift,
+        severity: styleDriftSeverity(drift),
+        note: prose.note,
+        updatedAt: report.updatedAt
+      };
+    })
+    .sort((left, right) => Math.abs(right.drift) - Math.abs(left.drift) || right.updatedAt.localeCompare(left.updatedAt))
+    .slice(0, 8);
+}
+
 function buildQualityTrend(
   key: SeriesQualityTrend["key"],
   label: string,
@@ -558,6 +600,7 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
     characterArcSignals: buildCharacterArcSignals(chapterSignals.map((item) => item.summary)),
     qualityTrends: buildQualityTrends(reports),
     tensionCurve: buildTensionCurve(chapterSignals),
+    styleDriftSignals: buildStyleDriftSignals(reports),
     updatedAt: nowIso()
   };
 
@@ -567,7 +610,9 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
 
 export async function readSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
   const cached = await readJsonFile<SeriesQualityMetrics | null>(root, seriesQualityPath(), null);
-  return cached?.rhythmSignals && cached.characterArcSignals && cached.qualityTrends && cached.tensionCurve ? cached : buildSeriesQualityMetrics(root, project);
+  return cached?.rhythmSignals && cached.characterArcSignals && cached.qualityTrends && cached.tensionCurve && cached.styleDriftSignals
+    ? cached
+    : buildSeriesQualityMetrics(root, project);
 }
 
 export async function readSceneCards(root: string, chapterId: string): Promise<SceneCard[]> {
