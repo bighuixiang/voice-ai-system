@@ -3,6 +3,7 @@ import type {
   AiAgentProfile,
   PlatformAiConfig,
   ChapterDashboard,
+  ChapterSummary,
   CodexTaskType,
   EditorSelection,
   LedgerEntry,
@@ -13,7 +14,8 @@ import type {
   PlatformAssetType,
   PlatformLibrary,
   SceneCard,
-  StoryControl
+  StoryControl,
+  WritingRecapCandidate
 } from "@/types/novel";
 
 const jsonHeaders = { "Content-Type": "application/json" };
@@ -202,6 +204,36 @@ export const novelApi = {
       body: JSON.stringify({ entries })
     });
     return data.entries;
+  },
+
+  async readChapterSummary(projectId: string, chapterId: string): Promise<ChapterSummary> {
+    const data = await request<{ summary: ChapterSummary }>(
+      `/api/novel/projects/${projectId}/memory/chapter-summaries/${chapterId}`
+    );
+    return data.summary;
+  },
+
+  async saveChapterSummary(projectId: string, chapterId: string, summary: ChapterSummary): Promise<ChapterSummary> {
+    const data = await request<{ summary: ChapterSummary }>(
+      `/api/novel/projects/${projectId}/memory/chapter-summaries/${chapterId}`,
+      {
+        method: "PUT",
+        headers: jsonHeaders,
+        body: JSON.stringify({ summary })
+      }
+    );
+    return data.summary;
+  },
+
+  async acceptWritingRecap(
+    projectId: string,
+    recap: WritingRecapCandidate
+  ): Promise<{ summary: ChapterSummary }> {
+    return request<{ summary: ChapterSummary }>(`/api/novel/projects/${projectId}/recaps/accept`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ recap })
+    });
   },
 
   async runTask(projectId: string, type: CodexTaskType, payload: Record<string, unknown>): Promise<NovelTask> {

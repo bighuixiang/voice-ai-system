@@ -5,6 +5,7 @@ import type {
   AiAgentCheckResult,
   AiAgentProfile,
   ChapterDashboard,
+  ChapterSummary,
   ChapterQualityReport,
   CodexTaskResult,
   CodexTaskType,
@@ -54,6 +55,7 @@ interface WorkspaceCache {
   focusTargetWords: number;
   focusDraftInstruction: string;
   dashboard: ChapterDashboard | null;
+  chapterSummary: ChapterSummary | null;
   sceneCards: SceneCard[];
   storyControl: StoryControl | null;
   structureIdeaInput: string;
@@ -115,6 +117,7 @@ export const useNovelStore = defineStore("novel", () => {
   const focusTargetWords = ref(DEFAULT_FOCUS_TARGET_WORDS);
   const focusDraftInstruction = ref("");
   const currentDashboard = ref<ChapterDashboard | null>(null);
+  const currentChapterSummary = ref<ChapterSummary | null>(null);
   const sceneCards = ref<SceneCard[]>([]);
   const storyControl = ref<StoryControl | null>(null);
   const structureIdeaInput = ref("");
@@ -756,7 +759,12 @@ export const useNovelStore = defineStore("novel", () => {
         foreshadowingUpdates: Array.isArray(parsed.foreshadowingUpdates) ? parsed.foreshadowingUpdates : [],
         continuityRisks: Array.isArray(parsed.continuityRisks) ? parsed.continuityRisks : [],
         powerProgressionUpdates: Array.isArray(parsed.powerProgressionUpdates) ? parsed.powerProgressionUpdates : [],
-        createdAt: parsed.createdAt || new Date().toISOString()
+        createdAt: parsed.createdAt || new Date().toISOString(),
+        summaryPatch: parsed.summaryPatch,
+        factPatches: Array.isArray(parsed.factPatches) ? parsed.factPatches : undefined,
+        ledgerPatches: Array.isArray(parsed.ledgerPatches) ? parsed.ledgerPatches : undefined,
+        characterStatePatches: Array.isArray(parsed.characterStatePatches) ? parsed.characterStatePatches : undefined,
+        riskPatches: Array.isArray(parsed.riskPatches) ? parsed.riskPatches : undefined
       };
     } catch {
       return null;
@@ -865,6 +873,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusTargetWords.value = DEFAULT_FOCUS_TARGET_WORDS;
     focusDraftInstruction.value = "";
     currentDashboard.value = null;
+    currentChapterSummary.value = null;
     sceneCards.value = [];
     storyControl.value = null;
     structureIdeaInput.value = "";
@@ -901,6 +910,7 @@ export const useNovelStore = defineStore("novel", () => {
         focusTargetWords: focusTargetWords.value,
         focusDraftInstruction: focusDraftInstruction.value,
         dashboard: currentDashboard.value,
+        chapterSummary: currentChapterSummary.value,
         sceneCards: sceneCards.value,
         storyControl: storyControl.value,
         structureIdeaInput: structureIdeaInput.value,
@@ -938,6 +948,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusTargetWords.value = cached.focusTargetWords || DEFAULT_FOCUS_TARGET_WORDS;
     focusDraftInstruction.value = cached.focusDraftInstruction || "";
     currentDashboard.value = cached.dashboard;
+    currentChapterSummary.value = cached.chapterSummary || null;
     sceneCards.value = cached.sceneCards;
     storyControl.value = cached.storyControl;
     structureIdeaInput.value = cached.structureIdeaInput || "";
@@ -1102,15 +1113,17 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function loadChapterCockpit(chapterId: string) {
     if (!currentProject.value) return;
-    const [dashboard, cards] = await Promise.all([
+    const [dashboard, cards, summary] = await Promise.all([
       novelApi.readChapterDashboard(currentProject.value.slug, chapterId),
-      novelApi.readSceneCards(currentProject.value.slug, chapterId)
+      novelApi.readSceneCards(currentProject.value.slug, chapterId),
+      novelApi.readChapterSummary(currentProject.value.slug, chapterId)
     ]);
     currentDashboard.value = {
       ...dashboard,
       wordCount: countDraftWords(currentContent.value)
     };
     sceneCards.value = cards;
+    currentChapterSummary.value = summary;
   }
 
   async function loadStoryControl() {
@@ -1400,24 +1413,9 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function acceptWritingRecap() {
     if (!currentProject.value || !recapCandidate.value) return;
-    const updates = [
-      ...recapCandidate.value.foreshadowingUpdates,
-      ...recapCandidate.value.continuityRisks,
-      ...recapCandidate.value.powerProgressionUpdates
-    ];
-    const updatesByKind = updates.reduce<Partial<Record<LedgerKind, LedgerEntry[]>>>((groups, entry) => {
-      groups[entry.kind] = [...(groups[entry.kind] || []), entry];
-      return groups;
-    }, {});
-
-    for (const [kind, entries] of Object.entries(updatesByKind) as Array<[LedgerKind, LedgerEntry[]]>) {
-      const existing = kind === activeLedgerKind.value ? ledgerEntries.value : await novelApi.readLedgerEntries(currentProject.value.slug, kind);
-      const saved = await novelApi.saveLedgerEntries(currentProject.value.slug, kind, mergeLedgerEntries(existing, entries));
-      if (kind === activeLedgerKind.value) {
-        ledgerEntries.value = saved;
-      }
-    }
-
+    const accepted = await novelApi.acceptWritingRecap(currentProject.value.slug, recapCandidate.value);
+    currentChapterSummary.value = accepted.summary;
+    ledgerEntries.value = await novelApi.readLedgerEntries(currentProject.value.slug, activeLedgerKind.value);
     recapCandidate.value = null;
   }
 
@@ -1713,6 +1711,7 @@ export const useNovelStore = defineStore("novel", () => {
     focusWritingGuide,
     creationLoopSteps,
     currentDashboard,
+    currentChapterSummary,
     sceneCards,
     storyControl,
     structureIdeaInput,

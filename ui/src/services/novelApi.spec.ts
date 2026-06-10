@@ -342,6 +342,51 @@ describe("novelApi", () => {
     );
   });
 
+  it("reads, saves, and accepts chapter memory recap patches", async () => {
+    const summary = {
+      chapterId: "chapter-001",
+      summary: "A cost was paid for the clue.",
+      keyEvents: ["The gate answered blood."],
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-10T00:00:00.000Z"
+    };
+    const recap = {
+      chapterId: "chapter-001",
+      summary: "A cost was paid for the clue.",
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-10T00:00:00.000Z",
+      summaryPatch: { summary: "A cost was paid for the clue." }
+    };
+    mockJson({ summary });
+    mockJson({ summary });
+    mockJson({ summary });
+
+    await expect(novelApi.readChapterSummary("demo", "chapter-001")).resolves.toEqual(summary);
+    await expect(novelApi.saveChapterSummary("demo", "chapter-001", summary)).resolves.toEqual(summary);
+    await expect(novelApi.acceptWritingRecap("demo", recap)).resolves.toEqual({ summary });
+
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/memory/chapter-summaries/chapter-001", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      2,
+      "/api/novel/projects/demo/memory/chapter-summaries/chapter-001",
+      expect.objectContaining({ method: "PUT", body: JSON.stringify({ summary }) })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      3,
+      "/api/novel/projects/demo/recaps/accept",
+      expect.objectContaining({ method: "POST", body: JSON.stringify({ recap }) })
+    );
+  });
+
   it("runs Codex tasks and selection polish requests", async () => {
     mockJson({ task: { id: "task-1", type: "idea.suggest", status: "success" } });
     mockJson({ task: { id: "task-2", type: "selection.polish", status: "success" } });

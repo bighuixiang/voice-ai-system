@@ -28,10 +28,13 @@ const mockNovelApi = vi.hoisted(() => ({
   saveChapterDashboard: vi.fn(),
   readSceneCards: vi.fn(),
   saveSceneCards: vi.fn(),
+  readChapterSummary: vi.fn(),
+  saveChapterSummary: vi.fn(),
   readStoryControl: vi.fn(),
   saveStoryControl: vi.fn(),
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
+  acceptWritingRecap: vi.fn(),
   runTask: vi.fn(),
   polishSelection: vi.fn(),
   applyPatches: vi.fn()
@@ -266,10 +269,37 @@ describe("useNovelStore", () => {
     mockNovelApi.saveChapterDashboard.mockImplementation(async (_projectId: string, dashboard: ChapterDashboard) => dashboard);
     mockNovelApi.readSceneCards.mockResolvedValue([]);
     mockNovelApi.saveSceneCards.mockImplementation(async (_projectId: string, _chapterId: string, cards: SceneCard[]) => cards);
+    mockNovelApi.readChapterSummary.mockImplementation(async (_projectId: string, chapterId: string) => ({
+      chapterId,
+      summary: "",
+      keyEvents: [],
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }));
+    mockNovelApi.saveChapterSummary.mockImplementation(async (_projectId: string, _chapterId: string, summary: ChapterSummary) => summary);
     mockNovelApi.readStoryControl.mockResolvedValue(storyControl);
     mockNovelApi.saveStoryControl.mockImplementation(async (_projectId: string, control: StoryControl) => control);
     mockNovelApi.readLedgerEntries.mockResolvedValue([]);
     mockNovelApi.saveLedgerEntries.mockImplementation(async (_projectId: string, _kind: LedgerEntry["kind"], entries: LedgerEntry[]) => entries);
+    mockNovelApi.acceptWritingRecap.mockImplementation(async (_projectId: string, recap: WritingRecapCandidate) => ({
+      summary: {
+        chapterId: recap.chapterId,
+        summary: recap.summary,
+        keyEvents: [],
+        newFacts: recap.factPatches || [],
+        characterStateChanges: recap.characterStatePatches || [],
+        foreshadowingUpdates: recap.foreshadowingUpdates,
+        continuityRisks: recap.continuityRisks,
+        powerProgressionUpdates: recap.powerProgressionUpdates,
+        acceptedRecapIds: [recap.createdAt],
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    }));
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
     mockNovelApi.createPlatformAsset.mockResolvedValue({
@@ -438,8 +468,10 @@ describe("useNovelStore", () => {
 
     expect(mockNovelApi.readChapterDashboard).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readSceneCards).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readChapterSummary).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
     expect(store.currentDashboard?.chapterId).toBe("chapter-002");
+    expect(store.currentChapterSummary?.chapterId).toBe("chapter-002");
     expect(store.sceneCards).toEqual(scenes);
     expect(store.activeLedgerKind).toBe("foreshadowing");
   });
@@ -963,7 +995,24 @@ describe("useNovelStore", () => {
         }
       ],
       powerProgressionUpdates: [],
-      createdAt: "2026-06-04T00:00:00.000Z"
+      createdAt: "2026-06-04T00:00:00.000Z",
+      summaryPatch: {
+        summary: "The clue now has a cost.",
+        keyEvents: ["Blood wakes the mark."]
+      },
+      ledgerPatches: [
+        {
+          id: "risk-1",
+          kind: "risk",
+          title: "POV boundary",
+          status: "open",
+          severity: "high",
+          chapterIds: ["chapter-002"],
+          relatedEntities: ["Hero"],
+          note: "Avoid knowledge outside the hero's senses.",
+          updatedAt: "2026-06-04T00:00:00.000Z"
+        }
+      ]
     };
     mockNovelApi.runTask.mockResolvedValue(
       taskWithResult({
@@ -994,6 +1043,8 @@ describe("useNovelStore", () => {
       })
     );
     expect(store.recapCandidate?.summary).toBe("The clue now has a cost.");
+    expect(store.recapCandidate?.summaryPatch?.keyEvents).toEqual(["Blood wakes the mark."]);
+    expect(store.recapCandidate?.ledgerPatches?.[0].id).toBe("risk-1");
     expect(store.rewriteCandidate).toBeNull();
   });
 
@@ -1021,13 +1072,17 @@ describe("useNovelStore", () => {
       foreshadowingUpdates: [],
       continuityRisks: [update],
       powerProgressionUpdates: [],
-      createdAt: "2026-06-04T00:00:00.000Z"
+      createdAt: "2026-06-04T00:00:00.000Z",
+      riskPatches: [update]
     };
+    mockNovelApi.readLedgerEntries.mockResolvedValueOnce([update]);
 
     await store.acceptWritingRecap();
 
-    expect(mockNovelApi.saveLedgerEntries).toHaveBeenCalledWith("demo", "risk", [update]);
+    expect(mockNovelApi.acceptWritingRecap).toHaveBeenCalledWith("demo", expect.objectContaining({ chapterId: "chapter-002" }));
+    expect(mockNovelApi.saveLedgerEntries).not.toHaveBeenCalled();
     expect(store.ledgerEntries).toEqual([update]);
+    expect(store.currentChapterSummary?.summary).toBe("The clue now has a cost.");
     expect(store.recapCandidate).toBeNull();
   });
 
