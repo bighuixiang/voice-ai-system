@@ -1,6 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ChapterDashboard, LedgerEntry, SceneCard, StoryControl, WritingRecapCandidate } from "./types.js";
+import type {
+  ChapterDashboard,
+  ChapterFactPatch,
+  ChapterSummary,
+  CharacterStatePatch,
+  LedgerEntry,
+  SceneCard,
+  StoryControl,
+  WritingRecapCandidate
+} from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 
 type LedgerKind = LedgerEntry["kind"];
@@ -28,6 +37,21 @@ function defaultDashboard(chapterId: string): ChapterDashboard {
     status: "empty",
     unresolvedForeshadowingIds: [],
     continuityRiskIds: [],
+    updatedAt: nowIso()
+  };
+}
+
+function defaultChapterSummary(chapterId: string): ChapterSummary {
+  return {
+    chapterId,
+    summary: "",
+    keyEvents: [],
+    newFacts: [],
+    characterStateChanges: [],
+    foreshadowingUpdates: [],
+    continuityRisks: [],
+    powerProgressionUpdates: [],
+    acceptedRecapIds: [],
     updatedAt: nowIso()
   };
 }
@@ -112,12 +136,73 @@ function sceneCardsPath(chapterId: string): string {
   return `scenes/${chapterId}.json`;
 }
 
+function chapterSummaryPath(chapterId: string): string {
+  return `memory/chapter-summaries/${chapterId}.json`;
+}
+
 function storyControlPath(): string {
   return "story-control/story-control.json";
 }
 
 function ledgerPath(kind: LedgerKind): string {
   return ledgerPaths[kind];
+}
+
+function mergeById<T extends { id: string }>(existing: T[], updates: T[]): T[] {
+  const merged = new Map(existing.map((item) => [item.id, item]));
+  updates.forEach((item) => {
+    merged.set(item.id, {
+      ...merged.get(item.id),
+      ...item
+    });
+  });
+  return Array.from(merged.values());
+}
+
+function acceptedFactPatches(patches: ChapterFactPatch[]): ChapterFactPatch[] {
+  return patches.map((patch) => ({
+    ...patch,
+    status: "accepted",
+    updatedAt: nowIso()
+  }));
+}
+
+function acceptedCharacterStatePatches(patches: CharacterStatePatch[]): CharacterStatePatch[] {
+  return patches.map((patch) => ({
+    ...patch,
+    status: "accepted",
+    updatedAt: nowIso()
+  }));
+}
+
+function legacyFactPatches(recap: WritingRecapCandidate): ChapterFactPatch[] {
+  return recap.newFacts.map((fact, index) => ({
+    id: `fact-${recap.chapterId}-${Date.parse(recap.createdAt) || 0}-${index + 1}`,
+    chapterId: recap.chapterId,
+    fact,
+    relatedEntities: [],
+    status: "pending",
+    createdAt: recap.createdAt,
+    updatedAt: recap.createdAt
+  }));
+}
+
+function legacyCharacterPatches(recap: WritingRecapCandidate): CharacterStatePatch[] {
+  return recap.characterStateChanges.map((change, index) => ({
+    id: `character-state-${recap.chapterId}-${Date.parse(recap.createdAt) || 0}-${index + 1}`,
+    chapterId: recap.chapterId,
+    characterName: "未指定角色",
+    after: change,
+    cause: recap.summary,
+    relatedEntities: [],
+    status: "pending",
+    createdAt: recap.createdAt,
+    updatedAt: recap.createdAt
+  }));
+}
+
+function recapAcceptanceId(recap: WritingRecapCandidate): string {
+  return `${recap.chapterId}:${recap.createdAt}`;
 }
 
 export async function readChapterDashboard(root: string, chapterId: string): Promise<ChapterDashboard> {
@@ -130,6 +215,27 @@ export async function saveChapterDashboard(root: string, dashboard: ChapterDashb
     updatedAt: dashboard.updatedAt || nowIso()
   };
   await writeJsonFile(root, chapterDashboardPath(dashboard.chapterId), normalized);
+  return normalized;
+}
+
+export async function readChapterSummary(root: string, chapterId: string): Promise<ChapterSummary> {
+  return readJsonFile(root, chapterSummaryPath(chapterId), defaultChapterSummary(chapterId));
+}
+
+export async function saveChapterSummary(root: string, summary: ChapterSummary): Promise<ChapterSummary> {
+  const normalized: ChapterSummary = {
+    ...defaultChapterSummary(summary.chapterId),
+    ...summary,
+    keyEvents: summary.keyEvents || [],
+    newFacts: summary.newFacts || [],
+    characterStateChanges: summary.characterStateChanges || [],
+    foreshadowingUpdates: summary.foreshadowingUpdates || [],
+    continuityRisks: summary.continuityRisks || [],
+    powerProgressionUpdates: summary.powerProgressionUpdates || [],
+    acceptedRecapIds: summary.acceptedRecapIds || [],
+    updatedAt: summary.updatedAt || nowIso()
+  };
+  await writeJsonFile(root, chapterSummaryPath(summary.chapterId), normalized);
   return normalized;
 }
 
@@ -187,4 +293,52 @@ export async function appendWritingRecap(root: string, recap: WritingRecapCandid
   const target = resolveInside(root, "tasks/recaps.jsonl");
   await fs.mkdir(path.dirname(target), { recursive: true });
   await fs.appendFile(target, `${JSON.stringify(recap)}\n`, "utf8");
+}
+
+export async function acceptWritingRecapPatches(root: string, recap: WritingRecapCandidate): Promise<ChapterSummary> {
+  const existingSummary = await readChapterSummary(root, recap.chapterId);
+  const acceptedFacts = acceptedFactPatches(recap.factPatches?.length ? recap.factPatches : legacyFactPatches(recap));
+  const acceptedCharacters = acceptedCharacterStatePatches(
+    recap.characterStatePatches?.length ? recap.characterStatePatches : legacyCharacterPatches(recap)
+  );
+  const ledgerPatches = mergeById(
+    [...recap.foreshadowingUpdates, ...recap.continuityRisks, ...recap.powerProgressionUpdates],
+    recap.ledgerPatches || []
+  );
+  const riskPatches = recap.riskPatches || [];
+  const foreshadowingUpdates = ledgerPatches.filter((entry) => entry.kind === "foreshadowing");
+  const continuityRisks = [...ledgerPatches.filter((entry) => entry.kind === "continuity"), ...riskPatches];
+  const powerProgressionUpdates = ledgerPatches.filter((entry) => entry.kind === "power");
+  const acceptanceId = recapAcceptanceId(recap);
+  const summaryPatch = recap.summaryPatch || {};
+  const nextSummary: ChapterSummary = {
+    ...existingSummary,
+    ...summaryPatch,
+    chapterId: recap.chapterId,
+    summary: summaryPatch.summary || recap.summary || existingSummary.summary,
+    keyEvents: summaryPatch.keyEvents || existingSummary.keyEvents,
+    newFacts: mergeById(existingSummary.newFacts, acceptedFacts),
+    characterStateChanges: mergeById(existingSummary.characterStateChanges, acceptedCharacters),
+    foreshadowingUpdates: mergeById(existingSummary.foreshadowingUpdates, foreshadowingUpdates),
+    continuityRisks: mergeById(existingSummary.continuityRisks, continuityRisks),
+    powerProgressionUpdates: mergeById(existingSummary.powerProgressionUpdates, powerProgressionUpdates),
+    acceptedRecapIds: Array.from(new Set([...existingSummary.acceptedRecapIds, acceptanceId])),
+    updatedAt: nowIso()
+  };
+
+  const updatesByKind = [...ledgerPatches, ...riskPatches].reduce<Partial<Record<LedgerKind, LedgerEntry[]>>>(
+    (groups, entry) => {
+      groups[entry.kind] = [...(groups[entry.kind] || []), entry];
+      return groups;
+    },
+    {}
+  );
+  for (const [kind, entries] of Object.entries(updatesByKind) as Array<[LedgerKind, LedgerEntry[]]>) {
+    const existing = await readLedgerEntries(root, kind);
+    await saveLedgerEntries(root, kind, mergeById(existing, entries));
+  }
+
+  const savedSummary = await saveChapterSummary(root, nextSummary);
+  await appendWritingRecap(root, recap);
+  return savedSummary;
 }
