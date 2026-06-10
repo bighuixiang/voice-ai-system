@@ -408,7 +408,10 @@
         <KnowledgeIndexPanel
           :index="store.knowledgeIndex"
           :is-rebuilding="store.isRebuildingKnowledgeIndex"
+          :search-result="store.knowledgeSearchResult"
+          :is-searching="store.isSearchingKnowledge"
           @rebuild="store.rebuildKnowledgeIndex"
+          @search="store.searchKnowledgeIndex"
         />
       </div>
     </el-dialog>

@@ -312,6 +312,13 @@ describe("novelApi", () => {
       },
       updatedAt: "2026-06-11T00:00:00.000Z"
     };
+    const knowledgeSearch = {
+      query: "Hero gate",
+      tokens: ["hero", "gate"],
+      facts: [{ ...knowledgeIndex.facts[0], score: 2 }],
+      triples: [],
+      chapters: [{ ...knowledgeIndex.chapterIndex.chapters[0], score: 2 }]
+    };
     const entries = [
       {
         id: "risk-1",
@@ -334,6 +341,7 @@ describe("novelApi", () => {
     mockJson({ graph });
     mockJson({ index: knowledgeIndex });
     mockJson({ index: knowledgeIndex });
+    mockJson({ result: knowledgeSearch });
     mockJson({ report: qualityReport });
     mockJson({ report: qualityReport });
     mockJson({ entries });
@@ -348,6 +356,9 @@ describe("novelApi", () => {
     await expect(novelApi.readStoryGraph("demo")).resolves.toEqual(graph);
     await expect(novelApi.readKnowledgeIndex("demo")).resolves.toEqual(knowledgeIndex);
     await expect(novelApi.rebuildKnowledgeIndex("demo")).resolves.toEqual(knowledgeIndex);
+    await expect(novelApi.searchKnowledgeIndex("demo", { query: "Hero gate", chapterId: "chapter-001" })).resolves.toEqual(
+      knowledgeSearch
+    );
     await expect(novelApi.readChapterQualityReport("demo", "chapter-001")).resolves.toEqual(qualityReport);
     await expect(novelApi.saveChapterQualityReport("demo", qualityReport)).resolves.toEqual(qualityReport);
     await expect(novelApi.readLedgerEntries("demo", "risk")).resolves.toEqual(entries);
@@ -374,15 +385,23 @@ describe("novelApi", () => {
     expect(fetch).toHaveBeenNthCalledWith(7, "/api/novel/projects/demo/story-graph", {});
     expect(fetch).toHaveBeenNthCalledWith(8, "/api/novel/projects/demo/knowledge/index", {});
     expect(fetch).toHaveBeenNthCalledWith(9, "/api/novel/projects/demo/knowledge/index/rebuild", expect.objectContaining({ method: "POST" }));
-    expect(fetch).toHaveBeenNthCalledWith(10, "/api/novel/projects/demo/quality/chapter-001", {});
     expect(fetch).toHaveBeenNthCalledWith(
-      11,
+      10,
+      "/api/novel/projects/demo/knowledge/search",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ query: "Hero gate", chapterId: "chapter-001" })
+      })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(11, "/api/novel/projects/demo/quality/chapter-001", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      12,
       "/api/novel/projects/demo/quality/chapter-001",
       expect.objectContaining({ method: "PUT", body: JSON.stringify({ report: qualityReport }) })
     );
-    expect(fetch).toHaveBeenNthCalledWith(12, "/api/novel/projects/demo/ledger/risk", {});
+    expect(fetch).toHaveBeenNthCalledWith(13, "/api/novel/projects/demo/ledger/risk", {});
     expect(fetch).toHaveBeenNthCalledWith(
-      13,
+      14,
       "/api/novel/projects/demo/ledger/risk",
       expect.objectContaining({ method: "PUT", body: JSON.stringify({ entries }) })
     );

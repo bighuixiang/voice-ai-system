@@ -24,6 +24,35 @@
         </div>
       </div>
 
+      <form class="search-form" @submit.prevent="submitSearch">
+        <input v-model="searchQuery" aria-label="知识检索关键词" placeholder="关键词 / 角色 / 地点 / 伏笔" />
+        <button type="submit" :disabled="isSearching || !searchQuery.trim()">
+          {{ isSearching ? "检索中" : "检索" }}
+        </button>
+      </form>
+
+      <div v-if="searchResult" class="search-results">
+        <div class="result-header">
+          <span>“{{ searchResult.query }}”</span>
+          <em>{{ searchResult.facts.length }} facts / {{ searchResult.triples.length }} triples</em>
+        </div>
+        <div v-if="searchResult.facts.length" class="result-list">
+          <article v-for="fact in searchResult.facts.slice(0, 5)" :key="fact.id">
+            <strong>{{ fact.text }}</strong>
+            <span>{{ fact.relatedEntities.join(" / ") || fact.source.type }}</span>
+          </article>
+        </div>
+        <div v-if="searchResult.triples.length" class="triple-list">
+          <span v-for="triple in searchResult.triples.slice(0, 5)" :key="triple.id">
+            {{ triple.subject }} · {{ triple.predicate }} · {{ triple.object }}
+          </span>
+        </div>
+        <div v-if="searchResult.chapters.length" class="chapter-hits">
+          <span v-for="chapter in searchResult.chapters.slice(0, 6)" :key="chapter.chapterId">{{ chapter.title }}</span>
+        </div>
+        <p v-if="!searchResult.facts.length && !searchResult.triples.length" class="empty-state">没有命中事实或关系。</p>
+      </div>
+
       <div class="keyword-strip" v-if="visibleKeywords.length">
         <span v-for="keyword in visibleKeywords" :key="keyword">{{ keyword }}</span>
       </div>
@@ -41,18 +70,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { Refresh } from "@element-plus/icons-vue";
-import type { KnowledgeIndexProjection } from "@/types/novel";
+import type { KnowledgeIndexProjection, KnowledgeSearchResult } from "@/types/novel";
 
 const props = defineProps<{
   index: KnowledgeIndexProjection | null;
   isRebuilding: boolean;
+  searchResult?: KnowledgeSearchResult | null;
+  isSearching?: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   rebuild: [];
+  search: [query: string];
 }>();
+
+const searchQuery = ref("");
 
 const indexedChapterCount = computed(() => props.index?.chapterIndex.chapters.filter((chapter) => chapter.factIds.length).length || 0);
 
@@ -64,6 +98,12 @@ const summaryText = computed(() => {
   if (!props.index) return "从章节摘要、台账和故事总控重建";
   return `${props.index.facts.length} 个事实 / ${props.index.triples.length} 条关系`;
 });
+
+function submitSearch() {
+  const query = searchQuery.value.trim();
+  if (!query) return;
+  emit("search", query);
+}
 </script>
 
 <style scoped lang="scss">
@@ -77,7 +117,8 @@ const summaryText = computed(() => {
 }
 
 header,
-.chapter-row {
+.chapter-row,
+.result-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -126,6 +167,111 @@ p {
     color: #64748b;
     font-size: 11px;
   }
+}
+
+.search-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+
+  input,
+  button {
+    min-height: 34px;
+    border-radius: 7px;
+    font-size: 12px;
+  }
+
+  input {
+    min-width: 0;
+    padding: 0 10px;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    outline: none;
+  }
+
+  button {
+    padding: 0 12px;
+    border: 1px solid #1d4ed8;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    border-color: #cbd5e1;
+    background: #e2e8f0;
+    color: #64748b;
+    cursor: not-allowed;
+  }
+}
+
+.search-results {
+  display: grid;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #dbeafe;
+  border-radius: 7px;
+  background: #f8fbff;
+}
+
+.result-header {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 800;
+
+  em {
+    color: #2563eb;
+    font-style: normal;
+    font-weight: 700;
+  }
+}
+
+.result-list,
+.triple-list,
+.chapter-hits {
+  display: grid;
+  gap: 5px;
+}
+
+.result-list article {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #ffffff;
+
+  strong,
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    color: #0f172a;
+    font-size: 12px;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 11px;
+  }
+}
+
+.triple-list span,
+.chapter-hits span {
+  min-width: 0;
+  overflow: hidden;
+  padding: 5px 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  color: #334155;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .keyword-strip {
@@ -183,7 +329,8 @@ p {
 }
 
 @media (max-width: 760px) {
-  .index-stats {
+  .index-stats,
+  .search-form {
     grid-template-columns: 1fr;
   }
 }

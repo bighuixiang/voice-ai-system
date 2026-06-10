@@ -39,6 +39,7 @@ const mockNovelApi = vi.hoisted(() => ({
   readStoryGraph: vi.fn(),
   readKnowledgeIndex: vi.fn(),
   rebuildKnowledgeIndex: vi.fn(),
+  searchKnowledgeIndex: vi.fn(),
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
   acceptWritingRecap: vi.fn(),
@@ -336,6 +337,35 @@ describe("useNovelStore", () => {
       updatedAt: "2026-06-11T00:00:00.000Z"
     });
     mockNovelApi.rebuildKnowledgeIndex.mockImplementation(async () => mockNovelApi.readKnowledgeIndex());
+    mockNovelApi.searchKnowledgeIndex.mockResolvedValue({
+      query: "Hero gate",
+      tokens: ["hero", "gate"],
+      facts: [
+        {
+          id: "fact:gate",
+          text: "The gate opens.",
+          chapterIds: ["chapter-001"],
+          relatedEntities: ["Hero"],
+          keywords: ["gate"],
+          source: { type: "chapter-summary", id: "fact-1" },
+          updatedAt: "2026-06-11T00:00:00.000Z",
+          score: 2
+        }
+      ],
+      triples: [],
+      chapters: [
+        {
+          chapterId: "chapter-001",
+          title: "Chapter 1",
+          keywords: ["gate"],
+          factIds: ["fact:gate"],
+          tripleIds: [],
+          entityNames: ["Hero"],
+          updatedAt: "2026-06-11T00:00:00.000Z",
+          score: 2
+        }
+      ]
+    });
     mockNovelApi.readLedgerEntries.mockResolvedValue([]);
     mockNovelApi.saveLedgerEntries.mockImplementation(async (_projectId: string, _kind: LedgerEntry["kind"], entries: LedgerEntry[]) => entries);
     mockNovelApi.acceptWritingRecap.mockImplementation(async (_projectId: string, recap: WritingRecapCandidate) => ({
@@ -542,6 +572,25 @@ describe("useNovelStore", () => {
     expect(store.knowledgeIndex?.facts).toEqual([expect.objectContaining({ id: "fact:gate" })]);
     expect(store.sceneCards).toEqual(scenes);
     expect(store.activeLedgerKind).toBe("foreshadowing");
+  });
+
+  it("searches the knowledge index for the active chapter", async () => {
+    const store = useNovelStore();
+    store.projects = [project];
+    await store.openProject(project);
+
+    const result = await store.searchKnowledgeIndex(" Hero gate ");
+
+    expect(mockNovelApi.searchKnowledgeIndex).toHaveBeenCalledWith("demo", {
+      query: "Hero gate",
+      chapterId: "chapter-002",
+      limit: 12
+    });
+    expect(result?.facts).toEqual([expect.objectContaining({ id: "fact:gate", score: 2 })]);
+    expect(store.knowledgeSearchResult?.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001" }));
+
+    await expect(store.searchKnowledgeIndex("   ")).resolves.toBeNull();
+    expect(store.knowledgeSearchResult).toBeNull();
   });
 
   it("loads, saves, and requests story-level orchestration", async () => {

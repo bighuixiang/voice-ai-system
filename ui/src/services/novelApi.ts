@@ -9,6 +9,8 @@ import type {
   CodexTaskType,
   EditorSelection,
   KnowledgeIndexProjection,
+  KnowledgeSearchQuery,
+  KnowledgeSearchResult,
   LedgerEntry,
   NovelFilePatch,
   NovelProject,
@@ -211,6 +213,15 @@ export const novelApi = {
       method: "POST"
     });
     return data.index;
+  },
+
+  async searchKnowledgeIndex(projectId: string, input: KnowledgeSearchQuery): Promise<KnowledgeSearchResult> {
+    const data = await request<{ result: KnowledgeSearchResult }>(`/api/novel/projects/${projectId}/knowledge/search`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+    return data.result;
   },
 
   async readLedgerEntries(projectId: string, kind: LedgerEntry["kind"]): Promise<LedgerEntry[]> {

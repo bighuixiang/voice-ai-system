@@ -16,6 +16,7 @@ import type {
   EditorSelection,
   FocusWritingGuide,
   KnowledgeIndexProjection,
+  KnowledgeSearchResult,
   LedgerEntry,
   NovelFilePatch,
   NovelChapter,
@@ -129,6 +130,7 @@ export const useNovelStore = defineStore("novel", () => {
   const storyControl = ref<StoryControl | null>(null);
   const storyGraph = ref<StoryGraphProjection | null>(null);
   const knowledgeIndex = ref<KnowledgeIndexProjection | null>(null);
+  const knowledgeSearchResult = ref<KnowledgeSearchResult | null>(null);
   const structureIdeaInput = ref("");
   const structureDraftVersion = ref(0);
   const activeLedgerKind = ref<LedgerKind>("foreshadowing");
@@ -138,6 +140,7 @@ export const useNovelStore = defineStore("novel", () => {
   const isSavingScenes = ref(false);
   const isSavingStoryControl = ref(false);
   const isRebuildingKnowledgeIndex = ref(false);
+  const isSearchingKnowledge = ref(false);
   const isReverseEngineeringStructure = ref(false);
   const agentProfiles = ref<AiAgentProfile[]>([]);
   const agentChecks = ref<AiAgentCheckResult[]>([]);
@@ -899,6 +902,7 @@ export const useNovelStore = defineStore("novel", () => {
     storyControl.value = null;
     storyGraph.value = null;
     knowledgeIndex.value = null;
+    knowledgeSearchResult.value = null;
     structureIdeaInput.value = "";
     structureDraftVersion.value = 0;
     activeLedgerKind.value = "foreshadowing";
@@ -1185,9 +1189,32 @@ export const useNovelStore = defineStore("novel", () => {
     isRebuildingKnowledgeIndex.value = true;
     try {
       knowledgeIndex.value = await novelApi.rebuildKnowledgeIndex(currentProject.value.slug);
+      knowledgeSearchResult.value = null;
       await loadStoryGraph();
     } finally {
       isRebuildingKnowledgeIndex.value = false;
+    }
+  }
+
+  async function searchKnowledgeIndex(query: string) {
+    if (!currentProject.value) return null;
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) {
+      knowledgeSearchResult.value = null;
+      return null;
+    }
+
+    isSearchingKnowledge.value = true;
+    try {
+      const result = await novelApi.searchKnowledgeIndex(currentProject.value.slug, {
+        query: normalizedQuery,
+        chapterId: currentChapter.value?.id,
+        limit: 12
+      });
+      knowledgeSearchResult.value = result;
+      return result;
+    } finally {
+      isSearchingKnowledge.value = false;
     }
   }
 
@@ -1786,6 +1813,7 @@ export const useNovelStore = defineStore("novel", () => {
     storyControl,
     storyGraph,
     knowledgeIndex,
+    knowledgeSearchResult,
     structureIdeaInput,
     structureDraftVersion,
     activeLedgerKind,
@@ -1795,6 +1823,7 @@ export const useNovelStore = defineStore("novel", () => {
     isSavingScenes,
     isSavingStoryControl,
     isRebuildingKnowledgeIndex,
+    isSearchingKnowledge,
     isReverseEngineeringStructure,
     agentProfiles,
     agentChecks,
@@ -1839,6 +1868,7 @@ export const useNovelStore = defineStore("novel", () => {
     loadStoryGraph,
     loadKnowledgeIndex,
     rebuildKnowledgeIndex,
+    searchKnowledgeIndex,
     updateDashboard,
     saveCurrentDashboard,
     updateSceneCards,
