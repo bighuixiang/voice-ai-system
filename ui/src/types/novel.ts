@@ -377,6 +377,8 @@ export interface KnowledgeVectorEntry {
 
 export interface KnowledgeVectorIndex {
   projectSlug: string;
+  provider: "local" | "openai-compatible";
+  model?: string;
   dimensions: number;
   entries: KnowledgeVectorEntry[];
   updatedAt: string;

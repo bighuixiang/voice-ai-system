@@ -38,6 +38,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Knowledge facts and triples persist under `knowledge/facts.jsonl` and `knowledge/triples.jsonl`.
   - Chapter memory index persists under `memory/chapter-index.json`.
   - Local vector recall persists under `knowledge/vectors.json` and contributes `vectorScore` to search results.
+  - Optional OpenAI-compatible embedding providers can populate `knowledge/vectors.json` when `KNOWLEDGE_EMBEDDING_PROVIDER=openai-compatible` and an API key are configured.
   - UI supports knowledge search and a quick reference lookup across characters, locations, terms, and facts.
 
 - Runtime snapshot:
@@ -82,6 +83,7 @@ Known warnings remain unchanged:
 - `1c67938 feat: expand story graph visualization`
 - `617e60d feat: orchestrate project background jobs`
 - `e644a79 feat: add local vector recall`
+- `54a05b1 feat: rebuild knowledge index in background`
 
 Earlier supporting commits in this branch:
 
@@ -92,4 +94,11 @@ Earlier supporting commits in this branch:
 
 ## Remaining Work
 
-- External embedding provider integration for semantic recall, if needed beyond the local vector index.
+- Tune production embedding provider settings after a real provider and model are selected.
+
+## Optional Embedding Configuration
+
+- `KNOWLEDGE_EMBEDDING_PROVIDER=openai-compatible`
+- `KNOWLEDGE_EMBEDDING_API_KEY=<key>` or `OPENAI_API_KEY=<key>`
+- `KNOWLEDGE_EMBEDDING_BASE_URL=https://api.openai.com/v1` by default
+- `KNOWLEDGE_EMBEDDING_MODEL=text-embedding-3-small` by default

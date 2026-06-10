@@ -18,8 +18,18 @@ import { resolveInside } from "./pathSafety.js";
 import { readChapterSummary, readLedgerEntries, readStoryControl } from "./writingCockpit.js";
 
 const ledgerKinds: LedgerEntry["kind"][] = ["foreshadowing", "continuity", "power", "character", "risk"];
-const vectorDimensions = 64;
+const localVectorDimensions = 64;
 const vectorMatchThreshold = 0.15;
+
+interface EmbeddingProvider {
+  name: KnowledgeVectorIndex["provider"];
+  model?: string;
+  embed(texts: string[]): Promise<number[][]>;
+}
+
+interface KnowledgeVectorEntryDraft extends Omit<KnowledgeVectorIndex["entries"][number], "vector"> {
+  embeddingText: string;
+}
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -66,11 +76,11 @@ function hashString(input: string): number {
 }
 
 function vectorize(parts: string[]): number[] {
-  const vector = Array.from({ length: vectorDimensions }, () => 0);
+  const vector = Array.from({ length: localVectorDimensions }, () => 0);
   const tokens = keywordsFrom(parts, 96);
   for (const token of tokens) {
     const hash = hashString(token);
-    const bucket = hash % vectorDimensions;
+    const bucket = hash % localVectorDimensions;
     const sign = hash & 1 ? 1 : -1;
     const weight = 1 + Math.min(token.length, 16) / 16;
     vector[bucket] += sign * weight;
@@ -79,6 +89,65 @@ function vectorize(parts: string[]): number[] {
   const magnitude = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0));
   if (!magnitude) return vector;
   return vector.map((value) => Number((value / magnitude).toFixed(6)));
+}
+
+function normalizeVector(vector: number[]): number[] {
+  const values = vector.map((value) => (Number.isFinite(value) ? value : 0));
+  const magnitude = Math.sqrt(values.reduce((sum, value) => sum + value * value, 0));
+  if (!magnitude) return values;
+  return values.map((value) => Number((value / magnitude).toFixed(6)));
+}
+
+function localEmbeddingProvider(): EmbeddingProvider {
+  return {
+    name: "local",
+    embed: async (texts) => texts.map((text) => vectorize([text]))
+  };
+}
+
+function embeddingEnv(name: string): string {
+  return (process.env[name] || "").trim();
+}
+
+function getEmbeddingProvider(): EmbeddingProvider {
+  const providerName = embeddingEnv("KNOWLEDGE_EMBEDDING_PROVIDER").toLowerCase();
+  if (providerName !== "openai-compatible" && providerName !== "openai") {
+    return localEmbeddingProvider();
+  }
+
+  const apiKey = embeddingEnv("KNOWLEDGE_EMBEDDING_API_KEY") || embeddingEnv("OPENAI_API_KEY");
+  if (!apiKey) {
+    return localEmbeddingProvider();
+  }
+
+  const baseUrl = (embeddingEnv("KNOWLEDGE_EMBEDDING_BASE_URL") || "https://api.openai.com/v1").replace(/\/+$/, "");
+  const model = embeddingEnv("KNOWLEDGE_EMBEDDING_MODEL") || "text-embedding-3-small";
+  return {
+    name: "openai-compatible",
+    model,
+    embed: async (texts) => requestOpenAiCompatibleEmbeddings(baseUrl, apiKey, model, texts)
+  };
+}
+
+async function requestOpenAiCompatibleEmbeddings(baseUrl: string, apiKey: string, model: string, texts: string[]): Promise<number[][]> {
+  if (!texts.length) return [];
+  const response = await fetch(`${baseUrl}/embeddings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({ model, input: texts })
+  });
+  if (!response.ok) {
+    throw new Error(`Embedding provider failed with ${response.status}`);
+  }
+  const payload = (await response.json()) as { data?: Array<{ embedding?: number[] }> };
+  const vectors = payload.data?.map((item) => item.embedding).filter((item): item is number[] => Array.isArray(item)) || [];
+  if (vectors.length !== texts.length) {
+    throw new Error(`Embedding provider returned ${vectors.length} vectors for ${texts.length} inputs`);
+  }
+  return vectors.map(normalizeVector);
 }
 
 function cosineScore(left: number[], right: number[]): number {
@@ -359,50 +428,109 @@ function buildChapterIndex(project: NovelProject, facts: KnowledgeFact[], triple
   };
 }
 
-function buildKnowledgeVectorIndex(
+function buildKnowledgeVectorDrafts(
   project: NovelProject,
   facts: KnowledgeFact[],
   triples: KnowledgeTriple[],
   chapterIndex: ChapterMemoryIndex,
   updatedAt: string
-): KnowledgeVectorIndex {
+): KnowledgeVectorEntryDraft[] {
+  return [
+    ...facts.map((fact) => ({
+      id: fact.id,
+      kind: "fact" as const,
+      label: fact.source.label || fact.source.type,
+      text: fact.text,
+      chapterIds: fact.chapterIds,
+      sourceIds: [fact.source.id],
+      embeddingText: [fact.text, ...fact.keywords, ...fact.relatedEntities, fact.source.label || ""].join(" "),
+      updatedAt
+    })),
+    ...triples.map((triple) => ({
+      id: triple.id,
+      kind: "triple" as const,
+      label: triple.predicate,
+      text: `${triple.subject} ${triple.predicate} ${triple.object}`,
+      chapterIds: triple.chapterIds,
+      sourceIds: triple.sourceFactIds,
+      embeddingText: [triple.subject, triple.predicate, triple.object].join(" "),
+      updatedAt
+    })),
+    ...chapterIndex.chapters.map((chapter) => ({
+      id: chapter.chapterId,
+      kind: "chapter" as const,
+      label: chapter.title,
+      text: [chapter.title, ...chapter.keywords, ...chapter.entityNames].join(" "),
+      chapterIds: [chapter.chapterId],
+      sourceIds: [...chapter.factIds, ...chapter.tripleIds],
+      embeddingText: [chapter.title, ...chapter.keywords, ...chapter.entityNames].join(" "),
+      updatedAt
+    }))
+  ];
+}
+
+async function buildKnowledgeVectorIndexWithProvider(
+  project: NovelProject,
+  facts: KnowledgeFact[],
+  triples: KnowledgeTriple[],
+  chapterIndex: ChapterMemoryIndex,
+  updatedAt: string,
+  provider: EmbeddingProvider
+): Promise<KnowledgeVectorIndex> {
+  const drafts = buildKnowledgeVectorDrafts(project, facts, triples, chapterIndex, updatedAt);
+  const vectors = await provider.embed(drafts.map((entry) => entry.embeddingText));
+  const dimensions = vectors[0]?.length || localVectorDimensions;
   return {
     projectSlug: project.slug,
-    dimensions: vectorDimensions,
-    entries: [
-      ...facts.map((fact) => ({
-        id: fact.id,
-        kind: "fact" as const,
-        label: fact.source.label || fact.source.type,
-        text: fact.text,
-        chapterIds: fact.chapterIds,
-        sourceIds: [fact.source.id],
-        vector: vectorize([fact.text, ...fact.keywords, ...fact.relatedEntities, fact.source.label || ""]),
-        updatedAt
-      })),
-      ...triples.map((triple) => ({
-        id: triple.id,
-        kind: "triple" as const,
-        label: triple.predicate,
-        text: `${triple.subject} ${triple.predicate} ${triple.object}`,
-        chapterIds: triple.chapterIds,
-        sourceIds: triple.sourceFactIds,
-        vector: vectorize([triple.subject, triple.predicate, triple.object]),
-        updatedAt
-      })),
-      ...chapterIndex.chapters.map((chapter) => ({
-        id: chapter.chapterId,
-        kind: "chapter" as const,
-        label: chapter.title,
-        text: [chapter.title, ...chapter.keywords, ...chapter.entityNames].join(" "),
-        chapterIds: [chapter.chapterId],
-        sourceIds: [...chapter.factIds, ...chapter.tripleIds],
-        vector: vectorize([chapter.title, ...chapter.keywords, ...chapter.entityNames]),
-        updatedAt
-      }))
-    ],
+    provider: provider.name,
+    model: provider.model,
+    dimensions,
+    entries: drafts.map(({ embeddingText: _embeddingText, ...entry }, index) => ({
+      ...entry,
+      vector: vectors[index] || []
+    })),
     updatedAt
   };
+}
+
+async function buildKnowledgeVectorIndex(
+  project: NovelProject,
+  facts: KnowledgeFact[],
+  triples: KnowledgeTriple[],
+  chapterIndex: ChapterMemoryIndex,
+  updatedAt: string
+): Promise<KnowledgeVectorIndex> {
+  const provider = getEmbeddingProvider();
+  try {
+    return await buildKnowledgeVectorIndexWithProvider(project, facts, triples, chapterIndex, updatedAt, provider);
+  } catch (error) {
+    if (provider.name === "local") {
+      throw error;
+    }
+    return buildKnowledgeVectorIndexWithProvider(project, facts, triples, chapterIndex, updatedAt, localEmbeddingProvider());
+  }
+}
+
+async function vectorizeQueryForIndex(index: KnowledgeVectorIndex, query: string, tokens: string[]): Promise<number[]> {
+  const localQueryVector = vectorize([query, ...tokens]);
+  if (index.provider === "local") {
+    return localQueryVector;
+  }
+
+  const provider = getEmbeddingProvider();
+  const providerMatchesIndex = provider.name === index.provider && (!index.model || provider.model === index.model);
+  if (providerMatchesIndex) {
+    try {
+      const [queryVector] = await provider.embed([[query, ...tokens].join(" ")]);
+      if (queryVector?.length === index.dimensions) {
+        return queryVector;
+      }
+    } catch {
+      return index.dimensions === localQueryVector.length ? localQueryVector : [];
+    }
+  }
+
+  return index.dimensions === localQueryVector.length ? localQueryVector : [];
 }
 
 async function writeJsonl(root: string, relativePath: string, items: unknown[]): Promise<void> {
@@ -442,13 +570,13 @@ async function readKnowledgeVectorIndex(root: string, project: NovelProject): Pr
   try {
     const raw = await fs.readFile(resolveInside(root, "knowledge/vectors.json"), "utf8");
     const index = JSON.parse(raw) as KnowledgeVectorIndex;
-    if (index.dimensions !== vectorDimensions) {
-      return { projectSlug: project.slug, dimensions: vectorDimensions, entries: [], updatedAt: nowIso() };
+    if (!index.dimensions) {
+      return { projectSlug: project.slug, provider: "local", dimensions: localVectorDimensions, entries: [], updatedAt: nowIso() };
     }
-    return index;
+    return { ...index, provider: index.provider || "local" };
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") {
-      return { projectSlug: project.slug, dimensions: vectorDimensions, entries: [], updatedAt: nowIso() };
+      return { projectSlug: project.slug, provider: "local", dimensions: localVectorDimensions, entries: [], updatedAt: nowIso() };
     }
     throw error;
   }
@@ -495,7 +623,7 @@ export async function buildKnowledgeIndexProjection(root: string, project: Novel
 
 export async function rebuildKnowledgeIndex(root: string, project: NovelProject): Promise<KnowledgeIndexProjection> {
   const projection = await buildKnowledgeIndexProjection(root, project);
-  const vectorIndex = buildKnowledgeVectorIndex(project, projection.facts, projection.triples, projection.chapterIndex, projection.updatedAt);
+  const vectorIndex = await buildKnowledgeVectorIndex(project, projection.facts, projection.triples, projection.chapterIndex, projection.updatedAt);
   await writeJsonl(root, "knowledge/facts.jsonl", projection.facts);
   await writeJsonl(root, "knowledge/triples.jsonl", projection.triples);
   await writeChapterIndex(root, projection.chapterIndex);
@@ -534,8 +662,8 @@ export async function searchKnowledgeIndex(
   const persistedVectorIndex = await readKnowledgeVectorIndex(root, project);
   const vectorIndex = persistedVectorIndex.entries.length
     ? persistedVectorIndex
-    : buildKnowledgeVectorIndex(project, index.facts, index.triples, index.chapterIndex, index.updatedAt);
-  const queryVector = vectorize([query, ...tokens]);
+    : await buildKnowledgeVectorIndex(project, index.facts, index.triples, index.chapterIndex, index.updatedAt);
+  const queryVector = await vectorizeQueryForIndex(vectorIndex, query, tokens);
   const vectorScores = vectorIndex.entries.reduce((scores, entry) => {
     scores.set(entry.id, cosineScore(queryVector, entry.vector));
     return scores;

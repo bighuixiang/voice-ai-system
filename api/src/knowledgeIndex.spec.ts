@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createProjectFiles, createProjectSkeleton, projectRoot } from "./novelProject.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
 import { saveChapterSummary, saveLedgerEntries, saveStoryControl } from "./writingCockpit.js";
@@ -20,6 +20,12 @@ describe("knowledgeIndex", () => {
     delete process.env.NOVELS_ROOT;
     delete process.env.PLATFORM_ROOT;
     delete process.env.NOVEL_DB_PATH;
+    delete process.env.KNOWLEDGE_EMBEDDING_PROVIDER;
+    delete process.env.KNOWLEDGE_EMBEDDING_API_KEY;
+    delete process.env.KNOWLEDGE_EMBEDDING_BASE_URL;
+    delete process.env.KNOWLEDGE_EMBEDDING_MODEL;
+    delete process.env.OPENAI_API_KEY;
+    vi.unstubAllGlobals();
     await fs.rm(tempRoot, { recursive: true, force: true });
   });
 
@@ -138,7 +144,64 @@ describe("knowledgeIndex", () => {
     expect(persisted.triples).toHaveLength(projection.triples.length);
     await expect(fs.readFile(path.join(root, "knowledge", "facts.jsonl"), "utf8")).resolves.toContain("fact-gate-blood");
     await expect(fs.readFile(path.join(root, "knowledge", "vectors.json"), "utf8")).resolves.toContain('"dimensions": 64');
+    await expect(fs.readFile(path.join(root, "knowledge", "vectors.json"), "utf8")).resolves.toContain('"provider": "local"');
     await expect(fs.readFile(path.join(root, "memory", "chapter-index.json"), "utf8")).resolves.toContain("chapter-001");
+  });
+
+  it("uses an openai-compatible embedding provider when configured", async () => {
+    process.env.KNOWLEDGE_EMBEDDING_PROVIDER = "openai-compatible";
+    process.env.KNOWLEDGE_EMBEDDING_API_KEY = "test-key";
+    process.env.KNOWLEDGE_EMBEDDING_BASE_URL = "https://embeddings.example/v1";
+    process.env.KNOWLEDGE_EMBEDDING_MODEL = "embedding-test";
+    const fetchMock = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body || "{}")) as { input: string[] };
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: body.input.map((_, index) => ({ embedding: [index + 1, 1, 0] }))
+        })
+      } as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const project = createProjectSkeleton({ title: "External Embedding Demo", roughIdea: "Use configured semantic recall." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await saveChapterSummary(root, {
+      chapterId: "chapter-001",
+      summary: "The archive remembers every opened gate.",
+      keyEvents: [],
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
+
+    await rebuildKnowledgeIndex(root, project);
+    const vectors = JSON.parse(await fs.readFile(path.join(root, "knowledge", "vectors.json"), "utf8")) as {
+      provider: string;
+      model?: string;
+      dimensions: number;
+      entries: Array<{ vector: number[] }>;
+    };
+    const [, requestInit] = fetchMock.mock.calls[0];
+    const requestBody = JSON.parse(String(requestInit?.body || "{}")) as { model: string; input: string[] };
+
+    expect(vectors).toMatchObject({ provider: "openai-compatible", model: "embedding-test", dimensions: 3 });
+    expect(vectors.entries.every((entry) => entry.vector.length === 3)).toBe(true);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://embeddings.example/v1/embeddings",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ Authorization: "Bearer test-key" })
+      })
+    );
+    expect(requestBody.model).toBe("embedding-test");
+    expect(requestBody.input.length).toBe(vectors.entries.length);
   });
 
   it("searches persisted knowledge by keyword and entity", async () => {
