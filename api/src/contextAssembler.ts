@@ -1,6 +1,16 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ChapterSummary, CodexTaskType, LedgerEntry, NovelChapter, NovelProject, SelectionPayload } from "./types.js";
+import type {
+  ChapterMemoryIndex,
+  ChapterSummary,
+  CodexTaskType,
+  KnowledgeFact,
+  KnowledgeTriple,
+  LedgerEntry,
+  NovelChapter,
+  NovelProject,
+  SelectionPayload
+} from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 
 async function readOptional(root: string, relativePath: string): Promise<string> {
@@ -19,6 +29,22 @@ async function readOptionalJson<T>(root: string, relativePath: string): Promise<
   } catch {
     return undefined;
   }
+}
+
+async function readOptionalJsonl<T>(root: string, relativePath: string): Promise<T[]> {
+  const content = await readOptional(root, relativePath);
+  if (!content.trim()) return [];
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .flatMap((line) => {
+      try {
+        return [JSON.parse(line) as T];
+      } catch {
+        return [];
+      }
+    });
 }
 
 function trimContext(content: string, limit = 6000): string {
@@ -133,6 +159,58 @@ async function buildChapterMemoryBlocks(
   return blocks;
 }
 
+async function buildKnowledgeMemoryBlocks(root: string, chapterId: string): Promise<Array<{ title: string; content: string }>> {
+  const chapterIndex = await readOptionalJson<ChapterMemoryIndex>(root, "memory/chapter-index.json");
+  const indexEntry = chapterIndex?.chapters.find((entry) => entry.chapterId === chapterId);
+  if (!indexEntry || (!indexEntry.factIds.length && !indexEntry.tripleIds.length)) return [];
+
+  const [facts, triples] = await Promise.all([
+    readOptionalJsonl<KnowledgeFact>(root, "knowledge/facts.jsonl"),
+    readOptionalJsonl<KnowledgeTriple>(root, "knowledge/triples.jsonl")
+  ]);
+  const factIds = new Set(indexEntry.factIds);
+  const tripleIds = new Set(indexEntry.tripleIds);
+  const selectedFacts = facts
+    .filter((fact) => factIds.has(fact.id))
+    .slice(0, 24)
+    .map((fact) => ({
+      id: fact.id,
+      text: fact.text,
+      chapterIds: fact.chapterIds,
+      relatedEntities: fact.relatedEntities,
+      keywords: fact.keywords.slice(0, 8),
+      source: fact.source
+    }));
+  const selectedTriples = triples
+    .filter((triple) => tripleIds.has(triple.id))
+    .slice(0, 16)
+    .map((triple) => ({
+      id: triple.id,
+      subject: triple.subject,
+      predicate: triple.predicate,
+      object: triple.object,
+      chapterIds: triple.chapterIds
+    }));
+
+  if (!selectedFacts.length && !selectedTriples.length) return [];
+  return [
+    {
+      title: "Knowledge Memory Index",
+      content: JSON.stringify(
+        {
+          chapterId,
+          keywords: indexEntry.keywords.slice(0, 24),
+          entityNames: indexEntry.entityNames.slice(0, 24),
+          facts: selectedFacts,
+          triples: selectedTriples
+        },
+        null,
+        2
+      )
+    }
+  ];
+}
+
 export async function assembleContext(
   type: CodexTaskType,
   root: string,
@@ -176,6 +254,7 @@ export async function assembleContext(
 
   if (chapter && memoryContextTypes.includes(type)) {
     blocks.push(...(await buildChapterMemoryBlocks(root, project, chapter.id)));
+    blocks.push(...(await buildKnowledgeMemoryBlocks(root, chapter.id)));
   }
 
   if (chapter && targetChapterTypes.includes(type)) {

@@ -190,4 +190,76 @@ describe("contextAssembler", () => {
     expect(adjacent?.content).toContain("第三章承接封印松动。");
     expect(distant?.content).toContain("第十章兑现尸王伏笔。");
   });
+
+  it("injects persisted knowledge index facts for the target chapter", async () => {
+    const project = createProjectSkeleton({ title: "Knowledge Context", roughIdea: "Indexed memory should guide drafting." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(
+      path.join(root, "knowledge", "facts.jsonl"),
+      `${JSON.stringify({
+        id: "fact:gate-blood",
+        text: "The sealed gate responds to blood.",
+        chapterIds: ["chapter-001"],
+        relatedEntities: ["Hero", "sealed gate"],
+        keywords: ["gate", "blood"],
+        source: { type: "chapter-summary", id: "fact-gate-blood" },
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      })}\n${JSON.stringify({
+        id: "fact:other",
+        text: "A distant unrelated fact.",
+        chapterIds: ["chapter-003"],
+        relatedEntities: [],
+        keywords: ["other"],
+        source: { type: "chapter-summary", id: "other" },
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(root, "knowledge", "triples.jsonl"),
+      `${JSON.stringify({
+        id: "triple:hero-state",
+        subject: "Hero",
+        predicate: "state_after",
+        object: "Wounded but alert.",
+        chapterIds: ["chapter-001"],
+        sourceFactIds: ["fact:gate-blood"],
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(root, "memory", "chapter-index.json"),
+      JSON.stringify(
+        {
+          projectSlug: project.slug,
+          chapters: [
+            {
+              chapterId: "chapter-001",
+              title: "Chapter 1",
+              keywords: ["gate", "blood"],
+              factIds: ["fact:gate-blood"],
+              tripleIds: ["triple:hero-state"],
+              entityNames: ["Hero"],
+              updatedAt: "2026-06-11T00:00:00.000Z"
+            }
+          ],
+          keywords: { gate: ["chapter-001"], blood: ["chapter-001"] },
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+    const knowledge = blocks.find((block) => block.title === "Knowledge Memory Index");
+
+    expect(knowledge?.content).toContain("The sealed gate responds to blood.");
+    expect(knowledge?.content).toContain("state_after");
+    expect(knowledge?.content).toContain("Wounded but alert.");
+    expect(knowledge?.content).not.toContain("A distant unrelated fact.");
+  });
 });
