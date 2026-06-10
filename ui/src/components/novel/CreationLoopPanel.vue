@@ -7,7 +7,7 @@
       </div>
       <div class="loop-meta">
         <span v-if="runtimeSnapshot?.activeStepId" class="runtime-chip">
-          {{ runtimeSnapshot.activeStepId }} · {{ runtimeSnapshot.signals.wordCount }} 字
+          {{ runtimeSnapshot.activeStepId }} · {{ runtimeSnapshot.signals.wordCount }} 字 · #{{ runtimeFingerprint }}
         </span>
         <span class="loop-summary">{{ doneCount }} / {{ steps.length }} 已沉淀</span>
       </div>
@@ -65,6 +65,7 @@ defineEmits<{
 }>();
 
 const doneCount = computed(() => props.steps.filter((step) => step.status === "done").length);
+const runtimeFingerprint = computed(() => props.runtimeSnapshot?.fingerprint.slice(0, 8) || "");
 </script>
 
 <style scoped lang="scss">

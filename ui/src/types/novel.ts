@@ -444,6 +444,7 @@ export interface CreationRuntimeSnapshot {
   chapterId: string;
   chapterTitle: string;
   activeStepId?: CreationLoopStep["id"];
+  fingerprint: string;
   steps: Array<Omit<CreationLoopStep, "action" | "actionLabel">>;
   signals: {
     wordCount: number;

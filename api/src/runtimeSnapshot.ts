@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import type { CreationRuntimeSnapshot, CreationRuntimeStep, LedgerEntry, NovelProject } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 import { readChapterDashboard, readChapterQualityReport, readChapterSummary, readLedgerEntries, readSceneCards } from "./writingCockpit.js";
@@ -11,6 +12,10 @@ function countDraftWords(content: string): number {
 
 function firstActiveStep(steps: CreationRuntimeStep[]): CreationRuntimeSnapshot["activeStepId"] {
   return steps.find((step) => step.status === "active")?.id || steps.find((step) => step.status === "waiting")?.id;
+}
+
+function snapshotFingerprint(input: Omit<CreationRuntimeSnapshot, "fingerprint" | "updatedAt">): string {
+  return crypto.createHash("sha256").update(JSON.stringify(input)).digest("hex").slice(0, 16);
 }
 
 async function readTaskHistory(root: string): Promise<Array<{ type?: string; status?: string; inputSummary?: string; result?: { content?: string } }>> {
@@ -114,7 +119,7 @@ export async function buildCreationRuntimeSnapshot(
     }
   ];
 
-  return {
+  const snapshotBase = {
     projectSlug: project.slug,
     chapterId: chapter.id,
     chapterTitle: chapter.title,
@@ -128,7 +133,12 @@ export async function buildCreationRuntimeSnapshot(
       hasQualityReport,
       hasWritingRecap,
       acceptedLedgerCount: acceptedLedgers.length
-    },
+    }
+  };
+
+  return {
+    ...snapshotBase,
+    fingerprint: snapshotFingerprint(snapshotBase),
     updatedAt: new Date().toISOString()
   };
 }

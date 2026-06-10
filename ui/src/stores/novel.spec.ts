@@ -305,6 +305,7 @@ describe("useNovelStore", () => {
       chapterId,
       chapterTitle: "Chapter",
       activeStepId: "review",
+      fingerprint: "abcdef1234567890",
       steps: [],
       signals: {
         wordCount: 120,

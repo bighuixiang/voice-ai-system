@@ -274,11 +274,19 @@ describe("novel API routes", () => {
     });
 
     const response = await jsonFetch<{
-      snapshot: { chapterId: string; signals: { wordCount: number; hasQualityReport: boolean }; steps: Array<{ id: string; status: string }> };
+      snapshot: {
+        chapterId: string;
+        fingerprint: string;
+        signals: { wordCount: number; hasQualityReport: boolean };
+        steps: Array<{ id: string; status: string }>;
+      };
     }>(`/api/novel/projects/${slug}/runtime/chapter-001`);
+    const repeated = await jsonFetch<{ snapshot: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/chapter-001`);
 
     expect(response.status).toBe(200);
     expect(response.data.snapshot.chapterId).toBe("chapter-001");
+    expect(response.data.snapshot.fingerprint).toMatch(/^[a-f0-9]{16}$/);
+    expect(repeated.data.snapshot.fingerprint).toBe(response.data.snapshot.fingerprint);
     expect(response.data.snapshot.signals.wordCount).toBeGreaterThanOrEqual(30);
     expect(response.data.snapshot.signals.hasQualityReport).toBe(true);
     expect(response.data.snapshot.steps).toEqual(

@@ -28,6 +28,7 @@ const runtimeSnapshot: CreationRuntimeSnapshot = {
   chapterId: "chapter-001",
   chapterTitle: "Chapter 1",
   activeStepId: "review",
+  fingerprint: "abcdef1234567890",
   steps: [
     {
       id: "review",
@@ -70,7 +71,7 @@ describe("CreationLoopPanel", () => {
       global
     });
 
-    expect(wrapper.text()).toContain("review · 1200 字");
+    expect(wrapper.text()).toContain("review · 1200 字 · #abcdef12");
     expect(wrapper.text()).toContain("1 / 2 已沉淀");
     expect(wrapper.text()).toContain("正文已保存。");
   });

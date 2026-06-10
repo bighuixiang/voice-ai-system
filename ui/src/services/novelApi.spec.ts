@@ -301,6 +301,7 @@ describe("novelApi", () => {
       chapterId: "chapter-001",
       chapterTitle: "Chapter 1",
       activeStepId: "review",
+      fingerprint: "abcdef1234567890",
       steps: [{ id: "draft", label: "正文", status: "done", detail: "Saved.", metric: "1200 字" }],
       signals: {
         wordCount: 1200,

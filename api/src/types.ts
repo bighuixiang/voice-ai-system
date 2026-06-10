@@ -412,6 +412,7 @@ export interface CreationRuntimeSnapshot {
   chapterId: string;
   chapterTitle: string;
   activeStepId?: CreationRuntimeStepId;
+  fingerprint: string;
   steps: CreationRuntimeStep[];
   signals: {
     wordCount: number;
