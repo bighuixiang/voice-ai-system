@@ -813,11 +813,30 @@ describe("novel API routes", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: "before plain line after" })
     });
+    const invocation = {
+      id: "invocation-patch-1",
+      taskId: "task-patch-1",
+      projectId: "patch-demo",
+      taskType: "chapter.draft",
+      stageKey: "pipeline.chapter.prose",
+      status: "success",
+      promptSnapshot: { length: 100, preview: "Draft", contextTitles: ["Project"] },
+      contextSnapshot: { blockCount: 1, totalChars: 20, blocks: [{ title: "Project", length: 20 }] },
+      attempt: { index: 1, startedAt: "2026-06-11T00:00:00.000Z", durationMs: 12, exitCode: 0 },
+      adoptionDecision: "pending",
+      proposedPatchTargets: ["chapters/chapter-001.md"],
+      acceptedPatchTargets: [],
+      commitResult: { historyAppended: true, invocationAppended: true },
+      createdAt: "2026-06-11T00:00:00.000Z",
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    };
+    await fs.appendFile(path.join(tempRoot, "patch-demo", "tasks", "invocations.jsonl"), `${JSON.stringify(invocation)}\n`, "utf8");
 
-    const patched = await jsonFetch<{ applied: number }>("/api/novel/projects/patch-demo/patches", {
+    const patched = await jsonFetch<{ applied: number; invocationUpdated: boolean; invocationId?: string }>("/api/novel/projects/patch-demo/patches", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        taskId: "task-patch-1",
         patches: [
           {
             target: "chapters/chapter-001.md",
@@ -829,9 +848,18 @@ describe("novel API routes", () => {
       })
     });
     const readAfter = await jsonFetch<{ content: string }>("/api/novel/projects/patch-demo/files/chapters/chapter-001.md");
+    const auditAfter = await jsonFetch<{ invocations: Array<{ adoptionDecision: string; acceptedPatchTargets: string[] }> }>(
+      "/api/novel/projects/patch-demo/tasks/invocations"
+    );
 
     expect(patched.data.applied).toBe(1);
+    expect(patched.data.invocationUpdated).toBe(true);
+    expect(patched.data.invocationId).toBe("invocation-patch-1");
     expect(readAfter.data.content).toBe("before sharper line after");
+    expect(auditAfter.data.invocations[0]).toMatchObject({
+      adoptionDecision: "accepted",
+      acceptedPatchTargets: ["chapters/chapter-001.md"]
+    });
   });
 
   it("rejects unsupported task types before invoking Codex", async () => {

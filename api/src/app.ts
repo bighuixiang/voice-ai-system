@@ -17,7 +17,7 @@ import {
 import { getNovelsRoot } from "./workspace.js";
 import { aiScenarioKeys, mergePlatformAiConfig, readPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 import { createPlatformAsset, linkAssetToProject, readPlatformLibrary } from "./platformLibrary.js";
-import { applyPatch, fallbackProjectCreateResult, readInvocationSessions, runNovelTask } from "./taskService.js";
+import { applyPatch, fallbackProjectCreateResult, markInvocationPatchesAccepted, readInvocationSessions, runNovelTask } from "./taskService.js";
 import { aiStageDefinitions } from "./aiStages.js";
 import { buildStoryGraphProjection } from "./storyGraph.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
@@ -541,7 +541,12 @@ export function createApp() {
     for (const patch of patches) {
       await applyPatch(projectRoot(project.slug), patch);
     }
-    res.json({ applied: patches.length });
+    const acceptedTargets = patches.map((patch) => patch.target);
+    const invocationUpdate =
+      typeof req.body.taskId === "string"
+        ? await markInvocationPatchesAccepted(projectRoot(project.slug), req.body.taskId, acceptedTargets)
+        : { updated: false };
+    res.json({ applied: patches.length, invocationUpdated: invocationUpdate.updated, invocationId: invocationUpdate.invocationId });
   }));
 
   app.use(errorHandler);

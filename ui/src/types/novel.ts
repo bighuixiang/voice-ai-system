@@ -541,6 +541,7 @@ export interface AiInvocationSession {
     error?: string;
   };
   adoptionDecision: AiInvocationAdoptionDecision;
+  adoptionUpdatedAt?: string;
   proposedPatchTargets: string[];
   acceptedPatchTargets: string[];
   commitResult: {

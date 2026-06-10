@@ -325,11 +325,11 @@ export const novelApi = {
     return data.task;
   },
 
-  async applyPatches(projectId: string, patches: NovelFilePatch[]): Promise<void> {
+  async applyPatches(projectId: string, patches: NovelFilePatch[], taskId?: string): Promise<void> {
     await request(`/api/novel/projects/${projectId}/patches`, {
       method: "POST",
       headers: jsonHeaders,
-      body: JSON.stringify({ patches })
+      body: JSON.stringify({ patches, taskId })
     });
   }
 };

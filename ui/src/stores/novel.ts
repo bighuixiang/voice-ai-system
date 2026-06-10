@@ -1806,7 +1806,8 @@ export const useNovelStore = defineStore("novel", () => {
     if (!currentProject.value || !rewriteCandidate.value?.patches.length) return;
     if (!canLeaveCurrentChapter()) return;
 
-    await novelApi.applyPatches(currentProject.value.slug, withSelectionPatchAnchors(rewriteCandidate.value.patches));
+    await novelApi.applyPatches(currentProject.value.slug, withSelectionPatchAnchors(rewriteCandidate.value.patches), currentTask.value?.id);
+    await refreshAiInvocations();
     if (currentChapter.value) {
       await openChapter(currentChapter.value, currentDocumentKind.value);
     }

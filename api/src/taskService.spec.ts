@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createProjectFiles, createProjectSkeleton } from "./novelProject.js";
 import { defaultPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
-import { applyPatch, runNovelTask } from "./taskService.js";
+import { applyPatch, markInvocationPatchesAccepted, runNovelTask } from "./taskService.js";
 import type { ProcessRunner } from "./codexRunner.js";
 import type { AiInvocationSession } from "./types.js";
 
@@ -35,7 +35,14 @@ async function readInvocations(projectSlug = "demo"): Promise<AiInvocationSessio
     .trim()
     .split(/\r?\n/)
     .filter(Boolean)
-    .map((line) => JSON.parse(line) as AiInvocationSession);
+    .map((line) => {
+      try {
+        return JSON.parse(line) as AiInvocationSession;
+      } catch {
+        return null;
+      }
+    })
+    .filter((session): session is AiInvocationSession => Boolean(session));
 }
 
 describe("taskService", () => {
@@ -110,6 +117,47 @@ describe("taskService", () => {
     expect(invocation.adoptionDecision).toBe("pending");
     expect(invocation.proposedPatchTargets).toEqual(["outline/chapter-001.md"]);
     expect(invocation.acceptedPatchTargets).toEqual([]);
+  });
+
+  it("marks a proposed invocation patch as accepted after author confirmation", async () => {
+    const patchRunner: ProcessRunner = {
+      async run() {
+        return {
+          stdout: "",
+          stderr: "",
+          exitCode: 0,
+          durationMs: 15,
+          finalMessage: JSON.stringify({
+            summary: "patch ready",
+            content: "",
+            changes: ["updated outline"],
+            risks: [],
+            questions: [],
+            patches: [
+              {
+                target: "outline/chapter-001.md",
+                mode: "replace-file",
+                content: "# patched\n"
+              }
+            ]
+          })
+        };
+      }
+    };
+
+    const task = await runNovelTask("demo", "chapter.plan", { chapterId: "chapter-001" }, patchRunner);
+    await fs.appendFile(path.join(tempRoot, "demo", "tasks", "invocations.jsonl"), "not-json\n", "utf8");
+
+    const update = await markInvocationPatchesAccepted(path.join(tempRoot, "demo"), task.id, ["outline/chapter-001.md"]);
+    const [invocation] = await readInvocations();
+    const raw = await fs.readFile(path.join(tempRoot, "demo", "tasks", "invocations.jsonl"), "utf8");
+
+    expect(update.updated).toBe(true);
+    expect(update.invocationId).toBe(invocation.id);
+    expect(invocation.adoptionDecision).toBe("accepted");
+    expect(invocation.acceptedPatchTargets).toEqual(["outline/chapter-001.md"]);
+    expect(invocation.adoptionUpdatedAt).toBeTruthy();
+    expect(raw).toContain("not-json");
   });
 
   it("ignores Codex command values stored in project files", async () => {

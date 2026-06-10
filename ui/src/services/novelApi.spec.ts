@@ -583,13 +583,22 @@ describe("novelApi", () => {
         mode: "replace-file",
         content: "accepted draft"
       }
-    ]);
+    ], "task-1");
 
     expect(fetch).toHaveBeenCalledWith(
       "/api/novel/projects/demo/patches",
       expect.objectContaining({
         method: "POST",
-        body: expect.stringContaining("accepted draft")
+        body: JSON.stringify({
+          patches: [
+            {
+              target: "chapters/chapter-001.md",
+              mode: "replace-file",
+              content: "accepted draft"
+            }
+          ],
+          taskId: "task-1"
+        })
       })
     );
   });

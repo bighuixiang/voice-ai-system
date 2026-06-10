@@ -31,17 +31,18 @@ async function appendInvocationSession(root: string, session: AiInvocationSessio
   await fs.appendFile(invocationPath, `${JSON.stringify(session)}\n`, "utf8");
 }
 
-export async function readInvocationSessions(root: string): Promise<AiInvocationSession[]> {
+async function readInvocationLines(root: string): Promise<string[]> {
   const invocationPath = resolveInside(root, "tasks/invocations.jsonl");
-  let content = "";
   try {
-    content = await fs.readFile(invocationPath, "utf8");
+    const content = await fs.readFile(invocationPath, "utf8");
+    return content.split(/\r?\n/).filter(Boolean);
   } catch {
     return [];
   }
+}
 
-  return content
-    .split(/\r?\n/)
+export async function readInvocationSessions(root: string): Promise<AiInvocationSession[]> {
+  return (await readInvocationLines(root))
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
@@ -53,6 +54,44 @@ export async function readInvocationSessions(root: string): Promise<AiInvocation
     })
     .filter((session): session is AiInvocationSession => Boolean(session?.id && session.taskId && session.taskType))
     .sort((left, right) => Date.parse(right.attempt.startedAt || right.createdAt) - Date.parse(left.attempt.startedAt || left.createdAt));
+}
+
+export async function markInvocationPatchesAccepted(
+  root: string,
+  taskId: string,
+  acceptedPatchTargets: string[]
+): Promise<{ updated: boolean; invocationId?: string }> {
+  const invocationPath = resolveInside(root, "tasks/invocations.jsonl");
+  const lines = await readInvocationLines(root);
+  if (!lines.length) return { updated: false };
+
+  let updated = false;
+  let invocationId = "";
+  const updatedAt = new Date().toISOString();
+  const nextLines = lines.map((line) => {
+    try {
+      const session = JSON.parse(line) as AiInvocationSession;
+      if (!session?.id || session.taskId !== taskId) {
+        return line;
+      }
+      updated = true;
+      invocationId = session.id;
+      return JSON.stringify({
+        ...session,
+        adoptionDecision: acceptedPatchTargets.length ? "accepted" : session.adoptionDecision,
+        adoptionUpdatedAt: updatedAt,
+        acceptedPatchTargets,
+        updatedAt
+      } satisfies AiInvocationSession);
+    } catch {
+      return line;
+    }
+  });
+
+  if (!updated) return { updated: false };
+  await fs.mkdir(path.dirname(invocationPath), { recursive: true });
+  await fs.writeFile(invocationPath, `${nextLines.join("\n")}\n`, "utf8");
+  return { updated: true, invocationId };
 }
 
 function previewText(input: string, limit = 240): string {

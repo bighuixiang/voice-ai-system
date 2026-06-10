@@ -1757,6 +1757,7 @@ describe("useNovelStore", () => {
     const store = useNovelStore();
     store.currentProject = project;
     store.currentChapter = project.chapters[0];
+    store.currentTask = taskWithResult();
     store.rewriteCandidate = {
       summary: "Patch",
       content: "",
@@ -1770,7 +1771,8 @@ describe("useNovelStore", () => {
 
     expect(mockNovelApi.applyPatches).toHaveBeenCalledWith("demo", [
       { target: "chapters/chapter-001.md", mode: "replace-file", content: "accepted" }
-    ]);
+    ], "task-1");
+    expect(mockNovelApi.readAiInvocations).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readFile).toHaveBeenCalledWith("demo", "chapters/chapter-001.md");
     expect(store.currentContent).toBe("draft:chapters/chapter-001.md");
   });
@@ -1813,6 +1815,6 @@ describe("useNovelStore", () => {
         content: "a sharper line",
         selection: { start: 7, end: 17 }
       }
-    ]);
+    ], "task-1");
   });
 });
