@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { CodexTaskType, NovelProject, SelectionPayload } from "./types.js";
+import type { ChapterSummary, CodexTaskType, LedgerEntry, NovelChapter, NovelProject, SelectionPayload } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 
 async function readOptional(root: string, relativePath: string): Promise<string> {
@@ -8,6 +8,16 @@ async function readOptional(root: string, relativePath: string): Promise<string>
     return await fs.readFile(resolveInside(root, relativePath), "utf8");
   } catch {
     return "";
+  }
+}
+
+async function readOptionalJson<T>(root: string, relativePath: string): Promise<T | undefined> {
+  const content = await readOptional(root, relativePath);
+  if (!content.trim()) return undefined;
+  try {
+    return JSON.parse(content) as T;
+  } catch {
+    return undefined;
   }
 }
 
@@ -28,6 +38,100 @@ const broadContextTypes: CodexTaskType[] = [
 
 const targetChapterTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
 const cockpitContextTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
+const memoryContextTypes: CodexTaskType[] = ["chapter.plan", "chapter.draft", "writing.briefing", "writing.recap", "continuity.check", "idea.suggest"];
+
+function orderedChapters(project: NovelProject): NovelChapter[] {
+  return [...project.chapters].sort((a, b) => {
+    const volumeOrderA = a.volumeOrder ?? 0;
+    const volumeOrderB = b.volumeOrder ?? 0;
+    if (volumeOrderA !== volumeOrderB) return volumeOrderA - volumeOrderB;
+    return (a.order ?? 0) - (b.order ?? 0);
+  });
+}
+
+function hasSummarySignal(summary: Partial<ChapterSummary>): boolean {
+  return Boolean(
+    summary.summary?.trim() ||
+      summary.keyEvents?.length ||
+      summary.newFacts?.length ||
+      summary.characterStateChanges?.length ||
+      summary.foreshadowingUpdates?.length ||
+      summary.continuityRisks?.length ||
+      summary.powerProgressionUpdates?.length
+  );
+}
+
+function compactSummary(summary: Partial<ChapterSummary>): Record<string, unknown> {
+  return {
+    chapterId: summary.chapterId,
+    summary: summary.summary || "",
+    keyEvents: summary.keyEvents || [],
+    newFacts: (summary.newFacts || []).map((item) => item.fact),
+    characterStateChanges: (summary.characterStateChanges || []).map((item) => ({
+      characterName: item.characterName,
+      after: item.after,
+      cause: item.cause
+    })),
+    ledgerUpdateIds: [
+      ...(summary.foreshadowingUpdates || []),
+      ...(summary.continuityRisks || []),
+      ...(summary.powerProgressionUpdates || [])
+    ].map((item) => item.id)
+  };
+}
+
+async function readChapterSummary(root: string, chapterId: string): Promise<Partial<ChapterSummary> | undefined> {
+  const summary = await readOptionalJson<Partial<ChapterSummary>>(root, `memory/chapter-summaries/${chapterId}.json`);
+  if (!summary || !hasSummarySignal(summary)) return undefined;
+  return { ...summary, chapterId: summary.chapterId || chapterId };
+}
+
+async function readLedgerEntries(root: string): Promise<LedgerEntry[]> {
+  const ledgers = await Promise.all(
+    ["foreshadowing", "continuity", "power-progression", "character-state", "risks"].map((name) =>
+      readOptionalJson<LedgerEntry[]>(root, `ledger/${name}.json`)
+    )
+  );
+  return ledgers.flatMap((items) => (Array.isArray(items) ? items : []));
+}
+
+async function buildChapterMemoryBlocks(
+  root: string,
+  project: NovelProject,
+  chapterId: string
+): Promise<Array<{ title: string; content: string }>> {
+  const chapters = orderedChapters(project);
+  const targetIndex = chapters.findIndex((item) => item.id === chapterId);
+  if (targetIndex === -1) return [];
+
+  const adjacentChapters = [...chapters.slice(Math.max(0, targetIndex - 2), targetIndex), ...chapters.slice(targetIndex + 1, targetIndex + 2)];
+  const adjacentIds = new Set(adjacentChapters.map((item) => item.id));
+  const adjacentSummaries = (
+    await Promise.all(adjacentChapters.map((chapter) => readChapterSummary(root, chapter.id)))
+  ).filter((summary): summary is Partial<ChapterSummary> => Boolean(summary));
+
+  const relatedChapterIds = new Set<string>();
+  for (const entry of await readLedgerEntries(root)) {
+    if (!entry.chapterIds?.includes(chapterId)) continue;
+    for (const relatedId of entry.chapterIds) {
+      if (relatedId !== chapterId && !adjacentIds.has(relatedId)) {
+        relatedChapterIds.add(relatedId);
+      }
+    }
+  }
+  const relatedSummaries = (
+    await Promise.all([...relatedChapterIds].slice(0, 6).map((relatedId) => readChapterSummary(root, relatedId)))
+  ).filter((summary): summary is Partial<ChapterSummary> => Boolean(summary));
+
+  const blocks: Array<{ title: string; content: string }> = [];
+  if (adjacentSummaries.length) {
+    blocks.push({ title: "相邻章节摘要", content: JSON.stringify(adjacentSummaries.map(compactSummary), null, 2) });
+  }
+  if (relatedSummaries.length) {
+    blocks.push({ title: "相关远章摘要", content: JSON.stringify(relatedSummaries.map(compactSummary), null, 2) });
+  }
+  return blocks;
+}
 
 export async function assembleContext(
   type: CodexTaskType,
@@ -68,6 +172,10 @@ export async function assembleContext(
       { title: "结构化角色状态", content: await readOptional(root, "ledger/character-state.json") },
       { title: "结构化风险账本", content: await readOptional(root, "ledger/risks.json") }
     );
+  }
+
+  if (chapter && memoryContextTypes.includes(type)) {
+    blocks.push(...(await buildChapterMemoryBlocks(root, project, chapter.id)));
   }
 
   if (chapter && targetChapterTypes.includes(type)) {

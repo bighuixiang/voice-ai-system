@@ -104,4 +104,90 @@ describe("contextAssembler", () => {
     expect(targetDraftIndex).toBeGreaterThan(-1);
     expect(sceneIndex).toBeLessThan(targetDraftIndex);
   });
+
+  it("injects adjacent and related distant chapter summaries into writing context", async () => {
+    const project = createProjectSkeleton({ title: "Memory Context", roughIdea: "Memory matters." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    project.chapters.push(
+      {
+        id: "chapter-002",
+        title: "第二章",
+        outlinePath: "outline/chapter-002.md",
+        contentPath: "chapters/chapter-002.md",
+        status: "planned",
+        order: 2,
+        volumeId: "volume-001",
+        volumeTitle: "第一卷",
+        volumeOrder: 1
+      },
+      {
+        id: "chapter-003",
+        title: "第三章",
+        outlinePath: "outline/chapter-003.md",
+        contentPath: "chapters/chapter-003.md",
+        status: "planned",
+        order: 3,
+        volumeId: "volume-001",
+        volumeTitle: "第一卷",
+        volumeOrder: 1
+      },
+      {
+        id: "chapter-010",
+        title: "第十章",
+        outlinePath: "outline/chapter-010.md",
+        contentPath: "chapters/chapter-010.md",
+        status: "planned",
+        order: 10,
+        volumeId: "volume-001",
+        volumeTitle: "第一卷",
+        volumeOrder: 1
+      }
+    );
+    await fs.mkdir(path.join(root, "memory", "chapter-summaries"), { recursive: true });
+    await fs.writeFile(
+      path.join(root, "memory", "chapter-summaries", "chapter-001.json"),
+      JSON.stringify({ chapterId: "chapter-001", summary: "第一章留下血月异象。" }, null, 2),
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(root, "memory", "chapter-summaries", "chapter-003.json"),
+      JSON.stringify({ chapterId: "chapter-003", summary: "第三章承接封印松动。" }, null, 2),
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(root, "memory", "chapter-summaries", "chapter-010.json"),
+      JSON.stringify({ chapterId: "chapter-010", summary: "第十章兑现尸王伏笔。" }, null, 2),
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(root, "ledger", "foreshadowing.json"),
+      JSON.stringify(
+        [
+          {
+            id: "far-link",
+            kind: "foreshadowing",
+            title: "血月伏笔",
+            status: "open",
+            severity: "medium",
+            chapterIds: ["chapter-002", "chapter-010"],
+            relatedEntities: ["血月"],
+            note: "第十章回收第二章的异象。",
+            updatedAt: "2026-06-10T00:00:00.000Z"
+          }
+        ],
+        null,
+        2
+      ),
+      "utf8"
+    );
+
+    const blocks = await assembleContext("writing.briefing", root, project, { chapterId: "chapter-002" });
+    const adjacent = blocks.find((block) => block.title === "相邻章节摘要");
+    const distant = blocks.find((block) => block.title === "相关远章摘要");
+
+    expect(adjacent?.content).toContain("第一章留下血月异象。");
+    expect(adjacent?.content).toContain("第三章承接封印松动。");
+    expect(distant?.content).toContain("第十章兑现尸王伏笔。");
+  });
 });
