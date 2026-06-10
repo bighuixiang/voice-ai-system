@@ -430,6 +430,11 @@
           @rebuild="store.rebuildKnowledgeIndex"
           @search="store.searchKnowledgeIndex"
         />
+        <BackgroundJobPanel
+          :jobs="store.backgroundJobs"
+          :is-loading="store.isRebuildingKnowledgeIndex || store.isRebuildingSeriesQualityMetrics || store.isRebuildingStoryGraph"
+          @refresh="store.loadBackgroundJobs"
+        />
       </div>
     </el-dialog>
     <el-dialog v-model="aiConfigDialogOpen" title="AI 配置" width="min(980px, 96vw)" destroy-on-close>
@@ -464,6 +469,7 @@ import StoryControlPanel from "./StoryControlPanel.vue";
 import QuickReferencePanel from "./QuickReferencePanel.vue";
 import StoryGraphPanel from "./StoryGraphPanel.vue";
 import KnowledgeIndexPanel from "./KnowledgeIndexPanel.vue";
+import BackgroundJobPanel from "./BackgroundJobPanel.vue";
 import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
 import SceneCardPanel from "./SceneCardPanel.vue";
 import ChapterEditor from "./ChapterEditor.vue";

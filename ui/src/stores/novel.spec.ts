@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { useNovelStore } from "./novel";
 import type {
   AiInvocationSession,
+  BackgroundJob,
   ChapterDashboard,
   ChapterFactPatch,
   ChapterQualityReport,
@@ -41,6 +42,7 @@ const mockNovelApi = vi.hoisted(() => ({
   readStoryGraph: vi.fn(),
   readKnowledgeIndex: vi.fn(),
   rebuildKnowledgeIndex: vi.fn(),
+  listBackgroundJobs: vi.fn(),
   startBackgroundJob: vi.fn(),
   readBackgroundJob: vi.fn(),
   searchKnowledgeIndex: vi.fn(),
@@ -198,6 +200,23 @@ function invocationForTask(taskId = "task-1"): AiInvocationSession {
     commitResult: { historyAppended: true, invocationAppended: true },
     createdAt: "2026-06-03T00:00:00.000Z",
     updatedAt: "2026-06-03T00:00:00.000Z"
+  };
+}
+
+function backgroundJob(overrides: Partial<BackgroundJob> = {}): BackgroundJob {
+  return {
+    id: "job-knowledge-1",
+    projectId: "demo",
+    type: "knowledge.index.rebuild",
+    status: "success",
+    inputSummary: "{}",
+    outputSummary: "1 facts / 0 relations",
+    resultRef: "/api/novel/projects/demo/knowledge/index",
+    startedAt: "2026-06-11T00:00:00.000Z",
+    finishedAt: "2026-06-11T00:00:01.000Z",
+    durationMs: 1000,
+    updatedAt: "2026-06-11T00:00:01.000Z",
+    ...overrides
   };
 }
 
@@ -394,27 +413,18 @@ describe("useNovelStore", () => {
       updatedAt: "2026-06-11T00:00:00.000Z"
     });
     mockNovelApi.rebuildKnowledgeIndex.mockImplementation(async () => mockNovelApi.readKnowledgeIndex());
-    mockNovelApi.startBackgroundJob.mockResolvedValue({
-      id: "job-knowledge-1",
-      projectId: "demo",
-      type: "knowledge.index.rebuild",
-      status: "running",
-      inputSummary: "{}",
-      startedAt: "2026-06-11T00:00:00.000Z",
-      updatedAt: "2026-06-11T00:00:00.000Z"
-    });
-    mockNovelApi.readBackgroundJob.mockResolvedValue({
-      id: "job-knowledge-1",
-      projectId: "demo",
-      type: "knowledge.index.rebuild",
-      status: "success",
-      inputSummary: "{}",
-      outputSummary: "1 facts / 0 relations",
-      resultRef: "/api/novel/projects/demo/knowledge/index",
-      startedAt: "2026-06-11T00:00:00.000Z",
-      finishedAt: "2026-06-11T00:00:01.000Z",
-      updatedAt: "2026-06-11T00:00:01.000Z"
-    });
+    mockNovelApi.listBackgroundJobs.mockResolvedValue([]);
+    mockNovelApi.startBackgroundJob.mockResolvedValue(
+      backgroundJob({
+        status: "running",
+        outputSummary: undefined,
+        resultRef: undefined,
+        finishedAt: undefined,
+        durationMs: undefined,
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      })
+    );
+    mockNovelApi.readBackgroundJob.mockResolvedValue(backgroundJob());
     mockNovelApi.searchKnowledgeIndex.mockResolvedValue({
       query: "Hero gate",
       tokens: ["hero", "gate"],
@@ -645,6 +655,7 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
+    expect(mockNovelApi.listBackgroundJobs).toHaveBeenCalledWith("demo");
     expect(store.currentDashboard?.chapterId).toBe("chapter-002");
     expect(store.currentChapterSummary?.chapterId).toBe("chapter-002");
     expect(store.currentRuntimeSnapshot?.chapterId).toBe("chapter-002");
@@ -673,6 +684,17 @@ describe("useNovelStore", () => {
 
     await expect(store.searchKnowledgeIndex("   ")).resolves.toBeNull();
     expect(store.knowledgeSearchResult).toBeNull();
+  });
+
+  it("loads project background jobs", async () => {
+    mockNovelApi.listBackgroundJobs.mockResolvedValueOnce([backgroundJob()]);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await store.loadBackgroundJobs();
+
+    expect(mockNovelApi.listBackgroundJobs).toHaveBeenCalledWith("demo");
+    expect(store.backgroundJobs).toEqual([expect.objectContaining({ id: "job-knowledge-1", status: "success" })]);
   });
 
   it("loads, saves, and requests story-level orchestration", async () => {
@@ -1287,6 +1309,7 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readBackgroundJob).toHaveBeenCalledWith("demo", "job-knowledge-1");
     expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.saveLedgerEntries).not.toHaveBeenCalled();
+    expect(store.backgroundJobs[0]).toMatchObject({ id: "job-knowledge-1", status: "success" });
     expect(store.ledgerEntries).toEqual([update]);
     expect(store.currentChapterSummary?.summary).toBe("The clue now has a cost.");
     expect(store.recapCandidate).toBeNull();
@@ -1449,6 +1472,7 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readBackgroundJob).toHaveBeenCalledWith("demo", "job-knowledge-1");
     expect(mockNovelApi.readSeriesQualityMetrics).toHaveBeenCalledWith("demo");
     expect(store.currentSeriesQualityMetrics).toMatchObject({ projectSlug: "demo" });
+    expect(store.backgroundJobs[0]).toMatchObject({ id: "job-knowledge-1", status: "success" });
     expect(store.isRebuildingSeriesQualityMetrics).toBe(false);
   });
 
@@ -1462,6 +1486,7 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readBackgroundJob).toHaveBeenCalledWith("demo", "job-knowledge-1");
     expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
     expect(store.storyGraph).toMatchObject({ projectSlug: "demo" });
+    expect(store.backgroundJobs[0]).toMatchObject({ id: "job-knowledge-1", status: "success" });
     expect(store.isRebuildingStoryGraph).toBe(false);
   });
 

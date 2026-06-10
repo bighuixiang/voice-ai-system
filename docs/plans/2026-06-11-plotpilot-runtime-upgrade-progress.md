@@ -56,13 +56,14 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - UI API clients can start jobs and poll job status.
   - Workspace knowledge-index rebuilds now use background jobs before refreshing the index.
   - Workspace quality overview and story graph rebuilds can also run through background jobs.
+  - Story control now shows recent background jobs with status, output summary, duration, and manual refresh.
 
 ## Verification
 
 Latest full verification passed:
 
 - API tests: 74 passed, 1 real Codex integration skipped.
-- UI tests: 147 passed.
+- UI tests: 150 passed.
 - API build passed.
 - UI build passed.
 

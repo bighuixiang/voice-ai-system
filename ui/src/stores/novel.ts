@@ -124,6 +124,7 @@ export const useNovelStore = defineStore("novel", () => {
   const taskProgress = ref<TaskProgressStep[]>([]);
   const taskHistory = ref<NovelTask[]>([]);
   const aiInvocations = ref<AiInvocationSession[]>([]);
+  const backgroundJobs = ref<BackgroundJob[]>([]);
   const rewriteCandidate = ref<CodexTaskResult | null>(null);
   const recapCandidate = ref<WritingRecapCandidate | null>(null);
   const currentQualityReport = ref<ChapterQualityReport | null>(null);
@@ -841,6 +842,15 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
+  async function loadBackgroundJobs() {
+    if (!currentProject.value) return;
+    try {
+      backgroundJobs.value = await novelApi.listBackgroundJobs(currentProject.value.slug);
+    } catch {
+      backgroundJobs.value = [];
+    }
+  }
+
   async function refreshAiInvocations() {
     if (!currentProject.value) return;
     try {
@@ -908,6 +918,7 @@ export const useNovelStore = defineStore("novel", () => {
     taskProgress.value = [];
     taskHistory.value = [];
     aiInvocations.value = [];
+    backgroundJobs.value = [];
     rewriteCandidate.value = null;
     recapCandidate.value = null;
     currentQualityReport.value = null;
@@ -1269,16 +1280,25 @@ export const useNovelStore = defineStore("novel", () => {
       throw new Error("未打开项目");
     }
     const startedJob = await novelApi.startBackgroundJob(currentProject.value.slug, type, payload);
+    upsertBackgroundJob(startedJob);
     const finishedJob = await waitForBackgroundJob(currentProject.value.slug, startedJob.id);
+    upsertBackgroundJob(finishedJob);
     if (finishedJob.status === "error") {
       throw new Error(finishedJob.error || errorMessage);
     }
     return finishedJob;
   }
 
+  function upsertBackgroundJob(job: BackgroundJob) {
+    backgroundJobs.value = [job, ...backgroundJobs.value.filter((item) => item.id !== job.id)].sort(
+      (left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt)
+    );
+  }
+
   async function waitForBackgroundJob(projectId: string, jobId: string): Promise<BackgroundJob> {
     for (let attempt = 0; attempt < 60; attempt += 1) {
       const job = await novelApi.readBackgroundJob(projectId, jobId);
+      upsertBackgroundJob(job);
       if (job.status === "success" || job.status === "error") {
         return job;
       }
@@ -1631,6 +1651,7 @@ export const useNovelStore = defineStore("novel", () => {
     await loadLedger(activeLedgerKind.value);
     await loadTaskHistory();
     await loadAiInvocations();
+    await loadBackgroundJobs();
   }
 
   function showProjectHub(options: WorkspaceSwitchOptions = {}) {
@@ -1918,6 +1939,7 @@ export const useNovelStore = defineStore("novel", () => {
     taskProgress,
     taskHistory,
     aiInvocations,
+    backgroundJobs,
     rewriteCandidate,
     recapCandidate,
     currentQualityReport,
@@ -1996,6 +2018,7 @@ export const useNovelStore = defineStore("novel", () => {
     loadStoryControl,
     loadStoryGraph,
     loadKnowledgeIndex,
+    loadBackgroundJobs,
     rebuildKnowledgeIndex,
     rebuildSeriesQualityMetrics,
     rebuildStoryGraph,

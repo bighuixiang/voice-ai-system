@@ -108,6 +108,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
       chapterIndex: { projectSlug: "demo", chapters: [], keywords: {}, updatedAt: "2026-06-11T00:00:00.000Z" },
       updatedAt: "2026-06-11T00:00:00.000Z"
     },
+    backgroundJobs: [],
     isSavingStoryControl: false,
     isRebuildingKnowledgeIndex: false,
     isRebuildingSeriesQualityMetrics: false,
@@ -194,6 +195,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     updateStoryControl: vi.fn(),
     saveStoryControl: vi.fn(),
     loadStoryGraph: vi.fn().mockResolvedValue(undefined),
+    loadBackgroundJobs: vi.fn().mockResolvedValue(undefined),
     rebuildStoryGraph: vi.fn().mockResolvedValue(undefined),
     rebuildKnowledgeIndex: vi.fn().mockResolvedValue(undefined),
     rebuildSeriesQualityMetrics: vi.fn().mockResolvedValue(undefined),
@@ -274,6 +276,10 @@ const stubs = {
   },
   StoryGraphPanel: { template: "<div class='story-graph-stub'>story graph</div>" },
   KnowledgeIndexPanel: { template: "<div class='knowledge-index-stub'>knowledge index</div>" },
+  BackgroundJobPanel: {
+    emits: ["refresh"],
+    template: "<button class='background-job-stub' @click='$emit(\"refresh\")'>background jobs</button>"
+  },
   ChapterDashboardPanel: { template: "<div class='dashboard-stub'>dashboard</div>" },
   SceneCardPanel: { template: "<div class='scene-stub'>scene</div>" },
   ChapterEditor: { template: "<div class='editor-stub'>editor</div>" },
@@ -464,6 +470,9 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".story-control-stub").exists()).toBe(true);
     expect(wrapper.find(".story-graph-stub").exists()).toBe(true);
     expect(wrapper.find(".knowledge-index-stub").exists()).toBe(true);
+    expect(wrapper.find(".background-job-stub").exists()).toBe(true);
+    await wrapper.find(".background-job-stub").trigger("click");
+    expect(storeRef.value.loadBackgroundJobs).toHaveBeenCalled();
     await wrapper.find(".story-control-stub").trigger("click");
     expect(storeRef.value.requestStoryOrchestration).toHaveBeenCalled();
   });
