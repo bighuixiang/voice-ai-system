@@ -405,6 +405,11 @@
           @orchestrate="store.requestStoryOrchestration"
         />
         <StoryGraphPanel :graph="store.storyGraph" @refresh="store.loadStoryGraph" />
+        <KnowledgeIndexPanel
+          :index="store.knowledgeIndex"
+          :is-rebuilding="store.isRebuildingKnowledgeIndex"
+          @rebuild="store.rebuildKnowledgeIndex"
+        />
       </div>
     </el-dialog>
     <el-dialog v-model="aiConfigDialogOpen" title="AI 配置" width="min(980px, 96vw)" destroy-on-close>
@@ -437,6 +442,7 @@ import FocusWritingPanel from "./FocusWritingPanel.vue";
 import StructureQuickStartPanel from "./StructureQuickStartPanel.vue";
 import StoryControlPanel from "./StoryControlPanel.vue";
 import StoryGraphPanel from "./StoryGraphPanel.vue";
+import KnowledgeIndexPanel from "./KnowledgeIndexPanel.vue";
 import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
 import SceneCardPanel from "./SceneCardPanel.vue";
 import ChapterEditor from "./ChapterEditor.vue";

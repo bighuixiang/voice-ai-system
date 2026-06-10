@@ -1,0 +1,72 @@
+import { describe, expect, it } from "vitest";
+import { mount } from "@vue/test-utils";
+import KnowledgeIndexPanel from "./KnowledgeIndexPanel.vue";
+
+const stubs = {
+  "el-button": {
+    emits: ["click"],
+    template: `<button @click="$emit('click')"><slot /></button>`
+  }
+};
+
+describe("KnowledgeIndexPanel", () => {
+  it("renders index stats and emits rebuild", async () => {
+    const wrapper = mount(KnowledgeIndexPanel, {
+      props: {
+        isRebuilding: false,
+        index: {
+          projectSlug: "demo",
+          facts: [
+            {
+              id: "fact:gate",
+              text: "The gate opens.",
+              chapterIds: ["chapter-001"],
+              relatedEntities: ["Hero"],
+              keywords: ["gate"],
+              source: { type: "chapter-summary", id: "fact-1" },
+              updatedAt: "2026-06-11T00:00:00.000Z"
+            }
+          ],
+          triples: [
+            {
+              id: "triple:hero",
+              subject: "Hero",
+              predicate: "state_after",
+              object: "Wounded.",
+              chapterIds: ["chapter-001"],
+              sourceFactIds: ["fact:gate"],
+              updatedAt: "2026-06-11T00:00:00.000Z"
+            }
+          ],
+          chapterIndex: {
+            projectSlug: "demo",
+            chapters: [
+              {
+                chapterId: "chapter-001",
+                title: "Chapter 1",
+                keywords: ["gate"],
+                factIds: ["fact:gate"],
+                tripleIds: ["triple:hero"],
+                entityNames: ["Hero"],
+                updatedAt: "2026-06-11T00:00:00.000Z"
+              }
+            ],
+            keywords: { gate: ["chapter-001"] },
+            updatedAt: "2026-06-11T00:00:00.000Z"
+          },
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        }
+      },
+      global: { stubs }
+    });
+
+    expect(wrapper.text()).toContain("检索记忆层");
+    expect(wrapper.text()).toContain("1 个事实 / 1 条关系");
+    expect(wrapper.text()).toContain("gate");
+    expect(wrapper.text()).toContain("Chapter 1");
+
+    await wrapper.find("button").trigger("click");
+
+    expect(wrapper.emitted("rebuild")).toHaveLength(1);
+  });
+});

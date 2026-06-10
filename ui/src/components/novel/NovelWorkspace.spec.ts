@@ -101,7 +101,15 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
       edges: [],
       updatedAt: "2026-06-11T00:00:00.000Z"
     },
+    knowledgeIndex: {
+      projectSlug: "demo",
+      facts: [],
+      triples: [],
+      chapterIndex: { projectSlug: "demo", chapters: [], keywords: {}, updatedAt: "2026-06-11T00:00:00.000Z" },
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    },
     isSavingStoryControl: false,
+    isRebuildingKnowledgeIndex: false,
     canRequestStoryOrchestration: true,
     currentDocumentKind: "content",
     currentDocumentLabel: "章节正文",
@@ -182,6 +190,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     updateStoryControl: vi.fn(),
     saveStoryControl: vi.fn(),
     loadStoryGraph: vi.fn().mockResolvedValue(undefined),
+    rebuildKnowledgeIndex: vi.fn().mockResolvedValue(undefined),
     requestStoryOrchestration: vi.fn(),
     updateContent: vi.fn(),
     openChapterDocument: vi.fn(),
@@ -258,6 +267,7 @@ const stubs = {
     template: "<button class='story-control-stub' @click='$emit(\"orchestrate\")'>story control</button>"
   },
   StoryGraphPanel: { template: "<div class='story-graph-stub'>story graph</div>" },
+  KnowledgeIndexPanel: { template: "<div class='knowledge-index-stub'>knowledge index</div>" },
   ChapterDashboardPanel: { template: "<div class='dashboard-stub'>dashboard</div>" },
   SceneCardPanel: { template: "<div class='scene-stub'>scene</div>" },
   ChapterEditor: { template: "<div class='editor-stub'>editor</div>" },
@@ -447,6 +457,7 @@ describe("NovelWorkspace writing modes", () => {
 
     expect(wrapper.find(".story-control-stub").exists()).toBe(true);
     expect(wrapper.find(".story-graph-stub").exists()).toBe(true);
+    expect(wrapper.find(".knowledge-index-stub").exists()).toBe(true);
     await wrapper.find(".story-control-stub").trigger("click");
     expect(storeRef.value.requestStoryOrchestration).toHaveBeenCalled();
   });

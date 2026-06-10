@@ -15,6 +15,7 @@ import type {
   CreationLoopStep,
   EditorSelection,
   FocusWritingGuide,
+  KnowledgeIndexProjection,
   LedgerEntry,
   NovelFilePatch,
   NovelChapter,
@@ -62,6 +63,7 @@ interface WorkspaceCache {
   sceneCards: SceneCard[];
   storyControl: StoryControl | null;
   storyGraph: StoryGraphProjection | null;
+  knowledgeIndex: KnowledgeIndexProjection | null;
   structureIdeaInput: string;
   structureDraftVersion: number;
   ledgerKind: LedgerKind;
@@ -126,6 +128,7 @@ export const useNovelStore = defineStore("novel", () => {
   const sceneCards = ref<SceneCard[]>([]);
   const storyControl = ref<StoryControl | null>(null);
   const storyGraph = ref<StoryGraphProjection | null>(null);
+  const knowledgeIndex = ref<KnowledgeIndexProjection | null>(null);
   const structureIdeaInput = ref("");
   const structureDraftVersion = ref(0);
   const activeLedgerKind = ref<LedgerKind>("foreshadowing");
@@ -134,6 +137,7 @@ export const useNovelStore = defineStore("novel", () => {
   const isSavingDashboard = ref(false);
   const isSavingScenes = ref(false);
   const isSavingStoryControl = ref(false);
+  const isRebuildingKnowledgeIndex = ref(false);
   const isReverseEngineeringStructure = ref(false);
   const agentProfiles = ref<AiAgentProfile[]>([]);
   const agentChecks = ref<AiAgentCheckResult[]>([]);
@@ -894,6 +898,7 @@ export const useNovelStore = defineStore("novel", () => {
     sceneCards.value = [];
     storyControl.value = null;
     storyGraph.value = null;
+    knowledgeIndex.value = null;
     structureIdeaInput.value = "";
     structureDraftVersion.value = 0;
     activeLedgerKind.value = "foreshadowing";
@@ -933,6 +938,7 @@ export const useNovelStore = defineStore("novel", () => {
         sceneCards: sceneCards.value,
         storyControl: storyControl.value,
         storyGraph: storyGraph.value,
+        knowledgeIndex: knowledgeIndex.value,
         structureIdeaInput: structureIdeaInput.value,
         structureDraftVersion: structureDraftVersion.value,
         ledgerKind: activeLedgerKind.value,
@@ -973,6 +979,7 @@ export const useNovelStore = defineStore("novel", () => {
     sceneCards.value = cached.sceneCards;
     storyControl.value = cached.storyControl;
     storyGraph.value = cached.storyGraph || null;
+    knowledgeIndex.value = cached.knowledgeIndex || null;
     structureIdeaInput.value = cached.structureIdeaInput || "";
     structureDraftVersion.value = cached.structureDraftVersion || 0;
     activeLedgerKind.value = cached.ledgerKind;
@@ -1164,6 +1171,26 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
+  async function loadKnowledgeIndex() {
+    if (!currentProject.value) return;
+    try {
+      knowledgeIndex.value = await novelApi.readKnowledgeIndex(currentProject.value.slug);
+    } catch {
+      knowledgeIndex.value = null;
+    }
+  }
+
+  async function rebuildKnowledgeIndex() {
+    if (!currentProject.value) return;
+    isRebuildingKnowledgeIndex.value = true;
+    try {
+      knowledgeIndex.value = await novelApi.rebuildKnowledgeIndex(currentProject.value.slug);
+      await loadStoryGraph();
+    } finally {
+      isRebuildingKnowledgeIndex.value = false;
+    }
+  }
+
   function updateStoryControl(patch: Partial<StoryControl>) {
     if (!storyControl.value) return;
     storyControl.value = {
@@ -1180,6 +1207,7 @@ export const useNovelStore = defineStore("novel", () => {
     try {
       storyControl.value = await novelApi.saveStoryControl(currentProject.value.slug, storyControl.value);
       await loadStoryGraph();
+      await loadKnowledgeIndex();
     } finally {
       isSavingStoryControl.value = false;
     }
@@ -1451,6 +1479,7 @@ export const useNovelStore = defineStore("novel", () => {
     const accepted = await novelApi.acceptWritingRecap(currentProject.value.slug, recapCandidate.value);
     currentChapterSummary.value = accepted.summary;
     ledgerEntries.value = await novelApi.readLedgerEntries(currentProject.value.slug, activeLedgerKind.value);
+    await rebuildKnowledgeIndex();
     recapCandidate.value = null;
   }
 
@@ -1477,6 +1506,7 @@ export const useNovelStore = defineStore("novel", () => {
     await openSupportFile(currentSupportPath.value, { skipLeaveCheck: true });
     await loadStoryControl();
     await loadStoryGraph();
+    await loadKnowledgeIndex();
     await loadLedger(activeLedgerKind.value);
     await loadTaskHistory();
     await loadAiInvocations();
@@ -1755,6 +1785,7 @@ export const useNovelStore = defineStore("novel", () => {
     sceneCards,
     storyControl,
     storyGraph,
+    knowledgeIndex,
     structureIdeaInput,
     structureDraftVersion,
     activeLedgerKind,
@@ -1763,6 +1794,7 @@ export const useNovelStore = defineStore("novel", () => {
     isSavingDashboard,
     isSavingScenes,
     isSavingStoryControl,
+    isRebuildingKnowledgeIndex,
     isReverseEngineeringStructure,
     agentProfiles,
     agentChecks,
@@ -1805,6 +1837,8 @@ export const useNovelStore = defineStore("novel", () => {
     loadChapterCockpit,
     loadStoryControl,
     loadStoryGraph,
+    loadKnowledgeIndex,
+    rebuildKnowledgeIndex,
     updateDashboard,
     saveCurrentDashboard,
     updateSceneCards,

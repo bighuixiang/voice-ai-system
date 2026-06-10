@@ -8,6 +8,7 @@ import type {
   ChapterSummary,
   CodexTaskType,
   EditorSelection,
+  KnowledgeIndexProjection,
   LedgerEntry,
   NovelFilePatch,
   NovelProject,
@@ -198,6 +199,18 @@ export const novelApi = {
   async readStoryGraph(projectId: string): Promise<StoryGraphProjection> {
     const data = await request<{ graph: StoryGraphProjection }>(`/api/novel/projects/${projectId}/story-graph`);
     return data.graph;
+  },
+
+  async readKnowledgeIndex(projectId: string): Promise<KnowledgeIndexProjection> {
+    const data = await request<{ index: KnowledgeIndexProjection }>(`/api/novel/projects/${projectId}/knowledge/index`);
+    return data.index;
+  },
+
+  async rebuildKnowledgeIndex(projectId: string): Promise<KnowledgeIndexProjection> {
+    const data = await request<{ index: KnowledgeIndexProjection }>(`/api/novel/projects/${projectId}/knowledge/index/rebuild`, {
+      method: "POST"
+    });
+    return data.index;
   },
 
   async readLedgerEntries(projectId: string, kind: LedgerEntry["kind"]): Promise<LedgerEntry[]> {

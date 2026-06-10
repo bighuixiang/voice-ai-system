@@ -37,6 +37,8 @@ const mockNovelApi = vi.hoisted(() => ({
   readStoryControl: vi.fn(),
   saveStoryControl: vi.fn(),
   readStoryGraph: vi.fn(),
+  readKnowledgeIndex: vi.fn(),
+  rebuildKnowledgeIndex: vi.fn(),
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
   acceptWritingRecap: vi.fn(),
@@ -321,6 +323,19 @@ describe("useNovelStore", () => {
       edges: [],
       updatedAt: "2026-06-11T00:00:00.000Z"
     });
+    mockNovelApi.readKnowledgeIndex.mockResolvedValue({
+      projectSlug: "demo",
+      facts: [{ id: "fact:gate", text: "The gate opens.", chapterIds: ["chapter-001"], relatedEntities: ["Hero"], keywords: ["gate"], source: { type: "chapter-summary", id: "fact-1" }, updatedAt: "2026-06-11T00:00:00.000Z" }],
+      triples: [],
+      chapterIndex: {
+        projectSlug: "demo",
+        chapters: [{ chapterId: "chapter-001", title: "Chapter 1", keywords: ["gate"], factIds: ["fact:gate"], tripleIds: [], entityNames: ["Hero"], updatedAt: "2026-06-11T00:00:00.000Z" }],
+        keywords: { gate: ["chapter-001"] },
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      },
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
+    mockNovelApi.rebuildKnowledgeIndex.mockImplementation(async () => mockNovelApi.readKnowledgeIndex());
     mockNovelApi.readLedgerEntries.mockResolvedValue([]);
     mockNovelApi.saveLedgerEntries.mockImplementation(async (_projectId: string, _kind: LedgerEntry["kind"], entries: LedgerEntry[]) => entries);
     mockNovelApi.acceptWritingRecap.mockImplementation(async (_projectId: string, recap: WritingRecapCandidate) => ({
@@ -518,11 +533,13 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readChapterSummary).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readChapterQualityReport).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
     expect(store.currentDashboard?.chapterId).toBe("chapter-002");
     expect(store.currentChapterSummary?.chapterId).toBe("chapter-002");
     expect(store.currentQualityReport?.overallScore).toBe(78);
     expect(store.storyGraph?.nodes).toEqual([expect.objectContaining({ type: "chapter" })]);
+    expect(store.knowledgeIndex?.facts).toEqual([expect.objectContaining({ id: "fact:gate" })]);
     expect(store.sceneCards).toEqual(scenes);
     expect(store.activeLedgerKind).toBe("foreshadowing");
   });
@@ -544,6 +561,7 @@ describe("useNovelStore", () => {
       "demo",
       expect.objectContaining({ premise: "Updated whole-novel premise." })
     );
+    expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
 
     await store.requestStoryOrchestration();
 
@@ -1134,6 +1152,7 @@ describe("useNovelStore", () => {
     await store.acceptWritingRecap();
 
     expect(mockNovelApi.acceptWritingRecap).toHaveBeenCalledWith("demo", expect.objectContaining({ chapterId: "chapter-002" }));
+    expect(mockNovelApi.rebuildKnowledgeIndex).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.saveLedgerEntries).not.toHaveBeenCalled();
     expect(store.ledgerEntries).toEqual([update]);
     expect(store.currentChapterSummary?.summary).toBe("The clue now has a cost.");
