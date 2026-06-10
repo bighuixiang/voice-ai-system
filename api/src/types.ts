@@ -457,12 +457,30 @@ export interface KnowledgeSearchQuery {
   limit?: number;
 }
 
+export interface KnowledgeVectorEntry {
+  id: string;
+  kind: "fact" | "triple" | "chapter";
+  label: string;
+  text: string;
+  chapterIds: string[];
+  sourceIds: string[];
+  vector: number[];
+  updatedAt: string;
+}
+
+export interface KnowledgeVectorIndex {
+  projectSlug: string;
+  dimensions: number;
+  entries: KnowledgeVectorEntry[];
+  updatedAt: string;
+}
+
 export interface KnowledgeSearchResult {
   query: string;
   tokens: string[];
-  facts: Array<KnowledgeFact & { score: number }>;
-  triples: Array<KnowledgeTriple & { score: number }>;
-  chapters: Array<ChapterIndexEntry & { score: number }>;
+  facts: Array<KnowledgeFact & { score: number; vectorScore?: number }>;
+  triples: Array<KnowledgeTriple & { score: number; vectorScore?: number }>;
+  chapters: Array<ChapterIndexEntry & { score: number; vectorScore?: number }>;
 }
 
 export type CreationLoopStepStatus = "done" | "active" | "waiting" | "blocked";

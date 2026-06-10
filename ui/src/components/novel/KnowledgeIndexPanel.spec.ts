@@ -56,9 +56,9 @@ const index: KnowledgeIndexProjection = {
 const searchResult: KnowledgeSearchResult = {
   query: "Hero gate",
   tokens: ["hero", "gate"],
-  facts: [{ ...index.facts[0], score: 2 }],
-  triples: [{ ...index.triples[0], score: 1 }],
-  chapters: [{ ...index.chapterIndex.chapters[0], score: 3 }]
+  facts: [{ ...index.facts[0], score: 2, vectorScore: 0.64 }],
+  triples: [{ ...index.triples[0], score: 1, vectorScore: 0.22 }],
+  chapters: [{ ...index.chapterIndex.chapters[0], score: 3, vectorScore: 0.51 }]
 };
 
 describe("KnowledgeIndexPanel", () => {
@@ -97,6 +97,8 @@ describe("KnowledgeIndexPanel", () => {
 
     expect(wrapper.emitted("search")).toEqual([["Hero gate"]]);
     expect(wrapper.text()).toContain("The gate opens.");
+    expect(wrapper.text()).toContain("3 vectors");
+    expect(wrapper.text()).toContain("向量 0.64");
     expect(wrapper.text()).toContain("Hero · state_after · Wounded.");
     expect(wrapper.text()).toContain("Chapter 1");
   });

@@ -137,6 +137,7 @@ describe("knowledgeIndex", () => {
     expect(persisted.facts).toHaveLength(projection.facts.length);
     expect(persisted.triples).toHaveLength(projection.triples.length);
     await expect(fs.readFile(path.join(root, "knowledge", "facts.jsonl"), "utf8")).resolves.toContain("fact-gate-blood");
+    await expect(fs.readFile(path.join(root, "knowledge", "vectors.json"), "utf8")).resolves.toContain('"dimensions": 64');
     await expect(fs.readFile(path.join(root, "memory", "chapter-index.json"), "utf8")).resolves.toContain("chapter-001");
   });
 
@@ -184,11 +185,11 @@ describe("knowledgeIndex", () => {
 
     expect(result.tokens).toEqual(expect.arrayContaining(["hero", "blood", "gate"]));
     expect(result.facts).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: "fact:fact-gate-blood", score: expect.any(Number) })
+      expect.objectContaining({ id: "fact:fact-gate-blood", score: expect.any(Number), vectorScore: expect.any(Number) })
     ]));
     expect(result.triples).toEqual(expect.arrayContaining([
-      expect.objectContaining({ subject: "Hero", predicate: "state_after", score: expect.any(Number) })
+      expect.objectContaining({ subject: "Hero", predicate: "state_after", score: expect.any(Number), vectorScore: expect.any(Number) })
     ]));
-    expect(result.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001", score: expect.any(Number) }));
+    expect(result.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001", score: expect.any(Number), vectorScore: expect.any(Number) }));
   });
 });

@@ -37,6 +37,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
 - Searchable memory layer:
   - Knowledge facts and triples persist under `knowledge/facts.jsonl` and `knowledge/triples.jsonl`.
   - Chapter memory index persists under `memory/chapter-index.json`.
+  - Local vector recall persists under `knowledge/vectors.json` and contributes `vectorScore` to search results.
   - UI supports knowledge search and a quick reference lookup across characters, locations, terms, and facts.
 
 - Runtime snapshot:
@@ -78,6 +79,7 @@ Known warnings remain unchanged:
 - `08e6c46 feat: export project audit report`
 - `b71198d feat: project quality trends`
 - `1c67938 feat: expand story graph visualization`
+- `617e60d feat: orchestrate project background jobs`
 
 Earlier supporting commits in this branch:
 
@@ -88,4 +90,4 @@ Earlier supporting commits in this branch:
 
 ## Remaining Work
 
-- P2 real vector search or embedding-backed recall.
+- External embedding provider integration for semantic recall, if needed beyond the local vector index.

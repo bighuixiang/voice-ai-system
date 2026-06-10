@@ -9,6 +9,7 @@ import type {
   KnowledgeSearchResult,
   KnowledgeSourceRef,
   KnowledgeTriple,
+  KnowledgeVectorIndex,
   LedgerEntry,
   NovelChapter,
   NovelProject
@@ -17,6 +18,8 @@ import { resolveInside } from "./pathSafety.js";
 import { readChapterSummary, readLedgerEntries, readStoryControl } from "./writingCockpit.js";
 
 const ledgerKinds: LedgerEntry["kind"][] = ["foreshadowing", "continuity", "power", "character", "risk"];
+const vectorDimensions = 64;
+const vectorMatchThreshold = 0.15;
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -51,6 +54,37 @@ function keywordsFrom(parts: string[], limit = 24): string[] {
 
 function searchTokens(input: string): string[] {
   return keywordsFrom([input], 32);
+}
+
+function hashString(input: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function vectorize(parts: string[]): number[] {
+  const vector = Array.from({ length: vectorDimensions }, () => 0);
+  const tokens = keywordsFrom(parts, 96);
+  for (const token of tokens) {
+    const hash = hashString(token);
+    const bucket = hash % vectorDimensions;
+    const sign = hash & 1 ? 1 : -1;
+    const weight = 1 + Math.min(token.length, 16) / 16;
+    vector[bucket] += sign * weight;
+  }
+
+  const magnitude = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0));
+  if (!magnitude) return vector;
+  return vector.map((value) => Number((value / magnitude).toFixed(6)));
+}
+
+function cosineScore(left: number[], right: number[]): number {
+  if (!left.length || !right.length || left.length !== right.length) return 0;
+  const score = left.reduce((sum, value, index) => sum + value * right[index], 0);
+  return Math.max(0, Number(score.toFixed(6)));
 }
 
 function scoreText(tokens: string[], parts: string[], exactBoost = 0): number {
@@ -325,6 +359,52 @@ function buildChapterIndex(project: NovelProject, facts: KnowledgeFact[], triple
   };
 }
 
+function buildKnowledgeVectorIndex(
+  project: NovelProject,
+  facts: KnowledgeFact[],
+  triples: KnowledgeTriple[],
+  chapterIndex: ChapterMemoryIndex,
+  updatedAt: string
+): KnowledgeVectorIndex {
+  return {
+    projectSlug: project.slug,
+    dimensions: vectorDimensions,
+    entries: [
+      ...facts.map((fact) => ({
+        id: fact.id,
+        kind: "fact" as const,
+        label: fact.source.label || fact.source.type,
+        text: fact.text,
+        chapterIds: fact.chapterIds,
+        sourceIds: [fact.source.id],
+        vector: vectorize([fact.text, ...fact.keywords, ...fact.relatedEntities, fact.source.label || ""]),
+        updatedAt
+      })),
+      ...triples.map((triple) => ({
+        id: triple.id,
+        kind: "triple" as const,
+        label: triple.predicate,
+        text: `${triple.subject} ${triple.predicate} ${triple.object}`,
+        chapterIds: triple.chapterIds,
+        sourceIds: triple.sourceFactIds,
+        vector: vectorize([triple.subject, triple.predicate, triple.object]),
+        updatedAt
+      })),
+      ...chapterIndex.chapters.map((chapter) => ({
+        id: chapter.chapterId,
+        kind: "chapter" as const,
+        label: chapter.title,
+        text: [chapter.title, ...chapter.keywords, ...chapter.entityNames].join(" "),
+        chapterIds: [chapter.chapterId],
+        sourceIds: [...chapter.factIds, ...chapter.tripleIds],
+        vector: vectorize([chapter.title, ...chapter.keywords, ...chapter.entityNames]),
+        updatedAt
+      }))
+    ],
+    updatedAt
+  };
+}
+
 async function writeJsonl(root: string, relativePath: string, items: unknown[]): Promise<void> {
   const target = resolveInside(root, relativePath);
   await fs.mkdir(path.dirname(target), { recursive: true });
@@ -350,6 +430,28 @@ async function writeChapterIndex(root: string, index: ChapterMemoryIndex): Promi
   const target = resolveInside(root, "memory/chapter-index.json");
   await fs.mkdir(path.dirname(target), { recursive: true });
   await fs.writeFile(target, `${JSON.stringify(index, null, 2)}\n`, "utf8");
+}
+
+async function writeKnowledgeVectorIndex(root: string, index: KnowledgeVectorIndex): Promise<void> {
+  const target = resolveInside(root, "knowledge/vectors.json");
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.writeFile(target, `${JSON.stringify(index, null, 2)}\n`, "utf8");
+}
+
+async function readKnowledgeVectorIndex(root: string, project: NovelProject): Promise<KnowledgeVectorIndex> {
+  try {
+    const raw = await fs.readFile(resolveInside(root, "knowledge/vectors.json"), "utf8");
+    const index = JSON.parse(raw) as KnowledgeVectorIndex;
+    if (index.dimensions !== vectorDimensions) {
+      return { projectSlug: project.slug, dimensions: vectorDimensions, entries: [], updatedAt: nowIso() };
+    }
+    return index;
+  } catch (error) {
+    if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") {
+      return { projectSlug: project.slug, dimensions: vectorDimensions, entries: [], updatedAt: nowIso() };
+    }
+    throw error;
+  }
 }
 
 async function readChapterIndex(root: string, project: NovelProject): Promise<ChapterMemoryIndex> {
@@ -393,9 +495,11 @@ export async function buildKnowledgeIndexProjection(root: string, project: Novel
 
 export async function rebuildKnowledgeIndex(root: string, project: NovelProject): Promise<KnowledgeIndexProjection> {
   const projection = await buildKnowledgeIndexProjection(root, project);
+  const vectorIndex = buildKnowledgeVectorIndex(project, projection.facts, projection.triples, projection.chapterIndex, projection.updatedAt);
   await writeJsonl(root, "knowledge/facts.jsonl", projection.facts);
   await writeJsonl(root, "knowledge/triples.jsonl", projection.triples);
   await writeChapterIndex(root, projection.chapterIndex);
+  await writeKnowledgeVectorIndex(root, vectorIndex);
   return projection;
 }
 
@@ -427,6 +531,15 @@ export async function searchKnowledgeIndex(
   }
 
   const index = await readKnowledgeIndex(root, project);
+  const persistedVectorIndex = await readKnowledgeVectorIndex(root, project);
+  const vectorIndex = persistedVectorIndex.entries.length
+    ? persistedVectorIndex
+    : buildKnowledgeVectorIndex(project, index.facts, index.triples, index.chapterIndex, index.updatedAt);
+  const queryVector = vectorize([query, ...tokens]);
+  const vectorScores = vectorIndex.entries.reduce((scores, entry) => {
+    scores.set(entry.id, cosineScore(queryVector, entry.vector));
+    return scores;
+  }, new Map<string, number>());
   const targetChapterId = cleanText(input.chapterId || "");
   const chapterScores = new Map<string, number>();
   const addChapterScore = (chapterIds: string[], score: number) => {
@@ -438,35 +551,45 @@ export async function searchKnowledgeIndex(
   const facts = index.facts
     .map((fact) => {
       const chapterBoost = targetChapterId && fact.chapterIds.includes(targetChapterId) ? 0.25 : 0;
-      const score = scoreText(tokens, [fact.text, ...fact.keywords, ...fact.relatedEntities, fact.source.label || ""], chapterBoost);
+      const vectorScore = vectorScores.get(fact.id) || 0;
+      const score = scoreText(tokens, [fact.text, ...fact.keywords, ...fact.relatedEntities, fact.source.label || ""], chapterBoost) + vectorScore;
       if (score > 0) addChapterScore(fact.chapterIds, score);
-      return { ...fact, score };
+      return { ...fact, score, vectorScore };
     })
-    .filter((fact) => fact.score > 0)
-    .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
+    .filter((fact) => fact.score > 0 || (fact.vectorScore || 0) >= vectorMatchThreshold)
+    .sort((left, right) => right.score - left.score || (right.vectorScore || 0) - (left.vectorScore || 0) || left.id.localeCompare(right.id))
     .slice(0, limit);
 
   const triples = index.triples
     .map((triple) => {
       const chapterBoost = targetChapterId && triple.chapterIds.includes(targetChapterId) ? 0.25 : 0;
-      const score = scoreText(tokens, [triple.subject, triple.predicate, triple.object], chapterBoost);
+      const vectorScore = vectorScores.get(triple.id) || 0;
+      const score = scoreText(tokens, [triple.subject, triple.predicate, triple.object], chapterBoost) + vectorScore;
       if (score > 0) addChapterScore(triple.chapterIds, score);
-      return { ...triple, score };
+      return { ...triple, score, vectorScore };
     })
-    .filter((triple) => triple.score > 0)
-    .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
+    .filter((triple) => triple.score > 0 || (triple.vectorScore || 0) >= vectorMatchThreshold)
+    .sort((left, right) => right.score - left.score || (right.vectorScore || 0) - (left.vectorScore || 0) || left.id.localeCompare(right.id))
     .slice(0, limit);
 
   const chapters = index.chapterIndex.chapters
     .map((chapter) => {
       const chapterBoost = targetChapterId && chapter.chapterId === targetChapterId ? 0.25 : 0;
+      const vectorScore = vectorScores.get(chapter.chapterId) || 0;
       const score =
         (chapterScores.get(chapter.chapterId) || 0) +
-        scoreText(tokens, [chapter.title, ...chapter.keywords, ...chapter.entityNames], chapterBoost);
-      return { ...chapter, score };
+        scoreText(tokens, [chapter.title, ...chapter.keywords, ...chapter.entityNames], chapterBoost) +
+        vectorScore;
+      return { ...chapter, score, vectorScore };
     })
-    .filter((chapter) => chapter.score > 0)
-    .sort((left, right) => right.score - left.score || (left.order || 0) - (right.order || 0) || left.chapterId.localeCompare(right.chapterId))
+    .filter((chapter) => chapter.score > 0 || (chapter.vectorScore || 0) >= vectorMatchThreshold)
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        (right.vectorScore || 0) - (left.vectorScore || 0) ||
+        (left.order || 0) - (right.order || 0) ||
+        left.chapterId.localeCompare(right.chapterId)
+    )
     .slice(0, limit);
 
   return { query, tokens, facts, triples, chapters };

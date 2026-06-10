@@ -34,12 +34,12 @@
       <div v-if="searchResult" class="search-results">
         <div class="result-header">
           <span>“{{ searchResult.query }}”</span>
-          <em>{{ searchResult.facts.length }} facts / {{ searchResult.triples.length }} triples</em>
+          <em>{{ searchResult.facts.length }} facts / {{ searchResult.triples.length }} triples / {{ vectorHitCount }} vectors</em>
         </div>
         <div v-if="searchResult.facts.length" class="result-list">
           <article v-for="fact in searchResult.facts.slice(0, 5)" :key="fact.id">
             <strong>{{ fact.text }}</strong>
-            <span>{{ fact.relatedEntities.join(" / ") || fact.source.type }}</span>
+            <span>{{ fact.relatedEntities.join(" / ") || fact.source.type }} · 向量 {{ formatScore(fact.vectorScore) }}</span>
           </article>
         </div>
         <div v-if="searchResult.triples.length" class="triple-list">
@@ -94,6 +94,11 @@ const visibleKeywords = computed(() => Object.keys(props.index?.chapterIndex.key
 
 const visibleChapters = computed(() => (props.index?.chapterIndex.chapters || []).filter((chapter) => chapter.factIds.length).slice(0, 8));
 
+const vectorHitCount = computed(() => {
+  if (!props.searchResult) return 0;
+  return [...props.searchResult.facts, ...props.searchResult.triples, ...props.searchResult.chapters].filter((item) => (item.vectorScore || 0) > 0).length;
+});
+
 const summaryText = computed(() => {
   if (!props.index) return "从章节摘要、台账和故事总控重建";
   return `${props.index.facts.length} 个事实 / ${props.index.triples.length} 条关系`;
@@ -103,6 +108,10 @@ function submitSearch() {
   const query = searchQuery.value.trim();
   if (!query) return;
   emit("search", query);
+}
+
+function formatScore(score?: number) {
+  return score ? score.toFixed(2) : "0.00";
 }
 </script>
 
