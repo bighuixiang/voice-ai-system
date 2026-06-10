@@ -446,6 +446,19 @@ export interface SeriesQualityTrend {
   delta?: number;
 }
 
+export interface SeriesTensionPoint {
+  chapterId: string;
+  chapterTitle: string;
+  tensionScore: number;
+  conflictScore?: number;
+  hookScore?: number;
+  emotionScore?: number;
+  rhythmScore?: number;
+  sceneCount: number;
+  note: string;
+  updatedAt: string;
+}
+
 export interface SeriesQualityMetrics {
   projectSlug: string;
   chapterCount: number;
@@ -456,6 +469,7 @@ export interface SeriesQualityMetrics {
   rhythmSignals?: SeriesRhythmSignal[];
   characterArcSignals?: CharacterArcSignal[];
   qualityTrends?: SeriesQualityTrend[];
+  tensionCurve?: SeriesTensionPoint[];
   updatedAt: string;
 }
 

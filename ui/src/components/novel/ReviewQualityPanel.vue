@@ -81,6 +81,16 @@
         </div>
       </div>
 
+      <div v-if="visibleTensionCurve.length" class="signal-block">
+        <strong>张力曲线</strong>
+        <div class="signal-list">
+          <div v-for="point in visibleTensionCurve" :key="point.chapterId" class="signal-row">
+            <span>{{ point.chapterTitle }}</span>
+            <em>{{ tensionLabel(point) }}</em>
+          </div>
+        </div>
+      </div>
+
       <div v-if="visibleRhythmSignals.length" class="signal-block">
         <strong>章节节奏</strong>
         <div class="signal-list">
@@ -153,6 +163,7 @@ const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
 
 const weakestSeriesMetrics = computed(() => props.seriesMetrics?.metricAverages.slice(0, 3) || []);
 const visibleQualityTrends = computed(() => props.seriesMetrics?.qualityTrends?.slice(0, 4) || []);
+const visibleTensionCurve = computed(() => props.seriesMetrics?.tensionCurve?.slice(0, 4) || []);
 const visibleRhythmSignals = computed(() => props.seriesMetrics?.rhythmSignals?.slice(0, 3) || []);
 const visibleCharacterArcSignals = computed(() => props.seriesMetrics?.characterArcSignals?.slice(0, 3) || []);
 
@@ -169,6 +180,10 @@ function trendLabel(trend: NonNullable<SeriesQualityMetrics["qualityTrends"]>[nu
   if (typeof trend.delta !== "number") return "基线";
   if (trend.delta === 0) return "持平";
   return `${trend.delta > 0 ? "+" : ""}${trend.delta}`;
+}
+
+function tensionLabel(point: NonNullable<SeriesQualityMetrics["tensionCurve"]>[number]) {
+  return `${point.tensionScore} 分 · ${point.sceneCount} 场 · ${point.note}`;
 }
 </script>
 

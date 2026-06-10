@@ -352,12 +352,24 @@ describe("writingCockpit", () => {
       latestScore: 58,
       delta: -10
     });
+    expect(metrics.tensionCurve?.[0]).toMatchObject({
+      chapterId: "chapter-001",
+      tensionScore: 78.2,
+      conflictScore: 82,
+      rhythmScore: 68,
+      sceneCount: 1
+    });
+    expect(metrics.tensionCurve?.[1]).toMatchObject({
+      chapterId: "chapter-002",
+      tensionScore: 69.6
+    });
 
     const saved = JSON.parse(await fs.readFile(path.join(tempRoot, "quality", "series-metrics.json"), "utf8"));
     expect(saved.averageOverallScore).toBe(76);
     expect(saved.rhythmSignals[0].chapterId).toBe("chapter-001");
     expect(saved.characterArcSignals[0].characterName).toBe("主角");
     expect(saved.qualityTrends[0].key).toBe("overall");
+    expect(saved.tensionCurve[0].tensionScore).toBe(78.2);
     await expect(readSeriesQualityMetrics(tempRoot, project())).resolves.toMatchObject({ reportCount: 2 });
   });
 

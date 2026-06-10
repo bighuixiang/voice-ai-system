@@ -26,7 +26,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
 - Quality persistence:
   - Chapter quality reports persist under `quality/<chapterId>.json`.
   - Project-level metrics persist under `quality/series-metrics.json`.
-  - Metrics include averages, weakest chapters, rhythm signals, character arc signals, and quality trend points.
+  - Metrics include averages, weakest chapters, rhythm signals, tension curve points, character arc signals, and quality trend points.
 
 - Story graph projection:
   - New projects create `story-graph/storyline.json`.
@@ -78,6 +78,6 @@ Earlier supporting commits in this branch:
 ## Remaining Work
 
 - P2 real vector search or embedding-backed recall.
-- Tension curve and style-drift metrics beyond the current persisted quality trend.
+- Style-drift metrics beyond the current persisted quality trend.
 - Larger graph visualization for story relations.
 - Background job orchestration for heavy indexing and analysis.

@@ -13,6 +13,7 @@ import type {
   SeriesQualityMetricAverage,
   SeriesRhythmSignal,
   SeriesQualityTrend,
+  SeriesTensionPoint,
   SeriesQualityMetrics,
   StoryControl,
   WritingRecapCandidate
@@ -282,6 +283,10 @@ function rhythmMetric(report?: ChapterQualityReport | null): ChapterQualityRepor
   return report?.metrics.find((metric) => metric.key === "rhythm");
 }
 
+function qualityMetric(report: ChapterQualityReport | null, key: ChapterQualityReport["metrics"][number]["key"]): ChapterQualityReport["metrics"][number] | undefined {
+  return report?.metrics.find((metric) => metric.key === key);
+}
+
 function hasRhythmSignal(input: {
   report: ChapterQualityReport | null;
   dashboard: ChapterDashboard;
@@ -289,6 +294,15 @@ function hasRhythmSignal(input: {
   summary: ChapterSummary;
 }): boolean {
   return Boolean(rhythmMetric(input.report) || input.dashboard.wordCount || input.scenes.length || input.summary.keyEvents.length);
+}
+
+function hasTensionSignal(input: {
+  report: ChapterQualityReport | null;
+  dashboard: ChapterDashboard;
+  scenes: SceneCard[];
+  summary: ChapterSummary;
+}): boolean {
+  return Boolean(input.report || input.dashboard.mainConflict || input.dashboard.endingHook || input.scenes.some((scene) => scene.conflict || scene.turn) || input.summary.keyEvents.length);
 }
 
 function buildRhythmSignals(
@@ -347,6 +361,75 @@ function buildCharacterArcSignals(summaries: ChapterSummary[]): CharacterArcSign
     })
     .sort((left, right) => right.changeCount - left.changeCount || right.updatedAt.localeCompare(left.updatedAt))
     .slice(0, 8);
+}
+
+function weightedTensionScore(input: {
+  conflict?: number;
+  hook?: number;
+  emotion?: number;
+  rhythm?: number;
+  sceneCount: number;
+}): number {
+  const weighted = [
+    { value: input.conflict, weight: 0.4 },
+    { value: input.hook, weight: 0.25 },
+    { value: input.emotion, weight: 0.2 },
+    { value: input.rhythm, weight: 0.15 }
+  ].filter((item): item is { value: number; weight: number } => typeof item.value === "number");
+
+  if (weighted.length) {
+    const weightSum = weighted.reduce((sum, item) => sum + item.weight, 0);
+    return roundScore(weighted.reduce((sum, item) => sum + item.value * item.weight, 0) / weightSum);
+  }
+
+  return Math.min(85, 45 + input.sceneCount * 8);
+}
+
+function buildTensionCurve(
+  chapters: Array<{
+    chapter: NovelProject["chapters"][number];
+    report: ChapterQualityReport | null;
+    dashboard: ChapterDashboard;
+    scenes: SceneCard[];
+    summary: ChapterSummary;
+  }>
+): SeriesTensionPoint[] {
+  return chapters
+    .filter(hasTensionSignal)
+    .map(({ chapter, report, dashboard, scenes, summary }) => {
+      const conflict = qualityMetric(report, "conflict");
+      const hook = qualityMetric(report, "hook");
+      const emotion = qualityMetric(report, "emotion");
+      const rhythm = qualityMetric(report, "rhythm");
+      const note =
+        conflict?.note ||
+        hook?.note ||
+        dashboard.mainConflict ||
+        scenes.find((scene) => scene.conflict || scene.turn)?.conflict ||
+        scenes.find((scene) => scene.turn)?.turn ||
+        summary.keyEvents[0] ||
+        summary.summary ||
+        "暂无张力摘要。";
+
+      return {
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        tensionScore: weightedTensionScore({
+          conflict: conflict?.score,
+          hook: hook?.score,
+          emotion: emotion?.score,
+          rhythm: rhythm?.score,
+          sceneCount: scenes.length
+        }),
+        conflictScore: conflict?.score,
+        hookScore: hook?.score,
+        emotionScore: emotion?.score,
+        rhythmScore: rhythm?.score,
+        sceneCount: scenes.length,
+        note,
+        updatedAt: report?.updatedAt || dashboard.updatedAt || summary.updatedAt
+      };
+    });
 }
 
 function buildQualityTrend(
@@ -474,6 +557,7 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
     rhythmSignals: buildRhythmSignals(chapterSignals),
     characterArcSignals: buildCharacterArcSignals(chapterSignals.map((item) => item.summary)),
     qualityTrends: buildQualityTrends(reports),
+    tensionCurve: buildTensionCurve(chapterSignals),
     updatedAt: nowIso()
   };
 
@@ -483,7 +567,7 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
 
 export async function readSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
   const cached = await readJsonFile<SeriesQualityMetrics | null>(root, seriesQualityPath(), null);
-  return cached?.rhythmSignals && cached.characterArcSignals && cached.qualityTrends ? cached : buildSeriesQualityMetrics(root, project);
+  return cached?.rhythmSignals && cached.characterArcSignals && cached.qualityTrends && cached.tensionCurve ? cached : buildSeriesQualityMetrics(root, project);
 }
 
 export async function readSceneCards(root: string, chapterId: string): Promise<SceneCard[]> {

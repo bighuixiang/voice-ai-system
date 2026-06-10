@@ -77,6 +77,19 @@ const seriesMetrics: SeriesQualityMetrics = {
       points: [{ chapterId: "chapter-001", chapterTitle: "Chapter 1", score: 68, updatedAt: "2026-06-04T00:00:00.000Z" }]
     }
   ],
+  tensionCurve: [
+    {
+      chapterId: "chapter-001",
+      chapterTitle: "Chapter 1",
+      tensionScore: 78.2,
+      conflictScore: 76,
+      hookScore: 68,
+      rhythmScore: 80,
+      sceneCount: 3,
+      note: "Clear pressure.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
   rhythmSignals: [
     {
       chapterId: "chapter-001",
@@ -127,6 +140,8 @@ describe("ReviewQualityPanel", () => {
     expect(wrapper.text()).toContain("质量趋势");
     expect(wrapper.text()).toContain("Overall");
     expect(wrapper.text()).toContain("+8");
+    expect(wrapper.text()).toContain("张力曲线");
+    expect(wrapper.text()).toContain("78.2 分 · 3 场 · Clear pressure.");
     expect(wrapper.text()).toContain("章节节奏");
     expect(wrapper.text()).toContain("80 分 · 2400 字 · 3 场 · 5 事件");
     expect(wrapper.text()).toContain("角色弧");
