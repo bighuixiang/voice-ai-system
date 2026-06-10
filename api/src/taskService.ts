@@ -9,6 +9,7 @@ import { assembleContext } from "./contextAssembler.js";
 import { readProject, projectRoot, writeProject } from "./novelProject.js";
 import { assertSafeNovelPath, resolveInside } from "./pathSafety.js";
 import { AgentProcessRunner, type ProcessRunner } from "./codexRunner.js";
+import { stageKeyForTask } from "./aiStages.js";
 
 function taskId(): string {
   return `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -84,7 +85,7 @@ function createInvocationSession(task: NovelTask): AiInvocationSession {
     taskId: task.id,
     projectId: task.projectId,
     taskType: task.type,
-    stageKey: task.type,
+    stageKey: stageKeyForTask(task.type),
     status: "running",
     promptSnapshot: {
       length: 0,

@@ -491,6 +491,7 @@ describe("novelApi", () => {
           id: "invocation-1",
           taskId: "task-1",
           taskType: "idea.suggest",
+          stageKey: "pipeline.idea.suggest",
           status: "success",
           promptSnapshot: { length: 100, preview: "prompt", contextTitles: [] },
           contextSnapshot: { blockCount: 0, totalChars: 0, blocks: [] },

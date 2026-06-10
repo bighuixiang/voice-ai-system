@@ -66,7 +66,7 @@ describe("taskService", () => {
     const [invocation] = await readInvocations();
     expect(invocation.taskId).toBe(task.id);
     expect(invocation.taskType).toBe("outline.generate");
-    expect(invocation.stageKey).toBe("outline.generate");
+    expect(invocation.stageKey).toBe("pipeline.outline.generate");
     expect(invocation.status).toBe("success");
     expect(invocation.agentProfileId).toBe("codex-cli");
     expect(invocation.agentProvider).toBe("codex");
@@ -236,6 +236,7 @@ describe("taskService", () => {
 
     const [invocation] = await readInvocations();
     expect(invocation.status).toBe("error");
+    expect(invocation.stageKey).toBe("pipeline.chapter.prose");
     expect(invocation.attempt.exitCode).toBe(1);
     expect(invocation.attempt.error).toContain("network unavailable");
   });

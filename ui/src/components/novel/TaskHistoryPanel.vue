@@ -29,6 +29,7 @@ const props = defineProps<{
 const labels: Partial<Record<CodexTaskType, string>> = {
   "project.create": "创建项目",
   "outline.generate": "生成大纲",
+  "structure.reverse": "反写结构",
   "chapter.plan": "规划章节",
   "chapter.draft": "起草正文",
   "selection.polish": "选区润色",
@@ -88,7 +89,7 @@ function auditSummary(task: NovelTask) {
   if (!invocation) return "";
   const agent = [invocation.agentProvider, invocation.modelId].filter(Boolean).join("/");
   const patches = invocation.proposedPatchTargets.length ? ` · patches ${invocation.proposedPatchTargets.length}` : "";
-  return `${agent || "agent"} · ctx ${invocation.contextSnapshot.blockCount} · prompt ${formatCount(
+  return `${invocation.stageKey} · ${agent || "agent"} · ctx ${invocation.contextSnapshot.blockCount} · prompt ${formatCount(
     invocation.promptSnapshot.length
   )}${patches} · ${decisionLabel(invocation.adoptionDecision)}`;
 }

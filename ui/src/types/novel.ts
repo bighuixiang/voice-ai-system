@@ -27,6 +27,18 @@ export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information"
 export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
 export type AiAgentProvider = "codex" | "claude-code";
 export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
+export type AiStageKey =
+  | "pipeline.project.create"
+  | "pipeline.outline.generate"
+  | "pipeline.structure.reverse"
+  | "pipeline.chapter.plan"
+  | "pipeline.chapter.prose"
+  | "pipeline.selection.polish"
+  | "pipeline.chapter.validate"
+  | "pipeline.idea.suggest"
+  | "pipeline.writing.briefing"
+  | "autopilot.post_chapter.recap"
+  | "assistant.free";
 
 export interface AiAgentModelOption {
   id: string;
@@ -454,7 +466,7 @@ export interface AiInvocationSession {
   taskId: string;
   projectId: string;
   taskType: CodexTaskType;
-  stageKey: string;
+  stageKey: AiStageKey;
   status: NovelTask["status"];
   agentProfileId?: string;
   agentProvider?: AiAgentProvider;

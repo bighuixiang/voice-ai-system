@@ -101,7 +101,7 @@ describe("novel API routes", () => {
       taskId: "task-1",
       projectId: slug,
       taskType: "chapter.plan",
-      stageKey: "chapter.plan",
+      stageKey: "pipeline.chapter.plan",
       status: "success",
       promptSnapshot: { length: 100, preview: "Plan chapter", contextTitles: ["Project"] },
       contextSnapshot: { blockCount: 1, totalChars: 20, blocks: [{ title: "Project", length: 20 }] },

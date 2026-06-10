@@ -180,7 +180,7 @@ function invocationForTask(taskId = "task-1"): AiInvocationSession {
     taskId,
     projectId: "demo",
     taskType: "idea.suggest",
-    stageKey: "idea.suggest",
+    stageKey: "pipeline.idea.suggest",
     status: "success",
     agentProfileId: "codex-cli",
     agentProvider: "codex",
