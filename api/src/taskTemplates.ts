@@ -11,6 +11,7 @@ export interface PromptContext {
 const taskGoals: Partial<Record<CodexTaskType, string>> = {
   "project.create": "从作者粗略想法创建小说项目骨架、故事圣经、大纲草案和第一章入口。",
   "outline.generate": "基于故事圣经生成或重写卷纲、章纲、情节因果链和伏笔安排。",
+  "structure.reverse": "调用 AI 阅读当前章节正文，反向提炼章节仪表盘和多张场景卡，过滤标题、写作日期、版本号等非叙事元信息。",
   "chapter.plan": "为指定章节生成章纲设定，包含章节目标、场景卡、冲突、转折、伏笔、POV 限制和结尾钩子。",
   "chapter.draft": "基于章纲和上下文起草章节正文，并标出风险和修改建议。",
   "selection.polish": "只改写选区文本，保持剧情事实，优先修复 POV、因果和可读性。",
@@ -40,11 +41,53 @@ function buildTaskContract(type: CodexTaskType) {
     ];
   }
 
+  if (type === "structure.reverse") {
+    return [
+      {
+        title: "Reverse Structure Contract",
+        content: [
+          "Return a CodexTaskResult JSON. Its `content` field must be a stringified JSON object with this shape:",
+          JSON.stringify(
+            {
+              dashboard: {
+                goal: "ChapterDashboard.goal，说明本章真实叙事目标",
+                pov: "ChapterDashboard.pov，必须从正文判断",
+                mainConflict: "ChapterDashboard.mainConflict，提炼核心阻力和代价",
+                endingHook: "ChapterDashboard.endingHook，提炼结尾钩子或下一步牵引",
+                status: "drafting | drafted | reviewing"
+              },
+              scenes: [
+                {
+                  title: "SceneCard.title，具体场景名，不要用章节标题或日期",
+                  time: "SceneCard.time，可空",
+                  location: "SceneCard.location，可空但要尽量从正文提取",
+                  pov: "SceneCard.pov",
+                  characters: ["出场角色"],
+                  conflict: "SceneCard.conflict，必须是具体冲突/阻力/代价",
+                  turn: "SceneCard.turn，必须是该场景的转折或信息变化",
+                  informationReleased: ["释放给读者的关键信息"],
+                  foreshadowingIds: ["可追踪伏笔 ID，可空"],
+                  powerProgression: "能力/修行/资源推进，可空",
+                  draftAnchor: "正文中对应的短锚点"
+                }
+              ]
+            },
+            null,
+            2
+          ),
+          "Analyze the current draft deeply and produce enough SceneCard items for real beats, usually 4-8 when the chapter supports it.",
+          "过滤标题、写作日期、版本号、章节编号、Markdown 标记、导入噪声和说明文字；不要把这些内容当成场景。",
+          "Do not return shallow snippets. Each scene needs concrete conflict, turn, informationReleased, and draftAnchor."
+        ].join("\n")
+      }
+    ];
+  }
+
   return [];
 }
 
 export function buildTaskPrompt(type: CodexTaskType, context: PromptContext): string {
-  const cockpitInstruction = ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "writing.briefing", "writing.recap"].includes(type)
+  const cockpitInstruction = ["structure.reverse", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "writing.briefing", "writing.recap"].includes(type)
     ? [
         {
           title: "Cockpit Boundaries",

@@ -1,12 +1,12 @@
 {
-  "chapterId": "chapter-001",
-  "goal": "",
-  "pov": "",
-  "mainConflict": "",
-  "endingHook": "",
-  "wordCount": 0,
-  "status": "empty",
+  "goal": "反写：梳理“# 第1章 尸王破封·天狗食月”这一章的目标、阻力和结尾钩子。",
+  "pov": "第一人称视角",
+  "mainConflict": "像山腹深处藏着一颗早已死去的心脏，此刻却忽然恢复了搏动",
+  "endingHook": "黑暗迎面砸下",
+  "wordCount": 5747,
+  "status": "drafted",
   "unresolvedForeshadowingIds": [],
   "continuityRiskIds": [],
-  "updatedAt": "2026-06-08T09:35:38.323Z"
+  "chapterId": "chapter-001",
+  "updatedAt": "2026-06-09T07:15:13.314Z"
 }

@@ -60,4 +60,18 @@ describe("taskTemplates", () => {
     expect(recapPrompt).toContain("WritingRecapCandidate");
     expect(recapPrompt).toContain("Do not auto-apply ledger updates");
   });
+
+  it("requires reverse-structure tasks to return dashboard and scene cards", () => {
+    const prompt = buildTaskPrompt("structure.reverse", {
+      contextBlocks: [{ title: "目标正文", content: "正文内容" }],
+      payload: { chapterId: "chapter-001", draftContent: "正文内容" }
+    });
+
+    expect(prompt).toContain("structure.reverse");
+    expect(prompt).toContain("ChapterDashboard");
+    expect(prompt).toContain("SceneCard");
+    expect(prompt).toContain("dashboard");
+    expect(prompt).toContain("scenes");
+    expect(prompt).toContain("过滤标题、写作日期、版本号");
+  });
 });

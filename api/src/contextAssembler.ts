@@ -18,6 +18,7 @@ function trimContext(content: string, limit = 6000): string {
 
 const broadContextTypes: CodexTaskType[] = [
   "outline.generate",
+  "structure.reverse",
   "chapter.plan",
   "chapter.draft",
   "continuity.check",
@@ -25,8 +26,8 @@ const broadContextTypes: CodexTaskType[] = [
   "assistant.free"
 ];
 
-const targetChapterTypes: CodexTaskType[] = ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
-const cockpitContextTypes: CodexTaskType[] = ["chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
+const targetChapterTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
+const cockpitContextTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
 
 export async function assembleContext(
   type: CodexTaskType,

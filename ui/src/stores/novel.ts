@@ -12,6 +12,7 @@ import type {
   EditorSelection,
   FocusWritingGuide,
   LedgerEntry,
+  NovelFilePatch,
   NovelChapter,
   NovelProject,
   NovelTask,
@@ -40,6 +41,7 @@ interface WorkspaceCache {
   savedContent: string;
   lastSavedAt: string;
   selection: EditorSelection | null;
+  rewriteSelection: EditorSelection | null;
   currentTask: NovelTask | null;
   taskProgress: TaskProgressStep[];
   taskHistory: NovelTask[];
@@ -64,6 +66,12 @@ interface WorkspaceCache {
 
 interface WorkspaceSwitchOptions {
   skipLeaveCheck?: boolean;
+}
+
+interface ReverseStructurePayload {
+  dashboard?: Partial<ChapterDashboard>;
+  scenes?: Array<Partial<SceneCard>>;
+  sceneCards?: Array<Partial<SceneCard>>;
 }
 
 function makeDefaultPlatformAiConfig(): PlatformAiConfig {
@@ -94,6 +102,7 @@ export const useNovelStore = defineStore("novel", () => {
   const isSavingContent = ref(false);
   const lastSavedAt = ref("");
   const selection = ref<EditorSelection | null>(null);
+  const rewriteSelection = ref<EditorSelection | null>(null);
   const currentTask = ref<NovelTask | null>(null);
   const taskProgress = ref<TaskProgressStep[]>([]);
   const taskHistory = ref<NovelTask[]>([]);
@@ -154,6 +163,7 @@ export const useNovelStore = defineStore("novel", () => {
   const hasUnsavedSupportChanges = computed(() => supportContent.value !== savedSupportContent.value);
   const canUseSelection = computed(() => Boolean(selection.value?.selectedText));
   const canTuneSelection = computed(() => Boolean(selection.value?.selectedText?.trim()));
+  const activeRewriteSelection = computed(() => rewriteSelection.value || selection.value);
   const canDiagnoseChapter = computed(() => currentDocumentKind.value === "content" && countDraftWords(currentContent.value) >= 30);
   const canReverseEngineerStructure = computed(
     () => currentDocumentKind.value === "content" && currentContent.value.replace(/\s+/g, "").length >= 20
@@ -395,6 +405,83 @@ export const useNovelStore = defineStore("novel", () => {
     );
   }
 
+  function extractJsonText(value: string) {
+    const trimmed = value.trim();
+    const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    return fenced ? fenced[1].trim() : trimmed;
+  }
+
+  function parseJsonObject(value: unknown): Record<string, unknown> | null {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+    if (typeof value !== "string" || !value.trim()) return null;
+    try {
+      const parsed = JSON.parse(extractJsonText(value));
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function textField(source: Record<string, unknown>, key: string, maxLength = 800) {
+    const value = source[key];
+    if (typeof value !== "string") return "";
+    return value.trim().slice(0, maxLength);
+  }
+
+  function arrayField(source: Record<string, unknown>, key: string) {
+    const value = source[key];
+    if (!Array.isArray(value)) return [];
+    return value.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 12);
+  }
+
+  function statusField(value: unknown, fallback: ChapterDashboard["status"]): ChapterDashboard["status"] {
+    const allowed: ChapterDashboard["status"][] = ["empty", "planned", "drafting", "drafted", "reviewing", "checked"];
+    return allowed.includes(value as ChapterDashboard["status"]) ? (value as ChapterDashboard["status"]) : fallback;
+  }
+
+  function parseReverseStructureResult(content: unknown, chapterId: string) {
+    const parsed = parseJsonObject(content) as ReverseStructurePayload | null;
+    if (!parsed) return null;
+
+    const dashboardSource =
+      parsed.dashboard && typeof parsed.dashboard === "object" && !Array.isArray(parsed.dashboard)
+        ? (parsed.dashboard as Record<string, unknown>)
+        : (parsed as Record<string, unknown>);
+    const sceneSources = Array.isArray(parsed.scenes) ? parsed.scenes : Array.isArray(parsed.sceneCards) ? parsed.sceneCards : [];
+    const cards = sceneSources
+      .filter((scene): scene is Record<string, unknown> => Boolean(scene && typeof scene === "object" && !Array.isArray(scene)))
+      .map((scene, index) =>
+        makeSceneCard(chapterId, index + 1, {
+          title: textField(scene, "title", 160) || `场景 ${index + 1}`,
+          time: textField(scene, "time", 160),
+          location: textField(scene, "location", 180),
+          pov: textField(scene, "pov", 180) || textField(dashboardSource, "pov", 180),
+          characters: arrayField(scene, "characters"),
+          conflict: textField(scene, "conflict"),
+          turn: textField(scene, "turn"),
+          informationReleased: arrayField(scene, "informationReleased"),
+          foreshadowingIds: arrayField(scene, "foreshadowingIds"),
+          powerProgression: textField(scene, "powerProgression"),
+          draftAnchor: textField(scene, "draftAnchor", 240)
+        })
+      );
+
+    if (!cards.length) return null;
+
+    return {
+      dashboardPatch: {
+        goal: textField(dashboardSource, "goal"),
+        pov: textField(dashboardSource, "pov"),
+        mainConflict: textField(dashboardSource, "mainConflict"),
+        endingHook: textField(dashboardSource, "endingHook"),
+        status: statusField(dashboardSource.status, countDraftWords(currentContent.value) > 80 ? "drafted" : "drafting")
+      },
+      cards
+    };
+  }
+
   function clampScore(score: number) {
     return Math.max(0, Math.min(100, Math.round(score)));
   }
@@ -522,16 +609,18 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function tuneSelectionStyle(tone: StyleToneKey = styleTone.value) {
-    if (!selection.value?.selectedText.trim()) return false;
+    const selectionAnchor = selection.value;
+    if (!selectionAnchor?.selectedText.trim()) return false;
     styleTone.value = tone;
     rewriteCandidate.value = {
       summary: `文风调音：${styleToneLabels[tone]}`,
-      content: tuneText(selection.value.selectedText, tone),
+      content: tuneText(selectionAnchor.selectedText, tone),
       changes: [`调整为${styleToneLabels[tone]}`, "压低空泛判断，强化画面、动作或压力"],
       risks: [],
       questions: ["接受前建议确认：这段是否仍然符合当前 POV 和角色性格。"],
       patches: []
     };
+    rewriteSelection.value = cloneSelection(selectionAnchor);
     return true;
   }
 
@@ -625,6 +714,29 @@ export const useNovelStore = defineStore("novel", () => {
     taskProgress.value = taskProgress.value.map((step) => (step.id === id ? { ...step, status } : step));
   }
 
+  function cloneSelection(anchor: EditorSelection): EditorSelection {
+    return { ...anchor };
+  }
+
+  function withSelectionPatchAnchors(patches: NovelFilePatch[]) {
+    const anchor = rewriteSelection.value || selection.value;
+    if (!anchor) return patches;
+
+    return patches.map((patch) => {
+      if (patch.mode !== "replace-selection" || patch.selection || patch.target !== anchor.filePath) {
+        return patch;
+      }
+
+      return {
+        ...patch,
+        selection: {
+          start: anchor.start,
+          end: anchor.end
+        }
+      };
+    });
+  }
+
   function finishTaskProgress(success: boolean) {
     const fallbackStatus = success ? "done" : "error";
     taskProgress.value = taskProgress.value.map((step) => ({
@@ -642,6 +754,7 @@ export const useNovelStore = defineStore("novel", () => {
     savedContent.value = "";
     lastSavedAt.value = "";
     selection.value = null;
+    rewriteSelection.value = null;
     currentTask.value = null;
     taskProgress.value = [];
     taskHistory.value = [];
@@ -677,6 +790,7 @@ export const useNovelStore = defineStore("novel", () => {
         savedContent: savedContent.value,
         lastSavedAt: lastSavedAt.value,
         selection: selection.value,
+        rewriteSelection: rewriteSelection.value,
         currentTask: currentTask.value,
         taskProgress: taskProgress.value,
         taskHistory: taskHistory.value,
@@ -713,6 +827,7 @@ export const useNovelStore = defineStore("novel", () => {
     savedContent.value = cached.savedContent;
     lastSavedAt.value = cached.lastSavedAt;
     selection.value = cached.selection;
+    rewriteSelection.value = cached.rewriteSelection || null;
     currentTask.value = cached.currentTask;
     taskProgress.value = cached.taskProgress;
     taskHistory.value = cached.taskHistory;
@@ -965,11 +1080,7 @@ export const useNovelStore = defineStore("novel", () => {
     structureIdeaInput.value = value;
   }
 
-  function reverseEngineerStructureFromDraft() {
-    const content = currentContent.value.trim();
-    const chapterId = currentDashboard.value?.chapterId || currentChapter.value?.id;
-    if (!chapterId || !content || !canReverseEngineerStructure.value) return false;
-
+  function applyLocalReverseStructure(content: string, chapterId: string) {
     const units = splitTextUnits(content);
     const conflict = pickConflict(units);
     return applyGeneratedStructure(
@@ -982,6 +1093,59 @@ export const useNovelStore = defineStore("novel", () => {
       },
       buildSceneCardsFromDraft(content, chapterId)
     );
+  }
+
+  async function reverseEngineerStructureFromDraft() {
+    const content = currentContent.value.trim();
+    const chapterId = currentDashboard.value?.chapterId || currentChapter.value?.id;
+    if (!currentProject.value || !chapterId || !content || !canReverseEngineerStructure.value) return false;
+
+    isLoading.value = true;
+    error.value = "";
+    startTaskProgress();
+    try {
+      setTaskProgress("context", "done");
+      setTaskProgress("codex", "running");
+      const task = await novelApi.runTask(currentProject.value.slug, "structure.reverse", {
+        chapterId,
+        documentKind: currentDocumentKind.value,
+        filePath: currentFilePath.value,
+        draftContent: content,
+        existingDashboard: currentDashboard.value,
+        existingSceneCards: sceneCards.value,
+        storyControl: storyControl.value,
+        feedback: [
+          "请从当前章节正文反向分析章节结构，生成更完整的章节仪表盘和场景卡。",
+          "只提取真实叙事场景，过滤标题、写作日期、版本号、Markdown 标记、导入噪声和说明文字。",
+          "场景卡不能只复述短句：每张卡都要有具体冲突、转折、释放信息和正文锚点。"
+        ].join("\n")
+      });
+      setTaskProgress("codex", "done");
+      setTaskProgress("parse", "running");
+      currentTask.value = task;
+      taskHistory.value.unshift(task);
+
+      const parsed = task.result ? parseReverseStructureResult(task.result.content, chapterId) : null;
+      if (!parsed || task.status === "error") {
+        error.value = task.error || "AI 反写结果无法解析，已使用本地兜底结构。";
+        const generated = applyLocalReverseStructure(content, chapterId);
+        setTaskProgress("parse", generated ? "error" : "done");
+        return generated;
+      }
+
+      rewriteCandidate.value = null;
+      rewriteSelection.value = null;
+      recapCandidate.value = null;
+      const generated = applyGeneratedStructure(parsed.dashboardPatch, parsed.cards);
+      setTaskProgress("parse", generated ? "done" : "error");
+      return generated;
+    } catch (err) {
+      error.value = `AI 反写失败，已使用本地兜底：${err instanceof Error ? err.message : String(err)}`;
+      finishTaskProgress(false);
+      return applyLocalReverseStructure(content, chapterId);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   function generateStructureFromIdea(input = structureIdeaInput.value) {
@@ -1188,6 +1352,7 @@ export const useNovelStore = defineStore("novel", () => {
     savedContent.value = content;
     lastSavedAt.value = "";
     selection.value = null;
+    rewriteSelection.value = null;
     rewriteCandidate.value = null;
     recapCandidate.value = null;
     currentQualityReport.value = null;
@@ -1282,8 +1447,10 @@ export const useNovelStore = defineStore("novel", () => {
         if (type === "writing.recap") {
           recapCandidate.value = parseRecapCandidate(task.result.content);
           rewriteCandidate.value = null;
+          rewriteSelection.value = null;
         } else if (type !== "writing.briefing") {
           rewriteCandidate.value = task.result;
+          rewriteSelection.value = null;
         }
       }
       setTaskProgress("parse", task.status === "error" ? "error" : "done");
@@ -1298,6 +1465,7 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function polishSelection(mode: string) {
     if (!currentProject.value || !currentChapter.value || !selection.value) return;
+    const selectionAnchor = cloneSelection(selection.value);
     isLoading.value = true;
     error.value = "";
     startTaskProgress();
@@ -1305,7 +1473,7 @@ export const useNovelStore = defineStore("novel", () => {
       setTaskProgress("context", "done");
       setTaskProgress("codex", "running");
       const task = await novelApi.polishSelection(currentProject.value.slug, {
-        ...selection.value,
+        ...selectionAnchor,
         chapterId: currentChapter.value.id,
         mode
       });
@@ -1314,6 +1482,7 @@ export const useNovelStore = defineStore("novel", () => {
       currentTask.value = task;
       taskHistory.value.unshift(task);
       rewriteCandidate.value = task.result || null;
+      rewriteSelection.value = task.result ? selectionAnchor : null;
       setTaskProgress("parse", task.status === "error" ? "error" : "done");
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err);
@@ -1325,12 +1494,14 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function acceptRewrite() {
-    if (!selection.value || !rewriteCandidate.value?.content) return;
-    currentContent.value = `${currentContent.value.slice(0, selection.value.start)}${rewriteCandidate.value.content}${currentContent.value.slice(selection.value.end)}`;
+    const selectionAnchor = rewriteSelection.value || selection.value;
+    if (!selectionAnchor || !rewriteCandidate.value?.content) return;
+    currentContent.value = `${currentContent.value.slice(0, selectionAnchor.start)}${rewriteCandidate.value.content}${currentContent.value.slice(selectionAnchor.end)}`;
     savedContent.value = savedContent.value === currentContent.value ? currentContent.value : savedContent.value;
     currentQualityReport.value = null;
     syncDashboardWordCount();
     selection.value = null;
+    rewriteSelection.value = null;
     rewriteCandidate.value = null;
   }
 
@@ -1355,12 +1526,14 @@ export const useNovelStore = defineStore("novel", () => {
     currentQualityReport.value = null;
     syncDashboardWordCount();
     selection.value = null;
+    rewriteSelection.value = null;
     rewriteCandidate.value = null;
     await requestWritingRecapForAcceptedDraft(addition, previousTail);
     return true;
   }
 
   function rejectRewrite() {
+    rewriteSelection.value = null;
     rewriteCandidate.value = null;
   }
 
@@ -1368,7 +1541,7 @@ export const useNovelStore = defineStore("novel", () => {
     if (!currentProject.value || !rewriteCandidate.value?.patches.length) return;
     if (!canLeaveCurrentChapter()) return;
 
-    await novelApi.applyPatches(currentProject.value.slug, rewriteCandidate.value.patches);
+    await novelApi.applyPatches(currentProject.value.slug, withSelectionPatchAnchors(rewriteCandidate.value.patches));
     if (currentChapter.value) {
       await openChapter(currentChapter.value, currentDocumentKind.value);
     }
@@ -1388,6 +1561,8 @@ export const useNovelStore = defineStore("novel", () => {
     currentContent,
     isSavingContent,
     selection,
+    rewriteSelection,
+    activeRewriteSelection,
     currentTask,
     taskProgress,
     taskHistory,

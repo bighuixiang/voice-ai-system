@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { mount } from "@vue/test-utils";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { enableAutoUnmount, flushPromises, mount } from "@vue/test-utils";
 import NovelWorkspace from "./NovelWorkspace.vue";
 
 const route = vi.hoisted(() => ({
@@ -16,6 +16,8 @@ const router = vi.hoisted(() => ({
 const storeRef = vi.hoisted(() => ({
   value: {} as Record<string, unknown>
 }));
+
+enableAutoUnmount(afterEach);
 
 vi.mock("vue-router", () => ({
   useRoute: () => route,
@@ -354,6 +356,28 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".history-stub").exists()).toBe(true);
     expect(wrapper.find(".scene-stub").exists()).toBe(false);
     expect(wrapper.find(".ai-stub").exists()).toBe(false);
+  });
+
+  it.each([
+    ["Ctrl+S", { ctrlKey: true }],
+    ["Cmd+S", { metaKey: true }]
+  ])("saves the current document with %s instead of opening browser save", async (_label, modifier) => {
+    storeRef.value = makeStore("review");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    const event = new KeyboardEvent("keydown", {
+      key: "s",
+      cancelable: true,
+      ...modifier
+    });
+    const preventDefault = vi.spyOn(event, "preventDefault");
+
+    window.dispatchEvent(event);
+    await flushPromises();
+    wrapper.unmount();
+
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(storeRef.value.saveCurrentContent).toHaveBeenCalledTimes(1);
   });
 
   it("shows quick structure generation tools in structure mode", () => {

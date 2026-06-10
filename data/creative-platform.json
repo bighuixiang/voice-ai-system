@@ -53,7 +53,7 @@
         "genre": "东方玄幻",
         "roughIdea": "Imported from browser directory upload: voice-ai-system",
         "createdAt": "2026-06-08T09:35:38.196Z",
-        "updatedAt": "2026-06-08T09:35:41.009Z",
+        "updatedAt": "2026-06-09T07:15:13.291Z",
         "lastOpenedChapterId": "chapter-001",
         "codex": {
           "command": "codex"
@@ -2445,6 +2445,6 @@
         "enabled": true
       }
     ],
-    "updatedAt": "2026-06-08T09:35:41.999Z"
+    "updatedAt": "2026-06-09T08:44:07.509Z"
   }
 }

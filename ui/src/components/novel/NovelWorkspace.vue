@@ -265,8 +265,8 @@
         >
           <RewriteComparison
             :result="store.rewriteCandidate"
-            :original-text="store.selection?.selectedText"
-            :can-accept="Boolean(store.selection?.selectedText && store.rewriteCandidate?.content)"
+            :original-text="store.activeRewriteSelection?.selectedText"
+            :can-accept="Boolean(store.activeRewriteSelection?.selectedText && store.rewriteCandidate?.content)"
             :can-request="Boolean(store.selection?.selectedText && !store.isLoading)"
             @accept="store.acceptRewrite"
             @reject="store.rejectRewrite"
@@ -405,7 +405,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Close, Collection, Folder, Loading, Refresh, Setting } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
@@ -568,6 +568,17 @@ async function handleSaveCurrentContent() {
   }
 }
 
+function isSaveShortcut(event: KeyboardEvent) {
+  return (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "s";
+}
+
+function handleGlobalKeydown(event: KeyboardEvent) {
+  if (!isSaveShortcut(event) || event.repeat || !isProjectRoute.value || !store.hasProject) return;
+
+  event.preventDefault();
+  handleSaveCurrentContent();
+}
+
 async function handleSaveCurrentStructure() {
   try {
     await store.saveCurrentStructure();
@@ -641,9 +652,14 @@ watch(
 );
 
 onMounted(() => {
+  window.addEventListener("keydown", handleGlobalKeydown);
   syncWorkspaceFromRoute().catch(() => {
     // Initial load can fail if the API service has not been started yet.
   });
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleGlobalKeydown);
 });
 
 watch(

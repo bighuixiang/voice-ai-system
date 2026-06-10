@@ -34,6 +34,7 @@ import {
 const taskTypes: CodexTaskType[] = [
   "project.create",
   "outline.generate",
+  "structure.reverse",
   "chapter.plan",
   "chapter.draft",
   "selection.polish",

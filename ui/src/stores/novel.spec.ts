@@ -597,26 +597,80 @@ describe("useNovelStore", () => {
     );
   });
 
-  it("reverse engineers dashboard and scene cards from the current draft", async () => {
+  it("reverse engineers dashboard and scene cards from the current draft with AI analysis", async () => {
+    const aiStructure = {
+      dashboard: {
+        goal: "让王破封在饥饿与封印反噬之间做出选择。",
+        pov: "第一人称视角",
+        mainConflict: "王破封必须判断天狗食月到底是灾兆还是封印入口。",
+        endingHook: "他意识到月影里的东西正在回应自己的血。",
+        status: "drafted"
+      },
+      scenes: [
+        {
+          title: "月食压城",
+          time: "夜半月食时",
+          location: "九山莲台山门外",
+          pov: "第一人称视角",
+          characters: ["王破封"],
+          conflict: "饥饿与封印牵引同时压来，他不能贸然靠近。",
+          turn: "封印没有吞掉血，而是主动回应。",
+          informationReleased: ["天狗食月和旧封印存在关联"],
+          foreshadowingIds: ["seal-blood"],
+          powerProgression: "血与封印第一次产生可见共鸣",
+          draftAnchor: "印记突然回应了他的血"
+        }
+      ]
+    };
+    mockNovelApi.runTask.mockResolvedValue(
+      taskWithResult({
+        type: "structure.reverse",
+        result: {
+          summary: "已从正文反写结构",
+          content: JSON.stringify(aiStructure),
+          changes: ["提取章节目标和场景卡"],
+          risks: [],
+          questions: [],
+          patches: []
+        }
+      })
+    );
     const store = useNovelStore();
     store.currentProject = project;
     await store.openChapter(project.chapters[0]);
     store.updateContent("主角在山门外发现异常印记，但他不能立刻靠近。印记突然回应了他的血。");
 
-    const generated = store.reverseEngineerStructureFromDraft();
+    const generated = await store.reverseEngineerStructureFromDraft();
 
     expect(generated).toBe(true);
+    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+      "demo",
+      "structure.reverse",
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        documentKind: "content",
+        filePath: "chapters/chapter-001.md",
+        draftContent: "主角在山门外发现异常印记，但他不能立刻靠近。印记突然回应了他的血。"
+      })
+    );
     expect(store.currentDashboard).toMatchObject({
       chapterId: "chapter-001",
-      pov: "主角限知视角",
-      status: "drafting"
+      goal: "让王破封在饥饿与封印反噬之间做出选择。",
+      pov: "第一人称视角",
+      mainConflict: "王破封必须判断天狗食月到底是灾兆还是封印入口。",
+      status: "drafted"
     });
-    expect(store.currentDashboard?.goal).toContain("反写");
-    expect(store.sceneCards.length).toBeGreaterThan(0);
+    expect(store.sceneCards).toHaveLength(1);
     expect(store.sceneCards[0]).toMatchObject({
       chapterId: "chapter-001",
-      order: 1
+      order: 1,
+      title: "月食压城",
+      conflict: "饥饿与封印牵引同时压来，他不能贸然靠近。",
+      turn: "封印没有吞掉血，而是主动回应。",
+      informationReleased: ["天狗食月和旧封印存在关联"]
     });
+    expect(store.rewriteCandidate).toBeNull();
+    expect(store.currentTask?.type).toBe("structure.reverse");
     expect(store.structureDraftVersion).toBe(1);
   });
 
@@ -899,6 +953,40 @@ describe("useNovelStore", () => {
       expect.objectContaining({ chapterId: "chapter-001", mode: "polish", selectedText: "plain line" })
     );
     expect(store.rewriteCandidate?.content).toBe("a sharper line");
+  });
+
+  it("keeps the polished selection anchor when the editor selection collapses", async () => {
+    mockNovelApi.polishSelection.mockResolvedValue(
+      taskWithResult({
+        type: "selection.polish",
+        result: {
+          summary: "Polished",
+          content: "a sharper line",
+          changes: [],
+          risks: [],
+          questions: [],
+          patches: []
+        }
+      })
+    );
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
+    store.currentContent = "before plain line after";
+    store.selection = {
+      filePath: "chapters/chapter-001.md",
+      selectedText: "plain line",
+      beforeText: "before ",
+      afterText: " after",
+      start: 7,
+      end: 17
+    };
+
+    await store.polishSelection("polish");
+    store.updateSelection(null);
+    store.acceptRewrite();
+
+    expect(store.currentContent).toBe("before a sharper line after");
   });
 
   it("diagnoses the current chapter with quality metrics", async () => {
@@ -1278,5 +1366,46 @@ describe("useNovelStore", () => {
     ]);
     expect(mockNovelApi.readFile).toHaveBeenCalledWith("demo", "chapters/chapter-001.md");
     expect(store.currentContent).toBe("draft:chapters/chapter-001.md");
+  });
+
+  it("fills replace-selection patch coordinates from the polished selection anchor", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
+    store.currentFilePath = "chapters/chapter-001.md";
+    store.selection = {
+      filePath: "chapters/chapter-001.md",
+      selectedText: "plain line",
+      beforeText: "before ",
+      afterText: " after",
+      start: 7,
+      end: 17
+    };
+    mockNovelApi.polishSelection.mockResolvedValue(
+      taskWithResult({
+        type: "selection.polish",
+        result: {
+          summary: "Patch",
+          content: "",
+          changes: [],
+          risks: [],
+          questions: [],
+          patches: [{ target: "chapters/chapter-001.md", mode: "replace-selection", content: "a sharper line" }]
+        }
+      })
+    );
+
+    await store.polishSelection("polish");
+    store.updateSelection(null);
+    await store.applyTaskPatches();
+
+    expect(mockNovelApi.applyPatches).toHaveBeenCalledWith("demo", [
+      {
+        target: "chapters/chapter-001.md",
+        mode: "replace-selection",
+        content: "a sharper line",
+        selection: { start: 7, end: 17 }
+      }
+    ]);
   });
 });
