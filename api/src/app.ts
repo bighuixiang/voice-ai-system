@@ -23,7 +23,7 @@ import { buildStoryGraphProjection } from "./storyGraph.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
 import { buildCreationRuntimeSnapshot } from "./runtimeSnapshot.js";
 import { buildProjectAuditReport } from "./auditReport.js";
-import { enqueueProjectBackgroundJob, listProjectBackgroundJobs, readBackgroundJob } from "./backgroundJobs.js";
+import { cancelBackgroundJob, enqueueProjectBackgroundJob, listProjectBackgroundJobs, readBackgroundJob, retryBackgroundJob } from "./backgroundJobs.js";
 import type { AiScenarioConfig, BackgroundJobType, CodexTaskType, KnowledgeSearchQuery, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
@@ -147,6 +147,35 @@ function validatePlatformAiConfig(input: PlatformAiConfig): PlatformAiConfig {
       apiKeyConfigured: Boolean(merged.knowledgeEmbedding.apiKey || merged.knowledgeEmbedding.apiKeyConfigured)
     },
     updatedAt: merged.updatedAt || new Date().toISOString()
+  };
+}
+
+function createBackgroundJobHandler(project: Awaited<ReturnType<typeof readProject>>, root: string, type: BackgroundJobType) {
+  return async () => {
+    if (type === "knowledge.index.rebuild") {
+      const index = await rebuildKnowledgeIndex(root, project);
+      return {
+        outputSummary: `${index.facts.length} facts / ${index.triples.length} relations`,
+        resultRef: `/api/novel/projects/${project.slug}/knowledge/index`
+      };
+    }
+    if (type === "quality.series.rebuild") {
+      const metrics = await buildSeriesQualityMetrics(root, project);
+      return {
+        outputSummary: `${metrics.reportCount}/${metrics.chapterCount} chapters reviewed, average ${metrics.averageOverallScore}`,
+        resultRef: `/api/novel/projects/${project.slug}/quality/series-metrics`
+      };
+    }
+
+    return asyncStoryGraphJob(project, root);
+  };
+}
+
+async function asyncStoryGraphJob(project: Awaited<ReturnType<typeof readProject>>, root: string) {
+  const graph = await buildStoryGraphProjection(root, project);
+  return {
+    outputSummary: `${graph.nodes.length} nodes / ${graph.edges.length} relations`,
+    resultRef: `/api/novel/projects/${project.slug}/story-graph`
   };
 }
 
@@ -518,30 +547,34 @@ export function createApp() {
 
     const project = await readProject(req.params.projectId);
     const root = projectRoot(project.slug);
-    const job = await enqueueProjectBackgroundJob(project, root, type, JSON.stringify(req.body.payload || {}).slice(0, 500), async () => {
-      if (type === "knowledge.index.rebuild") {
-        const index = await rebuildKnowledgeIndex(root, project);
-        return {
-          outputSummary: `${index.facts.length} facts / ${index.triples.length} relations`,
-          resultRef: `/api/novel/projects/${project.slug}/knowledge/index`
-        };
-      }
-      if (type === "quality.series.rebuild") {
-        const metrics = await buildSeriesQualityMetrics(root, project);
-        return {
-          outputSummary: `${metrics.reportCount}/${metrics.chapterCount} chapters reviewed, average ${metrics.averageOverallScore}`,
-          resultRef: `/api/novel/projects/${project.slug}/quality/series-metrics`
-        };
-      }
-
-      const graph = await buildStoryGraphProjection(root, project);
-      return {
-        outputSummary: `${graph.nodes.length} nodes / ${graph.edges.length} relations`,
-        resultRef: `/api/novel/projects/${project.slug}/story-graph`
-      };
-    });
+    const job = await enqueueProjectBackgroundJob(project, root, type, JSON.stringify(req.body.payload || {}).slice(0, 500), createBackgroundJobHandler(project, root, type));
 
     res.status(202).json({ job });
+  }));
+
+  app.post("/api/novel/projects/:projectId/jobs/:jobId/cancel", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const job = await cancelBackgroundJob(projectRoot(project.slug), project.slug, req.params.jobId);
+    if (!job) {
+      res.status(404).json({ error: "Background job not found" });
+      return;
+    }
+    res.json({ job });
+  }));
+
+  app.post("/api/novel/projects/:projectId/jobs/:jobId/retry", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const root = projectRoot(project.slug);
+    try {
+      const job = await retryBackgroundJob(project, root, req.params.jobId, (failedJob) => createBackgroundJobHandler(project, root, failedJob.type));
+      if (!job) {
+        res.status(404).json({ error: "Background job not found" });
+        return;
+      }
+      res.status(202).json({ job });
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : String(error) });
+    }
   }));
 
   app.get("/api/novel/projects/:projectId/ledger/:kind", asyncRoute(async (req, res) => {

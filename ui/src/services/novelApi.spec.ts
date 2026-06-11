@@ -441,7 +441,7 @@ describe("novelApi", () => {
       },
       backgroundJobSummary: {
         total: 1,
-        byStatus: { pending: 0, running: 0, success: 1, error: 0 },
+        byStatus: { pending: 0, running: 0, success: 1, error: 0, cancelled: 0 },
         latestJobs: [
           {
             id: "job-1",
@@ -672,10 +672,14 @@ describe("novelApi", () => {
     mockJson({ job });
     mockJson({ job });
     mockJson({ jobs: [job] });
+    mockJson({ job: { ...job, status: "cancelled", cancelRequestedAt: "2026-06-11T00:00:02.000Z" } });
+    mockJson({ job: { ...job, id: "job-2", status: "pending", retryOf: "job-1" } });
 
     await expect(novelApi.startBackgroundJob("demo", "knowledge.index.rebuild", { reason: "manual" })).resolves.toEqual(job);
     await expect(novelApi.readBackgroundJob("demo", "job-1")).resolves.toEqual(job);
     await expect(novelApi.listBackgroundJobs("demo")).resolves.toEqual([job]);
+    await expect(novelApi.cancelBackgroundJob("demo", "job-1")).resolves.toMatchObject({ status: "cancelled" });
+    await expect(novelApi.retryBackgroundJob("demo", "job-1")).resolves.toMatchObject({ id: "job-2", retryOf: "job-1" });
 
     expect(fetch).toHaveBeenNthCalledWith(
       1,
@@ -687,6 +691,8 @@ describe("novelApi", () => {
     );
     expect(fetch).toHaveBeenNthCalledWith(2, "/api/novel/projects/demo/jobs/job-1", {});
     expect(fetch).toHaveBeenNthCalledWith(3, "/api/novel/projects/demo/jobs", {});
+    expect(fetch).toHaveBeenNthCalledWith(4, "/api/novel/projects/demo/jobs/job-1/cancel", { method: "POST" });
+    expect(fetch).toHaveBeenNthCalledWith(5, "/api/novel/projects/demo/jobs/job-1/retry", { method: "POST" });
   });
 
   it("applies file patches after user confirmation", async () => {

@@ -436,6 +436,8 @@
           :jobs="store.backgroundJobs"
           :is-loading="store.isRebuildingKnowledgeIndex || store.isRebuildingSeriesQualityMetrics || store.isRebuildingStoryGraph"
           @refresh="store.loadBackgroundJobs"
+          @cancel="store.cancelBackgroundJob"
+          @retry="store.retryBackgroundJob"
         />
       </div>
     </el-dialog>

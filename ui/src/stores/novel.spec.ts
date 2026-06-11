@@ -46,6 +46,8 @@ const mockNovelApi = vi.hoisted(() => ({
   listBackgroundJobs: vi.fn(),
   startBackgroundJob: vi.fn(),
   readBackgroundJob: vi.fn(),
+  cancelBackgroundJob: vi.fn(),
+  retryBackgroundJob: vi.fn(),
   searchKnowledgeIndex: vi.fn(),
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
@@ -490,6 +492,8 @@ describe("useNovelStore", () => {
       })
     );
     mockNovelApi.readBackgroundJob.mockResolvedValue(backgroundJob());
+    mockNovelApi.cancelBackgroundJob.mockResolvedValue(backgroundJob({ status: "cancelled" }));
+    mockNovelApi.retryBackgroundJob.mockResolvedValue(backgroundJob({ id: "job-retry-1", status: "running", retryOf: "job-knowledge-1" }));
     mockNovelApi.searchKnowledgeIndex.mockResolvedValue({
       query: "Hero gate",
       tokens: ["hero", "gate"],
@@ -761,6 +765,28 @@ describe("useNovelStore", () => {
 
     expect(mockNovelApi.listBackgroundJobs).toHaveBeenCalledWith("demo");
     expect(store.backgroundJobs).toEqual([expect.objectContaining({ id: "job-knowledge-1", status: "success" })]);
+  });
+
+  it("cancels and retries project background jobs", async () => {
+    const cancelled = backgroundJob({ id: "job-running-1", status: "cancelled" });
+    const retried = backgroundJob({ id: "job-retry-1", status: "running", retryOf: "job-failed-1" });
+    const retryFinished = backgroundJob({ id: "job-retry-1", status: "success", retryOf: "job-failed-1", outputSummary: "retried" });
+    mockNovelApi.cancelBackgroundJob.mockResolvedValueOnce(cancelled);
+    mockNovelApi.retryBackgroundJob.mockResolvedValueOnce(retried);
+    mockNovelApi.readBackgroundJob.mockResolvedValueOnce(retryFinished);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await store.cancelBackgroundJob("job-running-1");
+    await store.retryBackgroundJob("job-failed-1");
+
+    expect(mockNovelApi.cancelBackgroundJob).toHaveBeenCalledWith("demo", "job-running-1");
+    expect(mockNovelApi.retryBackgroundJob).toHaveBeenCalledWith("demo", "job-failed-1");
+    expect(mockNovelApi.readBackgroundJob).toHaveBeenCalledWith("demo", "job-retry-1");
+    expect(store.backgroundJobs).toEqual([
+      expect.objectContaining({ id: "job-retry-1", status: "success", retryOf: "job-failed-1" }),
+      expect.objectContaining({ id: "job-running-1", status: "cancelled" })
+    ]);
   });
 
   it("previews a project audit report in the workspace", async () => {

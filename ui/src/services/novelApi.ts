@@ -343,6 +343,20 @@ export const novelApi = {
     return data.job;
   },
 
+  async cancelBackgroundJob(projectId: string, jobId: string): Promise<BackgroundJob> {
+    const data = await request<{ job: BackgroundJob }>(`/api/novel/projects/${projectId}/jobs/${jobId}/cancel`, {
+      method: "POST"
+    });
+    return data.job;
+  },
+
+  async retryBackgroundJob(projectId: string, jobId: string): Promise<BackgroundJob> {
+    const data = await request<{ job: BackgroundJob }>(`/api/novel/projects/${projectId}/jobs/${jobId}/retry`, {
+      method: "POST"
+    });
+    return data.job;
+  },
+
   async polishSelection(projectId: string, selection: EditorSelection & { chapterId: string; mode: string }): Promise<NovelTask> {
     const data = await request<{ task: NovelTask }>(`/api/novel/projects/${projectId}/selection/polish`, {
       method: "POST",

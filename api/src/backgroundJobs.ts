@@ -4,6 +4,7 @@ import type { BackgroundJob, BackgroundJobType, NovelProject } from "./types.js"
 import { resolveInside } from "./pathSafety.js";
 
 type BackgroundJobHandler = () => Promise<Pick<BackgroundJob, "outputSummary" | "resultRef">>;
+type BackgroundJobHandlerFactory = (job: BackgroundJob) => BackgroundJobHandler;
 
 const jobs = new Map<string, BackgroundJob>();
 const maxJobs = 200;
@@ -73,7 +74,8 @@ export async function enqueueProjectBackgroundJob(
   root: string,
   type: BackgroundJobType,
   inputSummary: string,
-  handler: BackgroundJobHandler
+  handler: BackgroundJobHandler,
+  options: { retryOf?: string } = {}
 ): Promise<BackgroundJob> {
   const startedAt = nowIso();
   const job: BackgroundJob = {
@@ -82,6 +84,7 @@ export async function enqueueProjectBackgroundJob(
     type,
     status: "pending",
     inputSummary,
+    retryOf: options.retryOf,
     startedAt,
     updatedAt: startedAt
   };
@@ -90,7 +93,9 @@ export async function enqueueProjectBackgroundJob(
   await appendJobHistory(root, job);
   const queuedJob = publicJob(job);
 
-  void runJob(root, job.id, handler);
+  setTimeout(() => {
+    void runJob(root, job.id, handler);
+  }, 0);
 
   return queuedJob;
 }
@@ -98,6 +103,7 @@ export async function enqueueProjectBackgroundJob(
 async function runJob(root: string, id: string, handler: BackgroundJobHandler): Promise<void> {
   const job = jobs.get(id);
   if (!job) return;
+  if (job.status === "cancelled") return;
 
   const started = Date.now();
   job.status = "running";
@@ -106,18 +112,66 @@ async function runJob(root: string, id: string, handler: BackgroundJobHandler): 
 
   try {
     const result = await handler();
-    job.status = "success";
-    job.outputSummary = result.outputSummary;
-    job.resultRef = result.resultRef;
+    if (job.cancelRequestedAt) {
+      job.status = "cancelled";
+      job.outputSummary = "Cancellation requested; job stopped after the current handler completed.";
+    } else {
+      job.status = "success";
+      job.outputSummary = result.outputSummary;
+      job.resultRef = result.resultRef;
+    }
   } catch (error) {
-    job.status = "error";
-    job.error = error instanceof Error ? error.message : String(error);
+    if (job.cancelRequestedAt) {
+      job.status = "cancelled";
+      job.error = error instanceof Error ? error.message : String(error);
+      job.outputSummary = "Cancellation requested; job stopped after handler error.";
+    } else {
+      job.status = "error";
+      job.error = error instanceof Error ? error.message : String(error);
+    }
   } finally {
     job.finishedAt = nowIso();
     job.durationMs = Date.now() - started;
     job.updatedAt = job.finishedAt;
     await appendJobHistory(root, job);
   }
+}
+
+export async function cancelBackgroundJob(root: string, projectId: string, id: string): Promise<BackgroundJob | null> {
+  const job = jobs.get(id) || (await readBackgroundJob(root, projectId, id));
+  if (!job || job.projectId !== projectId) return null;
+  if (job.status === "success" || job.status === "error" || job.status === "cancelled") {
+    return publicJob(job);
+  }
+
+  const timestamp = nowIso();
+  job.cancelRequestedAt = job.cancelRequestedAt || timestamp;
+  job.updatedAt = timestamp;
+  if (job.status === "pending") {
+    job.status = "cancelled";
+    job.finishedAt = timestamp;
+    job.durationMs = 0;
+    job.outputSummary = "Cancelled before the background handler started.";
+  } else {
+    job.outputSummary = "Cancellation requested; short rebuild jobs may finish before the request is observed.";
+  }
+  jobs.set(job.id, job);
+  await appendJobHistory(root, job);
+  return publicJob(job);
+}
+
+export async function retryBackgroundJob(
+  project: Pick<NovelProject, "slug">,
+  root: string,
+  id: string,
+  handlerFactory: BackgroundJobHandlerFactory
+): Promise<BackgroundJob | null> {
+  const job = await readBackgroundJob(root, project.slug, id);
+  if (!job) return null;
+  if (job.status !== "error" && job.status !== "cancelled") {
+    throw new Error(`Only failed or cancelled background jobs can be retried: ${id}`);
+  }
+  return enqueueProjectBackgroundJob(project, root, job.type, job.inputSummary, handlerFactory(job), { retryOf: job.id });
 }
 
 export async function readBackgroundJob(root: string, projectId: string, id: string): Promise<BackgroundJob | null> {

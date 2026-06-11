@@ -1299,6 +1299,22 @@ export const useNovelStore = defineStore("novel", () => {
     return finishedJob;
   }
 
+  async function cancelBackgroundJob(jobId: string): Promise<BackgroundJob | null> {
+    if (!currentProject.value) return null;
+    const job = await novelApi.cancelBackgroundJob(currentProject.value.slug, jobId);
+    upsertBackgroundJob(job);
+    return job;
+  }
+
+  async function retryBackgroundJob(jobId: string): Promise<BackgroundJob | null> {
+    if (!currentProject.value) return null;
+    const startedJob = await novelApi.retryBackgroundJob(currentProject.value.slug, jobId);
+    upsertBackgroundJob(startedJob);
+    const finishedJob = await waitForBackgroundJob(currentProject.value.slug, startedJob.id);
+    upsertBackgroundJob(finishedJob);
+    return finishedJob;
+  }
+
   function upsertBackgroundJob(job: BackgroundJob) {
     backgroundJobs.value = [job, ...backgroundJobs.value.filter((item) => item.id !== job.id)].sort(
       (left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt)
@@ -1309,7 +1325,7 @@ export const useNovelStore = defineStore("novel", () => {
     for (let attempt = 0; attempt < 60; attempt += 1) {
       const job = await novelApi.readBackgroundJob(projectId, jobId);
       upsertBackgroundJob(job);
-      if (job.status === "success" || job.status === "error") {
+      if (job.status === "success" || job.status === "error" || job.status === "cancelled") {
         return job;
       }
       await wait(500);
@@ -2053,6 +2069,8 @@ export const useNovelStore = defineStore("novel", () => {
     rebuildKnowledgeIndex,
     rebuildSeriesQualityMetrics,
     rebuildStoryGraph,
+    cancelBackgroundJob,
+    retryBackgroundJob,
     searchKnowledgeIndex,
     updateDashboard,
     saveCurrentDashboard,

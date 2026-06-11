@@ -689,7 +689,7 @@ export interface ProjectAuditReport {
 }
 
 export type BackgroundJobType = "knowledge.index.rebuild" | "quality.series.rebuild" | "story.graph.rebuild";
-export type BackgroundJobStatus = "pending" | "running" | "success" | "error";
+export type BackgroundJobStatus = "pending" | "running" | "success" | "error" | "cancelled";
 
 export interface BackgroundJob {
   id: string;
@@ -700,6 +700,8 @@ export interface BackgroundJob {
   outputSummary?: string;
   resultRef?: string;
   error?: string;
+  retryOf?: string;
+  cancelRequestedAt?: string;
   startedAt: string;
   finishedAt?: string;
   durationMs?: number;

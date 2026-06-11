@@ -205,6 +205,8 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     saveStoryControl: vi.fn(),
     loadStoryGraph: vi.fn().mockResolvedValue(undefined),
     loadBackgroundJobs: vi.fn().mockResolvedValue(undefined),
+    cancelBackgroundJob: vi.fn().mockResolvedValue(undefined),
+    retryBackgroundJob: vi.fn().mockResolvedValue(undefined),
     rebuildStoryGraph: vi.fn().mockResolvedValue(undefined),
     rebuildKnowledgeIndex: vi.fn().mockResolvedValue(undefined),
     rebuildSeriesQualityMetrics: vi.fn().mockResolvedValue(undefined),
@@ -289,8 +291,14 @@ const stubs = {
   StoryGraphPanel: { template: "<div class='story-graph-stub'>story graph</div>" },
   KnowledgeIndexPanel: { template: "<div class='knowledge-index-stub'>knowledge index</div>" },
   BackgroundJobPanel: {
-    emits: ["refresh"],
-    template: "<button class='background-job-stub' @click='$emit(\"refresh\")'>background jobs</button>"
+    emits: ["refresh", "cancel", "retry"],
+    template: `
+      <div>
+        <button class='background-job-stub' @click='$emit("refresh")'>background jobs</button>
+        <button class='background-job-cancel-stub' @click='$emit("cancel", "job-running-1")'>cancel</button>
+        <button class='background-job-retry-stub' @click='$emit("retry", "job-error-1")'>retry</button>
+      </div>
+    `
   },
   ChapterDashboardPanel: { template: "<div class='dashboard-stub'>dashboard</div>" },
   SceneCardPanel: { template: "<div class='scene-stub'>scene</div>" },
@@ -509,6 +517,10 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".background-job-stub").exists()).toBe(true);
     await wrapper.find(".background-job-stub").trigger("click");
     expect(storeRef.value.loadBackgroundJobs).toHaveBeenCalled();
+    await wrapper.find(".background-job-cancel-stub").trigger("click");
+    expect(storeRef.value.cancelBackgroundJob).toHaveBeenCalledWith("job-running-1");
+    await wrapper.find(".background-job-retry-stub").trigger("click");
+    expect(storeRef.value.retryBackgroundJob).toHaveBeenCalledWith("job-error-1");
     await wrapper.find(".story-control-stub").trigger("click");
     expect(storeRef.value.requestStoryOrchestration).toHaveBeenCalled();
   });

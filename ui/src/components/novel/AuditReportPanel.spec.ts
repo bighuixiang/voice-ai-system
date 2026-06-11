@@ -72,7 +72,7 @@ const report: ProjectAuditReport = {
   },
   backgroundJobSummary: {
     total: 2,
-    byStatus: { pending: 0, running: 1, success: 1, error: 0 },
+    byStatus: { pending: 0, running: 1, success: 1, error: 0, cancelled: 0 },
     latestJobs: [
       {
         id: "job-1",

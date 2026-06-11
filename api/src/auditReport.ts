@@ -37,7 +37,8 @@ function emptyBackgroundJobStatusCounts(): Record<BackgroundJobStatus, number> {
     pending: 0,
     running: 0,
     success: 0,
-    error: 0
+    error: 0,
+    cancelled: 0
   };
 }
 

@@ -17,6 +17,14 @@
         <div class="job-meta">
           <el-tag size="small" :type="tagType(job.status)">{{ statusLabel(job.status) }}</el-tag>
           <small>{{ formatTime(job.updatedAt) }}<template v-if="job.durationMs"> · {{ formatDuration(job.durationMs) }}</template></small>
+          <div class="job-actions">
+            <el-tooltip v-if="canCancel(job)" content="取消任务" placement="top">
+              <el-button circle size="small" :icon="CircleClose" @click="$emit('cancel', job.id)" />
+            </el-tooltip>
+            <el-tooltip v-if="canRetry(job)" content="重试任务" placement="top">
+              <el-button circle size="small" :icon="RefreshRight" @click="$emit('retry', job.id)" />
+            </el-tooltip>
+          </div>
         </div>
       </article>
     </div>
@@ -26,7 +34,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { Refresh } from "@element-plus/icons-vue";
+import { CircleClose, Refresh, RefreshRight } from "@element-plus/icons-vue";
 import type { BackgroundJob, BackgroundJobStatus, BackgroundJobType } from "@/types/novel";
 
 const props = defineProps<{
@@ -36,6 +44,8 @@ const props = defineProps<{
 
 defineEmits<{
   refresh: [];
+  cancel: [jobId: string];
+  retry: [jobId: string];
 }>();
 
 const jobTypeLabels: Record<BackgroundJobType, string> = {
@@ -48,7 +58,8 @@ const statusLabels: Record<BackgroundJobStatus, string> = {
   pending: "等待",
   running: "运行中",
   success: "完成",
-  error: "失败"
+  error: "失败",
+  cancelled: "已取消"
 };
 
 const visibleJobs = computed(() => props.jobs.slice(0, 6));
@@ -73,6 +84,14 @@ function tagType(status: BackgroundJobStatus) {
   if (status === "error") return "danger";
   if (status === "running") return "warning";
   return "info";
+}
+
+function canCancel(job: BackgroundJob) {
+  return job.status === "pending" || job.status === "running";
+}
+
+function canRetry(job: BackgroundJob) {
+  return job.status === "error" || job.status === "cancelled";
 }
 
 function formatTime(value: string) {
@@ -147,6 +166,10 @@ p {
   &.error {
     border-left-color: #dc2626;
   }
+
+  &.cancelled {
+    border-left-color: #64748b;
+  }
 }
 
 .job-main {
@@ -180,6 +203,18 @@ p {
     color: #64748b;
     font-size: 11px;
     white-space: nowrap;
+  }
+}
+
+.job-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+
+  :deep(.el-button) {
+    width: 26px;
+    height: 26px;
+    padding: 0;
   }
 }
 

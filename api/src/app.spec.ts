@@ -38,7 +38,7 @@ async function waitForJob(projectId: string, jobId: string): Promise<{ job: { st
     const response = await jsonFetch<{ job: { status: string; outputSummary?: string; resultRef?: string } }>(
       `/api/novel/projects/${projectId}/jobs/${jobId}`
     );
-    if (response.data.job.status === "success" || response.data.job.status === "error") {
+    if (response.data.job.status === "success" || response.data.job.status === "error" || response.data.job.status === "cancelled") {
       return response.data;
     }
     await new Promise((resolve) => setTimeout(resolve, 10));
@@ -483,6 +483,58 @@ describe("novel API routes", () => {
     });
     expect(finished.job.outputSummary).toContain("facts");
     expect(listed.data.jobs).toEqual([expect.objectContaining({ id: started.data.job.id, status: "success" })]);
+  });
+
+  it("cancels and retries background jobs", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Job Control Demo", roughIdea: "Control background work." })
+    });
+    const slug = created.data.project.slug;
+    const pendingJob = {
+      id: "job-pending-route",
+      projectId: slug,
+      type: "knowledge.index.rebuild",
+      status: "pending",
+      inputSummary: "{\"reason\":\"cancel-test\"}",
+      startedAt: "2026-06-11T00:00:00.000Z",
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    };
+    const failedJob = {
+      id: "job-failed-route",
+      projectId: slug,
+      type: "story.graph.rebuild",
+      status: "error",
+      inputSummary: "{\"reason\":\"retry-test\"}",
+      error: "boom",
+      startedAt: "2026-06-11T00:00:00.000Z",
+      finishedAt: "2026-06-11T00:00:01.000Z",
+      updatedAt: "2026-06-11T00:00:01.000Z"
+    };
+    await fs.mkdir(path.join(tempRoot, slug, "tasks"), { recursive: true });
+    await fs.writeFile(
+      path.join(tempRoot, slug, "tasks", "background-jobs.jsonl"),
+      `${JSON.stringify(pendingJob)}\n${JSON.stringify(failedJob)}\n`,
+      "utf8"
+    );
+
+    const cancelled = await jsonFetch<{ job: { id: string; status: string; cancelRequestedAt?: string } }>(
+      `/api/novel/projects/${slug}/jobs/${pendingJob.id}/cancel`,
+      { method: "POST" }
+    );
+
+    const retried = await jsonFetch<{ job: { id: string; type: string; status: string; retryOf?: string } }>(
+      `/api/novel/projects/${slug}/jobs/${failedJob.id}/retry`,
+      { method: "POST" }
+    );
+    const retryFinished = await waitForJob(slug, retried.data.job.id);
+
+    expect(cancelled.status).toBe(200);
+    expect(cancelled.data.job).toMatchObject({ id: pendingJob.id, status: "cancelled", cancelRequestedAt: expect.any(String) });
+    expect(retried.status).toBe(202);
+    expect(retried.data.job).toMatchObject({ type: "story.graph.rebuild", retryOf: failedJob.id });
+    expect(retryFinished.job.status).toBe("success");
   });
 
   it("returns a creation runtime snapshot for a chapter", async () => {
