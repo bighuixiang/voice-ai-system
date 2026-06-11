@@ -12,6 +12,7 @@ import type {
   LedgerEntry,
   NovelProject,
   NovelTask,
+  ProjectAuditReport,
   SceneCard,
   StoryControl,
   WritingBriefing,
@@ -50,6 +51,7 @@ const mockNovelApi = vi.hoisted(() => ({
   saveLedgerEntries: vi.fn(),
   acceptWritingRecap: vi.fn(),
   readAiInvocations: vi.fn(),
+  readProjectAuditReport: vi.fn(),
   runTask: vi.fn(),
   polishSelection: vi.fn(),
   applyPatches: vi.fn()
@@ -216,6 +218,69 @@ function backgroundJob(overrides: Partial<BackgroundJob> = {}): BackgroundJob {
     finishedAt: "2026-06-11T00:00:01.000Z",
     durationMs: 1000,
     updatedAt: "2026-06-11T00:00:01.000Z",
+    ...overrides
+  };
+}
+
+function auditReport(overrides: Partial<ProjectAuditReport> = {}): ProjectAuditReport {
+  return {
+    projectSlug: "demo",
+    projectTitle: "Demo Novel",
+    generatedAt: "2026-06-11T00:00:00.000Z",
+    chapters: [
+      {
+        id: "chapter-001",
+        title: "Chapter 1",
+        status: "drafted",
+        contentPath: "chapters/chapter-001.md",
+        outlinePath: "outline/chapter-001.md"
+      }
+    ],
+    quality: {
+      projectSlug: "demo",
+      chapterCount: 1,
+      reportCount: 1,
+      averageOverallScore: 82,
+      metricAverages: [],
+      weakestChapters: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    },
+    taskSummary: {
+      total: 1,
+      byStatus: { pending: 0, running: 0, success: 1, error: 0, cancelled: 0 },
+      byType: { "chapter.draft": 1 },
+      latestTasks: []
+    },
+    aiInvocationSummary: {
+      total: 1,
+      byDecision: { pending: 0, accepted: 1, rejected: 0, "not-required": 0 },
+      proposedPatchCount: 1,
+      acceptedPatchCount: 1
+    },
+    knowledgeSummary: {
+      factCount: 2,
+      tripleCount: 1,
+      indexedChapterCount: 1,
+      keywordCount: 3,
+      vectorSummary: {
+        provider: "local",
+        dimensions: 16,
+        entryCount: 4,
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      }
+    },
+    runtimeSummary: {
+      chapterCount: 1,
+      byActiveStep: { structure: 0, draft: 0, review: 1, recap: 0, ledger: 0, next: 0, none: 0 },
+      blockedStepCount: 0,
+      snapshots: []
+    },
+    backgroundJobSummary: {
+      total: 1,
+      byStatus: { pending: 0, running: 0, success: 1, error: 0 },
+      latestJobs: [backgroundJob()]
+    },
+    aiInvocations: [invocationForTask()],
     ...overrides
   };
 }
@@ -471,6 +536,7 @@ describe("useNovelStore", () => {
       }
     }));
     mockNovelApi.readAiInvocations.mockResolvedValue([]);
+    mockNovelApi.readProjectAuditReport.mockResolvedValue(auditReport());
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
     mockNovelApi.createPlatformAsset.mockResolvedValue({
@@ -695,6 +761,23 @@ describe("useNovelStore", () => {
 
     expect(mockNovelApi.listBackgroundJobs).toHaveBeenCalledWith("demo");
     expect(store.backgroundJobs).toEqual([expect.objectContaining({ id: "job-knowledge-1", status: "success" })]);
+  });
+
+  it("previews a project audit report in the workspace", async () => {
+    const report = auditReport({ projectTitle: "Preview Demo" });
+    mockNovelApi.readProjectAuditReport.mockResolvedValueOnce(report);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    const result = await store.previewProjectAuditReport();
+
+    expect(mockNovelApi.readProjectAuditReport).toHaveBeenCalledWith("demo");
+    expect(result).toEqual(report);
+    expect(store.auditReportPreview).toEqual(report);
+    expect(store.isLoadingAuditReportPreview).toBe(false);
+
+    store.clearAuditReportPreview();
+    expect(store.auditReportPreview).toBeNull();
   });
 
   it("loads, saves, and requests story-level orchestration", async () => {

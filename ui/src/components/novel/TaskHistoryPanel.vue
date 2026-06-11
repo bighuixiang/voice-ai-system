@@ -2,7 +2,10 @@
   <section class="task-history-panel" aria-label="任务历史">
     <div class="panel-head">
       <div class="panel-title">任务历史</div>
-      <el-button v-if="canExport" size="small" :loading="isExporting" @click="$emit('export-report')">导出报告</el-button>
+      <div v-if="canExport" class="report-actions">
+        <el-button size="small" :loading="isPreviewing" @click="$emit('preview-report')">审计报告</el-button>
+        <el-button size="small" :loading="isExporting" @click="$emit('export-report')">JSON</el-button>
+      </div>
     </div>
     <el-empty v-if="!tasks.length" description="暂无任务" :image-size="48" />
     <ol v-else>
@@ -50,9 +53,11 @@ const props = defineProps<{
   invocations?: AiInvocationSession[];
   canExport?: boolean;
   isExporting?: boolean;
+  isPreviewing?: boolean;
 }>();
 
 defineEmits<{
+  "preview-report": [];
   "export-report": [];
 }>();
 
@@ -155,6 +160,12 @@ function auditSummary(invocation: AiInvocationSession) {
 .panel-title {
   color: var(--app-text-primary);
   font-weight: 700;
+}
+
+.report-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
 }
 
 ol {

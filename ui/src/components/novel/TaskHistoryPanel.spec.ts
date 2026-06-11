@@ -69,8 +69,13 @@ describe("TaskHistoryPanel", () => {
     expect(wrapper.text()).toContain("prompt preview");
     expect(wrapper.text()).toContain("chapters/chapter-001.md");
     expect(wrapper.text()).toContain("已采纳");
+    expect(wrapper.text()).toContain("审计报告");
+    expect(wrapper.text()).toContain("JSON");
 
-    await wrapper.find("button").trigger("click");
+    const buttons = wrapper.findAll("button");
+    await buttons[0].trigger("click");
+    await buttons[1].trigger("click");
+    expect(wrapper.emitted("preview-report")).toHaveLength(1);
     expect(wrapper.emitted("export-report")).toHaveLength(1);
   });
 });

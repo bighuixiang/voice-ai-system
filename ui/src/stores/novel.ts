@@ -29,6 +29,7 @@ import type {
   PlatformAsset,
   PlatformAssetType,
   PlatformLibrary,
+  ProjectAuditReport,
   SceneCard,
   SeriesQualityMetrics,
   StoryControl,
@@ -176,6 +177,8 @@ export const useNovelStore = defineStore("novel", () => {
   const isLoading = ref(false);
   const error = ref("");
   const isExportingAuditReport = ref(false);
+  const auditReportPreview = ref<ProjectAuditReport | null>(null);
+  const isLoadingAuditReportPreview = ref(false);
 
   const hasProject = computed(() => currentProject.value !== null);
   const openWorkspaceProjects = computed(() =>
@@ -934,6 +937,7 @@ export const useNovelStore = defineStore("novel", () => {
     storyGraph.value = null;
     knowledgeIndex.value = null;
     knowledgeSearchResult.value = null;
+    auditReportPreview.value = null;
     structureIdeaInput.value = "";
     structureDraftVersion.value = 0;
     activeLedgerKind.value = "foreshadowing";
@@ -1919,6 +1923,25 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
+  async function previewProjectAuditReport() {
+    if (!currentProject.value || isLoadingAuditReportPreview.value) return auditReportPreview.value;
+    isLoadingAuditReportPreview.value = true;
+    try {
+      const report = await novelApi.readProjectAuditReport(currentProject.value.slug);
+      auditReportPreview.value = report;
+      return report;
+    } catch (err) {
+      error.value = `读取审计报告失败：${err instanceof Error ? err.message : String(err)}`;
+      return null;
+    } finally {
+      isLoadingAuditReportPreview.value = false;
+    }
+  }
+
+  function clearAuditReportPreview() {
+    auditReportPreview.value = null;
+  }
+
   return {
     projects,
     openWorkspaceSlugs,
@@ -1974,6 +1997,8 @@ export const useNovelStore = defineStore("novel", () => {
     isSearchingKnowledge,
     isReverseEngineeringStructure,
     isExportingAuditReport,
+    auditReportPreview,
+    isLoadingAuditReportPreview,
     agentProfiles,
     agentChecks,
     defaultAgentProfileId,
@@ -2066,6 +2091,8 @@ export const useNovelStore = defineStore("novel", () => {
     acceptFocusDraft,
     rejectRewrite,
     applyTaskPatches,
-    exportProjectAuditReport
+    exportProjectAuditReport,
+    previewProjectAuditReport,
+    clearAuditReportPreview
   };
 });

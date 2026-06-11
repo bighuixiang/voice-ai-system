@@ -333,6 +333,8 @@
             :invocations="store.aiInvocations"
             :can-export="Boolean(store.currentProject)"
             :is-exporting="store.isExportingAuditReport"
+            :is-previewing="store.isLoadingAuditReportPreview"
+            @preview-report="openAuditReportPreview"
             @export-report="store.exportProjectAuditReport"
           />
         </CollapsiblePanel>
@@ -448,6 +450,20 @@
         @check="handleCheckAgent"
       />
     </el-dialog>
+    <el-dialog
+      v-model="auditReportDialogOpen"
+      title="审计报告"
+      width="min(1100px, 96vw)"
+      destroy-on-close
+      @closed="store.clearAuditReportPreview"
+    >
+      <AuditReportPanel
+        :report="store.auditReportPreview"
+        :loading="store.isLoadingAuditReportPreview"
+        @refresh="store.previewProjectAuditReport"
+        @download="store.exportProjectAuditReport"
+      />
+    </el-dialog>
   </div>
 </template>
 
@@ -480,6 +496,7 @@ import AIOperationPanel from "./AIOperationPanel.vue";
 import WritingRecapPanel from "./WritingRecapPanel.vue";
 import WritingModeSwitcher from "./WritingModeSwitcher.vue";
 import TaskHistoryPanel from "./TaskHistoryPanel.vue";
+import AuditReportPanel from "./AuditReportPanel.vue";
 import ContextPanel from "./ContextPanel.vue";
 import SupportFilePanel from "./SupportFilePanel.vue";
 import LedgerPanel from "./LedgerPanel.vue";
@@ -500,6 +517,7 @@ const sampleStarterIdea = "一个被逐出山门的少年在雨夜发现旧封�
 const starterIdea = ref("");
 const aiConfigDialogOpen = ref(false);
 const storyControlDialogOpen = ref(false);
+const auditReportDialogOpen = ref(false);
 const collapsedPanels = ref<Record<string, boolean>>({});
 const isProjectRoute = computed(() => route.name === "project-workspace");
 const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
@@ -681,6 +699,14 @@ async function handleCheckAgent(config: { profileId: string; modelId?: string })
     ElMessage.error(err instanceof Error ? err.message : "AI 执行器测试失败");
   } finally {
     store.isLoading = false;
+  }
+}
+
+async function openAuditReportPreview() {
+  auditReportDialogOpen.value = true;
+  const report = await store.previewProjectAuditReport();
+  if (!report && store.error) {
+    ElMessage.error(store.error);
   }
 }
 

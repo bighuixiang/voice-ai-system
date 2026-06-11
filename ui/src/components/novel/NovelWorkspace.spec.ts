@@ -152,6 +152,9 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     agentChecks: [],
     defaultAgentProfileId: "codex-cli",
     isSavingAiConfig: false,
+    isExportingAuditReport: false,
+    auditReportPreview: null,
+    isLoadingAuditReportPreview: false,
     platformAiConfig: {
       version: 1,
       defaultScenario: "novel",
@@ -220,6 +223,9 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     runCreationLoopAction: vi.fn(),
     acceptWritingRecap: vi.fn(),
     rejectWritingRecap: vi.fn(),
+    exportProjectAuditReport: vi.fn().mockResolvedValue(true),
+    previewProjectAuditReport: vi.fn().mockResolvedValue({ projectTitle: "Demo Novel" }),
+    clearAuditReportPreview: vi.fn(),
     createSharedAsset: vi.fn(),
     linkSharedAsset: vi.fn(),
     openSupportFile: vi.fn(),
@@ -292,7 +298,20 @@ const stubs = {
   },
   AIOperationPanel: { template: "<div class='ai-stub'>ai</div>" },
   WritingRecapPanel: { template: "<div class='recap-stub'>recap</div>" },
-  TaskHistoryPanel: { template: "<div class='history-stub'>history</div>" },
+  TaskHistoryPanel: {
+    emits: ["preview-report", "export-report"],
+    template: `
+      <div class='history-stub'>
+        <button class='preview-report-stub' @click='$emit("preview-report")'>preview</button>
+        <button class='export-report-stub' @click='$emit("export-report")'>export</button>
+      </div>
+    `
+  },
+  AuditReportPanel: {
+    props: ["report", "loading"],
+    emits: ["refresh", "download"],
+    template: "<button class='audit-report-stub' @click='$emit(\"refresh\")'>audit</button>"
+  },
   ContextPanel: { template: "<div class='context-stub'>context</div>" },
   SupportFilePanel: { template: "<div class='support-stub'>support</div>" },
   LedgerPanel: { template: "<div class='ledger-stub'>ledger</div>" }
@@ -422,6 +441,17 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".history-stub").exists()).toBe(true);
     expect(wrapper.find(".scene-stub").exists()).toBe(false);
     expect(wrapper.find(".ai-stub").exists()).toBe(false);
+  });
+
+  it("opens audit report preview from task history", async () => {
+    storeRef.value = makeStore("review");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".preview-report-stub").trigger("click");
+    await flushPromises();
+
+    expect(storeRef.value.previewProjectAuditReport).toHaveBeenCalledTimes(1);
+    expect(wrapper.find(".audit-report-stub").exists()).toBe(true);
   });
 
   it.each([
