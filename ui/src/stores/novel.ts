@@ -5,6 +5,7 @@ import type {
   AiAgentCheckResult,
   AiAgentProfile,
   AiInvocationSession,
+  AiStageDefinition,
   ChapterDashboard,
   ChapterSummary,
   ChapterQualityReport,
@@ -134,6 +135,7 @@ export const useNovelStore = defineStore("novel", () => {
   const taskProgress = ref<TaskProgressStep[]>([]);
   const taskHistory = ref<NovelTask[]>([]);
   const aiInvocations = ref<AiInvocationSession[]>([]);
+  const aiStages = ref<AiStageDefinition[]>([]);
   const backgroundJobs = ref<BackgroundJob[]>([]);
   const rewriteCandidate = ref<CodexTaskResult | null>(null);
   const recapCandidate = ref<WritingRecapCandidate | null>(null);
@@ -1057,6 +1059,10 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function loadPlatformLibrary() {
     platformLibrary.value = await novelApi.readPlatformLibrary();
+  }
+
+  async function loadAiStages() {
+    aiStages.value = await novelApi.readAiStages();
   }
 
   async function loadAgentProfiles() {
@@ -2097,6 +2103,7 @@ export const useNovelStore = defineStore("novel", () => {
     taskProgress,
     taskHistory,
     aiInvocations,
+    aiStages,
     backgroundJobs,
     rewriteCandidate,
     recapCandidate,
@@ -2165,6 +2172,7 @@ export const useNovelStore = defineStore("novel", () => {
     canLeaveCurrentWorkspace,
     loadProjects,
     loadPlatformLibrary,
+    loadAiStages,
     loadPlatformAiConfig,
     loadAgentProfiles,
     checkAgentProfile,

@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { useNovelStore } from "./novel";
 import type {
   AiInvocationSession,
+  AiStageDefinition,
   BackgroundJob,
   ChapterDashboard,
   ChapterFactPatch,
@@ -24,6 +25,7 @@ const mockNovelApi = vi.hoisted(() => ({
   createProject: vi.fn(),
   importProject: vi.fn(),
   readPlatformLibrary: vi.fn(),
+  readAiStages: vi.fn(),
   createPlatformAsset: vi.fn(),
   linkPlatformAsset: vi.fn(),
   readFile: vi.fn(),
@@ -111,6 +113,11 @@ const platformLibrary = {
   skills: [],
   updatedAt: "2026-06-03T00:00:00.000Z"
 };
+
+const aiStages: AiStageDefinition[] = [
+  { key: "pipeline.chapter.prose", label: "Chapter prose drafting", taskTypes: ["chapter.draft"] },
+  { key: "autopilot.post_chapter.recap", label: "Post-chapter recap", taskTypes: ["writing.recap"] }
+];
 
 const storyControl: StoryControl = {
   version: 1,
@@ -543,6 +550,7 @@ describe("useNovelStore", () => {
     mockNovelApi.readProjectAuditReport.mockResolvedValue(auditReport());
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
+    mockNovelApi.readAiStages.mockResolvedValue(aiStages);
     mockNovelApi.createPlatformAsset.mockResolvedValue({
       ...platformLibrary.assets[0],
       id: "asset-2",
@@ -735,6 +743,15 @@ describe("useNovelStore", () => {
     expect(store.knowledgeIndex?.facts).toEqual([expect.objectContaining({ id: "fact:gate" })]);
     expect(store.sceneCards).toEqual(scenes);
     expect(store.activeLedgerKind).toBe("foreshadowing");
+  });
+
+  it("loads shared AI stage definitions", async () => {
+    const store = useNovelStore();
+
+    await store.loadAiStages();
+
+    expect(mockNovelApi.readAiStages).toHaveBeenCalled();
+    expect(store.aiStages).toEqual(aiStages);
   });
 
   it("searches the knowledge index for the active chapter", async () => {
