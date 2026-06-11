@@ -1078,6 +1078,118 @@ describe("useNovelStore", () => {
     );
   });
 
+  it("does not run the post-save pipeline by default", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    vi.clearAllMocks();
+
+    store.updateContent("manual edit for ordinary save");
+    await store.saveCurrentContent();
+
+    expect(mockNovelApi.saveFile).toHaveBeenCalledWith("demo", "chapters/chapter-001.md", "manual edit for ordinary save");
+    expect(mockNovelApi.runTask).not.toHaveBeenCalled();
+    expect(mockNovelApi.startBackgroundJob).not.toHaveBeenCalled();
+    expect(store.savePipelineSteps).toEqual([]);
+  });
+
+  it("runs the opt-in post-save pipeline for chapter content saves", async () => {
+    const recap = {
+      chapterId: "chapter-001",
+      summary: "The gate answered the hero's blood.",
+      newFacts: ["The gate reacts to blood."],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-11T00:00:00.000Z"
+    };
+    mockNovelApi.runTask.mockResolvedValue(
+      taskWithResult({
+        type: "writing.recap",
+        result: {
+          summary: "Recap ready",
+          content: JSON.stringify(recap),
+          changes: [],
+          risks: [],
+          questions: [],
+          patches: []
+        }
+      })
+    );
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    vi.clearAllMocks();
+
+    store.setAutoRunSavePipeline(true);
+    store.updateContent("old pressure becomes new pressure at the sealed gate");
+    await store.saveCurrentContent();
+
+    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+      "demo",
+      "writing.recap",
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        mode: "chapter.save.pipeline",
+        changedCharCount: expect.any(Number),
+        previousTail: expect.stringContaining("draft:chapters/chapter-001.md"),
+        currentTail: expect.stringContaining("sealed gate")
+      })
+    );
+    expect(mockNovelApi.startBackgroundJob).toHaveBeenCalledWith("demo", "quality.series.rebuild", {
+      source: "save-pipeline",
+      chapterId: "chapter-001"
+    });
+    expect(mockNovelApi.startBackgroundJob).toHaveBeenCalledWith("demo", "knowledge.index.rebuild", {
+      source: "save-pipeline",
+      chapterId: "chapter-001"
+    });
+    expect(mockNovelApi.readCreationRuntimeSnapshot).toHaveBeenCalledWith("demo", "chapter-001");
+    expect(store.recapCandidate).toMatchObject({ chapterId: "chapter-001", summary: recap.summary });
+    expect(store.savePipelineSteps.map((step) => [step.id, step.status])).toEqual([
+      ["save", "done"],
+      ["recap", "done"],
+      ["quality", "done"],
+      ["knowledge", "done"],
+      ["runtime", "done"]
+    ]);
+    expect(store.isRunningSavePipeline).toBe(false);
+  });
+
+  it("skips the post-save pipeline for outline documents", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0], "outline");
+    vi.clearAllMocks();
+
+    store.setAutoRunSavePipeline(true);
+    store.updateContent("outline update");
+    await store.saveCurrentContent();
+
+    expect(mockNovelApi.saveFile).toHaveBeenCalledWith("demo", "outline/chapter-001.md", "outline update");
+    expect(mockNovelApi.runTask).not.toHaveBeenCalled();
+    expect(mockNovelApi.startBackgroundJob).not.toHaveBeenCalled();
+    expect(store.savePipelineSteps.find((step) => step.id === "recap")).toMatchObject({ status: "skipped" });
+  });
+
+  it("keeps saved content when the post-save recap step fails", async () => {
+    mockNovelApi.runTask.mockRejectedValueOnce(new Error("recap failed"));
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    vi.clearAllMocks();
+
+    store.setAutoRunSavePipeline(true);
+    store.updateContent("saved before recap failure");
+    await expect(store.saveCurrentContent()).resolves.toBeUndefined();
+
+    expect(mockNovelApi.saveFile).toHaveBeenCalledWith("demo", "chapters/chapter-001.md", "saved before recap failure");
+    expect(store.hasUnsavedChanges).toBe(false);
+    expect(store.error).toBe("recap failed");
+    expect(store.savePipelineSteps.find((step) => step.id === "recap")).toMatchObject({ status: "error", detail: "recap failed" });
+  });
+
   it("reverse engineers dashboard and scene cards from the current draft with AI analysis", async () => {
     const aiStructure = {
       dashboard: {

@@ -146,6 +146,9 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     taskProgress: [],
     creationLoopSteps: [],
     currentRuntimeSnapshot: null,
+    autoRunSavePipeline: false,
+    savePipelineSteps: [],
+    isRunningSavePipeline: false,
     recapCandidate: null,
     taskHistory: [],
     agentProfiles: [],
@@ -229,6 +232,8 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     applyTaskPatches: vi.fn(),
     runTask: vi.fn(),
     runCreationLoopAction: vi.fn(),
+    setAutoRunSavePipeline: vi.fn(),
+    runPostSavePipelineFromCurrentContent: vi.fn().mockResolvedValue(undefined),
     acceptWritingRecap: vi.fn(),
     rejectWritingRecap: vi.fn(),
     exportProjectAuditReport: vi.fn().mockResolvedValue(true),
@@ -272,6 +277,16 @@ const stubs = {
     props: ["steps", "runtimeSnapshot"],
     emits: ["action"],
     template: "<button class='creation-loop-stub' @click='$emit(\"action\", steps?.[0]?.action)'>loop</button>"
+  },
+  SavePipelinePanel: {
+    props: ["autoRun", "steps", "isRunning"],
+    emits: ["update:auto-run", "run"],
+    template: `
+      <div class='save-pipeline-stub'>
+        <button class='save-pipeline-toggle-stub' @click='$emit("update:auto-run", !autoRun)'>toggle</button>
+        <button class='save-pipeline-run-stub' @click='$emit("run")'>run pipeline</button>
+      </div>
+    `
   },
   FocusWritingPanel: {
     props: ["instruction"],
@@ -344,8 +359,21 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".left-rail").exists()).toBe(false);
     expect(wrapper.find(".right-rail").exists()).toBe(false);
     expect(wrapper.find(".focus-stub").exists()).toBe(true);
+    expect(wrapper.find(".save-pipeline-stub").exists()).toBe(true);
     expect(wrapper.find(".dashboard-stub").exists()).toBe(false);
     expect(wrapper.find(".editor-stub").exists()).toBe(true);
+  });
+
+  it("wires save pipeline controls to the workspace store", async () => {
+    storeRef.value = makeStore("focus");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+
+    await wrapper.find(".save-pipeline-toggle-stub").trigger("click");
+    await wrapper.find(".save-pipeline-run-stub").trigger("click");
+
+    expect(storeRef.value.setAutoRunSavePipeline).toHaveBeenCalledWith(true);
+    expect(storeRef.value.runPostSavePipelineFromCurrentContent).toHaveBeenCalledTimes(1);
   });
 
   it("routes focus guide generation to the store", async () => {

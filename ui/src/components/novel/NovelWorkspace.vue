@@ -111,6 +111,13 @@
           :loading="store.isLoading || store.isSavingContent"
           @action="handleCreationLoopAction"
         />
+        <SavePipelinePanel
+          :auto-run="store.autoRunSavePipeline"
+          :steps="store.savePipelineSteps"
+          :is-running="store.isRunningSavePipeline"
+          @update:auto-run="store.setAutoRunSavePipeline"
+          @run="store.runPostSavePipelineFromCurrentContent"
+        />
         <CollapsiblePanel
           title="快速指引"
           :collapsed="panelCollapsed('quick-start', hasWorkspaceDraft || hasWorkspaceStructure)"
@@ -506,6 +513,7 @@ import PlatformLibraryPanel from "./PlatformLibraryPanel.vue";
 import QuickStartGuidePanel from "./QuickStartGuidePanel.vue";
 import CollapsiblePanel from "./CollapsiblePanel.vue";
 import CreationLoopPanel from "./CreationLoopPanel.vue";
+import SavePipelinePanel from "./SavePipelinePanel.vue";
 
 defineOptions({
   name: "NovelWorkspace"

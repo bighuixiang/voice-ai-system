@@ -31,6 +31,9 @@ import type {
   PlatformLibrary,
   ProjectAuditReport,
   SceneCard,
+  SavePipelineStep,
+  SavePipelineStepId,
+  SavePipelineStepStatus,
   SeriesQualityMetrics,
   StoryControl,
   StoryGraphProjection,
@@ -185,6 +188,9 @@ export const useNovelStore = defineStore("novel", () => {
   const isExportingAuditReport = ref(false);
   const auditReportPreview = ref<ProjectAuditReport | null>(null);
   const isLoadingAuditReportPreview = ref(false);
+  const autoRunSavePipeline = ref(false);
+  const savePipelineSteps = ref<SavePipelineStep[]>([]);
+  const isRunningSavePipeline = ref(false);
 
   const hasProject = computed(() => currentProject.value !== null);
   const openWorkspaceProjects = computed(() =>
@@ -944,6 +950,8 @@ export const useNovelStore = defineStore("novel", () => {
     knowledgeIndex.value = null;
     knowledgeSearchResult.value = null;
     auditReportPreview.value = null;
+    savePipelineSteps.value = [];
+    isRunningSavePipeline.value = false;
     structureIdeaInput.value = "";
     structureDraftVersion.value = 0;
     activeLedgerKind.value = "foreshadowing";
@@ -1331,6 +1339,107 @@ export const useNovelStore = defineStore("novel", () => {
       await wait(500);
     }
     throw new Error("后台作业超时");
+  }
+
+  const savePipelineStepLabels: Record<SavePipelineStepId, string> = {
+    save: "保存",
+    recap: "章后回顾",
+    quality: "质量重建",
+    knowledge: "知识索引",
+    runtime: "运行快照"
+  };
+
+  function makeSavePipelineSteps(): SavePipelineStep[] {
+    return (["save", "recap", "quality", "knowledge", "runtime"] as SavePipelineStepId[]).map((id) => ({
+      id,
+      label: savePipelineStepLabels[id],
+      status: "pending"
+    }));
+  }
+
+  function setAutoRunSavePipeline(value: boolean) {
+    autoRunSavePipeline.value = value;
+  }
+
+  function updateSavePipelineStep(id: SavePipelineStepId, status: SavePipelineStepStatus, detail?: string) {
+    savePipelineSteps.value = savePipelineSteps.value.map((step) => (step.id === id ? { ...step, status, detail } : step));
+  }
+
+  function skipSavePipelineSteps(ids: SavePipelineStepId[], detail: string) {
+    for (const id of ids) {
+      updateSavePipelineStep(id, "skipped", detail);
+    }
+  }
+
+  function pipelineErrorMessage(err: unknown) {
+    return err instanceof Error ? err.message : String(err);
+  }
+
+  async function runPostSavePipeline(previousContent = savedContent.value) {
+    if (isRunningSavePipeline.value) return;
+    savePipelineSteps.value = makeSavePipelineSteps();
+    updateSavePipelineStep("save", "done", "当前文档已保存");
+
+    const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
+    if (!currentProject.value || !chapterId) {
+      skipSavePipelineSteps(["recap", "quality", "knowledge", "runtime"], "未打开章节");
+      return;
+    }
+
+    if (currentDocumentKind.value !== "content") {
+      skipSavePipelineSteps(["recap", "quality", "knowledge", "runtime"], "仅章节正文保存后运行");
+      return;
+    }
+
+    const projectId = currentProject.value.slug;
+    isRunningSavePipeline.value = true;
+    let activeStep: SavePipelineStepId = "recap";
+    try {
+      activeStep = "recap";
+      updateSavePipelineStep("recap", "running", "抽取本次保存带来的事实变化");
+      await runTask("writing.recap", {
+        mode: "chapter.save.pipeline",
+        previousTail: previousContent.slice(-1600),
+        currentTail: currentContent.value.slice(-1600),
+        changedCharCount: Math.abs(currentContent.value.length - previousContent.length),
+        instruction:
+          "请只复盘本次章节保存带来的事实变化，生成可由作者确认后写入账本的 WritingRecapCandidate JSON；不要改写正文，也不要自动应用账本。"
+      });
+      updateSavePipelineStep("recap", "done", recapCandidate.value ? "已生成待确认回顾" : "任务完成，未解析到回顾候选");
+
+      activeStep = "quality";
+      updateSavePipelineStep("quality", "running", "重建全书质量指标");
+      await runCurrentProjectBackgroundJob("quality.series.rebuild", { source: "save-pipeline", chapterId }, "全书质量指标重建失败");
+      currentSeriesQualityMetrics.value = await novelApi.readSeriesQualityMetrics(projectId);
+      updateSavePipelineStep("quality", "done", "质量指标已更新");
+
+      activeStep = "knowledge";
+      updateSavePipelineStep("knowledge", "running", "重建知识索引");
+      await runCurrentProjectBackgroundJob("knowledge.index.rebuild", { source: "save-pipeline", chapterId }, "知识索引重建失败");
+      knowledgeIndex.value = await novelApi.readKnowledgeIndex(projectId);
+      knowledgeSearchResult.value = null;
+      await loadStoryGraph();
+      updateSavePipelineStep("knowledge", "done", "知识索引已更新");
+
+      activeStep = "runtime";
+      updateSavePipelineStep("runtime", "running", "刷新创作闭环快照");
+      await loadCreationRuntimeSnapshot(chapterId);
+      updateSavePipelineStep("runtime", "done", "运行快照已刷新");
+    } catch (err) {
+      const message = pipelineErrorMessage(err);
+      error.value = message;
+      updateSavePipelineStep(activeStep, "error", message);
+      const remaining = (["recap", "quality", "knowledge", "runtime"] as SavePipelineStepId[]).slice(
+        (["recap", "quality", "knowledge", "runtime"] as SavePipelineStepId[]).indexOf(activeStep) + 1
+      );
+      skipSavePipelineSteps(remaining, "前序步骤失败后跳过");
+    } finally {
+      isRunningSavePipeline.value = false;
+    }
+  }
+
+  async function runPostSavePipelineFromCurrentContent() {
+    await runPostSavePipeline(savedContent.value);
   }
 
   async function searchKnowledgeIndex(query: string) {
@@ -1750,6 +1859,7 @@ export const useNovelStore = defineStore("novel", () => {
     if (!currentProject.value || !currentFilePath.value) return;
     isSavingContent.value = true;
     error.value = "";
+    const previousContent = savedContent.value;
     try {
       await novelApi.saveFile(currentProject.value.slug, currentFilePath.value, currentContent.value);
       savedContent.value = currentContent.value;
@@ -1760,6 +1870,9 @@ export const useNovelStore = defineStore("novel", () => {
         await loadCreationRuntimeSnapshot();
       }
       lastSavedAt.value = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+      if (autoRunSavePipeline.value) {
+        await runPostSavePipeline(previousContent);
+      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err);
       throw err;
@@ -2021,6 +2134,9 @@ export const useNovelStore = defineStore("novel", () => {
     isExportingAuditReport,
     auditReportPreview,
     isLoadingAuditReportPreview,
+    autoRunSavePipeline,
+    savePipelineSteps,
+    isRunningSavePipeline,
     agentProfiles,
     agentChecks,
     defaultAgentProfileId,
@@ -2110,6 +2226,9 @@ export const useNovelStore = defineStore("novel", () => {
     updateSupportContent,
     saveSupportContent,
     runTask,
+    setAutoRunSavePipeline,
+    runPostSavePipeline,
+    runPostSavePipelineFromCurrentContent,
     polishSelection,
     acceptRewrite,
     acceptFocusDraft,

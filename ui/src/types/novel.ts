@@ -735,6 +735,16 @@ export interface BackgroundJob {
   updatedAt: string;
 }
 
+export type SavePipelineStepId = "save" | "recap" | "quality" | "knowledge" | "runtime";
+export type SavePipelineStepStatus = "pending" | "running" | "done" | "skipped" | "error";
+
+export interface SavePipelineStep {
+  id: SavePipelineStepId;
+  label: string;
+  status: SavePipelineStepStatus;
+  detail?: string;
+}
+
 export interface EditorSelection {
   filePath: string;
   selectedText: string;

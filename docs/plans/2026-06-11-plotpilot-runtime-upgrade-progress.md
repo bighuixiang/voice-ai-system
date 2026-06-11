@@ -39,6 +39,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Chapter memory index persists under `memory/chapter-index.json`.
   - Local vector recall persists under `knowledge/vectors.json` and contributes `vectorScore` to search results.
   - Optional OpenAI-compatible embedding providers can populate `knowledge/vectors.json` when `KNOWLEDGE_EMBEDDING_PROVIDER=openai-compatible` and an API key are configured.
+  - Workspace AI settings can edit the knowledge embedding provider, base URL, model, and local API key configuration without exposing the raw saved key.
   - Knowledge index responses expose vector provider, dimensions, entry count, and fallback details so provider issues are visible in the workspace.
   - UI supports knowledge search and a quick reference lookup across characters, locations, terms, and facts.
 
@@ -53,6 +54,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Reports include knowledge fact/triple counts, indexed chapter counts, keyword counts, and vector provider status.
   - Reports include per-chapter runtime fingerprints, active creation steps, blocked-step counts, and runtime signals.
   - Task history UI can download the report as JSON.
+  - Task history UI can also open an in-workspace audit preview dialog before downloading JSON.
 
 - Background job orchestration:
   - `/api/novel/projects/:projectId/jobs` starts and lists project background jobs.
@@ -62,6 +64,15 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Workspace quality overview and story graph rebuilds can also run through background jobs.
   - Story control now shows recent background jobs with status, output summary, duration, and manual refresh.
   - Background job history persists under `tasks/background-jobs.jsonl` and can be listed after the in-memory cache is cleared.
+  - Jobs can be cancelled or retried from API routes and the workspace background job panel.
+  - Cancelled jobs are terminal and retry jobs retain `retryOf` lineage for auditability.
+
+- Post-save chapter pipeline:
+  - Save pipeline state tracks save, recap, quality, knowledge, and runtime steps.
+  - The pipeline is opt-in and visible in the workspace near the creation loop.
+  - Chapter content saves can automatically request a reviewable `writing.recap`, rebuild series quality, rebuild the knowledge index, and refresh the runtime snapshot.
+  - Outline/support saves do not trigger the automatic pipeline.
+  - Pipeline failures mark the failed step and preserve the saved chapter content.
 
 ## Verification
 
@@ -77,6 +88,12 @@ Known warnings remain unchanged:
 - Node SQLite experimental warning.
 - Dart Sass legacy JS API warning.
 - Vite chunk size warning for the UI bundle.
+
+Latest targeted P0 extension verification:
+
+- `npm --prefix api run test -- backgroundJobs app`: 23 passed.
+- `npm --prefix api run build`: passed.
+- `npm --prefix ui run test -- NovelWorkspace novel SavePipelinePanel`: 160 passed.
 
 ## Recent Commits
 
@@ -99,6 +116,9 @@ Known warnings remain unchanged:
 - `808d368 feat: surface knowledge vector status`
 - `4c32890 feat: include knowledge index in audit report`
 - `f307a70 feat: include runtime snapshots in audit report`
+- `58b6e09 feat: preview audit report in workspace`
+- `0c2b485 feat: configure knowledge embeddings in settings`
+- `60cad36 feat: control background job retries and cancellation`
 
 Earlier supporting commits in this branch:
 
