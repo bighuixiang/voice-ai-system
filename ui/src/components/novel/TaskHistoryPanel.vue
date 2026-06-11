@@ -20,6 +20,8 @@
         <details v-if="item.invocation" class="audit-detail">
           <summary>{{ auditSummary(item.invocation) }}</summary>
           <div class="audit-grid">
+            <span>阶段 {{ stageLabel(item.invocation) }}</span>
+            <span>{{ item.invocation.stageKey }}</span>
             <span>上下文 {{ item.invocation.contextSnapshot.blockCount }} 块 / {{ formatCount(item.invocation.contextSnapshot.totalChars) }} 字</span>
             <span>Prompt {{ formatCount(item.invocation.promptSnapshot.length) }} 字</span>
             <span>耗时 {{ formatDuration(item.invocation.attempt.durationMs) }}</span>
@@ -46,11 +48,12 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { AiInvocationSession, CodexTaskType, NovelTask } from "@/types/novel";
+import type { AiInvocationSession, AiStageDefinition, CodexTaskType, NovelTask } from "@/types/novel";
 
 const props = defineProps<{
   tasks: NovelTask[];
   invocations?: AiInvocationSession[];
+  stages?: AiStageDefinition[];
   canExport?: boolean;
   isExporting?: boolean;
   isPreviewing?: boolean;
@@ -80,6 +83,16 @@ const visibleHistory = computed(() =>
     task,
     invocation: props.invocations?.find((item) => item.taskId === task.id)
   }))
+);
+
+const stageLabels = computed(() =>
+  (props.stages || []).reduce(
+    (mapping, stage) => ({
+      ...mapping,
+      [stage.key]: stage.label
+    }),
+    {} as Record<string, string>
+  )
 );
 
 function statusType(status: NovelTask["status"]) {
@@ -132,10 +145,14 @@ function formatDuration(value?: number) {
   return `${value}ms`;
 }
 
+function stageLabel(invocation: AiInvocationSession) {
+  return stageLabels.value[invocation.stageKey] || invocation.stageKey;
+}
+
 function auditSummary(invocation: AiInvocationSession) {
   const agent = [invocation.agentProvider, invocation.modelId].filter(Boolean).join("/");
   const patches = invocation.proposedPatchTargets.length ? ` · patches ${invocation.proposedPatchTargets.length}` : "";
-  return `${invocation.stageKey} · ${agent || "agent"} · ctx ${invocation.contextSnapshot.blockCount} · prompt ${formatCount(
+  return `${stageLabel(invocation)} (${invocation.stageKey}) · ${agent || "agent"} · ctx ${invocation.contextSnapshot.blockCount} · prompt ${formatCount(
     invocation.promptSnapshot.length
   )}${patches} · ${decisionLabel(invocation.adoptionDecision)}`;
 }

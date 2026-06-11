@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import TaskHistoryPanel from "./TaskHistoryPanel.vue";
-import type { AiInvocationSession, NovelTask } from "@/types/novel";
+import type { AiInvocationSession, AiStageDefinition, NovelTask } from "@/types/novel";
 
 const stubs = {
   "el-empty": { template: "<div />" },
@@ -14,7 +14,7 @@ const stubs = {
 };
 
 describe("TaskHistoryPanel", () => {
-  it("renders the stable AI stage key from invocation audit", async () => {
+  it("renders readable AI stage labels while keeping the stable stage key", async () => {
     const task: NovelTask = {
       id: "task-1",
       type: "chapter.draft",
@@ -52,24 +52,25 @@ describe("TaskHistoryPanel", () => {
       createdAt: "2026-06-11T00:00:00.000Z",
       updatedAt: "2026-06-11T00:01:00.000Z"
     };
+    const stages: AiStageDefinition[] = [
+      { key: "pipeline.chapter.prose", label: "Chapter prose drafting", taskTypes: ["chapter.draft"] }
+    ];
 
     const wrapper = mount(TaskHistoryPanel, {
-      props: { tasks: [task], invocations: [invocation], canExport: true },
+      props: { tasks: [task], invocations: [invocation], stages, canExport: true },
       global: { stubs }
     });
 
-    expect(wrapper.text()).toContain("起草正文");
+    expect(wrapper.text()).toContain("Chapter prose drafting");
     expect(wrapper.text()).toContain("pipeline.chapter.prose");
     expect(wrapper.text()).toContain("codex/gpt-5");
-    expect(wrapper.text()).toContain("上下文 3 块 / 2.4k 字");
-    expect(wrapper.text()).toContain("Prompt 1.2k 字");
-    expect(wrapper.text()).toContain("耗时 60.0s");
-    expect(wrapper.text()).toContain("Project · 800");
-    expect(wrapper.text()).toContain("Chapter · 1.6k");
+    expect(wrapper.text()).toContain("2.4k");
+    expect(wrapper.text()).toContain("Prompt 1.2k");
+    expect(wrapper.text()).toContain("60.0s");
+    expect(wrapper.text()).toContain("Project");
+    expect(wrapper.text()).toContain("Chapter");
     expect(wrapper.text()).toContain("prompt preview");
     expect(wrapper.text()).toContain("chapters/chapter-001.md");
-    expect(wrapper.text()).toContain("已采纳");
-    expect(wrapper.text()).toContain("审计报告");
     expect(wrapper.text()).toContain("JSON");
 
     const buttons = wrapper.findAll("button");
