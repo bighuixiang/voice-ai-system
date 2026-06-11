@@ -398,6 +398,23 @@ describe("novelApi", () => {
         proposedPatchCount: 1,
         acceptedPatchCount: 1
       },
+      backgroundJobSummary: {
+        total: 1,
+        byStatus: { pending: 0, running: 0, success: 1, error: 0 },
+        latestJobs: [
+          {
+            id: "job-1",
+            type: "knowledge.index.rebuild",
+            status: "success",
+            inputSummary: "{}",
+            outputSummary: "1 facts / 0 relations",
+            startedAt: "2026-06-11T00:00:00.000Z",
+            finishedAt: "2026-06-11T00:00:01.000Z",
+            durationMs: 1000,
+            updatedAt: "2026-06-11T00:00:01.000Z"
+          }
+        ]
+      },
       aiInvocations: []
     };
     mockJson({ dashboard });

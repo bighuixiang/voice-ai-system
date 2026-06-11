@@ -637,6 +637,13 @@ export interface ProjectAuditReport {
     proposedPatchCount: number;
     acceptedPatchCount: number;
   };
+  backgroundJobSummary: {
+    total: number;
+    byStatus: Record<BackgroundJobStatus, number>;
+    latestJobs: Array<
+      Pick<BackgroundJob, "id" | "type" | "status" | "inputSummary" | "outputSummary" | "error" | "startedAt" | "finishedAt" | "durationMs" | "updatedAt">
+    >;
+  };
   aiInvocations: AiInvocationSession[];
 }
 

@@ -203,6 +203,23 @@ describe("novel API routes", () => {
       })}\n`,
       "utf8"
     );
+    await fs.appendFile(
+      path.join(tempRoot, slug, "tasks", "background-jobs.jsonl"),
+      `${JSON.stringify({
+        id: "job-1",
+        projectId: slug,
+        type: "knowledge.index.rebuild",
+        status: "success",
+        inputSummary: "{\"reason\":\"manual\"}",
+        outputSummary: "3 facts / 1 relations",
+        resultRef: `/api/novel/projects/${slug}/knowledge/index`,
+        startedAt: "2026-06-11T00:02:00.000Z",
+        finishedAt: "2026-06-11T00:02:01.000Z",
+        durationMs: 1000,
+        updatedAt: "2026-06-11T00:02:01.000Z"
+      })}\n`,
+      "utf8"
+    );
 
     const response = await jsonFetch<{
       report: {
@@ -211,6 +228,7 @@ describe("novel API routes", () => {
         quality: { reportCount: number; qualityTrends: Array<{ key: string; latestScore: number }> };
         taskSummary: { total: number; byStatus: { success: number }; byType: { "chapter.draft": number } };
         aiInvocationSummary: { total: number; byDecision: { accepted: number }; proposedPatchCount: number; acceptedPatchCount: number };
+        backgroundJobSummary: { total: number; byStatus: { success: number }; latestJobs: Array<{ id: string; outputSummary?: string }> };
       };
     }>(`/api/novel/projects/${slug}/audit-report`);
 
@@ -232,6 +250,11 @@ describe("novel API routes", () => {
         byDecision: expect.objectContaining({ accepted: 1 }),
         proposedPatchCount: 1,
         acceptedPatchCount: 1
+      },
+      backgroundJobSummary: {
+        total: 1,
+        byStatus: expect.objectContaining({ success: 1 }),
+        latestJobs: [expect.objectContaining({ id: "job-1", outputSummary: "3 facts / 1 relations" })]
       }
     });
   });

@@ -1,6 +1,7 @@
-import type { AiInvocationAdoptionDecision, CodexTaskType, NovelTaskStatus, NovelProject, ProjectAuditReport } from "./types.js";
+import type { AiInvocationAdoptionDecision, BackgroundJobStatus, CodexTaskType, NovelTaskStatus, NovelProject, ProjectAuditReport } from "./types.js";
 import { readSeriesQualityMetrics } from "./writingCockpit.js";
 import { readInvocationSessions, readTaskHistory } from "./taskService.js";
+import { listProjectBackgroundJobs } from "./backgroundJobs.js";
 
 function emptyStatusCounts(): Record<NovelTaskStatus, number> {
   return {
@@ -21,11 +22,21 @@ function emptyDecisionCounts(): Record<AiInvocationAdoptionDecision, number> {
   };
 }
 
+function emptyBackgroundJobStatusCounts(): Record<BackgroundJobStatus, number> {
+  return {
+    pending: 0,
+    running: 0,
+    success: 0,
+    error: 0
+  };
+}
+
 export async function buildProjectAuditReport(root: string, project: NovelProject): Promise<ProjectAuditReport> {
-  const [quality, tasks, aiInvocations] = await Promise.all([
+  const [quality, tasks, aiInvocations, backgroundJobs] = await Promise.all([
     readSeriesQualityMetrics(root, project),
     readTaskHistory(root),
-    readInvocationSessions(root)
+    readInvocationSessions(root),
+    listProjectBackgroundJobs(root, project.slug)
   ]);
 
   const byStatus = emptyStatusCounts();
@@ -38,6 +49,11 @@ export async function buildProjectAuditReport(root: string, project: NovelProjec
   const byDecision = emptyDecisionCounts();
   for (const invocation of aiInvocations) {
     byDecision[invocation.adoptionDecision] += 1;
+  }
+
+  const backgroundJobsByStatus = emptyBackgroundJobStatusCounts();
+  for (const job of backgroundJobs) {
+    backgroundJobsByStatus[job.status] += 1;
   }
 
   return {
@@ -73,6 +89,22 @@ export async function buildProjectAuditReport(root: string, project: NovelProjec
       byDecision,
       proposedPatchCount: aiInvocations.reduce((sum, invocation) => sum + invocation.proposedPatchTargets.length, 0),
       acceptedPatchCount: aiInvocations.reduce((sum, invocation) => sum + invocation.acceptedPatchTargets.length, 0)
+    },
+    backgroundJobSummary: {
+      total: backgroundJobs.length,
+      byStatus: backgroundJobsByStatus,
+      latestJobs: backgroundJobs.slice(0, 20).map((job) => ({
+        id: job.id,
+        type: job.type,
+        status: job.status,
+        inputSummary: job.inputSummary,
+        outputSummary: job.outputSummary,
+        error: job.error,
+        startedAt: job.startedAt,
+        finishedAt: job.finishedAt,
+        durationMs: job.durationMs,
+        updatedAt: job.updatedAt
+      }))
     },
     aiInvocations
   };
