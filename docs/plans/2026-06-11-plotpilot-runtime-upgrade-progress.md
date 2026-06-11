@@ -96,6 +96,7 @@ Known warnings remain unchanged:
 - `fc5e477 feat: persist background job history`
 - `153f677 feat: include background jobs in audit report`
 - `808d368 feat: surface knowledge vector status`
+- `4c32890 feat: include knowledge index in audit report`
 
 Earlier supporting commits in this branch:
 
