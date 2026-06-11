@@ -144,9 +144,10 @@ function formatScore(score?: number) {
   display: grid;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
+  color: var(--app-text-primary);
 }
 
 header,
@@ -159,14 +160,14 @@ header,
 }
 
 .panel-title {
-  color: #111827;
+  color: var(--app-text-primary);
   font-size: 14px;
   font-weight: 800;
 }
 
 p {
   margin: 3px 0 0;
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -185,19 +186,19 @@ p {
     min-width: 0;
     gap: 2px;
     padding: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--app-border);
     border-radius: 7px;
-    background: #f8fafc;
+    background: var(--app-bg-soft);
   }
 
   strong {
-    color: #0f172a;
+    color: var(--app-text-primary);
     font-size: 17px;
     line-height: 1;
   }
 
   span {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 11px;
   }
 }
@@ -206,25 +207,25 @@ p {
   display: grid;
   gap: 3px;
   padding: 8px;
-  border: 1px solid #dbeafe;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 28%, var(--app-border));
   border-radius: 7px;
-  background: #f8fbff;
-  color: #334155;
+  background: var(--app-primary-soft);
+  color: var(--app-text-secondary);
   font-size: 12px;
 
   span {
-    color: #0f172a;
+    color: var(--app-text-primary);
     font-weight: 800;
   }
 
   em {
-    color: #2563eb;
+    color: var(--app-primary);
     font-style: normal;
     font-weight: 700;
   }
 
   small {
-    color: #b45309;
+    color: var(--app-warning-text);
     font-size: 11px;
   }
 }
@@ -244,24 +245,25 @@ p {
   input {
     min-width: 0;
     padding: 0 10px;
-    border: 1px solid #cbd5e1;
-    color: #0f172a;
+    border: 1px solid var(--app-border);
+    color: var(--app-text-primary);
+    background: var(--app-bg);
     outline: none;
   }
 
   button {
     padding: 0 12px;
-    border: 1px solid #1d4ed8;
-    background: #2563eb;
-    color: #ffffff;
+    border: 1px solid var(--app-primary);
+    background: var(--app-primary);
+    color: var(--app-bg);
     font-weight: 700;
     cursor: pointer;
   }
 
   button:disabled {
-    border-color: #cbd5e1;
-    background: #e2e8f0;
-    color: #64748b;
+    border-color: var(--app-border);
+    background: var(--app-bg-muted);
+    color: var(--app-text-muted);
     cursor: not-allowed;
   }
 }
@@ -270,18 +272,18 @@ p {
   display: grid;
   gap: 8px;
   padding: 9px;
-  border: 1px solid #dbeafe;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 28%, var(--app-border));
   border-radius: 7px;
-  background: #f8fbff;
+  background: var(--app-primary-soft);
 }
 
 .result-header {
-  color: #0f172a;
+  color: var(--app-text-primary);
   font-size: 12px;
   font-weight: 800;
 
   em {
-    color: #2563eb;
+    color: var(--app-primary);
     font-style: normal;
     font-weight: 700;
   }
@@ -299,9 +301,9 @@ p {
   gap: 2px;
   min-width: 0;
   padding: 7px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--app-bg);
 
   strong,
   span {
@@ -311,12 +313,12 @@ p {
   }
 
   strong {
-    color: #0f172a;
+    color: var(--app-text-primary);
     font-size: 12px;
   }
 
   span {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 11px;
   }
 }
@@ -326,9 +328,9 @@ p {
   min-width: 0;
   overflow: hidden;
   padding: 5px 7px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  color: #334155;
+  color: var(--app-text-secondary);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -343,9 +345,9 @@ p {
     max-width: 150px;
     overflow: hidden;
     padding: 4px 7px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--app-border);
     border-radius: 7px;
-    color: #334155;
+    color: var(--app-text-secondary);
     font-size: 12px;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -361,9 +363,9 @@ p {
   min-width: 0;
   min-height: 34px;
   padding: 7px 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  color: #0f172a;
+  color: var(--app-text-primary);
   font-size: 12px;
 
   span {
@@ -375,7 +377,7 @@ p {
 
   em {
     flex: 0 0 auto;
-    color: #2563eb;
+    color: var(--app-primary);
     font-style: normal;
     font-weight: 700;
   }
@@ -383,9 +385,9 @@ p {
 
 .empty-state {
   padding: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 }
 
 @media (max-width: 760px) {

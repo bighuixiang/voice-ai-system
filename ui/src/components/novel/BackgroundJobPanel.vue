@@ -111,9 +111,10 @@ function formatDuration(durationMs: number) {
   display: grid;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
+  color: var(--app-text-primary);
 }
 
 header,
@@ -129,14 +130,14 @@ header {
 }
 
 .panel-title {
-  color: #111827;
+  color: var(--app-text-primary);
   font-size: 14px;
   font-weight: 800;
 }
 
 p {
   margin: 3px 0 0;
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -150,25 +151,25 @@ p {
   min-width: 0;
   min-height: 46px;
   padding: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-left-width: 3px;
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 
   &.running {
-    border-left-color: #f59e0b;
+    border-left-color: var(--app-warning-text);
   }
 
   &.success {
-    border-left-color: #16a34a;
+    border-left-color: var(--app-success-text);
   }
 
   &.error {
-    border-left-color: #dc2626;
+    border-left-color: var(--app-danger-text);
   }
 
   &.cancelled {
-    border-left-color: #64748b;
+    border-left-color: var(--app-text-muted);
   }
 }
 
@@ -185,12 +186,12 @@ p {
   }
 
   strong {
-    color: #0f172a;
+    color: var(--app-text-primary);
     font-size: 13px;
   }
 
   span {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
   }
 }
@@ -200,7 +201,7 @@ p {
   justify-content: flex-end;
 
   small {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 11px;
     white-space: nowrap;
   }
@@ -220,9 +221,9 @@ p {
 
 .empty-state {
   padding: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 }
 
 @media (max-width: 760px) {

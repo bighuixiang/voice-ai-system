@@ -263,8 +263,8 @@ function checkActiveScenario() {
   flex-direction: column;
   gap: 14px;
   min-height: min(620px, 74vh);
-  color: #0f172a;
-  background: #f8fafc;
+  color: var(--app-text-primary);
+  background: var(--app-bg-soft);
 }
 
 .config-header,
@@ -285,13 +285,13 @@ function checkActiveScenario() {
 
   p {
     margin: 4px 0 0;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 13px;
   }
 }
 
 .panel-title {
-  color: #111827;
+  color: var(--app-text-primary);
   font-size: 16px;
   font-weight: 800;
 }
@@ -311,9 +311,9 @@ function checkActiveScenario() {
   min-height: 0;
   grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
   overflow: hidden;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .scenario-pane {
@@ -322,9 +322,9 @@ function checkActiveScenario() {
   flex-direction: column;
   gap: 6px;
   overflow: auto;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid var(--app-border);
   padding: 12px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 
   button {
     display: grid;
@@ -336,7 +336,7 @@ function checkActiveScenario() {
     border: 1px solid transparent;
     border-radius: 7px;
     background: transparent;
-    color: #0f172a;
+    color: var(--app-text-primary);
     cursor: pointer;
     font: inherit;
     text-align: left;
@@ -344,12 +344,12 @@ function checkActiveScenario() {
 
     &:hover,
     &.active {
-      border-color: #bfdbfe;
-      background: #ffffff;
+      border-color: color-mix(in srgb, var(--app-primary) 42%, var(--app-border));
+      background: var(--app-bg);
     }
 
     &.active {
-      box-shadow: inset 3px 0 0 #2563eb;
+      box-shadow: inset 3px 0 0 var(--app-primary);
     }
 
     span {
@@ -368,13 +368,13 @@ function checkActiveScenario() {
     }
 
     small {
-      color: #64748b;
+      color: var(--app-text-muted);
       font-size: 12px;
     }
 
     em {
       max-width: 108px;
-      color: #64748b;
+      color: var(--app-text-muted);
       font-size: 12px;
       font-style: normal;
     }
@@ -392,7 +392,7 @@ function checkActiveScenario() {
 
 .detail-heading {
   padding-bottom: 12px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--app-border);
 
   h3 {
     margin: 3px 0 0;
@@ -402,15 +402,15 @@ function checkActiveScenario() {
 }
 
 .detail-kicker {
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 12px;
   font-weight: 700;
 }
 
 .provider-badge {
   border-radius: 8px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-text);
   font-size: 12px;
   font-weight: 700;
   padding: 5px 8px;
@@ -426,7 +426,7 @@ function checkActiveScenario() {
     gap: 5px;
 
     span {
-      color: #475569;
+      color: var(--app-text-secondary);
       font-size: 12px;
       font-weight: 700;
     }
@@ -436,16 +436,16 @@ function checkActiveScenario() {
 .ai-config-panel :deep(.el-input__wrapper),
 .ai-config-panel :deep(.el-select__wrapper) {
   border-radius: 6px;
-  box-shadow: 0 0 0 1px #d8dee8 inset;
+  box-shadow: 0 0 0 1px var(--app-border) inset;
 }
 
 .agent-status,
 .embedding-config,
 .future-note {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   padding: 12px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .embedding-config {
@@ -461,14 +461,14 @@ function checkActiveScenario() {
 
   span,
   strong {
-    color: #475569;
+    color: var(--app-text-secondary);
     font-size: 12px;
     font-weight: 700;
   }
 
   p {
     margin: 5px 0 0;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 13px;
   }
 }
@@ -478,46 +478,46 @@ function checkActiveScenario() {
   gap: 4px;
 
   span {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 12px;
     font-weight: 700;
   }
 
   strong {
-    color: #475569;
+    color: var(--app-text-secondary);
     font-size: 13px;
     line-height: 1.5;
   }
 
   &.available {
-    border-color: #bbf7d0;
-    background: #f0fdf4;
+    border-color: color-mix(in srgb, var(--app-success-text) 48%, var(--app-border));
+    background: var(--app-success-soft);
 
     strong {
-      color: #047857;
+      color: var(--app-success-text);
     }
   }
 
   &.unavailable {
-    border-color: #fecaca;
-    background: #fef2f2;
+    border-color: color-mix(in srgb, var(--app-danger-text) 48%, var(--app-border));
+    background: var(--app-danger-soft);
 
     strong {
-      color: #991b1b;
+      color: var(--app-danger-text);
     }
   }
 }
 
 .future-note {
   span {
-    color: #475569;
+    color: var(--app-text-secondary);
     font-size: 12px;
     font-weight: 700;
   }
 
   p {
     margin: 5px 0 0;
-    color: #4b5563;
+    color: var(--app-text-secondary);
     line-height: 1.6;
   }
 }
@@ -540,7 +540,7 @@ function checkActiveScenario() {
 
   .scenario-pane {
     border-right: 0;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--app-border);
   }
 }
 </style>

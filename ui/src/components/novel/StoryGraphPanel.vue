@@ -180,9 +180,10 @@ function selectNode(id: string) {
   display: grid;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
+  color: var(--app-text-primary);
 }
 
 header,
@@ -194,14 +195,14 @@ header,
 }
 
 .panel-title {
-  color: #111827;
+  color: var(--app-text-primary);
   font-size: 14px;
   font-weight: 800;
 }
 
 p {
   margin: 3px 0 0;
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -220,20 +221,20 @@ p {
     min-width: 0;
     gap: 2px;
     padding: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--app-border);
     border-radius: 7px;
-    background: #f8fafc;
+    background: var(--app-bg-soft);
   }
 
   strong {
-    color: #0f172a;
+    color: var(--app-text-primary);
     font-size: 17px;
     line-height: 1;
   }
 
   span {
     overflow: hidden;
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 11px;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -266,9 +267,9 @@ p {
   min-width: 110px;
   gap: 6px;
   padding: 8px;
-  border: 1px solid #dbe4ef;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--app-bg);
 }
 
 .column-title,
@@ -281,12 +282,12 @@ p {
 }
 
 .column-title {
-  color: #475569;
+  color: var(--app-text-secondary);
   font-size: 11px;
   font-weight: 800;
 
   strong {
-    color: #0f172a;
+    color: var(--app-text-primary);
   }
 }
 
@@ -296,10 +297,10 @@ p {
   min-width: 0;
   gap: 3px;
   padding: 7px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--app-bg-soft);
+  color: var(--app-text-primary);
   cursor: pointer;
   text-align: left;
 
@@ -317,13 +318,13 @@ p {
   }
 
   small {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 11px;
   }
 
   &.active {
-    border-color: #2563eb;
-    background: #eff6ff;
+    border-color: var(--app-primary);
+    background: var(--app-primary-soft);
   }
 }
 
@@ -333,14 +334,14 @@ p {
   min-width: 0;
   gap: 8px;
   padding: 10px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 }
 
 .detail-heading {
   span {
-    color: #2563eb;
+    color: var(--app-primary);
     font-size: 11px;
     font-weight: 800;
   }
@@ -348,7 +349,7 @@ p {
   strong {
     min-width: 0;
     overflow: hidden;
-    color: #0f172a;
+    color: var(--app-text-primary);
     font-size: 13px;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -363,20 +364,20 @@ p {
 .relation-row {
   min-width: 0;
   padding: 7px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--app-bg);
+  color: var(--app-text-primary);
   font-size: 12px;
 
   span,
   em {
     flex: 0 0 auto;
-    color: #64748b;
+    color: var(--app-text-muted);
   }
 
   em {
-    color: #2563eb;
+    color: var(--app-primary);
     font-style: normal;
     font-weight: 800;
   }
@@ -393,9 +394,9 @@ p {
   min-width: 0;
   min-height: 34px;
   padding: 7px 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  color: #0f172a;
+  color: var(--app-text-primary);
   font-size: 12px;
 
   span {
@@ -407,7 +408,7 @@ p {
 
   em {
     flex: 0 0 auto;
-    color: #2563eb;
+    color: var(--app-primary);
     font-style: normal;
     font-weight: 700;
   }
@@ -415,18 +416,18 @@ p {
 
 .empty-state {
   padding: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 }
 
 .compact-empty {
   margin: 0;
   padding: 7px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed var(--app-border);
   border-radius: 7px;
-  background: #ffffff;
-  color: #94a3b8;
+  background: var(--app-bg);
+  color: var(--app-text-muted);
   font-size: 11px;
 }
 

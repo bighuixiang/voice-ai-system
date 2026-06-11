@@ -75,9 +75,10 @@ function statusLabel(status: SavePipelineStepStatus) {
   display: grid;
   gap: 10px;
   padding: 12px;
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-bg);
+  color: var(--app-text-primary);
 }
 
 header,
@@ -93,14 +94,14 @@ header {
 }
 
 .panel-title {
-  color: #111827;
+  color: var(--app-text-primary);
   font-size: 14px;
   font-weight: 800;
 }
 
 p {
   margin: 3px 0 0;
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -122,27 +123,27 @@ p {
   min-width: 0;
   gap: 6px;
   padding: 7px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f8fafc;
+  background: var(--app-bg-soft);
 
   &.running {
-    border-color: #f59e0b;
-    background: #fffbeb;
+    border-color: var(--app-warning-text);
+    background: var(--app-warning-soft);
   }
 
   &.done {
-    border-color: #16a34a;
-    background: #f0fdf4;
+    border-color: var(--app-success-text);
+    background: var(--app-success-soft);
   }
 
   &.skipped {
-    border-color: #94a3b8;
+    border-color: var(--app-text-muted);
   }
 
   &.error {
-    border-color: #dc2626;
-    background: #fef2f2;
+    border-color: var(--app-danger-text);
+    background: var(--app-danger-soft);
   }
 }
 
@@ -151,19 +152,19 @@ p {
   height: 8px;
   flex: 0 0 auto;
   border-radius: 999px;
-  background: #94a3b8;
+  background: var(--app-text-muted);
 }
 
 .running .step-dot {
-  background: #f59e0b;
+  background: var(--app-warning-text);
 }
 
 .done .step-dot {
-  background: #16a34a;
+  background: var(--app-success-text);
 }
 
 .error .step-dot {
-  background: #dc2626;
+  background: var(--app-danger-text);
 }
 
 .step-copy {
@@ -179,12 +180,12 @@ p {
   }
 
   strong {
-    color: #0f172a;
+    color: var(--app-text-primary);
     font-size: 12px;
   }
 
   small {
-    color: #64748b;
+    color: var(--app-text-muted);
     font-size: 11px;
   }
 }
