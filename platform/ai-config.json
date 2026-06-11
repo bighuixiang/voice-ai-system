@@ -19,5 +19,11 @@
       "profileId": "codex-cli"
     }
   },
-  "updatedAt": "2026-06-05T08:26:33.749Z"
+  "knowledgeEmbedding": {
+    "provider": "local",
+    "baseUrl": "https://api.openai.com/v1",
+    "model": "text-embedding-3-small",
+    "apiKeyConfigured": false
+  },
+  "updatedAt": "2026-06-11T06:44:53.553Z"
 }
