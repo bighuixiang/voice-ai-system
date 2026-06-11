@@ -92,6 +92,9 @@ Latest full verification passed:
 - UI build passed.
 - Runtime smoke: `http://127.0.0.1:5173` returned HTTP 200.
 - Runtime smoke: `http://127.0.0.1:8787/health` returned HTTP 200 with `status: healthy`.
+- Runtime smoke script: `npm run smoke:runtime` passed for `novel-1780911338197` / `chapter-001` with 198 chapters, 198 indexed chapters, local embeddings, 244 vector entries, and stable fingerprint `455526bce1beb72b`.
+- Browser UI smoke: `npm run smoke:ui` passed through Playwright, covering the project hub, real workspace load, save pipeline panel, embedding config dialog, background job panel, audit report preview, and dark theme backgrounds.
+- Commit guard: `npm run check:runtime-staged` passed and blocks staged generated runtime state or local platform config.
 
 Known warnings remain unchanged:
 
@@ -146,6 +149,10 @@ Latest targeted P0 extension verification:
 - `64fe61d feat: show active ai stage progress`
 - `b2dc378 docs: record active stage progress`
 - `3c01ce9 fix: align novel panels with dark theme`
+- `83e7b7b test: guard novel theme tokens`
+- `2d71553 fix: count indexed chapters in audit report`
+- `beccfc0 chore: add runtime acceptance smoke`
+- `1dd71d9 test: add runtime ui smoke`
 
 Earlier supporting commits in this branch:
 
