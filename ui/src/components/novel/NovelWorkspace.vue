@@ -338,6 +338,7 @@
           <TaskHistoryPanel
             :tasks="store.taskHistory"
             :invocations="store.aiInvocations"
+            :stages="store.aiStages"
             :can-export="Boolean(store.currentProject)"
             :is-exporting="store.isExportingAuditReport"
             :is-previewing="store.isLoadingAuditReportPreview"
@@ -560,6 +561,9 @@ async function syncWorkspaceFromRoute() {
   });
   await store.loadPlatformLibrary().catch(() => {
     // Platform library is optional until the API service is running.
+  });
+  await store.loadAiStages().catch(() => {
+    // AI stage labels are optional while the API service is booting.
   });
 
   if (!isProjectRoute.value) {

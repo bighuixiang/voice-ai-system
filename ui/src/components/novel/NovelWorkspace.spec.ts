@@ -151,6 +151,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     isRunningSavePipeline: false,
     recapCandidate: null,
     taskHistory: [],
+    aiStages: [{ key: "pipeline.chapter.prose", label: "Chapter prose drafting", taskTypes: ["chapter.draft"] }],
     agentProfiles: [],
     agentChecks: [],
     defaultAgentProfileId: "codex-cli",
@@ -188,6 +189,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     error: "",
     loadProjects: vi.fn().mockResolvedValue(undefined),
     loadPlatformLibrary: vi.fn().mockResolvedValue(undefined),
+    loadAiStages: vi.fn().mockResolvedValue(undefined),
     loadPlatformAiConfig: vi.fn().mockResolvedValue(undefined),
     loadAgentProfiles: vi.fn().mockResolvedValue(undefined),
     savePlatformAiConfig: vi.fn().mockResolvedValue(undefined),
@@ -483,6 +485,15 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".history-stub").exists()).toBe(true);
     expect(wrapper.find(".scene-stub").exists()).toBe(false);
     expect(wrapper.find(".ai-stub").exists()).toBe(false);
+  });
+
+  it("loads AI stage definitions during workspace startup", async () => {
+    storeRef.value = makeStore("review");
+
+    mount(NovelWorkspace, { global: { stubs } });
+    await flushPromises();
+
+    expect(storeRef.value.loadAiStages).toHaveBeenCalledTimes(1);
   });
 
   it("opens audit report preview from task history", async () => {
