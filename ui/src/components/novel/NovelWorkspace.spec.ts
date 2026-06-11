@@ -165,6 +165,12 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
         "image-generation": { profileId: "codex-cli" },
         "video-generation": { profileId: "codex-cli" }
       },
+      knowledgeEmbedding: {
+        provider: "local",
+        baseUrl: "https://api.openai.com/v1",
+        model: "text-embedding-3-small",
+        apiKeyConfigured: false
+      },
       updatedAt: "2026-06-04T00:00:00.000Z"
     },
     activeNovelAiSummary: "Codex CLI · 默认模型",

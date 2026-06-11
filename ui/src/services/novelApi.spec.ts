@@ -168,6 +168,12 @@ describe("novelApi", () => {
           "image-generation": { profileId: "codex-cli" },
           "video-generation": { profileId: "codex-cli" }
         },
+        knowledgeEmbedding: {
+          provider: "local",
+          baseUrl: "https://api.openai.com/v1",
+          model: "text-embedding-3-small",
+          apiKeyConfigured: false
+        },
         updatedAt: "2026-06-05T00:00:00.000Z"
       }
     });
@@ -181,6 +187,12 @@ describe("novelApi", () => {
           script: { profileId: "codex-cli" },
           "image-generation": { profileId: "codex-cli" },
           "video-generation": { profileId: "codex-cli" }
+        },
+        knowledgeEmbedding: {
+          provider: "local",
+          baseUrl: "https://api.openai.com/v1",
+          model: "text-embedding-3-small",
+          apiKeyConfigured: false
         },
         updatedAt: "2026-06-05T00:00:00.000Z"
       }

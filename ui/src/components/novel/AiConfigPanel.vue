@@ -77,6 +77,54 @@
           <strong>{{ agentStatusLabel }}</strong>
         </div>
 
+        <section class="embedding-config" aria-label="知识向量配置">
+          <div class="embedding-heading">
+            <div>
+              <span>知识向量</span>
+              <p>配置故事知识库的语义召回来源。</p>
+            </div>
+            <strong>{{ embeddingStatusLabel }}</strong>
+          </div>
+          <div class="detail-grid">
+            <label>
+              <span>向量提供方</span>
+              <el-select :model-value="embeddingConfig.provider" @update:model-value="updateEmbeddingConfig('provider', String($event))">
+                <el-option label="本地向量" value="local" />
+                <el-option label="OpenAI 兼容" value="openai-compatible" />
+              </el-select>
+            </label>
+            <label>
+              <span>Base URL</span>
+              <el-input
+                :model-value="embeddingConfig.baseUrl || ''"
+                :disabled="!isExternalEmbedding"
+                placeholder="https://api.openai.com/v1"
+                @update:model-value="updateEmbeddingConfig('baseUrl', String($event))"
+              />
+            </label>
+            <label>
+              <span>模型</span>
+              <el-input
+                :model-value="embeddingConfig.model || ''"
+                :disabled="!isExternalEmbedding"
+                placeholder="text-embedding-3-small"
+                @update:model-value="updateEmbeddingConfig('model', String($event))"
+              />
+            </label>
+            <label>
+              <span>API Key</span>
+              <el-input
+                :model-value="embeddingConfig.apiKey || ''"
+                :disabled="!isExternalEmbedding"
+                type="password"
+                show-password
+                placeholder="留空沿用已保存密钥"
+                @update:model-value="updateEmbeddingConfig('apiKey', String($event))"
+              />
+            </label>
+          </div>
+        </section>
+
         <div class="future-note">
           <span>预留能力</span>
           <p>在线 API、图片生成服务、视频生成服务后续可以作为新的执行器加入同一套场景配置，不需要塞回项目上下文。</p>
@@ -117,6 +165,8 @@ const localConfig = ref<PlatformAiConfig>(cloneConfig(props.config));
 
 const activeScenarioMeta = computed(() => scenarios.find((scenario) => scenario.key === activeScenario.value) || scenarios[0]);
 const activeScenarioConfig = computed(() => localConfig.value.scenarios[activeScenario.value]);
+const embeddingConfig = computed(() => localConfig.value.knowledgeEmbedding);
+const isExternalEmbedding = computed(() => embeddingConfig.value.provider === "openai-compatible");
 const activeProfile = computed(() => props.profiles.find((profile) => profile.id === activeScenarioConfig.value.profileId));
 const activeCheck = computed(() => props.checks.find((check) => check.profileId === activeScenarioConfig.value.profileId));
 const providerLabel = computed(() => {
@@ -129,6 +179,11 @@ const agentStatusLabel = computed(() => {
   if (activeCheck.value.available) return activeCheck.value.version || "连接正常";
   return activeCheck.value.error || "连接失败";
 });
+const embeddingStatusLabel = computed(() => {
+  if (!isExternalEmbedding.value) return "本地向量，无需 API Key";
+  if (embeddingConfig.value.apiKey || embeddingConfig.value.apiKeyConfigured) return "API Key 已配置";
+  return "尚未配置 API Key";
+});
 const isDirty = computed(() => JSON.stringify(localConfig.value) !== JSON.stringify(props.config));
 
 watch(
@@ -139,8 +194,16 @@ watch(
   { deep: true }
 );
 
-function cloneConfig(config: PlatformAiConfig): PlatformAiConfig {
-  return JSON.parse(JSON.stringify(config)) as PlatformAiConfig;
+function cloneConfig(config: PlatformAiConfig, options: { includeApiKey?: boolean } = {}): PlatformAiConfig {
+  const cloned = JSON.parse(JSON.stringify(config)) as PlatformAiConfig;
+  cloned.knowledgeEmbedding = {
+    provider: cloned.knowledgeEmbedding?.provider || "local",
+    baseUrl: cloned.knowledgeEmbedding?.baseUrl || "https://api.openai.com/v1",
+    model: cloned.knowledgeEmbedding?.model || "text-embedding-3-small",
+    apiKeyConfigured: Boolean(cloned.knowledgeEmbedding?.apiKeyConfigured),
+    apiKey: options.includeApiKey ? cloned.knowledgeEmbedding?.apiKey : undefined
+  };
+  return cloned;
 }
 
 function profileLabel(profileId: string) {
@@ -161,8 +224,29 @@ function updateScenario(key: "profileId" | "modelId", value: string) {
   };
 }
 
+function updateEmbeddingConfig(key: "provider" | "baseUrl" | "model" | "apiKey", value: string) {
+  const nextValue = value.trim();
+  localConfig.value = {
+    ...localConfig.value,
+    knowledgeEmbedding: {
+      ...localConfig.value.knowledgeEmbedding,
+      [key]: nextValue || undefined,
+      ...(key === "provider" && nextValue === "openai-compatible"
+        ? {
+            baseUrl: localConfig.value.knowledgeEmbedding.baseUrl || "https://api.openai.com/v1",
+            model: localConfig.value.knowledgeEmbedding.model || "text-embedding-3-small"
+          }
+        : {})
+    }
+  };
+}
+
 function save() {
-  emit("save", cloneConfig(localConfig.value));
+  const nextConfig = cloneConfig(localConfig.value, { includeApiKey: true });
+  if (!nextConfig.knowledgeEmbedding.apiKey) {
+    delete nextConfig.knowledgeEmbedding.apiKey;
+  }
+  emit("save", nextConfig);
 }
 
 function checkActiveScenario() {
@@ -356,11 +440,37 @@ function checkActiveScenario() {
 }
 
 .agent-status,
+.embedding-config,
 .future-note {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 12px;
   background: #ffffff;
+}
+
+.embedding-config {
+  display: grid;
+  gap: 12px;
+}
+
+.embedding-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  span,
+  strong {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 13px;
+  }
 }
 
 .agent-status {

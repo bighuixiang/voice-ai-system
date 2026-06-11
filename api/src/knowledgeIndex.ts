@@ -16,6 +16,7 @@ import type {
   NovelProject
 } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
+import { readPlatformAiConfig } from "./platformAiConfig.js";
 import { readChapterSummary, readLedgerEntries, readStoryControl } from "./writingCockpit.js";
 
 const ledgerKinds: LedgerEntry["kind"][] = ["foreshadowing", "continuity", "power", "character", "risk"];
@@ -110,7 +111,15 @@ function embeddingEnv(name: string): string {
   return (process.env[name] || "").trim();
 }
 
-function getEmbeddingProvider(): EmbeddingProvider {
+function openAiCompatibleEmbeddingProvider(baseUrl: string, apiKey: string, model: string): EmbeddingProvider {
+  return {
+    name: "openai-compatible",
+    model,
+    embed: async (texts) => requestOpenAiCompatibleEmbeddings(baseUrl.replace(/\/+$/, ""), apiKey, model, texts)
+  };
+}
+
+function getEnvEmbeddingProvider(): EmbeddingProvider {
   const providerName = embeddingEnv("KNOWLEDGE_EMBEDDING_PROVIDER").toLowerCase();
   if (providerName !== "openai-compatible" && providerName !== "openai") {
     return localEmbeddingProvider();
@@ -123,11 +132,27 @@ function getEmbeddingProvider(): EmbeddingProvider {
 
   const baseUrl = (embeddingEnv("KNOWLEDGE_EMBEDDING_BASE_URL") || "https://api.openai.com/v1").replace(/\/+$/, "");
   const model = embeddingEnv("KNOWLEDGE_EMBEDDING_MODEL") || "text-embedding-3-small";
-  return {
-    name: "openai-compatible",
-    model,
-    embed: async (texts) => requestOpenAiCompatibleEmbeddings(baseUrl, apiKey, model, texts)
-  };
+  return openAiCompatibleEmbeddingProvider(baseUrl, apiKey, model);
+}
+
+async function getEmbeddingProvider(): Promise<EmbeddingProvider> {
+  try {
+    const config = await readPlatformAiConfig();
+    const embedding = config.knowledgeEmbedding;
+    if (embedding.provider !== "openai-compatible") {
+      return localEmbeddingProvider();
+    }
+    if (!embedding.apiKey) {
+      return localEmbeddingProvider();
+    }
+    return openAiCompatibleEmbeddingProvider(
+      embedding.baseUrl || "https://api.openai.com/v1",
+      embedding.apiKey,
+      embedding.model || "text-embedding-3-small"
+    );
+  } catch {
+    return getEnvEmbeddingProvider();
+  }
 }
 
 function errorMessage(error: unknown): string {
@@ -505,7 +530,7 @@ async function buildKnowledgeVectorIndex(
   chapterIndex: ChapterMemoryIndex,
   updatedAt: string
 ): Promise<KnowledgeVectorIndex> {
-  const provider = getEmbeddingProvider();
+  const provider = await getEmbeddingProvider();
   try {
     return await buildKnowledgeVectorIndexWithProvider(project, facts, triples, chapterIndex, updatedAt, provider);
   } catch (error) {
@@ -539,7 +564,7 @@ async function vectorizeQueryForIndex(index: KnowledgeVectorIndex, query: string
     return localQueryVector;
   }
 
-  const provider = getEmbeddingProvider();
+  const provider = await getEmbeddingProvider();
   const providerMatchesIndex = provider.name === index.provider && (!index.model || provider.model === index.model);
   if (providerMatchesIndex) {
     try {

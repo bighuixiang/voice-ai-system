@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createProjectFiles, createProjectSkeleton, projectRoot } from "./novelProject.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
 import { saveChapterSummary, saveLedgerEntries, saveStoryControl } from "./writingCockpit.js";
+import { defaultPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 
 let tempRoot = "";
 
@@ -208,6 +209,63 @@ describe("knowledgeIndex", () => {
     );
     expect(requestBody.model).toBe("embedding-test");
     expect(requestBody.input.length).toBe(vectors.entries.length);
+  });
+
+  it("uses saved embedding config before environment variables", async () => {
+    process.env.KNOWLEDGE_EMBEDDING_PROVIDER = "openai-compatible";
+    process.env.KNOWLEDGE_EMBEDDING_API_KEY = "env-key";
+    process.env.KNOWLEDGE_EMBEDDING_BASE_URL = "https://env-embeddings.example/v1";
+    process.env.KNOWLEDGE_EMBEDDING_MODEL = "env-model";
+    await writePlatformAiConfig({
+      ...defaultPlatformAiConfig(),
+      knowledgeEmbedding: {
+        provider: "openai-compatible",
+        baseUrl: "https://saved-embeddings.example/v1",
+        model: "saved-model",
+        apiKey: "saved-key"
+      }
+    });
+    const fetchMock = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body || "{}")) as { input: string[] };
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: body.input.map((_, index) => ({ embedding: [index + 1, 1, 0, 0] }))
+        })
+      } as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const project = createProjectSkeleton({ title: "Saved Embedding Demo", roughIdea: "Use saved semantic recall." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await saveChapterSummary(root, {
+      chapterId: "chapter-001",
+      summary: "The saved provider indexes the archive.",
+      keyEvents: [],
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
+
+    const projection = await rebuildKnowledgeIndex(root, project);
+    const [, requestInit] = fetchMock.mock.calls[0];
+    const requestBody = JSON.parse(String(requestInit?.body || "{}")) as { model: string; input: string[] };
+
+    expect(projection.vectorSummary).toMatchObject({ provider: "openai-compatible", model: "saved-model", dimensions: 4 });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://saved-embeddings.example/v1/embeddings",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ Authorization: "Bearer saved-key" })
+      })
+    );
+    expect(requestBody.model).toBe("saved-model");
   });
 
   it("records external embedding fallback details when the provider fails", async () => {

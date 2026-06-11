@@ -16,6 +16,7 @@ export type NovelTaskStatus = "pending" | "running" | "success" | "error" | "can
 export type CreativeModuleKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
 export type AiAgentProvider = "codex" | "claude-code";
 export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
+export type KnowledgeEmbeddingProvider = "local" | "openai-compatible";
 export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook";
 export type AiStageKey =
   | "pipeline.project.create"
@@ -65,10 +66,19 @@ export interface AiScenarioConfig {
   modelId?: string;
 }
 
+export interface KnowledgeEmbeddingConfig {
+  provider: KnowledgeEmbeddingProvider;
+  baseUrl?: string;
+  model?: string;
+  apiKeyConfigured?: boolean;
+  apiKey?: string;
+}
+
 export interface PlatformAiConfig {
   version: 1;
   defaultScenario: AiUsageScenarioKey;
   scenarios: Record<AiUsageScenarioKey, AiScenarioConfig>;
+  knowledgeEmbedding: KnowledgeEmbeddingConfig;
   updatedAt: string;
 }
 

@@ -27,6 +27,7 @@ export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information"
 export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
 export type AiAgentProvider = "codex" | "claude-code";
 export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
+export type KnowledgeEmbeddingProvider = "local" | "openai-compatible";
 export type AiStageKey =
   | "pipeline.project.create"
   | "pipeline.outline.generate"
@@ -85,10 +86,19 @@ export interface AiScenarioConfig {
   modelId?: string;
 }
 
+export interface KnowledgeEmbeddingConfig {
+  provider: KnowledgeEmbeddingProvider;
+  baseUrl?: string;
+  model?: string;
+  apiKeyConfigured?: boolean;
+  apiKey?: string;
+}
+
 export interface PlatformAiConfig {
   version: 1;
   defaultScenario: AiUsageScenarioKey;
   scenarios: Record<AiUsageScenarioKey, AiScenarioConfig>;
+  knowledgeEmbedding: KnowledgeEmbeddingConfig;
   updatedAt: string;
 }
 

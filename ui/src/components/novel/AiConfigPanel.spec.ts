@@ -18,6 +18,11 @@ const stubs = {
     props: ["label", "value"],
     template: `<option :value="value">{{ label }}</option>`
   },
+  "el-input": {
+    props: ["modelValue", "disabled", "type", "placeholder"],
+    emits: ["update:modelValue"],
+    template: `<input :type="type || 'text'" :value="modelValue" :disabled="disabled" :placeholder="placeholder" @input="$emit('update:modelValue', $event.target.value)" />`
+  },
   "el-icon": { template: "<span><slot /></span>" }
 };
 
@@ -30,6 +35,12 @@ const config: PlatformAiConfig = {
     script: { profileId: "codex-cli" },
     "image-generation": { profileId: "codex-cli" },
     "video-generation": { profileId: "codex-cli" }
+  },
+  knowledgeEmbedding: {
+    provider: "local",
+    baseUrl: "https://api.openai.com/v1",
+    model: "text-embedding-3-small",
+    apiKeyConfigured: false
   },
   updatedAt: "2026-06-05T00:00:00.000Z"
 };
@@ -70,7 +81,57 @@ describe("AiConfigPanel", () => {
       scenarios: {
         assets: { profileId: "claude-code", modelId: "sonnet" },
         novel: { profileId: "codex-cli" }
+      },
+      knowledgeEmbedding: {
+        provider: "local"
       }
     });
+  });
+
+  it("saves knowledge embedding provider settings", async () => {
+    const wrapper = mount(AiConfigPanel, {
+      props: { config, profiles, checks: [] },
+      global: { stubs }
+    });
+
+    const selects = wrapper.findAll("select");
+    await selects[2].setValue("openai-compatible");
+    const inputs = wrapper.findAll("input");
+    await inputs[0].setValue("https://embeddings.example/v1");
+    await inputs[1].setValue("embedding-test");
+    await inputs[2].setValue("secret-key");
+    await wrapper.find('.panel-actions button[data-type="primary"]').trigger("click");
+
+    expect(wrapper.emitted("save")?.[0]?.[0]).toMatchObject({
+      knowledgeEmbedding: {
+        provider: "openai-compatible",
+        baseUrl: "https://embeddings.example/v1",
+        model: "embedding-test",
+        apiKey: "secret-key"
+      }
+    });
+  });
+
+  it("does not render an existing raw embedding API key from props", () => {
+    const wrapper = mount(AiConfigPanel, {
+      props: {
+        config: {
+          ...config,
+          knowledgeEmbedding: {
+            provider: "openai-compatible",
+            baseUrl: "https://embeddings.example/v1",
+            model: "embedding-test",
+            apiKeyConfigured: true,
+            apiKey: "raw-secret"
+          }
+        },
+        profiles,
+        checks: []
+      },
+      global: { stubs }
+    });
+
+    expect(wrapper.text()).toContain("API Key 已配置");
+    expect(wrapper.html()).not.toContain("raw-secret");
   });
 });

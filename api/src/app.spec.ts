@@ -628,22 +628,32 @@ describe("novel API routes", () => {
       config: {
         defaultScenario: string;
         scenarios: { novel: { profileId: string; modelId?: string } };
+        knowledgeEmbedding: { provider: string; baseUrl?: string; model?: string; apiKeyConfigured?: boolean; apiKey?: string };
       };
     }>("/api/platform/ai-config");
 
     expect(current.data.config.defaultScenario).toBe("novel");
     expect(current.data.config.scenarios.novel.profileId).toBe("codex-cli");
+    expect(current.data.config.knowledgeEmbedding.provider).toBe("local");
+    expect(current.data.config.knowledgeEmbedding.apiKey).toBeUndefined();
 
     const nextConfig = {
       ...current.data.config,
       scenarios: {
         ...current.data.config.scenarios,
         novel: { profileId: "claude-code", modelId: "sonnet" }
+      },
+      knowledgeEmbedding: {
+        provider: "openai-compatible",
+        baseUrl: "https://embeddings.example/v1/",
+        model: "embedding-test",
+        apiKey: "secret-key"
       }
     };
     const saved = await jsonFetch<{
       config: {
         scenarios: { novel: { profileId: string; modelId: string } };
+        knowledgeEmbedding: { provider: string; baseUrl?: string; model?: string; apiKeyConfigured?: boolean; apiKey?: string };
       };
     }>("/api/platform/ai-config", {
       method: "PUT",
@@ -652,6 +662,19 @@ describe("novel API routes", () => {
     });
 
     expect(saved.data.config.scenarios.novel).toEqual({ profileId: "claude-code", modelId: "sonnet" });
+    expect(saved.data.config.knowledgeEmbedding).toMatchObject({
+      provider: "openai-compatible",
+      baseUrl: "https://embeddings.example/v1",
+      model: "embedding-test",
+      apiKeyConfigured: true
+    });
+    expect(saved.data.config.knowledgeEmbedding.apiKey).toBeUndefined();
+
+    const reloaded = await jsonFetch<{
+      config: { knowledgeEmbedding: { apiKeyConfigured?: boolean; apiKey?: string } };
+    }>("/api/platform/ai-config");
+    expect(reloaded.data.config.knowledgeEmbedding.apiKeyConfigured).toBe(true);
+    expect(reloaded.data.config.knowledgeEmbedding.apiKey).toBeUndefined();
 
     const rejected = await jsonFetch<{ error: string }>("/api/platform/ai-config", {
       method: "PUT",
@@ -669,6 +692,20 @@ describe("novel API routes", () => {
 
     expect(rejected.status).toBe(400);
     expect(rejected.data.error).toContain("Model id can only contain");
+
+    const rejectedProvider = await jsonFetch<{ error: string }>("/api/platform/ai-config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        config: {
+          ...nextConfig,
+          knowledgeEmbedding: { provider: "unsupported" }
+        }
+      })
+    });
+
+    expect(rejectedProvider.status).toBe(400);
+    expect(rejectedProvider.data.error).toContain("Unsupported knowledge embedding provider");
   });
 
   it("seeds the platform library and links shared assets across projects", async () => {

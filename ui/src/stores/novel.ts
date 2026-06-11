@@ -103,6 +103,12 @@ function makeDefaultPlatformAiConfig(): PlatformAiConfig {
       }),
       {} as PlatformAiConfig["scenarios"]
     ),
+    knowledgeEmbedding: {
+      provider: "local",
+      baseUrl: "https://api.openai.com/v1",
+      model: "text-embedding-3-small",
+      apiKeyConfigured: false
+    },
     updatedAt: new Date().toISOString()
   };
 }

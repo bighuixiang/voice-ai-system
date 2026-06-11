@@ -15,7 +15,7 @@ import {
   writeProject
 } from "./novelProject.js";
 import { getNovelsRoot } from "./workspace.js";
-import { aiScenarioKeys, mergePlatformAiConfig, readPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
+import { aiScenarioKeys, mergePlatformAiConfig, publicPlatformAiConfig, readPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 import { createPlatformAsset, linkAssetToProject, readPlatformLibrary } from "./platformLibrary.js";
 import { applyPatch, fallbackProjectCreateResult, markInvocationPatchesAccepted, readInvocationSessions, runNovelTask } from "./taskService.js";
 import { aiStageDefinitions } from "./aiStages.js";
@@ -108,7 +108,25 @@ function validateAiScenarioConfig(config: AiScenarioConfig): AiScenarioConfig {
   };
 }
 
+function validateEmbeddingBaseUrl(baseUrl?: string): string | undefined {
+  const trimmed = String(baseUrl || "").trim();
+  if (!trimmed) return undefined;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error("Embedding base URL must use http or https");
+    }
+    return trimmed.replace(/\/+$/, "");
+  } catch {
+    throw new Error("Embedding base URL must be a valid URL");
+  }
+}
+
 function validatePlatformAiConfig(input: PlatformAiConfig): PlatformAiConfig {
+  const rawProvider = String(input.knowledgeEmbedding?.provider || "local").trim();
+  if (rawProvider !== "local" && rawProvider !== "openai-compatible") {
+    throw new Error(`Unsupported knowledge embedding provider: ${rawProvider}`);
+  }
   const merged = mergePlatformAiConfig(input);
   const scenarioKeys = aiScenarioKeys();
   return {
@@ -121,6 +139,13 @@ function validatePlatformAiConfig(input: PlatformAiConfig): PlatformAiConfig {
       }),
       {} as PlatformAiConfig["scenarios"]
     ),
+    knowledgeEmbedding: {
+      provider: rawProvider,
+      baseUrl: validateEmbeddingBaseUrl(merged.knowledgeEmbedding.baseUrl),
+      model: String(merged.knowledgeEmbedding.model || "").trim() || undefined,
+      apiKey: typeof merged.knowledgeEmbedding.apiKey === "string" ? merged.knowledgeEmbedding.apiKey.trim() : undefined,
+      apiKeyConfigured: Boolean(merged.knowledgeEmbedding.apiKey || merged.knowledgeEmbedding.apiKeyConfigured)
+    },
     updatedAt: merged.updatedAt || new Date().toISOString()
   };
 }
@@ -182,14 +207,14 @@ export function createApp() {
   }));
 
   app.get("/api/platform/ai-config", asyncRoute(async (_req, res) => {
-    res.json({ config: await readPlatformAiConfig() });
+    res.json({ config: publicPlatformAiConfig(await readPlatformAiConfig()) });
   }));
 
   app.put("/api/platform/ai-config", asyncRoute(async (req, res) => {
     const input = (req.body.config || req.body) as PlatformAiConfig;
     try {
       const config = validatePlatformAiConfig(input);
-      res.json({ config: await writePlatformAiConfig(config) });
+      res.json({ config: publicPlatformAiConfig(await writePlatformAiConfig(config)) });
     } catch (error) {
       res.status(400).json({ error: error instanceof Error ? error.message : String(error) });
     }
