@@ -134,6 +134,8 @@ Latest targeted P0 extension verification:
 - `3153ad0 feat: bootstrap ai stage dictionary`
 - `c829403 feat: show ai stage labels in task history`
 - `c03eb73 feat: show ai stages in operation panel`
+- `8352fd3 docs: update stage operation progress`
+- `64fe61d feat: show active ai stage progress`
 
 Earlier supporting commits in this branch:
 
