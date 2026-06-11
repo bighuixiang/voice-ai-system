@@ -78,10 +78,12 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
 
 Latest full verification passed:
 
-- API tests: 76 passed, 1 real Codex integration skipped.
-- UI tests: 150 passed.
+- API tests: 80 passed, 1 real Codex integration skipped.
+- UI tests: 164 passed.
 - API build passed.
 - UI build passed.
+- Runtime smoke: `http://127.0.0.1:5173` returned HTTP 200.
+- Runtime smoke: `http://127.0.0.1:8787/health` returned HTTP 200 with `status: healthy`.
 
 Known warnings remain unchanged:
 
@@ -119,6 +121,7 @@ Latest targeted P0 extension verification:
 - `58b6e09 feat: preview audit report in workspace`
 - `0c2b485 feat: configure knowledge embeddings in settings`
 - `60cad36 feat: control background job retries and cancellation`
+- `fa936c8 feat: orchestrate post-save chapter pipeline`
 
 Earlier supporting commits in this branch:
 
