@@ -287,6 +287,12 @@ describe("novel API routes", () => {
         taskSummary: { total: number; byStatus: { success: number }; byType: { "chapter.draft": number } };
         aiInvocationSummary: { total: number; byDecision: { accepted: number }; proposedPatchCount: number; acceptedPatchCount: number };
         knowledgeSummary: { factCount: number; tripleCount: number; indexedChapterCount: number; keywordCount: number; vectorSummary?: { provider: string; entryCount: number } };
+        runtimeSummary: {
+          chapterCount: number;
+          byActiveStep: Record<string, number>;
+          blockedStepCount: number;
+          snapshots: Array<{ chapterId: string; fingerprint: string; signals: { hasQualityReport: boolean }; steps: Array<{ id: string; status: string }> }>;
+        };
         backgroundJobSummary: { total: number; byStatus: { success: number }; latestJobs: Array<{ id: string; outputSummary?: string }> };
       };
     }>(`/api/novel/projects/${slug}/audit-report`);
@@ -316,6 +322,19 @@ describe("novel API routes", () => {
         indexedChapterCount: 1,
         keywordCount: 2,
         vectorSummary: expect.objectContaining({ provider: "local", entryCount: 1 })
+      },
+      runtimeSummary: {
+        chapterCount: 3,
+        byActiveStep: expect.any(Object),
+        blockedStepCount: expect.any(Number),
+        snapshots: expect.arrayContaining([
+          expect.objectContaining({
+            chapterId: "chapter-001",
+            fingerprint: expect.stringMatching(/^[a-f0-9]{16}$/),
+            signals: expect.objectContaining({ hasQualityReport: true }),
+            steps: expect.arrayContaining([expect.objectContaining({ id: "review", status: "done" })])
+          })
+        ])
       },
       backgroundJobSummary: {
         total: 1,

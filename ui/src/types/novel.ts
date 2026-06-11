@@ -542,6 +542,10 @@ export interface CreationLoopStep {
   actionLabel?: string;
 }
 
+export type CreationRuntimeStepId = CreationLoopStep["id"];
+
+export type CreationRuntimeStep = Omit<CreationLoopStep, "action" | "actionLabel">;
+
 export interface CreationRuntimeSnapshot {
   projectSlug: string;
   chapterId: string;
@@ -680,6 +684,16 @@ export interface ProjectAuditReport {
     indexedChapterCount: number;
     keywordCount: number;
     vectorSummary?: KnowledgeVectorSummary;
+  };
+  runtimeSummary: {
+    chapterCount: number;
+    byActiveStep: Record<CreationRuntimeStepId | "none", number>;
+    blockedStepCount: number;
+    snapshots: Array<
+      Pick<CreationRuntimeSnapshot, "chapterId" | "chapterTitle" | "activeStepId" | "fingerprint" | "signals" | "updatedAt"> & {
+        steps: Array<Pick<CreationRuntimeStep, "id" | "status" | "metric">>;
+      }
+    >;
   };
   backgroundJobSummary: {
     total: number;

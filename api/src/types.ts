@@ -658,6 +658,16 @@ export interface ProjectAuditReport {
     keywordCount: number;
     vectorSummary?: KnowledgeVectorSummary;
   };
+  runtimeSummary: {
+    chapterCount: number;
+    byActiveStep: Record<CreationRuntimeStepId | "none", number>;
+    blockedStepCount: number;
+    snapshots: Array<
+      Pick<CreationRuntimeSnapshot, "chapterId" | "chapterTitle" | "activeStepId" | "fingerprint" | "signals" | "updatedAt"> & {
+        steps: Array<Pick<CreationRuntimeStep, "id" | "status" | "metric">>;
+      }
+    >;
+  };
   backgroundJobSummary: {
     total: number;
     byStatus: Record<BackgroundJobStatus, number>;

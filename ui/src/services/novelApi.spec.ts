@@ -411,6 +411,22 @@ describe("novelApi", () => {
         keywordCount: 1,
         vectorSummary: knowledgeIndex.vectorSummary
       },
+      runtimeSummary: {
+        chapterCount: 1,
+        byActiveStep: { structure: 0, draft: 0, review: 1, recap: 0, ledger: 0, next: 0, none: 0 },
+        blockedStepCount: 0,
+        snapshots: [
+          {
+            chapterId: "chapter-001",
+            chapterTitle: "Chapter 1",
+            activeStepId: "review",
+            fingerprint: "abcdef1234567890",
+            signals: runtimeSnapshot.signals,
+            steps: [{ id: "review", status: "active", metric: "待体检" }],
+            updatedAt: "2026-06-11T00:00:00.000Z"
+          }
+        ]
+      },
       backgroundJobSummary: {
         total: 1,
         byStatus: { pending: 0, running: 0, success: 1, error: 0 },

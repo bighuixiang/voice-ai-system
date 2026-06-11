@@ -1,8 +1,17 @@
-import type { AiInvocationAdoptionDecision, BackgroundJobStatus, CodexTaskType, NovelTaskStatus, NovelProject, ProjectAuditReport } from "./types.js";
+import type {
+  AiInvocationAdoptionDecision,
+  BackgroundJobStatus,
+  CodexTaskType,
+  CreationRuntimeStepId,
+  NovelTaskStatus,
+  NovelProject,
+  ProjectAuditReport
+} from "./types.js";
 import { readSeriesQualityMetrics } from "./writingCockpit.js";
 import { readInvocationSessions, readTaskHistory } from "./taskService.js";
 import { listProjectBackgroundJobs } from "./backgroundJobs.js";
 import { readKnowledgeIndex } from "./knowledgeIndex.js";
+import { buildCreationRuntimeSnapshot } from "./runtimeSnapshot.js";
 
 function emptyStatusCounts(): Record<NovelTaskStatus, number> {
   return {
@@ -32,13 +41,26 @@ function emptyBackgroundJobStatusCounts(): Record<BackgroundJobStatus, number> {
   };
 }
 
+function emptyActiveStepCounts(): Record<CreationRuntimeStepId | "none", number> {
+  return {
+    structure: 0,
+    draft: 0,
+    review: 0,
+    recap: 0,
+    ledger: 0,
+    next: 0,
+    none: 0
+  };
+}
+
 export async function buildProjectAuditReport(root: string, project: NovelProject): Promise<ProjectAuditReport> {
-  const [quality, tasks, aiInvocations, backgroundJobs, knowledgeIndex] = await Promise.all([
+  const [quality, tasks, aiInvocations, backgroundJobs, knowledgeIndex, runtimeSnapshots] = await Promise.all([
     readSeriesQualityMetrics(root, project),
     readTaskHistory(root),
     readInvocationSessions(root),
     listProjectBackgroundJobs(root, project.slug),
-    readKnowledgeIndex(root, project)
+    readKnowledgeIndex(root, project),
+    Promise.all(project.chapters.map((chapter) => buildCreationRuntimeSnapshot(root, project, chapter.id)))
   ]);
 
   const byStatus = emptyStatusCounts();
@@ -56,6 +78,11 @@ export async function buildProjectAuditReport(root: string, project: NovelProjec
   const backgroundJobsByStatus = emptyBackgroundJobStatusCounts();
   for (const job of backgroundJobs) {
     backgroundJobsByStatus[job.status] += 1;
+  }
+
+  const byActiveStep = emptyActiveStepCounts();
+  for (const snapshot of runtimeSnapshots) {
+    byActiveStep[snapshot.activeStepId || "none"] += 1;
   }
 
   return {
@@ -98,6 +125,24 @@ export async function buildProjectAuditReport(root: string, project: NovelProjec
       indexedChapterCount: knowledgeIndex.chapterIndex.chapters.filter((chapter) => chapter.factIds.length || chapter.tripleIds.length).length,
       keywordCount: Object.keys(knowledgeIndex.chapterIndex.keywords).length,
       vectorSummary: knowledgeIndex.vectorSummary
+    },
+    runtimeSummary: {
+      chapterCount: runtimeSnapshots.length,
+      byActiveStep,
+      blockedStepCount: runtimeSnapshots.reduce((sum, snapshot) => sum + snapshot.steps.filter((step) => step.status === "blocked").length, 0),
+      snapshots: runtimeSnapshots.map((snapshot) => ({
+        chapterId: snapshot.chapterId,
+        chapterTitle: snapshot.chapterTitle,
+        activeStepId: snapshot.activeStepId,
+        fingerprint: snapshot.fingerprint,
+        signals: snapshot.signals,
+        steps: snapshot.steps.map((step) => ({
+          id: step.id,
+          status: step.status,
+          metric: step.metric
+        })),
+        updatedAt: snapshot.updatedAt
+      }))
     },
     backgroundJobSummary: {
       total: backgroundJobs.length,

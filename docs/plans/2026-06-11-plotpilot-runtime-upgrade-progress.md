@@ -51,6 +51,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Reports include chapters, persisted quality metrics and trends, task summaries, and AI invocation adoption summaries.
   - Reports include background job totals, status counts, and recent job history.
   - Reports include knowledge fact/triple counts, indexed chapter counts, keyword counts, and vector provider status.
+  - Reports include per-chapter runtime fingerprints, active creation steps, blocked-step counts, and runtime signals.
   - Task history UI can download the report as JSON.
 
 - Background job orchestration:
