@@ -98,6 +98,25 @@ describe("AIOperationPanel", () => {
     expect(wrapper.text()).toContain("autopilot.post_chapter.recap");
   });
 
+  it("shows the active stage beside task progress", () => {
+    const wrapper = mount(AIOperationPanel, {
+      props: {
+        task: null,
+        activeTaskType: "chapter.draft",
+        progress: [{ id: "codex", label: "Running AI", status: "running" }],
+        loading: true,
+        stages
+      },
+      global: { stubs }
+    });
+
+    const progressStage = wrapper.find(".progress-stage");
+
+    expect(progressStage.text()).toContain("Chapter prose drafting");
+    expect(progressStage.text()).toContain("pipeline.chapter.prose");
+    expect(wrapper.text()).toContain("Running AI");
+  });
+
   it("emits an ad-hoc AI instruction", async () => {
     const wrapper = mount(AIOperationPanel, {
       props: {

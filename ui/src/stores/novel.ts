@@ -132,6 +132,7 @@ export const useNovelStore = defineStore("novel", () => {
   const selection = ref<EditorSelection | null>(null);
   const rewriteSelection = ref<EditorSelection | null>(null);
   const currentTask = ref<NovelTask | null>(null);
+  const activeTaskType = ref<CodexTaskType | null>(null);
   const taskProgress = ref<TaskProgressStep[]>([]);
   const taskHistory = ref<NovelTask[]>([]);
   const aiInvocations = ref<AiInvocationSession[]>([]);
@@ -877,7 +878,8 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  function startTaskProgress() {
+  function startTaskProgress(type: CodexTaskType | null = null) {
+    activeTaskType.value = type;
     const agentLabel = currentProject.value?.ai?.profileId === "claude-code" ? "调用 Claude Code CLI" : "调用 AI 执行器";
     taskProgress.value = [
       { id: "context", label: "准备项目上下文", status: "running" },
@@ -932,6 +934,7 @@ export const useNovelStore = defineStore("novel", () => {
     selection.value = null;
     rewriteSelection.value = null;
     currentTask.value = null;
+    activeTaskType.value = null;
     taskProgress.value = [];
     taskHistory.value = [];
     aiInvocations.value = [];
@@ -1560,7 +1563,7 @@ export const useNovelStore = defineStore("novel", () => {
     isReverseEngineeringStructure.value = true;
     isLoading.value = true;
     error.value = "";
-    startTaskProgress();
+    startTaskProgress("structure.reverse");
     try {
       setTaskProgress("context", "done");
       setTaskProgress("codex", "running");
@@ -1920,7 +1923,7 @@ export const useNovelStore = defineStore("novel", () => {
 
     isLoading.value = true;
     error.value = "";
-    startTaskProgress();
+    startTaskProgress(type);
     try {
       setTaskProgress("context", "done");
       setTaskProgress("codex", "running");
@@ -1960,7 +1963,7 @@ export const useNovelStore = defineStore("novel", () => {
     const selectionAnchor = cloneSelection(selection.value);
     isLoading.value = true;
     error.value = "";
-    startTaskProgress();
+    startTaskProgress("selection.polish");
     try {
       setTaskProgress("context", "done");
       setTaskProgress("codex", "running");
@@ -2100,6 +2103,7 @@ export const useNovelStore = defineStore("novel", () => {
     rewriteSelection,
     activeRewriteSelection,
     currentTask,
+    activeTaskType,
     taskProgress,
     taskHistory,
     aiInvocations,

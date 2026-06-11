@@ -143,6 +143,7 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     canDiagnoseChapter: true,
     canTuneSelection: false,
     currentTask: null,
+    activeTaskType: null,
     taskProgress: [],
     creationLoopSteps: [],
     currentRuntimeSnapshot: null,

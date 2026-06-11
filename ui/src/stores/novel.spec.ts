@@ -1434,6 +1434,7 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readAiInvocations).toHaveBeenCalledWith("demo");
     expect(store.aiInvocations).toEqual([invocationForTask()]);
     expect(store.rewriteCandidate?.summary).toBe("Generated ideas");
+    expect(store.activeTaskType).toBe("idea.suggest");
     expect(store.taskProgress.every((step) => step.status === "done")).toBe(true);
   });
 

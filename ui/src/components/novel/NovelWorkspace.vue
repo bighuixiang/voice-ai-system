@@ -307,6 +307,7 @@
         >
           <AIOperationPanel
             :task="store.currentTask"
+            :active-task-type="store.activeTaskType"
             :progress="store.taskProgress"
             :loading="store.isLoading"
             :stages="store.aiStages"

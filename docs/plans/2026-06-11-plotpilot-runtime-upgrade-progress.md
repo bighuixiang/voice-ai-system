@@ -24,6 +24,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Task history now exposes expandable audit details.
   - Workspace startup loads the shared AI stage dictionary and task history shows readable stage labels beside stable stage keys.
   - AI operation controls now show the same shared stage labels and stable keys beside matching task launch actions.
+  - Running AI progress now carries the active task type so the progress panel can show the matching stage label and stable key.
 
 - Quality persistence:
   - Chapter quality reports persist under `quality/<chapterId>.json`.
@@ -81,7 +82,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
 Latest full verification passed:
 
 - API tests: 80 passed, 1 real Codex integration skipped.
-- UI tests: 167 passed.
+- UI tests: 168 passed.
 - API build passed.
 - UI build passed.
 - Runtime smoke: `http://127.0.0.1:5173` returned HTTP 200.
@@ -101,6 +102,7 @@ Latest targeted P0 extension verification:
 - `npm --prefix ui run test -- TaskHistoryPanel NovelWorkspace novel`: 162 passed.
 - `npm --prefix ui run test -- AIOperationPanel NovelWorkspace`: 19 passed.
 - `npm --prefix ui run test -- AIOperationPanel NovelWorkspace TaskHistoryPanel novel`: 163 passed.
+- `npm --prefix ui run test -- AIOperationPanel NovelWorkspace novel`: 164 passed.
 
 ## Recent Commits
 

@@ -42,12 +42,18 @@
       </el-button>
     </el-form>
 
-    <ol v-if="progress.length" class="task-progress" aria-label="AI 执行进度">
-      <li v-for="step in progress" :key="step.id" :class="step.status">
-        <span class="progress-dot" />
-        <span>{{ step.label }}</span>
-      </li>
-    </ol>
+    <div v-if="progress.length" class="task-progress-wrap">
+      <div v-if="activeStage" class="progress-stage">
+        <span>{{ activeStage.label }}</span>
+        <small>{{ activeStage.key }}</small>
+      </div>
+      <ol class="task-progress" aria-label="AI 执行进度">
+        <li v-for="step in progress" :key="step.id" :class="step.status">
+          <span class="progress-dot" />
+          <span>{{ step.label }}</span>
+        </li>
+      </ol>
+    </div>
 
     <div v-if="task?.error" class="task-error" role="alert">{{ task.error }}</div>
 
@@ -69,6 +75,7 @@ import type { AiStageDefinition, CodexTaskType, NovelTask, TaskProgressStep } fr
 
 const props = defineProps<{
   task: NovelTask | null;
+  activeTaskType?: CodexTaskType | null;
   progress: TaskProgressStep[];
   loading: boolean;
   stages?: AiStageDefinition[];
@@ -114,6 +121,11 @@ const stageByTaskType = computed(() => {
 function stageForTask(type: CodexTaskType) {
   return stageByTaskType.value.get(type);
 }
+
+const activeStage = computed(() => {
+  const taskType = props.activeTaskType || props.task?.type;
+  return taskType ? stageByTaskType.value.get(taskType) : undefined;
+});
 
 function isLastOddAction(index: number) {
   return actions.length % 2 === 1 && index === actions.length - 1;
@@ -196,14 +208,38 @@ function isLastOddAction(index: number) {
   width: 100%;
 }
 
+.task-progress-wrap {
+  margin: 12px 0 0;
+  border-radius: 6px;
+  background: var(--app-bg-soft);
+  overflow: hidden;
+}
+
+.progress-stage {
+  display: grid;
+  gap: 2px;
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-text-secondary);
+  font-size: 13px;
+
+  span {
+    font-weight: 700;
+  }
+
+  small {
+    overflow-wrap: anywhere;
+    color: var(--app-text-muted);
+    font-size: 11px;
+  }
+}
+
 .task-progress {
   display: grid;
   gap: 6px;
   padding: 10px;
-  margin: 12px 0 0;
+  margin: 0;
   list-style: none;
-  border-radius: 6px;
-  background: var(--app-bg-soft);
 
   li {
     display: flex;
