@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import AIOperationPanel from "./AIOperationPanel.vue";
-import type { NovelTask } from "@/types/novel";
+import type { AiStageDefinition, NovelTask } from "@/types/novel";
 
 const stubs = {
   "el-button": {
@@ -43,6 +43,19 @@ const task: NovelTask = {
   }
 };
 
+const stages: AiStageDefinition[] = [
+  {
+    key: "pipeline.chapter.prose",
+    label: "Chapter prose drafting",
+    taskTypes: ["chapter.draft"]
+  },
+  {
+    key: "autopilot.post_chapter.recap",
+    label: "Post chapter recap",
+    taskTypes: ["writing.recap"]
+  }
+];
+
 describe("AIOperationPanel", () => {
   it("emits task types from action buttons", async () => {
     const wrapper = mount(AIOperationPanel, {
@@ -71,6 +84,18 @@ describe("AIOperationPanel", () => {
     expect(wrapper.text()).toContain("Draft ready");
     expect(wrapper.text()).toContain("Chapter draft");
     expect(wrapper.emitted("apply-patches")).toHaveLength(1);
+  });
+
+  it("shows shared AI stage labels beside matching actions", () => {
+    const wrapper = mount(AIOperationPanel, {
+      props: { task: null, progress: [], loading: false, stages },
+      global: { stubs }
+    });
+
+    expect(wrapper.text()).toContain("Chapter prose drafting");
+    expect(wrapper.text()).toContain("pipeline.chapter.prose");
+    expect(wrapper.text()).toContain("Post chapter recap");
+    expect(wrapper.text()).toContain("autopilot.post_chapter.recap");
   });
 
   it("emits an ad-hoc AI instruction", async () => {

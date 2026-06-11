@@ -17,7 +17,13 @@
         @click="$emit('run-task', action.type)"
       >
         <el-icon><component :is="action.icon" /></el-icon>
-        {{ action.label }}
+        <span class="action-content">
+          <span class="action-label">{{ action.label }}</span>
+          <span v-if="stageForTask(action.type)" class="action-stage">
+            {{ stageForTask(action.type)?.label }}
+            <small>{{ stageForTask(action.type)?.key }}</small>
+          </span>
+        </span>
       </el-button>
     </div>
 
@@ -56,15 +62,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { Collection, DataAnalysis, Edit, Finished, MagicStick } from "@element-plus/icons-vue";
-import type { CodexTaskType, NovelTask, TaskProgressStep } from "@/types/novel";
+import type { AiStageDefinition, CodexTaskType, NovelTask, TaskProgressStep } from "@/types/novel";
 
-defineProps<{
+const props = defineProps<{
   task: NovelTask | null;
   progress: TaskProgressStep[];
   loading: boolean;
+  stages?: AiStageDefinition[];
 }>();
 
 const emit = defineEmits<{
@@ -93,6 +100,20 @@ const actions: Array<{ type: CodexTaskType; label: string; icon: unknown }> = [
   { type: "idea.suggest", label: "补灵感", icon: MagicStick },
   { type: "continuity.check", label: "连续性检查", icon: Finished }
 ];
+
+const stageByTaskType = computed(() => {
+  const entries = new Map<CodexTaskType, AiStageDefinition>();
+  for (const stage of props.stages || []) {
+    for (const taskType of stage.taskTypes) {
+      entries.set(taskType, stage);
+    }
+  }
+  return entries;
+});
+
+function stageForTask(type: CodexTaskType) {
+  return stageByTaskType.value.get(type);
+}
 
 function isLastOddAction(index: number) {
   return actions.length % 2 === 1 && index === actions.length - 1;
@@ -128,7 +149,35 @@ function isLastOddAction(index: number) {
 .action-button {
   width: 100%;
   min-width: 0;
-  justify-content: center;
+  min-height: 58px;
+  justify-content: flex-start;
+  white-space: normal;
+  text-align: left;
+}
+
+.action-content {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.action-label {
+  font-weight: 600;
+}
+
+.action-stage {
+  display: grid;
+  gap: 1px;
+  color: var(--app-text-muted);
+  font-size: 12px;
+
+  small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 11px;
+    line-height: 1.2;
+  }
 }
 
 .action-button--centered {

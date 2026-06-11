@@ -309,6 +309,7 @@
             :task="store.currentTask"
             :progress="store.taskProgress"
             :loading="store.isLoading"
+            :stages="store.aiStages"
             @run-task="store.runTask"
             @apply-patches="store.applyTaskPatches"
           />
