@@ -123,7 +123,7 @@ export async function buildProjectAuditReport(root: string, project: NovelProjec
     knowledgeSummary: {
       factCount: knowledgeIndex.facts.length,
       tripleCount: knowledgeIndex.triples.length,
-      indexedChapterCount: knowledgeIndex.chapterIndex.chapters.filter((chapter) => chapter.factIds.length || chapter.tripleIds.length).length,
+      indexedChapterCount: knowledgeIndex.chapterIndex.chapters.length,
       keywordCount: Object.keys(knowledgeIndex.chapterIndex.keywords).length,
       vectorSummary: knowledgeIndex.vectorSummary
     },

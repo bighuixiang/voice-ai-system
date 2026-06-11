@@ -260,6 +260,16 @@ describe("novel API routes", () => {
             tripleIds: ["triple:report"],
             entityNames: ["Auditor"],
             updatedAt: "2026-06-11T00:03:00.000Z"
+          },
+          {
+            chapterId: "chapter-002",
+            title: "Chapter 2",
+            order: 2,
+            keywords: [],
+            factIds: [],
+            tripleIds: [],
+            entityNames: [],
+            updatedAt: "2026-06-11T00:03:00.000Z"
           }
         ],
         keywords: { audit: ["chapter-001"], memory: ["chapter-001"] },
@@ -319,7 +329,7 @@ describe("novel API routes", () => {
       knowledgeSummary: {
         factCount: 1,
         tripleCount: 1,
-        indexedChapterCount: 1,
+        indexedChapterCount: 2,
         keywordCount: 2,
         vectorSummary: expect.objectContaining({ provider: "local", entryCount: 1 })
       },
