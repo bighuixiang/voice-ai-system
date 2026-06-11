@@ -17,7 +17,17 @@ import {
 import { getNovelsRoot } from "./workspace.js";
 import { aiScenarioKeys, mergePlatformAiConfig, publicPlatformAiConfig, readPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
 import { createPlatformAsset, linkAssetToProject, readPlatformLibrary } from "./platformLibrary.js";
-import { applyPatch, fallbackProjectCreateResult, markInvocationPatchesAccepted, readInvocationSessions, runNovelTask } from "./taskService.js";
+import {
+  applyPatch,
+  cancelNovelTask,
+  fallbackProjectCreateResult,
+  markInvocationPatchesAccepted,
+  readInvocationSessions,
+  readNovelTask,
+  readTaskHistory,
+  runNovelTask,
+  startNovelTaskAsync
+} from "./taskService.js";
 import { aiStageDefinitions } from "./aiStages.js";
 import { buildStoryGraphProjection } from "./storyGraph.js";
 import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
@@ -632,10 +642,43 @@ export function createApp() {
     res.json({ task: await runNovelTask(req.params.projectId, type, req.body.payload || {}) });
   }));
 
+  app.get("/api/novel/projects/:projectId/tasks", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    res.json({ tasks: await readTaskHistory(projectRoot(project.slug)) });
+  }));
+
+  app.post("/api/novel/projects/:projectId/tasks/async", asyncRoute(async (req, res) => {
+    const type = req.body.type as CodexTaskType;
+    if (!taskTypes.includes(type)) {
+      res.status(400).json({ error: `Unsupported task type: ${type}` });
+      return;
+    }
+    res.status(202).json({ task: await startNovelTaskAsync(req.params.projectId, type, req.body.payload || {}) });
+  }));
+
   app.get("/api/novel/projects/:projectId/tasks/invocations", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
     const invocations = await readInvocationSessions(projectRoot(project.slug));
     res.json({ invocations });
+  }));
+
+  app.get("/api/novel/projects/:projectId/tasks/:taskId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const task = await readNovelTask(projectRoot(project.slug), req.params.taskId);
+    if (!task || task.projectId !== project.slug) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+    res.json({ task });
+  }));
+
+  app.post("/api/novel/projects/:projectId/tasks/:taskId/cancel", asyncRoute(async (req, res) => {
+    const task = await cancelNovelTask(req.params.projectId, req.params.taskId);
+    if (!task) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+    res.json({ task });
   }));
 
   app.get("/api/novel/projects/:projectId/audit-report", asyncRoute(async (req, res) => {

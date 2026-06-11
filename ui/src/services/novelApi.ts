@@ -314,6 +314,32 @@ export const novelApi = {
     return data.task;
   },
 
+  async listTasks(projectId: string): Promise<NovelTask[]> {
+    const data = await request<{ tasks: NovelTask[] }>(`/api/novel/projects/${projectId}/tasks`);
+    return data.tasks;
+  },
+
+  async startTask(projectId: string, type: CodexTaskType, payload: Record<string, unknown>): Promise<NovelTask> {
+    const data = await request<{ task: NovelTask }>(`/api/novel/projects/${projectId}/tasks/async`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ type, payload })
+    });
+    return data.task;
+  },
+
+  async readTask(projectId: string, taskId: string): Promise<NovelTask> {
+    const data = await request<{ task: NovelTask }>(`/api/novel/projects/${projectId}/tasks/${taskId}`);
+    return data.task;
+  },
+
+  async cancelTask(projectId: string, taskId: string): Promise<NovelTask> {
+    const data = await request<{ task: NovelTask }>(`/api/novel/projects/${projectId}/tasks/${taskId}/cancel`, {
+      method: "POST"
+    });
+    return data.task;
+  },
+
   async readAiInvocations(projectId: string): Promise<AiInvocationSession[]> {
     const data = await request<{ invocations: AiInvocationSession[] }>(`/api/novel/projects/${projectId}/tasks/invocations`);
     return data.invocations;

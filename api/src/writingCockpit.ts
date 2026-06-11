@@ -137,6 +137,53 @@ async function writeJsonFile(root: string, relativePath: string, value: unknown)
   await fs.writeFile(target, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
+function jsonContent(value: unknown): string {
+  return `${JSON.stringify(value, null, 2)}\n`;
+}
+
+async function readOptionalTextFile(root: string, relativePath: string): Promise<string | null> {
+  try {
+    return await fs.readFile(resolveInside(root, relativePath), "utf8");
+  } catch (error) {
+    if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function writeFilesTransaction(root: string, writes: Array<{ relativePath: string; content: string }>): Promise<void> {
+  const txId = `tx-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const prepared: Array<{ target: string; tmp: string; backup: string | null }> = [];
+  const committed: Array<{ target: string; backup: string | null }> = [];
+
+  try {
+    for (const write of writes) {
+      const target = resolveInside(root, write.relativePath);
+      const tmp = `${target}.${txId}.tmp`;
+      await fs.mkdir(path.dirname(target), { recursive: true });
+      const backup = await readOptionalTextFile(root, write.relativePath);
+      await fs.writeFile(tmp, write.content, "utf8");
+      prepared.push({ target, tmp, backup });
+    }
+
+    for (const item of prepared) {
+      await fs.rename(item.tmp, item.target);
+      committed.push({ target: item.target, backup: item.backup });
+    }
+  } catch (error) {
+    await Promise.allSettled(prepared.map((item) => fs.rm(item.tmp, { force: true })));
+    for (const item of committed.reverse()) {
+      if (item.backup === null) {
+        await fs.rm(item.target, { force: true }).catch(() => undefined);
+      } else {
+        await fs.writeFile(item.target, item.backup, "utf8").catch(() => undefined);
+      }
+    }
+    throw error;
+  }
+}
+
 function chapterDashboardPath(chapterId: string): string {
   return `dashboard/${chapterId}.json`;
 }
@@ -240,7 +287,13 @@ export async function readChapterSummary(root: string, chapterId: string): Promi
 }
 
 export async function saveChapterSummary(root: string, summary: ChapterSummary): Promise<ChapterSummary> {
-  const normalized: ChapterSummary = {
+  const normalized = normalizeChapterSummary(summary);
+  await writeJsonFile(root, chapterSummaryPath(summary.chapterId), normalized);
+  return normalized;
+}
+
+function normalizeChapterSummary(summary: ChapterSummary): ChapterSummary {
+  return {
     ...defaultChapterSummary(summary.chapterId),
     ...summary,
     keyEvents: summary.keyEvents || [],
@@ -252,8 +305,6 @@ export async function saveChapterSummary(root: string, summary: ChapterSummary):
     acceptedRecapIds: summary.acceptedRecapIds || [],
     updatedAt: summary.updatedAt || nowIso()
   };
-  await writeJsonFile(root, chapterSummaryPath(summary.chapterId), normalized);
-  return normalized;
 }
 
 export async function readChapterQualityReport(root: string, chapterId: string): Promise<ChapterQualityReport | null> {
@@ -656,13 +707,17 @@ export async function readLedgerEntries(root: string, kind: LedgerKind): Promise
 }
 
 export async function saveLedgerEntries(root: string, kind: LedgerKind, entries: LedgerEntry[]): Promise<LedgerEntry[]> {
-  const normalized = entries.map((entry) => ({
+  const normalized = normalizeLedgerEntries(kind, entries);
+  await writeJsonFile(root, ledgerPath(kind), normalized);
+  return normalized;
+}
+
+function normalizeLedgerEntries(kind: LedgerKind, entries: LedgerEntry[]): LedgerEntry[] {
+  return entries.map((entry) => ({
     ...entry,
     kind,
     updatedAt: entry.updatedAt || nowIso()
   }));
-  await writeJsonFile(root, ledgerPath(kind), normalized);
-  return normalized;
 }
 
 export async function appendWritingRecap(root: string, recap: WritingRecapCandidate): Promise<void> {
@@ -709,12 +764,27 @@ export async function acceptWritingRecapPatches(root: string, recap: WritingReca
     },
     {}
   );
+  const writes: Array<{ relativePath: string; content: string }> = [];
   for (const [kind, entries] of Object.entries(updatesByKind) as Array<[LedgerKind, LedgerEntry[]]>) {
     const existing = await readLedgerEntries(root, kind);
-    await saveLedgerEntries(root, kind, mergeById(existing, entries));
+    writes.push({
+      relativePath: ledgerPath(kind),
+      content: jsonContent(normalizeLedgerEntries(kind, mergeById(existing, entries)))
+    });
   }
 
-  const savedSummary = await saveChapterSummary(root, nextSummary);
-  await appendWritingRecap(root, recap);
+  const savedSummary = normalizeChapterSummary(nextSummary);
+  const existingRecaps = await readOptionalTextFile(root, "tasks/recaps.jsonl");
+  const recapPrefix = existingRecaps ? (existingRecaps.endsWith("\n") ? existingRecaps : `${existingRecaps}\n`) : "";
+  writes.push({
+    relativePath: chapterSummaryPath(recap.chapterId),
+    content: jsonContent(savedSummary)
+  });
+  writes.push({
+    relativePath: "tasks/recaps.jsonl",
+    content: `${recapPrefix}${JSON.stringify(recap)}\n`
+  });
+
+  await writeFilesTransaction(root, writes);
   return savedSummary;
 }

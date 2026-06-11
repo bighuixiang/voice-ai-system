@@ -590,6 +590,8 @@ export interface NovelTask {
   startedAt: string;
   finishedAt?: string;
   durationMs?: number;
+  timeoutMs?: number;
+  cancelRequestedAt?: string;
 }
 
 export type AiInvocationAdoptionDecision = "pending" | "accepted" | "rejected" | "not-required";
@@ -653,7 +655,12 @@ export interface ProjectAuditReport {
     total: number;
     byStatus: Record<NovelTaskStatus, number>;
     byType: Partial<Record<CodexTaskType, number>>;
-    latestTasks: Array<Pick<NovelTask, "id" | "type" | "status" | "inputSummary" | "outputSummary" | "error" | "startedAt" | "finishedAt" | "durationMs">>;
+    latestTasks: Array<
+      Pick<
+        NovelTask,
+        "id" | "type" | "status" | "inputSummary" | "outputSummary" | "error" | "startedAt" | "finishedAt" | "durationMs" | "timeoutMs" | "cancelRequestedAt"
+      >
+    >;
   };
   aiInvocationSummary: {
     total: number;

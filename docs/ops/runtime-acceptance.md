@@ -36,7 +36,17 @@ Browser smoke:
 npm run smoke:ui
 ```
 
-The Playwright smoke starts the API and UI when needed, opens a real project workspace, and checks the save pipeline, embedding config panel, background job panel, audit report preview, and dark theme backgrounds.
+By default, the Playwright smoke starts isolated API/UI services on `18787` and `15173`, injects `scripts/mock-codex-agent.cjs` as the Codex-compatible agent, opens a real project workspace, and checks the save pipeline, embedding config panel, background job panel, audit report preview, workflow save pipeline, and dark theme backgrounds.
+
+Reuse already-started local services only when that is intentional:
+
+```powershell
+$env:PLAYWRIGHT_REUSE_EXISTING_SERVER = "1"
+npm run smoke:ui
+Remove-Item Env:\PLAYWRIGHT_REUSE_EXISTING_SERVER
+```
+
+When reusing services, make sure the API process was started with the real agent and embedding environment you want to verify. The smoke will not inject the mock agent in reuse mode.
 
 First-time browser setup:
 
@@ -57,6 +67,7 @@ Local configuration:
 - `platform/ai-config.json` may contain workstation-specific provider settings.
 - The public AI config API must never return raw embedding API keys.
 - External embedding keys should be configured locally and verified by runtime smoke before being considered production-ready.
+- Automated browser smoke intentionally uses a deterministic mock agent by default. Real-model author workflow acceptance must reuse an already-started API/UI pair.
 
 ## Smoke Command
 
@@ -79,6 +90,46 @@ Run with background rebuilds:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/smoke-runtime.ps1 -RunRebuild
 ```
+
+## Real AI Workflow Acceptance
+
+Use this pass after `CODEX_COMMAND` or another agent profile is configured and, if needed, after the embedding provider/API key is saved through the workspace AI settings panel.
+
+1. Start the API with the real agent environment.
+
+   ```powershell
+   $env:CODEX_COMMAND = "codex"
+   npm --prefix api run dev
+   ```
+
+2. Start the UI in another shell.
+
+   ```powershell
+   npm --prefix ui run dev -- --host 127.0.0.1 --port 5173
+   ```
+
+3. Run runtime smoke against the local services.
+
+   ```powershell
+   npm run smoke:runtime
+   ```
+
+4. Run browser smoke in reuse mode so Playwright does not replace the agent with the mock.
+
+   ```powershell
+   $env:PLAYWRIGHT_REUSE_EXISTING_SERVER = "1"
+   npm run smoke:ui
+   Remove-Item Env:\PLAYWRIGHT_REUSE_EXISTING_SERVER
+   ```
+
+5. In the workspace, manually save a chapter with the save pipeline enabled and confirm:
+
+   - the `writing.recap` task reaches `success` or a clear terminal `error`;
+   - the recap candidate appears for author review and is not auto-accepted;
+   - quality, knowledge, and runtime steps finish after recap success;
+   - if recap is cancelled or errors, later steps are skipped with the reason visible;
+   - audit preview opens in the UI and JSON download remains available;
+   - external embedding status shows the configured provider, vector entries, and no raw API key leakage.
 
 ## Acceptance Checks
 

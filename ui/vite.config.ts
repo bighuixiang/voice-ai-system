@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
+const apiPort = process.env.NOVEL_API_PORT || '8787'
+const apiTarget = `http://127.0.0.1:${apiPort}`
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
@@ -16,12 +19,12 @@ export default defineConfig({
     cors: true,
     proxy: {
       '/api/novel': {
-        target: 'http://127.0.0.1:8787',
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       '/api/platform': {
-        target: 'http://127.0.0.1:8787',
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },

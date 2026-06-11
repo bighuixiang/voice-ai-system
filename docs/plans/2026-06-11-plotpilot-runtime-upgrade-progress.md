@@ -16,6 +16,8 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - `WritingRecapCandidate` supports `summaryPatch`, `factPatches`, `ledgerPatches`, `characterStatePatches`, and `riskPatches`.
   - UI shows patch categories before author acceptance.
   - Legacy recap outputs remain accepted.
+  - Accepting recap patches now stages summary, ledger, and recap-log writes before committing them with temporary files and rename.
+  - If a recap accept write fails after replacing a file, replaced files are restored from backups.
 
 - AI invocation audit:
   - AI tasks append `tasks/invocations.jsonl`.
@@ -25,6 +27,11 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Workspace startup loads the shared AI stage dictionary and task history shows readable stage labels beside stable stage keys.
   - AI operation controls now show the same shared stage labels and stable keys beside matching task launch actions.
   - Running AI progress now carries the active task type so the progress panel can show the matching stage label and stable key.
+  - AI task execution now supports an async lifecycle with start, list, poll, and cancel API routes while preserving the original synchronous route.
+  - Codex and Claude child processes accept `AbortSignal` and timeout options; the default timeout is `AI_TASK_TIMEOUT_MS || 600000`.
+  - Task history is deduplicated by latest `taskId` state so running and terminal records do not double-count in task summaries.
+  - Workspace AI operations now start async tasks, poll to terminal state, and expose a running-task cancel control.
+  - If the API process restarts while an async task is running, later task reads reconcile the orphaned running history into an unrecoverable `error` record instead of leaving the UI permanently running.
 
 - Quality persistence:
   - Chapter quality reports persist under `quality/<chapterId>.json`.
@@ -71,29 +78,40 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Cancelled jobs are terminal and retry jobs retain `retryOf` lineage for auditability.
 
 - Post-save chapter pipeline:
-  - Save pipeline state tracks save, recap, quality, knowledge, and runtime steps.
+  - Save pipeline state tracks save, recap, runtime, quality, knowledge, and story graph steps.
   - The pipeline is opt-in and visible in the workspace near the creation loop.
-  - Chapter content saves can automatically request a reviewable `writing.recap`, rebuild series quality, rebuild the knowledge index, and refresh the runtime snapshot.
+  - Chapter content saves automatically keep the critical path short: save the file, request a reviewable `writing.recap`, and refresh the runtime snapshot.
+  - Series quality, knowledge index, and story graph rebuilds are enqueued as background jobs after the critical path completes.
+  - The save pipeline panel marks deferred rebuild steps as queued so the author can keep writing while background jobs finish later.
   - Outline/support saves do not trigger the automatic pipeline.
   - Pipeline failures mark the failed step and preserve the saved chapter content.
+  - If the recap task is cancelled or errors, later runtime, quality, knowledge, and story graph steps are skipped with the failure reason surfaced in the panel.
 
 - Theme consistency:
   - Novel workspace panels use dark theme tokens instead of hardcoded light panel colors.
   - Root tests run a theme-token guard that rejects hardcoded hex colors and light backgrounds in novel workspace component styles.
 
+- Workflow smoke coverage:
+  - `scripts/mock-codex-agent.cjs` provides Codex-compatible deterministic JSON for smoke runs.
+  - Playwright workflow smoke creates a temporary project, writes a chapter, enables the save pipeline, saves, waits for recap/quality/index/runtime artifacts, previews the audit report in the UI, and deletes the temporary project.
+  - `smoke:all` now runs the workflow smoke alongside the existing runtime UI smoke.
+  - Playwright starts isolated API/UI services on `18787`/`15173` by default so the mock agent environment is guaranteed and local `8787`/`5173` dev servers are not disturbed.
+  - Set `PLAYWRIGHT_REUSE_EXISTING_SERVER=1` only when intentionally reusing local services.
+
 ## Verification
 
-Latest full verification passed:
+Latest full verification passed after the P0 reliability extension:
 
 - Theme token check: 31 novel workspace Vue components passed.
-- API tests: 80 passed, 1 real Codex integration skipped.
-- UI tests: 168 passed.
+- API tests: 90 passed, 1 real Codex integration skipped.
+- UI tests: 171 passed.
 - API build passed.
 - UI build passed.
 - Runtime smoke: `http://127.0.0.1:5173` returned HTTP 200.
 - Runtime smoke: `http://127.0.0.1:8787/health` returned HTTP 200 with `status: healthy`.
 - Runtime smoke script: `npm run smoke:runtime` passed for `novel-1780911338197` / `chapter-001` with 198 chapters, 198 indexed chapters, local embeddings, 244 vector entries, and stable fingerprint `455526bce1beb72b`.
-- Browser UI smoke: `npm run smoke:ui` passed through Playwright, covering the project hub, real workspace load, save pipeline panel, embedding config dialog, background job panel, audit report preview, and dark theme backgrounds.
+- Browser UI smoke: `npm run smoke:ui` passed through Playwright, covering the project hub, real workspace load, save pipeline panel, embedding config dialog, background job panel, audit report preview, workflow save pipeline, and dark theme backgrounds.
+- Full smoke: `npm run smoke:all` passed, including runtime smoke and 2 Playwright UI smoke tests.
 - Commit guard: `npm run check:runtime-staged` passed and blocks staged generated runtime state or local platform config.
 
 Known warnings remain unchanged:
@@ -104,6 +122,12 @@ Known warnings remain unchanged:
 
 Latest targeted P0 extension verification:
 
+- `npm --prefix api run test -- codexRunner taskService app writingCockpit`: 48 passed.
+- `npm --prefix api run test -- taskService app`: 33 passed.
+- `npm --prefix ui run test -- novelApi novel AIOperationPanel NovelWorkspace`: 167 passed.
+- `npx playwright test tests/e2e/workflow-smoke.spec.ts`: 1 passed.
+- `npm run verify`: passed.
+- `npm run smoke:all`: passed.
 - `npm --prefix api run test -- backgroundJobs app`: 23 passed.
 - `npm --prefix api run build`: passed.
 - `npm --prefix ui run test -- NovelWorkspace novel SavePipelinePanel`: 160 passed.
@@ -114,6 +138,9 @@ Latest targeted P0 extension verification:
 - `npm --prefix ui run test -- AiConfigPanel BackgroundJobPanel SavePipelinePanel KnowledgeIndexPanel QuickReferencePanel StoryGraphPanel StoryControlPanel NovelWorkspace`: 29 passed.
 - `npm --prefix ui run build`: passed.
 - `npm run test:theme`: passed.
+- `npm --prefix ui run test -- novel SavePipelinePanel`: 167 passed.
+- `npm run verify`: passed after the save pipeline critical/background split.
+- `npm run smoke:all`: passed after the workflow smoke was updated to expect 3 critical-path done steps and 3 queued background rebuilds.
 
 ## Recent Commits
 
@@ -164,6 +191,8 @@ Earlier supporting commits in this branch:
 ## Remaining Work
 
 - Tune production embedding provider settings after a real provider and model are selected.
+- Run one manual real-model save pipeline pass after `CODEX_COMMAND`/provider credentials are configured; automated smoke intentionally uses the deterministic mock agent. The repeatable checklist lives in `docs/ops/runtime-acceptance.md`.
+- Full async AI task recovery across API process restarts remains out of scope; current behavior marks orphaned running tasks as unrecoverable errors on read.
 
 ## Optional Embedding Configuration
 

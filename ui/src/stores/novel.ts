@@ -133,6 +133,7 @@ export const useNovelStore = defineStore("novel", () => {
   const rewriteSelection = ref<EditorSelection | null>(null);
   const currentTask = ref<NovelTask | null>(null);
   const activeTaskType = ref<CodexTaskType | null>(null);
+  const activeAsyncTaskId = ref<string | null>(null);
   const taskProgress = ref<TaskProgressStep[]>([]);
   const taskHistory = ref<NovelTask[]>([]);
   const aiInvocations = ref<AiInvocationSession[]>([]);
@@ -825,27 +826,28 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  function parseTaskHistoryContent(content: string): NovelTask[] {
-    return content
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        try {
-          return JSON.parse(line) as NovelTask;
-        } catch {
-          return null;
-        }
-      })
-      .filter((task): task is NovelTask => Boolean(task?.id && task.type && task.status))
-      .sort((left, right) => Date.parse(right.startedAt || "") - Date.parse(left.startedAt || ""));
+  function taskSortTime(task: NovelTask) {
+    return Date.parse(task.finishedAt || task.cancelRequestedAt || task.startedAt || "") || 0;
+  }
+
+  function isTerminalTask(task: NovelTask) {
+    return task.status === "success" || task.status === "error" || task.status === "cancelled";
+  }
+
+  function upsertTaskHistory(task: NovelTask) {
+    const existingIndex = taskHistory.value.findIndex((item) => item.id === task.id);
+    if (existingIndex >= 0) {
+      taskHistory.value.splice(existingIndex, 1, task);
+    } else {
+      taskHistory.value.unshift(task);
+    }
+    taskHistory.value = [...taskHistory.value].sort((left, right) => taskSortTime(right) - taskSortTime(left));
   }
 
   async function loadTaskHistory() {
     if (!currentProject.value) return;
     try {
-      const content = await novelApi.readFile(currentProject.value.slug, "tasks/history.jsonl");
-      taskHistory.value = parseTaskHistoryContent(content);
+      taskHistory.value = await novelApi.listTasks(currentProject.value.slug);
     } catch {
       taskHistory.value = [];
     }
@@ -1316,6 +1318,15 @@ export const useNovelStore = defineStore("novel", () => {
     return finishedJob;
   }
 
+  async function enqueueCurrentProjectBackgroundJob(type: BackgroundJobType, payload: Record<string, unknown>): Promise<BackgroundJob> {
+    if (!currentProject.value) {
+      throw new Error("鏈墦寮€椤圭洰");
+    }
+    const startedJob = await novelApi.startBackgroundJob(currentProject.value.slug, type, payload);
+    upsertBackgroundJob(startedJob);
+    return startedJob;
+  }
+
   async function cancelBackgroundJob(jobId: string): Promise<BackgroundJob | null> {
     if (!currentProject.value) return null;
     const job = await novelApi.cancelBackgroundJob(currentProject.value.slug, jobId);
@@ -1350,16 +1361,35 @@ export const useNovelStore = defineStore("novel", () => {
     throw new Error("后台作业超时");
   }
 
+  async function waitForTask(projectId: string, startedTask: NovelTask): Promise<NovelTask> {
+    const timeoutMs = Math.max(startedTask.timeoutMs || 600_000, 60_000) + 30_000;
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const task = await novelApi.readTask(projectId, startedTask.id);
+      currentTask.value = task;
+      upsertTaskHistory(task);
+      if (isTerminalTask(task)) {
+        return task;
+      }
+      await wait(500);
+    }
+    throw new Error("AI 浠诲姟杞瓒呮椂");
+  }
+
   const savePipelineStepLabels: Record<SavePipelineStepId, string> = {
     save: "保存",
     recap: "章后回顾",
+    runtime: "运行快照",
     quality: "质量重建",
     knowledge: "知识索引",
-    runtime: "运行快照"
+    story: "故事图谱"
   };
 
+  const savePipelineStepOrder: SavePipelineStepId[] = ["save", "recap", "runtime", "quality", "knowledge", "story"];
+  const savePipelineAfterSaveSteps: SavePipelineStepId[] = ["recap", "runtime", "quality", "knowledge", "story"];
+
   function makeSavePipelineSteps(): SavePipelineStep[] {
-    return (["save", "recap", "quality", "knowledge", "runtime"] as SavePipelineStepId[]).map((id) => ({
+    return savePipelineStepOrder.map((id) => ({
       id,
       label: savePipelineStepLabels[id],
       status: "pending"
@@ -1384,6 +1414,20 @@ export const useNovelStore = defineStore("novel", () => {
     return err instanceof Error ? err.message : String(err);
   }
 
+  async function enqueueSavePipelineBackgroundJob(stepId: SavePipelineStepId, type: BackgroundJobType, payload: Record<string, unknown>) {
+    updateSavePipelineStep(stepId, "running", "正在加入后台队列");
+    try {
+      const job = await enqueueCurrentProjectBackgroundJob(type, payload);
+      updateSavePipelineStep(stepId, "queued", `已加入后台队列：${job.id}`);
+      return job;
+    } catch (err) {
+      const message = pipelineErrorMessage(err);
+      updateSavePipelineStep(stepId, "error", message);
+      error.value = message;
+      return null;
+    }
+  }
+
   async function runPostSavePipeline(previousContent = savedContent.value) {
     if (isRunningSavePipeline.value) return;
     savePipelineSteps.value = makeSavePipelineSteps();
@@ -1391,22 +1435,21 @@ export const useNovelStore = defineStore("novel", () => {
 
     const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
     if (!currentProject.value || !chapterId) {
-      skipSavePipelineSteps(["recap", "quality", "knowledge", "runtime"], "未打开章节");
+      skipSavePipelineSteps(savePipelineAfterSaveSteps, "未打开章节");
       return;
     }
 
     if (currentDocumentKind.value !== "content") {
-      skipSavePipelineSteps(["recap", "quality", "knowledge", "runtime"], "仅章节正文保存后运行");
+      skipSavePipelineSteps(savePipelineAfterSaveSteps, "仅章节正文保存后运行");
       return;
     }
 
-    const projectId = currentProject.value.slug;
     isRunningSavePipeline.value = true;
     let activeStep: SavePipelineStepId = "recap";
     try {
       activeStep = "recap";
       updateSavePipelineStep("recap", "running", "抽取本次保存带来的事实变化");
-      await runTask("writing.recap", {
+      const recapTask = await runTask("writing.recap", {
         mode: "chapter.save.pipeline",
         previousTail: previousContent.slice(-1600),
         currentTail: currentContent.value.slice(-1600),
@@ -1416,31 +1459,25 @@ export const useNovelStore = defineStore("novel", () => {
       });
       updateSavePipelineStep("recap", "done", recapCandidate.value ? "已生成待确认回顾" : "任务完成，未解析到回顾候选");
 
-      activeStep = "quality";
-      updateSavePipelineStep("quality", "running", "重建全书质量指标");
-      await runCurrentProjectBackgroundJob("quality.series.rebuild", { source: "save-pipeline", chapterId }, "全书质量指标重建失败");
-      currentSeriesQualityMetrics.value = await novelApi.readSeriesQualityMetrics(projectId);
-      updateSavePipelineStep("quality", "done", "质量指标已更新");
-
-      activeStep = "knowledge";
-      updateSavePipelineStep("knowledge", "running", "重建知识索引");
-      await runCurrentProjectBackgroundJob("knowledge.index.rebuild", { source: "save-pipeline", chapterId }, "知识索引重建失败");
-      knowledgeIndex.value = await novelApi.readKnowledgeIndex(projectId);
-      knowledgeSearchResult.value = null;
-      await loadStoryGraph();
-      updateSavePipelineStep("knowledge", "done", "知识索引已更新");
+      if (!recapTask || recapTask.status === "error" || recapTask.status === "cancelled") {
+        throw new Error(recapTask?.error || (recapTask?.status === "cancelled" ? "AI 浠诲姟宸插彇娑?" : "绔犲悗鍥為【澶辫触"));
+      }
 
       activeStep = "runtime";
       updateSavePipelineStep("runtime", "running", "刷新创作闭环快照");
       await loadCreationRuntimeSnapshot(chapterId);
       updateSavePipelineStep("runtime", "done", "运行快照已刷新");
+
+      await Promise.all([
+        enqueueSavePipelineBackgroundJob("quality", "quality.series.rebuild", { source: "save-pipeline", chapterId }),
+        enqueueSavePipelineBackgroundJob("knowledge", "knowledge.index.rebuild", { source: "save-pipeline", chapterId }),
+        enqueueSavePipelineBackgroundJob("story", "story.graph.rebuild", { source: "save-pipeline", chapterId })
+      ]);
     } catch (err) {
       const message = pipelineErrorMessage(err);
       error.value = message;
       updateSavePipelineStep(activeStep, "error", message);
-      const remaining = (["recap", "quality", "knowledge", "runtime"] as SavePipelineStepId[]).slice(
-        (["recap", "quality", "knowledge", "runtime"] as SavePipelineStepId[]).indexOf(activeStep) + 1
-      );
+      const remaining = savePipelineAfterSaveSteps.slice(savePipelineAfterSaveSteps.indexOf(activeStep) + 1);
       skipSavePipelineSteps(remaining, "前序步骤失败后跳过");
     } finally {
       isRunningSavePipeline.value = false;
@@ -1927,16 +1964,21 @@ export const useNovelStore = defineStore("novel", () => {
     try {
       setTaskProgress("context", "done");
       setTaskProgress("codex", "running");
-      const task = await novelApi.runTask(currentProject.value.slug, type, {
+      const startedTask = await novelApi.startTask(currentProject.value.slug, type, {
         chapterId: currentChapter.value?.id,
         documentKind: currentDocumentKind.value,
         filePath: currentFilePath.value,
         ...payload
       });
+      activeAsyncTaskId.value = startedTask.id;
+      currentTask.value = startedTask;
+      upsertTaskHistory(startedTask);
+
+      const task = await waitForTask(currentProject.value.slug, startedTask);
       setTaskProgress("codex", "done");
       setTaskProgress("parse", "running");
       currentTask.value = task;
-      taskHistory.value.unshift(task);
+      upsertTaskHistory(task);
       await refreshAiInvocations();
       if (task.result) {
         if (type === "writing.recap") {
@@ -1948,14 +1990,35 @@ export const useNovelStore = defineStore("novel", () => {
           rewriteSelection.value = null;
         }
       }
-      setTaskProgress("parse", task.status === "error" ? "error" : "done");
+      setTaskProgress("parse", task.status === "error" || task.status === "cancelled" ? "error" : "done");
+      if (task.status === "error" || task.status === "cancelled") {
+        error.value = task.error || (task.status === "cancelled" ? "AI 浠诲姟宸插彇娑?" : "");
+      }
+      return task;
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err);
       finishTaskProgress(false);
       throw err;
     } finally {
       isLoading.value = false;
+      activeAsyncTaskId.value = null;
     }
+  }
+
+  async function cancelActiveTask() {
+    if (!currentProject.value) return;
+    const taskId = activeAsyncTaskId.value || (currentTask.value?.status === "running" ? currentTask.value.id : null);
+    if (!taskId) return;
+    const task = await novelApi.cancelTask(currentProject.value.slug, taskId);
+    currentTask.value = task;
+    upsertTaskHistory(task);
+    if (task.status === "cancelled" || task.status === "error") {
+      error.value = task.error || "AI 浠诲姟宸插彇娑?";
+      finishTaskProgress(false);
+      activeAsyncTaskId.value = null;
+      isLoading.value = false;
+    }
+    return task;
   }
 
   async function polishSelection(mode: string) {
@@ -2238,6 +2301,7 @@ export const useNovelStore = defineStore("novel", () => {
     updateSupportContent,
     saveSupportContent,
     runTask,
+    cancelActiveTask,
     setAutoRunSavePipeline,
     runPostSavePipeline,
     runPostSavePipelineFromCurrentContent,

@@ -8,8 +8,21 @@ import { parseCodexResult } from "./resultParser.js";
 import { assembleContext } from "./contextAssembler.js";
 import { readProject, projectRoot, writeProject } from "./novelProject.js";
 import { assertSafeNovelPath, resolveInside } from "./pathSafety.js";
-import { AgentProcessRunner, type ProcessRunner } from "./codexRunner.js";
+import { AgentProcessRunner, type ProcessRunner, type ProcessRunOptions } from "./codexRunner.js";
 import { stageKeyForTask } from "./aiStages.js";
+
+interface ActiveNovelTask {
+  controller: AbortController;
+  task: NovelTask;
+  root: string;
+}
+
+interface NovelTaskRunOptions extends ProcessRunOptions {
+  task?: NovelTask;
+  appendInitialHistory?: boolean;
+}
+
+const activeNovelTasks = new Map<string, ActiveNovelTask>();
 
 function taskId(): string {
   return `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -25,7 +38,48 @@ async function appendHistory(root: string, task: NovelTask): Promise<void> {
   await fs.appendFile(historyPath, `${JSON.stringify(task)}\n`, "utf8");
 }
 
-export async function readTaskHistory(root: string): Promise<NovelTask[]> {
+function defaultTaskTimeoutMs(): number {
+  const configured = Number(process.env.AI_TASK_TIMEOUT_MS);
+  return Number.isFinite(configured) && configured > 0 ? configured : 600_000;
+}
+
+function taskSortTime(task: NovelTask): number {
+  return Date.parse(task.finishedAt || task.cancelRequestedAt || task.startedAt || "") || 0;
+}
+
+function isTerminalTask(task: NovelTask): boolean {
+  return task.status === "success" || task.status === "error" || task.status === "cancelled";
+}
+
+function isActiveTaskForRoot(root: string, task: NovelTask): boolean {
+  const active = activeNovelTasks.get(task.id);
+  return Boolean(active && active.task.projectId === task.projectId && path.resolve(active.root) === path.resolve(root));
+}
+
+function staleRunningTask(task: NovelTask): NovelTask {
+  const finishedAt = new Date().toISOString();
+  return {
+    ...task,
+    status: "error",
+    finishedAt,
+    durationMs: Date.parse(finishedAt) - Date.parse(task.startedAt),
+    outputSummary: "AI task stopped before completion.",
+    error: "AI task was left running by a previous API process and cannot be recovered."
+  };
+}
+
+function latestTaskRecords(tasks: NovelTask[]): NovelTask[] {
+  const byId = new Map<string, NovelTask>();
+  for (const task of tasks) {
+    const current = byId.get(task.id);
+    if (!current || taskSortTime(task) >= taskSortTime(current)) {
+      byId.set(task.id, task);
+    }
+  }
+  return [...byId.values()].sort((left, right) => taskSortTime(right) - taskSortTime(left));
+}
+
+export async function readTaskHistory(root: string, options: { reconcileStaleRunning?: boolean } = {}): Promise<NovelTask[]> {
   const historyPath = resolveInside(root, "tasks/history.jsonl");
   let content = "";
   try {
@@ -34,7 +88,7 @@ export async function readTaskHistory(root: string): Promise<NovelTask[]> {
     return [];
   }
 
-  return content
+  const tasks = content
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean)
@@ -45,8 +99,26 @@ export async function readTaskHistory(root: string): Promise<NovelTask[]> {
         return null;
       }
     })
-    .filter((task): task is NovelTask => Boolean(task?.id && task.type && task.status))
-    .sort((left, right) => Date.parse(right.finishedAt || right.startedAt) - Date.parse(left.finishedAt || left.startedAt));
+    .filter((task): task is NovelTask => Boolean(task?.id && task.type && task.status));
+  const latestTasks = latestTaskRecords(tasks);
+  if (options.reconcileStaleRunning === false) {
+    return latestTasks;
+  }
+
+  const staleTasks = latestTasks
+    .filter((task) => task.status === "running" && !isActiveTaskForRoot(root, task))
+    .map(staleRunningTask);
+  for (const task of staleTasks) {
+    await appendHistory(root, task);
+  }
+
+  return staleTasks.length ? latestTaskRecords([...latestTasks, ...staleTasks]) : latestTasks;
+}
+
+export async function readNovelTask(root: string, taskId: string): Promise<NovelTask | null> {
+  const active = activeNovelTasks.get(taskId);
+  if (active) return { ...active.task };
+  return (await readTaskHistory(root)).find((task) => task.id === taskId) || null;
 }
 
 async function appendInvocationSession(root: string, session: AiInvocationSession): Promise<void> {
@@ -202,20 +274,28 @@ export async function runNovelTask(
   projectId: string,
   type: CodexTaskType,
   payload: Record<string, unknown>,
-  runner: ProcessRunner = new AgentProcessRunner()
+  runner: ProcessRunner = new AgentProcessRunner(),
+  options: NovelTaskRunOptions = {}
 ): Promise<NovelTask> {
   const project = await readProject(projectId);
   const root = projectRoot(project.slug);
   const started = Date.now();
-  const task: NovelTask = {
-    id: taskId(),
-    type,
-    status: "running",
-    projectId: project.slug,
-    inputSummary: JSON.stringify(payload).slice(0, 500),
-    startedAt: new Date(started).toISOString()
-  };
+  const task: NovelTask =
+    options.task ||
+    {
+      id: taskId(),
+      type,
+      status: "running",
+      projectId: project.slug,
+      inputSummary: JSON.stringify(payload).slice(0, 500),
+      startedAt: new Date(started).toISOString(),
+      timeoutMs: options.timeoutMs || defaultTaskTimeoutMs()
+    };
+  task.timeoutMs = task.timeoutMs || options.timeoutMs || defaultTaskTimeoutMs();
   const invocation = createInvocationSession(task);
+  if (options.appendInitialHistory) {
+    await appendHistory(root, task);
+  }
 
   try {
     const contextBlocks = await assembleContext(type, root, project, payload);
@@ -239,19 +319,33 @@ export async function runNovelTask(
     invocation.agentProfileId = config.id;
     invocation.agentProvider = config.provider;
     invocation.modelId = config.model;
-    const output = await runner.run(prompt, root, config);
+    const output = await runner.run(prompt, root, config, { signal: options.signal, timeoutMs: task.timeoutMs });
     const result = parseCodexResult(output.finalMessage);
-    task.status = output.exitCode === 0 ? "success" : "error";
+    if (output.cancelled || options.signal?.aborted) {
+      task.status = "cancelled";
+      task.cancelRequestedAt = task.cancelRequestedAt || new Date().toISOString();
+      task.outputSummary = "AI task cancelled.";
+      task.error = output.stderr || "AI task cancelled.";
+    } else {
+      task.status = output.exitCode === 0 && !output.timedOut ? "success" : "error";
+      task.outputSummary = result.summary;
+      task.error = output.exitCode === 0 && !output.timedOut ? undefined : output.stderr || `${config.label} exited with ${output.exitCode}`;
+    }
     task.result = result;
-    task.outputSummary = result.summary;
-    task.error = output.exitCode === 0 ? undefined : output.stderr || `${config.label} exited with ${output.exitCode}`;
     task.durationMs = output.durationMs;
     invocation.attempt.exitCode = output.exitCode;
     invocation.proposedPatchTargets = result.patches.map((patch) => patch.target);
-    invocation.adoptionDecision = result.patches.length ? "pending" : "not-required";
+    invocation.adoptionDecision = task.status === "cancelled" ? "not-required" : result.patches.length ? "pending" : "not-required";
   } catch (error) {
-    task.status = "error";
-    task.error = error instanceof Error ? error.message : String(error);
+    if (options.signal?.aborted) {
+      task.status = "cancelled";
+      task.cancelRequestedAt = task.cancelRequestedAt || new Date().toISOString();
+      task.error = "AI task cancelled.";
+      task.outputSummary = "AI task cancelled.";
+    } else {
+      task.status = "error";
+      task.error = error instanceof Error ? error.message : String(error);
+    }
     task.durationMs = Date.now() - started;
   } finally {
     task.finishedAt = new Date().toISOString();
@@ -271,6 +365,78 @@ export async function runNovelTask(
   project.updatedAt = new Date().toISOString();
   await writeProject(project);
   return task;
+}
+
+export async function startNovelTaskAsync(
+  projectId: string,
+  type: CodexTaskType,
+  payload: Record<string, unknown>,
+  runner: ProcessRunner = new AgentProcessRunner()
+): Promise<NovelTask> {
+  const project = await readProject(projectId);
+  const root = projectRoot(project.slug);
+  const startedAt = new Date().toISOString();
+  const task: NovelTask = {
+    id: taskId(),
+    type,
+    status: "running",
+    projectId: project.slug,
+    inputSummary: JSON.stringify(payload).slice(0, 500),
+    startedAt,
+    timeoutMs: defaultTaskTimeoutMs()
+  };
+  const controller = new AbortController();
+  activeNovelTasks.set(task.id, { controller, task, root });
+  await appendHistory(root, task);
+
+  setTimeout(() => {
+    void runNovelTask(project.slug, type, payload, runner, { task, signal: controller.signal, timeoutMs: task.timeoutMs })
+      .catch(async (error) => {
+        task.status = controller.signal.aborted ? "cancelled" : "error";
+        task.error = error instanceof Error ? error.message : String(error);
+        task.finishedAt = new Date().toISOString();
+        task.durationMs = Date.parse(task.finishedAt) - Date.parse(task.startedAt);
+        await appendHistory(root, task);
+      })
+      .finally(() => {
+        activeNovelTasks.delete(task.id);
+      });
+  }, 0);
+
+  return { ...task };
+}
+
+export async function cancelNovelTask(projectId: string, id: string): Promise<NovelTask | null> {
+  const project = await readProject(projectId);
+  const root = projectRoot(project.slug);
+  const active = activeNovelTasks.get(id);
+  if (active && active.task.projectId === project.slug) {
+    const timestamp = new Date().toISOString();
+    active.task.cancelRequestedAt = active.task.cancelRequestedAt || timestamp;
+    active.task.outputSummary = "Cancellation requested.";
+    active.controller.abort();
+    await appendHistory(root, active.task);
+    return { ...active.task };
+  }
+
+  const task = (await readTaskHistory(root, { reconcileStaleRunning: false })).find((item) => item.id === id) || null;
+  if (!task) return null;
+  if (isTerminalTask(task)) {
+    return task;
+  }
+
+  const timestamp = new Date().toISOString();
+  const cancelledTask: NovelTask = {
+    ...task,
+    status: "cancelled",
+    cancelRequestedAt: task.cancelRequestedAt || timestamp,
+    finishedAt: timestamp,
+    durationMs: Date.parse(timestamp) - Date.parse(task.startedAt),
+    outputSummary: "Cancelled because the task is no longer active.",
+    error: "AI task was not active in this API process."
+  };
+  await appendHistory(root, cancelledTask);
+  return cancelledTask;
 }
 
 export function fallbackProjectCreateResult(title: string): CodexTaskResult {

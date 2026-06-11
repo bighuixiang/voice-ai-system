@@ -57,6 +57,10 @@ const mockNovelApi = vi.hoisted(() => ({
   readAiInvocations: vi.fn(),
   readProjectAuditReport: vi.fn(),
   runTask: vi.fn(),
+  listTasks: vi.fn(),
+  startTask: vi.fn(),
+  readTask: vi.fn(),
+  cancelTask: vi.fn(),
   polishSelection: vi.fn(),
   applyPatches: vi.fn()
 }));
@@ -548,6 +552,19 @@ describe("useNovelStore", () => {
     }));
     mockNovelApi.readAiInvocations.mockResolvedValue([]);
     mockNovelApi.readProjectAuditReport.mockResolvedValue(auditReport());
+    mockNovelApi.listTasks.mockResolvedValue([]);
+    mockNovelApi.startTask.mockResolvedValue(
+      taskWithResult({
+        status: "running",
+        result: undefined,
+        outputSummary: undefined,
+        finishedAt: undefined,
+        durationMs: undefined,
+        timeoutMs: 60_000
+      })
+    );
+    mockNovelApi.readTask.mockResolvedValue(taskWithResult());
+    mockNovelApi.cancelTask.mockResolvedValue(taskWithResult({ status: "cancelled", error: "cancelled" }));
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
     mockNovelApi.readAiStages.mockResolvedValue(aiStages);
@@ -824,7 +841,7 @@ describe("useNovelStore", () => {
   });
 
   it("loads, saves, and requests story-level orchestration", async () => {
-    mockNovelApi.runTask.mockResolvedValue(taskWithResult());
+    mockNovelApi.readTask.mockResolvedValue(taskWithResult());
     const store = useNovelStore();
     store.projects = [project];
 
@@ -844,7 +861,7 @@ describe("useNovelStore", () => {
 
     await store.requestStoryOrchestration();
 
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "idea.suggest",
       expect.objectContaining({
@@ -1105,7 +1122,7 @@ describe("useNovelStore", () => {
     await store.saveCurrentContent();
 
     expect(mockNovelApi.saveFile).toHaveBeenCalledWith("demo", "chapters/chapter-001.md", "manual edit for ordinary save");
-    expect(mockNovelApi.runTask).not.toHaveBeenCalled();
+    expect(mockNovelApi.startTask).not.toHaveBeenCalled();
     expect(mockNovelApi.startBackgroundJob).not.toHaveBeenCalled();
     expect(store.savePipelineSteps).toEqual([]);
   });
@@ -1121,7 +1138,7 @@ describe("useNovelStore", () => {
       powerProgressionUpdates: [],
       createdAt: "2026-06-11T00:00:00.000Z"
     };
-    mockNovelApi.runTask.mockResolvedValue(
+    mockNovelApi.readTask.mockResolvedValue(
       taskWithResult({
         type: "writing.recap",
         result: {
@@ -1143,7 +1160,7 @@ describe("useNovelStore", () => {
     store.updateContent("old pressure becomes new pressure at the sealed gate");
     await store.saveCurrentContent();
 
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "writing.recap",
       expect.objectContaining({
@@ -1162,14 +1179,24 @@ describe("useNovelStore", () => {
       source: "save-pipeline",
       chapterId: "chapter-001"
     });
+    expect(mockNovelApi.startBackgroundJob).toHaveBeenCalledWith("demo", "story.graph.rebuild", {
+      source: "save-pipeline",
+      chapterId: "chapter-001"
+    });
+    expect(mockNovelApi.startBackgroundJob).toHaveBeenCalledTimes(3);
+    expect(mockNovelApi.readBackgroundJob).not.toHaveBeenCalled();
     expect(mockNovelApi.readCreationRuntimeSnapshot).toHaveBeenCalledWith("demo", "chapter-001");
+    expect(mockNovelApi.readSeriesQualityMetrics).not.toHaveBeenCalled();
+    expect(mockNovelApi.readKnowledgeIndex).not.toHaveBeenCalled();
+    expect(mockNovelApi.readStoryGraph).not.toHaveBeenCalled();
     expect(store.recapCandidate).toMatchObject({ chapterId: "chapter-001", summary: recap.summary });
     expect(store.savePipelineSteps.map((step) => [step.id, step.status])).toEqual([
       ["save", "done"],
       ["recap", "done"],
-      ["quality", "done"],
-      ["knowledge", "done"],
-      ["runtime", "done"]
+      ["runtime", "done"],
+      ["quality", "queued"],
+      ["knowledge", "queued"],
+      ["story", "queued"]
     ]);
     expect(store.isRunningSavePipeline).toBe(false);
   });
@@ -1185,13 +1212,13 @@ describe("useNovelStore", () => {
     await store.saveCurrentContent();
 
     expect(mockNovelApi.saveFile).toHaveBeenCalledWith("demo", "outline/chapter-001.md", "outline update");
-    expect(mockNovelApi.runTask).not.toHaveBeenCalled();
+    expect(mockNovelApi.startTask).not.toHaveBeenCalled();
     expect(mockNovelApi.startBackgroundJob).not.toHaveBeenCalled();
     expect(store.savePipelineSteps.find((step) => step.id === "recap")).toMatchObject({ status: "skipped" });
   });
 
   it("keeps saved content when the post-save recap step fails", async () => {
-    mockNovelApi.runTask.mockRejectedValueOnce(new Error("recap failed"));
+    mockNovelApi.startTask.mockRejectedValueOnce(new Error("recap failed"));
     const store = useNovelStore();
     store.currentProject = project;
     await store.openChapter(project.chapters[0]);
@@ -1411,7 +1438,7 @@ describe("useNovelStore", () => {
   });
 
   it("runs an AI task with current chapter context and stores the result", async () => {
-    mockNovelApi.runTask.mockResolvedValue(taskWithResult());
+    mockNovelApi.readTask.mockResolvedValue(taskWithResult());
     mockNovelApi.readAiInvocations.mockResolvedValue([invocationForTask()]);
     const store = useNovelStore();
     store.currentProject = project;
@@ -1420,7 +1447,7 @@ describe("useNovelStore", () => {
 
     await store.runTask("idea.suggest", { feedback: "Need a smaller turn." });
 
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "idea.suggest",
       expect.objectContaining({
@@ -1436,6 +1463,21 @@ describe("useNovelStore", () => {
     expect(store.rewriteCandidate?.summary).toBe("Generated ideas");
     expect(store.activeTaskType).toBe("idea.suggest");
     expect(store.taskProgress.every((step) => step.status === "done")).toBe(true);
+  });
+
+  it("cancels the active async AI task", async () => {
+    const started = taskWithResult({ id: "task-cancel", status: "running", result: undefined, timeoutMs: 60_000 });
+    const cancelled = taskWithResult({ id: "task-cancel", status: "cancelled", result: undefined, error: "cancelled" });
+    mockNovelApi.cancelTask.mockResolvedValueOnce(cancelled);
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentTask = started;
+
+    await expect(store.cancelActiveTask()).resolves.toMatchObject({ status: "cancelled" });
+
+    expect(mockNovelApi.cancelTask).toHaveBeenCalledWith("demo", "task-cancel");
+    expect(store.currentTask?.status).toBe("cancelled");
+    expect(store.taskHistory.filter((item) => item.id === "task-cancel")).toHaveLength(1);
   });
 
   it("requests a writing recap candidate and keeps it out of rewrite flow", async () => {
@@ -1478,7 +1520,7 @@ describe("useNovelStore", () => {
         }
       ]
     };
-    mockNovelApi.runTask.mockResolvedValue(
+    mockNovelApi.readTask.mockResolvedValue(
       taskWithResult({
         type: "writing.recap",
         result: {
@@ -1498,7 +1540,7 @@ describe("useNovelStore", () => {
 
     await store.requestWritingRecap();
 
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "writing.recap",
       expect.objectContaining({
@@ -1555,7 +1597,7 @@ describe("useNovelStore", () => {
   });
 
   it("routes chapter planning to the outline document before calling AI", async () => {
-    mockNovelApi.runTask.mockResolvedValue(taskWithResult({ type: "chapter.plan" }));
+    mockNovelApi.readTask.mockResolvedValue(taskWithResult({ type: "chapter.plan" }));
     const store = useNovelStore();
     store.currentProject = project;
     await store.openChapter(project.chapters[0]);
@@ -1563,7 +1605,7 @@ describe("useNovelStore", () => {
     await store.runTask("chapter.plan");
 
     expect(store.currentDocumentKind).toBe("outline");
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "chapter.plan",
       expect.objectContaining({
@@ -1575,7 +1617,7 @@ describe("useNovelStore", () => {
   });
 
   it("runs an ad-hoc AI task with the author instruction", async () => {
-    mockNovelApi.runTask.mockResolvedValue(taskWithResult({ type: "assistant.free" }));
+    mockNovelApi.readTask.mockResolvedValue(taskWithResult({ type: "assistant.free" }));
     const store = useNovelStore();
     store.currentProject = project;
     store.currentChapter = project.chapters[1];
@@ -1583,7 +1625,7 @@ describe("useNovelStore", () => {
 
     await store.runTask("assistant.free", { instruction: "检查这一章的升级节奏。" });
 
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "assistant.free",
       expect.objectContaining({
@@ -1595,7 +1637,7 @@ describe("useNovelStore", () => {
   });
 
   it("captures task errors without leaving the store in loading state", async () => {
-    mockNovelApi.runTask.mockRejectedValue(new Error("Codex unavailable"));
+    mockNovelApi.startTask.mockRejectedValue(new Error("Codex unavailable"));
     const store = useNovelStore();
     store.currentProject = project;
 
@@ -1821,7 +1863,7 @@ describe("useNovelStore", () => {
   });
 
   it("requests a focus draft from the next beat guide", async () => {
-    mockNovelApi.runTask.mockResolvedValue(
+    mockNovelApi.readTask.mockResolvedValue(
       taskWithResult({
         type: "chapter.draft",
         result: {
@@ -1865,7 +1907,7 @@ describe("useNovelStore", () => {
 
     await store.requestFocusDraft();
 
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "chapter.draft",
       expect.objectContaining({
@@ -1883,7 +1925,7 @@ describe("useNovelStore", () => {
   });
 
   it("requests a tuned focus draft revision from the current candidate", async () => {
-    mockNovelApi.runTask.mockResolvedValue(
+    mockNovelApi.readTask.mockResolvedValue(
       taskWithResult({
         type: "chapter.draft",
         result: {
@@ -1913,7 +1955,7 @@ describe("useNovelStore", () => {
     const requested = await store.requestFocusDraftRevision("增强压迫感");
 
     expect(requested).toBe(true);
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "chapter.draft",
       expect.objectContaining({
@@ -1939,7 +1981,7 @@ describe("useNovelStore", () => {
       powerProgressionUpdates: [],
       createdAt: "2026-06-04T00:00:00.000Z"
     };
-    mockNovelApi.runTask.mockResolvedValue(
+    mockNovelApi.readTask.mockResolvedValue(
       taskWithResult({
         type: "writing.recap",
         result: {
@@ -1980,7 +2022,7 @@ describe("useNovelStore", () => {
     const accepted = await store.acceptFocusDraft();
 
     expect(accepted).toBe(true);
-    expect(mockNovelApi.runTask).toHaveBeenCalledWith(
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
       "demo",
       "writing.recap",
       expect.objectContaining({

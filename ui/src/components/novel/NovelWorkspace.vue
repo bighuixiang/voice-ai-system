@@ -312,6 +312,7 @@
             :loading="store.isLoading"
             :stages="store.aiStages"
             @run-task="store.runTask"
+            @cancel-task="store.cancelActiveTask"
             @apply-patches="store.applyTaskPatches"
           />
         </CollapsiblePanel>

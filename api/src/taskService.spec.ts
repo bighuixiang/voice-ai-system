@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createProjectFiles, createProjectSkeleton } from "./novelProject.js";
 import { defaultPlatformAiConfig, writePlatformAiConfig } from "./platformAiConfig.js";
-import { applyPatch, markInvocationPatchesAccepted, runNovelTask } from "./taskService.js";
+import { applyPatch, cancelNovelTask, markInvocationPatchesAccepted, readNovelTask, readTaskHistory, runNovelTask, startNovelTaskAsync } from "./taskService.js";
 import type { ProcessRunner } from "./codexRunner.js";
 import type { AiInvocationSession } from "./types.js";
 
@@ -82,6 +82,124 @@ describe("taskService", () => {
     expect(invocation.contextSnapshot.blockCount).toBeGreaterThan(0);
     expect(invocation.adoptionDecision).toBe("not-required");
     expect(invocation.commitResult).toEqual({ historyAppended: true, invocationAppended: true });
+  });
+
+  it("starts, polls, and cancels an async task", async () => {
+    const cancellableRunner: ProcessRunner = {
+      async run(_prompt, _root, _config, options) {
+        if (options?.signal?.aborted) {
+          return {
+            stdout: "",
+            stderr: "cancelled before runner started",
+            exitCode: null,
+            durationMs: 1,
+            finalMessage: "",
+            cancelled: true
+          };
+        }
+        return new Promise((resolve) => {
+          options?.signal?.addEventListener(
+            "abort",
+            () =>
+              resolve({
+                stdout: "",
+                stderr: "cancelled by test",
+                exitCode: null,
+                durationMs: 2,
+                finalMessage: "",
+                cancelled: true
+              }),
+            { once: true }
+          );
+        });
+      }
+    };
+
+    const started = await startNovelTaskAsync("demo", "outline.generate", {}, cancellableRunner);
+    const cancelRequested = await cancelNovelTask("demo", started.id);
+
+    expect(started.status).toBe("running");
+    expect(cancelRequested).toMatchObject({ id: started.id, status: "running" });
+
+    let finished = await readNovelTask(path.join(tempRoot, "demo"), started.id);
+    for (let attempt = 0; attempt < 20 && finished?.status === "running"; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      finished = await readNovelTask(path.join(tempRoot, "demo"), started.id);
+    }
+
+    expect(finished).toMatchObject({
+      id: started.id,
+      status: "cancelled",
+      cancelRequestedAt: expect.any(String)
+    });
+    const [historyTask] = await readTaskHistory(path.join(tempRoot, "demo"));
+    expect(historyTask).toMatchObject({ id: started.id, status: "cancelled" });
+  });
+
+  it("deduplicates task history by latest task status", async () => {
+    const root = path.join(tempRoot, "demo");
+    await fs.mkdir(path.join(root, "tasks"), { recursive: true });
+    await fs.appendFile(
+      path.join(root, "tasks", "history.jsonl"),
+      [
+        JSON.stringify({
+          id: "task-duplicate",
+          type: "chapter.draft",
+          status: "running",
+          projectId: "demo",
+          inputSummary: "{}",
+          startedAt: "2026-06-11T00:00:00.000Z"
+        }),
+        JSON.stringify({
+          id: "task-duplicate",
+          type: "chapter.draft",
+          status: "success",
+          projectId: "demo",
+          inputSummary: "{}",
+          outputSummary: "done",
+          startedAt: "2026-06-11T00:00:00.000Z",
+          finishedAt: "2026-06-11T00:00:02.000Z",
+          durationMs: 2000
+        }),
+        "not-json"
+      ].join("\n"),
+      "utf8"
+    );
+
+    const history = await readTaskHistory(root);
+
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({ id: "task-duplicate", status: "success" });
+  });
+
+  it("marks stale running history as an unrecoverable error", async () => {
+    const root = path.join(tempRoot, "demo");
+    await fs.mkdir(path.join(root, "tasks"), { recursive: true });
+    await fs.appendFile(
+      path.join(root, "tasks", "history.jsonl"),
+      `${JSON.stringify({
+        id: "task-stale-running",
+        type: "chapter.draft",
+        status: "running",
+        projectId: "demo",
+        inputSummary: "{}",
+        startedAt: "2026-06-11T00:00:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+
+    const history = await readTaskHistory(root);
+    const persisted = await fs.readFile(path.join(root, "tasks", "history.jsonl"), "utf8");
+
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({
+      id: "task-stale-running",
+      status: "error",
+      outputSummary: "AI task stopped before completion."
+    });
+    expect(history[0].error).toContain("previous API process");
+    expect(persisted).toContain('"status":"running"');
+    expect(persisted).toContain('"status":"error"');
   });
 
   it("records proposed patch targets in the AI invocation audit log", async () => {

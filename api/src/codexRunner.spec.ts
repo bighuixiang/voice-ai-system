@@ -19,10 +19,12 @@ describe("CodexProcessRunner", () => {
       stdout: EventEmitter;
       stderr: EventEmitter;
       stdin: { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn> };
+      kill: ReturnType<typeof vi.fn>;
     };
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.stdin = { write: vi.fn(), end: vi.fn() };
+    child.kill = vi.fn();
     spawnMock.mockImplementation((_command: string, args: string[]) => {
       const outputPath = args[args.indexOf("--output-last-message") + 1];
       setTimeout(async () => {
@@ -57,10 +59,12 @@ describe("CodexProcessRunner", () => {
       stdout: EventEmitter;
       stderr: EventEmitter;
       stdin: { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn> };
+      kill: ReturnType<typeof vi.fn>;
     };
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.stdin = { write: vi.fn(), end: vi.fn() };
+    child.kill = vi.fn();
     spawnMock.mockImplementation(() => {
       setTimeout(() => {
         child.stdout.emit(
@@ -92,5 +96,60 @@ describe("CodexProcessRunner", () => {
     expect(child.stdin.write).toHaveBeenCalledWith("Return JSON");
     expect(output.exitCode).toBe(0);
     expect(output.finalMessage).toContain('"summary":"ok"');
+  });
+
+  it("cancels a running Codex process with SIGTERM", async () => {
+    const child = new EventEmitter() as EventEmitter & {
+      stdout: EventEmitter;
+      stderr: EventEmitter;
+      stdin: { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn> };
+      kill: ReturnType<typeof vi.fn>;
+    };
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.stdin = { write: vi.fn(), end: vi.fn() };
+    child.kill = vi.fn(() => {
+      setTimeout(() => child.emit("close", null), 0);
+      return true;
+    });
+    spawnMock.mockReturnValue(child);
+    const controller = new AbortController();
+
+    const outputPromise = new CodexProcessRunner().run("Return JSON", process.cwd(), { command: "codex", label: "Codex CLI", provider: "codex" }, { signal: controller.signal });
+    controller.abort();
+    const output = await outputPromise;
+
+    expect(child.kill).toHaveBeenCalledWith("SIGTERM");
+    expect(output.cancelled).toBe(true);
+    expect(output.stderr).toContain("cancelled");
+  });
+
+  it("times out a running Claude process", async () => {
+    const child = new EventEmitter() as EventEmitter & {
+      stdout: EventEmitter;
+      stderr: EventEmitter;
+      stdin: { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn> };
+      kill: ReturnType<typeof vi.fn>;
+    };
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.stdin = { write: vi.fn(), end: vi.fn() };
+    child.kill = vi.fn(() => {
+      setTimeout(() => child.emit("close", null), 0);
+      return true;
+    });
+    spawnMock.mockReturnValue(child);
+
+    const outputPromise = new ClaudeCodeProcessRunner().run(
+      "Return JSON",
+      process.cwd(),
+      { command: "claude", label: "Claude Code CLI", provider: "claude-code" },
+      { timeoutMs: 5 }
+    );
+    const output = await outputPromise;
+
+    expect(child.kill).toHaveBeenCalledWith("SIGTERM");
+    expect(output.timedOut).toBe(true);
+    expect(output.stderr).toContain("timed out");
   });
 });

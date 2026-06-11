@@ -44,14 +44,16 @@ defineEmits<{
 const defaultSteps: SavePipelineStep[] = [
   { id: "save", label: "保存", status: "pending" },
   { id: "recap", label: "回顾", status: "pending" },
+  { id: "runtime", label: "快照", status: "pending" },
   { id: "quality", label: "质量", status: "pending" },
   { id: "knowledge", label: "索引", status: "pending" },
-  { id: "runtime", label: "快照", status: "pending" }
+  { id: "story", label: "故事图谱", status: "pending" }
 ];
 
 const statusLabels: Record<SavePipelineStepStatus, string> = {
   pending: "待运行",
   running: "运行中",
+  queued: "后台处理中",
   done: "完成",
   skipped: "跳过",
   error: "失败"
@@ -60,8 +62,8 @@ const statusLabels: Record<SavePipelineStepStatus, string> = {
 const visibleSteps = computed(() => (props.steps.length ? props.steps : defaultSteps));
 
 const summaryText = computed(() => {
-  if (props.isRunning) return "正在编排 recap / quality / index";
-  if (props.autoRun) return "章节正文保存后自动运行";
+  if (props.isRunning) return "正在运行 recap / runtime，后台稍后重建质量与索引";
+  if (props.autoRun) return "章节正文保存后自动运行关键路径";
   return "手动运行，或开启自动保存后编排";
 });
 
@@ -112,7 +114,7 @@ p {
 
 .step-list {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
   margin: 0;
   padding: 0;
@@ -130,6 +132,11 @@ p {
   &.running {
     border-color: var(--app-warning-text);
     background: var(--app-warning-soft);
+  }
+
+  &.queued {
+    border-color: var(--app-primary);
+    background: var(--app-primary-soft);
   }
 
   &.done {
@@ -157,6 +164,10 @@ p {
 
 .running .step-dot {
   background: var(--app-warning-text);
+}
+
+.queued .step-dot {
+  background: var(--app-primary);
 }
 
 .done .step-dot {

@@ -22,7 +22,8 @@ const stubs = {
   DataAnalysis: true,
   Edit: true,
   Finished: true,
-  MagicStick: true
+  MagicStick: true,
+  CircleClose: true
 };
 
 const task: NovelTask = {
@@ -115,6 +116,21 @@ describe("AIOperationPanel", () => {
     expect(progressStage.text()).toContain("Chapter prose drafting");
     expect(progressStage.text()).toContain("pipeline.chapter.prose");
     expect(wrapper.text()).toContain("Running AI");
+  });
+
+  it("emits cancel for a running task", async () => {
+    const wrapper = mount(AIOperationPanel, {
+      props: {
+        task: { ...task, status: "running", result: undefined },
+        progress: [{ id: "codex", label: "Running AI", status: "running" }],
+        loading: true
+      },
+      global: { stubs }
+    });
+
+    await wrapper.find(".panel-title-actions button").trigger("click");
+
+    expect(wrapper.emitted("cancel-task")).toHaveLength(1);
   });
 
   it("emits an ad-hoc AI instruction", async () => {

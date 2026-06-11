@@ -627,6 +627,34 @@ describe("novelApi", () => {
     );
   });
 
+  it("starts, lists, reads, and cancels async Codex tasks", async () => {
+    mockJson({ task: { id: "task-async", type: "idea.suggest", status: "running" } });
+    mockJson({ tasks: [{ id: "task-async", type: "idea.suggest", status: "running" }] });
+    mockJson({ task: { id: "task-async", type: "idea.suggest", status: "success" } });
+    mockJson({ task: { id: "task-async", type: "idea.suggest", status: "cancelled" } });
+
+    await expect(novelApi.startTask("demo", "idea.suggest", { chapterId: "chapter-001" })).resolves.toMatchObject({
+      id: "task-async",
+      status: "running"
+    });
+    await expect(novelApi.listTasks("demo")).resolves.toHaveLength(1);
+    await expect(novelApi.readTask("demo", "task-async")).resolves.toMatchObject({ status: "success" });
+    await expect(novelApi.cancelTask("demo", "task-async")).resolves.toMatchObject({ status: "cancelled" });
+
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      "/api/novel/projects/demo/tasks/async",
+      expect.objectContaining({ method: "POST" })
+    );
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/novel/projects/demo/tasks", {});
+    expect(fetch).toHaveBeenNthCalledWith(3, "/api/novel/projects/demo/tasks/task-async", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      4,
+      "/api/novel/projects/demo/tasks/task-async/cancel",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
   it("reads AI invocation audit sessions", async () => {
     mockJson({
       invocations: [

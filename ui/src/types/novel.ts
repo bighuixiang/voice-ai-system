@@ -626,6 +626,8 @@ export interface NovelTask {
   startedAt: string;
   finishedAt?: string;
   durationMs?: number;
+  timeoutMs?: number;
+  cancelRequestedAt?: string;
 }
 
 export type AiInvocationAdoptionDecision = "pending" | "accepted" | "rejected" | "not-required";
@@ -680,7 +682,7 @@ export interface ProjectAuditReport {
     total: number;
     byStatus: Record<NovelTask["status"], number>;
     byType: Partial<Record<CodexTaskType, number>>;
-    latestTasks: Array<Pick<NovelTask, "id" | "type" | "status" | "inputSummary" | "outputSummary" | "error" | "startedAt" | "finishedAt" | "durationMs">>;
+    latestTasks: Array<Pick<NovelTask, "id" | "type" | "status" | "inputSummary" | "outputSummary" | "error" | "startedAt" | "finishedAt" | "durationMs" | "timeoutMs" | "cancelRequestedAt">>;
   };
   aiInvocationSummary: {
     total: number;
@@ -735,8 +737,8 @@ export interface BackgroundJob {
   updatedAt: string;
 }
 
-export type SavePipelineStepId = "save" | "recap" | "quality" | "knowledge" | "runtime";
-export type SavePipelineStepStatus = "pending" | "running" | "done" | "skipped" | "error";
+export type SavePipelineStepId = "save" | "recap" | "runtime" | "quality" | "knowledge" | "story";
+export type SavePipelineStepStatus = "pending" | "running" | "queued" | "done" | "skipped" | "error";
 
 export interface SavePipelineStep {
   id: SavePipelineStepId;

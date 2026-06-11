@@ -46,6 +46,57 @@ async function waitForJob(projectId: string, jobId: string): Promise<{ job: { st
   throw new Error(`Background job did not finish: ${jobId}`);
 }
 
+async function writeMockCodexCommand(root: string): Promise<string> {
+  const scriptPath = path.join(root, "mock-codex.cjs");
+  const commandPath = path.join(root, "mock-codex.cmd");
+  await fs.writeFile(
+    scriptPath,
+    `
+const fs = require("node:fs");
+const outputFlag = process.argv.indexOf("--output-last-message");
+const outputPath = outputFlag >= 0 ? process.argv[outputFlag + 1] : "";
+const delayMs = Number(process.env.MOCK_CODEX_DELAY_MS || 1);
+const result = {
+  summary: "mock task complete",
+  content: JSON.stringify({
+    chapterId: "chapter-001",
+    summary: "The mock recap records the save.",
+    newFacts: ["The mock save happened."],
+    characterStateChanges: [],
+    foreshadowingUpdates: [],
+    continuityRisks: [],
+    powerProgressionUpdates: [],
+    createdAt: "2026-06-11T00:00:00.000Z"
+  }),
+  changes: ["mocked"],
+  risks: [],
+  questions: [],
+  patches: []
+};
+setTimeout(() => {
+  if (outputPath) fs.writeFileSync(outputPath, JSON.stringify(result), "utf8");
+  process.stdout.write(JSON.stringify(result));
+}, delayMs);
+`,
+    "utf8"
+  );
+  await fs.writeFile(commandPath, `@echo off\r\nnode "${scriptPath}" %*\r\n`, "utf8");
+  return commandPath;
+}
+
+async function waitForTask(projectId: string, taskId: string): Promise<{ task: { status: string; outputSummary?: string } }> {
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    const response = await jsonFetch<{ task: { status: string; outputSummary?: string } }>(
+      `/api/novel/projects/${projectId}/tasks/${taskId}`
+    );
+    if (response.data.task.status === "success" || response.data.task.status === "error" || response.data.task.status === "cancelled") {
+      return response.data;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  throw new Error(`Task did not finish: ${taskId}`);
+}
+
 describe("novel API routes", () => {
   beforeEach(async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-api-routes-"));
@@ -57,6 +108,8 @@ describe("novel API routes", () => {
 
   afterEach(async () => {
     await stopServer();
+    delete process.env.CODEX_COMMAND;
+    delete process.env.MOCK_CODEX_DELAY_MS;
     delete process.env.NOVELS_ROOT;
     delete process.env.PLATFORM_ROOT;
     delete process.env.NOVEL_DB_PATH;
@@ -1246,5 +1299,106 @@ describe("novel API routes", () => {
 
     expect(response.status).toBe(400);
     expect(response.data.error).toContain("Unsupported task type");
+  });
+
+  it("starts and polls an async AI task route", async () => {
+    process.env.CODEX_COMMAND = await writeMockCodexCommand(tempRoot);
+    process.env.MOCK_CODEX_DELAY_MS = "1";
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Async Task Demo", roughIdea: "Run AI without blocking the UI." })
+    });
+
+    const started = await jsonFetch<{ task: { id: string; status: string; timeoutMs: number } }>(
+      "/api/novel/projects/async-task-demo/tasks/async",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "writing.recap", payload: { chapterId: "chapter-001" } })
+      }
+    );
+    const finished = await waitForTask("async-task-demo", started.data.task.id);
+    const history = await jsonFetch<{ tasks: Array<{ id: string; status: string }> }>(
+      "/api/novel/projects/async-task-demo/tasks"
+    );
+
+    expect(started.status).toBe(202);
+    expect(started.data.task).toMatchObject({ status: "running", timeoutMs: 600000 });
+    expect(finished.task).toMatchObject({ status: "success", outputSummary: "mock task complete" });
+    expect(history.data.tasks.filter((task) => task.id === started.data.task.id)).toEqual([
+      expect.objectContaining({ status: "success" })
+    ]);
+  });
+
+  it("lists stale running AI tasks as unrecoverable errors", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Stale Task Demo", roughIdea: "Detect interrupted AI work." })
+    });
+    await fs.mkdir(path.join(tempRoot, "stale-task-demo", "tasks"), { recursive: true });
+    await fs.appendFile(
+      path.join(tempRoot, "stale-task-demo", "tasks", "history.jsonl"),
+      `${JSON.stringify({
+        id: "task-stale-running",
+        type: "chapter.draft",
+        status: "running",
+        projectId: "stale-task-demo",
+        inputSummary: "{}",
+        startedAt: "2026-06-11T00:00:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+
+    const history = await jsonFetch<{ tasks: Array<{ id: string; status: string; error?: string }> }>(
+      "/api/novel/projects/stale-task-demo/tasks"
+    );
+
+    expect(history.status).toBe(200);
+    expect(history.data.tasks).toEqual([
+      expect.objectContaining({
+        id: "task-stale-running",
+        status: "error",
+        error: expect.stringContaining("previous API process")
+      })
+    ]);
+  });
+
+  it("cancels a non-active running AI task route from history", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Cancel Task Demo", roughIdea: "Cancel stale work." })
+    });
+    await fs.mkdir(path.join(tempRoot, "cancel-task-demo", "tasks"), { recursive: true });
+    await fs.appendFile(
+      path.join(tempRoot, "cancel-task-demo", "tasks", "history.jsonl"),
+      `${JSON.stringify({
+        id: "task-stale-running",
+        type: "chapter.draft",
+        status: "running",
+        projectId: "cancel-task-demo",
+        inputSummary: "{}",
+        startedAt: "2026-06-11T00:00:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+
+    const cancelled = await jsonFetch<{ task: { id: string; status: string; cancelRequestedAt?: string } }>(
+      "/api/novel/projects/cancel-task-demo/tasks/task-stale-running/cancel",
+      { method: "POST" }
+    );
+    const history = await jsonFetch<{ tasks: Array<{ id: string; status: string }> }>(
+      "/api/novel/projects/cancel-task-demo/tasks"
+    );
+
+    expect(cancelled.status).toBe(200);
+    expect(cancelled.data.task).toMatchObject({
+      id: "task-stale-running",
+      status: "cancelled",
+      cancelRequestedAt: expect.any(String)
+    });
+    expect(history.data.tasks).toEqual([expect.objectContaining({ id: "task-stale-running", status: "cancelled" })]);
   });
 });

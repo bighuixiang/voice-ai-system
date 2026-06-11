@@ -2,9 +2,15 @@
   <section class="ai-panel" aria-label="AI 操作">
     <div class="panel-title">
       <span>AI 操作</span>
-      <el-tag v-if="task" size="small" :type="task.status === 'success' ? 'success' : task.status === 'error' ? 'danger' : 'info'">
-        {{ task.status }}
-      </el-tag>
+      <div class="panel-title-actions">
+        <el-button v-if="canCancelTask" size="small" type="danger" plain @click="$emit('cancel-task')">
+          <el-icon><CircleClose /></el-icon>
+          鍙栨秷
+        </el-button>
+        <el-tag v-if="task" size="small" :type="task.status === 'success' ? 'success' : task.status === 'error' || task.status === 'cancelled' ? 'danger' : 'info'">
+          {{ task.status }}
+        </el-tag>
+      </div>
     </div>
 
     <div class="action-grid">
@@ -70,7 +76,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { ElMessage } from "element-plus";
-import { Collection, DataAnalysis, Edit, Finished, MagicStick } from "@element-plus/icons-vue";
+import { CircleClose, Collection, DataAnalysis, Edit, Finished, MagicStick } from "@element-plus/icons-vue";
 import type { AiStageDefinition, CodexTaskType, NovelTask, TaskProgressStep } from "@/types/novel";
 
 const props = defineProps<{
@@ -84,6 +90,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   "run-task": [type: CodexTaskType, payload?: Record<string, unknown>];
   "apply-patches": [];
+  "cancel-task": [];
 }>();
 
 const freePrompt = ref("");
@@ -127,6 +134,8 @@ const activeStage = computed(() => {
   return taskType ? stageByTaskType.value.get(taskType) : undefined;
 });
 
+const canCancelTask = computed(() => props.loading && props.task?.status === "running");
+
 function isLastOddAction(index: number) {
   return actions.length % 2 === 1 && index === actions.length - 1;
 }
@@ -146,6 +155,12 @@ function isLastOddAction(index: number) {
   justify-content: space-between;
   font-weight: 700;
   margin-bottom: 10px;
+}
+
+.panel-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .action-grid {

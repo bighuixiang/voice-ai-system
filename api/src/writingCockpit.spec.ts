@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   ChapterDashboard,
   ChapterFactPatch,
@@ -32,6 +32,7 @@ import {
 let tempRoot = "";
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   if (tempRoot) {
     await fs.rm(tempRoot, { recursive: true, force: true });
     tempRoot = "";
@@ -507,5 +508,73 @@ describe("writingCockpit", () => {
     ]);
     const lines = (await fs.readFile(path.join(tempRoot, "tasks", "recaps.jsonl"), "utf8")).trim().split(/\r?\n/);
     expect(lines.map((line) => JSON.parse(line).summary)).toEqual(["The clue cost blood."]);
+  });
+
+  it("preserves existing recap log lines when accepting recap patches", async () => {
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "writing-cockpit-accept-recap-log-"));
+    await fs.mkdir(path.join(tempRoot, "tasks"), { recursive: true });
+    await fs.writeFile(path.join(tempRoot, "tasks", "recaps.jsonl"), "not-json\n", "utf8");
+
+    await acceptWritingRecapPatches(tempRoot, {
+      chapterId: "chapter-001",
+      summary: "The clue cost blood.",
+      newFacts: ["Blood wakes the seal."],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-04T00:00:00.000Z"
+    });
+
+    const lines = (await fs.readFile(path.join(tempRoot, "tasks", "recaps.jsonl"), "utf8")).trim().split(/\r?\n/);
+    expect(lines[0]).toBe("not-json");
+    expect(JSON.parse(lines[1]).summary).toBe("The clue cost blood.");
+  });
+
+  it("rolls back recap acceptance writes if a later transaction commit fails", async () => {
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "writing-cockpit-accept-recap-rollback-"));
+    await saveChapterSummary(tempRoot, {
+      chapterId: "chapter-001",
+      summary: "Original summary.",
+      keyEvents: ["Original event."],
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    });
+    await saveLedgerEntries(tempRoot, "risk", [ledgerEntry({ id: "risk-original", note: "Original risk." })]);
+    await fs.mkdir(path.join(tempRoot, "tasks"), { recursive: true });
+    await fs.writeFile(path.join(tempRoot, "tasks", "recaps.jsonl"), "previous-recap\n", "utf8");
+    const summaryBefore = await fs.readFile(path.join(tempRoot, "memory", "chapter-summaries", "chapter-001.json"), "utf8");
+    const riskBefore = await fs.readFile(path.join(tempRoot, "ledger", "risks.json"), "utf8");
+    const recapBefore = await fs.readFile(path.join(tempRoot, "tasks", "recaps.jsonl"), "utf8");
+    const realRename = fs.rename.bind(fs);
+    vi.spyOn(fs, "rename").mockImplementation(async (from, to) => {
+      if (String(to).endsWith(`${path.sep}tasks${path.sep}recaps.jsonl`)) {
+        throw new Error("simulated recap commit failure");
+      }
+      await realRename(from, to);
+    });
+
+    await expect(
+      acceptWritingRecapPatches(tempRoot, {
+        chapterId: "chapter-001",
+        summary: "Changed summary.",
+        newFacts: [],
+        characterStateChanges: [],
+        foreshadowingUpdates: [],
+        continuityRisks: [],
+        powerProgressionUpdates: [],
+        riskPatches: [ledgerEntry({ id: "risk-new", note: "New risk." })],
+        createdAt: "2026-06-04T00:00:00.000Z"
+      })
+    ).rejects.toThrow("simulated recap commit failure");
+
+    await expect(fs.readFile(path.join(tempRoot, "memory", "chapter-summaries", "chapter-001.json"), "utf8")).resolves.toBe(summaryBefore);
+    await expect(fs.readFile(path.join(tempRoot, "ledger", "risks.json"), "utf8")).resolves.toBe(riskBefore);
+    await expect(fs.readFile(path.join(tempRoot, "tasks", "recaps.jsonl"), "utf8")).resolves.toBe(recapBefore);
   });
 });
