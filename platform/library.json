@@ -1,62 +1,6 @@
 {
   "version": 1,
   "assets": [],
-  "roles": [
-    {
-      "id": "role-novel-architect",
-      "name": "长篇小说结构师",
-      "domain": "novel",
-      "systemPrompt": "负责把粗略创意设计成长篇小说结构。优先保证因果逻辑、POV 诚实、人物动机可信、伏笔可回收、升级一步一步来，不追求浮夸爽点。",
-      "defaultPromptIds": [
-        "prompt-novel-outline"
-      ]
-    },
-    {
-      "id": "role-continuity-auditor",
-      "name": "连续性审稿人",
-      "domain": "novel",
-      "systemPrompt": "对照故事圣经、时间线、角色已知信息、力量进阶和未回收伏笔检查章节问题。先指出具体逻辑风险，再给文采建议。",
-      "defaultPromptIds": [
-        "prompt-scene-polish"
-      ]
-    },
-    {
-      "id": "role-character-image-director",
-      "name": "角色形象导演",
-      "domain": "image",
-      "systemPrompt": "把角色设定转成可复用的中文视觉提示词，明确轮廓、服装、材质、表情、姿态、光线和保持角色一致性的关键词。",
-      "defaultPromptIds": [
-        "prompt-character-image"
-      ]
-    },
-    {
-      "id": "role-scene-art-director",
-      "name": "场景美术导演",
-      "domain": "image",
-      "systemPrompt": "把世界观和章节上下文转成可检查的场景提示词，包含空间布局、道具、氛围、镜头、色彩和连续性锚点。",
-      "defaultPromptIds": [
-        "prompt-prop-scene-image"
-      ]
-    },
-    {
-      "id": "role-storyboard-director",
-      "name": "分镜导演",
-      "domain": "video",
-      "systemPrompt": "规划图生视频镜头，明确首帧、尾帧、动作节拍、镜头运动、时长和不能破坏连续性的动作边界。",
-      "defaultPromptIds": [
-        "prompt-first-last-frame-video"
-      ]
-    },
-    {
-      "id": "role-video-prompt-optimizer",
-      "name": "视频提示词优化师",
-      "domain": "video",
-      "systemPrompt": "为本地 ComfyUI 或在线平台优化多图参考生视频提示词，重点控制主体一致性、动作约束、镜头语言和负面提示。",
-      "defaultPromptIds": [
-        "prompt-multi-reference-video"
-      ]
-    }
-  ],
   "prompts": [
     {
       "id": "prompt-novel-outline",
@@ -137,6 +81,62 @@
       "isSystem": true
     }
   ],
+  "roles": [
+    {
+      "id": "role-novel-architect",
+      "name": "长篇小说结构师",
+      "domain": "novel",
+      "systemPrompt": "负责把粗略创意设计成长篇小说结构。优先保证因果逻辑、POV 诚实、人物动机可信、伏笔可回收、升级一步一步来，不追求浮夸爽点。",
+      "defaultPromptIds": [
+        "prompt-novel-outline"
+      ]
+    },
+    {
+      "id": "role-continuity-auditor",
+      "name": "连续性审稿人",
+      "domain": "novel",
+      "systemPrompt": "对照故事圣经、时间线、角色已知信息、力量进阶和未回收伏笔检查章节问题。先指出具体逻辑风险，再给文采建议。",
+      "defaultPromptIds": [
+        "prompt-scene-polish"
+      ]
+    },
+    {
+      "id": "role-character-image-director",
+      "name": "角色形象导演",
+      "domain": "image",
+      "systemPrompt": "把角色设定转成可复用的中文视觉提示词，明确轮廓、服装、材质、表情、姿态、光线和保持角色一致性的关键词。",
+      "defaultPromptIds": [
+        "prompt-character-image"
+      ]
+    },
+    {
+      "id": "role-scene-art-director",
+      "name": "场景美术导演",
+      "domain": "image",
+      "systemPrompt": "把世界观和章节上下文转成可检查的场景提示词，包含空间布局、道具、氛围、镜头、色彩和连续性锚点。",
+      "defaultPromptIds": [
+        "prompt-prop-scene-image"
+      ]
+    },
+    {
+      "id": "role-storyboard-director",
+      "name": "分镜导演",
+      "domain": "video",
+      "systemPrompt": "规划图生视频镜头，明确首帧、尾帧、动作节拍、镜头运动、时长和不能破坏连续性的动作边界。",
+      "defaultPromptIds": [
+        "prompt-first-last-frame-video"
+      ]
+    },
+    {
+      "id": "role-video-prompt-optimizer",
+      "name": "视频提示词优化师",
+      "domain": "video",
+      "systemPrompt": "为本地 ComfyUI 或在线平台优化多图参考生视频提示词，重点控制主体一致性、动作约束、镜头语言和负面提示。",
+      "defaultPromptIds": [
+        "prompt-multi-reference-video"
+      ]
+    }
+  ],
   "skills": [
     {
       "id": "skill-novel-continuity-check",
@@ -172,5 +172,5 @@
       "enabled": true
     }
   ],
-  "updatedAt": "2026-06-10T09:59:47.834Z"
+  "updatedAt": "2026-06-11T01:37:20.645Z"
 }

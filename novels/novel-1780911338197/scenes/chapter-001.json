@@ -1,87 +1,208 @@
 [
   {
-    "id": "scene-chapter-001-2026-06-09T06:41:17.342Z-1",
+    "id": "scene-chapter-001-2026-06-10T16:46:28.641Z-1",
     "chapterId": "chapter-001",
     "order": 1,
-    "title": "# 第1章 尸王破封·天狗食...",
-    "time": "",
-    "location": "",
-    "pov": "第一人称视角",
-    "characters": [],
-    "conflict": "# 第1章 尸王破封·天狗食月",
-    "turn": "# 第1章 尸王破封·天狗食月",
-    "informationReleased": [],
-    "foreshadowingIds": [],
-    "powerProgression": "",
-    "draftAnchor": "# 第1章 尸王破封·天狗食月",
-    "updatedAt": "2026-06-09T06:41:17.342Z"
+    "title": "万尸之祖与赶尸派封印",
+    "time": "上古年间",
+    "location": "极阴之地与后世赶尸派传承源头",
+    "pov": "历史叙述视角",
+    "characters": [
+      "将臣",
+      "先民",
+      "赶尸派术士"
+    ],
+    "conflict": "战乱造成万尸汇聚和阴煞滋生，将臣的存在打破阴阳平衡，生人世界被尸变、鬼祟、邪煞持续侵蚀，先民被迫以血肉试法寻找克制之道。",
+    "turn": "零散求生术法被整合成赶尸派传承，赶尸派立派后的首要行动不是扩张，而是集天下术士之力封印将臣。",
+    "informationReleased": [
+      "将臣生于万尸极阴之地，以天地灵气和日月精华为食，不入生死轮回。",
+      "赶尸派的术法来源于先民对尸祸的求生试验。",
+      "封印将臣是赶尸派立派根基，也解释了后文师徒为何天然把破封视为灾难。"
+    ],
+    "foreshadowingIds": [
+      "foreshadow-ch001-jiangchen-misread-origin",
+      "foreshadow-ch001-corpse-sealing-lineage"
+    ],
+    "powerProgression": "建立蓝星赶尸派克尸法门基线：糯米、黑狗血、墨斗线、黄符铃印等术法可针对尸祸，但面对将臣只能形成封印体系。",
+    "draftAnchor": "赶尸派立派之后，所做的第一件事，便是集天下术士之力，封印将臣。",
+    "updatedAt": "2026-06-10T16:46:28.641Z"
   },
   {
-    "id": "scene-chapter-001-2026-06-09T06:41:17.342Z-2",
+    "id": "scene-chapter-001-2026-06-10T16:46:28.641Z-2",
     "chapterId": "chapter-001",
     "order": 2,
-    "title": "> 写作日期：2026-05...",
-    "time": "",
-    "location": "",
-    "pov": "第一人称视角",
-    "characters": [],
-    "conflict": "> 写作日期：2026-05-26",
-    "turn": "> 写作日期：2026-05-26",
-    "informationReleased": [],
-    "foreshadowingIds": [],
-    "powerProgression": "",
-    "draftAnchor": "> 写作日期：2026-05-26",
-    "updatedAt": "2026-06-09T06:41:17.342Z"
+    "title": "九莲山封印异动",
+    "time": "天狗食月前夜，月圆之夜",
+    "location": "蓝星九莲山赶尸派道观与镇尸台远景",
+    "pov": "向德豪/向守一外部有限视角",
+    "characters": [
+      "向德豪",
+      "向守一"
+    ],
+    "conflict": "祖师殿内香烟倒沉、罗盘折断、镇尸铃被压断声，封印异兆连续升级；师徒无法确认铜棺内变化，只能按祖训把异动视作尸祖破封风险。",
+    "turn": "山腹心跳与向德豪心脏同步，天狗食月开始，镇尸台九柱震颤，向守一从观察转入行动，直接下令开坛。",
+    "informationReleased": [
+      "九莲山由九峰环抱，镇尸台、九柱、玄铁锁链、青铜棺、玄武驮碑共同构成封印。",
+      "残碑明确警告：非天狗食月、九柱齐鸣之夜不得近封。",
+      "向德豪与镇尸铃、封印心跳之间存在异常感应。"
+    ],
+    "foreshadowingIds": [
+      "foreshadow-ch001-heart-resonance",
+      "foreshadow-ch001-nine-lotus-seal",
+      "foreshadow-ch001-eclipse-trigger"
+    ],
+    "powerProgression": "向德豪尚未升级，但首次显示对尸祖封印的身体级共鸣，提示其与后续玉佩、尸祖气息存在潜在关联。",
+    "draftAnchor": "向德豪猛地按住胸口。不是错觉，那一声响起时，他自己的心脏也被迫跟着重重撞了一下。",
+    "updatedAt": "2026-06-10T16:46:28.641Z"
   },
   {
-    "id": "scene-chapter-001-2026-06-09T06:41:17.342Z-3",
+    "id": "scene-chapter-001-2026-06-10T16:46:28.641Z-3",
     "chapterId": "chapter-001",
     "order": 3,
-    "title": "> 版本：v4.2（九山莲台...",
-    "time": "",
-    "location": "",
-    "pov": "第一人称视角",
-    "characters": [],
-    "conflict": "> 版本：v4.2（九山莲台短章版）",
-    "turn": "> 版本：v4.2（九山莲台短章版）",
-    "informationReleased": [],
-    "foreshadowingIds": [],
-    "powerProgression": "",
-    "draftAnchor": "> 版本：v4.2（九山莲台短章版）",
-    "updatedAt": "2026-06-09T06:41:17.342Z"
+    "title": "师徒开坛守九宫",
+    "time": "封印异动后立即",
+    "location": "九莲山中央圆场至正西主峰镇尸台",
+    "pov": "向德豪有限视角",
+    "characters": [
+      "向德豪",
+      "向守一",
+      "五具青铜尸兵"
+    ],
+    "conflict": "旧阵纹正在发黑断裂，玄武驮碑符文开裂，铜棺鼓动；师徒必须在封印彻底破开前用白玉九莲宝灯、金钱剑、朱砂线和尸兵补住九宫阵眼。",
+    "turn": "向德豪补符立界后，符钉仍连续裂开，铜棺轰然炸开，说明他们的开坛不是成功封回尸祖，而只是赶上破封瞬间。",
+    "informationReleased": [
+      "向守一负责踏阵眼与指挥，向德豪能熟练执行守九宫、布灯、压北斗、补朱砂线。",
+      "黑色裹尸袋内有五具青铜尸兵，是向德豪当前可调用的重要资源。",
+      "‘天圆地方，律令九章。九山为锁，玄武镇煞。’是本章道法立界核心短咒。"
+    ],
+    "foreshadowingIds": [
+      "foreshadow-ch001-black-body-bag",
+      "foreshadow-ch001-nine-palace-lamps",
+      "foreshadow-ch001-taoist-command-style"
+    ],
+    "powerProgression": "向德豪完成蓝星道法基线展示：布九宫、燃黄符、控尸兵、以血补符，但能力边界明确，无法真正阻止尸祖苏醒。",
+    "draftAnchor": "向德豪掷出九盏白玉九莲宝灯，灯落九宫。",
+    "updatedAt": "2026-06-10T16:46:28.641Z"
   },
   {
-    "id": "scene-chapter-001-2026-06-09T06:41:17.342Z-4",
+    "id": "scene-chapter-001-2026-06-10T16:46:28.641Z-4",
     "chapterId": "chapter-001",
     "order": 4,
-    "title": "> 本章定位：开篇钩子 / ...",
-    "time": "",
-    "location": "",
-    "pov": "第一人称视角",
-    "characters": [],
-    "conflict": "> 本章定位：开篇钩子 / 尸祖破封 / 师徒误判迎战 / 玉佩穿越触发",
-    "turn": "> 本章定位：开篇钩子 / 尸祖破封 / 师徒误判迎战 / 玉佩穿越触发",
-    "informationReleased": [],
-    "foreshadowingIds": [],
-    "powerProgression": "",
-    "draftAnchor": "> 本章定位：开篇钩子 / 尸祖破封 / 师徒误判迎战 / 玉佩穿越触发",
-    "updatedAt": "2026-06-09T06:41:17.342Z"
+    "title": "将臣苏醒与误会真相",
+    "time": "铜棺炸开后",
+    "location": "镇尸台铜棺破封处",
+    "pov": "先向德豪观察，后切入将臣内心视角",
+    "characters": [
+      "将臣",
+      "向德豪",
+      "向守一"
+    ],
+    "conflict": "向德豪看见的将臣压迫感足以令九山草木低头；将臣真正的目标却是借天狗食月漏入的月华压回尸祖之息，避免两个活人和九山被自己外泄气息伤到。",
+    "turn": "正文揭示将臣不吃人、不饮血，曾主动沉睡以压制气息；但他一开口只能化为尸王低吼，使所有解释继续被误读为发狂。",
+    "informationReleased": [
+      "将臣并非传统嗜血恶尸，他的危险来自无法完全收束的尸祖之息。",
+      "当年封印可能源自误会：术士以为打入长眠，将臣则是主动沉睡等待世人遗忘。",
+      "天狗食月的月华对将臣不是血食，而是压回尸气的‘药’。"
+    ],
+    "foreshadowingIds": [
+      "foreshadow-ch001-jiangchen-good-corpse",
+      "foreshadow-ch001-speech-curse",
+      "foreshadow-ch001-moonlight-as-medicine"
+    ],
+    "powerProgression": "将臣战力定位建立：九柱与锁链仍压着他，但即便刚苏醒，他的存在本身已足以造成生机退避；他的主要限制是自我压制和不愿伤人。",
+    "draftAnchor": "他不吃人，也不饮血。",
+    "updatedAt": "2026-06-10T16:46:28.641Z"
   },
   {
-    "id": "scene-chapter-001-2026-06-09T06:41:17.342Z-5",
+    "id": "scene-chapter-001-2026-06-10T16:46:28.641Z-5",
     "chapterId": "chapter-001",
     "order": 5,
-    "title": "## 正文",
-    "time": "",
-    "location": "",
-    "pov": "第一人称视角",
-    "characters": [],
-    "conflict": "## 正文",
-    "turn": "## 正文",
-    "informationReleased": [],
-    "foreshadowingIds": [],
-    "powerProgression": "",
-    "draftAnchor": "## 正文",
-    "updatedAt": "2026-06-09T06:41:17.342Z"
+    "title": "截气开界与第一次交锋",
+    "time": "将臣尝试解释失败后",
+    "location": "镇尸台阵边与中宫阵位",
+    "pov": "向德豪/将臣交替有限视角",
+    "characters": [
+      "向德豪",
+      "向守一",
+      "将臣",
+      "铜尸",
+      "符尸"
+    ],
+    "conflict": "将臣越想收束尸气越显得像发狂，阵纹继续发黑；向守一依据草木枯死和夜虫死去判断尸祖破封必须压制，向德豪则在中宫用风、火、铃、尸兵抢一线喘息。",
+    "turn": "将臣主动不震散风符、不破坏法坛，只推人不追击；但在师徒视角中，收力被误判为戏弄，双方误会进一步加深，战斗从控场升级为正面压制。",
+    "informationReleased": [
+      "向德豪可用‘风来’把外泄尸气推回镇尸台，用‘火起’照出尸气流动。",
+      "镇尸铃和铜尸能为师徒争取半拍窗口，但代价会反噬向德豪身体。",
+      "将臣有能力轻易破阵，却因担心九山地脉崩坏而持续收力。"
+    ],
+    "foreshadowingIds": [
+      "foreshadow-ch001-jiangchen-holds-back",
+      "foreshadow-ch001-half-beat-window",
+      "foreshadow-ch001-daoist-cost"
+    ],
+    "powerProgression": "向德豪完成风符、火符、镇尸铃、符电、尸兵合用的实战展示；收益只是半拍窗口，代价是喉头发甜、腕骨受震、胸口承压。",
+    "draftAnchor": "三关并位，镇！",
+    "updatedAt": "2026-06-10T16:46:28.641Z"
+  },
+  {
+    "id": "scene-chapter-001-2026-06-10T16:46:28.641Z-6",
+    "chapterId": "chapter-001",
+    "order": 6,
+    "title": "断月华引发尸气失控",
+    "time": "天狗吞月至半",
+    "location": "镇尸台、血月照临的九莲山圆场",
+    "pov": "向德豪/将臣交替有限视角",
+    "characters": [
+      "向德豪",
+      "向守一",
+      "将臣",
+      "铜尸",
+      "两具符尸"
+    ],
+    "conflict": "月华倒灌本可帮助将臣压回寒意，但向守一把它理解为尸王借血月复苏，下令向德豪断月华；师徒为了守山执行正确职责，却切断了将臣唯一自控手段。",
+    "turn": "火光截断月华的一瞬，将臣真正急怒，朱砂线崩断、符尸散架，战局从可勉强控场转向失控；向守一被迫借天雷，付出白发蔓延和重伤代价。",
+    "informationReleased": [
+      "月华对将臣是压制尸祖之息的关键，不是杀戮增幅。",
+      "师徒的误判并非愚蠢，而是来自封印传承、现场尸气外泄和将臣无法说人话的多重因果。",
+      "铜尸即使膝骨碎裂仍抱住将臣小腿，替法坛多拖一口气。"
+    ],
+    "foreshadowingIds": [
+      "foreshadow-ch001-wrong-severed-moonlight",
+      "foreshadow-ch001-master-thunder-cost",
+      "foreshadow-ch001-copper-corpse-sacrifice"
+    ],
+    "powerProgression": "向德豪使用‘风卷火，火截阴’完成高压截断，但眼角渗血；向守一施展雷法‘九天玄刹，化为神雷’，代价显性化为白发蔓延与吐血。",
+    "draftAnchor": "那不是他要借来杀人的血月。那是他唯一能把自己关回去的锁。",
+    "updatedAt": "2026-06-10T16:46:28.641Z"
+  },
+  {
+    "id": "scene-chapter-001-2026-06-10T16:46:28.641Z-7",
+    "chapterId": "chapter-001",
+    "order": 7,
+    "title": "以血补线与玉佩撕空",
+    "time": "雷法落下、法坛濒毁后",
+    "location": "镇尸台阵眼与九山上空虚空裂缝",
+    "pov": "向德豪有限视角，夹入将臣认知",
+    "characters": [
+      "向德豪",
+      "向守一",
+      "将臣"
+    ],
+    "conflict": "雷法和祖师紫符仍无法真正解决尸祖之息外泄，向守一被将臣推飞，法坛断裂；向德豪必须在重伤中选择松手保命还是以血补线继续压住地脉。",
+    "turn": "向德豪以血按回朱砂线，让将臣意识到少年不是想赢他，而是想让九山活着；双方目标第一次接近时，玉佩突然发热显纹，撕开虚空，把向德豪、黑色裹尸袋和将臣一并卷走。",
+    "informationReleased": [
+      "向德豪的核心选择是守住活地而非击败强敌，奠定‘先活再赢’的人物底色。",
+      "玉佩纹路不是道门符纹也不是蓝星文字，暗示其来源超出蓝星赶尸派体系。",
+      "向守一知道或认出了玉佩异常，但来不及解释。"
+    ],
+    "foreshadowingIds": [
+      "foreshadow-ch001-jade-pendant-origin",
+      "foreshadow-ch001-master-knows-jade",
+      "foreshadow-ch001-body-bag-crosses",
+      "foreshadow-ch001-master-separated"
+    ],
+    "powerProgression": "向德豪没有战力升级，但完成关键意志推进：重伤状态下以血补线压回第三道发黑阵纹；玉佩被触发，开启跨界事件但规则未知。",
+    "draftAnchor": "向德豪没有松。断开的法坛像濒死之人重新吸入一口气。",
+    "updatedAt": "2026-06-10T16:46:28.641Z"
   }
 ]
