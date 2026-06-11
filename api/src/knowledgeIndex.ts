@@ -10,6 +10,7 @@ import type {
   KnowledgeSourceRef,
   KnowledgeTriple,
   KnowledgeVectorIndex,
+  KnowledgeVectorSummary,
   LedgerEntry,
   NovelChapter,
   NovelProject
@@ -127,6 +128,10 @@ function getEmbeddingProvider(): EmbeddingProvider {
     model,
     embed: async (texts) => requestOpenAiCompatibleEmbeddings(baseUrl, apiKey, model, texts)
   };
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Embedding provider failed";
 }
 
 async function requestOpenAiCompatibleEmbeddings(baseUrl: string, apiKey: string, model: string, texts: string[]): Promise<number[][]> {
@@ -507,8 +512,25 @@ async function buildKnowledgeVectorIndex(
     if (provider.name === "local") {
       throw error;
     }
-    return buildKnowledgeVectorIndexWithProvider(project, facts, triples, chapterIndex, updatedAt, localEmbeddingProvider());
+    const fallback = await buildKnowledgeVectorIndexWithProvider(project, facts, triples, chapterIndex, updatedAt, localEmbeddingProvider());
+    return {
+      ...fallback,
+      fallbackFrom: provider.name,
+      fallbackReason: errorMessage(error)
+    };
   }
+}
+
+function summarizeVectorIndex(index: KnowledgeVectorIndex): KnowledgeVectorSummary {
+  return {
+    provider: index.provider,
+    model: index.model,
+    dimensions: index.dimensions,
+    entryCount: index.entries.length,
+    fallbackFrom: index.fallbackFrom,
+    fallbackReason: index.fallbackReason,
+    updatedAt: index.updatedAt
+  };
 }
 
 async function vectorizeQueryForIndex(index: KnowledgeVectorIndex, query: string, tokens: string[]): Promise<number[]> {
@@ -628,20 +650,22 @@ export async function rebuildKnowledgeIndex(root: string, project: NovelProject)
   await writeJsonl(root, "knowledge/triples.jsonl", projection.triples);
   await writeChapterIndex(root, projection.chapterIndex);
   await writeKnowledgeVectorIndex(root, vectorIndex);
-  return projection;
+  return { ...projection, vectorSummary: summarizeVectorIndex(vectorIndex) };
 }
 
 export async function readKnowledgeIndex(root: string, project: NovelProject): Promise<KnowledgeIndexProjection> {
-  const [facts, triples, chapterIndex] = await Promise.all([
+  const [facts, triples, chapterIndex, vectorIndex] = await Promise.all([
     readJsonl<KnowledgeFact>(root, "knowledge/facts.jsonl"),
     readJsonl<KnowledgeTriple>(root, "knowledge/triples.jsonl"),
-    readChapterIndex(root, project)
+    readChapterIndex(root, project),
+    readKnowledgeVectorIndex(root, project)
   ]);
   return {
     projectSlug: project.slug,
     facts,
     triples,
     chapterIndex,
+    vectorSummary: summarizeVectorIndex(vectorIndex),
     updatedAt: chapterIndex.updatedAt
   };
 }
@@ -720,5 +744,5 @@ export async function searchKnowledgeIndex(
     )
     .slice(0, limit);
 
-  return { query, tokens, facts, triples, chapters };
+  return { query, tokens, vectorSummary: summarizeVectorIndex(vectorIndex), facts, triples, chapters };
 }

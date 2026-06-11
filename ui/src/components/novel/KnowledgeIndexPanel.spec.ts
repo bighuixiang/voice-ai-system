@@ -50,12 +50,19 @@ const index: KnowledgeIndexProjection = {
     keywords: { gate: ["chapter-001"] },
     updatedAt: "2026-06-11T00:00:00.000Z"
   },
+  vectorSummary: {
+    provider: "local",
+    dimensions: 64,
+    entryCount: 3,
+    updatedAt: "2026-06-11T00:00:00.000Z"
+  },
   updatedAt: "2026-06-11T00:00:00.000Z"
 };
 
 const searchResult: KnowledgeSearchResult = {
   query: "Hero gate",
   tokens: ["hero", "gate"],
+  vectorSummary: index.vectorSummary,
   facts: [{ ...index.facts[0], score: 2, vectorScore: 0.64 }],
   triples: [{ ...index.triples[0], score: 1, vectorScore: 0.22 }],
   chapters: [{ ...index.chapterIndex.chapters[0], score: 3, vectorScore: 0.51 }]
@@ -73,6 +80,8 @@ describe("KnowledgeIndexPanel", () => {
 
     expect(wrapper.text()).toContain("检索记忆层");
     expect(wrapper.text()).toContain("1 个事实 / 1 条关系");
+    expect(wrapper.text()).toContain("Vector: local");
+    expect(wrapper.text()).toContain("3 entries / 64 dims");
     expect(wrapper.text()).toContain("gate");
     expect(wrapper.text()).toContain("Chapter 1");
 

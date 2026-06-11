@@ -140,8 +140,12 @@ describe("knowledgeIndex", () => {
       })
     ]));
     expect(projection.chapterIndex.keywords.blood).toContain("chapter-001");
+    expect(projection.vectorSummary).toMatchObject({ provider: "local", dimensions: 64 });
+    expect(projection.vectorSummary?.entryCount).toBeGreaterThan(0);
     expect(persisted.facts).toHaveLength(projection.facts.length);
     expect(persisted.triples).toHaveLength(projection.triples.length);
+    expect(persisted.vectorSummary).toMatchObject({ provider: "local", dimensions: 64 });
+    expect(persisted.vectorSummary?.entryCount).toBe(projection.vectorSummary?.entryCount);
     await expect(fs.readFile(path.join(root, "knowledge", "facts.jsonl"), "utf8")).resolves.toContain("fact-gate-blood");
     await expect(fs.readFile(path.join(root, "knowledge", "vectors.json"), "utf8")).resolves.toContain('"dimensions": 64');
     await expect(fs.readFile(path.join(root, "knowledge", "vectors.json"), "utf8")).resolves.toContain('"provider": "local"');
@@ -181,7 +185,7 @@ describe("knowledgeIndex", () => {
       updatedAt: "2026-06-11T00:00:00.000Z"
     });
 
-    await rebuildKnowledgeIndex(root, project);
+    const projection = await rebuildKnowledgeIndex(root, project);
     const vectors = JSON.parse(await fs.readFile(path.join(root, "knowledge", "vectors.json"), "utf8")) as {
       provider: string;
       model?: string;
@@ -191,6 +195,8 @@ describe("knowledgeIndex", () => {
     const [, requestInit] = fetchMock.mock.calls[0];
     const requestBody = JSON.parse(String(requestInit?.body || "{}")) as { model: string; input: string[] };
 
+    expect(projection.vectorSummary).toMatchObject({ provider: "openai-compatible", model: "embedding-test", dimensions: 3 });
+    expect(projection.vectorSummary?.entryCount).toBe(vectors.entries.length);
     expect(vectors).toMatchObject({ provider: "openai-compatible", model: "embedding-test", dimensions: 3 });
     expect(vectors.entries.every((entry) => entry.vector.length === 3)).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -202,6 +208,56 @@ describe("knowledgeIndex", () => {
     );
     expect(requestBody.model).toBe("embedding-test");
     expect(requestBody.input.length).toBe(vectors.entries.length);
+  });
+
+  it("records external embedding fallback details when the provider fails", async () => {
+    process.env.KNOWLEDGE_EMBEDDING_PROVIDER = "openai-compatible";
+    process.env.KNOWLEDGE_EMBEDDING_API_KEY = "test-key";
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      status: 503,
+      json: async () => ({})
+    }) as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const project = createProjectSkeleton({ title: "Embedding Fallback Demo", roughIdea: "Fallback to local vectors." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await saveChapterSummary(root, {
+      chapterId: "chapter-001",
+      summary: "The local index remains usable after provider errors.",
+      keyEvents: [],
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      acceptedRecapIds: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    });
+
+    const projection = await rebuildKnowledgeIndex(root, project);
+    const persisted = await readKnowledgeIndex(root, project);
+    const vectors = JSON.parse(await fs.readFile(path.join(root, "knowledge", "vectors.json"), "utf8")) as {
+      provider: string;
+      fallbackFrom?: string;
+      fallbackReason?: string;
+      entries: Array<{ vector: number[] }>;
+    };
+
+    expect(fetchMock).toHaveBeenCalled();
+    expect(vectors).toMatchObject({
+      provider: "local",
+      fallbackFrom: "openai-compatible",
+      fallbackReason: "Embedding provider failed with 503"
+    });
+    expect(projection.vectorSummary).toMatchObject({
+      provider: "local",
+      fallbackFrom: "openai-compatible",
+      fallbackReason: "Embedding provider failed with 503"
+    });
+    expect(persisted.vectorSummary).toMatchObject(projection.vectorSummary);
+    expect(vectors.entries.length).toBeGreaterThan(0);
   });
 
   it("searches persisted knowledge by keyword and entity", async () => {

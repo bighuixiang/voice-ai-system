@@ -24,6 +24,12 @@
         </div>
       </div>
 
+      <div v-if="vectorSummary" class="vector-summary">
+        <span>{{ vectorProviderText }}</span>
+        <em>{{ vectorDetailText }}</em>
+        <small v-if="vectorFallbackText">{{ vectorFallbackText }}</small>
+      </div>
+
       <form class="search-form" @submit.prevent="submitSearch">
         <input v-model="searchQuery" aria-label="知识检索关键词" placeholder="关键词 / 角色 / 地点 / 伏笔" />
         <button type="submit" :disabled="isSearching || !searchQuery.trim()">
@@ -93,6 +99,24 @@ const indexedChapterCount = computed(() => props.index?.chapterIndex.chapters.fi
 const visibleKeywords = computed(() => Object.keys(props.index?.chapterIndex.keywords || {}).slice(0, 12));
 
 const visibleChapters = computed(() => (props.index?.chapterIndex.chapters || []).filter((chapter) => chapter.factIds.length).slice(0, 8));
+
+const vectorSummary = computed(() => props.index?.vectorSummary || props.searchResult?.vectorSummary || null);
+
+const vectorProviderText = computed(() => {
+  if (!vectorSummary.value) return "";
+  const model = vectorSummary.value.model ? ` / ${vectorSummary.value.model}` : "";
+  return `Vector: ${vectorSummary.value.provider}${model}`;
+});
+
+const vectorDetailText = computed(() => {
+  if (!vectorSummary.value) return "";
+  return `${vectorSummary.value.entryCount} entries / ${vectorSummary.value.dimensions} dims`;
+});
+
+const vectorFallbackText = computed(() => {
+  if (!vectorSummary.value?.fallbackFrom) return "";
+  return `fallback from ${vectorSummary.value.fallbackFrom}: ${vectorSummary.value.fallbackReason || "provider unavailable"}`;
+});
 
 const vectorHitCount = computed(() => {
   if (!props.searchResult) return 0;
@@ -174,6 +198,33 @@ p {
 
   span {
     color: #64748b;
+    font-size: 11px;
+  }
+}
+
+.vector-summary {
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 7px;
+  background: #f8fbff;
+  color: #334155;
+  font-size: 12px;
+
+  span {
+    color: #0f172a;
+    font-weight: 800;
+  }
+
+  em {
+    color: #2563eb;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  small {
+    color: #b45309;
     font-size: 11px;
   }
 }

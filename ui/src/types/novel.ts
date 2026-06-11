@@ -355,6 +355,7 @@ export interface KnowledgeIndexProjection {
   facts: KnowledgeFact[];
   triples: KnowledgeTriple[];
   chapterIndex: ChapterMemoryIndex;
+  vectorSummary?: KnowledgeVectorSummary;
   updatedAt: string;
 }
 
@@ -381,12 +382,25 @@ export interface KnowledgeVectorIndex {
   model?: string;
   dimensions: number;
   entries: KnowledgeVectorEntry[];
+  fallbackFrom?: "local" | "openai-compatible";
+  fallbackReason?: string;
+  updatedAt: string;
+}
+
+export interface KnowledgeVectorSummary {
+  provider: KnowledgeVectorIndex["provider"];
+  model?: string;
+  dimensions: number;
+  entryCount: number;
+  fallbackFrom?: KnowledgeVectorIndex["provider"];
+  fallbackReason?: string;
   updatedAt: string;
 }
 
 export interface KnowledgeSearchResult {
   query: string;
   tokens: string[];
+  vectorSummary?: KnowledgeVectorSummary;
   facts: Array<KnowledgeFact & { score: number; vectorScore?: number }>;
   triples: Array<KnowledgeTriple & { score: number; vectorScore?: number }>;
   chapters: Array<ChapterIndexEntry & { score: number; vectorScore?: number }>;

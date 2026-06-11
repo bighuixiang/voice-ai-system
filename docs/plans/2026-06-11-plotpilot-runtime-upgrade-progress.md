@@ -39,6 +39,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Chapter memory index persists under `memory/chapter-index.json`.
   - Local vector recall persists under `knowledge/vectors.json` and contributes `vectorScore` to search results.
   - Optional OpenAI-compatible embedding providers can populate `knowledge/vectors.json` when `KNOWLEDGE_EMBEDDING_PROVIDER=openai-compatible` and an API key are configured.
+  - Knowledge index responses expose vector provider, dimensions, entry count, and fallback details so provider issues are visible in the workspace.
   - UI supports knowledge search and a quick reference lookup across characters, locations, terms, and facts.
 
 - Runtime snapshot:
@@ -64,7 +65,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
 
 Latest full verification passed:
 
-- API tests: 75 passed, 1 real Codex integration skipped.
+- API tests: 76 passed, 1 real Codex integration skipped.
 - UI tests: 150 passed.
 - API build passed.
 - UI build passed.
