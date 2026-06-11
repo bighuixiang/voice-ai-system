@@ -674,6 +674,13 @@ export interface ProjectAuditReport {
     proposedPatchCount: number;
     acceptedPatchCount: number;
   };
+  knowledgeSummary: {
+    factCount: number;
+    tripleCount: number;
+    indexedChapterCount: number;
+    keywordCount: number;
+    vectorSummary?: KnowledgeVectorSummary;
+  };
   backgroundJobSummary: {
     total: number;
     byStatus: Record<BackgroundJobStatus, number>;

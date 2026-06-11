@@ -358,6 +358,12 @@ describe("novelApi", () => {
         keywords: { gate: ["chapter-001"] },
         updatedAt: "2026-06-11T00:00:00.000Z"
       },
+      vectorSummary: {
+        provider: "local" as const,
+        dimensions: 64,
+        entryCount: 1,
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      },
       updatedAt: "2026-06-11T00:00:00.000Z"
     };
     const knowledgeSearch = {
@@ -397,6 +403,13 @@ describe("novelApi", () => {
         byDecision: { pending: 0, accepted: 1, rejected: 0, "not-required": 0 },
         proposedPatchCount: 1,
         acceptedPatchCount: 1
+      },
+      knowledgeSummary: {
+        factCount: 1,
+        tripleCount: 0,
+        indexedChapterCount: 1,
+        keywordCount: 1,
+        vectorSummary: knowledgeIndex.vectorSummary
       },
       backgroundJobSummary: {
         total: 1,

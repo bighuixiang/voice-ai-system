@@ -220,6 +220,64 @@ describe("novel API routes", () => {
       })}\n`,
       "utf8"
     );
+    await fs.writeFile(
+      path.join(tempRoot, slug, "knowledge", "facts.jsonl"),
+      `${JSON.stringify({
+        id: "fact:report",
+        text: "The audit report includes memory facts.",
+        chapterIds: ["chapter-001"],
+        relatedEntities: ["Auditor"],
+        keywords: ["audit", "memory"],
+        source: { type: "chapter-summary", id: "chapter-001" },
+        updatedAt: "2026-06-11T00:03:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(tempRoot, slug, "knowledge", "triples.jsonl"),
+      `${JSON.stringify({
+        id: "triple:report",
+        subject: "Audit report",
+        predicate: "includes",
+        object: "memory facts",
+        chapterIds: ["chapter-001"],
+        sourceFactIds: ["fact:report"],
+        updatedAt: "2026-06-11T00:03:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(tempRoot, slug, "memory", "chapter-index.json"),
+      `${JSON.stringify({
+        projectSlug: slug,
+        chapters: [
+          {
+            chapterId: "chapter-001",
+            title: "Chapter 1",
+            order: 1,
+            keywords: ["audit", "memory"],
+            factIds: ["fact:report"],
+            tripleIds: ["triple:report"],
+            entityNames: ["Auditor"],
+            updatedAt: "2026-06-11T00:03:00.000Z"
+          }
+        ],
+        keywords: { audit: ["chapter-001"], memory: ["chapter-001"] },
+        updatedAt: "2026-06-11T00:03:00.000Z"
+      })}\n`,
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(tempRoot, slug, "knowledge", "vectors.json"),
+      `${JSON.stringify({
+        projectSlug: slug,
+        provider: "local",
+        dimensions: 64,
+        entries: [{ id: "fact:report", kind: "fact", label: "chapter-001", text: "memory facts", chapterIds: ["chapter-001"], sourceIds: ["chapter-001"], vector: [1], updatedAt: "2026-06-11T00:03:00.000Z" }],
+        updatedAt: "2026-06-11T00:03:00.000Z"
+      })}\n`,
+      "utf8"
+    );
 
     const response = await jsonFetch<{
       report: {
@@ -228,6 +286,7 @@ describe("novel API routes", () => {
         quality: { reportCount: number; qualityTrends: Array<{ key: string; latestScore: number }> };
         taskSummary: { total: number; byStatus: { success: number }; byType: { "chapter.draft": number } };
         aiInvocationSummary: { total: number; byDecision: { accepted: number }; proposedPatchCount: number; acceptedPatchCount: number };
+        knowledgeSummary: { factCount: number; tripleCount: number; indexedChapterCount: number; keywordCount: number; vectorSummary?: { provider: string; entryCount: number } };
         backgroundJobSummary: { total: number; byStatus: { success: number }; latestJobs: Array<{ id: string; outputSummary?: string }> };
       };
     }>(`/api/novel/projects/${slug}/audit-report`);
@@ -250,6 +309,13 @@ describe("novel API routes", () => {
         byDecision: expect.objectContaining({ accepted: 1 }),
         proposedPatchCount: 1,
         acceptedPatchCount: 1
+      },
+      knowledgeSummary: {
+        factCount: 1,
+        tripleCount: 1,
+        indexedChapterCount: 1,
+        keywordCount: 2,
+        vectorSummary: expect.objectContaining({ provider: "local", entryCount: 1 })
       },
       backgroundJobSummary: {
         total: 1,

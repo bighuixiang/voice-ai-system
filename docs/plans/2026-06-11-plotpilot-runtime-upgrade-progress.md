@@ -50,6 +50,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - `/api/novel/projects/:projectId/audit-report` returns a JSON audit report.
   - Reports include chapters, persisted quality metrics and trends, task summaries, and AI invocation adoption summaries.
   - Reports include background job totals, status counts, and recent job history.
+  - Reports include knowledge fact/triple counts, indexed chapter counts, keyword counts, and vector provider status.
   - Task history UI can download the report as JSON.
 
 - Background job orchestration:
@@ -94,6 +95,7 @@ Known warnings remain unchanged:
 - `381c866 feat: show background job status`
 - `fc5e477 feat: persist background job history`
 - `153f677 feat: include background jobs in audit report`
+- `808d368 feat: surface knowledge vector status`
 
 Earlier supporting commits in this branch:
 

@@ -2,6 +2,7 @@ import type { AiInvocationAdoptionDecision, BackgroundJobStatus, CodexTaskType, 
 import { readSeriesQualityMetrics } from "./writingCockpit.js";
 import { readInvocationSessions, readTaskHistory } from "./taskService.js";
 import { listProjectBackgroundJobs } from "./backgroundJobs.js";
+import { readKnowledgeIndex } from "./knowledgeIndex.js";
 
 function emptyStatusCounts(): Record<NovelTaskStatus, number> {
   return {
@@ -32,11 +33,12 @@ function emptyBackgroundJobStatusCounts(): Record<BackgroundJobStatus, number> {
 }
 
 export async function buildProjectAuditReport(root: string, project: NovelProject): Promise<ProjectAuditReport> {
-  const [quality, tasks, aiInvocations, backgroundJobs] = await Promise.all([
+  const [quality, tasks, aiInvocations, backgroundJobs, knowledgeIndex] = await Promise.all([
     readSeriesQualityMetrics(root, project),
     readTaskHistory(root),
     readInvocationSessions(root),
-    listProjectBackgroundJobs(root, project.slug)
+    listProjectBackgroundJobs(root, project.slug),
+    readKnowledgeIndex(root, project)
   ]);
 
   const byStatus = emptyStatusCounts();
@@ -89,6 +91,13 @@ export async function buildProjectAuditReport(root: string, project: NovelProjec
       byDecision,
       proposedPatchCount: aiInvocations.reduce((sum, invocation) => sum + invocation.proposedPatchTargets.length, 0),
       acceptedPatchCount: aiInvocations.reduce((sum, invocation) => sum + invocation.acceptedPatchTargets.length, 0)
+    },
+    knowledgeSummary: {
+      factCount: knowledgeIndex.facts.length,
+      tripleCount: knowledgeIndex.triples.length,
+      indexedChapterCount: knowledgeIndex.chapterIndex.chapters.filter((chapter) => chapter.factIds.length || chapter.tripleIds.length).length,
+      keywordCount: Object.keys(knowledgeIndex.chapterIndex.keywords).length,
+      vectorSummary: knowledgeIndex.vectorSummary
     },
     backgroundJobSummary: {
       total: backgroundJobs.length,
