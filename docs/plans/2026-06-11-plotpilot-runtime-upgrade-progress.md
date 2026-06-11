@@ -92,6 +92,7 @@ Known warnings remain unchanged:
 - `de71927 feat: surface background rebuild actions`
 - `381c866 feat: show background job status`
 - `fc5e477 feat: persist background job history`
+- `153f677 feat: include background jobs in audit report`
 
 Earlier supporting commits in this branch:
 
