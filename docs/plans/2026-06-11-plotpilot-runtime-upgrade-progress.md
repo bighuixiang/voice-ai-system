@@ -57,12 +57,13 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Workspace knowledge-index rebuilds now use background jobs before refreshing the index.
   - Workspace quality overview and story graph rebuilds can also run through background jobs.
   - Story control now shows recent background jobs with status, output summary, duration, and manual refresh.
+  - Background job history persists under `tasks/background-jobs.jsonl` and can be listed after the in-memory cache is cleared.
 
 ## Verification
 
 Latest full verification passed:
 
-- API tests: 74 passed, 1 real Codex integration skipped.
+- API tests: 75 passed, 1 real Codex integration skipped.
 - UI tests: 150 passed.
 - API build passed.
 - UI build passed.
@@ -88,6 +89,7 @@ Known warnings remain unchanged:
 - `54a05b1 feat: rebuild knowledge index in background`
 - `b09d915 feat: support external knowledge embeddings`
 - `de71927 feat: surface background rebuild actions`
+- `381c866 feat: show background job status`
 
 Earlier supporting commits in this branch:
 

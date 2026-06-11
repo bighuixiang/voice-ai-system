@@ -273,6 +273,7 @@ describe("novelProject", () => {
       await fs.readFile(path.join(root, "memory", "chapter-summaries", "chapter-001.json"), "utf8")
     );
     const recaps = await fs.readFile(path.join(root, "tasks", "recaps.jsonl"), "utf8");
+    const backgroundJobs = await fs.readFile(path.join(root, "tasks", "background-jobs.jsonl"), "utf8");
 
     expect(dashboard).toEqual(
       expect.objectContaining({
@@ -323,6 +324,7 @@ describe("novelProject", () => {
       ).resolves.toContain(`"chapterId": "${chapter.id}"`);
     }
     expect(recaps).toBe("");
+    expect(backgroundJobs).toBe("");
   });
 
   it("imports a structured novel repository without mixing chapter cards into chapters", async () => {

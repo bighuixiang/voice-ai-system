@@ -471,12 +471,12 @@ export function createApp() {
 
   app.get("/api/novel/projects/:projectId/jobs", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
-    res.json({ jobs: listProjectBackgroundJobs(project.slug) });
+    res.json({ jobs: await listProjectBackgroundJobs(projectRoot(project.slug), project.slug) });
   }));
 
   app.get("/api/novel/projects/:projectId/jobs/:jobId", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
-    const job = readBackgroundJob(project.slug, req.params.jobId);
+    const job = await readBackgroundJob(projectRoot(project.slug), project.slug, req.params.jobId);
     if (!job) {
       res.status(404).json({ error: "Background job not found" });
       return;
@@ -493,7 +493,7 @@ export function createApp() {
 
     const project = await readProject(req.params.projectId);
     const root = projectRoot(project.slug);
-    const job = enqueueProjectBackgroundJob(project, type, JSON.stringify(req.body.payload || {}).slice(0, 500), async () => {
+    const job = await enqueueProjectBackgroundJob(project, root, type, JSON.stringify(req.body.payload || {}).slice(0, 500), async () => {
       if (type === "knowledge.index.rebuild") {
         const index = await rebuildKnowledgeIndex(root, project);
         return {

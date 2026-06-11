@@ -286,6 +286,7 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "tasks/history.jsonl": "",
     "tasks/invocations.jsonl": "",
     "tasks/recaps.jsonl": "",
+    "tasks/background-jobs.jsonl": "",
     "story-control/story-control.json": `${JSON.stringify(defaultStoryControl(), null, 2)}\n`
   };
 

@@ -1,9 +1,13 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import type { BackgroundJob, BackgroundJobType, NovelProject } from "./types.js";
+import { resolveInside } from "./pathSafety.js";
 
 type BackgroundJobHandler = () => Promise<Pick<BackgroundJob, "outputSummary" | "resultRef">>;
 
 const jobs = new Map<string, BackgroundJob>();
 const maxJobs = 200;
+const jobHistoryPath = "tasks/background-jobs.jsonl";
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -25,12 +29,52 @@ function publicJob(job: BackgroundJob): BackgroundJob {
   return { ...job };
 }
 
-export function enqueueProjectBackgroundJob(
+async function appendJobHistory(root: string, job: BackgroundJob): Promise<void> {
+  const target = resolveInside(root, jobHistoryPath);
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.appendFile(target, `${JSON.stringify(job)}\n`, "utf8");
+}
+
+async function readPersistedJobs(root: string): Promise<BackgroundJob[]> {
+  let content = "";
+  try {
+    content = await fs.readFile(resolveInside(root, jobHistoryPath), "utf8");
+  } catch {
+    return [];
+  }
+
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line) as BackgroundJob;
+      } catch {
+        return null;
+      }
+    })
+    .filter((job): job is BackgroundJob => Boolean(job?.id && job.projectId && job.type && job.status));
+}
+
+function latestJobs(jobsToMerge: BackgroundJob[]): BackgroundJob[] {
+  const byId = new Map<string, BackgroundJob>();
+  for (const job of jobsToMerge) {
+    const current = byId.get(job.id);
+    if (!current || Date.parse(job.updatedAt || job.startedAt) >= Date.parse(current.updatedAt || current.startedAt)) {
+      byId.set(job.id, job);
+    }
+  }
+  return [...byId.values()].sort((left, right) => Date.parse(right.startedAt) - Date.parse(left.startedAt));
+}
+
+export async function enqueueProjectBackgroundJob(
   project: Pick<NovelProject, "slug">,
+  root: string,
   type: BackgroundJobType,
   inputSummary: string,
   handler: BackgroundJobHandler
-): BackgroundJob {
+): Promise<BackgroundJob> {
   const startedAt = nowIso();
   const job: BackgroundJob = {
     id: jobId(),
@@ -43,19 +87,22 @@ export function enqueueProjectBackgroundJob(
   };
   jobs.set(job.id, job);
   trimJobs();
+  await appendJobHistory(root, job);
+  const queuedJob = publicJob(job);
 
-  void runJob(job.id, handler);
+  void runJob(root, job.id, handler);
 
-  return publicJob(job);
+  return queuedJob;
 }
 
-async function runJob(id: string, handler: BackgroundJobHandler): Promise<void> {
+async function runJob(root: string, id: string, handler: BackgroundJobHandler): Promise<void> {
   const job = jobs.get(id);
   if (!job) return;
 
   const started = Date.now();
   job.status = "running";
   job.updatedAt = nowIso();
+  await appendJobHistory(root, job);
 
   try {
     const result = await handler();
@@ -69,18 +116,24 @@ async function runJob(id: string, handler: BackgroundJobHandler): Promise<void> 
     job.finishedAt = nowIso();
     job.durationMs = Date.now() - started;
     job.updatedAt = job.finishedAt;
+    await appendJobHistory(root, job);
   }
 }
 
-export function readBackgroundJob(projectId: string, id: string): BackgroundJob | null {
+export async function readBackgroundJob(root: string, projectId: string, id: string): Promise<BackgroundJob | null> {
   const job = jobs.get(id);
-  if (!job || job.projectId !== projectId) return null;
-  return publicJob(job);
+  if (job?.projectId === projectId) return publicJob(job);
+  const persisted = latestJobs(await readPersistedJobs(root)).find((item) => item.id === id && item.projectId === projectId);
+  return persisted ? publicJob(persisted) : null;
 }
 
-export function listProjectBackgroundJobs(projectId: string): BackgroundJob[] {
-  return [...jobs.values()]
+export async function listProjectBackgroundJobs(root: string, projectId: string): Promise<BackgroundJob[]> {
+  return latestJobs([...(await readPersistedJobs(root)), ...jobs.values()])
     .filter((job) => job.projectId === projectId)
-    .sort((left, right) => Date.parse(right.startedAt) - Date.parse(left.startedAt))
+    .slice(0, maxJobs)
     .map(publicJob);
+}
+
+export function clearBackgroundJobsForTests(): void {
+  jobs.clear();
 }
