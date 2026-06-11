@@ -77,10 +77,15 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Outline/support saves do not trigger the automatic pipeline.
   - Pipeline failures mark the failed step and preserve the saved chapter content.
 
+- Theme consistency:
+  - Novel workspace panels use dark theme tokens instead of hardcoded light panel colors.
+  - Root tests run a theme-token guard that rejects hardcoded hex colors and light backgrounds in novel workspace component styles.
+
 ## Verification
 
 Latest full verification passed:
 
+- Theme token check: 31 novel workspace Vue components passed.
 - API tests: 80 passed, 1 real Codex integration skipped.
 - UI tests: 168 passed.
 - API build passed.
@@ -103,6 +108,9 @@ Latest targeted P0 extension verification:
 - `npm --prefix ui run test -- AIOperationPanel NovelWorkspace`: 19 passed.
 - `npm --prefix ui run test -- AIOperationPanel NovelWorkspace TaskHistoryPanel novel`: 163 passed.
 - `npm --prefix ui run test -- AIOperationPanel NovelWorkspace novel`: 164 passed.
+- `npm --prefix ui run test -- AiConfigPanel BackgroundJobPanel SavePipelinePanel KnowledgeIndexPanel QuickReferencePanel StoryGraphPanel StoryControlPanel NovelWorkspace`: 29 passed.
+- `npm --prefix ui run build`: passed.
+- `npm run test:theme`: passed.
 
 ## Recent Commits
 
@@ -136,6 +144,8 @@ Latest targeted P0 extension verification:
 - `c03eb73 feat: show ai stages in operation panel`
 - `8352fd3 docs: update stage operation progress`
 - `64fe61d feat: show active ai stage progress`
+- `b2dc378 docs: record active stage progress`
+- `3c01ce9 fix: align novel panels with dark theme`
 
 Earlier supporting commits in this branch:
 
