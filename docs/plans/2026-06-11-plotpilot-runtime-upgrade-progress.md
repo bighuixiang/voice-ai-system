@@ -22,6 +22,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
   - Invocation sessions capture stage key, agent/model, prompt snapshot, context snapshot, patch targets, and adoption state.
   - Applying patches can mark the matching invocation accepted.
   - Task history now exposes expandable audit details.
+  - Workspace startup loads the shared AI stage dictionary and task history shows readable stage labels beside stable stage keys.
 
 - Quality persistence:
   - Chapter quality reports persist under `quality/<chapterId>.json`.
@@ -79,7 +80,7 @@ This note tracks the post-P0 implementation work after the PlotPilot comparison 
 Latest full verification passed:
 
 - API tests: 80 passed, 1 real Codex integration skipped.
-- UI tests: 164 passed.
+- UI tests: 166 passed.
 - API build passed.
 - UI build passed.
 - Runtime smoke: `http://127.0.0.1:5173` returned HTTP 200.
@@ -96,6 +97,7 @@ Latest targeted P0 extension verification:
 - `npm --prefix api run test -- backgroundJobs app`: 23 passed.
 - `npm --prefix api run build`: passed.
 - `npm --prefix ui run test -- NovelWorkspace novel SavePipelinePanel`: 160 passed.
+- `npm --prefix ui run test -- TaskHistoryPanel NovelWorkspace novel`: 162 passed.
 
 ## Recent Commits
 
@@ -122,6 +124,10 @@ Latest targeted P0 extension verification:
 - `0c2b485 feat: configure knowledge embeddings in settings`
 - `60cad36 feat: control background job retries and cancellation`
 - `fa936c8 feat: orchestrate post-save chapter pipeline`
+- `3d552cc docs: plan ai stage dictionary ui`
+- `8ce7e92 feat: load ai stage dictionary`
+- `3153ad0 feat: bootstrap ai stage dictionary`
+- `c829403 feat: show ai stage labels in task history`
 
 Earlier supporting commits in this branch:
 
