@@ -9,6 +9,7 @@
     "check:runtime-staged": "powershell -ExecutionPolicy Bypass -File scripts/check-runtime-staged.ps1",
     "smoke:runtime": "powershell -ExecutionPolicy Bypass -File scripts/smoke-runtime.ps1",
     "smoke:ui": "playwright test",
+    "smoke:all": "npm run check:runtime-staged && npm run smoke:runtime && npm run smoke:ui",
     "test:real-codex": "npm --prefix api run test:real-codex"
   },
   "devDependencies": {

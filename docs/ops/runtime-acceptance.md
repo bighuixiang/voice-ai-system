@@ -38,6 +38,20 @@ npm run smoke:ui
 
 The Playwright smoke starts the API and UI when needed, opens a real project workspace, and checks the save pipeline, embedding config panel, background job panel, audit report preview, and dark theme backgrounds.
 
+First-time browser setup:
+
+```powershell
+npx playwright install chromium
+```
+
+Combined local acceptance:
+
+```powershell
+npm run smoke:all
+```
+
+This runs the staged runtime-state guard, runtime API smoke, and browser UI smoke in sequence.
+
 Local configuration:
 
 - `platform/ai-config.json` may contain workstation-specific provider settings.
