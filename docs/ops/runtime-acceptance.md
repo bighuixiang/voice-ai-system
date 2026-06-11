@@ -22,6 +22,22 @@ Generated runtime data:
 
 Generated runtime data should not be committed by default. If a test fixture needs it, add a fixture under a dedicated test path rather than committing a live project run.
 
+Before committing after a runtime smoke, run:
+
+```powershell
+npm run check:runtime-staged
+```
+
+The check only inspects staged files. It blocks generated runtime JSON/JSONL and local platform config from being mixed into ordinary code commits.
+
+Browser smoke:
+
+```powershell
+npm run smoke:ui
+```
+
+The Playwright smoke starts the API and UI when needed, opens a real project workspace, and checks the save pipeline, embedding config panel, background job panel, audit report preview, and dark theme backgrounds.
+
 Local configuration:
 
 - `platform/ai-config.json` may contain workstation-specific provider settings.

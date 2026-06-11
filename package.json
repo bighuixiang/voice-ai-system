@@ -6,7 +6,12 @@
     "test:theme": "node scripts/check-theme-tokens.mjs",
     "build": "npm --prefix api run build && npm --prefix ui run build",
     "verify": "npm run test && npm run build",
+    "check:runtime-staged": "powershell -ExecutionPolicy Bypass -File scripts/check-runtime-staged.ps1",
     "smoke:runtime": "powershell -ExecutionPolicy Bypass -File scripts/smoke-runtime.ps1",
+    "smoke:ui": "playwright test",
     "test:real-codex": "npm --prefix api run test:real-codex"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
   }
 }
