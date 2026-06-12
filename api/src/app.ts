@@ -34,7 +34,23 @@ import { readKnowledgeIndex, rebuildKnowledgeIndex, searchKnowledgeIndex } from 
 import { buildCreationRuntimeSnapshot } from "./runtimeSnapshot.js";
 import { buildProjectAuditReport } from "./auditReport.js";
 import { cancelBackgroundJob, enqueueProjectBackgroundJob, listProjectBackgroundJobs, readBackgroundJob, retryBackgroundJob } from "./backgroundJobs.js";
-import type { AiScenarioConfig, BackgroundJobType, CodexTaskType, KnowledgeSearchQuery, LedgerEntry, NovelFilePatch, PlatformAiConfig } from "./types.js";
+import {
+  buildEditorSuggestion,
+  createWritingFileSnapshot,
+  listWritingFileVersions,
+  readWritingFileDiff
+} from "./fileVersions.js";
+import type {
+  AiScenarioConfig,
+  BackgroundJobType,
+  CodexTaskType,
+  EditorSuggestion,
+  EditorSuggestionRequest,
+  KnowledgeSearchQuery,
+  LedgerEntry,
+  NovelFilePatch,
+  PlatformAiConfig
+} from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
   acceptWritingRecapPatches,
@@ -187,6 +203,58 @@ async function asyncStoryGraphJob(project: Awaited<ReturnType<typeof readProject
     outputSummary: `${graph.nodes.length} nodes / ${graph.edges.length} relations`,
     resultRef: `/api/novel/projects/${project.slug}/story-graph`
   };
+}
+
+function aiEditorSuggestionEnabled(): boolean {
+  const mode = String(process.env.EDITOR_SUGGESTION_PROVIDER || "").trim().toLowerCase();
+  return mode === "ai" || mode === "true" || mode === "1";
+}
+
+function compactEditorSuggestionText(text: string): string {
+  return text
+    .replace(/^```(?:\w+)?/g, "")
+    .replace(/```$/g, "")
+    .split(/\r?\n/)
+    .map((line) => line.trimEnd())
+    .filter(Boolean)
+    .slice(0, 3)
+    .join("\n")
+    .slice(0, 360);
+}
+
+async function buildAiBackedEditorSuggestion(
+  projectId: string,
+  input: EditorSuggestionRequest,
+  fallback: EditorSuggestion
+): Promise<EditorSuggestion> {
+  if (!aiEditorSuggestionEnabled()) return fallback;
+
+  try {
+    const task = await runNovelTask(projectId, "assistant.free", {
+      mode: "editor.inline-suggestion",
+      chapterId: input.chapterId,
+      filePath: input.filePath,
+      documentKind: input.documentKind,
+      beforeText: input.beforeText,
+      afterText: input.afterText,
+      roughIdea: [
+        "为 Monaco Editor inline suggestion 生成一条可直接 Tab 接受的中文续写 ghost text。",
+        "只在 CodexTaskResult.content 中放建议文本，不要解释，不要 Markdown，不要改写已有上下文。",
+        "建议应短，最多三行；接受后只进入编辑器 dirty buffer，由作者自行保存。"
+      ].join("\n")
+    });
+    const text = compactEditorSuggestionText(task.result?.content || "");
+    if (task.status !== "success" || !text.trim()) return fallback;
+    return {
+      id: `editor-suggestion-${task.id}`,
+      text,
+      summary: task.result?.summary || "AI inline suggestion",
+      source: "ai",
+      createdAt: task.finishedAt || new Date().toISOString()
+    };
+  } catch {
+    return fallback;
+  }
 }
 
 const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
@@ -610,6 +678,53 @@ export function createApp() {
     res.json({ entries });
   }));
 
+  app.get("/api/novel/projects/:projectId/file-versions/*", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const wildcardParams = req.params as Record<string, string>;
+    const relativePath = assertSafeNovelPath(wildcardParams[0]);
+    res.json({ filePath: relativePath, versions: await listWritingFileVersions(projectRoot(project.slug), relativePath) });
+  }));
+
+  app.get("/api/novel/projects/:projectId/file-diff/*", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const wildcardParams = req.params as Record<string, string>;
+    const relativePath = assertSafeNovelPath(wildcardParams[0]);
+    const versionId = String(req.query.from || "").trim();
+    if (!versionId) {
+      res.status(400).json({ error: "from version id is required" });
+      return;
+    }
+    res.json({ diff: await readWritingFileDiff(projectRoot(project.slug), relativePath, versionId) });
+  }));
+
+  app.post("/api/novel/projects/:projectId/editor/suggestion", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const input = (req.body || {}) as EditorSuggestionRequest;
+    const filePath = assertSafeNovelPath(String(input.filePath || ""));
+    const chapter = project.chapters.find((item) => item.id === input.chapterId || item.contentPath === filePath || item.outlinePath === filePath);
+    if (!chapter) {
+      res.status(400).json({ error: `Unknown chapter file: ${filePath}` });
+      return;
+    }
+    const documentKind: EditorSuggestionRequest["documentKind"] = input.documentKind === "outline" ? "outline" : "content";
+    const expectedPath = documentKind === "outline" ? chapter.outlinePath : chapter.contentPath;
+    if (expectedPath !== filePath) {
+      res.status(400).json({ error: `File does not match ${documentKind} for chapter ${chapter.id}` });
+      return;
+    }
+    const suggestionInput: EditorSuggestionRequest = {
+      ...input,
+      filePath,
+      chapterId: chapter.id,
+      documentKind,
+      beforeText: String(input.beforeText || "").slice(-1600),
+      afterText: String(input.afterText || "").slice(0, 800),
+      selectedText: typeof input.selectedText === "string" ? input.selectedText.slice(0, 800) : undefined
+    };
+    const fallback = buildEditorSuggestion(suggestionInput);
+    res.json({ suggestion: await buildAiBackedEditorSuggestion(project.slug, suggestionInput, fallback) });
+  }));
+
   app.get("/api/novel/projects/:projectId/files/*", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
     const wildcardParams = req.params as Record<string, string>;
@@ -627,10 +742,12 @@ export function createApp() {
       return;
     }
 
-    await fs.writeFile(resolveInside(projectRoot(project.slug), relativePath), String(req.body.content || ""), "utf8");
+    const nextContent = String(req.body.content || "");
+    const snapshot = await createWritingFileSnapshot(projectRoot(project.slug), project, relativePath, nextContent);
+    await fs.writeFile(resolveInside(projectRoot(project.slug), relativePath), nextContent, "utf8");
     project.updatedAt = new Date().toISOString();
     await writeProject(project);
-    res.json({ path: relativePath, saved: true });
+    res.json({ path: relativePath, saved: true, version: snapshot });
   }));
 
   app.post("/api/novel/projects/:projectId/tasks", asyncRoute(async (req, res) => {

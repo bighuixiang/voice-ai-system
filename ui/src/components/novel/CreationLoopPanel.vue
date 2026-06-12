@@ -13,6 +13,10 @@
       </div>
     </div>
 
+    <div v-if="radarSignals.length" class="loop-radar" aria-label="创作状态雷达">
+      <span v-for="signal in radarSignals" :key="signal">{{ signal }}</span>
+    </div>
+
     <ol class="loop-steps">
       <li v-for="step in steps" :key="step.id" class="loop-step" :class="`is-${step.status}`">
         <div class="step-topline">
@@ -27,6 +31,9 @@
         </div>
 
         <p>{{ step.detail }}</p>
+        <div v-if="step.signals?.length" class="step-signals" aria-label="创作状态信号">
+          <span v-for="signal in step.signals.slice(0, 3)" :key="signal">{{ signal }}</span>
+        </div>
 
         <el-button
           v-if="step.action && step.actionLabel"
@@ -66,6 +73,19 @@ defineEmits<{
 
 const doneCount = computed(() => props.steps.filter((step) => step.status === "done").length);
 const runtimeFingerprint = computed(() => props.runtimeSnapshot?.fingerprint.slice(0, 8) || "");
+const radarSignals = computed(() => {
+  const signals = new Set<string>();
+  const blockedCount = props.steps.filter((step) => step.status === "blocked").length;
+  const activeCount = props.steps.filter((step) => step.status === "active").length;
+  if (blockedCount) signals.add(`阻塞 ${blockedCount}`);
+  if (activeCount) signals.add(`进行中 ${activeCount}`);
+  for (const step of props.steps) {
+    for (const signal of step.signals || []) {
+      signals.add(signal);
+    }
+  }
+  return [...signals].slice(0, 8);
+});
 </script>
 
 <style scoped lang="scss">
@@ -111,6 +131,26 @@ const runtimeFingerprint = computed(() => props.runtimeSnapshot?.fingerprint.sli
   justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.loop-radar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+
+  span {
+    max-width: 180px;
+    overflow: hidden;
+    padding: 4px 8px;
+    border: 1px solid color-mix(in srgb, var(--app-primary) 30%, var(--app-border));
+    border-radius: 999px;
+    background: var(--app-bg-soft);
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .loop-summary,
@@ -221,6 +261,25 @@ const runtimeFingerprint = computed(() => props.runtimeSnapshot?.fingerprint.sli
 .step-metric {
   color: var(--app-text-muted);
   font-size: 11px;
+}
+
+.step-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    padding: 2px 6px;
+    border: 1px solid color-mix(in srgb, var(--app-primary) 28%, var(--app-border));
+    border-radius: 999px;
+    background: var(--app-bg);
+    color: var(--app-text-secondary);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .is-spinning {

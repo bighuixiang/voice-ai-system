@@ -243,11 +243,28 @@
           :save-state-label="store.currentSaveStateLabel"
           :is-saving="store.isSavingContent"
           :word-count="editorWordCount"
+          :suggestion-provider="store.requestEditorSuggestion"
           @update:content="store.updateContent"
           @switch-document="store.openChapterDocument"
           @selection="store.updateSelection"
           @save="handleSaveCurrentContent"
         />
+        <CollapsiblePanel
+          title="版本对比"
+          :subtitle="`${store.fileVersions.length} 个快照`"
+          :collapsed="panelCollapsed('file-diff', true)"
+          @update:collapsed="setPanelCollapsed('file-diff', $event)"
+        >
+          <FileVersionDiffPanel
+            :versions="store.fileVersions"
+            :diff="store.currentFileDiff"
+            :loading-versions="store.isLoadingFileVersions"
+            :loading-diff="store.isLoadingFileDiff"
+            @refresh="store.loadCurrentFileVersions"
+            @preview="store.previewCurrentFileDiff"
+            @close="store.clearCurrentFileDiff"
+          />
+        </CollapsiblePanel>
       </section>
 
       <aside v-if="store.writingMode !== 'focus'" class="right-rail">
@@ -502,6 +519,7 @@ import BackgroundJobPanel from "./BackgroundJobPanel.vue";
 import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
 import SceneCardPanel from "./SceneCardPanel.vue";
 import ChapterEditor from "./ChapterEditor.vue";
+import FileVersionDiffPanel from "./FileVersionDiffPanel.vue";
 import SelectionToolbar from "./SelectionToolbar.vue";
 import ReviewQualityPanel from "./ReviewQualityPanel.vue";
 import RewriteComparison from "./RewriteComparison.vue";
@@ -736,6 +754,9 @@ function setPanelCollapsed(key: string, collapsed: boolean) {
     ...collapsedPanels.value,
     [key]: collapsed
   };
+  if (key === "file-diff" && !collapsed) {
+    store.loadCurrentFileVersions();
+  }
 }
 
 function loadCollapsedPanels() {

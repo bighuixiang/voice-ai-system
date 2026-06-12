@@ -102,6 +102,20 @@ const seriesMetrics: SeriesQualityMetrics = {
       updatedAt: "2026-06-04T00:00:00.000Z"
     }
   ],
+  narrativeDebtSignals: [
+    {
+      chapterId: "chapter-001",
+      chapterTitle: "Chapter 1",
+      debtCount: 3,
+      openForeshadowingCount: 1,
+      riskCount: 1,
+      openLoopCount: 1,
+      overdueCount: 1,
+      severity: "blocked",
+      note: "Payoff is due.",
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }
+  ],
   rhythmSignals: [
     {
       chapterId: "chapter-001",
@@ -152,6 +166,8 @@ describe("ReviewQualityPanel", () => {
     expect(wrapper.text()).toContain("质量趋势");
     expect(wrapper.text()).toContain("Overall");
     expect(wrapper.text()).toContain("+8");
+    expect(wrapper.text()).toContain("叙事债务");
+    expect(wrapper.text()).toContain("需交付 · 3 项 · 伏笔 1 / 风险 1 / 回路 1");
     expect(wrapper.text()).toContain("张力曲线");
     expect(wrapper.text()).toContain("78.2 分 · 3 场 · Clear pressure.");
     expect(wrapper.text()).toContain("风格漂移");

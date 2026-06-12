@@ -80,6 +80,11 @@ describe("taskService", () => {
     expect(invocation.promptSnapshot.length).toBeGreaterThan(0);
     expect(invocation.promptSnapshot.contextTitles.length).toBeGreaterThan(0);
     expect(invocation.contextSnapshot.blockCount).toBeGreaterThan(0);
+    expect(invocation.promptVersion).toBe("task-template:outline.generate:v2");
+    expect(invocation.variablePlan?.payloadKeys).toEqual([]);
+    expect(invocation.variablePlan?.contextTierCounts?.T0).toBeGreaterThanOrEqual(1);
+    expect(invocation.preCallReview?.status).toBe("pass");
+    expect(invocation.contextSnapshot.blocks.some((block) => block.tier === "T0")).toBe(true);
     expect(invocation.adoptionDecision).toBe("not-required");
     expect(invocation.commitResult).toEqual({ historyAppended: true, invocationAppended: true });
   });

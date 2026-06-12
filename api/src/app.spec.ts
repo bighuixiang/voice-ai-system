@@ -152,6 +152,75 @@ describe("novel API routes", () => {
     expect(readAfter.data.content).toBe("manual draft");
   });
 
+  it("creates chapter file snapshots and serves version diffs", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string; contentPath: string }> } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Version Demo",
+        genre: "fantasy",
+        roughIdea: "A writer wants reliable snapshots."
+      })
+    });
+    const filePath = created.data.project.chapters[0].contentPath;
+
+    const saved = await jsonFetch<{ saved: boolean; version: { id: string; filePath: string } | null }>(
+      `/api/novel/projects/version-demo/files/${filePath}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "new chapter body" })
+      }
+    );
+    expect(saved.data.saved).toBe(true);
+    expect(saved.data.version).toMatchObject({ filePath });
+
+    const versions = await jsonFetch<{ versions: Array<{ id: string; filePath: string; size: number }> }>(
+      `/api/novel/projects/version-demo/file-versions/${filePath}`
+    );
+    expect(versions.data.versions).toHaveLength(1);
+    expect(versions.data.versions[0]).toMatchObject({ id: saved.data.version?.id, filePath });
+    expect(versions.data.versions[0].size).toBeGreaterThan(0);
+
+    const diff = await jsonFetch<{ diff: { original: string; modified: string; fromVersion: { id: string } } }>(
+      `/api/novel/projects/version-demo/file-diff/${filePath}?from=${versions.data.versions[0].id}`
+    );
+    expect(diff.data.diff.fromVersion.id).toBe(versions.data.versions[0].id);
+    expect(diff.data.diff.original).not.toBe("new chapter body");
+    expect(diff.data.diff.modified).toBe("new chapter body");
+  });
+
+  it("returns editor ghost text suggestions for chapter documents", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string; contentPath: string }> } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Suggestion Demo",
+        genre: "fantasy",
+        roughIdea: "A writer wants tab completion."
+      })
+    });
+    const chapter = created.data.project.chapters[0];
+
+    const suggestion = await jsonFetch<{ suggestion: { text: string; source: string } }>(
+      "/api/novel/projects/suggestion-demo/editor/suggestion",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filePath: chapter.contentPath,
+          chapterId: chapter.id,
+          documentKind: "content",
+          beforeText: "他站在门前，听见里面传来一声很轻的叹息",
+          afterText: ""
+        })
+      }
+    );
+
+    expect(suggestion.data.suggestion.source).toBe("local");
+    expect(suggestion.data.suggestion.text.length).toBeGreaterThan(4);
+  });
+
   it("reads AI invocation audit sessions", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
       method: "POST",
@@ -231,7 +300,8 @@ describe("novel API routes", () => {
         outputSummary: "Draft complete.",
         startedAt: "2026-06-11T00:00:00.000Z",
         finishedAt: "2026-06-11T00:01:00.000Z",
-        durationMs: 60000
+        durationMs: 60000,
+        timeoutMs: 600000
       })}\nnot-json\n`,
       "utf8"
     );
@@ -244,8 +314,20 @@ describe("novel API routes", () => {
         taskType: "chapter.draft",
         stageKey: "pipeline.chapter.prose",
         status: "success",
+        promptVersion: "task-template:chapter.draft:v2",
+        variablePlan: { payloadKeys: ["chapterId"], target: "chapter-001", contextTierCounts: { T0: 1, T1: 1 } },
+        preCallReview: { status: "warn", warnings: ["multiple-context-blocks-truncated"], reviewedAt: "2026-06-11T00:00:01.000Z" },
         promptSnapshot: { length: 200, preview: "Draft", contextTitles: ["Project"] },
-        contextSnapshot: { blockCount: 1, totalChars: 80, blocks: [{ title: "Project", length: 80 }] },
+        contextSnapshot: {
+          blockCount: 2,
+          totalChars: 80,
+          tierCounts: { T0: 1, T1: 1 },
+          truncatedBlocks: ["World"],
+          blocks: [
+            { title: "Project", length: 40, tier: "T0" },
+            { title: "World", length: 40, tier: "T1", truncated: true }
+          ]
+        },
         attempt: { index: 1, startedAt: "2026-06-11T00:00:00.000Z", durationMs: 60000, exitCode: 0 },
         adoptionDecision: "accepted",
         proposedPatchTargets: ["content/chapter-001.md"],
@@ -347,8 +429,22 @@ describe("novel API routes", () => {
         projectSlug: string;
         projectTitle: string;
         quality: { reportCount: number; qualityTrends: Array<{ key: string; latestScore: number }> };
-        taskSummary: { total: number; byStatus: { success: number }; byType: { "chapter.draft": number } };
-        aiInvocationSummary: { total: number; byDecision: { accepted: number }; proposedPatchCount: number; acceptedPatchCount: number };
+        taskSummary: {
+          total: number;
+          byStatus: { success: number };
+          byType: { "chapter.draft": number };
+          latestTasks: Array<{ id: string; timeoutMs?: number; cancelRequestedAt?: string }>;
+        };
+        aiInvocationSummary: {
+          total: number;
+          byDecision: { accepted: number };
+          proposedPatchCount: number;
+          acceptedPatchCount: number;
+          promptVersions: Record<string, number>;
+          preCallWarnings: Record<string, number>;
+          contextTierTotals: Record<string, number>;
+          truncatedContextBlocks: Array<{ title: string; count: number }>;
+        };
         knowledgeSummary: { factCount: number; tripleCount: number; indexedChapterCount: number; keywordCount: number; vectorSummary?: { provider: string; entryCount: number } };
         runtimeSummary: {
           chapterCount: number;
@@ -371,13 +467,18 @@ describe("novel API routes", () => {
       taskSummary: {
         total: 1,
         byStatus: expect.objectContaining({ success: 1 }),
-        byType: expect.objectContaining({ "chapter.draft": 1 })
+        byType: expect.objectContaining({ "chapter.draft": 1 }),
+        latestTasks: [expect.objectContaining({ id: "task-1", timeoutMs: 600000 })]
       },
       aiInvocationSummary: {
         total: 1,
         byDecision: expect.objectContaining({ accepted: 1 }),
         proposedPatchCount: 1,
-        acceptedPatchCount: 1
+        acceptedPatchCount: 1,
+        promptVersions: expect.objectContaining({ "task-template:chapter.draft:v2": 1 }),
+        preCallWarnings: expect.objectContaining({ "multiple-context-blocks-truncated": 1 }),
+        contextTierTotals: expect.objectContaining({ T0: 1, T1: 1 }),
+        truncatedContextBlocks: [expect.objectContaining({ title: "World", count: 1 })]
       },
       knowledgeSummary: {
         factCount: 1,
@@ -651,7 +752,11 @@ describe("novel API routes", () => {
       snapshot: {
         chapterId: string;
         fingerprint: string;
-        signals: { wordCount: number; hasQualityReport: boolean };
+        signals: {
+          wordCount: number;
+          hasQualityReport: boolean;
+          narrativeDebt?: { debtCount: number; openForeshadowingCount: number; severity: string };
+        };
         steps: Array<{ id: string; status: string }>;
       };
     }>(`/api/novel/projects/${slug}/runtime/chapter-001`);
@@ -663,6 +768,11 @@ describe("novel API routes", () => {
     expect(repeated.data.snapshot.fingerprint).toBe(response.data.snapshot.fingerprint);
     expect(response.data.snapshot.signals.wordCount).toBeGreaterThanOrEqual(30);
     expect(response.data.snapshot.signals.hasQualityReport).toBe(true);
+    expect(response.data.snapshot.signals.narrativeDebt).toMatchObject({
+      debtCount: 1,
+      openForeshadowingCount: 1,
+      severity: "watch"
+    });
     expect(response.data.snapshot.steps).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ id: "draft", status: "done" }),

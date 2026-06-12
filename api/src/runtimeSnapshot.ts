@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
-import type { CreationRuntimeSnapshot, CreationRuntimeStep, LedgerEntry, NovelProject } from "./types.js";
+import type { CreationRuntimeSnapshot, CreationRuntimeStep, LedgerEntry, NarrativeDebtSignal, NovelProject } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 import { readChapterDashboard, readChapterQualityReport, readChapterSummary, readLedgerEntries, readSceneCards } from "./writingCockpit.js";
 
@@ -16,6 +16,27 @@ function firstActiveStep(steps: CreationRuntimeStep[]): CreationRuntimeSnapshot[
 
 function snapshotFingerprint(input: Omit<CreationRuntimeSnapshot, "fingerprint" | "updatedAt">): string {
   return crypto.createHash("sha256").update(JSON.stringify(input)).digest("hex").slice(0, 16);
+}
+
+function chapterOrder(project: NovelProject, chapterId: string): number | undefined {
+  const chapter = project.chapters.find((item) => item.id === chapterId);
+  if (typeof chapter?.order === "number" && chapter.order > 0) return chapter.order;
+  const index = project.chapters.findIndex((item) => item.id === chapterId);
+  if (index >= 0) return index + 1;
+  const digitMatch = `${chapterId} ${chapter?.title || ""}`.match(/(\d+)/);
+  return digitMatch ? Number(digitMatch[1]) : undefined;
+}
+
+function isOverdueDebt(entry: LedgerEntry, currentOrder?: number): boolean {
+  if (!entry.expectedResolutionChapterId || !currentOrder) return false;
+  const expected = entry.expectedResolutionChapterId.match(/(\d+)/);
+  return Boolean(expected && Number(expected[1]) <= currentOrder && entry.status !== "resolved");
+}
+
+function narrativeDebtSeverity(input: { debtCount: number; riskCount: number; openLoopCount: number; overdueCount: number }): NarrativeDebtSignal["severity"] {
+  if (input.overdueCount > 0 || input.riskCount >= 2) return "blocked";
+  if (input.debtCount > 0 || input.openLoopCount > 0 || input.riskCount > 0) return "watch";
+  return "stable";
 }
 
 async function readTaskHistory(root: string): Promise<Array<{ type?: string; status?: string; inputSummary?: string; result?: { content?: string } }>> {
@@ -73,6 +94,21 @@ export async function buildCreationRuntimeSnapshot(
   const acceptedLedgers = ledgers.filter((entry) => entry.chapterIds.includes(chapter.id));
   const hasLedger = acceptedLedgers.length > 0 || hasChapterSummary;
   const savedDraftBlocked = !hasDraft;
+  const currentOrder = chapterOrder(project, chapter.id);
+  const unresolvedDebts = ledgers.filter(
+    (entry) => entry.status !== "resolved" && (entry.chapterIds.includes(chapter.id) || isOverdueDebt(entry, currentOrder))
+  );
+  const openLoopCount = (summary.emotionLedger?.openLoops || []).filter((item) => item.status !== "resolved").length;
+  const riskCount = unresolvedDebts.filter((entry) => entry.kind === "risk" || entry.kind === "continuity" || entry.status === "blocked").length;
+  const overdueCount = unresolvedDebts.filter((entry) => isOverdueDebt(entry, currentOrder)).length;
+  const narrativeDebt = {
+    debtCount: unresolvedDebts.length + openLoopCount,
+    openForeshadowingCount: unresolvedDebts.filter((entry) => entry.kind === "foreshadowing").length,
+    riskCount,
+    openLoopCount,
+    overdueCount,
+    severity: narrativeDebtSeverity({ debtCount: unresolvedDebts.length + openLoopCount, riskCount, openLoopCount, overdueCount })
+  };
 
   const steps: CreationRuntimeStep[] = [
     {
@@ -132,7 +168,8 @@ export async function buildCreationRuntimeSnapshot(
       hasChapterSummary,
       hasQualityReport,
       hasWritingRecap,
-      acceptedLedgerCount: acceptedLedgers.length
+      acceptedLedgerCount: acceptedLedgers.length,
+      narrativeDebt
     }
   };
 

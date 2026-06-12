@@ -15,9 +15,13 @@ import type {
   ChapterDocumentKind,
   CreationLoopAction,
   CreationLoopStep,
+  EditorSuggestion,
+  EditorSuggestionRequest,
   EditorSelection,
   BackgroundJob,
   BackgroundJobType,
+  FileDiffResult,
+  FileVersionSnapshot,
   FocusWritingGuide,
   KnowledgeIndexProjection,
   KnowledgeSearchResult,
@@ -41,6 +45,7 @@ import type {
   StyleToneKey,
   TaskProgressStep,
   WritingMode,
+  EmotionLedger,
   WritingRecapCandidate
 } from "@/types/novel";
 
@@ -192,6 +197,10 @@ export const useNovelStore = defineStore("novel", () => {
   const isExportingAuditReport = ref(false);
   const auditReportPreview = ref<ProjectAuditReport | null>(null);
   const isLoadingAuditReportPreview = ref(false);
+  const fileVersions = ref<FileVersionSnapshot[]>([]);
+  const currentFileDiff = ref<FileDiffResult | null>(null);
+  const isLoadingFileVersions = ref(false);
+  const isLoadingFileDiff = ref(false);
   const autoRunSavePipeline = ref(false);
   const savePipelineSteps = ref<SavePipelineStep[]>([]);
   const isRunningSavePipeline = ref(false);
@@ -272,6 +281,76 @@ export const useNovelStore = defineStore("novel", () => {
         )
     );
   });
+  function emotionLedgerCount(ledger?: Partial<EmotionLedger>): number {
+    return (
+      (ledger?.wounds?.length || 0) +
+      (ledger?.boons?.length || 0) +
+      (ledger?.powerShifts?.length || 0) +
+      (ledger?.openLoops?.length || 0)
+    );
+  }
+  const pendingEmotionLedgerCount = computed(() => emotionLedgerCount(recapCandidate.value?.emotionLedgerPatch));
+  const acceptedEmotionLedgerCount = computed(() => emotionLedgerCount(currentChapterSummary.value?.emotionLedger));
+  const radarBackgroundJobLabels: Record<BackgroundJobType, string> = {
+    "knowledge.index.rebuild": "知识索引",
+    "quality.series.rebuild": "质量趋势",
+    "story.graph.rebuild": "故事图谱"
+  };
+  const radarSavePipelineLabels: Record<SavePipelineStepId, string> = {
+    save: "保存",
+    recap: "回顾",
+    runtime: "运行态",
+    quality: "质量",
+    knowledge: "索引",
+    story: "图谱"
+  };
+  function latestBackgroundJob(type: BackgroundJobType): BackgroundJob | undefined {
+    return backgroundJobs.value
+      .filter((job) => job.type === type)
+      .sort((left, right) => Date.parse(right.updatedAt || right.startedAt) - Date.parse(left.updatedAt || left.startedAt))[0];
+  }
+  function backgroundJobSignals(types: BackgroundJobType[]): string[] {
+    return types.flatMap((type) => {
+      const job = latestBackgroundJob(type);
+      if (!job) return [];
+      const label = radarBackgroundJobLabels[type];
+      if (job.status === "error") return [`${label}失败`];
+      if (job.status === "running" || job.status === "pending") return [`${label}后台中`];
+      if (job.status === "cancelled") return [`${label}已取消`];
+      return [];
+    });
+  }
+  function savePipelineSignals(ids: SavePipelineStepId[]): string[] {
+    if (!savePipelineSteps.value.length) return [];
+    return ids.flatMap((id) => {
+      const step = savePipelineSteps.value.find((item) => item.id === id);
+      if (!step) return [];
+      const label = radarSavePipelineLabels[id];
+      if (step.status === "error") return [`${label}失败`];
+      if (step.status === "running") return [`${label}进行中`];
+      if (step.status === "queued") return [`${label}后台队列`];
+      if (step.status === "skipped") return [`${label}跳过`];
+      return [];
+    });
+  }
+  const recapStateSignals = computed(() => {
+    const signals: string[] = [];
+    if (pendingEmotionLedgerCount.value) signals.push(`情绪待入账 ${pendingEmotionLedgerCount.value}`);
+    if (recapCandidate.value?.summaryPatch?.keyEvents?.length) signals.push(`事件 ${recapCandidate.value.summaryPatch.keyEvents.length}`);
+    if (recapCandidate.value?.ledgerPatches?.length) signals.push(`账本补丁 ${recapCandidate.value.ledgerPatches.length}`);
+    if (acceptedEmotionLedgerCount.value) signals.push(`情绪已沉淀 ${acceptedEmotionLedgerCount.value}`);
+    return signals;
+  });
+  const runtimeNarrativeDebtSignals = computed(() => {
+    const debt = currentRuntimeSnapshot.value?.signals.narrativeDebt;
+    if (!debt?.debtCount) return [];
+    const label = debt.severity === "blocked" ? "叙事债务需交付" : debt.severity === "watch" ? "叙事债务观察" : "叙事债务稳定";
+    const parts = [`${label} ${debt.debtCount}`];
+    if (debt.overdueCount) parts.push(`逾期 ${debt.overdueCount}`);
+    if (debt.riskCount) parts.push(`风险 ${debt.riskCount}`);
+    if (debt.openLoopCount) parts.push(`情绪回路 ${debt.openLoopCount}`);
+    return [parts.join(" / ")];
+  });
   const creationLoopSteps = computed<CreationLoopStep[]>(() => {
     const savedDraftBlocked = !hasSavedDraftContent.value;
     return [
@@ -281,6 +360,7 @@ export const useNovelStore = defineStore("novel", () => {
         status: hasChapterStructure.value ? "done" : writingMode.value === "structure" ? "active" : "waiting",
         detail: hasChapterStructure.value ? "仪表盘/场景卡已形成写作约束" : "先从想法或正文反写章节骨架",
         metric: sceneCards.value.length ? `${sceneCards.value.length} 场` : currentDashboard.value?.status || "未建",
+        signals: backgroundJobSignals(["story.graph.rebuild"]),
         action: "open-structure",
         actionLabel: hasChapterStructure.value ? "查看结构" : "补结构"
       },
@@ -290,6 +370,7 @@ export const useNovelStore = defineStore("novel", () => {
         status: hasSavedDraftContent.value ? "done" : hasDraftContent.value ? "active" : writingMode.value === "focus" ? "active" : "waiting",
         detail: hasDraftContent.value ? (hasUnsavedChanges.value ? "正文已有修改，保存后进入审稿/回顾" : "正文已保存，可进入审稿") : "按下一拍生成或手写正文",
         metric: `${currentWordCount.value} 字`,
+        signals: [...(hasUnsavedChanges.value ? ["正文未保存"] : []), ...savePipelineSignals(["save"])],
         action: hasDraftContent.value && hasUnsavedChanges.value ? "save-draft" : "open-focus",
         actionLabel: hasDraftContent.value && hasUnsavedChanges.value ? "保存正文" : "去写作"
       },
@@ -299,6 +380,7 @@ export const useNovelStore = defineStore("novel", () => {
         status: hasChapterQualityReport.value ? "done" : writingMode.value === "review" ? "active" : savedDraftBlocked ? "blocked" : "waiting",
         detail: hasChapterQualityReport.value ? "已有本章质量体检结果" : savedDraftBlocked ? "需要先保存可审正文" : "检查冲突、节奏、信息释放和文风风险",
         metric: hasChapterQualityReport.value ? `${currentQualityReport.value?.overallScore || 0} 分` : "待体检",
+        signals: [...backgroundJobSignals(["quality.series.rebuild"]), ...savePipelineSignals(["quality"])],
         action: hasChapterQualityReport.value ? "open-review" : "diagnose",
         actionLabel: hasChapterQualityReport.value ? "看报告" : "体检本章"
       },
@@ -312,6 +394,7 @@ export const useNovelStore = defineStore("novel", () => {
           : hasWritingRecapTaskForCurrentChapter.value
             ? "已生成"
             : "待生成",
+        signals: [...recapStateSignals.value, ...savePipelineSignals(["recap", "runtime"])],
         action: recapCandidate.value ? "accept-recap" : "request-recap",
         actionLabel: recapCandidate.value ? "入账" : "生成回顾"
       },
@@ -320,7 +403,17 @@ export const useNovelStore = defineStore("novel", () => {
         label: "账本",
         status: hasAcceptedLedgerForCurrentChapter.value ? "done" : recapCandidate.value ? "active" : savedDraftBlocked ? "blocked" : "waiting",
         detail: hasAcceptedLedgerForCurrentChapter.value ? "本章已有账本状态沉淀" : recapCandidate.value ? "确认后写入伏笔/风险/升级账本" : "等待章后回顾产生可采纳条目",
-        metric: hasAcceptedLedgerForCurrentChapter.value ? `${ledgerEntries.value.length} 条` : "待入账",
+        metric: hasAcceptedLedgerForCurrentChapter.value
+          ? `${ledgerEntries.value.length} 条`
+          : pendingEmotionLedgerCount.value
+            ? `情绪 ${pendingEmotionLedgerCount.value}`
+            : "待入账",
+        signals: [
+          ...recapStateSignals.value,
+          ...runtimeNarrativeDebtSignals.value,
+          ...backgroundJobSignals(["knowledge.index.rebuild"]),
+          ...savePipelineSignals(["knowledge"])
+        ],
         action: recapCandidate.value ? "accept-recap" : "request-recap",
         actionLabel: recapCandidate.value ? "确认入账" : "先回顾"
       },
@@ -330,6 +423,12 @@ export const useNovelStore = defineStore("novel", () => {
         status: hasAcceptedLedgerForCurrentChapter.value || hasWritingRecapTaskForCurrentChapter.value ? "done" : "waiting",
         detail: hasAcceptedLedgerForCurrentChapter.value || hasWritingRecapTaskForCurrentChapter.value ? "下一章可读取回顾与账本继续推进" : "完成回顾和账本后，下一章上下文更稳",
         metric: currentChapter.value?.status || "当前章",
+        signals: [
+          ...(acceptedEmotionLedgerCount.value ? [`情绪线 ${acceptedEmotionLedgerCount.value}`] : []),
+          ...runtimeNarrativeDebtSignals.value,
+          ...backgroundJobSignals(["knowledge.index.rebuild", "story.graph.rebuild"]),
+          ...savePipelineSignals(["story"])
+        ],
         action: "open-structure",
         actionLabel: "规划后续"
       }
@@ -645,6 +744,42 @@ export const useNovelStore = defineStore("novel", () => {
     };
   }
 
+  function chapterOrdinal(project: NovelProject | null, chapter: NovelChapter | null): number | undefined {
+    if (!chapter) return undefined;
+    if (typeof chapter.order === "number" && chapter.order > 0) return chapter.order;
+    const index = project?.chapters.findIndex((item) => item.id === chapter.id) ?? -1;
+    if (index >= 0) return index + 1;
+    const digitMatch = `${chapter.id} ${chapter.title}`.match(/(\d+)/);
+    return digitMatch ? Number(digitMatch[1]) : undefined;
+  }
+
+  function macroPacingGuardrails(content: string, ordinal?: number): string[] {
+    if (ordinal && ordinal > 12) return [];
+    const revealOverload = countMatches(content, /真相|秘密|来历|身份|规则|幕后|答案|原来|全部|彻底|终于明白/g);
+    const finalitySignals = countMatches(content, /真相大白|尘埃落定|彻底解决|再无阻碍|完全掌握|洗清|平反|终结|结束了/g);
+    const cleanExitSignals = countMatches(content, /敌人退去|反派退去|毫无代价|没有代价|轻易解决|直接解决|不再威胁/g);
+    const risks: string[] = [];
+    if (revealOverload >= 5) risks.push("前期真相释放过载，建议只揭一角，把答案拆成后续章节的代价和误判。");
+    if (finalitySignals >= 2) risks.push("前期出现终局感表达，建议保留未解压力，避免让主线问题过早落地。");
+    if (cleanExitSignals >= 1) risks.push("核心阻力退场过轻，建议补上代价、伤痕或新的追索关系。");
+    return risks;
+  }
+
+  function currentNarrativeDebtRisks() {
+    const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
+    if (!chapterId) return [];
+    const openLedgers = ledgerEntries.value.filter((entry) => entry.status !== "resolved" && entry.chapterIds.includes(chapterId));
+    const dashboardDebtCount =
+      (currentDashboard.value?.unresolvedForeshadowingIds.length || 0) + (currentDashboard.value?.continuityRiskIds.length || 0);
+    const openLoopCount = (currentChapterSummary.value?.emotionLedger?.openLoops || []).filter((item) => item.status !== "resolved").length;
+    const riskCount = openLedgers.filter((entry) => entry.kind === "risk" || entry.kind === "continuity" || entry.status === "blocked").length;
+    const warnings: string[] = [];
+    if (openLedgers.length + dashboardDebtCount >= 3) warnings.push("叙事债务积压偏高，建议下一章优先交付一个伏笔、风险或明确延期。");
+    if (riskCount) warnings.push("存在未解决风险/连续性账本，写作前需要确认角色已知信息和状态锁。");
+    if (openLoopCount) warnings.push("情绪 open loop 尚未消化，下一场景需要给角色反应、压抑或转化。");
+    return warnings;
+  }
+
   async function diagnoseCurrentChapter() {
     const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
     const content = currentContent.value.trim();
@@ -690,6 +825,11 @@ export const useNovelStore = defineStore("novel", () => {
       "结尾具备翻页牵引。",
       "结尾钩子偏平，可以留下新问题、后果或未完成选择。"
     );
+    const tension = scoreMetric(
+      conflict.score * 0.35 + emotion.score * 0.25 + hook.score * 0.25 + rhythm.score * 0.15,
+      "情节、情绪、节奏和钩子形成了有效张力。",
+      "张力链条偏松，建议把阻力、代价、情绪反应和结尾悬念串成同一个压力源。"
+    );
 
     const metrics = [
       { key: "rhythm" as const, label: "节奏", ...rhythm },
@@ -697,11 +837,31 @@ export const useNovelStore = defineStore("novel", () => {
       { key: "emotion" as const, label: "情绪", ...emotion },
       { key: "information" as const, label: "信息", ...information },
       { key: "prose" as const, label: "文笔", ...prose },
-      { key: "hook" as const, label: "钩子", ...hook }
+      { key: "hook" as const, label: "钩子", ...hook },
+      { key: "tension" as const, label: "张力", ...tension }
     ];
+    const macroPacingRisks = macroPacingGuardrails(content, chapterOrdinal(currentProject.value, currentChapter.value));
+    const narrativeDebtRisks = currentNarrativeDebtRisks();
+    if (macroPacingRisks.length) {
+      const informationMetric = metrics.find((metric) => metric.key === "information");
+      if (informationMetric) {
+        informationMetric.score = clampScore(informationMetric.score - macroPacingRisks.length * 8);
+        informationMetric.note = `${informationMetric.note} 宏观节奏风险：${macroPacingRisks[0]}`;
+      }
+    }
+    if (narrativeDebtRisks.length) {
+      const tensionMetric = metrics.find((metric) => metric.key === "tension");
+      if (tensionMetric) {
+        tensionMetric.score = clampScore(tensionMetric.score - narrativeDebtRisks.length * 5);
+        tensionMetric.note = `${tensionMetric.note} 叙事债务：${narrativeDebtRisks[0]}`;
+      }
+    }
     const overallScore = clampScore(metrics.reduce((sum, metric) => sum + metric.score, 0) / metrics.length);
     const lowMetrics = [...metrics].sort((left, right) => left.score - right.score).slice(0, 2);
     const highMetrics = metrics.filter((metric) => metric.score >= 72).slice(0, 2);
+    const fixes = [...lowMetrics.map((metric) => `${metric.label}：${metric.note}`), ...macroPacingRisks.map((risk) => `宏观节奏：${risk}`)];
+
+    fixes.push(...narrativeDebtRisks.map((risk) => `叙事债务：${risk}`));
 
     const report: ChapterQualityReport = {
       chapterId,
@@ -712,7 +872,7 @@ export const useNovelStore = defineStore("novel", () => {
           : "这一章有可用骨架，但还需要补强读者继续读下去的压力和质感。",
       metrics,
       strengths: highMetrics.length ? highMetrics.map((metric) => `${metric.label}：${metric.note}`) : ["已有正文基础，可以继续向冲突和钩子集中。"],
-      fixes: lowMetrics.map((metric) => `${metric.label}：${metric.note}`),
+      fixes,
       updatedAt: new Date().toISOString()
     };
     currentQualityReport.value = report;
@@ -816,6 +976,7 @@ export const useNovelStore = defineStore("novel", () => {
         powerProgressionUpdates: Array.isArray(parsed.powerProgressionUpdates) ? parsed.powerProgressionUpdates : [],
         createdAt: parsed.createdAt || new Date().toISOString(),
         summaryPatch: parsed.summaryPatch,
+        emotionLedgerPatch: parsed.emotionLedgerPatch,
         factPatches: Array.isArray(parsed.factPatches) ? parsed.factPatches : undefined,
         ledgerPatches: Array.isArray(parsed.ledgerPatches) ? parsed.ledgerPatches : undefined,
         characterStatePatches: Array.isArray(parsed.characterStatePatches) ? parsed.characterStatePatches : undefined,
@@ -957,6 +1118,10 @@ export const useNovelStore = defineStore("novel", () => {
     knowledgeIndex.value = null;
     knowledgeSearchResult.value = null;
     auditReportPreview.value = null;
+    fileVersions.value = [];
+    currentFileDiff.value = null;
+    isLoadingFileVersions.value = false;
+    isLoadingFileDiff.value = false;
     savePipelineSteps.value = [];
     isRunningSavePipeline.value = false;
     structureIdeaInput.value = "";
@@ -1879,6 +2044,8 @@ export const useNovelStore = defineStore("novel", () => {
     rewriteCandidate.value = null;
     recapCandidate.value = null;
     currentQualityReport.value = null;
+    fileVersions.value = [];
+    currentFileDiff.value = null;
     await loadChapterCockpit(chapter.id);
   }
 
@@ -1909,6 +2076,9 @@ export const useNovelStore = defineStore("novel", () => {
     try {
       await novelApi.saveFile(currentProject.value.slug, currentFilePath.value, currentContent.value);
       savedContent.value = currentContent.value;
+      if (fileVersions.value.length) {
+        await loadCurrentFileVersions();
+      }
       syncDashboardWordCount();
       const hasDashboardToSave = Boolean(currentDashboard.value);
       await saveCurrentDashboard();
@@ -2149,6 +2319,56 @@ export const useNovelStore = defineStore("novel", () => {
     auditReportPreview.value = null;
   }
 
+  async function loadCurrentFileVersions() {
+    if (!currentProject.value || !currentFilePath.value) {
+      fileVersions.value = [];
+      return [];
+    }
+    isLoadingFileVersions.value = true;
+    try {
+      fileVersions.value = await novelApi.readFileVersions(currentProject.value.slug, currentFilePath.value);
+      return fileVersions.value;
+    } catch (err) {
+      error.value = `读取版本快照失败：${err instanceof Error ? err.message : String(err)}`;
+      return [];
+    } finally {
+      isLoadingFileVersions.value = false;
+    }
+  }
+
+  async function previewCurrentFileDiff(versionId: string) {
+    if (!currentProject.value || !currentFilePath.value || !versionId) return null;
+    isLoadingFileDiff.value = true;
+    try {
+      currentFileDiff.value = await novelApi.readFileDiff(currentProject.value.slug, currentFilePath.value, versionId);
+      return currentFileDiff.value;
+    } catch (err) {
+      error.value = `读取版本差异失败：${err instanceof Error ? err.message : String(err)}`;
+      return null;
+    } finally {
+      isLoadingFileDiff.value = false;
+    }
+  }
+
+  function clearCurrentFileDiff() {
+    currentFileDiff.value = null;
+  }
+
+  async function requestEditorSuggestion(input: EditorSuggestionRequest): Promise<EditorSuggestion | null> {
+    if (!currentProject.value || !currentChapter.value || !currentFilePath.value) return null;
+    try {
+      const suggestion = await novelApi.requestEditorSuggestion(currentProject.value.slug, {
+        ...input,
+        chapterId: currentChapter.value.id,
+        documentKind: currentDocumentKind.value,
+        filePath: currentFilePath.value
+      });
+      return suggestion.text.trim() ? suggestion : null;
+    } catch {
+      return null;
+    }
+  }
+
   return {
     projects,
     openWorkspaceSlugs,
@@ -2208,6 +2428,10 @@ export const useNovelStore = defineStore("novel", () => {
     isExportingAuditReport,
     auditReportPreview,
     isLoadingAuditReportPreview,
+    fileVersions,
+    currentFileDiff,
+    isLoadingFileVersions,
+    isLoadingFileDiff,
     autoRunSavePipeline,
     savePipelineSteps,
     isRunningSavePipeline,
@@ -2312,6 +2536,10 @@ export const useNovelStore = defineStore("novel", () => {
     applyTaskPatches,
     exportProjectAuditReport,
     previewProjectAuditReport,
-    clearAuditReportPreview
+    clearAuditReportPreview,
+    loadCurrentFileVersions,
+    previewCurrentFileDiff,
+    clearCurrentFileDiff,
+    requestEditorSuggestion
   };
 });

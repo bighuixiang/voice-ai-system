@@ -90,6 +90,19 @@ describe("storyGraph", () => {
         updatedAt: "2026-06-11T00:00:00.000Z"
       }
     ]);
+    await fs.writeFile(
+      path.join(root, "knowledge", "triples.jsonl"),
+      `${JSON.stringify({
+        id: "triple-gate-blood",
+        subject: "Hero",
+        predicate: "opens",
+        object: "Sealed Gate",
+        chapterIds: ["chapter-001"],
+        sourceFactIds: ["fact-gate"],
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      })}\n`,
+      "utf8"
+    );
 
     const graph = await buildStoryGraphProjection(root, project);
     const saved = JSON.parse(await fs.readFile(path.join(root, "story-graph", "storyline.json"), "utf8"));
@@ -98,13 +111,17 @@ describe("storyGraph", () => {
       expect.objectContaining({ id: "arc:arc-main", type: "arc" }),
       expect.objectContaining({ id: "character:hero", type: "character" }),
       expect.objectContaining({ id: "event:gate-opens", type: "event" }),
-      expect.objectContaining({ id: "ledger:foreshadow-1", type: "ledger" })
+      expect.objectContaining({ id: "ledger:foreshadow-1", type: "ledger" }),
+      expect.objectContaining({ id: "knowledge:hero", type: "knowledge" }),
+      expect.objectContaining({ id: "knowledge:sealed-gate", type: "knowledge" })
     ]));
     expect(graph.edges).toEqual(expect.arrayContaining([
       expect.objectContaining({ source: "arc:arc-main", target: "chapter:chapter-001", type: "contains" }),
       expect.objectContaining({ source: "event:gate-opens", target: "character:hero", type: "involves" }),
       expect.objectContaining({ source: "ledger:foreshadow-1", target: "chapter:chapter-001", type: "tracks" }),
-      expect.objectContaining({ source: "ledger:foreshadow-1", target: "character:hero", type: "references" })
+      expect.objectContaining({ source: "ledger:foreshadow-1", target: "character:hero", type: "references" }),
+      expect.objectContaining({ source: "knowledge:hero", target: "knowledge:sealed-gate", type: "asserts", label: "opens" }),
+      expect.objectContaining({ source: "knowledge:hero", target: "chapter:chapter-001", type: "references", label: "knowledge" })
     ]));
     expect(saved).toMatchObject({
       projectSlug: project.slug,

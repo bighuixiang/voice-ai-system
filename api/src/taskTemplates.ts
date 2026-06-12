@@ -45,6 +45,56 @@ function buildTaskContract(type: CodexTaskType) {
                 summary: "Concise chapter memory summary.",
                 keyEvents: ["Major irreversible events from the saved chapter."]
               },
+              emotionLedgerPatch: {
+                wounds: [
+                  {
+                    id: "emotion-wound-chapter-001-001",
+                    chapterId: "chapter-001",
+                    characterName: "Character name",
+                    description: "Emotional wound, fear, shame, obsession, or unresolved pain created or sharpened in this chapter.",
+                    cause: "Concrete scene or choice that caused it.",
+                    status: "open",
+                    relatedEntities: ["character/location/item/faction"],
+                    updatedAt: "ISO timestamp"
+                  }
+                ],
+                boons: [
+                  {
+                    id: "emotion-boon-chapter-001-001",
+                    chapterId: "chapter-001",
+                    characterName: "Character name",
+                    description: "Trust, recognition, healing, hope, or emotional resource earned in this chapter.",
+                    cause: "Concrete scene or choice that caused it.",
+                    status: "active",
+                    relatedEntities: ["character/location/item/faction"],
+                    updatedAt: "ISO timestamp"
+                  }
+                ],
+                powerShifts: [
+                  {
+                    id: "emotion-shift-chapter-001-001",
+                    chapterId: "chapter-001",
+                    characterName: "Character name",
+                    description: "Relationship or status power shift that changes future behavior.",
+                    cause: "Concrete scene or choice that caused it.",
+                    status: "active",
+                    relatedEntities: ["character/location/item/faction"],
+                    updatedAt: "ISO timestamp"
+                  }
+                ],
+                openLoops: [
+                  {
+                    id: "emotion-loop-chapter-001-001",
+                    chapterId: "chapter-001",
+                    characterName: "Character name",
+                    description: "Emotional question, debt, promise, or unresolved need that should pull a later chapter.",
+                    cause: "Concrete scene or choice that caused it.",
+                    status: "open",
+                    relatedEntities: ["character/location/item/faction"],
+                    updatedAt: "ISO timestamp"
+                  }
+                ]
+              },
               factPatches: [
                 {
                   id: "fact-chapter-001-001",

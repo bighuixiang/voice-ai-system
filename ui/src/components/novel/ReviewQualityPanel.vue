@@ -3,7 +3,7 @@
     <header>
       <div>
         <div class="panel-title">章节体检</div>
-        <p>检查冲突、节奏、情绪、信息、文笔和钩子。</p>
+        <p>检查冲突、节奏、情绪、信息、文笔、钩子和张力。</p>
       </div>
       <el-button :disabled="!canDiagnose" @click="$emit('diagnose')">
         <el-icon><DataAnalysis /></el-icon>
@@ -106,6 +106,16 @@
         </div>
       </div>
 
+      <div v-if="visibleNarrativeDebtSignals.length" class="signal-block">
+        <strong>叙事债务</strong>
+        <div class="signal-list">
+          <div v-for="signal in visibleNarrativeDebtSignals" :key="signal.chapterId" class="signal-row">
+            <span>{{ signal.chapterTitle }}</span>
+            <em>{{ narrativeDebtLabel(signal) }}</em>
+          </div>
+        </div>
+      </div>
+
       <div v-if="visibleRhythmSignals.length" class="signal-block">
         <strong>章节节奏</strong>
         <div class="signal-list">
@@ -182,6 +192,7 @@ const weakestSeriesMetrics = computed(() => props.seriesMetrics?.metricAverages.
 const visibleQualityTrends = computed(() => props.seriesMetrics?.qualityTrends?.slice(0, 4) || []);
 const visibleTensionCurve = computed(() => props.seriesMetrics?.tensionCurve?.slice(0, 4) || []);
 const visibleStyleDriftSignals = computed(() => props.seriesMetrics?.styleDriftSignals?.slice(0, 4) || []);
+const visibleNarrativeDebtSignals = computed(() => props.seriesMetrics?.narrativeDebtSignals?.slice(0, 4) || []);
 const visibleRhythmSignals = computed(() => props.seriesMetrics?.rhythmSignals?.slice(0, 3) || []);
 const visibleCharacterArcSignals = computed(() => props.seriesMetrics?.characterArcSignals?.slice(0, 3) || []);
 
@@ -208,6 +219,10 @@ function styleDriftLabel(signal: NonNullable<SeriesQualityMetrics["styleDriftSig
   const drift = signal.drift > 0 ? `+${signal.drift}` : String(signal.drift);
   const severity = signal.severity === "review" ? "需复核" : signal.severity === "watch" ? "观察" : "稳定";
   return `${severity} · ${drift} · ${signal.proseScore}/${signal.baselineScore}`;
+}
+function narrativeDebtLabel(signal: NonNullable<SeriesQualityMetrics["narrativeDebtSignals"]>[number]) {
+  const severity = signal.severity === "blocked" ? "需交付" : signal.severity === "watch" ? "观察" : "稳定";
+  return `${severity} · ${signal.debtCount} 项 · 伏笔 ${signal.openForeshadowingCount} / 风险 ${signal.riskCount} / 回路 ${signal.openLoopCount}`;
 }
 </script>
 

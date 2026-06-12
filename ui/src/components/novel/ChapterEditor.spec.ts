@@ -56,6 +56,14 @@ describe("ChapterEditor", () => {
     expect(wrapper.find("textarea").attributes("wrap")).toBe("soft");
   });
 
+  it("emits save from the editor shortcut in fallback mode", async () => {
+    const wrapper = mountEditor();
+
+    await wrapper.find("textarea").trigger("keydown", { key: "s", ctrlKey: true });
+
+    expect(wrapper.emitted("save")).toHaveLength(1);
+  });
+
   it("captures the selected region without changing content", async () => {
     const wrapper = mountEditor({
       content: "mountain wind stopped suddenly"

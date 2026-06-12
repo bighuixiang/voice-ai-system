@@ -153,6 +153,8 @@ The protagonist records a clean decision so the mock recap can be accepted later
 
     await expect(page.locator(".save-pipeline-panel .step-item.done")).toHaveCount(3, { timeout: 45_000 });
     await expect(page.locator(".save-pipeline-panel .step-item.queued")).toHaveCount(3, { timeout: 45_000 });
+    await expect(page.locator(".creation-loop-panel .loop-radar")).toBeVisible();
+    await expect(page.locator(".creation-loop-panel .loop-radar")).toContainText(/进行中|后台队列|处理中|质量|索引|图谱/);
     await waitForWorkflowArtifacts(request, project, chapter!.id);
 
     await openReviewMode(page);
@@ -163,6 +165,7 @@ The protagonist records a clean decision so the mock recap can be accepted later
     await page.locator(".task-history-panel .report-actions button").first().click();
     await expect(page.locator(".audit-report-panel")).toBeVisible();
     await expect(page.locator(".audit-report-panel .metric-strip")).toBeVisible();
+    await expect(page.locator(".audit-report-panel")).toContainText("Task Health");
   } finally {
     await deleteSmokeProject(request, project);
   }

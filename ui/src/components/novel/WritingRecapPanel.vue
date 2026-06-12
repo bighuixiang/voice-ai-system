@@ -59,10 +59,22 @@
         </ul>
       </div>
 
+      <div v-if="emotionLedgerItems.length" class="recap-section">
+        <h3>情绪账本补丁</h3>
+        <ul>
+          <li v-for="item in emotionLedgerItems" :key="`${item.kind}-${item.id}`">
+            <strong>{{ item.label }}</strong>
+            <span> - {{ item.characterName || "未指定角色" }}：{{ item.description }}</span>
+            <small v-if="item.cause">{{ item.cause }}</small>
+          </li>
+        </ul>
+      </div>
+
       <div class="ledger-preview">
         <span>伏笔 {{ candidate.foreshadowingUpdates.length }}</span>
         <span>风险 {{ candidate.continuityRisks.length }}</span>
         <span>升级 {{ candidate.powerProgressionUpdates.length }}</span>
+        <span v-if="emotionLedgerItems.length">情绪 {{ emotionLedgerItems.length }}</span>
       </div>
 
       <div v-if="ledgerPatchItems.length" class="recap-section">
@@ -101,6 +113,17 @@ const ledgerPatchItems = computed<LedgerEntry[]>(() => [
   ...(props.candidate?.ledgerPatches || []),
   ...(props.candidate?.riskPatches || [])
 ]);
+
+const emotionLedgerItems = computed(() => {
+  const ledger = props.candidate?.emotionLedgerPatch;
+  if (!ledger) return [];
+  return [
+    ...(ledger.wounds || []).map((item) => ({ ...item, kind: "wounds", label: "伤口" })),
+    ...(ledger.boons || []).map((item) => ({ ...item, kind: "boons", label: "收益" })),
+    ...(ledger.powerShifts || []).map((item) => ({ ...item, kind: "powerShifts", label: "权力变化" })),
+    ...(ledger.openLoops || []).map((item) => ({ ...item, kind: "openLoops", label: "未闭合问题" }))
+  ];
+});
 
 defineEmits<{
   accept: [];

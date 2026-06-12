@@ -26,10 +26,19 @@
             <span>Prompt {{ formatCount(item.invocation.promptSnapshot.length) }} 字</span>
             <span>耗时 {{ formatDuration(item.invocation.attempt.durationMs) }}</span>
             <span>{{ decisionLabel(item.invocation.adoptionDecision) }}</span>
+            <span v-if="item.invocation.promptVersion">版本 {{ item.invocation.promptVersion }}</span>
+            <span v-if="item.invocation.preCallReview">
+              预检 {{ reviewLabel(item.invocation.preCallReview.status) }}
+              <template v-if="item.invocation.preCallReview.warnings.length"> · {{ item.invocation.preCallReview.warnings.length }} 警告</template>
+            </span>
+            <span v-if="item.invocation.variablePlan?.target">目标 {{ item.invocation.variablePlan.target }}</span>
+          </div>
+          <div v-if="tierSummary(item.invocation)" class="audit-chip-list tier" aria-label="上下文预算分层">
+            <span>{{ tierSummary(item.invocation) }}</span>
           </div>
           <div v-if="item.invocation.contextSnapshot.blocks.length" class="audit-chip-list" aria-label="上下文块">
             <span v-for="block in item.invocation.contextSnapshot.blocks.slice(0, 4)" :key="block.title">
-              {{ block.title }} · {{ formatCount(block.length) }}
+              {{ block.tier ? `${block.tier} · ` : "" }}{{ block.title }} · {{ formatCount(block.length) }}{{ block.truncated ? " · 已压缩" : "" }}
             </span>
           </div>
           <p v-if="item.invocation.promptSnapshot.preview" class="audit-preview">{{ item.invocation.promptSnapshot.preview }}</p>
@@ -139,6 +148,10 @@ function decisionLabel(value: AiInvocationSession["adoptionDecision"]) {
   return labels[value];
 }
 
+function reviewLabel(value: NonNullable<AiInvocationSession["preCallReview"]>["status"]) {
+  return value === "pass" ? "通过" : "需关注";
+}
+
 function formatDuration(value?: number) {
   if (!value) return "未知";
   if (value >= 1000) return `${(value / 1000).toFixed(1)}s`;
@@ -147,6 +160,14 @@ function formatDuration(value?: number) {
 
 function stageLabel(invocation: AiInvocationSession) {
   return stageLabels.value[invocation.stageKey] || invocation.stageKey;
+}
+
+function tierSummary(invocation: AiInvocationSession) {
+  const counts = invocation.contextSnapshot.tierCounts || invocation.variablePlan?.contextTierCounts;
+  if (!counts) return "";
+  const parts = (["T0", "T1", "T2", "T3"] as const).map((tier) => `${tier} ${counts[tier] || 0}`);
+  const truncated = invocation.contextSnapshot.truncatedBlocks?.length ? ` · 压缩 ${invocation.contextSnapshot.truncatedBlocks.length}` : "";
+  return `${parts.join(" / ")}${truncated}`;
 }
 
 function auditSummary(invocation: AiInvocationSession) {

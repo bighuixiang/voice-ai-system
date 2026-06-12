@@ -29,7 +29,9 @@
         />
     </div>
 
+    <div v-if="!usePlainTextarea" ref="monacoHost" class="monaco-host" :aria-label="`Markdown ${documentLabel}`" />
     <textarea
+      v-else
       ref="textareaRef"
       class="editor-textarea"
       :value="content"
@@ -37,6 +39,7 @@
       wrap="soft"
       :aria-label="`Markdown ${documentLabel}`"
       @input="handleInput"
+      @keydown="handlePlainKeydown"
       @select="emitSelection"
       @keyup="emitSelection"
       @mouseup="emitSelection"
@@ -45,10 +48,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { DocumentChecked, Notebook, Reading } from "@element-plus/icons-vue";
 import WorkbenchSegmentedControl from "@/components/common/WorkbenchSegmentedControl.vue";
-import type { ChapterDocumentKind, EditorSelection, NovelChapter } from "@/types/novel";
+import type { ChapterDocumentKind, EditorSelection, EditorSuggestion, EditorSuggestionRequest, NovelChapter } from "@/types/novel";
+
+type MonacoApi = typeof import("monaco-editor/esm/vs/editor/editor.api");
+type MonacoEditor = import("monaco-editor").editor.IStandaloneCodeEditor;
+type MonacoDisposable = import("monaco-editor").IDisposable;
 
 const props = withDefaults(
   defineProps<{
@@ -61,9 +68,11 @@ const props = withDefaults(
   saveStateLabel: string;
   isSaving: boolean;
   wordCount?: number;
+  suggestionProvider?: (input: EditorSuggestionRequest) => Promise<EditorSuggestion | null>;
   }>(),
   {
-    wordCount: 0
+    wordCount: 0,
+    suggestionProvider: undefined
   }
 );
 
@@ -92,6 +101,14 @@ const documentOptions = [
 ];
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const monacoHost = ref<HTMLElement | null>(null);
+const usePlainTextarea = ref(shouldUsePlainTextarea());
+let monaco: MonacoApi | null = null;
+let editor: MonacoEditor | null = null;
+let contentDisposable: MonacoDisposable | null = null;
+let selectionDisposable: MonacoDisposable | null = null;
+let inlineSuggestionDisposable: MonacoDisposable | null = null;
+let suppressEditorChange = false;
 
 function switchDocument(value: string) {
   emit("switch-document", value as ChapterDocumentKind);
@@ -99,6 +116,16 @@ function switchDocument(value: string) {
 
 function handleInput(event: Event) {
   emit("update:content", (event.target as HTMLTextAreaElement).value);
+}
+
+function isSaveShortcut(event: KeyboardEvent) {
+  return (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "s";
+}
+
+function handlePlainKeydown(event: KeyboardEvent) {
+  if (!isSaveShortcut(event)) return;
+  event.preventDefault();
+  emit("save");
 }
 
 function emitSelection() {
@@ -125,6 +152,198 @@ function emitSelection() {
     end
   });
 }
+
+function shouldUsePlainTextarea() {
+  if (typeof window === "undefined" || typeof navigator === "undefined" || typeof navigator.userAgent === "string" && navigator.userAgent.includes("jsdom")) {
+    return true;
+  }
+  const pointerIsCoarse = typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches;
+  return Boolean(navigator.maxTouchPoints > 0 || pointerIsCoarse);
+}
+
+async function loadMonaco(): Promise<MonacoApi> {
+  if (typeof window !== "undefined") {
+    const monacoWindow = window as Window & {
+      MonacoEnvironment?: { getWorker: () => Worker };
+    };
+    monacoWindow.MonacoEnvironment ||= {
+      getWorker() {
+        return new Worker(new URL("monaco-editor/esm/vs/editor/editor.worker.js", import.meta.url), { type: "module" });
+      }
+    };
+  }
+  return import("monaco-editor/esm/vs/editor/editor.api");
+}
+
+async function initMonacoEditor() {
+  if (usePlainTextarea.value || editor || !monacoHost.value) return;
+  try {
+    monaco = await loadMonaco();
+    monaco.editor.defineTheme("plotpilot-dark", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [
+        { token: "", foreground: "d7dee8", background: "0b1120" },
+        { token: "comment", foreground: "94a3b8" }
+      ],
+      colors: {
+        "editor.background": "#0b1120",
+        "editor.foreground": "#d7dee8",
+        "editorLineNumber.foreground": "#64748b",
+        "editorCursor.foreground": "#38bdf8",
+        "editor.selectionBackground": "#2563eb55",
+        "editor.inactiveSelectionBackground": "#33415588",
+        "editorGhostText.foreground": "#94a3b8",
+        "editorGutter.background": "#0b1120",
+        "minimap.background": "#0b1120",
+        "minimapSlider.background": "#33415555",
+        "minimapSlider.hoverBackground": "#47556977",
+        "minimapSlider.activeBackground": "#64748b88"
+      }
+    });
+
+    const activeEditor = monaco.editor.create(monacoHost.value, {
+      value: props.content,
+      language: "markdown",
+      theme: "plotpilot-dark",
+      automaticLayout: true,
+      fontFamily: '"Microsoft YaHei", "PingFang SC", "Source Han Sans SC", sans-serif',
+      fontSize: 16,
+      lineHeight: 30,
+      minimap: {
+        enabled: true,
+        side: "right",
+        size: "fit",
+        maxColumn: 80,
+        renderCharacters: false,
+        scale: 1,
+        showSlider: "mouseover"
+      },
+      wordWrap: "on",
+      wrappingIndent: "same",
+      scrollBeyondLastLine: false,
+      renderWhitespace: "selection",
+      smoothScrolling: true,
+      tabSize: 2,
+      quickSuggestions: false,
+      suggestOnTriggerCharacters: false,
+      inlineSuggest: {
+        enabled: true,
+        showToolbar: "never"
+      }
+    });
+    editor = activeEditor;
+
+    contentDisposable = activeEditor.onDidChangeModelContent(() => {
+      if (!editor || suppressEditorChange) return;
+      emit("update:content", editor.getValue());
+    });
+    selectionDisposable = activeEditor.onDidChangeCursorSelection(emitMonacoSelection);
+    activeEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => emit("save"));
+    registerInlineSuggestions();
+  } catch {
+    disposeMonacoEditor();
+    usePlainTextarea.value = true;
+    await nextTick();
+  }
+}
+
+function registerInlineSuggestions() {
+  if (!monaco || inlineSuggestionDisposable) return;
+  const monacoApi = monaco;
+  inlineSuggestionDisposable = monaco.languages.registerInlineCompletionsProvider("markdown", {
+    async provideInlineCompletions(model, position, _context, token) {
+      if (!props.suggestionProvider || !props.filePath || token.isCancellationRequested) {
+        return { items: [] };
+      }
+      const offset = model.getOffsetAt(position);
+      const beforeText = model.getValue().slice(Math.max(0, offset - 1600), offset);
+      const afterText = model.getValue().slice(offset, offset + 800);
+      if (beforeText.trim().length < 8) return { items: [] };
+      const suggestion = await props.suggestionProvider({
+        filePath: props.filePath,
+        chapterId: props.chapter?.id,
+        documentKind: props.documentKind,
+        beforeText,
+        afterText
+      });
+      if (!suggestion?.text || token.isCancellationRequested) return { items: [] };
+      return {
+        items: [
+          {
+            insertText: suggestion.text,
+            range: new monacoApi.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+          }
+        ]
+      };
+    },
+    disposeInlineCompletions() {
+      // Monaco owns these short-lived completion objects.
+    }
+  });
+}
+
+function emitMonacoSelection() {
+  const activeEditor = editor;
+  const model = activeEditor?.getModel();
+  const selection = activeEditor?.getSelection();
+  if (!activeEditor || !model || !selection || selection.isEmpty() || !props.filePath) {
+    emit("selection", null);
+    return;
+  }
+  const start = model.getOffsetAt(selection.getStartPosition());
+  const end = model.getOffsetAt(selection.getEndPosition());
+  const value = model.getValue();
+  emit("selection", {
+    filePath: props.filePath,
+    selectedText: value.slice(start, end),
+    beforeText: value.slice(Math.max(0, start - 600), start),
+    afterText: value.slice(end, Math.min(value.length, end + 600)),
+    start,
+    end
+  });
+}
+
+function syncEditorValue(content: string) {
+  if (!editor || editor.getValue() === content) return;
+  suppressEditorChange = true;
+  editor.setValue(content);
+  suppressEditorChange = false;
+}
+
+function disposeMonacoEditor() {
+  contentDisposable?.dispose();
+  selectionDisposable?.dispose();
+  inlineSuggestionDisposable?.dispose();
+  editor?.dispose();
+  contentDisposable = null;
+  selectionDisposable = null;
+  inlineSuggestionDisposable = null;
+  editor = null;
+}
+
+onMounted(() => {
+  initMonacoEditor();
+});
+
+onBeforeUnmount(() => {
+  disposeMonacoEditor();
+});
+
+watch(
+  () => props.content,
+  (content) => {
+    syncEditorValue(content);
+  }
+);
+
+watch(
+  () => props.documentKind,
+  () => {
+    if (!monaco || !editor?.getModel()) return;
+    monaco.editor.setModelLanguage(editor.getModel()!, "markdown");
+  }
+);
 </script>
 
 <style scoped lang="scss">
@@ -259,11 +478,19 @@ function emitSelection() {
   background: var(--app-bg-soft);
 }
 
-.editor-textarea {
+.editor-textarea,
+.monaco-host {
   box-sizing: border-box;
   flex: 1;
   width: 100%;
   min-height: 480px;
+}
+
+.monaco-host {
+  background: var(--app-bg);
+}
+
+.editor-textarea {
   max-width: 100%;
   resize: none;
   border: 0;

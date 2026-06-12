@@ -92,6 +92,24 @@
         </article>
 
         <article>
+          <div class="section-title">Task Health</div>
+          <div class="fact-row">
+            <span>Failed / cancelled</span>
+            <strong>{{ taskFailureCount }}</strong>
+          </div>
+          <div class="fact-row">
+            <span>Timeout budgeted</span>
+            <strong>{{ timeoutTaskCount }}</strong>
+          </div>
+          <div class="job-list">
+            <div v-for="task in unhealthyTasks.slice(0, 4)" :key="task.id">
+              <span>{{ task.type }}</span>
+              <strong>{{ taskHealthLabel(task) }}</strong>
+            </div>
+          </div>
+        </article>
+
+        <article>
           <div class="section-title">Adoption</div>
           <div class="fact-row">
             <span>Proposed patches</span>
@@ -105,6 +123,27 @@
             <span v-for="item in adoptionRows" :key="item.id">{{ item.id }} {{ item.count }}</span>
           </div>
         </article>
+
+        <article>
+          <div class="section-title">AI Control Plane</div>
+          <div class="fact-row">
+            <span>Pre-call warnings</span>
+            <strong>{{ preCallWarningTotal }}</strong>
+          </div>
+          <div class="fact-row">
+            <span>Compressed context</span>
+            <strong>{{ report.aiInvocationSummary.truncatedContextBlocks.length }} blocks</strong>
+          </div>
+          <div class="step-list">
+            <span v-for="item in tierRows" :key="item.id">{{ item.id }} {{ item.count }}</span>
+          </div>
+          <div class="step-list">
+            <span v-for="item in promptVersionRows.slice(0, 3)" :key="item.id">{{ item.id }} {{ item.count }}</span>
+          </div>
+          <div class="step-list warning-list">
+            <span v-for="item in preCallWarningRows.slice(0, 3)" :key="item.id">{{ item.id }} {{ item.count }}</span>
+          </div>
+        </article>
       </section>
     </div>
   </section>
@@ -112,7 +151,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { ProjectAuditReport } from "@/types/novel";
+import type { NovelTask, ProjectAuditReport } from "@/types/novel";
 
 const props = defineProps<{
   report: ProjectAuditReport | null;
@@ -140,6 +179,33 @@ const adoptionRows = computed(() =>
   Object.entries(props.report?.aiInvocationSummary.byDecision || {}).map(([id, count]) => ({ id, count }))
 );
 
+const tierRows = computed(() =>
+  (["T0", "T1", "T2", "T3"] as const).map((id) => ({ id, count: props.report?.aiInvocationSummary.contextTierTotals[id] || 0 }))
+);
+
+const promptVersionRows = computed(() =>
+  Object.entries(props.report?.aiInvocationSummary.promptVersions || {})
+    .map(([id, count]) => ({ id, count }))
+    .sort((left, right) => right.count - left.count || left.id.localeCompare(right.id))
+);
+
+const preCallWarningRows = computed(() =>
+  Object.entries(props.report?.aiInvocationSummary.preCallWarnings || {})
+    .map(([id, count]) => ({ id, count }))
+    .sort((left, right) => right.count - left.count || left.id.localeCompare(right.id))
+);
+
+const preCallWarningTotal = computed(() => preCallWarningRows.value.reduce((sum, item) => sum + item.count, 0));
+const taskFailureCount = computed(
+  () => (props.report?.taskSummary.byStatus.error || 0) + (props.report?.taskSummary.byStatus.cancelled || 0)
+);
+const timeoutTaskCount = computed(() => (props.report?.taskSummary.latestTasks || []).filter((task) => task.timeoutMs).length);
+const unhealthyTasks = computed(() =>
+  (props.report?.taskSummary.latestTasks || []).filter(
+    (task) => task.status === "error" || task.status === "cancelled" || Boolean(task.cancelRequestedAt)
+  )
+);
+
 function formatTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -149,6 +215,22 @@ function formatTime(value: string) {
     hour: "2-digit",
     minute: "2-digit"
   });
+}
+
+function formatDuration(value?: number) {
+  if (!value) return "";
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}s`;
+  return `${value}ms`;
+}
+
+function taskHealthLabel(task: Pick<NovelTask, "status" | "error" | "durationMs" | "timeoutMs" | "cancelRequestedAt">) {
+  const parts: string[] = [task.status];
+  const duration = formatDuration(task.durationMs);
+  if (duration) parts.push(duration);
+  if (task.timeoutMs) parts.push(`timeout ${formatDuration(task.timeoutMs)}`);
+  if (task.cancelRequestedAt) parts.push("cancel requested");
+  if (task.error) parts.push(task.error);
+  return parts.join(" · ");
 }
 </script>
 
@@ -276,6 +358,11 @@ function formatTime(value: string) {
   background: var(--app-bg-soft);
   color: var(--app-text-secondary);
   font-size: 12px;
+}
+
+.warning-list span {
+  border-color: color-mix(in srgb, var(--app-warning-text) 45%, var(--app-border));
+  color: var(--app-warning-text);
 }
 
 .job-list {

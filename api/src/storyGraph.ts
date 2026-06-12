@@ -3,6 +3,7 @@ import path from "node:path";
 import type { LedgerEntry, NovelChapter, NovelProject, StoryGraphEdge, StoryGraphNode, StoryGraphProjection } from "./types.js";
 import { readLedgerEntries, readStoryControl } from "./writingCockpit.js";
 import { resolveInside } from "./pathSafety.js";
+import { readKnowledgeIndex } from "./knowledgeIndex.js";
 
 const ledgerKinds: LedgerEntry["kind"][] = ["foreshadowing", "continuity", "power", "character", "risk"];
 
@@ -42,6 +43,21 @@ function addEdge(edges: Map<string, StoryGraphEdge>, edge: StoryGraphEdge): void
 
 function entityKey(input: string): string {
   return input.trim().toLowerCase();
+}
+
+function knowledgeNodeId(input: string): string {
+  const key = input
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fff-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 90);
+  return `knowledge:${key || "entity"}`;
+}
+
+function mergeChapterIds(left: string[] = [], right: string[] = []): string[] {
+  return [...new Set([...left, ...right].filter(Boolean))];
 }
 
 export async function buildStoryGraphProjection(root: string, project: NovelProject): Promise<StoryGraphProjection> {
@@ -171,6 +187,56 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
         target: characterId,
         type: "references",
         label: entry.kind
+      });
+    }
+  }
+
+  const knowledge = await readKnowledgeIndex(root, project);
+  for (const triple of knowledge.triples) {
+    const subject = triple.subject.trim();
+    const object = triple.object.trim();
+    if (!subject || !object) continue;
+    const subjectId = knowledgeNodeId(subject);
+    const objectId = knowledgeNodeId(object);
+    const subjectExisting = nodes.get(subjectId);
+    const objectExisting = nodes.get(objectId);
+    addNode(nodes, {
+      id: subjectId,
+      type: "knowledge",
+      label: subject,
+      subtitle: "subject",
+      status: "indexed",
+      chapterIds: mergeChapterIds(subjectExisting?.chapterIds, triple.chapterIds)
+    });
+    addNode(nodes, {
+      id: objectId,
+      type: "knowledge",
+      label: object,
+      subtitle: "object",
+      status: "indexed",
+      chapterIds: mergeChapterIds(objectExisting?.chapterIds, triple.chapterIds)
+    });
+    addEdge(edges, {
+      id: `triple:${triple.id}`,
+      source: subjectId,
+      target: objectId,
+      type: "asserts",
+      label: triple.predicate || "asserts"
+    });
+    for (const chapterId of triple.chapterIds || []) {
+      addEdge(edges, {
+        id: `triple:${triple.id}->chapter:${chapterId}`,
+        source: subjectId,
+        target: `chapter:${chapterId}`,
+        type: "references",
+        label: "knowledge"
+      });
+      addEdge(edges, {
+        id: `chapter:${chapterId}->${objectId}`,
+        source: `chapter:${chapterId}`,
+        target: objectId,
+        type: "references",
+        label: "knowledge"
       });
     }
   }

@@ -287,6 +287,16 @@ describe("writingCockpit", () => {
         ]
       })
     );
+    await saveLedgerEntries(tempRoot, "foreshadowing", [
+      ledgerEntry({
+        id: "seal-payoff",
+        kind: "foreshadowing",
+        title: "Seal payoff",
+        status: "open",
+        severity: "medium",
+        expectedResolutionChapterId: "chapter-001"
+      })
+    ]);
     await saveChapterDashboard(tempRoot, dashboard({ chapterId: "chapter-002", wordCount: 900 }));
     await saveChapterSummary(tempRoot, {
       chapterId: "chapter-002",
@@ -392,6 +402,13 @@ describe("writingCockpit", () => {
       severity: "watch",
       note: "Voice softened."
     });
+    expect(metrics.narrativeDebtSignals?.[0]).toMatchObject({
+      chapterId: "chapter-001",
+      debtCount: 1,
+      openForeshadowingCount: 1,
+      overdueCount: 1,
+      severity: "blocked"
+    });
 
     const saved = JSON.parse(await fs.readFile(path.join(tempRoot, "quality", "series-metrics.json"), "utf8"));
     expect(saved.averageOverallScore).toBe(76);
@@ -400,6 +417,7 @@ describe("writingCockpit", () => {
     expect(saved.qualityTrends[0].key).toBe("overall");
     expect(saved.tensionCurve[0].tensionScore).toBe(78.2);
     expect(saved.styleDriftSignals[0].chapterId).toBe("chapter-002");
+    expect(saved.narrativeDebtSignals[0].chapterId).toBe("chapter-001");
     await expect(readSeriesQualityMetrics(tempRoot, project())).resolves.toMatchObject({ reportCount: 2 });
   });
 
@@ -478,6 +496,32 @@ describe("writingCockpit", () => {
         summary: "The protagonist learned the seal answers blood.",
         keyEvents: ["Blood touched the seal.", "The seal answered."]
       },
+      emotionLedgerPatch: {
+        wounds: [
+          {
+            id: "emotion-wound-1",
+            chapterId: "chapter-001",
+            characterName: "Hero",
+            description: "Pain now means the seal is listening.",
+            cause: "Blood touched the seal.",
+            status: "open",
+            relatedEntities: ["seal"],
+            updatedAt: "2026-06-04T00:00:00.000Z"
+          }
+        ],
+        openLoops: [
+          {
+            id: "emotion-loop-1",
+            chapterId: "chapter-001",
+            characterName: "Hero",
+            description: "He still needs to know who taught the seal to answer blood.",
+            cause: "The seal answered with intent.",
+            status: "open",
+            relatedEntities: ["seal"],
+            updatedAt: "2026-06-04T00:00:00.000Z"
+          }
+        ]
+      },
       factPatches: [factPatch()],
       characterStatePatches: [characterPatch()],
       ledgerPatches: [ledgerEntry({ id: "foreshadowing-1", kind: "foreshadowing", title: "Blood key" })],
@@ -493,6 +537,8 @@ describe("writingCockpit", () => {
     });
     expect(summary.newFacts[0]).toMatchObject({ id: "fact-1", status: "accepted" });
     expect(summary.characterStateChanges[0]).toMatchObject({ id: "character-state-1", status: "accepted" });
+    expect(summary.emotionLedger?.wounds[0]).toMatchObject({ id: "emotion-wound-1", description: "Pain now means the seal is listening." });
+    expect(summary.emotionLedger?.openLoops[0]).toMatchObject({ id: "emotion-loop-1", status: "open" });
     expect(summary.foreshadowingUpdates.map((entry) => entry.id)).toEqual(["foreshadowing-1"]);
     expect(summary.continuityRisks.map((entry) => entry.id)).toEqual(["risk-1"]);
     expect(summary.powerProgressionUpdates.map((entry) => entry.id)).toEqual(["power-1"]);

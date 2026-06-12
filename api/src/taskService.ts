@@ -1,6 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { AiInvocationSession, CodexTaskType, CodexTaskResult, NovelFilePatch, NovelTask } from "./types.js";
+import type {
+  AiInvocationContextSnapshot,
+  AiInvocationContextTier,
+  AiInvocationSession,
+  CodexTaskType,
+  CodexTaskResult,
+  NovelFilePatch,
+  NovelTask
+} from "./types.js";
 import { resolveAgentProfile } from "./agentConfig.js";
 import { readPlatformAiConfig } from "./platformAiConfig.js";
 import { buildTaskPrompt } from "./taskTemplates.js";
@@ -195,6 +203,10 @@ function previewText(input: string, limit = 240): string {
   return normalized.length > limit ? `${normalized.slice(0, limit)}...` : normalized;
 }
 
+function promptVersionForTask(type: CodexTaskType): string {
+  return `task-template:${type}:v2`;
+}
+
 function promptSnapshot(prompt: string, contextBlocks: Array<{ title: string; content: string }>) {
   return {
     length: prompt.length,
@@ -203,14 +215,78 @@ function promptSnapshot(prompt: string, contextBlocks: Array<{ title: string; co
   };
 }
 
+interface ContextBudgetBlockPlan {
+  title: string;
+  tier?: AiInvocationContextTier;
+  truncated?: boolean;
+}
+
+function contextBudgetPlan(contextBlocks: Array<{ title: string; content: string }>): Map<string, ContextBudgetBlockPlan> {
+  const budgetBlock = contextBlocks.find((block) => block.title === "上下文预算日志");
+  if (!budgetBlock) return new Map();
+  try {
+    const parsed = JSON.parse(budgetBlock.content) as { blockPlan?: ContextBudgetBlockPlan[] };
+    return new Map((parsed.blockPlan || []).filter((block) => block.title).map((block) => [block.title, block]));
+  } catch {
+    return new Map();
+  }
+}
+
 function contextSnapshot(contextBlocks: Array<{ title: string; content: string }>) {
+  const budgetPlan = contextBudgetPlan(contextBlocks);
+  const tierCounts: Partial<Record<AiInvocationContextTier, number>> = {};
+  const truncatedBlocks: string[] = [];
+  const blocks = contextBlocks.map((block) => {
+    const plan = budgetPlan.get(block.title);
+    if (plan?.tier) {
+      tierCounts[plan.tier] = (tierCounts[plan.tier] || 0) + 1;
+    }
+    if (plan?.truncated) {
+      truncatedBlocks.push(block.title);
+    }
+    return {
+      title: block.title,
+      length: block.content.length,
+      tier: plan?.tier,
+      truncated: plan?.truncated
+    };
+  });
   return {
     blockCount: contextBlocks.length,
     totalChars: contextBlocks.reduce((total, block) => total + block.content.length, 0),
-    blocks: contextBlocks.map((block) => ({
-      title: block.title,
-      length: block.content.length
-    }))
+    blocks,
+    tierCounts,
+    truncatedBlocks
+  };
+}
+
+function variablePlan(payload: Record<string, unknown>, context: AiInvocationContextSnapshot) {
+  const payloadKeys = Object.keys(payload).sort();
+  const target =
+    typeof payload.chapterId === "string"
+      ? payload.chapterId
+      : typeof payload.filePath === "string"
+        ? payload.filePath
+        : typeof payload.target === "string"
+          ? payload.target
+          : undefined;
+  return {
+    payloadKeys,
+    target,
+    contextTierCounts: context.tierCounts
+  };
+}
+
+function preCallReview(prompt: string, context: AiInvocationContextSnapshot) {
+  const warnings: string[] = [];
+  if (!context.blockCount) warnings.push("missing-context");
+  if (!context.tierCounts?.T0) warnings.push("missing-critical-context");
+  if (prompt.length > 120_000) warnings.push("prompt-over-120k");
+  if ((context.truncatedBlocks || []).length > 3) warnings.push("multiple-context-blocks-truncated");
+  return {
+    status: warnings.length ? ("warn" as const) : ("pass" as const),
+    warnings,
+    reviewedAt: new Date().toISOString()
   };
 }
 
@@ -308,6 +384,9 @@ export async function runNovelTask(
     });
     invocation.promptSnapshot = promptSnapshot(prompt, contextBlocks);
     invocation.contextSnapshot = contextSnapshot(contextBlocks);
+    invocation.promptVersion = promptVersionForTask(type);
+    invocation.variablePlan = variablePlan(payload, invocation.contextSnapshot);
+    invocation.preCallReview = preCallReview(prompt, invocation.contextSnapshot);
     const platformAiConfig = await readPlatformAiConfig();
     const novelAiConfig = platformAiConfig.scenarios.novel;
     const profileId = typeof payload.agentProfileId === "string" ? payload.agentProfileId : novelAiConfig.profileId || project.ai?.profileId;

@@ -52,6 +52,23 @@ const candidate: WritingRecapCandidate = {
       updatedAt: "2026-06-04T00:00:00.000Z"
     }
   ],
+  emotionLedgerPatch: {
+    wounds: [
+      {
+        id: "emotion-wound-1",
+        chapterId: "chapter-001",
+        characterName: "Hero",
+        description: "Trust now costs blood.",
+        cause: "The gate answered only after injury.",
+        status: "open",
+        relatedEntities: ["Hero", "seal"],
+        updatedAt: "2026-06-04T00:00:00.000Z"
+      }
+    ],
+    boons: [],
+    powerShifts: [],
+    openLoops: []
+  },
   riskPatches: [
     {
       id: "risk-1",
@@ -88,6 +105,7 @@ describe("WritingRecapPanel", () => {
     expect(wrapper.text()).toContain("The chapter memory records the blood cost.");
     expect(wrapper.text()).toContain("The seal responds to blood.");
     expect(wrapper.text()).toContain("Wounded and wary.");
+    expect(wrapper.text()).toContain("Trust now costs blood.");
     expect(wrapper.text()).toContain("POV boundary");
     expect(wrapper.text()).toContain("伏笔 1");
 

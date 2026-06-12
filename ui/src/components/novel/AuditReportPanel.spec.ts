@@ -42,15 +42,42 @@ const report: ProjectAuditReport = {
   },
   taskSummary: {
     total: 3,
-    byStatus: { pending: 0, running: 0, success: 2, error: 1, cancelled: 0 },
+    byStatus: { pending: 0, running: 0, success: 1, error: 1, cancelled: 1 },
     byType: { "chapter.draft": 2, "writing.recap": 1 },
-    latestTasks: []
+    latestTasks: [
+      {
+        id: "task-error",
+        type: "chapter.draft",
+        status: "error",
+        inputSummary: "{}",
+        error: "Codex timed out",
+        startedAt: "2026-06-11T00:00:00.000Z",
+        finishedAt: "2026-06-11T00:10:00.000Z",
+        durationMs: 600000,
+        timeoutMs: 600000
+      },
+      {
+        id: "task-cancelled",
+        type: "writing.recap",
+        status: "cancelled",
+        inputSummary: "{}",
+        startedAt: "2026-06-11T00:11:00.000Z",
+        finishedAt: "2026-06-11T00:11:02.000Z",
+        durationMs: 2000,
+        timeoutMs: 600000,
+        cancelRequestedAt: "2026-06-11T00:11:01.000Z"
+      }
+    ]
   },
   aiInvocationSummary: {
     total: 2,
     byDecision: { pending: 0, accepted: 1, rejected: 0, "not-required": 1 },
     proposedPatchCount: 2,
-    acceptedPatchCount: 1
+    acceptedPatchCount: 1,
+    promptVersions: { "task-template:chapter.draft:v2": 2 },
+    preCallWarnings: { "multiple-context-blocks-truncated": 1 },
+    contextTierTotals: { T0: 2, T1: 4, T2: 3, T3: 1 },
+    truncatedContextBlocks: [{ title: "World", count: 1 }]
   },
   knowledgeSummary: {
     factCount: 4,
@@ -102,7 +129,20 @@ describe("AuditReportPanel", () => {
     expect(wrapper.text()).toContain("1 chapters");
     expect(wrapper.text()).toContain("82");
     expect(wrapper.text()).toContain("3 tasks");
+    expect(wrapper.text()).toContain("Task Health");
+    expect(wrapper.text()).toContain("Failed / cancelled");
+    expect(wrapper.text()).toContain("Timeout budgeted");
+    expect(wrapper.text()).toContain("Codex timed out");
+    expect(wrapper.text()).toContain("cancel requested");
     expect(wrapper.text()).toContain("2 invocations");
+    expect(wrapper.text()).toContain("AI Control Plane");
+    expect(wrapper.text()).toContain("Pre-call warnings");
+    expect(wrapper.text()).toContain("1");
+    expect(wrapper.text()).toContain("Compressed context");
+    expect(wrapper.text()).toContain("T0 2");
+    expect(wrapper.text()).toContain("T1 4");
+    expect(wrapper.text()).toContain("task-template:chapter.draft:v2 2");
+    expect(wrapper.text()).toContain("multiple-context-blocks-truncated 1");
     expect(wrapper.text()).toContain("local");
     expect(wrapper.text()).toContain("6 vectors");
     expect(wrapper.text()).toContain("1 blocked");

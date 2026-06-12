@@ -35,6 +35,90 @@ describe("contextAssembler", () => {
     expect(blocks.some((block) => block.content.includes("Volume plan with causal steps."))).toBe(true);
   });
 
+  it("injects a narrative promise lock near the top of writing context", async () => {
+    const project = createProjectSkeleton({
+      title: "尸王破封",
+      genre: "玄幻",
+      roughIdea: [
+        "类型：玄幻悬疑",
+        "核心冲突：少年必须借尸王封印换取活路，但每次借力都会让封印松动。",
+        "开篇钩子：天狗食月时尸王破封，主角被迫穿越入局。"
+      ].join("\n")
+    });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+    const projectIndex = blocks.findIndex((block) => block.title === "项目配置");
+    const promiseIndex = blocks.findIndex((block) => block.title === "叙事承诺锁");
+    const genreIndex = blocks.findIndex((block) => block.title === "玄幻题材 Profile");
+    const promise = blocks[promiseIndex]?.content || "";
+
+    expect(projectIndex).toBeGreaterThanOrEqual(0);
+    expect(promiseIndex).toBe(projectIndex + 1);
+    expect(genreIndex).toBe(promiseIndex + 1);
+    expect(promise).toContain("书名承诺：尸王破封");
+    expect(promise).toContain("类型信号：玄幻悬疑");
+    expect(promise).toContain("核心冲突：少年必须借尸王封印换取活路");
+    expect(promise).toContain("开篇钩子：天狗食月时尸王破封");
+    expect(promise).toContain("前 12 章只加压");
+    expect(promise).toContain("尸王");
+    expect(promise).toContain("穿越");
+    expect(blocks[genreIndex]?.content).toContain("升级必须有代价");
+    expect(blocks.at(-1)?.title).toBe("上下文预算日志");
+  });
+
+  it("records context budget truncation when large blocks are compressed", async () => {
+    const project = createProjectSkeleton({ title: "Budget Demo", roughIdea: "Context budget matters." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(path.join(root, "bible", "world.md"), "A".repeat(14000), "utf8");
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+    const budget = JSON.parse(blocks.at(-1)?.content || "{}") as {
+      version?: string;
+      tiers?: Record<string, { blockCount: number; truncatedBlocks: string[] }>;
+      blockPlan?: Array<{ title: string; tier: string; truncated: boolean }>;
+      truncatedBlocks?: Array<{ title: string; tier: string }>;
+      totalOriginalChars?: number;
+      totalFinalChars?: number;
+    };
+
+    expect(blocks.at(-1)?.title).toBe("上下文预算日志");
+    expect(budget.version).toBe("context-budget:v2");
+    expect(budget.tiers?.T0.blockCount).toBeGreaterThanOrEqual(1);
+    expect(budget.tiers?.T1.truncatedBlocks).toContain("世界观");
+    expect(budget.blockPlan?.find((block) => block.title === "世界观")).toMatchObject({ tier: "T1", truncated: true });
+    expect(budget.truncatedBlocks).toContainEqual(expect.objectContaining({ title: "世界观", tier: "T1" }));
+    expect(budget.totalOriginalChars).toBeGreaterThan(budget.totalFinalChars || 0);
+  });
+
+  it("uses a project-level genre profile override when present", async () => {
+    const project = createProjectSkeleton({ title: "Override Demo", genre: "玄幻", roughIdea: "题材规则应被项目覆盖。" });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(
+      path.join(root, "bible", "genre-profile.json"),
+      JSON.stringify(
+        {
+          title: "自定义题材 Profile",
+          directives: ["每次借力都必须留下血债。", "所有奇观必须改变人物关系。"],
+          risks: ["避免系统白送奖励。"]
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+    const profile = blocks.find((block) => block.title === "自定义题材 Profile");
+
+    expect(profile?.content).toContain("来源：项目题材 Profile");
+    expect(profile?.content).toContain("每次借力都必须留下血债。");
+    expect(profile?.content).not.toContain("升级必须有代价");
+  });
+
   it("limits selection polish context to the selected range and nearby text", async () => {
     const project = createProjectSkeleton({ title: "Selection Demo", roughIdea: "Selection matters." });
     await createProjectFiles(project);
@@ -147,7 +231,30 @@ describe("contextAssembler", () => {
     await fs.mkdir(path.join(root, "memory", "chapter-summaries"), { recursive: true });
     await fs.writeFile(
       path.join(root, "memory", "chapter-summaries", "chapter-001.json"),
-      JSON.stringify({ chapterId: "chapter-001", summary: "第一章留下血月异象。" }, null, 2),
+      JSON.stringify(
+        {
+          chapterId: "chapter-001",
+          summary: "第一章留下血月异象。",
+          emotionLedger: {
+            wounds: [
+              {
+                id: "emotion-wound-1",
+                chapterId: "chapter-001",
+                characterName: "主角",
+                description: "他意识到求生必须付出血的代价。",
+                status: "open",
+                relatedEntities: ["血月"],
+                updatedAt: "2026-06-10T00:00:00.000Z"
+              }
+            ],
+            boons: [],
+            powerShifts: [],
+            openLoops: []
+          }
+        },
+        null,
+        2
+      ),
       "utf8"
     );
     await fs.writeFile(
@@ -187,6 +294,7 @@ describe("contextAssembler", () => {
     const distant = blocks.find((block) => block.title === "相关远章摘要");
 
     expect(adjacent?.content).toContain("第一章留下血月异象。");
+    expect(adjacent?.content).toContain("他意识到求生必须付出血的代价。");
     expect(adjacent?.content).toContain("第三章承接封印松动。");
     expect(distant?.content).toContain("第十章兑现尸王伏笔。");
   });

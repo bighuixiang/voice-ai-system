@@ -23,7 +23,7 @@ export type CreationLoopAction =
   | "diagnose"
   | "request-recap"
   | "accept-recap";
-export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook";
+export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook" | "tension";
 export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
 export type AiAgentProvider = "codex" | "claude-code";
 export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
@@ -207,8 +207,8 @@ export interface StoryControl {
   updatedAt: string;
 }
 
-export type StoryGraphNodeType = "arc" | "character" | "event" | "chapter" | "ledger";
-export type StoryGraphEdgeType = "contains" | "involves" | "tracks" | "references";
+export type StoryGraphNodeType = "arc" | "character" | "event" | "chapter" | "ledger" | "knowledge";
+export type StoryGraphEdgeType = "contains" | "involves" | "tracks" | "references" | "asserts";
 
 export interface StoryGraphNode {
   id: string;
@@ -274,12 +274,31 @@ export interface CharacterStatePatch {
   updatedAt: string;
 }
 
+export interface EmotionLedgerItem {
+  id: string;
+  chapterId?: string;
+  characterName?: string;
+  description: string;
+  cause?: string;
+  status: "open" | "active" | "resolved";
+  relatedEntities: string[];
+  updatedAt: string;
+}
+
+export interface EmotionLedger {
+  wounds: EmotionLedgerItem[];
+  boons: EmotionLedgerItem[];
+  powerShifts: EmotionLedgerItem[];
+  openLoops: EmotionLedgerItem[];
+}
+
 export interface ChapterSummary {
   chapterId: string;
   summary: string;
   keyEvents: string[];
   newFacts: ChapterFactPatch[];
   characterStateChanges: CharacterStatePatch[];
+  emotionLedger?: EmotionLedger;
   foreshadowingUpdates: LedgerEntry[];
   continuityRisks: LedgerEntry[];
   powerProgressionUpdates: LedgerEntry[];
@@ -308,6 +327,7 @@ export interface WritingRecapCandidate {
   powerProgressionUpdates: LedgerEntry[];
   createdAt: string;
   summaryPatch?: Partial<ChapterSummary>;
+  emotionLedgerPatch?: Partial<EmotionLedger>;
   factPatches?: ChapterFactPatch[];
   ledgerPatches?: LedgerEntry[];
   characterStatePatches?: CharacterStatePatch[];
@@ -514,6 +534,19 @@ export interface SeriesStyleDriftSignal {
   updatedAt: string;
 }
 
+export interface NarrativeDebtSignal {
+  chapterId: string;
+  chapterTitle: string;
+  debtCount: number;
+  openForeshadowingCount: number;
+  riskCount: number;
+  openLoopCount: number;
+  overdueCount: number;
+  severity: "stable" | "watch" | "blocked";
+  note: string;
+  updatedAt: string;
+}
+
 export interface SeriesQualityMetrics {
   projectSlug: string;
   chapterCount: number;
@@ -526,6 +559,7 @@ export interface SeriesQualityMetrics {
   qualityTrends?: SeriesQualityTrend[];
   tensionCurve?: SeriesTensionPoint[];
   styleDriftSignals?: SeriesStyleDriftSignal[];
+  narrativeDebtSignals?: NarrativeDebtSignal[];
   updatedAt: string;
 }
 
@@ -548,6 +582,7 @@ export interface CreationLoopStep {
   status: CreationLoopStepStatus;
   detail: string;
   metric?: string;
+  signals?: string[];
   action?: CreationLoopAction;
   actionLabel?: string;
 }
@@ -571,6 +606,7 @@ export interface CreationRuntimeSnapshot {
     hasQualityReport: boolean;
     hasWritingRecap: boolean;
     acceptedLedgerCount: number;
+    narrativeDebt?: Pick<NarrativeDebtSignal, "debtCount" | "openForeshadowingCount" | "riskCount" | "openLoopCount" | "overdueCount" | "severity">;
   };
   updatedAt: string;
 }
@@ -603,6 +639,43 @@ export interface NovelFilePatch {
   };
 }
 
+export interface FileVersionSnapshot {
+  id: string;
+  filePath: string;
+  versionPath: string;
+  createdAt: string;
+  size: number;
+}
+
+export interface FileDiffResult {
+  filePath: string;
+  fromVersion: FileVersionSnapshot;
+  toVersion: {
+    id: "current";
+    label: string;
+    createdAt: string;
+  };
+  original: string;
+  modified: string;
+}
+
+export interface EditorSuggestionRequest {
+  filePath: string;
+  chapterId?: string;
+  documentKind: ChapterDocumentKind;
+  beforeText: string;
+  afterText: string;
+  selectedText?: string;
+}
+
+export interface EditorSuggestion {
+  id: string;
+  text: string;
+  summary: string;
+  source: "local" | "ai";
+  createdAt: string;
+}
+
 export interface CodexTaskResult {
   summary: string;
   content: string;
@@ -631,6 +704,7 @@ export interface NovelTask {
 }
 
 export type AiInvocationAdoptionDecision = "pending" | "accepted" | "rejected" | "not-required";
+export type AiInvocationContextTier = "T0" | "T1" | "T2" | "T3";
 
 export interface AiInvocationSession {
   id: string;
@@ -642,6 +716,17 @@ export interface AiInvocationSession {
   agentProfileId?: string;
   agentProvider?: AiAgentProvider;
   modelId?: string;
+  promptVersion?: string;
+  variablePlan?: {
+    payloadKeys: string[];
+    target?: string;
+    contextTierCounts?: Partial<Record<AiInvocationContextTier, number>>;
+  };
+  preCallReview?: {
+    status: "pass" | "warn";
+    warnings: string[];
+    reviewedAt: string;
+  };
   promptSnapshot: {
     length: number;
     preview: string;
@@ -650,7 +735,9 @@ export interface AiInvocationSession {
   contextSnapshot: {
     blockCount: number;
     totalChars: number;
-    blocks: Array<{ title: string; length: number }>;
+    blocks: Array<{ title: string; length: number; tier?: AiInvocationContextTier; truncated?: boolean }>;
+    tierCounts?: Partial<Record<AiInvocationContextTier, number>>;
+    truncatedBlocks?: string[];
   };
   attempt: {
     index: number;
@@ -689,6 +776,10 @@ export interface ProjectAuditReport {
     byDecision: Record<AiInvocationAdoptionDecision, number>;
     proposedPatchCount: number;
     acceptedPatchCount: number;
+    promptVersions: Record<string, number>;
+    preCallWarnings: Record<string, number>;
+    contextTierTotals: Partial<Record<AiInvocationContextTier, number>>;
+    truncatedContextBlocks: Array<{ title: string; count: number }>;
   };
   knowledgeSummary: {
     factCount: number;

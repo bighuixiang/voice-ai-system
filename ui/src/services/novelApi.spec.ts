@@ -267,6 +267,49 @@ describe("novelApi", () => {
     );
   });
 
+  it("reads file versions, diffs, and editor suggestions", async () => {
+    mockJson({ versions: [{ id: "v1", filePath: "chapters/chapter-001.md", versionPath: "versions/chapter/v1.md", createdAt: "2026-06-12T00:00:00.000Z", size: 12 }] });
+    mockJson({
+      diff: {
+        filePath: "chapters/chapter-001.md",
+        fromVersion: { id: "v1", filePath: "chapters/chapter-001.md", versionPath: "versions/chapter/v1.md", createdAt: "2026-06-12T00:00:00.000Z", size: 12 },
+        toVersion: { id: "current", label: "当前文件", createdAt: "2026-06-12T00:01:00.000Z" },
+        original: "old",
+        modified: "new"
+      }
+    });
+    mockJson({ suggestion: { id: "s1", text: "继续推进。", summary: "local", source: "local", createdAt: "2026-06-12T00:00:00.000Z" } });
+
+    await expect(novelApi.readFileVersions("demo", "chapters/chapter-001.md")).resolves.toHaveLength(1);
+    await expect(novelApi.readFileDiff("demo", "chapters/chapter-001.md", "v1")).resolves.toMatchObject({ modified: "new" });
+    await expect(
+      novelApi.requestEditorSuggestion("demo", {
+        filePath: "chapters/chapter-001.md",
+        chapterId: "chapter-001",
+        documentKind: "content",
+        beforeText: "他推开门",
+        afterText: ""
+      })
+    ).resolves.toMatchObject({ text: "继续推进。" });
+
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/file-versions/chapters/chapter-001.md", {});
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/novel/projects/demo/file-diff/chapters/chapter-001.md?from=v1", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      3,
+      "/api/novel/projects/demo/editor/suggestion",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          filePath: "chapters/chapter-001.md",
+          chapterId: "chapter-001",
+          documentKind: "content",
+          beforeText: "他推开门",
+          afterText: ""
+        })
+      })
+    );
+  });
+
   it("reads and saves writing cockpit resources", async () => {
     const dashboard = {
       chapterId: "chapter-001",
@@ -414,7 +457,11 @@ describe("novelApi", () => {
         total: 1,
         byDecision: { pending: 0, accepted: 1, rejected: 0, "not-required": 0 },
         proposedPatchCount: 1,
-        acceptedPatchCount: 1
+        acceptedPatchCount: 1,
+        promptVersions: {},
+        preCallWarnings: {},
+        contextTierTotals: {},
+        truncatedContextBlocks: []
       },
       knowledgeSummary: {
         factCount: 1,

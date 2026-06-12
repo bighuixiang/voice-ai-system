@@ -56,6 +56,9 @@ const mockNovelApi = vi.hoisted(() => ({
   acceptWritingRecap: vi.fn(),
   readAiInvocations: vi.fn(),
   readProjectAuditReport: vi.fn(),
+  readFileVersions: vi.fn(),
+  readFileDiff: vi.fn(),
+  requestEditorSuggestion: vi.fn(),
   runTask: vi.fn(),
   listTasks: vi.fn(),
   startTask: vi.fn(),
@@ -268,7 +271,11 @@ function auditReport(overrides: Partial<ProjectAuditReport> = {}): ProjectAuditR
       total: 1,
       byDecision: { pending: 0, accepted: 1, rejected: 0, "not-required": 0 },
       proposedPatchCount: 1,
-      acceptedPatchCount: 1
+      acceptedPatchCount: 1,
+      promptVersions: {},
+      preCallWarnings: {},
+      contextTierTotals: {},
+      truncatedContextBlocks: []
     },
     knowledgeSummary: {
       factCount: 2,
@@ -552,6 +559,27 @@ describe("useNovelStore", () => {
     }));
     mockNovelApi.readAiInvocations.mockResolvedValue([]);
     mockNovelApi.readProjectAuditReport.mockResolvedValue(auditReport());
+    mockNovelApi.readFileVersions.mockResolvedValue([]);
+    mockNovelApi.readFileDiff.mockResolvedValue({
+      filePath: "chapters/chapter-001.md",
+      fromVersion: {
+        id: "version-1",
+        filePath: "chapters/chapter-001.md",
+        versionPath: "versions/chapters__chapter-001.md/version-1.md",
+        createdAt: "2026-06-12T00:00:00.000Z",
+        size: 12
+      },
+      toVersion: { id: "current", label: "current", createdAt: "2026-06-12T00:01:00.000Z" },
+      original: "old draft",
+      modified: "new draft"
+    });
+    mockNovelApi.requestEditorSuggestion.mockResolvedValue({
+      id: "suggestion-1",
+      text: " next line",
+      summary: "local",
+      source: "local",
+      createdAt: "2026-06-12T00:00:00.000Z"
+    });
     mockNovelApi.listTasks.mockResolvedValue([]);
     mockNovelApi.startTask.mockResolvedValue(
       taskWithResult({
@@ -1057,6 +1085,46 @@ describe("useNovelStore", () => {
     expect(store.hasUnsavedChanges).toBe(false);
   });
 
+  it("loads file snapshots, previews diffs, and asks for editor suggestions with chapter context", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    const version = {
+      id: "version-2",
+      filePath: "chapters/chapter-001.md",
+      versionPath: "versions/chapters__chapter-001.md/version-2.md",
+      createdAt: "2026-06-12T00:00:00.000Z",
+      size: 42
+    };
+    mockNovelApi.readFileVersions.mockResolvedValueOnce([version]);
+
+    await expect(store.loadCurrentFileVersions()).resolves.toEqual([version]);
+    await expect(store.previewCurrentFileDiff("version-2")).resolves.toMatchObject({
+      filePath: "chapters/chapter-001.md",
+      original: "old draft",
+      modified: "new draft"
+    });
+    await expect(
+      store.requestEditorSuggestion({
+        filePath: "ignored.md",
+        chapterId: "ignored",
+        documentKind: "outline",
+        beforeText: "The gate opens",
+        afterText: ""
+      })
+    ).resolves.toMatchObject({ id: "suggestion-1", text: " next line" });
+
+    expect(mockNovelApi.readFileVersions).toHaveBeenCalledWith("demo", "chapters/chapter-001.md");
+    expect(mockNovelApi.readFileDiff).toHaveBeenCalledWith("demo", "chapters/chapter-001.md", "version-2");
+    expect(mockNovelApi.requestEditorSuggestion).toHaveBeenCalledWith("demo", {
+      filePath: "chapters/chapter-001.md",
+      chapterId: "chapter-001",
+      documentKind: "content",
+      beforeText: "The gate opens",
+      afterText: ""
+    });
+  });
+
   it("builds chapter creation loop steps from structure, draft, review, and recap state", async () => {
     const store = useNovelStore();
     store.currentProject = project;
@@ -1071,7 +1139,8 @@ describe("useNovelStore", () => {
     });
     expect(store.creationLoopSteps.find((step) => step.id === "draft")).toMatchObject({
       status: "active",
-      action: "save-draft"
+      action: "save-draft",
+      signals: expect.arrayContaining(["正文未保存"])
     });
     expect(store.creationLoopSteps.find((step) => step.id === "review")).toMatchObject({
       status: "blocked"
@@ -1090,6 +1159,79 @@ describe("useNovelStore", () => {
     expect(store.creationLoopSteps.find((step) => step.id === "recap")).toMatchObject({
       status: "waiting",
       action: "request-recap"
+    });
+
+    store.recapCandidate = {
+      chapterId: "chapter-001",
+      summary: "血回应了封印。",
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      emotionLedgerPatch: {
+        wounds: [
+          {
+            id: "emotion-wound-1",
+            chapterId: "chapter-001",
+            characterName: "主角",
+            description: "他知道求生会继续流血。",
+            status: "open",
+            relatedEntities: ["封印"],
+            updatedAt: "2026-06-12T00:00:00.000Z"
+          }
+        ],
+        openLoops: [
+          {
+            id: "emotion-loop-1",
+            chapterId: "chapter-001",
+            characterName: "主角",
+            description: "血债何时回收仍未解决。",
+            status: "open",
+            relatedEntities: ["血债"],
+            updatedAt: "2026-06-12T00:00:00.000Z"
+          }
+        ]
+      },
+      createdAt: "2026-06-12T00:00:00.000Z"
+    };
+
+    expect(store.creationLoopSteps.find((step) => step.id === "recap")).toMatchObject({
+      status: "active",
+      signals: expect.arrayContaining(["情绪待入账 2"])
+    });
+    expect(store.creationLoopSteps.find((step) => step.id === "ledger")).toMatchObject({
+      metric: "情绪 2",
+      signals: expect.arrayContaining(["情绪待入账 2"])
+    });
+  });
+
+  it("projects background jobs and save pipeline states into creation loop signals", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+
+    store.backgroundJobs = [
+      backgroundJob({
+        id: "job-quality-error",
+        type: "quality.series.rebuild",
+        status: "error",
+        error: "quality failed",
+        finishedAt: "2026-06-11T00:00:02.000Z",
+        updatedAt: "2026-06-11T00:00:02.000Z"
+      })
+    ];
+    store.savePipelineSteps = [
+      {
+        id: "quality",
+        label: "质量趋势",
+        status: "queued",
+        detail: "已进入后台队列"
+      }
+    ];
+
+    expect(store.creationLoopSteps.find((step) => step.id === "review")).toMatchObject({
+      signals: expect.arrayContaining(["质量趋势失败", "质量后台队列"])
     });
   });
 
@@ -1732,15 +1874,29 @@ describe("useNovelStore", () => {
     );
     expect(store.currentQualityReport).toMatchObject({
       chapterId: "chapter-001",
-      metrics: expect.arrayContaining([expect.objectContaining({ key: "conflict" })])
+      metrics: expect.arrayContaining([expect.objectContaining({ key: "conflict" }), expect.objectContaining({ key: "tension" })])
     });
-    expect(store.currentQualityReport?.metrics).toHaveLength(6);
+    expect(store.currentQualityReport?.metrics).toHaveLength(7);
     expect(store.currentQualityReport?.fixes.length).toBeGreaterThan(0);
     expect(store.currentSeriesQualityMetrics).toMatchObject({
       projectSlug: "demo",
       reportCount: 1,
       averageOverallScore: store.currentQualityReport?.overallScore
     });
+  });
+
+  it("adds macro pacing guardrails for early chapter over-reveal", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateContent(
+      "他终于明白真相：尸王的身份、封印规则、幕后秘密、全部来历和答案都已经彻底揭开。敌人退去，没有代价，所有问题彻底解决，尘埃落定。"
+    );
+
+    await store.diagnoseCurrentChapter();
+
+    expect(store.currentQualityReport?.fixes).toEqual(expect.arrayContaining([expect.stringContaining("宏观节奏")]));
+    expect(store.currentQualityReport?.metrics.find((metric) => metric.key === "information")?.note).toContain("宏观节奏风险");
   });
 
   it("rebuilds series quality metrics through a background job", async () => {

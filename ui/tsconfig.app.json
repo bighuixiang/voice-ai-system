@@ -6,7 +6,8 @@
     "src/components/novel/**/*.vue",
     "src/services/novel*.ts",
     "src/stores/novel.ts",
-    "src/types/novel.ts"
+    "src/types/novel.ts",
+    "src/**/*.d.ts"
   ],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
 }

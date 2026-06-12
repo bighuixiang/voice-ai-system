@@ -18,6 +18,7 @@ const steps: CreationLoopStep[] = [
     label: "审稿",
     status: "active",
     detail: "等待体检。",
+    signals: ["情绪待入账 2"],
     action: "diagnose",
     actionLabel: "体检本章"
   }
@@ -73,7 +74,9 @@ describe("CreationLoopPanel", () => {
 
     expect(wrapper.text()).toContain("review · 1200 字 · #abcdef12");
     expect(wrapper.text()).toContain("1 / 2 已沉淀");
+    expect(wrapper.text()).toContain("进行中 1");
     expect(wrapper.text()).toContain("正文已保存。");
+    expect(wrapper.text()).toContain("情绪待入账 2");
   });
 
   it("emits the selected creation loop action", async () => {
@@ -107,6 +110,7 @@ describe("CreationLoopPanel", () => {
 
     await wrapper.find("button").trigger("click");
 
+    expect(wrapper.text()).toContain("阻塞 1");
     expect(clickSpy).not.toHaveBeenCalledWith("action", "diagnose");
   });
 });

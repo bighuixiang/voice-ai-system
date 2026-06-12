@@ -11,7 +11,11 @@ import type {
   ChapterSummary,
   CodexTaskType,
   CreationRuntimeSnapshot,
+  EditorSuggestion,
+  EditorSuggestionRequest,
   EditorSelection,
+  FileDiffResult,
+  FileVersionSnapshot,
   KnowledgeIndexProjection,
   KnowledgeSearchQuery,
   KnowledgeSearchResult,
@@ -162,6 +166,27 @@ export const novelApi = {
       headers: jsonHeaders,
       body: JSON.stringify({ content })
     });
+  },
+
+  async readFileVersions(projectId: string, filePath: string): Promise<FileVersionSnapshot[]> {
+    const data = await request<{ versions: FileVersionSnapshot[] }>(`/api/novel/projects/${projectId}/file-versions/${filePath}`);
+    return data.versions;
+  },
+
+  async readFileDiff(projectId: string, filePath: string, versionId: string): Promise<FileDiffResult> {
+    const data = await request<{ diff: FileDiffResult }>(
+      `/api/novel/projects/${projectId}/file-diff/${filePath}?from=${encodeURIComponent(versionId)}`
+    );
+    return data.diff;
+  },
+
+  async requestEditorSuggestion(projectId: string, input: EditorSuggestionRequest): Promise<EditorSuggestion> {
+    const data = await request<{ suggestion: EditorSuggestion }>(`/api/novel/projects/${projectId}/editor/suggestion`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+    return data.suggestion;
   },
 
   async readChapterDashboard(projectId: string, chapterId: string): Promise<ChapterDashboard> {

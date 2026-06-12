@@ -1,5 +1,6 @@
 import type {
   AiInvocationAdoptionDecision,
+  AiInvocationContextTier,
   BackgroundJobStatus,
   CodexTaskType,
   CreationRuntimeStepId,
@@ -54,6 +55,12 @@ function emptyActiveStepCounts(): Record<CreationRuntimeStepId | "none", number>
   };
 }
 
+function sortedCountRows(counts: Record<string, number>): Array<{ title: string; count: number }> {
+  return Object.entries(counts)
+    .map(([title, count]) => ({ title, count }))
+    .sort((left, right) => right.count - left.count || left.title.localeCompare(right.title));
+}
+
 export async function buildProjectAuditReport(root: string, project: NovelProject): Promise<ProjectAuditReport> {
   const [quality, tasks, aiInvocations, backgroundJobs, knowledgeIndex, runtimeSnapshots] = await Promise.all([
     readSeriesQualityMetrics(root, project),
@@ -72,8 +79,34 @@ export async function buildProjectAuditReport(root: string, project: NovelProjec
   }
 
   const byDecision = emptyDecisionCounts();
+  const promptVersions: Record<string, number> = {};
+  const preCallWarnings: Record<string, number> = {};
+  const contextTierTotals: Partial<Record<AiInvocationContextTier, number>> = {};
+  const truncatedContextBlockCounts: Record<string, number> = {};
   for (const invocation of aiInvocations) {
     byDecision[invocation.adoptionDecision] += 1;
+    const promptVersion = invocation.promptVersion || "unknown";
+    promptVersions[promptVersion] = (promptVersions[promptVersion] || 0) + 1;
+    for (const warning of invocation.preCallReview?.warnings || []) {
+      preCallWarnings[warning] = (preCallWarnings[warning] || 0) + 1;
+    }
+    const tierCounts = invocation.contextSnapshot.tierCounts || {};
+    const hasTierCounts = Object.keys(tierCounts).length > 0;
+    for (const [tier, count] of Object.entries(tierCounts)) {
+      contextTierTotals[tier as AiInvocationContextTier] = (contextTierTotals[tier as AiInvocationContextTier] || 0) + count;
+    }
+    if (!hasTierCounts) {
+      for (const block of invocation.contextSnapshot.blocks) {
+        if (!block.tier) continue;
+        contextTierTotals[block.tier] = (contextTierTotals[block.tier] || 0) + 1;
+      }
+    }
+    const truncatedBlocks = invocation.contextSnapshot.truncatedBlocks?.length
+      ? invocation.contextSnapshot.truncatedBlocks
+      : invocation.contextSnapshot.blocks.filter((block) => block.truncated).map((block) => block.title);
+    for (const title of truncatedBlocks) {
+      truncatedContextBlockCounts[title] = (truncatedContextBlockCounts[title] || 0) + 1;
+    }
   }
 
   const backgroundJobsByStatus = emptyBackgroundJobStatusCounts();
@@ -111,14 +144,20 @@ export async function buildProjectAuditReport(root: string, project: NovelProjec
         error: task.error,
         startedAt: task.startedAt,
         finishedAt: task.finishedAt,
-        durationMs: task.durationMs
+        durationMs: task.durationMs,
+        timeoutMs: task.timeoutMs,
+        cancelRequestedAt: task.cancelRequestedAt
       }))
     },
     aiInvocationSummary: {
       total: aiInvocations.length,
       byDecision,
       proposedPatchCount: aiInvocations.reduce((sum, invocation) => sum + invocation.proposedPatchTargets.length, 0),
-      acceptedPatchCount: aiInvocations.reduce((sum, invocation) => sum + invocation.acceptedPatchTargets.length, 0)
+      acceptedPatchCount: aiInvocations.reduce((sum, invocation) => sum + invocation.acceptedPatchTargets.length, 0),
+      promptVersions,
+      preCallWarnings,
+      contextTierTotals,
+      truncatedContextBlocks: sortedCountRows(truncatedContextBlockCounts).slice(0, 10)
     },
     knowledgeSummary: {
       factCount: knowledgeIndex.facts.length,

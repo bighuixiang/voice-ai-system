@@ -160,6 +160,10 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     isExportingAuditReport: false,
     auditReportPreview: null,
     isLoadingAuditReportPreview: false,
+    fileVersions: [],
+    currentFileDiff: null,
+    isLoadingFileVersions: false,
+    isLoadingFileDiff: false,
     platformAiConfig: {
       version: 1,
       defaultScenario: "novel",
@@ -237,6 +241,10 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     runCreationLoopAction: vi.fn(),
     setAutoRunSavePipeline: vi.fn(),
     runPostSavePipelineFromCurrentContent: vi.fn().mockResolvedValue(undefined),
+    loadCurrentFileVersions: vi.fn().mockResolvedValue([]),
+    previewCurrentFileDiff: vi.fn().mockResolvedValue(null),
+    clearCurrentFileDiff: vi.fn(),
+    requestEditorSuggestion: vi.fn().mockResolvedValue(null),
     acceptWritingRecap: vi.fn(),
     rejectWritingRecap: vi.fn(),
     exportProjectAuditReport: vi.fn().mockResolvedValue(true),
@@ -506,6 +514,18 @@ describe("NovelWorkspace writing modes", () => {
 
     expect(storeRef.value.previewProjectAuditReport).toHaveBeenCalledTimes(1);
     expect(wrapper.find(".audit-report-stub").exists()).toBe(true);
+  });
+
+  it("loads file snapshots when the diff panel is opened", async () => {
+    storeRef.value = makeStore("review");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    const diffToggle = wrapper.findAll(".collapse-toggle").find((button) => button.text().includes("版本对比"));
+
+    expect(diffToggle).toBeTruthy();
+    await diffToggle?.trigger("click");
+
+    expect(storeRef.value.loadCurrentFileVersions).toHaveBeenCalledTimes(1);
   });
 
   it.each([

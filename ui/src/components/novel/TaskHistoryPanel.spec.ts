@@ -35,13 +35,26 @@ describe("TaskHistoryPanel", () => {
       agentProfileId: "codex-cli",
       agentProvider: "codex",
       modelId: "gpt-5",
+      promptVersion: "task-template:chapter.draft:v2",
+      variablePlan: {
+        payloadKeys: ["chapterId"],
+        target: "chapter-001",
+        contextTierCounts: { T0: 1, T1: 1, T2: 1 }
+      },
+      preCallReview: {
+        status: "warn",
+        warnings: ["multiple-context-blocks-truncated"],
+        reviewedAt: "2026-06-11T00:00:01.000Z"
+      },
       promptSnapshot: { length: 1200, preview: "prompt preview", contextTitles: ["Project", "Chapter"] },
       contextSnapshot: {
         blockCount: 3,
         totalChars: 2400,
+        tierCounts: { T0: 1, T1: 1, T2: 1 },
+        truncatedBlocks: ["Chapter"],
         blocks: [
-          { title: "Project", length: 800 },
-          { title: "Chapter", length: 1600 }
+          { title: "Project", length: 800, tier: "T0" },
+          { title: "Chapter", length: 1600, tier: "T1", truncated: true }
         ]
       },
       attempt: { index: 1, startedAt: "2026-06-11T00:00:00.000Z", durationMs: 60000, exitCode: 0 },
@@ -66,6 +79,11 @@ describe("TaskHistoryPanel", () => {
     expect(wrapper.text()).toContain("codex/gpt-5");
     expect(wrapper.text()).toContain("2.4k");
     expect(wrapper.text()).toContain("Prompt 1.2k");
+    expect(wrapper.text()).toContain("版本 task-template:chapter.draft:v2");
+    expect(wrapper.text()).toContain("预检 需关注");
+    expect(wrapper.text()).toContain("目标 chapter-001");
+    expect(wrapper.text()).toContain("T0 1 / T1 1 / T2 1 / T3 0");
+    expect(wrapper.text()).toContain("Chapter · 1.6k · 已压缩");
     expect(wrapper.text()).toContain("60.0s");
     expect(wrapper.text()).toContain("Project");
     expect(wrapper.text()).toContain("Chapter");

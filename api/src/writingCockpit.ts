@@ -7,7 +7,10 @@ import type {
   ChapterSummary,
   CharacterArcSignal,
   CharacterStatePatch,
+  EmotionLedger,
+  EmotionLedgerItem,
   LedgerEntry,
+  NarrativeDebtSignal,
   NovelProject,
   SceneCard,
   SeriesQualityMetricAverage,
@@ -57,11 +60,21 @@ function defaultChapterSummary(chapterId: string): ChapterSummary {
     keyEvents: [],
     newFacts: [],
     characterStateChanges: [],
+    emotionLedger: defaultEmotionLedger(),
     foreshadowingUpdates: [],
     continuityRisks: [],
     powerProgressionUpdates: [],
     acceptedRecapIds: [],
     updatedAt: nowIso()
+  };
+}
+
+function defaultEmotionLedger(): EmotionLedger {
+  return {
+    wounds: [],
+    boons: [],
+    powerShifts: [],
+    openLoops: []
   };
 }
 
@@ -299,11 +312,56 @@ function normalizeChapterSummary(summary: ChapterSummary): ChapterSummary {
     keyEvents: summary.keyEvents || [],
     newFacts: summary.newFacts || [],
     characterStateChanges: summary.characterStateChanges || [],
+    emotionLedger: normalizeEmotionLedger(summary.emotionLedger, summary.chapterId),
     foreshadowingUpdates: summary.foreshadowingUpdates || [],
     continuityRisks: summary.continuityRisks || [],
     powerProgressionUpdates: summary.powerProgressionUpdates || [],
     acceptedRecapIds: summary.acceptedRecapIds || [],
     updatedAt: summary.updatedAt || nowIso()
+  };
+}
+
+function normalizeEmotionLedgerItem(
+  item: Partial<EmotionLedgerItem> | string,
+  chapterId: string,
+  bucket: keyof EmotionLedger,
+  index: number
+): EmotionLedgerItem {
+  const source = typeof item === "string" ? { description: item } : item;
+  const description = String(source.description || "").trim();
+  return {
+    id: source.id || `emotion-${bucket}-${chapterId}-${index + 1}`,
+    chapterId: source.chapterId || chapterId,
+    characterName: source.characterName,
+    description,
+    cause: source.cause,
+    status: source.status || "open",
+    relatedEntities: Array.isArray(source.relatedEntities) ? source.relatedEntities : [],
+    updatedAt: source.updatedAt || nowIso()
+  };
+}
+
+function normalizeEmotionLedger(ledger: Partial<EmotionLedger> | undefined, chapterId: string): EmotionLedger {
+  return {
+    wounds: (ledger?.wounds || []).map((item, index) => normalizeEmotionLedgerItem(item, chapterId, "wounds", index)).filter((item) => item.description),
+    boons: (ledger?.boons || []).map((item, index) => normalizeEmotionLedgerItem(item, chapterId, "boons", index)).filter((item) => item.description),
+    powerShifts: (ledger?.powerShifts || [])
+      .map((item, index) => normalizeEmotionLedgerItem(item, chapterId, "powerShifts", index))
+      .filter((item) => item.description),
+    openLoops: (ledger?.openLoops || [])
+      .map((item, index) => normalizeEmotionLedgerItem(item, chapterId, "openLoops", index))
+      .filter((item) => item.description)
+  };
+}
+
+function mergeEmotionLedger(existing: Partial<EmotionLedger> | undefined, patch: Partial<EmotionLedger> | undefined, chapterId: string): EmotionLedger {
+  const current = normalizeEmotionLedger(existing, chapterId);
+  const incoming = normalizeEmotionLedger(patch, chapterId);
+  return {
+    wounds: mergeById(current.wounds, incoming.wounds),
+    boons: mergeById(current.boons, incoming.boons),
+    powerShifts: mergeById(current.powerShifts, incoming.powerShifts),
+    openLoops: mergeById(current.openLoops, incoming.openLoops)
   };
 }
 
@@ -453,7 +511,9 @@ function buildTensionCurve(
       const hook = qualityMetric(report, "hook");
       const emotion = qualityMetric(report, "emotion");
       const rhythm = qualityMetric(report, "rhythm");
+      const tension = qualityMetric(report, "tension");
       const note =
+        tension?.note ||
         conflict?.note ||
         hook?.note ||
         dashboard.mainConflict ||
@@ -466,13 +526,15 @@ function buildTensionCurve(
       return {
         chapterId: chapter.id,
         chapterTitle: chapter.title,
-        tensionScore: weightedTensionScore({
-          conflict: conflict?.score,
-          hook: hook?.score,
-          emotion: emotion?.score,
-          rhythm: rhythm?.score,
-          sceneCount: scenes.length
-        }),
+        tensionScore:
+          tension?.score ??
+          weightedTensionScore({
+            conflict: conflict?.score,
+            hook: hook?.score,
+            emotion: emotion?.score,
+            rhythm: rhythm?.score,
+            sceneCount: scenes.length
+          }),
         conflictScore: conflict?.score,
         hookScore: hook?.score,
         emotionScore: emotion?.score,
@@ -523,6 +585,83 @@ function buildStyleDriftSignals(
     })
     .sort((left, right) => Math.abs(right.drift) - Math.abs(left.drift) || right.updatedAt.localeCompare(left.updatedAt))
     .slice(0, 8);
+}
+
+function chapterOrder(project: NovelProject, chapterId: string): number | undefined {
+  const chapter = project.chapters.find((item) => item.id === chapterId);
+  if (typeof chapter?.order === "number" && chapter.order > 0) return chapter.order;
+  const index = project.chapters.findIndex((item) => item.id === chapterId);
+  if (index >= 0) return index + 1;
+  const digitMatch = `${chapterId} ${chapter?.title || ""}`.match(/(\d+)/);
+  return digitMatch ? Number(digitMatch[1]) : undefined;
+}
+
+function unresolvedLedgerEntries(entries: LedgerEntry[]): LedgerEntry[] {
+  return entries.filter((entry) => entry.status !== "resolved");
+}
+
+function emotionOpenLoopCount(summary: ChapterSummary): number {
+  return (summary.emotionLedger?.openLoops || []).filter((item) => item.status !== "resolved").length;
+}
+
+function isOverdueDebt(entry: LedgerEntry, currentOrder?: number): boolean {
+  if (!entry.expectedResolutionChapterId || !currentOrder) return false;
+  const expected = entry.expectedResolutionChapterId.match(/(\d+)/);
+  return Boolean(expected && Number(expected[1]) <= currentOrder && entry.status !== "resolved");
+}
+
+function debtSeverity(input: { debtCount: number; riskCount: number; openLoopCount: number; overdueCount: number }): NarrativeDebtSignal["severity"] {
+  if (input.overdueCount > 0 || input.riskCount >= 2) return "blocked";
+  if (input.debtCount > 0 || input.openLoopCount > 0 || input.riskCount > 0) return "watch";
+  return "stable";
+}
+
+function buildNarrativeDebtSignals(
+  project: NovelProject,
+  chapters: Array<{
+    chapter: NovelProject["chapters"][number];
+    summary: ChapterSummary;
+  }>,
+  ledgers: LedgerEntry[]
+): NarrativeDebtSignal[] {
+  return chapters
+    .map(({ chapter, summary }) => {
+      const currentOrder = chapterOrder(project, chapter.id);
+      const relatedDebts = unresolvedLedgerEntries(
+        ledgers.filter((entry) => entry.chapterIds.includes(chapter.id) || isOverdueDebt(entry, currentOrder))
+      );
+      const openForeshadowingCount = relatedDebts.filter((entry) => entry.kind === "foreshadowing").length;
+      const riskCount = relatedDebts.filter((entry) => entry.kind === "risk" || entry.kind === "continuity" || entry.status === "blocked").length;
+      const openLoopCount = emotionOpenLoopCount(summary);
+      const overdueCount = relatedDebts.filter((entry) => isOverdueDebt(entry, currentOrder)).length;
+      const debtCount = relatedDebts.length + openLoopCount;
+      const severity = debtSeverity({ debtCount, riskCount, openLoopCount, overdueCount });
+      const note =
+        severity === "blocked"
+          ? "叙事债务已到交付点，下一轮写作需要先解决或显式延期。"
+          : severity === "watch"
+            ? "存在开放伏笔、风险或情绪回路，需要在后续章节持续推进。"
+            : "当前章节没有明显积压的叙事债务。";
+
+      return {
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        debtCount,
+        openForeshadowingCount,
+        riskCount,
+        openLoopCount,
+        overdueCount,
+        severity,
+        note,
+        updatedAt: summary.updatedAt
+      };
+    })
+    .filter((signal) => signal.debtCount > 0)
+    .sort((left, right) => {
+      const severityRank = { blocked: 2, watch: 1, stable: 0 };
+      return severityRank[right.severity] - severityRank[left.severity] || right.debtCount - left.debtCount || left.chapterId.localeCompare(right.chapterId);
+    })
+    .slice(0, 10);
 }
 
 function buildQualityTrend(
@@ -585,8 +724,8 @@ function buildQualityTrends(
 }
 
 export async function buildSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
-  const chapterSignals = await Promise.all(
-    project.chapters.map(async (chapter) => {
+  const [chapterSignals, allLedgers] = await Promise.all([
+    Promise.all(project.chapters.map(async (chapter) => {
       const [report, dashboard, scenes, summary] = await Promise.all([
         readChapterQualityReport(root, chapter.id),
         readChapterDashboard(root, chapter.id),
@@ -594,8 +733,9 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
         readChapterSummary(root, chapter.id)
       ]);
       return { chapter, report, dashboard, scenes, summary };
-    })
-  );
+    })),
+    Promise.all((Object.keys(ledgerPaths) as LedgerKind[]).map((kind) => readLedgerEntries(root, kind))).then((items) => items.flat())
+  ]);
 
   const reports = chapterSignals
     .map(({ chapter, report }) => ({
@@ -652,6 +792,7 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
     qualityTrends: buildQualityTrends(reports),
     tensionCurve: buildTensionCurve(chapterSignals),
     styleDriftSignals: buildStyleDriftSignals(reports),
+    narrativeDebtSignals: buildNarrativeDebtSignals(project, chapterSignals, allLedgers),
     updatedAt: nowIso()
   };
 
@@ -661,7 +802,12 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
 
 export async function readSeriesQualityMetrics(root: string, project: NovelProject): Promise<SeriesQualityMetrics> {
   const cached = await readJsonFile<SeriesQualityMetrics | null>(root, seriesQualityPath(), null);
-  return cached?.rhythmSignals && cached.characterArcSignals && cached.qualityTrends && cached.tensionCurve && cached.styleDriftSignals
+  return cached?.rhythmSignals &&
+    cached.characterArcSignals &&
+    cached.qualityTrends &&
+    cached.tensionCurve &&
+    cached.styleDriftSignals &&
+    cached.narrativeDebtSignals
     ? cached
     : buildSeriesQualityMetrics(root, project);
 }
@@ -742,6 +888,8 @@ export async function acceptWritingRecapPatches(root: string, recap: WritingReca
   const powerProgressionUpdates = ledgerPatches.filter((entry) => entry.kind === "power");
   const acceptanceId = recapAcceptanceId(recap);
   const summaryPatch = recap.summaryPatch || {};
+  const summaryEmotionLedger = mergeEmotionLedger(existingSummary.emotionLedger, summaryPatch.emotionLedger, recap.chapterId);
+  const nextEmotionLedger = mergeEmotionLedger(summaryEmotionLedger, recap.emotionLedgerPatch, recap.chapterId);
   const nextSummary: ChapterSummary = {
     ...existingSummary,
     ...summaryPatch,
@@ -750,6 +898,7 @@ export async function acceptWritingRecapPatches(root: string, recap: WritingReca
     keyEvents: summaryPatch.keyEvents || existingSummary.keyEvents,
     newFacts: mergeById(existingSummary.newFacts, acceptedFacts),
     characterStateChanges: mergeById(existingSummary.characterStateChanges, acceptedCharacters),
+    emotionLedger: nextEmotionLedger,
     foreshadowingUpdates: mergeById(existingSummary.foreshadowingUpdates, foreshadowingUpdates),
     continuityRisks: mergeById(existingSummary.continuityRisks, continuityRisks),
     powerProgressionUpdates: mergeById(existingSummary.powerProgressionUpdates, powerProgressionUpdates),
