@@ -23,6 +23,36 @@ export type CreationLoopAction =
   | "diagnose"
   | "request-recap"
   | "accept-recap";
+
+export interface WorkbenchNextAction {
+  id: string;
+  priority: "critical" | "recommended" | "optional";
+  label: string;
+  reason: string;
+  action: CreationLoopAction;
+  targetPanel?: string;
+}
+
+export interface WorkbenchRiskSignal {
+  id: string;
+  label: string;
+  status: "blocked" | "watch" | "stable";
+  reason: string;
+  action?: CreationLoopAction;
+  actionLabel?: string;
+  source: string;
+}
+
+export interface PlotPilotLearningItem {
+  id: string;
+  label: string;
+  status: "done" | "partial" | "planned";
+  sourcePattern: string;
+  localLanding: string;
+  userValue: string;
+  entryAction?: CreationLoopAction;
+  evidenceCount?: number;
+}
 export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook" | "tension";
 export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
 export type AiAgentProvider = "codex" | "claude-code";

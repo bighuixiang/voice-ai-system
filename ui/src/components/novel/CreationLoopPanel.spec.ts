@@ -90,6 +90,50 @@ describe("CreationLoopPanel", () => {
     expect(wrapper.emitted("action")).toEqual([["open-focus"]]);
   });
 
+  it("shows next actions and risk signals as the runtime command surface", async () => {
+    const wrapper = mount(CreationLoopPanel, {
+      props: {
+        steps,
+        nextActions: [
+          {
+            id: "save-draft",
+            priority: "critical",
+            label: "保存正文",
+            reason: "未保存会阻塞后续流水线。",
+            action: "save-draft"
+          },
+          {
+            id: "diagnose",
+            priority: "recommended",
+            label: "体检本章",
+            reason: "缺少质量报告。",
+            action: "diagnose"
+          }
+        ],
+        riskSignals: [
+          {
+            id: "draft-save",
+            label: "正文未保存",
+            status: "blocked",
+            reason: "先保存正文。",
+            action: "save-draft",
+            actionLabel: "保存",
+            source: "draft"
+          }
+        ]
+      },
+      global
+    });
+
+    expect(wrapper.text()).toContain("必须先做");
+    expect(wrapper.text()).toContain("保存正文");
+    expect(wrapper.text()).toContain("正文未保存");
+
+    await wrapper.find(".next-action-card button").trigger("click");
+
+    expect(wrapper.emitted("action")?.[0]).toEqual(["save-draft"]);
+  });
+
   it("does not emit blocked actions", async () => {
     const wrapper = mount(CreationLoopPanel, {
       props: {

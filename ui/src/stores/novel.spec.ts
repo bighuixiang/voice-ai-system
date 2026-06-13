@@ -1206,6 +1206,104 @@ describe("useNovelStore", () => {
     });
   });
 
+  it("ranks next workbench actions and aggregates first-screen risk signals", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+
+    store.updateContent("他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然传来回应，他必须选择是否暴露身份。");
+
+    expect(store.nextWorkbenchActions[0]).toMatchObject({
+      id: "save-draft",
+      priority: "critical",
+      action: "save-draft"
+    });
+    expect(store.workbenchRiskSignals.find((signal) => signal.id === "draft-save")).toMatchObject({
+      status: "blocked",
+      action: "save-draft"
+    });
+
+    await store.runCreationLoopAction("save-draft");
+    store.currentRuntimeSnapshot = {
+      ...store.currentRuntimeSnapshot!,
+      signals: {
+        ...store.currentRuntimeSnapshot!.signals,
+        narrativeDebt: {
+          debtCount: 4,
+          openForeshadowingCount: 2,
+          riskCount: 1,
+          openLoopCount: 1,
+          overdueCount: 1,
+          severity: "blocked"
+        }
+      }
+    };
+
+    expect(store.nextWorkbenchActions[0]).toMatchObject({
+      id: "narrative-debt",
+      priority: "critical",
+      action: "open-review"
+    });
+    expect(store.workbenchRiskSignals.find((signal) => signal.id === "narrative-debt")).toMatchObject({
+      status: "blocked",
+      action: "open-review"
+    });
+  });
+
+  it("summarizes PlotPilot learning items from available workspace evidence", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.aiInvocations = [
+      {
+        ...invocationForTask(),
+        promptVersion: "chapter-draft:v2",
+        preCallReview: {
+          status: "warn",
+          warnings: ["context compressed"],
+          reviewedAt: "2026-06-12T00:00:00.000Z"
+        },
+        contextSnapshot: {
+          blockCount: 3,
+          totalChars: 1200,
+          tierCounts: { T0: 1, T1: 1, T2: 1 },
+          truncatedBlocks: ["long draft"],
+          blocks: [
+            { title: "Promise", length: 200, tier: "T0" },
+            { title: "Ledger", length: 400, tier: "T1" },
+            { title: "Draft", length: 600, tier: "T2", truncated: true }
+          ]
+        }
+      }
+    ];
+    store.storyGraph = {
+      projectSlug: "demo",
+      nodes: [{ id: "knowledge:gate", type: "knowledge", label: "Gate" }],
+      edges: [],
+      characterRelations: {
+        characters: [],
+        relationships: [],
+        coverage: [],
+        appearanceSignals: []
+      },
+      updatedAt: "2026-06-12T00:00:00.000Z"
+    };
+
+    expect(store.plotPilotLearningItems).toHaveLength(6);
+    expect(store.plotPilotLearningItems.find((item) => item.id === "context-budget")).toMatchObject({
+      status: "done",
+      evidenceCount: 3
+    });
+    expect(store.plotPilotLearningItems.find((item) => item.id === "ai-control-plane")).toMatchObject({
+      status: "done",
+      evidenceCount: 1
+    });
+    expect(store.plotPilotLearningItems.find((item) => item.id === "knowledge-cast")).toMatchObject({
+      status: "done",
+      evidenceCount: 1
+    });
+  });
+
   it("projects background jobs and save pipeline states into creation loop signals", async () => {
     const store = useNovelStore();
     store.currentProject = project;

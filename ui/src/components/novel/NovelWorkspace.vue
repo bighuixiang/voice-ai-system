@@ -107,10 +107,13 @@
         <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
         <CreationLoopPanel
           :steps="store.creationLoopSteps"
+          :next-actions="store.nextWorkbenchActions"
+          :risk-signals="store.workbenchRiskSignals"
           :runtime-snapshot="store.currentRuntimeSnapshot"
           :loading="store.isLoading || store.isSavingContent"
           @action="handleCreationLoopAction"
         />
+        <PlotPilotLearningPanel :items="store.plotPilotLearningItems" @action="handleCreationLoopAction" />
         <SavePipelinePanel
           :auto-run="store.autoRunSavePipeline"
           :steps="store.savePipelineSteps"
@@ -535,6 +538,7 @@ import PlatformLibraryPanel from "./PlatformLibraryPanel.vue";
 import QuickStartGuidePanel from "./QuickStartGuidePanel.vue";
 import CollapsiblePanel from "./CollapsiblePanel.vue";
 import CreationLoopPanel from "./CreationLoopPanel.vue";
+import PlotPilotLearningPanel from "./PlotPilotLearningPanel.vue";
 import SavePipelinePanel from "./SavePipelinePanel.vue";
 
 defineOptions({

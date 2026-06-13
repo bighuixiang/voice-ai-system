@@ -34,6 +34,7 @@ import type {
   PlatformAsset,
   PlatformAssetType,
   PlatformLibrary,
+  PlotPilotLearningItem,
   ProjectAuditReport,
   SceneCard,
   SavePipelineStep,
@@ -44,6 +45,8 @@ import type {
   StoryGraphProjection,
   StyleToneKey,
   TaskProgressStep,
+  WorkbenchNextAction,
+  WorkbenchRiskSignal,
   WritingMode,
   EmotionLedger,
   WritingRecapCandidate
@@ -431,6 +434,317 @@ export const useNovelStore = defineStore("novel", () => {
         ],
         action: "open-structure",
         actionLabel: "规划后续"
+      }
+    ];
+  });
+  const nextWorkbenchActions = computed<WorkbenchNextAction[]>(() => {
+    const actions: WorkbenchNextAction[] = [];
+    const debt = currentRuntimeSnapshot.value?.signals.narrativeDebt;
+    const failedPipelineStep = savePipelineSteps.value.find((step) => step.status === "error");
+    const failedBackgroundJob = backgroundJobs.value.find((job) => job.status === "error");
+    const abnormalAppearance = storyGraph.value?.characterRelations?.appearanceSignals.find((signal) =>
+      ["should-appear", "overexposed", "absent"].includes(signal.status)
+    );
+
+    if (!currentChapter.value) {
+      actions.push({
+        id: "select-chapter",
+        priority: "critical",
+        label: "选择章节",
+        reason: "工作台还没有绑定当前章节，先进入章节才能计算闭环状态。",
+        action: "open-structure",
+        targetPanel: "chapter-tree"
+      });
+      return actions;
+    }
+
+    if (hasUnsavedChanges.value) {
+      actions.push({
+        id: "save-draft",
+        priority: "critical",
+        label: "保存正文",
+        reason: "当前正文有未保存修改，审稿、回顾和账本都应基于已落盘版本。",
+        action: "save-draft",
+        targetPanel: "editor"
+      });
+    }
+
+    if (!hasDraftContent.value) {
+      actions.push({
+        id: "write-draft",
+        priority: "recommended",
+        label: "进入正文写作",
+        reason: "本章还没有足够正文，先补出可审稿的文本。",
+        action: "open-focus",
+        targetPanel: "focus-writing"
+      });
+    }
+
+    if (!hasUnsavedChanges.value && recapCandidate.value) {
+      actions.push({
+        id: "accept-recap",
+        priority: "critical",
+        label: "确认写作回顾",
+        reason: "已有回顾候选，确认后才能把事实、情绪和账本变化沉淀下来。",
+        action: "accept-recap",
+        targetPanel: "writing-recap"
+      });
+    }
+
+    if (!hasUnsavedChanges.value && hasSavedDraftContent.value && !recapCandidate.value && !hasWritingRecapTaskForCurrentChapter.value) {
+      actions.push({
+        id: "request-recap",
+        priority: "recommended",
+        label: "生成写作回顾",
+        reason: "正文已保存，但本章还没有可复用的章后状态沉淀。",
+        action: "request-recap",
+        targetPanel: "writing-recap"
+      });
+    }
+
+    if (hasSavedDraftContent.value && !hasChapterQualityReport.value) {
+      actions.push({
+        id: "diagnose",
+        priority: "recommended",
+        label: "体检本章",
+        reason: "缺少本章质量报告，风险雷达无法判断节奏、张力和信息释放。",
+        action: "diagnose",
+        targetPanel: "review-quality"
+      });
+    }
+
+    if (debt && (debt.severity === "blocked" || debt.overdueCount > 0)) {
+      actions.push({
+        id: "narrative-debt",
+        priority: "critical",
+        label: "处理叙事债务",
+        reason: `当前叙事债务 ${debt.debtCount} 项，逾期 ${debt.overdueCount} 项。`,
+        action: "open-review",
+        targetPanel: "ledger"
+      });
+    }
+
+    if (pendingEmotionLedgerCount.value) {
+      actions.push({
+        id: "emotion-ledger",
+        priority: recapCandidate.value ? "critical" : "recommended",
+        label: "确认情绪账本",
+        reason: `有 ${pendingEmotionLedgerCount.value} 条情绪账本补丁待入账。`,
+        action: recapCandidate.value ? "accept-recap" : "request-recap",
+        targetPanel: "writing-recap"
+      });
+    }
+
+    if (failedPipelineStep || failedBackgroundJob) {
+      actions.push({
+        id: "pipeline-health",
+        priority: "recommended",
+        label: "检查后台流水线",
+        reason: failedPipelineStep ? `${failedPipelineStep.label} 失败。` : `${failedBackgroundJob?.inputSummary || "后台任务"} 失败。`,
+        action: "open-review",
+        targetPanel: "task-history"
+      });
+    }
+
+    if (abnormalAppearance) {
+      actions.push({
+        id: "character-schedule",
+        priority: "optional",
+        label: "检查角色调度",
+        reason: `${abnormalAppearance.name} 出现 ${abnormalAppearance.status} 信号。`,
+        action: "open-structure",
+        targetPanel: "story-graph"
+      });
+    }
+
+    if (!actions.length) {
+      actions.push({
+        id: "safe-next",
+        priority: "optional",
+        label: "规划下一章",
+        reason: "当前闭环没有阻塞项，可以推进下一章结构。",
+        action: "open-structure",
+        targetPanel: "chapter-tree"
+      });
+    }
+
+    const priorityRank: Record<WorkbenchNextAction["priority"], number> = {
+      critical: 0,
+      recommended: 1,
+      optional: 2
+    };
+    return actions
+      .filter((action, index, list) => list.findIndex((item) => item.id === action.id) === index)
+      .sort((left, right) => priorityRank[left.priority] - priorityRank[right.priority])
+      .slice(0, 3);
+  });
+  const workbenchRiskSignals = computed<WorkbenchRiskSignal[]>(() => {
+    const signals: WorkbenchRiskSignal[] = [];
+    const debt = currentRuntimeSnapshot.value?.signals.narrativeDebt;
+    const latestInvocation = [...aiInvocations.value].sort(
+      (left, right) => Date.parse(right.updatedAt || right.createdAt) - Date.parse(left.updatedAt || left.createdAt)
+    )[0];
+    const failedJob = backgroundJobs.value.find((job) => job.status === "error");
+    const runningJobCount = backgroundJobs.value.filter((job) => job.status === "running" || job.status === "pending").length;
+    const truncatedContextCount = latestInvocation?.contextSnapshot.truncatedBlocks?.length || 0;
+    const abnormalAppearanceCount =
+      storyGraph.value?.characterRelations?.appearanceSignals.filter((signal) =>
+        ["should-appear", "overexposed", "absent"].includes(signal.status)
+      ).length || 0;
+    const weakMetric = currentQualityReport.value?.metrics.find((metric) => metric.score < 60);
+
+    signals.push({
+      id: "draft-save",
+      label: hasUnsavedChanges.value ? "正文未保存" : "正文已沉淀",
+      status: hasUnsavedChanges.value ? "blocked" : "stable",
+      reason: hasUnsavedChanges.value ? "未保存会阻塞审稿、回顾和章后流水线。" : "当前正文可作为后续计算输入。",
+      action: hasUnsavedChanges.value ? "save-draft" : undefined,
+      actionLabel: hasUnsavedChanges.value ? "保存" : undefined,
+      source: "draft"
+    });
+
+    signals.push({
+      id: "quality",
+      label: weakMetric ? `${weakMetric.label} 偏低` : hasChapterQualityReport.value ? "质量体检可用" : "质量体检缺失",
+      status: weakMetric ? "watch" : hasChapterQualityReport.value ? "stable" : hasSavedDraftContent.value ? "watch" : "blocked",
+      reason: weakMetric?.note || (hasChapterQualityReport.value ? "已有本章质量报告。" : "缺少节奏、张力和信息释放检查。"),
+      action: hasChapterQualityReport.value && !weakMetric ? undefined : "diagnose",
+      actionLabel: hasChapterQualityReport.value && !weakMetric ? undefined : "体检",
+      source: "quality"
+    });
+
+    signals.push({
+      id: "narrative-debt",
+      label: debt?.debtCount ? `叙事债务 ${debt.debtCount}` : "叙事债务稳定",
+      status: debt?.severity === "blocked" ? "blocked" : debt?.severity === "watch" ? "watch" : "stable",
+      reason: debt?.debtCount
+        ? `伏笔 ${debt.openForeshadowingCount}，风险 ${debt.riskCount}，情绪回路 ${debt.openLoopCount}，逾期 ${debt.overdueCount}。`
+        : "当前快照未发现高压叙事债务。",
+      action: debt?.debtCount ? "open-review" : undefined,
+      actionLabel: debt?.debtCount ? "查看" : undefined,
+      source: "runtime"
+    });
+
+    signals.push({
+      id: "emotion-ledger",
+      label: pendingEmotionLedgerCount.value ? `情绪待入账 ${pendingEmotionLedgerCount.value}` : `情绪已沉淀 ${acceptedEmotionLedgerCount.value}`,
+      status: pendingEmotionLedgerCount.value ? "watch" : "stable",
+      reason: pendingEmotionLedgerCount.value ? "回顾候选里有情绪伤口、馈赠或开放回路待确认。" : "当前没有待确认情绪账本补丁。",
+      action: pendingEmotionLedgerCount.value ? "accept-recap" : undefined,
+      actionLabel: pendingEmotionLedgerCount.value ? "入账" : undefined,
+      source: "ledger"
+    });
+
+    signals.push({
+      id: "context-ai",
+      label:
+        latestInvocation?.status === "error"
+          ? "AI 调用失败"
+          : truncatedContextCount
+            ? `上下文截断 ${truncatedContextCount}`
+            : "AI 调用健康",
+      status: latestInvocation?.status === "error" ? "blocked" : truncatedContextCount ? "watch" : "stable",
+      reason:
+        latestInvocation?.status === "error"
+          ? latestInvocation.attempt.error || "最近一次 AI 调用失败。"
+          : truncatedContextCount
+            ? "最近一次调用发生上下文压缩，需要留意关键信息是否被截断。"
+            : "最近一次 AI 调用没有暴露失败或上下文截断。",
+      action: latestInvocation?.status === "error" || truncatedContextCount ? "open-review" : undefined,
+      actionLabel: latestInvocation?.status === "error" || truncatedContextCount ? "审计" : undefined,
+      source: "ai"
+    });
+
+    signals.push({
+      id: "jobs-and-cast",
+      label: failedJob ? "后台任务失败" : abnormalAppearanceCount ? `角色调度 ${abnormalAppearanceCount}` : runningJobCount ? `后台处理中 ${runningJobCount}` : "后台与角色稳定",
+      status: failedJob ? "blocked" : abnormalAppearanceCount || runningJobCount ? "watch" : "stable",
+      reason: failedJob
+        ? failedJob.error || "后台任务失败，需要重试或查看任务历史。"
+        : abnormalAppearanceCount
+          ? "角色关系图发现缺少证据、长期未登场或近期过曝信号。"
+          : runningJobCount
+            ? "仍有后台任务在排队或运行。"
+            : "知识图谱、故事图谱和角色调度没有暴露阻塞项。",
+      action: failedJob ? "open-review" : abnormalAppearanceCount ? "open-structure" : undefined,
+      actionLabel: failedJob ? "查看" : abnormalAppearanceCount ? "定位" : undefined,
+      source: "graph"
+    });
+
+    return signals;
+  });
+  const plotPilotLearningItems = computed<PlotPilotLearningItem[]>(() => {
+    const latestInvocation = [...aiInvocations.value].sort(
+      (left, right) => Date.parse(right.updatedAt || right.createdAt) - Date.parse(left.updatedAt || left.createdAt)
+    )[0];
+    const tierCount = latestInvocation?.contextSnapshot.tierCounts
+      ? Object.values(latestInvocation.contextSnapshot.tierCounts).reduce((total, value) => total + (value || 0), 0)
+      : 0;
+    const relationCount = storyGraph.value?.characterRelations?.relationships.length || 0;
+    const appearanceCount = storyGraph.value?.characterRelations?.appearanceSignals.length || 0;
+    const knowledgeCount = storyGraph.value?.nodes.filter((node) => node.type === "knowledge").length || 0;
+    const debt = currentRuntimeSnapshot.value?.signals.narrativeDebt;
+
+    return [
+      {
+        id: "promise-lock",
+        label: "叙事承诺锁",
+        status: hasChapterStructure.value || Boolean(currentRuntimeSnapshot.value) ? "done" : "partial",
+        sourcePattern: "把项目承诺、类型信号和早期节奏约束注入写作输入。",
+        localLanding: "结构、正文和上下文装配共享同一章目标。",
+        userValue: "减少早期跑题、过早泄底和无代价推进。",
+        entryAction: "open-structure",
+        evidenceCount: Number(hasChapterStructure.value) + sceneCards.value.length
+      },
+      {
+        id: "context-budget",
+        label: "上下文预算分层",
+        status: tierCount ? "done" : latestInvocation ? "partial" : "planned",
+        sourcePattern: "T0/T1/T2/T3 分层保护关键上下文，压缩低优先级材料。",
+        localLanding: "AI 调用审计记录 tier 计数和截断块。",
+        userValue: "长篇推进时优先保留承诺、人物和账本状态。",
+        entryAction: "open-review",
+        evidenceCount: tierCount || latestInvocation?.contextSnapshot.blockCount || 0
+      },
+      {
+        id: "ai-control-plane",
+        label: "AI 调用控制面",
+        status: latestInvocation?.promptVersion || latestInvocation?.preCallReview ? "done" : latestInvocation ? "partial" : "planned",
+        sourcePattern: "记录 prompt 版本、变量计划、调用前预检和采纳结果。",
+        localLanding: "任务历史与审计报告暴露 AI 调用健康度。",
+        userValue: "失败、截断和采纳状态能追溯，不必翻 JSONL。",
+        entryAction: "open-review",
+        evidenceCount: aiInvocations.value.length
+      },
+      {
+        id: "emotion-ledger",
+        label: "情绪账本",
+        status: acceptedEmotionLedgerCount.value ? "done" : pendingEmotionLedgerCount.value ? "partial" : "planned",
+        sourcePattern: "沉淀伤口、馈赠、权力变化和开放情绪回路。",
+        localLanding: "写作回顾候选与章节摘要都能携带 emotionLedger。",
+        userValue: "下一章不只记住事件，也记住人物被留下的情绪债。",
+        entryAction: pendingEmotionLedgerCount.value ? "accept-recap" : "request-recap",
+        evidenceCount: acceptedEmotionLedgerCount.value + pendingEmotionLedgerCount.value
+      },
+      {
+        id: "narrative-debt",
+        label: "叙事债务 / 读者压力",
+        status: debt ? "done" : currentSeriesQualityMetrics.value?.narrativeDebtSignals?.length ? "partial" : "planned",
+        sourcePattern: "汇总未交付伏笔、风险、连续性和开放回路。",
+        localLanding: "运行时快照和全书质量指标提供债务信号。",
+        userValue: "作者能优先决定交付、延期或关闭哪类承诺。",
+        entryAction: "open-review",
+        evidenceCount: debt?.debtCount || currentSeriesQualityMetrics.value?.narrativeDebtSignals?.length || 0
+      },
+      {
+        id: "knowledge-cast",
+        label: "知识图谱 / 角色关系 / 登场调度",
+        status: relationCount || appearanceCount || knowledgeCount ? "done" : storyGraph.value ? "partial" : "planned",
+        sourcePattern: "把事实三元组、角色关系证据和登场覆盖度投影成图谱。",
+        localLanding: "故事图谱承载知识节点、关系边和 appearanceSignals。",
+        userValue: "定位缺证据角色、关系断点和长期未登场风险。",
+        entryAction: "open-structure",
+        evidenceCount: relationCount + appearanceCount + knowledgeCount
       }
     ];
   });
@@ -2403,6 +2717,9 @@ export const useNovelStore = defineStore("novel", () => {
     activeSceneCard,
     focusWritingGuide,
     creationLoopSteps,
+    nextWorkbenchActions,
+    workbenchRiskSignals,
+    plotPilotLearningItems,
     currentDashboard,
     currentChapterSummary,
     currentRuntimeSnapshot,

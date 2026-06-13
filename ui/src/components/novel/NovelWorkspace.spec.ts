@@ -146,6 +146,9 @@ function makeStore(writingMode: "focus" | "structure" | "review") {
     activeTaskType: null,
     taskProgress: [],
     creationLoopSteps: [],
+    nextWorkbenchActions: [],
+    workbenchRiskSignals: [],
+    plotPilotLearningItems: [],
     currentRuntimeSnapshot: null,
     autoRunSavePipeline: false,
     savePipelineSteps: [],
@@ -285,9 +288,14 @@ const stubs = {
   ChapterTree: { template: "<div class='tree-stub'>tree</div>" },
   WritingModeSwitcher: { props: ["mode"], template: "<div class='mode-switcher-stub'>{{ mode }}</div>" },
   CreationLoopPanel: {
-    props: ["steps", "runtimeSnapshot"],
+    props: ["steps", "nextActions", "riskSignals", "runtimeSnapshot"],
     emits: ["action"],
     template: "<button class='creation-loop-stub' @click='$emit(\"action\", steps?.[0]?.action)'>loop</button>"
+  },
+  PlotPilotLearningPanel: {
+    props: ["items"],
+    emits: ["action"],
+    template: "<div class='plotpilot-learning-stub'>learning {{ items?.length || 0 }}</div>"
   },
   SavePipelinePanel: {
     props: ["autoRun", "steps", "isRunning"],
