@@ -45,7 +45,9 @@ import type {
   StoryGraphProjection,
   StyleToneKey,
   TaskProgressStep,
+  WorkbenchCommand,
   WorkbenchNextAction,
+  WorkbenchSourceRef,
   WorkbenchRiskSignal,
   WritingMode,
   EmotionLedger,
@@ -336,6 +338,37 @@ export const useNovelStore = defineStore("novel", () => {
       return [];
     });
   }
+  const latestAiInvocation = computed(() =>
+    [...aiInvocations.value].sort(
+      (left, right) => Date.parse(right.updatedAt || right.createdAt) - Date.parse(left.updatedAt || left.createdAt)
+    )[0]
+  );
+  const abnormalAppearanceSignals = computed(
+    () =>
+      storyGraph.value?.characterRelations?.appearanceSignals.filter((signal) =>
+        ["should-appear", "overexposed", "absent"].includes(signal.status)
+      ) || []
+  );
+  function sourceRef(id: string, label: string, value?: string | number, kind?: WorkbenchSourceRef["kind"]): WorkbenchSourceRef {
+    return {
+      id,
+      label,
+      value: typeof value === "number" ? String(value) : value,
+      kind
+    };
+  }
+  function auditCommand(): WorkbenchCommand {
+    return { type: "open-audit-report", section: "ai-control-plane" };
+  }
+  function storyGraphCommand(signal = abnormalAppearanceSignals.value[0]): WorkbenchCommand {
+    return {
+      type: "open-story-graph",
+      characterId: signal?.characterId,
+      nodeId: signal?.characterId,
+      appearanceStatus: signal?.status,
+      reason: signal ? `${signal.name} ${signal.status}` : undefined
+    };
+  }
   const recapStateSignals = computed(() => {
     const signals: string[] = [];
     if (pendingEmotionLedgerCount.value) signals.push(`情绪待入账 ${pendingEmotionLedgerCount.value}`);
@@ -581,16 +614,12 @@ export const useNovelStore = defineStore("novel", () => {
   const workbenchRiskSignals = computed<WorkbenchRiskSignal[]>(() => {
     const signals: WorkbenchRiskSignal[] = [];
     const debt = currentRuntimeSnapshot.value?.signals.narrativeDebt;
-    const latestInvocation = [...aiInvocations.value].sort(
-      (left, right) => Date.parse(right.updatedAt || right.createdAt) - Date.parse(left.updatedAt || left.createdAt)
-    )[0];
+    const latestInvocation = latestAiInvocation.value;
     const failedJob = backgroundJobs.value.find((job) => job.status === "error");
     const runningJobCount = backgroundJobs.value.filter((job) => job.status === "running" || job.status === "pending").length;
     const truncatedContextCount = latestInvocation?.contextSnapshot.truncatedBlocks?.length || 0;
-    const abnormalAppearanceCount =
-      storyGraph.value?.characterRelations?.appearanceSignals.filter((signal) =>
-        ["should-appear", "overexposed", "absent"].includes(signal.status)
-      ).length || 0;
+    const abnormalAppearance = abnormalAppearanceSignals.value[0];
+    const abnormalAppearanceCount = abnormalAppearanceSignals.value.length;
     const weakMetric = currentQualityReport.value?.metrics.find((metric) => metric.score < 60);
 
     signals.push({
@@ -600,7 +629,13 @@ export const useNovelStore = defineStore("novel", () => {
       reason: hasUnsavedChanges.value ? "未保存会阻塞审稿、回顾和章后流水线。" : "当前正文可作为后续计算输入。",
       action: hasUnsavedChanges.value ? "save-draft" : undefined,
       actionLabel: hasUnsavedChanges.value ? "保存" : undefined,
-      source: "draft"
+      source: "draft",
+      detailRows: [
+        sourceRef("draft-state", "保存状态", hasUnsavedChanges.value ? "未保存" : "已保存", "draft"),
+        sourceRef("draft-word-count", "当前字数", currentWordCount.value, "draft"),
+        sourceRef("chapter", "当前章节", currentChapter.value?.title || currentDashboard.value?.chapterId || "未选择章节", "draft")
+      ],
+      sourceRefs: [sourceRef("content-file", "正文文件", currentFilePath.value || currentChapter.value?.contentPath || "未打开文件", "draft")]
     });
 
     signals.push({
@@ -610,7 +645,13 @@ export const useNovelStore = defineStore("novel", () => {
       reason: weakMetric?.note || (hasChapterQualityReport.value ? "已有本章质量报告。" : "缺少节奏、张力和信息释放检查。"),
       action: hasChapterQualityReport.value && !weakMetric ? undefined : "diagnose",
       actionLabel: hasChapterQualityReport.value && !weakMetric ? undefined : "体检",
-      source: "quality"
+      source: "quality",
+      detailRows: [
+        sourceRef("quality-report", "质量报告", hasChapterQualityReport.value ? `${currentQualityReport.value?.overallScore || 0} 分` : "缺失", "quality"),
+        sourceRef("quality-weak-metric", "最低指标", weakMetric ? `${weakMetric.label} ${weakMetric.score}` : "暂无低分项", "quality"),
+        sourceRef("saved-draft", "可审正文", hasSavedDraftContent.value ? "已保存" : "不足或未保存", "draft")
+      ],
+      sourceRefs: currentQualityReport.value?.metrics.map((metric) => sourceRef(`metric-${metric.key}`, metric.label, `${metric.score} 分`, "quality")) || []
     });
 
     signals.push({
@@ -622,7 +663,15 @@ export const useNovelStore = defineStore("novel", () => {
         : "当前快照未发现高压叙事债务。",
       action: debt?.debtCount ? "open-review" : undefined,
       actionLabel: debt?.debtCount ? "查看" : undefined,
-      source: "runtime"
+      source: "runtime",
+      detailRows: [
+        sourceRef("runtime-fingerprint", "运行时快照", currentRuntimeSnapshot.value?.fingerprint.slice(0, 8) || "暂无", "runtime"),
+        sourceRef("open-foreshadowing", "未交付伏笔", debt?.openForeshadowingCount || 0, "runtime"),
+        sourceRef("continuity-risks", "风险项", debt?.riskCount || 0, "runtime"),
+        sourceRef("open-emotion-loops", "情绪回路", debt?.openLoopCount || 0, "ledger"),
+        sourceRef("overdue-debt", "逾期项", debt?.overdueCount || 0, "runtime")
+      ],
+      sourceRefs: [sourceRef("current-runtime", "章节运行时", currentRuntimeSnapshot.value?.updatedAt || "未生成", "runtime")]
     });
 
     signals.push({
@@ -632,7 +681,17 @@ export const useNovelStore = defineStore("novel", () => {
       reason: pendingEmotionLedgerCount.value ? "回顾候选里有情绪伤口、馈赠或开放回路待确认。" : "当前没有待确认情绪账本补丁。",
       action: pendingEmotionLedgerCount.value ? "accept-recap" : undefined,
       actionLabel: pendingEmotionLedgerCount.value ? "入账" : undefined,
-      source: "ledger"
+      source: "ledger",
+      detailRows: [
+        sourceRef("pending-ledger", "待确认补丁", pendingEmotionLedgerCount.value, "ledger"),
+        sourceRef("accepted-ledger", "已沉淀条目", acceptedEmotionLedgerCount.value, "ledger"),
+        sourceRef("recap-candidate", "回顾候选", recapCandidate.value ? recapCandidate.value.createdAt : "暂无", "ledger")
+      ],
+      sourceRefs: [
+        sourceRef("emotion-wounds", "伤口", recapCandidate.value?.emotionLedgerPatch?.wounds?.length || 0, "ledger"),
+        sourceRef("emotion-boons", "馈赠", recapCandidate.value?.emotionLedgerPatch?.boons?.length || 0, "ledger"),
+        sourceRef("emotion-open-loops", "开放回路", recapCandidate.value?.emotionLedgerPatch?.openLoops?.length || 0, "ledger")
+      ]
     });
 
     signals.push({
@@ -652,7 +711,24 @@ export const useNovelStore = defineStore("novel", () => {
             : "最近一次 AI 调用没有暴露失败或上下文截断。",
       action: latestInvocation?.status === "error" || truncatedContextCount ? "open-review" : undefined,
       actionLabel: latestInvocation?.status === "error" || truncatedContextCount ? "审计" : undefined,
-      source: "ai"
+      command: latestInvocation?.status === "error" || truncatedContextCount ? auditCommand() : undefined,
+      commandLabel: latestInvocation?.status === "error" || truncatedContextCount ? "定位 AI 调用控制面板" : undefined,
+      source: "ai",
+      detailRows: [
+        sourceRef("latest-invocation", "最近调用", latestInvocation?.id || "暂无", "ai"),
+        sourceRef("invocation-status", "调用状态", latestInvocation?.status || "无记录", "ai"),
+        sourceRef("prompt-version", "提示词版本", latestInvocation?.promptVersion || "未记录", "ai"),
+        sourceRef("context-blocks", "上下文块", latestInvocation?.contextSnapshot.blockCount || 0, "ai"),
+        sourceRef("truncated-blocks", "截断块", truncatedContextCount, "ai")
+      ],
+      sourceRefs: [
+        ...((latestInvocation?.contextSnapshot.truncatedBlocks || []).map((title, index) =>
+          sourceRef(`truncated-${index}`, "被截断上下文", title, "ai")
+        )),
+        ...((latestInvocation?.preCallReview?.warnings || []).map((warning, index) =>
+          sourceRef(`pre-call-warning-${index}`, "调用前预警", warning, "ai")
+        ))
+      ]
     });
 
     signals.push({
@@ -668,15 +744,27 @@ export const useNovelStore = defineStore("novel", () => {
             : "知识图谱、故事图谱和角色调度没有暴露阻塞项。",
       action: failedJob ? "open-review" : abnormalAppearanceCount ? "open-structure" : undefined,
       actionLabel: failedJob ? "查看" : abnormalAppearanceCount ? "定位" : undefined,
-      source: "graph"
+      command: abnormalAppearanceCount ? storyGraphCommand(abnormalAppearance) : failedJob ? undefined : undefined,
+      commandLabel: abnormalAppearanceCount ? "定位角色图谱" : undefined,
+      source: "graph",
+      detailRows: [
+        sourceRef("failed-job", "失败后台任务", failedJob ? `${radarBackgroundJobLabels[failedJob.type]} / ${failedJob.id}` : "无", "job"),
+        sourceRef("running-jobs", "处理中任务", runningJobCount, "job"),
+        sourceRef("appearance-risk-count", "异常调度", abnormalAppearanceCount, "graph"),
+        sourceRef("focused-character", "优先定位角色", abnormalAppearance?.name || "暂无", "graph")
+      ],
+      sourceRefs: [
+        ...(failedJob ? [sourceRef(failedJob.id, "后台任务错误", failedJob.error || failedJob.status, "job")] : []),
+        ...abnormalAppearanceSignals.value.map((signal) =>
+          sourceRef(signal.characterId, signal.name, `${signal.status} / ${signal.reasons.join("、") || "无原因"}`, "graph")
+        )
+      ]
     });
 
     return signals;
   });
   const plotPilotLearningItems = computed<PlotPilotLearningItem[]>(() => {
-    const latestInvocation = [...aiInvocations.value].sort(
-      (left, right) => Date.parse(right.updatedAt || right.createdAt) - Date.parse(left.updatedAt || left.createdAt)
-    )[0];
+    const latestInvocation = latestAiInvocation.value;
     const tierCount = latestInvocation?.contextSnapshot.tierCounts
       ? Object.values(latestInvocation.contextSnapshot.tierCounts).reduce((total, value) => total + (value || 0), 0)
       : 0;
@@ -684,6 +772,13 @@ export const useNovelStore = defineStore("novel", () => {
     const appearanceCount = storyGraph.value?.characterRelations?.appearanceSignals.length || 0;
     const knowledgeCount = storyGraph.value?.nodes.filter((node) => node.type === "knowledge").length || 0;
     const debt = currentRuntimeSnapshot.value?.signals.narrativeDebt;
+    const currentChapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
+    const structureActive = Boolean(hasChapterStructure.value || sceneCards.value.length);
+    const contextActive = Boolean(latestInvocation?.contextSnapshot.blockCount);
+    const aiControlActive = Boolean(latestInvocation?.promptVersion || latestInvocation?.preCallReview || latestInvocation?.contextSnapshot.truncatedBlocks?.length);
+    const emotionActive = Boolean(pendingEmotionLedgerCount.value || acceptedEmotionLedgerCount.value);
+    const narrativeDebtActive = Boolean(debt?.debtCount || currentSeriesQualityMetrics.value?.narrativeDebtSignals?.some((signal) => signal.chapterId === currentChapterId));
+    const graphActive = Boolean(relationCount || appearanceCount || knowledgeCount);
 
     return [
       {
@@ -694,7 +789,13 @@ export const useNovelStore = defineStore("novel", () => {
         localLanding: "结构、正文和上下文装配共享同一章目标。",
         userValue: "减少早期跑题、过早泄底和无代价推进。",
         entryAction: "open-structure",
-        evidenceCount: Number(hasChapterStructure.value) + sceneCards.value.length
+        evidenceCount: Number(hasChapterStructure.value) + sceneCards.value.length,
+        active: structureActive,
+        activeReason: structureActive ? `当前章正在使用 ${sceneCards.value.length} 张场景卡和章节目标约束。` : undefined,
+        sourceRefs: [
+          sourceRef("dashboard", "章节仪表盘", hasChapterStructure.value ? "已建立" : "缺失", "structure"),
+          sourceRef("scene-cards", "场景卡", sceneCards.value.length, "structure")
+        ]
       },
       {
         id: "context-budget",
@@ -704,7 +805,14 @@ export const useNovelStore = defineStore("novel", () => {
         localLanding: "AI 调用审计记录 tier 计数和截断块。",
         userValue: "长篇推进时优先保留承诺、人物和账本状态。",
         entryAction: "open-review",
-        evidenceCount: tierCount || latestInvocation?.contextSnapshot.blockCount || 0
+        entryCommand: auditCommand(),
+        evidenceCount: tierCount || latestInvocation?.contextSnapshot.blockCount || 0,
+        active: contextActive,
+        activeReason: contextActive ? `最近调用装配了 ${latestInvocation?.contextSnapshot.blockCount || 0} 个上下文块。` : undefined,
+        sourceRefs: [
+          sourceRef("tier-count", "分层证据", tierCount, "ai"),
+          sourceRef("truncated-count", "截断块", latestInvocation?.contextSnapshot.truncatedBlocks?.length || 0, "ai")
+        ]
       },
       {
         id: "ai-control-plane",
@@ -714,7 +822,15 @@ export const useNovelStore = defineStore("novel", () => {
         localLanding: "任务历史与审计报告暴露 AI 调用健康度。",
         userValue: "失败、截断和采纳状态能追溯，不必翻 JSONL。",
         entryAction: "open-review",
-        evidenceCount: aiInvocations.value.length
+        entryCommand: auditCommand(),
+        evidenceCount: aiInvocations.value.length,
+        active: aiControlActive,
+        activeReason: aiControlActive ? "最近调用已有提示词版本、预检或上下文截断记录。" : undefined,
+        sourceRefs: [
+          sourceRef("latest-ai-invocation", "最近调用", latestInvocation?.id || "暂无", "ai"),
+          sourceRef("prompt-version", "提示词版本", latestInvocation?.promptVersion || "未记录", "ai"),
+          sourceRef("pre-call-warnings", "预检警告", latestInvocation?.preCallReview?.warnings.length || 0, "ai")
+        ]
       },
       {
         id: "emotion-ledger",
@@ -724,7 +840,17 @@ export const useNovelStore = defineStore("novel", () => {
         localLanding: "写作回顾候选与章节摘要都能携带 emotionLedger。",
         userValue: "下一章不只记住事件，也记住人物被留下的情绪债。",
         entryAction: pendingEmotionLedgerCount.value ? "accept-recap" : "request-recap",
-        evidenceCount: acceptedEmotionLedgerCount.value + pendingEmotionLedgerCount.value
+        evidenceCount: acceptedEmotionLedgerCount.value + pendingEmotionLedgerCount.value,
+        active: emotionActive,
+        activeReason: pendingEmotionLedgerCount.value
+          ? `当前章有 ${pendingEmotionLedgerCount.value} 条情绪账本补丁待确认。`
+          : acceptedEmotionLedgerCount.value
+            ? `当前章已沉淀 ${acceptedEmotionLedgerCount.value} 条情绪账本。`
+            : undefined,
+        sourceRefs: [
+          sourceRef("pending-emotion-ledger", "待入账", pendingEmotionLedgerCount.value, "ledger"),
+          sourceRef("accepted-emotion-ledger", "已入账", acceptedEmotionLedgerCount.value, "ledger")
+        ]
       },
       {
         id: "narrative-debt",
@@ -734,7 +860,13 @@ export const useNovelStore = defineStore("novel", () => {
         localLanding: "运行时快照和全书质量指标提供债务信号。",
         userValue: "作者能优先决定交付、延期或关闭哪类承诺。",
         entryAction: "open-review",
-        evidenceCount: debt?.debtCount || currentSeriesQualityMetrics.value?.narrativeDebtSignals?.length || 0
+        evidenceCount: debt?.debtCount || currentSeriesQualityMetrics.value?.narrativeDebtSignals?.length || 0,
+        active: narrativeDebtActive,
+        activeReason: narrativeDebtActive ? `当前章检测到 ${debt?.debtCount || 0} 个运行时债务信号。` : undefined,
+        sourceRefs: [
+          sourceRef("runtime-debt", "运行时债务", debt?.debtCount || 0, "runtime"),
+          sourceRef("series-debt", "全书债务信号", currentSeriesQualityMetrics.value?.narrativeDebtSignals?.length || 0, "quality")
+        ]
       },
       {
         id: "knowledge-cast",
@@ -744,7 +876,15 @@ export const useNovelStore = defineStore("novel", () => {
         localLanding: "故事图谱承载知识节点、关系边和 appearanceSignals。",
         userValue: "定位缺证据角色、关系断点和长期未登场风险。",
         entryAction: "open-structure",
-        evidenceCount: relationCount + appearanceCount + knowledgeCount
+        entryCommand: storyGraphCommand(),
+        evidenceCount: relationCount + appearanceCount + knowledgeCount,
+        active: graphActive,
+        activeReason: graphActive ? `故事图谱当前有 ${relationCount} 条关系、${appearanceCount} 条调度信号。` : undefined,
+        sourceRefs: [
+          sourceRef("relation-count", "角色关系", relationCount, "graph"),
+          sourceRef("appearance-count", "登场信号", appearanceCount, "graph"),
+          sourceRef("knowledge-count", "知识节点", knowledgeCount, "graph")
+        ]
       }
     ];
   });

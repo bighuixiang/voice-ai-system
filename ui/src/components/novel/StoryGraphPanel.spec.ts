@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import StoryGraphPanel from "./StoryGraphPanel.vue";
 import type { StoryGraphProjection } from "@/types/novel";
@@ -125,6 +125,10 @@ function storyGraph(): StoryGraphProjection {
 }
 
 describe("StoryGraphPanel", () => {
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = vi.fn();
+  });
+
   it("renders grouped nodes, selected node relations, and character relation evidence", async () => {
     const wrapper = mount(StoryGraphPanel, {
       props: { graph: storyGraph() },
@@ -171,5 +175,22 @@ describe("StoryGraphPanel", () => {
     await wrapper.find("button").trigger("click");
 
     expect(wrapper.emitted("refresh")).toHaveLength(1);
+  });
+
+  it("focuses a character scheduling signal from parent navigation", async () => {
+    const wrapper = mount(StoryGraphPanel, {
+      props: {
+        graph: storyGraph(),
+        focus: { characterId: "char-shadow", nodeId: "char-shadow", appearanceStatus: "should-appear" }
+      },
+      global: { stubs }
+    });
+
+    await wrapper.vm.$nextTick();
+
+    const activeSchedule = wrapper.find(".schedule-row.active");
+    expect(activeSchedule.exists()).toBe(true);
+    expect(activeSchedule.text()).toContain("Shadow");
+    expect(wrapper.findAll(".relation-node.active").some((node) => node.text().includes("Shadow"))).toBe(true);
   });
 });

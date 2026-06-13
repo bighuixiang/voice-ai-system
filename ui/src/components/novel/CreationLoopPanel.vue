@@ -2,7 +2,7 @@
   <section class="creation-loop-panel" aria-label="章节创作闭环">
     <div class="runtime-console">
       <div class="runtime-title">
-        <p class="eyebrow">Chapter Runtime</p>
+        <p class="eyebrow">章节运行时</p>
         <h2>{{ runtimeSnapshot?.chapterTitle || "章节运行时总览" }}</h2>
         <div class="loop-meta">
           <span v-if="runtimeSnapshot?.activeStepId" class="runtime-chip">
@@ -37,14 +37,67 @@
     </div>
 
     <div v-if="visibleRiskSignals.length" class="risk-radar" aria-label="本章风险雷达">
-      <article v-for="signal in visibleRiskSignals" :key="signal.id" :class="`is-${signal.status}`">
+      <article
+        v-for="signal in visibleRiskSignals"
+        :key="signal.id"
+        :class="`is-${signal.status}`"
+        role="button"
+        tabindex="0"
+        @click="openRisk(signal)"
+        @keyup.enter="openRisk(signal)"
+      >
         <span>{{ signal.label }}</span>
         <p>{{ signal.reason }}</p>
-        <button v-if="signal.action && signal.actionLabel" type="button" :disabled="loading" @click="$emit('action', signal.action)">
-          {{ signal.actionLabel }}
+        <small>{{ (signal.detailRows?.length || 0) + (signal.sourceRefs?.length || 0) }} 条来源</small>
+        <button
+          v-if="hasRiskShortcut(signal)"
+          type="button"
+          :disabled="loading"
+          @click.stop="runRiskShortcut(signal)"
+        >
+          {{ signal.commandLabel || signal.actionLabel || "定位" }}
         </button>
       </article>
     </div>
+
+    <el-drawer v-model="riskDrawerOpen" size="380px" :with-header="false" append-to-body>
+      <section v-if="selectedRisk" class="risk-drawer" aria-label="风险来源详情">
+        <div class="drawer-heading">
+          <span :class="`risk-status is-${selectedRisk.status}`">{{ riskStatusLabel(selectedRisk.status) }}</span>
+          <h3>{{ selectedRisk.label }}</h3>
+          <p>{{ selectedRisk.reason }}</p>
+        </div>
+
+        <div class="source-section">
+          <div class="source-title">来源明细</div>
+          <dl>
+            <template v-for="row in selectedRisk.detailRows || []" :key="row.id">
+              <dt>{{ row.label }}</dt>
+              <dd>{{ row.value || "未记录" }}</dd>
+            </template>
+          </dl>
+          <p v-if="!selectedRisk.detailRows?.length" class="empty-source">暂无结构化来源。</p>
+        </div>
+
+        <div class="source-section">
+          <div class="source-title">证据引用</div>
+          <div v-for="ref in selectedRisk.sourceRefs || []" :key="ref.id" class="source-ref">
+            <span>{{ ref.label }}</span>
+            <strong>{{ ref.value || ref.id }}</strong>
+          </div>
+          <p v-if="!selectedRisk.sourceRefs?.length" class="empty-source">暂无额外证据。</p>
+        </div>
+
+        <div class="drawer-actions">
+          <el-button v-if="selectedRisk.command" type="primary" :disabled="loading" @click="runRiskCommand(selectedRisk.command)">
+            {{ selectedRisk.commandLabel || "定位" }}
+          </el-button>
+          <el-button v-if="selectedRisk.action" :disabled="loading" @click="runRiskAction(selectedRisk.action)">
+            {{ selectedRisk.actionLabel || "执行" }}
+          </el-button>
+        </div>
+      </section>
+    </el-drawer>
 
     <ol class="loop-steps">
       <li v-for="step in steps" :key="step.id" class="loop-step" :class="`is-${step.status}`">
@@ -80,9 +133,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { ArrowRight, CircleCheck, Loading, Warning } from "@element-plus/icons-vue";
-import type { CreationLoopAction, CreationLoopStep, CreationRuntimeSnapshot, WorkbenchNextAction, WorkbenchRiskSignal } from "@/types/novel";
+import type {
+  CreationLoopAction,
+  CreationLoopStep,
+  CreationRuntimeSnapshot,
+  WorkbenchCommand,
+  WorkbenchNextAction,
+  WorkbenchRiskSignal
+} from "@/types/novel";
 
 const props = withDefaults(
   defineProps<{
@@ -100,14 +160,17 @@ const props = withDefaults(
   }
 );
 
-defineEmits<{
+const emit = defineEmits<{
   action: [action: CreationLoopAction];
+  command: [command: WorkbenchCommand];
 }>();
 
 const doneCount = computed(() => props.steps.filter((step) => step.status === "done").length);
 const runtimeFingerprint = computed(() => props.runtimeSnapshot?.fingerprint.slice(0, 8) || "");
 const primaryAction = computed(() => props.nextActions[0]);
 const secondaryActions = computed(() => props.nextActions.slice(1, 3));
+const selectedRiskId = ref<string | null>(null);
+const riskDrawerOpen = ref(false);
 const radarSignals = computed(() => {
   const signals = new Set<string>();
   const blockedCount = props.steps.filter((step) => step.status === "blocked").length;
@@ -131,11 +194,43 @@ const visibleRiskSignals = computed<WorkbenchRiskSignal[]>(() => {
     source: "loop"
   }));
 });
+const selectedRisk = computed(() => visibleRiskSignals.value.find((signal) => signal.id === selectedRiskId.value) || null);
 
 function priorityLabel(priority: WorkbenchNextAction["priority"]) {
   if (priority === "critical") return "必须先做";
   if (priority === "recommended") return "建议下一步";
   return "可继续";
+}
+
+function riskStatusLabel(status: WorkbenchRiskSignal["status"]) {
+  if (status === "blocked") return "阻塞";
+  if (status === "watch") return "观察";
+  return "稳定";
+}
+
+function openRisk(signal: WorkbenchRiskSignal) {
+  selectedRiskId.value = signal.id;
+  riskDrawerOpen.value = true;
+}
+
+function runRiskAction(action: CreationLoopAction) {
+  emit("action", action);
+}
+
+function runRiskCommand(command: WorkbenchCommand) {
+  emit("command", command);
+}
+
+function hasRiskShortcut(signal: WorkbenchRiskSignal) {
+  return Boolean(signal.command || signal.action);
+}
+
+function runRiskShortcut(signal: WorkbenchRiskSignal) {
+  if (signal.command) {
+    runRiskCommand(signal.command);
+    return;
+  }
+  if (signal.action) runRiskAction(signal.action);
 }
 </script>
 
@@ -306,13 +401,15 @@ function priorityLabel(priority: WorkbenchNextAction["priority"]) {
 
   article {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
     gap: 5px;
     min-height: 86px;
     padding: 8px;
     border: 1px solid var(--app-border);
     border-radius: 7px;
     background: var(--app-bg);
+    cursor: pointer;
+    outline: none;
 
     &.is-blocked {
       border-color: color-mix(in srgb, var(--app-danger-text) 48%, var(--app-border));
@@ -326,6 +423,11 @@ function priorityLabel(priority: WorkbenchNextAction["priority"]) {
 
     &.is-stable {
       border-color: color-mix(in srgb, var(--app-success-text) 34%, var(--app-border));
+    }
+
+    &:focus-visible {
+      border-color: var(--app-primary);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-primary) 24%, transparent);
     }
   }
 
@@ -349,6 +451,11 @@ function priorityLabel(priority: WorkbenchNextAction["priority"]) {
     -webkit-line-clamp: 2;
   }
 
+  small {
+    color: var(--app-text-muted);
+    font-size: 10px;
+  }
+
   button {
     justify-self: start;
     padding: 0;
@@ -359,6 +466,133 @@ function priorityLabel(priority: WorkbenchNextAction["priority"]) {
     font-weight: 700;
     cursor: pointer;
   }
+}
+
+.risk-drawer {
+  display: grid;
+  gap: 14px;
+  color: var(--app-text-primary);
+}
+
+.drawer-heading {
+  display: grid;
+  gap: 8px;
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    font-size: 18px;
+    letter-spacing: 0;
+  }
+
+  p {
+    color: var(--app-text-secondary);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+.risk-status {
+  justify-self: start;
+  padding: 3px 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-bg-soft);
+  color: var(--app-text-muted);
+  font-size: 11px;
+  font-weight: 800;
+
+  &.is-blocked {
+    border-color: color-mix(in srgb, var(--app-danger-text) 45%, var(--app-border));
+    background: var(--app-danger-soft);
+    color: var(--app-danger-text);
+  }
+
+  &.is-watch {
+    border-color: color-mix(in srgb, var(--app-warning-text) 45%, var(--app-border));
+    background: var(--app-warning-soft);
+    color: var(--app-warning-text);
+  }
+
+  &.is-stable {
+    border-color: color-mix(in srgb, var(--app-success-text) 38%, var(--app-border));
+    background: var(--app-success-soft);
+    color: var(--app-success-text);
+  }
+}
+
+.source-section {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-bg-soft);
+
+  dl {
+    display: grid;
+    grid-template-columns: minmax(92px, auto) minmax(0, 1fr);
+    gap: 6px 10px;
+    margin: 0;
+  }
+
+  dt {
+    color: var(--app-text-muted);
+    font-size: 12px;
+  }
+
+  dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--app-text-primary);
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.source-title {
+  color: var(--app-primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.source-ref {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-bg);
+
+  span {
+    color: var(--app-text-muted);
+    font-size: 11px;
+  }
+
+  strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--app-text-primary);
+    font-size: 12px;
+  }
+}
+
+.empty-source {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 12px;
+}
+
+.drawer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .loop-steps {

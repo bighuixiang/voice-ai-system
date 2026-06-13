@@ -106,9 +106,9 @@
             <span>{{ relationSummaryText }}</span>
           </div>
           <div class="relation-badges">
-            <span>{{ characterRelations.characters.length }} characters</span>
-            <span>{{ characterRelations.relationships.length }} relations</span>
-            <span>{{ isolatedCoverage.length }} isolated</span>
+            <span>{{ characterRelations.characters.length }} 个角色</span>
+            <span>{{ characterRelations.relationships.length }} 条关系</span>
+            <span>{{ isolatedCoverage.length }} 个孤立</span>
           </div>
         </div>
 
@@ -155,7 +155,7 @@
                 <em>{{ selectedRelationship.label }}</em>
                 <span>{{ selectedRelationship.targetName }}</span>
               </div>
-              <p>{{ selectedRelationship.weight }} evidence · {{ selectedRelationship.chapterIds.join(", ") || "no chapter" }}</p>
+              <p>{{ selectedRelationship.weight }} 条证据 · {{ selectedRelationship.chapterIds.join(", ") || "无章节" }}</p>
               <div class="evidence-list">
                 <div v-for="item in selectedRelationship.evidence.slice(0, 4)" :key="`${item.sourceType}:${item.sourceId}:${item.label}`">
                   <span>{{ sourceTypeLabel(item.sourceType) }}</span>
@@ -170,24 +170,26 @@
               <div class="coverage-title">覆盖度</div>
               <div v-for="item in coverageRows" :key="item.characterId" class="coverage-row" :class="{ isolated: item.isolated }">
                 <span>{{ item.name }}</span>
-                <em>{{ item.relationshipCount }} relations</em>
+                <em>{{ item.relationshipCount }} 条关系</em>
                 <small>{{ coverageHint(item) }}</small>
               </div>
             </div>
-            <div class="appearance-schedule" aria-label="角色登场调度">
+            <div ref="appearanceScheduleRef" class="appearance-schedule" aria-label="角色登场调度">
               <div class="coverage-title">登场调度</div>
-              <div
+              <button
                 v-for="item in appearanceSignalRows"
                 :key="item.characterId"
                 class="schedule-row"
-                :class="scheduleStatusClass(item.status)"
+                :class="[scheduleStatusClass(item.status), { active: item.characterId === selectedAppearanceCharacterId }]"
+                type="button"
+                @click="selectAppearanceSignal(item)"
               >
                 <div>
                   <span>{{ item.name }}</span>
                   <em>{{ scheduleStatusLabel(item.status) }}</em>
                 </div>
                 <small>{{ scheduleSignalHint(item) }}</small>
-              </div>
+              </button>
               <p v-if="!appearanceSignalRows.length" class="compact-empty">暂无调度信号。</p>
             </div>
           </aside>
@@ -208,13 +210,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { Refresh } from "@element-plus/icons-vue";
 import type {
   CharacterAppearanceSignal,
   CharacterRelationshipCoverage,
   CharacterRelationshipSourceType,
   CharacterScheduleStatus,
+  StoryGraphFocus,
   StoryGraphNodeType,
   StoryGraphProjection
 } from "@/types/novel";
@@ -222,6 +225,7 @@ import type {
 const props = defineProps<{
   graph: StoryGraphProjection | null;
   isRebuilding?: boolean;
+  focus?: StoryGraphFocus | null;
 }>();
 
 defineEmits<{
@@ -269,6 +273,8 @@ const nodeStats = computed(() =>
 );
 
 const selectedNodeId = ref<string | null>(null);
+const selectedAppearanceCharacterId = ref<string | null>(null);
+const appearanceScheduleRef = ref<HTMLElement | null>(null);
 
 const graphNodeIds = computed(() => props.graph?.nodes.map((node) => node.id) || []);
 
@@ -340,6 +346,14 @@ watch(
   { immediate: true }
 );
 
+watch(
+  () => [props.focus?.nodeId, props.focus?.characterId, props.focus?.appearanceStatus, props.graph?.updatedAt],
+  () => {
+    applyFocus();
+  },
+  { immediate: true }
+);
+
 const selectedRelationship = computed(
   () => characterRelations.value?.relationships.find((item) => item.id === selectedRelationshipId.value) || null
 );
@@ -388,7 +402,7 @@ const relationCanvasNodes = computed(() => {
     const angle = -Math.PI / 2 + (index / total) * Math.PI * 2;
     const x = 280 + Math.cos(angle) * 205;
     const y = 130 + Math.sin(angle) * 90;
-    const active = selectedIds.has(node.id);
+    const active = selectedIds.has(node.id) || node.id === selectedNodeId.value || node.id === selectedAppearanceCharacterId.value;
     return {
       id: node.id,
       x,
@@ -397,7 +411,7 @@ const relationCanvasNodes = computed(() => {
       shortLabel: shortLabel(node.label),
       active,
       isolated: isolatedIds.has(node.id),
-      dimmed: Boolean(selectedRelationshipId.value && !active)
+      dimmed: Boolean((selectedRelationshipId.value || selectedAppearanceCharacterId.value) && !active)
     };
   });
 });
@@ -502,10 +516,40 @@ function shortLabel(label: string) {
 
 function selectNode(id: string) {
   selectedNodeId.value = id;
+  if (characterRelations.value?.characters.some((character) => character.id === id)) {
+    selectedAppearanceCharacterId.value = id;
+  }
 }
 
 function selectRelationship(id: string) {
   selectedRelationshipId.value = id;
+}
+
+function selectAppearanceSignal(item: CharacterAppearanceSignal) {
+  selectedAppearanceCharacterId.value = item.characterId;
+  if (graphNodeIds.value.includes(item.characterId)) {
+    selectedNodeId.value = item.characterId;
+  }
+  const relation = characterRelations.value?.relationships.find(
+    (edge) => edge.sourceCharacterId === item.characterId || edge.targetCharacterId === item.characterId
+  );
+  if (relation) selectedRelationshipId.value = relation.id;
+}
+
+async function applyFocus() {
+  const focus = props.focus;
+  if (!focus || !props.graph) return;
+  const nodeId = focus.nodeId || focus.characterId;
+  if (nodeId && graphNodeIds.value.includes(nodeId)) {
+    selectedNodeId.value = nodeId;
+  }
+  if (focus.characterId) {
+    selectedAppearanceCharacterId.value = focus.characterId;
+    const signal = characterRelations.value?.appearanceSignals.find((item) => item.characterId === focus.characterId);
+    if (signal) selectAppearanceSignal(signal);
+    await nextTick();
+    appearanceScheduleRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 }
 
 function sourceTypeLabel(sourceType: CharacterRelationshipSourceType) {
@@ -952,6 +996,11 @@ p {
 }
 
 .schedule-row {
+  width: 100%;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+
   div {
     display: flex;
     align-items: center;
@@ -974,6 +1023,13 @@ p {
 
   &.status-balanced {
     border-color: color-mix(in srgb, var(--app-success-text) 45%, var(--app-border));
+  }
+
+  &.active,
+  &:focus-visible {
+    border-color: var(--app-primary);
+    background: var(--app-primary-soft);
+    outline: none;
   }
 }
 

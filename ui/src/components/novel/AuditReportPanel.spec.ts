@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import AuditReportPanel from "./AuditReportPanel.vue";
 import type { ProjectAuditReport } from "@/types/novel";
@@ -119,6 +119,10 @@ const report: ProjectAuditReport = {
 };
 
 describe("AuditReportPanel", () => {
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = vi.fn();
+  });
+
   it("renders audit report summaries and emits actions", async () => {
     const wrapper = mount(AuditReportPanel, {
       props: { report, loading: false },
@@ -126,28 +130,28 @@ describe("AuditReportPanel", () => {
     });
 
     expect(wrapper.text()).toContain("Demo Novel");
-    expect(wrapper.text()).toContain("1 chapters");
+    expect(wrapper.text()).toContain("1 章");
     expect(wrapper.text()).toContain("82");
-    expect(wrapper.text()).toContain("3 tasks");
-    expect(wrapper.text()).toContain("Task Health");
-    expect(wrapper.text()).toContain("Failed / cancelled");
-    expect(wrapper.text()).toContain("Timeout budgeted");
+    expect(wrapper.text()).toContain("3 个任务");
+    expect(wrapper.text()).toContain("任务健康");
+    expect(wrapper.text()).toContain("失败 / 已取消");
+    expect(wrapper.text()).toContain("设置超时预算");
     expect(wrapper.text()).toContain("Codex timed out");
-    expect(wrapper.text()).toContain("cancel requested");
-    expect(wrapper.text()).toContain("2 invocations");
-    expect(wrapper.text()).toContain("AI Control Plane");
-    expect(wrapper.text()).toContain("Pre-call warnings");
+    expect(wrapper.text()).toContain("已请求取消");
+    expect(wrapper.text()).toContain("2 次调用");
+    expect(wrapper.text()).toContain("AI 调用控制面板");
+    expect(wrapper.text()).toContain("调用前预警");
     expect(wrapper.text()).toContain("1");
-    expect(wrapper.text()).toContain("Compressed context");
+    expect(wrapper.text()).toContain("上下文压缩");
     expect(wrapper.text()).toContain("T0 2");
     expect(wrapper.text()).toContain("T1 4");
     expect(wrapper.text()).toContain("task-template:chapter.draft:v2 2");
     expect(wrapper.text()).toContain("multiple-context-blocks-truncated 1");
     expect(wrapper.text()).toContain("local");
-    expect(wrapper.text()).toContain("6 vectors");
-    expect(wrapper.text()).toContain("1 blocked");
+    expect(wrapper.text()).toContain("6 个向量");
+    expect(wrapper.text()).toContain("1 个阻塞");
     expect(wrapper.text()).toContain("review 1");
-    expect(wrapper.text()).toContain("2 jobs");
+    expect(wrapper.text()).toContain("2 个任务");
     expect(wrapper.text()).toContain("4 facts / 2 relations");
 
     const buttons = wrapper.findAll("button");
@@ -164,6 +168,20 @@ describe("AuditReportPanel", () => {
       global: { stubs }
     });
 
-    expect(wrapper.text()).toContain("No audit report loaded");
+    expect(wrapper.text()).toContain("尚未加载审计报告");
+  });
+
+  it("focuses the AI Control Plane section when requested", async () => {
+    const wrapper = mount(AuditReportPanel, {
+      props: { report, loading: false, focusSection: "ai-control-plane" },
+      global: { stubs }
+    });
+
+    await wrapper.vm.$nextTick();
+
+    const section = wrapper.find("#audit-ai-control-plane");
+    expect(section.exists()).toBe(true);
+    expect(section.classes()).toContain("is-focus-highlight");
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
   });
 });

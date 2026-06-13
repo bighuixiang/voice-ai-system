@@ -289,13 +289,18 @@ const stubs = {
   WritingModeSwitcher: { props: ["mode"], template: "<div class='mode-switcher-stub'>{{ mode }}</div>" },
   CreationLoopPanel: {
     props: ["steps", "nextActions", "riskSignals", "runtimeSnapshot"],
-    emits: ["action"],
-    template: "<button class='creation-loop-stub' @click='$emit(\"action\", steps?.[0]?.action)'>loop</button>"
+    emits: ["action", "command"],
+    template: `
+      <div>
+        <button class='creation-loop-stub' @click='$emit("action", steps?.[0]?.action)'>loop</button>
+        <button class='creation-loop-command-stub' @click='$emit("command", { type: "open-audit-report", section: "ai-control-plane" })'>audit command</button>
+      </div>
+    `
   },
   PlotPilotLearningPanel: {
     props: ["items"],
-    emits: ["action"],
-    template: "<div class='plotpilot-learning-stub'>learning {{ items?.length || 0 }}</div>"
+    emits: ["action", "command"],
+    template: "<button class='plotpilot-learning-stub' @click='$emit(\"command\", { type: \"open-story-graph\", characterId: \"char-shadow\", nodeId: \"char-shadow\", appearanceStatus: \"should-appear\" })'>learning {{ items?.length || 0 }}</button>"
   },
   SavePipelinePanel: {
     props: ["autoRun", "steps", "isRunning"],
@@ -322,7 +327,7 @@ const stubs = {
     emits: ["orchestrate"],
     template: "<button class='story-control-stub' @click='$emit(\"orchestrate\")'>story control</button>"
   },
-  StoryGraphPanel: { template: "<div class='story-graph-stub'>story graph</div>" },
+  StoryGraphPanel: { props: ["focus"], template: "<div class='story-graph-stub'>story graph {{ focus?.characterId || '' }}</div>" },
   KnowledgeIndexPanel: { template: "<div class='knowledge-index-stub'>knowledge index</div>" },
   BackgroundJobPanel: {
     emits: ["refresh", "cancel", "retry"],
@@ -356,9 +361,9 @@ const stubs = {
     `
   },
   AuditReportPanel: {
-    props: ["report", "loading"],
+    props: ["report", "loading", "focusSection"],
     emits: ["refresh", "download"],
-    template: "<button class='audit-report-stub' @click='$emit(\"refresh\")'>audit</button>"
+    template: "<button class='audit-report-stub' @click='$emit(\"refresh\")'>audit {{ focusSection || '' }}</button>"
   },
   ContextPanel: { template: "<div class='context-stub'>context</div>" },
   SupportFilePanel: { template: "<div class='support-stub'>support</div>" },
@@ -423,6 +428,27 @@ describe("NovelWorkspace writing modes", () => {
     await wrapper.find(".creation-loop-stub").trigger("click");
 
     expect(storeRef.value.runCreationLoopAction).toHaveBeenCalledWith("save-draft");
+  });
+
+  it("routes workbench audit commands to the focused audit report dialog", async () => {
+    storeRef.value = makeStore("focus");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".creation-loop-command-stub").trigger("click");
+    await wrapper.vm.$nextTick();
+
+    expect(storeRef.value.previewProjectAuditReport).toHaveBeenCalledTimes(1);
+    expect(wrapper.find(".audit-report-stub").text()).toContain("ai-control-plane");
+  });
+
+  it("routes character scheduling commands to the focused story graph", async () => {
+    storeRef.value = makeStore("focus");
+
+    const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".plotpilot-learning-stub").trigger("click");
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find(".story-graph-stub").text()).toContain("char-shadow");
   });
 
   it("syncs focus micro-command input to the store", async () => {

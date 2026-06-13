@@ -2,18 +2,19 @@
   <section class="plotpilot-learning-panel" aria-label="PlotPilot 机制沉淀">
     <div class="panel-header">
       <div>
-        <p class="eyebrow">PlotPilot Learning</p>
+        <p class="eyebrow">PlotPilot 机制学习</p>
         <h2>机制沉淀</h2>
       </div>
       <span>{{ doneCount }} / {{ items.length }} 已落地</span>
     </div>
 
     <div class="learning-grid">
-      <article v-for="item in items" :key="item.id" :class="`is-${item.status}`">
+      <article v-for="item in items" :key="item.id" :class="[`is-${item.status}`, { 'is-active-mechanism': item.active }]">
         <div class="item-topline">
           <strong>{{ item.label }}</strong>
-          <span>{{ statusLabel(item.status) }}</span>
+          <span>{{ item.active ? "正在发挥作用" : statusLabel(item.status) }}</span>
         </div>
+        <p v-if="item.activeReason" class="active-reason">{{ item.activeReason }}</p>
         <dl>
           <dt>来源机制</dt>
           <dd>{{ item.sourcePattern }}</dd>
@@ -22,9 +23,12 @@
           <dt>本章价值</dt>
           <dd>{{ item.userValue }}</dd>
         </dl>
+        <div v-if="item.sourceRefs?.length" class="source-ref-list" aria-label="机制来源证据">
+          <span v-for="ref in item.sourceRefs.slice(0, 3)" :key="ref.id">{{ ref.label }} {{ ref.value || ref.id }}</span>
+        </div>
         <div class="item-footer">
           <span>{{ item.evidenceCount || 0 }} 条证据</span>
-          <button v-if="item.entryAction" type="button" @click="$emit('action', item.entryAction)">进入</button>
+          <button v-if="item.entryCommand || item.entryAction" type="button" @click="runEntry(item)">进入</button>
         </div>
       </article>
     </div>
@@ -33,14 +37,15 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { CreationLoopAction, PlotPilotLearningItem } from "@/types/novel";
+import type { CreationLoopAction, PlotPilotLearningItem, WorkbenchCommand } from "@/types/novel";
 
 const props = defineProps<{
   items: PlotPilotLearningItem[];
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   action: [action: CreationLoopAction];
+  command: [command: WorkbenchCommand];
 }>();
 
 const doneCount = computed(() => props.items.filter((item) => item.status === "done").length);
@@ -49,6 +54,14 @@ function statusLabel(status: PlotPilotLearningItem["status"]) {
   if (status === "done") return "已落地";
   if (status === "partial") return "部分落地";
   return "待增强";
+}
+
+function runEntry(item: PlotPilotLearningItem) {
+  if (item.entryCommand) {
+    emit("command", item.entryCommand);
+    return;
+  }
+  if (item.entryAction) emit("action", item.entryAction);
 }
 </script>
 
@@ -122,6 +135,14 @@ article {
   &.is-planned {
     opacity: 0.78;
   }
+
+  &.is-active-mechanism {
+    border-color: color-mix(in srgb, var(--app-primary) 58%, var(--app-border));
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--app-primary) 13%, transparent), transparent 48%),
+      var(--app-bg-soft);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-primary) 18%, transparent);
+  }
 }
 
 .item-topline,
@@ -149,6 +170,17 @@ article {
   }
 }
 
+.active-reason {
+  margin: 0;
+  padding: 7px;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 28%, var(--app-border));
+  border-radius: 7px;
+  background: var(--app-bg);
+  color: var(--app-primary-text);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 dl {
   display: grid;
   gap: 4px;
@@ -169,6 +201,22 @@ dd {
   line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.source-ref-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  span {
+    min-width: 0;
+    padding: 3px 6px;
+    border: 1px solid var(--app-border);
+    border-radius: 999px;
+    background: var(--app-bg);
+    color: var(--app-text-muted);
+    font-size: 11px;
+  }
 }
 
 .item-footer {

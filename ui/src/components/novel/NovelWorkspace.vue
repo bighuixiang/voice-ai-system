@@ -112,8 +112,13 @@
           :runtime-snapshot="store.currentRuntimeSnapshot"
           :loading="store.isLoading || store.isSavingContent"
           @action="handleCreationLoopAction"
+          @command="handleWorkbenchCommand"
         />
-        <PlotPilotLearningPanel :items="store.plotPilotLearningItems" @action="handleCreationLoopAction" />
+        <PlotPilotLearningPanel
+          :items="store.plotPilotLearningItems"
+          @action="handleCreationLoopAction"
+          @command="handleWorkbenchCommand"
+        />
         <SavePipelinePanel
           :auto-run="store.autoRunSavePipeline"
           :steps="store.savePipelineSteps"
@@ -436,7 +441,7 @@
       <el-icon class="is-loading"><Loading /></el-icon>
       <span>{{ store.error || "正在载入工作台" }}</span>
     </main>
-    <el-dialog v-model="storyControlDialogOpen" title="故事总控台" width="min(1180px, 96vw)" destroy-on-close>
+    <el-dialog v-model="storyControlDialogOpen" title="故事总控台" width="min(1180px, 96vw)" destroy-on-close @closed="storyGraphFocus = null">
       <div class="story-control-dialog-body">
         <StoryControlPanel
           :story-control="store.storyControl"
@@ -454,7 +459,12 @@
           :is-searching="store.isSearchingKnowledge"
           @search="store.searchKnowledgeIndex"
         />
-        <StoryGraphPanel :graph="store.storyGraph" :is-rebuilding="store.isRebuildingStoryGraph" @refresh="store.rebuildStoryGraph" />
+        <StoryGraphPanel
+          :graph="store.storyGraph"
+          :is-rebuilding="store.isRebuildingStoryGraph"
+          :focus="storyGraphFocus"
+          @refresh="store.rebuildStoryGraph"
+        />
         <KnowledgeIndexPanel
           :index="store.knowledgeIndex"
           :is-rebuilding="store.isRebuildingKnowledgeIndex"
@@ -488,11 +498,12 @@
       title="审计报告"
       width="min(1100px, 96vw)"
       destroy-on-close
-      @closed="store.clearAuditReportPreview"
+      @closed="closeAuditReportPreview"
     >
       <AuditReportPanel
         :report="store.auditReportPreview"
         :loading="store.isLoadingAuditReportPreview"
+        :focus-section="auditReportFocusSection"
         @refresh="store.previewProjectAuditReport"
         @download="store.exportProjectAuditReport"
       />
@@ -507,7 +518,7 @@ import { Close, Collection, Folder, Loading, Moon, Refresh, Setting, Sunny } fro
 import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
 import { useThemeStore } from "@/stores/theme";
-import type { CreationLoopAction, NovelProject, PlatformAiConfig } from "@/types/novel";
+import type { CreationLoopAction, NovelProject, PlatformAiConfig, StoryGraphFocus, WorkbenchCommand } from "@/types/novel";
 import ProjectManagerPanel from "./ProjectManagerPanel.vue";
 import ProjectCreatePanel from "./ProjectCreatePanel.vue";
 import AiConfigPanel from "./AiConfigPanel.vue";
@@ -554,6 +565,8 @@ const starterIdea = ref("");
 const aiConfigDialogOpen = ref(false);
 const storyControlDialogOpen = ref(false);
 const auditReportDialogOpen = ref(false);
+const storyGraphFocus = ref<StoryGraphFocus | null>(null);
+const auditReportFocusSection = ref<"ai-control-plane" | null>(null);
 const collapsedPanels = ref<Record<string, boolean>>({});
 const isProjectRoute = computed(() => route.name === "project-workspace");
 const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
@@ -687,6 +700,26 @@ async function handleCreationLoopAction(action: CreationLoopAction) {
   }
 }
 
+async function handleWorkbenchCommand(command: WorkbenchCommand) {
+  if (command.type === "creation-action") {
+    await handleCreationLoopAction(command.action);
+    return;
+  }
+  if (command.type === "open-story-graph") {
+    storyGraphFocus.value = {
+      nodeId: command.nodeId,
+      characterId: command.characterId,
+      appearanceStatus: command.appearanceStatus
+    };
+    storyControlDialogOpen.value = true;
+    return;
+  }
+  if (command.type === "open-audit-report") {
+    auditReportFocusSection.value = command.section === "ai-control-plane" ? "ai-control-plane" : null;
+    await openAuditReportPreview(auditReportFocusSection.value);
+  }
+}
+
 function isSaveShortcut(event: KeyboardEvent) {
   return (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "s";
 }
@@ -741,12 +774,18 @@ async function handleCheckAgent(config: { profileId: string; modelId?: string })
   }
 }
 
-async function openAuditReportPreview() {
+async function openAuditReportPreview(focusSection: "ai-control-plane" | null = null) {
+  auditReportFocusSection.value = focusSection;
   auditReportDialogOpen.value = true;
   const report = await store.previewProjectAuditReport();
   if (!report && store.error) {
     ElMessage.error(store.error);
   }
+}
+
+function closeAuditReportPreview() {
+  auditReportFocusSection.value = null;
+  store.clearAuditReportPreview();
 }
 
 function panelCollapsed(key: string, defaultCollapsed = false) {

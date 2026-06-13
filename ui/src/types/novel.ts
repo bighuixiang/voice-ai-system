@@ -33,6 +33,19 @@ export interface WorkbenchNextAction {
   targetPanel?: string;
 }
 
+export interface WorkbenchSourceRef {
+  id: string;
+  label: string;
+  value?: string;
+  kind?: "draft" | "quality" | "runtime" | "ledger" | "ai" | "job" | "graph" | "structure";
+}
+
+export type WorkbenchCommand =
+  | { type: "creation-action"; action: CreationLoopAction }
+  | { type: "open-risk"; riskId: string }
+  | { type: "open-story-graph"; characterId?: string; nodeId?: string; appearanceStatus?: CharacterScheduleStatus; reason?: string }
+  | { type: "open-audit-report"; section?: "ai-control-plane" };
+
 export interface WorkbenchRiskSignal {
   id: string;
   label: string;
@@ -40,7 +53,11 @@ export interface WorkbenchRiskSignal {
   reason: string;
   action?: CreationLoopAction;
   actionLabel?: string;
+  command?: WorkbenchCommand;
+  commandLabel?: string;
   source: string;
+  detailRows?: WorkbenchSourceRef[];
+  sourceRefs?: WorkbenchSourceRef[];
 }
 
 export interface PlotPilotLearningItem {
@@ -51,7 +68,11 @@ export interface PlotPilotLearningItem {
   localLanding: string;
   userValue: string;
   entryAction?: CreationLoopAction;
+  entryCommand?: WorkbenchCommand;
   evidenceCount?: number;
+  active?: boolean;
+  activeReason?: string;
+  sourceRefs?: WorkbenchSourceRef[];
 }
 export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook" | "tension";
 export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
@@ -319,6 +340,12 @@ export interface StoryGraphProjection {
   edges: StoryGraphEdge[];
   characterRelations?: CharacterRelationGraph;
   updatedAt: string;
+}
+
+export interface StoryGraphFocus {
+  nodeId?: string;
+  characterId?: string;
+  appearanceStatus?: CharacterScheduleStatus;
 }
 
 export interface LedgerEntry {

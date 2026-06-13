@@ -1,55 +1,55 @@
 <template>
-  <section class="audit-report-panel" aria-label="Audit report preview">
+  <section class="audit-report-panel" aria-label="审计报告预览">
     <header class="audit-header">
       <div>
-        <div class="panel-title">Audit Report</div>
+        <div class="panel-title">审计报告</div>
         <p v-if="report">{{ report.projectTitle }} · {{ formatTime(report.generatedAt) }}</p>
-        <p v-else>Project runtime, memory, quality, and automation summary.</p>
+        <p v-else>项目运行时、记忆、质量与自动化汇总。</p>
       </div>
       <div class="panel-actions">
-        <el-button :loading="loading" @click="$emit('refresh')">Refresh</el-button>
-        <el-button :disabled="!report" @click="$emit('download')">Download JSON</el-button>
+        <el-button :loading="loading" @click="$emit('refresh')">刷新</el-button>
+        <el-button :disabled="!report" @click="$emit('download')">下载 JSON</el-button>
       </div>
     </header>
 
-    <el-empty v-if="!report" description="No audit report loaded" :image-size="48" />
+    <el-empty v-if="!report" description="尚未加载审计报告" :image-size="48" />
 
     <div v-else class="report-body">
-      <section class="metric-strip" aria-label="Audit summary">
+      <section class="metric-strip" aria-label="审计摘要">
         <div>
-          <span>Chapters</span>
-          <strong>{{ report.chapters.length }} chapters</strong>
+          <span>章节</span>
+          <strong>{{ report.chapters.length }} 章</strong>
         </div>
         <div>
-          <span>Quality</span>
+          <span>质量</span>
           <strong>{{ report.quality.averageOverallScore }}</strong>
-          <small>{{ report.quality.reportCount }}/{{ report.quality.chapterCount }} reviewed</small>
+          <small>{{ report.quality.reportCount }}/{{ report.quality.chapterCount }} 已体检</small>
         </div>
         <div>
-          <span>Tasks</span>
-          <strong>{{ report.taskSummary.total }} tasks</strong>
-          <small>{{ report.taskSummary.byStatus.success || 0 }} success / {{ report.taskSummary.byStatus.error || 0 }} error</small>
+          <span>任务</span>
+          <strong>{{ report.taskSummary.total }} 个任务</strong>
+          <small>{{ report.taskSummary.byStatus.success || 0 }} 成功 / {{ report.taskSummary.byStatus.error || 0 }} 失败</small>
         </div>
         <div>
-          <span>AI Audit</span>
-          <strong>{{ report.aiInvocationSummary.total }} invocations</strong>
-          <small>{{ report.aiInvocationSummary.byDecision.accepted }} accepted</small>
+          <span>AI 审计</span>
+          <strong>{{ report.aiInvocationSummary.total }} 次调用</strong>
+          <small>{{ report.aiInvocationSummary.byDecision.accepted }} 已采纳</small>
         </div>
       </section>
 
-      <section class="detail-grid" aria-label="Audit details">
+      <section class="detail-grid" aria-label="审计详情">
         <article>
-          <div class="section-title">Knowledge</div>
+          <div class="section-title">知识</div>
           <div class="fact-row">
-            <span>Facts</span>
+            <span>事实</span>
             <strong>{{ report.knowledgeSummary.factCount }}</strong>
           </div>
           <div class="fact-row">
-            <span>Triples</span>
+            <span>三元组</span>
             <strong>{{ report.knowledgeSummary.tripleCount }}</strong>
           </div>
           <div class="fact-row">
-            <span>Keywords</span>
+            <span>关键词</span>
             <strong>{{ report.knowledgeSummary.keywordCount }}</strong>
           </div>
           <div class="vector-line">
@@ -59,14 +59,14 @@
         </article>
 
         <article>
-          <div class="section-title">Runtime</div>
+          <div class="section-title">运行时</div>
           <div class="fact-row">
-            <span>Tracked chapters</span>
+            <span>跟踪章节</span>
             <strong>{{ report.runtimeSummary.chapterCount }}</strong>
           </div>
           <div class="fact-row">
-            <span>Blocked steps</span>
-            <strong>{{ report.runtimeSummary.blockedStepCount }} blocked</strong>
+            <span>阻塞步骤</span>
+            <strong>{{ report.runtimeSummary.blockedStepCount }} 个阻塞</strong>
           </div>
           <div class="step-list">
             <span v-for="item in activeStepRows" :key="item.id">{{ item.id }} {{ item.count }}</span>
@@ -74,13 +74,13 @@
         </article>
 
         <article>
-          <div class="section-title">Background Jobs</div>
+          <div class="section-title">后台任务</div>
           <div class="fact-row">
-            <span>Total</span>
-            <strong>{{ report.backgroundJobSummary.total }} jobs</strong>
+            <span>总数</span>
+            <strong>{{ report.backgroundJobSummary.total }} 个任务</strong>
           </div>
           <div class="fact-row">
-            <span>Running</span>
+            <span>运行中</span>
             <strong>{{ report.backgroundJobSummary.byStatus.running || 0 }}</strong>
           </div>
           <div class="job-list">
@@ -92,13 +92,13 @@
         </article>
 
         <article>
-          <div class="section-title">Task Health</div>
+          <div class="section-title">任务健康</div>
           <div class="fact-row">
-            <span>Failed / cancelled</span>
+            <span>失败 / 已取消</span>
             <strong>{{ taskFailureCount }}</strong>
           </div>
           <div class="fact-row">
-            <span>Timeout budgeted</span>
+            <span>设置超时预算</span>
             <strong>{{ timeoutTaskCount }}</strong>
           </div>
           <div class="job-list">
@@ -110,13 +110,13 @@
         </article>
 
         <article>
-          <div class="section-title">Adoption</div>
+          <div class="section-title">采纳</div>
           <div class="fact-row">
-            <span>Proposed patches</span>
+            <span>提议补丁</span>
             <strong>{{ report.aiInvocationSummary.proposedPatchCount }}</strong>
           </div>
           <div class="fact-row">
-            <span>Accepted patches</span>
+            <span>已采纳补丁</span>
             <strong>{{ report.aiInvocationSummary.acceptedPatchCount }}</strong>
           </div>
           <div class="step-list">
@@ -124,15 +124,19 @@
           </div>
         </article>
 
-        <article>
-          <div class="section-title">AI Control Plane</div>
+        <article
+          id="audit-ai-control-plane"
+          ref="aiControlPlaneRef"
+          :class="{ 'is-focus-highlight': focusSection === 'ai-control-plane' && focusHighlightActive }"
+        >
+          <div class="section-title">AI 调用控制面板</div>
           <div class="fact-row">
-            <span>Pre-call warnings</span>
+            <span>调用前预警</span>
             <strong>{{ preCallWarningTotal }}</strong>
           </div>
           <div class="fact-row">
-            <span>Compressed context</span>
-            <strong>{{ report.aiInvocationSummary.truncatedContextBlocks.length }} blocks</strong>
+            <span>上下文压缩</span>
+            <strong>{{ report.aiInvocationSummary.truncatedContextBlocks.length }} 个块</strong>
           </div>
           <div class="step-list">
             <span v-for="item in tierRows" :key="item.id">{{ item.id }} {{ item.count }}</span>
@@ -150,12 +154,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import type { NovelTask, ProjectAuditReport } from "@/types/novel";
 
 const props = defineProps<{
   report: ProjectAuditReport | null;
   loading?: boolean;
+  focusSection?: "ai-control-plane" | null;
 }>();
 
 defineEmits<{
@@ -163,10 +168,10 @@ defineEmits<{
   download: [];
 }>();
 
-const vectorLabel = computed(() => props.report?.knowledgeSummary.vectorSummary?.provider || "no-vector");
+const vectorLabel = computed(() => props.report?.knowledgeSummary.vectorSummary?.provider || "未启用向量");
 const vectorEntryLabel = computed(() => {
   const entryCount = props.report?.knowledgeSummary.vectorSummary?.entryCount;
-  return typeof entryCount === "number" ? `${entryCount} vectors` : "0 vectors";
+  return typeof entryCount === "number" ? `${entryCount} 个向量` : "0 个向量";
 });
 
 const activeStepRows = computed(() =>
@@ -205,6 +210,22 @@ const unhealthyTasks = computed(() =>
     (task) => task.status === "error" || task.status === "cancelled" || Boolean(task.cancelRequestedAt)
   )
 );
+const aiControlPlaneRef = ref<HTMLElement | null>(null);
+const focusHighlightActive = ref(false);
+
+watch(
+  () => [props.focusSection, props.report?.generatedAt],
+  async () => {
+    if (props.focusSection !== "ai-control-plane" || !props.report) return;
+    await nextTick();
+    aiControlPlaneRef.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+    focusHighlightActive.value = true;
+    window.setTimeout(() => {
+      focusHighlightActive.value = false;
+    }, 1800);
+  },
+  { immediate: true }
+);
 
 function formatTime(value: string) {
   const date = new Date(value);
@@ -224,13 +245,24 @@ function formatDuration(value?: number) {
 }
 
 function taskHealthLabel(task: Pick<NovelTask, "status" | "error" | "durationMs" | "timeoutMs" | "cancelRequestedAt">) {
-  const parts: string[] = [task.status];
+  const parts: string[] = [taskStatusLabel(task.status)];
   const duration = formatDuration(task.durationMs);
   if (duration) parts.push(duration);
-  if (task.timeoutMs) parts.push(`timeout ${formatDuration(task.timeoutMs)}`);
-  if (task.cancelRequestedAt) parts.push("cancel requested");
+  if (task.timeoutMs) parts.push(`超时预算 ${formatDuration(task.timeoutMs)}`);
+  if (task.cancelRequestedAt) parts.push("已请求取消");
   if (task.error) parts.push(task.error);
   return parts.join(" · ");
+}
+
+function taskStatusLabel(status: NovelTask["status"]) {
+  const labels: Partial<Record<NovelTask["status"], string>> = {
+    pending: "排队中",
+    running: "运行中",
+    success: "成功",
+    error: "失败",
+    cancelled: "已取消"
+  };
+  return labels[status] || status;
 }
 </script>
 
@@ -319,6 +351,16 @@ function taskHealthLabel(task: Pick<NovelTask, "status" | "error" | "durationMs"
     border: 1px solid var(--app-border);
     border-radius: 8px;
     background: var(--app-bg);
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background 180ms ease;
+
+    &.is-focus-highlight {
+      border-color: var(--app-primary);
+      background: var(--app-primary-soft);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-primary) 24%, transparent);
+    }
   }
 }
 

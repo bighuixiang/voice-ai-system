@@ -1220,7 +1220,8 @@ describe("useNovelStore", () => {
     });
     expect(store.workbenchRiskSignals.find((signal) => signal.id === "draft-save")).toMatchObject({
       status: "blocked",
-      action: "save-draft"
+      action: "save-draft",
+      detailRows: expect.arrayContaining([expect.objectContaining({ id: "draft-state" })])
     });
 
     await store.runCreationLoopAction("save-draft");
@@ -1246,7 +1247,8 @@ describe("useNovelStore", () => {
     });
     expect(store.workbenchRiskSignals.find((signal) => signal.id === "narrative-debt")).toMatchObject({
       status: "blocked",
-      action: "open-review"
+      action: "open-review",
+      detailRows: expect.arrayContaining([expect.objectContaining({ id: "open-foreshadowing" })])
     });
   });
 
@@ -1281,10 +1283,21 @@ describe("useNovelStore", () => {
       nodes: [{ id: "knowledge:gate", type: "knowledge", label: "Gate" }],
       edges: [],
       characterRelations: {
-        characters: [],
+        characters: [{ id: "char-shadow", type: "character", label: "Shadow" }],
         relationships: [],
         coverage: [],
-        appearanceSignals: []
+        appearanceSignals: [
+          {
+            characterId: "char-shadow",
+            name: "Shadow",
+            status: "should-appear",
+            priority: 1,
+            appearanceCount: 0,
+            mentionedInUpcoming: false,
+            relationshipCount: 0,
+            reasons: ["缺少登场证据"]
+          }
+        ]
       },
       updatedAt: "2026-06-12T00:00:00.000Z"
     };
@@ -1296,11 +1309,23 @@ describe("useNovelStore", () => {
     });
     expect(store.plotPilotLearningItems.find((item) => item.id === "ai-control-plane")).toMatchObject({
       status: "done",
-      evidenceCount: 1
+      evidenceCount: 1,
+      active: true,
+      entryCommand: { type: "open-audit-report", section: "ai-control-plane" }
     });
     expect(store.plotPilotLearningItems.find((item) => item.id === "knowledge-cast")).toMatchObject({
       status: "done",
-      evidenceCount: 1
+      evidenceCount: 2,
+      active: true
+    });
+    expect(store.workbenchRiskSignals.find((signal) => signal.id === "jobs-and-cast")).toMatchObject({
+      status: "watch",
+      command: {
+        type: "open-story-graph",
+        characterId: "char-shadow",
+        nodeId: "char-shadow",
+        appearanceStatus: "should-appear"
+      }
     });
   });
 
