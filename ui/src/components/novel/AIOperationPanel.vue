@@ -5,10 +5,10 @@
       <div class="panel-title-actions">
         <el-button v-if="canCancelTask" size="small" type="danger" plain @click="$emit('cancel-task')">
           <el-icon><CircleClose /></el-icon>
-          鍙栨秷
+          取消任务
         </el-button>
-        <el-tag v-if="task" size="small" :type="task.status === 'success' ? 'success' : task.status === 'error' || task.status === 'cancelled' ? 'danger' : 'info'">
-          {{ task.status }}
+        <el-tag v-if="task" size="small" :type="taskStatusTagType">
+          {{ taskStatusLabel(task.status) }}
         </el-tag>
       </div>
     </div>
@@ -19,16 +19,13 @@
         :key="action.type"
         class="action-button"
         :class="{ 'action-button--centered': isLastOddAction(index) }"
-        :loading="loading"
+        :loading="actionLoading(action.type)"
+        :disabled="loading && !actionLoading(action.type)"
         @click="$emit('run-task', action.type)"
       >
         <el-icon><component :is="action.icon" /></el-icon>
         <span class="action-content">
           <span class="action-label">{{ action.label }}</span>
-          <span v-if="stageForTask(action.type)" class="action-stage">
-            {{ stageForTask(action.type)?.label }}
-            <small>{{ stageForTask(action.type)?.key }}</small>
-          </span>
         </span>
       </el-button>
     </div>
@@ -42,7 +39,7 @@
           placeholder="例如：检查这一章的升级节奏，或帮我补一个更合理的转折。"
         />
       </el-form-item>
-      <el-button class="free-task-button" :loading="loading" @click="submitFreeTask">
+      <el-button class="free-task-button" :loading="actionLoading('assistant.free')" :disabled="loading && !actionLoading('assistant.free')" @click="submitFreeTask">
         <el-icon><MagicStick /></el-icon>
         执行指令
       </el-button>
@@ -50,13 +47,12 @@
 
     <div v-if="progress.length" class="task-progress-wrap">
       <div v-if="activeStage" class="progress-stage">
-        <span>{{ activeStage.label }}</span>
-        <small>{{ activeStage.key }}</small>
+        <span>当前阶段：{{ stageLabel(activeStage) }}</span>
       </div>
       <ol class="task-progress" aria-label="AI 执行进度">
         <li v-for="step in progress" :key="step.id" :class="step.status">
           <span class="progress-dot" />
-          <span>{{ step.label }}</span>
+          <span>{{ stepLabel(step.label) }}</span>
         </li>
       </ol>
     </div>
@@ -95,16 +91,6 @@ const emit = defineEmits<{
 
 const freePrompt = ref("");
 
-function submitFreeTask() {
-  const prompt = freePrompt.value.trim();
-  if (!prompt) {
-    ElMessage.warning("先写一句要交给 AI 的任务。");
-    return;
-  }
-
-  emit("run-task", "assistant.free", { instruction: prompt });
-}
-
 const actions: Array<{ type: CodexTaskType; label: string; icon: unknown }> = [
   { type: "outline.generate", label: "生成大纲", icon: Collection },
   { type: "chapter.plan", label: "规划章节", icon: DataAnalysis },
@@ -114,6 +100,26 @@ const actions: Array<{ type: CodexTaskType; label: string; icon: unknown }> = [
   { type: "idea.suggest", label: "补灵感", icon: MagicStick },
   { type: "continuity.check", label: "连续性检查", icon: Finished }
 ];
+
+const stageLabels: Record<string, string> = {
+  "pipeline.project.create": "创建项目",
+  "pipeline.outline.generate": "生成大纲",
+  "pipeline.structure.reverse": "反推结构",
+  "pipeline.chapter.plan": "规划章节",
+  "pipeline.chapter.prose": "起草正文",
+  "pipeline.selection.polish": "选区润色",
+  "pipeline.chapter.validate": "章节验证",
+  "pipeline.idea.suggest": "创意建议",
+  "pipeline.writing.briefing": "写前简报",
+  "autopilot.post_chapter.recap": "章后总结",
+  "assistant.free": "自由指令"
+};
+
+const progressLabelMap: Record<string, string> = {
+  "Running AI": "调用 AI 执行器",
+  "调用 Codex CLI": "调用 AI 执行器",
+  "调用 Claude Code CLI": "调用 AI 执行器"
+};
 
 const stageByTaskType = computed(() => {
   const entries = new Map<CodexTaskType, AiStageDefinition>();
@@ -125,16 +131,54 @@ const stageByTaskType = computed(() => {
   return entries;
 });
 
-function stageForTask(type: CodexTaskType) {
-  return stageByTaskType.value.get(type);
-}
+const activeTaskType = computed(() => props.activeTaskType || props.task?.type || null);
 
 const activeStage = computed(() => {
-  const taskType = props.activeTaskType || props.task?.type;
-  return taskType ? stageByTaskType.value.get(taskType) : undefined;
+  return activeTaskType.value ? stageByTaskType.value.get(activeTaskType.value) : undefined;
 });
 
 const canCancelTask = computed(() => props.loading && props.task?.status === "running");
+
+const taskStatusTagType = computed(() => {
+  if (props.task?.status === "success") return "success";
+  if (props.task?.status === "error" || props.task?.status === "cancelled") return "danger";
+  return "info";
+});
+
+function submitFreeTask() {
+  const prompt = freePrompt.value.trim();
+  if (!prompt) {
+    ElMessage.warning("先写一句要交给 AI 的任务。");
+    return;
+  }
+
+  emit("run-task", "assistant.free", { instruction: prompt });
+}
+
+function stageLabel(stage?: AiStageDefinition) {
+  if (!stage) return "";
+  return stageLabels[stage.key] || stage.label;
+}
+
+function taskStatusLabel(status: NovelTask["status"]) {
+  const labels: Record<NovelTask["status"], string> = {
+    pending: "等待中",
+    running: "运行中",
+    success: "已完成",
+    error: "失败",
+    cancelled: "已取消"
+  };
+  return labels[status];
+}
+
+function actionLoading(type: CodexTaskType) {
+  if (!props.loading) return false;
+  return activeTaskType.value ? activeTaskType.value === type : false;
+}
+
+function stepLabel(label: string) {
+  return progressLabelMap[label] || label;
+}
 
 function isLastOddAction(index: number) {
   return actions.length % 2 === 1 && index === actions.length - 1;
@@ -143,7 +187,7 @@ function isLastOddAction(index: number) {
 
 <style scoped lang="scss">
 .ai-panel {
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--app-border);
   border-radius: 8px;
   background: var(--app-bg);
@@ -153,8 +197,11 @@ function isLastOddAction(index: number) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 700;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: var(--app-text-primary);
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .panel-title-actions {
@@ -166,7 +213,7 @@ function isLastOddAction(index: number) {
 .action-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 
   :deep(.el-button + .el-button) {
     margin-left: 0;
@@ -176,41 +223,40 @@ function isLastOddAction(index: number) {
 .action-button {
   width: 100%;
   min-width: 0;
-  min-height: 58px;
+  min-height: 42px;
+  height: auto;
+  padding: 0 10px;
+  align-items: center;
   justify-content: flex-start;
   white-space: normal;
   text-align: left;
+
+  :deep(.el-icon) {
+    flex: 0 0 auto;
+    margin-right: 6px;
+    font-size: 16px;
+  }
 }
 
 .action-content {
   display: grid;
   min-width: 0;
-  gap: 2px;
-  line-height: 1.25;
+  line-height: 1;
 }
 
 .action-label {
-  font-weight: 600;
-}
-
-.action-stage {
-  display: grid;
-  gap: 1px;
-  color: var(--app-text-muted);
-  font-size: 12px;
-
-  small {
-    min-width: 0;
-    overflow-wrap: anywhere;
-    font-size: 11px;
-    line-height: 1.2;
-  }
+  overflow: hidden;
+  color: var(--app-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .action-button--centered {
   grid-column: 1 / -1;
   justify-self: center;
-  width: calc((100% - 8px) / 2);
+  width: calc((100% - 6px) / 2);
 }
 
 .free-task {
@@ -240,12 +286,6 @@ function isLastOddAction(index: number) {
 
   span {
     font-weight: 700;
-  }
-
-  small {
-    overflow-wrap: anywhere;
-    color: var(--app-text-muted);
-    font-size: 11px;
   }
 }
 
@@ -306,6 +346,16 @@ function isLastOddAction(index: number) {
     max-height: 180px;
     overflow: auto;
     margin: 8px 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-button--centered {
+    width: 100%;
   }
 }
 </style>

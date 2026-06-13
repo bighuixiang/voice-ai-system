@@ -11873,5 +11873,686 @@
       "label": "has_role"
     }
   ],
-  "updatedAt": "2026-06-12T04:52:00.842Z"
+  "characterRelations": {
+    "characters": [
+      {
+        "id": "character:char-001-00-世界观设定-双女主感情线冲突处理方案",
+        "type": "character",
+        "label": "双女主感情线冲突处理方案（第15-40章）",
+        "subtitle": "00-世界观设定",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-002-01-角色设定-反派-艾德里安-帝国王子",
+        "type": "character",
+        "label": "艾德里安 - 帝国三王子的救赎之路（完整版）",
+        "subtitle": "反派",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-003-01-角色设定-魔兽-将臣",
+        "type": "character",
+        "label": "将臣——万年冤种僵尸王",
+        "subtitle": "魔兽",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-004-01-角色设定-双女主-索菲亚-校花",
+        "type": "character",
+        "label": "索菲亚 - 学院校花",
+        "subtitle": "双女主",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-005-01-角色设定-双女主-伊莎贝拉-精灵族院长",
+        "type": "character",
+        "label": "伊莎贝拉——异界美女师父",
+        "subtitle": "双女主",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-006-01-角色设定-小伙伴-艾米莉亚-完整版",
+        "type": "character",
+        "label": "艾米莉亚（Amelia）- 天然呆可爱担当（完整版）",
+        "subtitle": "小伙伴",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-007-01-角色设定-小伙伴-弗拉姆-完整版",
+        "type": "character",
+        "label": "弗拉姆 - 热血火法师（完整版）",
+        "subtitle": "小伙伴",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-008-01-角色设定-小伙伴-格蕾丝-完整版",
+        "type": "character",
+        "label": "格蕾丝 - 温柔治疗师（完整版）",
+        "subtitle": "小伙伴",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-009-01-角色设定-小伙伴-凯尔",
+        "type": "character",
+        "label": "凯尔——正义之剑",
+        "subtitle": "小伙伴",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-010-01-角色设定-小伙伴-瑟莱恩-福奇-第七王子",
+        "type": "character",
+        "label": "瑟莱恩·福奇（Thrain Forge）完整故事线",
+        "subtitle": "小伙伴",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-011-01-角色设定-小说封面-文生图设计方案",
+        "type": "character",
+        "label": "《魔道尸祖》封面设计方案",
+        "subtitle": "小说封面-文生图设计方案.md",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-012-01-角色设定-异界师父-向守一",
+        "type": "character",
+        "label": "向守一 - 现代师父（异界篇）",
+        "subtitle": "异界师父",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-013-01-角色设定-至高神主宰-光明主宰",
+        "type": "character",
+        "label": "光明主宰·奥瑞尔",
+        "subtitle": "至高神主宰",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-014-01-角色设定-至高神主宰-黑暗主宰",
+        "type": "character",
+        "label": "黑暗主宰——最终反派",
+        "subtitle": "至高神主宰",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-015-01-角色设定-至高神主宰-生命主宰",
+        "type": "character",
+        "label": "生命主宰·盖亚",
+        "subtitle": "至高神主宰",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-016-01-角色设定-主角-向德豪",
+        "type": "character",
+        "label": "向德豪",
+        "subtitle": "主角",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-017-02-故事大纲-主线剧情-人物语音手册_v1",
+        "type": "character",
+        "label": "人物语音手册 v1",
+        "subtitle": "主线剧情",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-018-02-故事大纲-主线剧情-人物语音手册_v2",
+        "type": "character",
+        "label": "人物语音手册 v2",
+        "subtitle": "主线剧情",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-019-03-章节正文-第二卷-学院-伙伴-双凤-第13章-双女主初遇-",
+        "type": "character",
+        "label": "双女主初遇·秩序与直球",
+        "subtitle": "第二卷-学院·伙伴·双凤",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-020-03-章节正文-第二卷-学院-伙伴-双凤-第15章-魔兽岭历练-",
+        "type": "character",
+        "label": "魔兽岭历练·艾德里安的阴谋",
+        "subtitle": "第二卷-学院·伙伴·双凤",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-021-03-章节正文-第二卷-学院-伙伴-双凤-第22章-魔兽岭第二次",
+        "type": "character",
+        "label": "魔兽岭第二次·心意与战损",
+        "subtitle": "第二卷-学院·伙伴·双凤",
+        "status": "planned",
+        "chapterIds": []
+      },
+      {
+        "id": "character:char-022-03-章节正文-第二卷-学院-伙伴-双凤-第23章-双女主对话-",
+        "type": "character",
+        "label": "战场停战条约·先活下来",
+        "subtitle": "第二卷-学院·伙伴·双凤",
+        "status": "planned",
+        "chapterIds": []
+      }
+    ],
+    "relationships": [],
+    "coverage": [
+      {
+        "characterId": "character:char-001-00-世界观设定-双女主感情线冲突处理方案",
+        "name": "双女主感情线冲突处理方案（第15-40章）",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-002-01-角色设定-反派-艾德里安-帝国王子",
+        "name": "艾德里安 - 帝国三王子的救赎之路（完整版）",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-003-01-角色设定-魔兽-将臣",
+        "name": "将臣——万年冤种僵尸王",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-004-01-角色设定-双女主-索菲亚-校花",
+        "name": "索菲亚 - 学院校花",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-005-01-角色设定-双女主-伊莎贝拉-精灵族院长",
+        "name": "伊莎贝拉——异界美女师父",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-006-01-角色设定-小伙伴-艾米莉亚-完整版",
+        "name": "艾米莉亚（Amelia）- 天然呆可爱担当（完整版）",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-007-01-角色设定-小伙伴-弗拉姆-完整版",
+        "name": "弗拉姆 - 热血火法师（完整版）",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-008-01-角色设定-小伙伴-格蕾丝-完整版",
+        "name": "格蕾丝 - 温柔治疗师（完整版）",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-009-01-角色设定-小伙伴-凯尔",
+        "name": "凯尔——正义之剑",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-010-01-角色设定-小伙伴-瑟莱恩-福奇-第七王子",
+        "name": "瑟莱恩·福奇（Thrain Forge）完整故事线",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-011-01-角色设定-小说封面-文生图设计方案",
+        "name": "《魔道尸祖》封面设计方案",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-012-01-角色设定-异界师父-向守一",
+        "name": "向守一 - 现代师父（异界篇）",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-013-01-角色设定-至高神主宰-光明主宰",
+        "name": "光明主宰·奥瑞尔",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-014-01-角色设定-至高神主宰-黑暗主宰",
+        "name": "黑暗主宰——最终反派",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-015-01-角色设定-至高神主宰-生命主宰",
+        "name": "生命主宰·盖亚",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-016-01-角色设定-主角-向德豪",
+        "name": "向德豪",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-017-02-故事大纲-主线剧情-人物语音手册_v1",
+        "name": "人物语音手册 v1",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-018-02-故事大纲-主线剧情-人物语音手册_v2",
+        "name": "人物语音手册 v2",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-019-03-章节正文-第二卷-学院-伙伴-双凤-第13章-双女主初遇-",
+        "name": "双女主初遇·秩序与直球",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-020-03-章节正文-第二卷-学院-伙伴-双凤-第15章-魔兽岭历练-",
+        "name": "魔兽岭历练·艾德里安的阴谋",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-021-03-章节正文-第二卷-学院-伙伴-双凤-第22章-魔兽岭第二次",
+        "name": "魔兽岭第二次·心意与战损",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      },
+      {
+        "characterId": "character:char-022-03-章节正文-第二卷-学院-伙伴-双凤-第23章-双女主对话-",
+        "name": "战场停战条约·先活下来",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": false,
+        "isolated": true
+      }
+    ],
+    "appearanceSignals": [
+      {
+        "characterId": "character:char-017-02-故事大纲-主线剧情-人物语音手册_v1",
+        "name": "人物语音手册 v1",
+        "status": "should-appear",
+        "priority": 0,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-018-02-故事大纲-主线剧情-人物语音手册_v2",
+        "name": "人物语音手册 v2",
+        "status": "should-appear",
+        "priority": 0,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-016-01-角色设定-主角-向德豪",
+        "name": "向德豪",
+        "status": "should-appear",
+        "priority": 0,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-006-01-角色设定-小伙伴-艾米莉亚-完整版",
+        "name": "艾米莉亚（Amelia）- 天然呆可爱担当（完整版）",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-007-01-角色设定-小伙伴-弗拉姆-完整版",
+        "name": "弗拉姆 - 热血火法师（完整版）",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-008-01-角色设定-小伙伴-格蕾丝-完整版",
+        "name": "格蕾丝 - 温柔治疗师（完整版）",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-009-01-角色设定-小伙伴-凯尔",
+        "name": "凯尔——正义之剑",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-021-03-章节正文-第二卷-学院-伙伴-双凤-第22章-魔兽岭第二次",
+        "name": "魔兽岭第二次·心意与战损",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-020-03-章节正文-第二卷-学院-伙伴-双凤-第15章-魔兽岭历练-",
+        "name": "魔兽岭历练·艾德里安的阴谋",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-010-01-角色设定-小伙伴-瑟莱恩-福奇-第七王子",
+        "name": "瑟莱恩·福奇（Thrain Forge）完整故事线",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-019-03-章节正文-第二卷-学院-伙伴-双凤-第13章-双女主初遇-",
+        "name": "双女主初遇·秩序与直球",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-022-03-章节正文-第二卷-学院-伙伴-双凤-第23章-双女主对话-",
+        "name": "战场停战条约·先活下来",
+        "status": "should-appear",
+        "priority": 1,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-011-01-角色设定-小说封面-文生图设计方案",
+        "name": "《魔道尸祖》封面设计方案",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-002-01-角色设定-反派-艾德里安-帝国王子",
+        "name": "艾德里安 - 帝国三王子的救赎之路（完整版）",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-013-01-角色设定-至高神主宰-光明主宰",
+        "name": "光明主宰·奥瑞尔",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-014-01-角色设定-至高神主宰-黑暗主宰",
+        "name": "黑暗主宰——最终反派",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-003-01-角色设定-魔兽-将臣",
+        "name": "将臣——万年冤种僵尸王",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-015-01-角色设定-至高神主宰-生命主宰",
+        "name": "生命主宰·盖亚",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-001-00-世界观设定-双女主感情线冲突处理方案",
+        "name": "双女主感情线冲突处理方案（第15-40章）",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-004-01-角色设定-双女主-索菲亚-校花",
+        "name": "索菲亚 - 学院校花",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-012-01-角色设定-异界师父-向守一",
+        "name": "向守一 - 现代师父（异界篇）",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      },
+      {
+        "characterId": "character:char-005-01-角色设定-双女主-伊莎贝拉-精灵族院长",
+        "name": "伊莎贝拉——异界美女师父",
+        "status": "absent",
+        "priority": 2,
+        "appearanceCount": 0,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "尚无正文登场证据",
+          "关系图缺少证据"
+        ]
+      }
+    ]
+  },
+  "updatedAt": "2026-06-12T19:31:27.236Z"
 }

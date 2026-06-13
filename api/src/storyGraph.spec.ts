@@ -51,9 +51,33 @@ describe("storyGraph", () => {
           goal: "Survive.",
           currentState: "Hiding.",
           knownSecrets: "",
+          relationshipNotes: "Hero trusts Mentor but hides the blood mark.",
+          powerLevel: "",
+          status: "active",
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        },
+        {
+          id: "mentor",
+          name: "Mentor",
+          role: "guide",
+          goal: "Protect the gate secret.",
+          currentState: "Watching Hero.",
+          knownSecrets: "",
           relationshipNotes: "",
           powerLevel: "",
           status: "active",
+          updatedAt: "2026-06-11T00:00:00.000Z"
+        },
+        {
+          id: "shadow",
+          name: "Shadow",
+          role: "major support",
+          goal: "Test the gate seekers.",
+          currentState: "Waiting offscreen.",
+          knownSecrets: "",
+          relationshipNotes: "",
+          powerLevel: "",
+          status: "planned",
           updatedAt: "2026-06-11T00:00:00.000Z"
         }
       ],
@@ -63,7 +87,7 @@ describe("storyGraph", () => {
           type: "reveal",
           title: "Gate opens",
           trigger: "Blood touches stone.",
-          participants: ["Hero"],
+          participants: ["Hero", "Mentor"],
           location: "Gate",
           conflict: "Hide or act.",
           reward: "A clue.",
@@ -100,6 +124,14 @@ describe("storyGraph", () => {
         chapterIds: ["chapter-001"],
         sourceFactIds: ["fact-gate"],
         updatedAt: "2026-06-11T00:00:00.000Z"
+      })}\n${JSON.stringify({
+        id: "triple-hero-mentor",
+        subject: "Hero",
+        predicate: "trusts",
+        object: "Mentor",
+        chapterIds: ["chapter-001"],
+        sourceFactIds: ["fact-mentor"],
+        updatedAt: "2026-06-11T00:00:00.000Z"
       })}\n`,
       "utf8"
     );
@@ -110,6 +142,7 @@ describe("storyGraph", () => {
     expect(graph.nodes).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "arc:arc-main", type: "arc" }),
       expect.objectContaining({ id: "character:hero", type: "character" }),
+      expect.objectContaining({ id: "character:mentor", type: "character" }),
       expect.objectContaining({ id: "event:gate-opens", type: "event" }),
       expect.objectContaining({ id: "ledger:foreshadow-1", type: "ledger" }),
       expect.objectContaining({ id: "knowledge:hero", type: "knowledge" }),
@@ -118,15 +151,51 @@ describe("storyGraph", () => {
     expect(graph.edges).toEqual(expect.arrayContaining([
       expect.objectContaining({ source: "arc:arc-main", target: "chapter:chapter-001", type: "contains" }),
       expect.objectContaining({ source: "event:gate-opens", target: "character:hero", type: "involves" }),
+      expect.objectContaining({ source: "event:gate-opens", target: "character:mentor", type: "involves" }),
       expect.objectContaining({ source: "ledger:foreshadow-1", target: "chapter:chapter-001", type: "tracks" }),
       expect.objectContaining({ source: "ledger:foreshadow-1", target: "character:hero", type: "references" }),
       expect.objectContaining({ source: "knowledge:hero", target: "knowledge:sealed-gate", type: "asserts", label: "opens" }),
-      expect.objectContaining({ source: "knowledge:hero", target: "chapter:chapter-001", type: "references", label: "knowledge" })
+      expect.objectContaining({ source: "knowledge:hero", target: "chapter:chapter-001", type: "references", label: "knowledge" }),
+      expect.objectContaining({ source: "character:hero", target: "character:mentor", type: "relationship", label: "trusts" }),
+      expect.objectContaining({ source: "character:hero", target: "character:mentor", type: "relationship", label: "co-appears" }),
+      expect.objectContaining({ source: "character:hero", target: "character:mentor", type: "relationship", label: "profile-note" })
+    ]));
+    expect(graph.characterRelations?.relationships).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        sourceName: "Hero",
+        targetName: "Mentor",
+        label: "trusts",
+        sourceTypes: ["knowledge"],
+        chapterIds: ["chapter-001"]
+      }),
+      expect.objectContaining({
+        sourceName: "Hero",
+        targetName: "Mentor",
+        label: "co-appears",
+        sourceTypes: ["event"]
+      })
+    ]));
+    expect(graph.characterRelations?.coverage).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: "Hero", relationshipCount: 3, isolated: false, hasProfileNote: true }),
+      expect.objectContaining({ name: "Mentor", relationshipCount: 3, isolated: false }),
+      expect.objectContaining({ name: "Shadow", relationshipCount: 0, isolated: true })
+    ]));
+    expect(graph.characterRelations?.appearanceSignals).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        name: "Shadow",
+        status: "should-appear",
+        appearanceCount: 0,
+        relationshipCount: 0
+      })
     ]));
     expect(saved).toMatchObject({
       projectSlug: project.slug,
       nodes: expect.arrayContaining([expect.objectContaining({ id: "event:gate-opens" })]),
-      edges: expect.arrayContaining([expect.objectContaining({ source: "event:gate-opens", target: "character:hero" })])
+      edges: expect.arrayContaining([expect.objectContaining({ source: "event:gate-opens", target: "character:hero" })]),
+      characterRelations: {
+        relationships: expect.arrayContaining([expect.objectContaining({ label: "trusts" })]),
+        appearanceSignals: expect.arrayContaining([expect.objectContaining({ name: "Shadow", status: "should-appear" })])
+      }
     });
   });
 });

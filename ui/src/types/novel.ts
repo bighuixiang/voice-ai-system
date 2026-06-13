@@ -208,7 +208,7 @@ export interface StoryControl {
 }
 
 export type StoryGraphNodeType = "arc" | "character" | "event" | "chapter" | "ledger" | "knowledge";
-export type StoryGraphEdgeType = "contains" | "involves" | "tracks" | "references" | "asserts";
+export type StoryGraphEdgeType = "contains" | "involves" | "tracks" | "references" | "asserts" | "relationship";
 
 export interface StoryGraphNode {
   id: string;
@@ -227,10 +227,67 @@ export interface StoryGraphEdge {
   label?: string;
 }
 
+export type CharacterRelationshipSourceType = "knowledge" | "event" | "profile";
+
+export interface CharacterRelationshipEvidence {
+  sourceType: CharacterRelationshipSourceType;
+  sourceId: string;
+  label: string;
+  chapterIds: string[];
+  note?: string;
+}
+
+export interface CharacterRelationshipEdge {
+  id: string;
+  sourceCharacterId: string;
+  targetCharacterId: string;
+  sourceName: string;
+  targetName: string;
+  label: string;
+  weight: number;
+  sourceTypes: CharacterRelationshipSourceType[];
+  chapterIds: string[];
+  evidence: CharacterRelationshipEvidence[];
+}
+
+export interface CharacterRelationshipCoverage {
+  characterId: string;
+  name: string;
+  relationshipCount: number;
+  eventCount: number;
+  knowledgeTripleCount: number;
+  hasProfileNote: boolean;
+  isolated: boolean;
+}
+
+export type CharacterScheduleStatus = "should-appear" | "overexposed" | "absent" | "balanced";
+
+export interface CharacterAppearanceSignal {
+  characterId: string;
+  name: string;
+  status: CharacterScheduleStatus;
+  priority: number;
+  appearanceCount: number;
+  lastChapterId?: string;
+  lastChapterNumber?: number;
+  gapChapters?: number;
+  mentionedInUpcoming: boolean;
+  relationshipCount: number;
+  reasons: string[];
+}
+
+export interface CharacterRelationGraph {
+  characters: StoryGraphNode[];
+  relationships: CharacterRelationshipEdge[];
+  coverage: CharacterRelationshipCoverage[];
+  appearanceSignals: CharacterAppearanceSignal[];
+}
+
 export interface StoryGraphProjection {
   projectSlug: string;
   nodes: StoryGraphNode[];
   edges: StoryGraphEdge[];
+  characterRelations?: CharacterRelationGraph;
   updatedAt: string;
 }
 

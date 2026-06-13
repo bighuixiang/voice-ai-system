@@ -99,6 +99,101 @@
         </aside>
       </div>
 
+      <div v-if="characterRelations" class="character-relations" aria-label="角色关系图">
+        <div class="relation-header">
+          <div>
+            <strong>角色关系图</strong>
+            <span>{{ relationSummaryText }}</span>
+          </div>
+          <div class="relation-badges">
+            <span>{{ characterRelations.characters.length }} characters</span>
+            <span>{{ characterRelations.relationships.length }} relations</span>
+            <span>{{ isolatedCoverage.length }} isolated</span>
+          </div>
+        </div>
+
+        <div class="relation-layout">
+          <div class="relation-canvas" aria-label="角色关系网络">
+            <svg viewBox="0 0 560 260" role="img" :aria-label="`角色关系网络：${characterRelations.characters.length} 个角色，${characterRelations.relationships.length} 条关系`">
+              <defs>
+                <marker id="character-relation-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L8,4 L0,8 Z" />
+                </marker>
+              </defs>
+              <g class="relation-edges">
+                <g v-for="edge in relationCanvasEdges" :key="edge.id">
+                  <line
+                    :x1="edge.x1"
+                    :y1="edge.y1"
+                    :x2="edge.x2"
+                    :y2="edge.y2"
+                    :class="{ active: edge.active, dimmed: edge.dimmed }"
+                    marker-end="url(#character-relation-arrow)"
+                    @click="selectRelationship(edge.id)"
+                  />
+                  <text v-if="edge.active" :x="edge.labelX" :y="edge.labelY">{{ edge.label }}</text>
+                </g>
+              </g>
+              <g class="relation-nodes">
+                <g
+                  v-for="node in relationCanvasNodes"
+                  :key="node.id"
+                  class="relation-node"
+                  :class="{ active: node.active, dimmed: node.dimmed, isolated: node.isolated }"
+                >
+                  <circle :cx="node.x" :cy="node.y" :r="node.radius" />
+                  <text :x="node.x" :y="node.y + node.radius + 13">{{ node.shortLabel }}</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <aside class="relation-detail" aria-label="角色关系证据">
+            <div v-if="selectedRelationship" class="relation-card selected">
+              <div class="relation-title">
+                <span>{{ selectedRelationship.sourceName }}</span>
+                <em>{{ selectedRelationship.label }}</em>
+                <span>{{ selectedRelationship.targetName }}</span>
+              </div>
+              <p>{{ selectedRelationship.weight }} evidence · {{ selectedRelationship.chapterIds.join(", ") || "no chapter" }}</p>
+              <div class="evidence-list">
+                <div v-for="item in selectedRelationship.evidence.slice(0, 4)" :key="`${item.sourceType}:${item.sourceId}:${item.label}`">
+                  <span>{{ sourceTypeLabel(item.sourceType) }}</span>
+                  <strong>{{ item.label }}</strong>
+                  <small>{{ item.note || item.chapterIds.join(", ") || item.sourceId }}</small>
+                </div>
+              </div>
+            </div>
+            <p v-else class="compact-empty">暂无可选角色关系。</p>
+
+            <div class="coverage-list">
+              <div class="coverage-title">覆盖度</div>
+              <div v-for="item in coverageRows" :key="item.characterId" class="coverage-row" :class="{ isolated: item.isolated }">
+                <span>{{ item.name }}</span>
+                <em>{{ item.relationshipCount }} relations</em>
+                <small>{{ coverageHint(item) }}</small>
+              </div>
+            </div>
+            <div class="appearance-schedule" aria-label="角色登场调度">
+              <div class="coverage-title">登场调度</div>
+              <div
+                v-for="item in appearanceSignalRows"
+                :key="item.characterId"
+                class="schedule-row"
+                :class="scheduleStatusClass(item.status)"
+              >
+                <div>
+                  <span>{{ item.name }}</span>
+                  <em>{{ scheduleStatusLabel(item.status) }}</em>
+                </div>
+                <small>{{ scheduleSignalHint(item) }}</small>
+              </div>
+              <p v-if="!appearanceSignalRows.length" class="compact-empty">暂无调度信号。</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+
       <div class="edge-list">
         <div v-for="edge in visibleEdges" :key="edge.id" class="edge-row">
           <span>{{ labelFor(edge.source) }}</span>
@@ -115,7 +210,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { Refresh } from "@element-plus/icons-vue";
-import type { StoryGraphNodeType, StoryGraphProjection } from "@/types/novel";
+import type {
+  CharacterAppearanceSignal,
+  CharacterRelationshipCoverage,
+  CharacterRelationshipSourceType,
+  CharacterScheduleStatus,
+  StoryGraphNodeType,
+  StoryGraphProjection
+} from "@/types/novel";
 
 const props = defineProps<{
   graph: StoryGraphProjection | null;
@@ -150,6 +252,7 @@ const edgeLabels: Record<string, string> = {
   tracks: "追踪",
   references: "引用",
   asserts: "断言",
+  relationship: "角色关系",
   knowledge: "知识",
   foreshadowing: "伏笔",
   continuity: "连续性",
@@ -218,6 +321,108 @@ const selectedRelationRows = computed(() => {
       };
     });
 });
+
+const characterRelations = computed(() => props.graph?.characterRelations || null);
+const selectedRelationshipId = ref<string | null>(null);
+const relationshipIds = computed(() => characterRelations.value?.relationships.map((item) => item.id) || []);
+
+watch(
+  relationshipIds,
+  (ids) => {
+    if (!ids.length) {
+      selectedRelationshipId.value = null;
+      return;
+    }
+    if (!selectedRelationshipId.value || !ids.includes(selectedRelationshipId.value)) {
+      selectedRelationshipId.value = ids[0];
+    }
+  },
+  { immediate: true }
+);
+
+const selectedRelationship = computed(
+  () => characterRelations.value?.relationships.find((item) => item.id === selectedRelationshipId.value) || null
+);
+
+const selectedRelationshipCharacterIds = computed(() => {
+  const relation = selectedRelationship.value;
+  if (!relation) return new Set<string>();
+  return new Set([relation.sourceCharacterId, relation.targetCharacterId]);
+});
+
+const isolatedCoverage = computed(() => characterRelations.value?.coverage.filter((item) => item.isolated) || []);
+
+const coverageRows = computed(() =>
+  [...(characterRelations.value?.coverage || [])].sort((left, right) => {
+    if (left.isolated !== right.isolated) return left.isolated ? -1 : 1;
+    return right.relationshipCount - left.relationshipCount || left.name.localeCompare(right.name);
+  })
+);
+
+const appearanceSignalRows = computed(() => {
+  const statusOrder: Record<CharacterScheduleStatus, number> = {
+    "should-appear": 0,
+    absent: 1,
+    overexposed: 2,
+    balanced: 3
+  };
+  return [...(characterRelations.value?.appearanceSignals || [])].sort((left, right) => {
+    return statusOrder[left.status] - statusOrder[right.status] || left.priority - right.priority || left.name.localeCompare(right.name);
+  });
+});
+
+const relationSummaryText = computed(() => {
+  const graph = characterRelations.value;
+  if (!graph) return "从知识三元组、事件共同登场和人物备注生成";
+  const evidenceCount = graph.relationships.reduce((sum, item) => sum + item.evidence.length, 0);
+  return `从 ${evidenceCount} 条证据生成，帮助检查角色是否孤立、关系是否有正文支撑`;
+});
+
+const relationCanvasNodes = computed(() => {
+  const graph = characterRelations.value;
+  if (!graph) return [];
+  const total = Math.max(1, graph.characters.length);
+  const isolatedIds = new Set(isolatedCoverage.value.map((item) => item.characterId));
+  const selectedIds = selectedRelationshipCharacterIds.value;
+  return graph.characters.map((node, index) => {
+    const angle = -Math.PI / 2 + (index / total) * Math.PI * 2;
+    const x = 280 + Math.cos(angle) * 205;
+    const y = 130 + Math.sin(angle) * 90;
+    const active = selectedIds.has(node.id);
+    return {
+      id: node.id,
+      x,
+      y,
+      radius: active ? 17 : 14,
+      shortLabel: shortLabel(node.label),
+      active,
+      isolated: isolatedIds.has(node.id),
+      dimmed: Boolean(selectedRelationshipId.value && !active)
+    };
+  });
+});
+
+const relationCanvasNodeMap = computed(() => new Map(relationCanvasNodes.value.map((node) => [node.id, node])));
+
+const relationCanvasEdges = computed(() =>
+  (characterRelations.value?.relationships || []).map((edge) => {
+    const source = relationCanvasNodeMap.value.get(edge.sourceCharacterId);
+    const target = relationCanvasNodeMap.value.get(edge.targetCharacterId);
+    const active = edge.id === selectedRelationshipId.value;
+    return {
+      id: edge.id,
+      x1: source?.x || 0,
+      y1: source?.y || 0,
+      x2: target?.x || 0,
+      y2: target?.y || 0,
+      labelX: ((source?.x || 0) + (target?.x || 0)) / 2,
+      labelY: ((source?.y || 0) + (target?.y || 0)) / 2 - 4,
+      label: edge.label,
+      active,
+      dimmed: Boolean(selectedRelationshipId.value && !active)
+    };
+  })
+);
 
 const visibleEdges = computed(() => (props.graph?.edges || []).slice(0, 12));
 
@@ -297,6 +502,47 @@ function shortLabel(label: string) {
 
 function selectNode(id: string) {
   selectedNodeId.value = id;
+}
+
+function selectRelationship(id: string) {
+  selectedRelationshipId.value = id;
+}
+
+function sourceTypeLabel(sourceType: CharacterRelationshipSourceType) {
+  const labels: Record<CharacterRelationshipSourceType, string> = {
+    knowledge: "知识",
+    event: "事件",
+    profile: "档案"
+  };
+  return labels[sourceType];
+}
+
+function coverageHint(item: CharacterRelationshipCoverage) {
+  const parts = [
+    item.knowledgeTripleCount ? `${item.knowledgeTripleCount} 知识` : "",
+    item.eventCount ? `${item.eventCount} 事件` : "",
+    item.hasProfileNote ? "有备注" : ""
+  ].filter(Boolean);
+  return item.isolated ? "缺少关系证据" : parts.join(" · ") || "已有关系";
+}
+function scheduleStatusLabel(status: CharacterScheduleStatus) {
+  const labels: Record<CharacterScheduleStatus, string> = {
+    "should-appear": "建议登场",
+    overexposed: "近期过曝",
+    absent: "缺少证据",
+    balanced: "节奏正常"
+  };
+  return labels[status];
+}
+
+function scheduleStatusClass(status: CharacterScheduleStatus) {
+  return `status-${status}`;
+}
+
+function scheduleSignalHint(item: CharacterAppearanceSignal) {
+  const reasons = item.reasons.length ? item.reasons.join(" · ") : scheduleStatusLabel(item.status);
+  const lastSeen = item.lastChapterNumber ? `最近第 ${item.lastChapterNumber} 章` : "暂无章节记录";
+  return `${reasons} · ${lastSeen} · ${item.appearanceCount} 次`;
 }
 </script>
 
@@ -474,6 +720,260 @@ p {
     width: 7px;
     height: 7px;
     border-radius: 999px;
+  }
+}
+
+.character-relations {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-bg-soft);
+}
+
+.relation-header,
+.relation-badges,
+.relation-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.relation-header {
+  strong {
+    display: block;
+    color: var(--app-text-primary);
+    font-size: 13px;
+  }
+
+  span {
+    color: var(--app-text-muted);
+    font-size: 11px;
+  }
+}
+
+.relation-badges {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  span {
+    padding: 4px 7px;
+    border: 1px solid var(--app-border);
+    border-radius: 999px;
+    background: var(--app-bg);
+    color: var(--app-text-secondary);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+}
+
+.relation-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  gap: 10px;
+  min-width: 0;
+}
+
+.relation-canvas {
+  min-height: 260px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--app-bg) 88%, var(--app-bg-page));
+  overflow: hidden;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 260px;
+  }
+
+  marker path {
+    fill: var(--app-border-strong);
+  }
+}
+
+.relation-edges {
+  line {
+    cursor: pointer;
+    opacity: 0.68;
+    stroke: var(--app-border-strong);
+    stroke-width: 1.5;
+
+    &.active {
+      opacity: 1;
+      stroke: var(--app-primary);
+      stroke-width: 2.5;
+    }
+
+    &.dimmed {
+      opacity: 0.18;
+    }
+  }
+
+  text {
+    fill: var(--app-primary);
+    font-size: 10px;
+    font-weight: 800;
+    paint-order: stroke;
+    stroke: var(--app-bg);
+    stroke-width: 3px;
+    text-anchor: middle;
+  }
+}
+
+.relation-node {
+  circle {
+    fill: rgba(20, 184, 166, 0.18);
+    stroke: var(--app-success-text);
+    stroke-width: 2;
+  }
+
+  text {
+    fill: var(--app-text-secondary);
+    font-size: 10px;
+    font-weight: 800;
+    pointer-events: none;
+    text-anchor: middle;
+  }
+
+  &.active circle {
+    filter: drop-shadow(0 0 10px rgba(45, 212, 191, 0.5));
+    stroke-width: 3;
+  }
+
+  &.isolated circle {
+    fill: rgba(248, 113, 113, 0.12);
+    stroke: var(--app-danger-text);
+    stroke-dasharray: 3 3;
+  }
+
+  &.dimmed {
+    opacity: 0.38;
+  }
+}
+
+.relation-detail {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.relation-card,
+.coverage-list,
+.appearance-schedule {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-bg);
+}
+
+.relation-card.selected {
+  border-color: color-mix(in srgb, var(--app-primary) 55%, var(--app-border));
+}
+
+.relation-title {
+  min-width: 0;
+  color: var(--app-text-primary);
+  font-size: 12px;
+  font-weight: 800;
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  em {
+    flex: 0 0 auto;
+    color: var(--app-primary);
+    font-style: normal;
+  }
+}
+
+.evidence-list,
+.coverage-list {
+  display: grid;
+  gap: 6px;
+}
+
+.evidence-list div,
+.coverage-row,
+.schedule-row {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-bg-soft);
+}
+
+.evidence-list span,
+.coverage-title {
+  color: var(--app-primary);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.evidence-list strong,
+.coverage-row span,
+.schedule-row span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--app-text-primary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evidence-list small,
+.coverage-row small,
+.coverage-row em,
+.schedule-row small,
+.schedule-row em {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--app-text-muted);
+  font-size: 11px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coverage-row.isolated {
+  border-color: color-mix(in srgb, var(--app-danger-text) 45%, var(--app-border));
+}
+
+.schedule-row {
+  div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &.status-should-appear {
+    border-color: color-mix(in srgb, var(--app-warning-text) 55%, var(--app-border));
+  }
+
+  &.status-overexposed {
+    border-color: color-mix(in srgb, var(--app-danger-text) 50%, var(--app-border));
+  }
+
+  &.status-absent {
+    border-color: color-mix(in srgb, var(--app-text-muted) 60%, var(--app-border));
+  }
+
+  &.status-balanced {
+    border-color: color-mix(in srgb, var(--app-success-text) 45%, var(--app-border));
   }
 }
 
@@ -669,6 +1169,10 @@ p {
   }
 
   .graph-map {
+    grid-template-columns: 1fr;
+  }
+
+  .relation-layout {
     grid-template-columns: 1fr;
   }
 

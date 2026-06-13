@@ -1,34 +1,206 @@
 {
   "projectSlug": "novel-1780911338197",
   "chapterCount": 198,
-  "reportCount": 0,
-  "averageOverallScore": 0,
-  "metricAverages": [],
-  "weakestChapters": [],
+  "reportCount": 1,
+  "averageOverallScore": 85,
+  "metricAverages": [
+    {
+      "key": "hook",
+      "label": "钩子",
+      "averageScore": 50,
+      "reportCount": 1
+    },
+    {
+      "key": "rhythm",
+      "label": "节奏",
+      "averageScore": 70,
+      "reportCount": 1
+    },
+    {
+      "key": "tension",
+      "label": "张力",
+      "averageScore": 83,
+      "reportCount": 1
+    },
+    {
+      "key": "information",
+      "label": "信息",
+      "averageScore": 92,
+      "reportCount": 1
+    },
+    {
+      "key": "conflict",
+      "label": "冲突",
+      "averageScore": 100,
+      "reportCount": 1
+    },
+    {
+      "key": "emotion",
+      "label": "情绪",
+      "averageScore": 100,
+      "reportCount": 1
+    },
+    {
+      "key": "prose",
+      "label": "文笔",
+      "averageScore": 100,
+      "reportCount": 1
+    }
+  ],
+  "weakestChapters": [
+    {
+      "chapterId": "chapter-001",
+      "chapterTitle": "第1章 尸王破封·天狗食月",
+      "overallScore": 85,
+      "weakestMetricKey": "hook",
+      "weakestMetricLabel": "钩子",
+      "weakestMetricScore": 50,
+      "updatedAt": "2026-06-12T19:33:22.370Z"
+    }
+  ],
   "rhythmSignals": [
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
+      "rhythmScore": 70,
+      "overallScore": 85,
       "wordCount": 5747,
       "sceneCount": 7,
       "beatCount": 0,
-      "note": "以九莲山天狗食月之夜为开篇，交代将臣由来与赶尸派封印传承，并通过师徒守封、将臣破封、双方误判和玉佩异动，把向德豪从蓝星推入异界主线。",
-      "updatedAt": "2026-06-12T02:02:01.182Z"
+      "note": "句段节奏偏单一，适合拆出动作、反应和停顿。",
+      "updatedAt": "2026-06-12T19:33:22.370Z"
     }
   ],
   "characterArcSignals": [],
-  "qualityTrends": [],
+  "qualityTrends": [
+    {
+      "key": "overall",
+      "label": "Overall",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 85,
+          "updatedAt": "2026-06-12T19:33:22.370Z"
+        }
+      ],
+      "averageScore": 85,
+      "latestScore": 85
+    },
+    {
+      "key": "hook",
+      "label": "钩子",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 50,
+          "updatedAt": "2026-06-12T19:33:22.370Z"
+        }
+      ],
+      "averageScore": 50,
+      "latestScore": 50
+    },
+    {
+      "key": "rhythm",
+      "label": "节奏",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 70,
+          "updatedAt": "2026-06-12T19:33:22.370Z"
+        }
+      ],
+      "averageScore": 70,
+      "latestScore": 70
+    },
+    {
+      "key": "tension",
+      "label": "张力",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 83,
+          "updatedAt": "2026-06-12T19:33:22.370Z"
+        }
+      ],
+      "averageScore": 83,
+      "latestScore": 83
+    },
+    {
+      "key": "information",
+      "label": "信息",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 92,
+          "updatedAt": "2026-06-12T19:33:22.370Z"
+        }
+      ],
+      "averageScore": 92,
+      "latestScore": 92
+    },
+    {
+      "key": "conflict",
+      "label": "冲突",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 100,
+          "updatedAt": "2026-06-12T19:33:22.370Z"
+        }
+      ],
+      "averageScore": 100,
+      "latestScore": 100
+    },
+    {
+      "key": "emotion",
+      "label": "情绪",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 100,
+          "updatedAt": "2026-06-12T19:33:22.370Z"
+        }
+      ],
+      "averageScore": 100,
+      "latestScore": 100
+    },
+    {
+      "key": "prose",
+      "label": "文笔",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 100,
+          "updatedAt": "2026-06-12T19:33:22.370Z"
+        }
+      ],
+      "averageScore": 100,
+      "latestScore": 100
+    }
+  ],
   "tensionCurve": [
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "tensionScore": 85,
+      "tensionScore": 83,
+      "conflictScore": 100,
+      "hookScore": 50,
+      "emotionScore": 100,
+      "rhythmScore": 70,
       "sceneCount": 7,
-      "note": "向守一与向德豪必须阻止尸祖之息外泄、守住九莲山生机；将臣实际只想借月华压回尸气并避免伤人，但他无法正常解释，师徒依据封印传承和现场枯死迹象误判其发狂，双方善意目标彼此冲撞，代价是法坛崩裂、师徒重伤、月华被截断、玉佩穿越被触发。",
-      "updatedAt": "2026-06-10T16:46:28.641Z"
+      "note": "情节、情绪、节奏和钩子形成了有效张力。",
+      "updatedAt": "2026-06-12T19:33:22.370Z"
     }
   ],
   "styleDriftSignals": [],
   "narrativeDebtSignals": [],
-  "updatedAt": "2026-06-12T02:02:01.216Z"
+  "updatedAt": "2026-06-12T19:33:22.407Z"
 }

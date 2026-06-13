@@ -266,3 +266,52 @@
 取舍：
 - 本轮暂不引入 ECharts/Vue Flow，先用零依赖 SVG 做稳定可读的工作台图谱。
 - 后续当知识节点超过百级时，再迁移到 ECharts force graph 或 Vue Flow，并加入缩放、搜索、类型过滤和小地图。
+
+## 2026-06-12 追加落地：角色关系图 / Cast Graph
+
+来源：
+- `.codex-reference/PlotPilot/application/world/services/cast_service.py`
+- `.codex-reference/PlotPilot/application/world/dtos/cast_dto.py`
+- `.codex-reference/PlotPilot/frontend/src/components/graphs/CharacterRelationGraph.vue`
+- `.codex-reference/PlotPilot/frontend/src/utils/characterGraphMerge.ts`
+
+借鉴点：
+- PlotPilot 的角色关系图不是手工画图，而是从知识三元组、Bible 人物关系和正文证据自动生成。
+- 关系图需要保留证据来源：知识三元组、事件共同登场、人物档案备注，否则作者无法判断关系是设定、正文事实还是 AI 推断。
+- 除了“有多少关系”，还要显示覆盖度：哪些角色没有关系证据、哪些只在设定存在、哪些缺少正文支撑。
+- 大图可以后续接 ECharts force graph，但工作台首版应保持轻量、稳定、暗色主题一致。
+
+落地方式：
+- `StoryGraphProjection` 新增可选 `characterRelations`。
+- `buildStoryGraphProjection()` 现在从三路生成角色关系：
+  - knowledge triple：subject/object 都命中角色名时生成关系边。
+  - event co-appearance：同一事件中多个角色共同登场时生成共同出现边。
+  - profile note：角色档案的 `relationshipNotes` 提到其他角色时生成档案备注边。
+- 主故事图谱同步增加 `relationship` 边，让总图也能看到角色之间的直接连接。
+- `StoryGraphPanel` 新增“角色关系图”区块：展示角色网络、选中关系证据、孤立角色和覆盖度提示。
+
+取舍：
+- 本轮仍不引入 ECharts，先用现有 SVG 图谱能力完成稳定闭环。
+- 关系抽取先做保守规则，不做 LLM 自动推断，避免把不确定关系写成事实。
+- 后续可继续迁移 PlotPilot 的 cast search / coverage API 思路，加入关系搜索、角色白名单、别名合并和“设定有但正文无”的缺口列表。
+## 2026-06-12 追加落地：角色登场调度 / Appearance Scheduler
+
+来源：
+- `.codex-reference/PlotPilot/domain/bible/services/appearance_scheduler.py`
+- `.codex-reference/PlotPilot/interfaces/api/v1/engine/character_scheduler_routes.py`
+- `.codex-reference/PlotPilot/application/engine/services/context_budget_allocator.py`
+- `.codex-reference/PlotPilot/frontend/src/views/Cast.vue`
+
+借鉴点：
+- PlotPilot 不只展示角色关系，还会根据大纲提及、角色重要度、最近出现记录和活动度做“下一段该让谁上场”的调度。
+- 这个能力最适合做成作者侧信号，而不是自动改写剧情：提示长期未登场、近期过曝、设定存在但缺少正文/关系证据的角色。
+- 角色调度应该和关系图共享证据来源：事件共现、知识三元组、人物档案备注、章节出现记录。
+
+落地方式：
+- `CharacterRelationGraph` 新增 `appearanceSignals`。
+- `buildStoryGraphProjection()` 基于角色优先级、事件参与者、知识三元组、关系证据和章节编号计算角色登场信号。
+- `StoryGraphPanel` 在角色关系图旁新增“登场调度”，展示“建议登场 / 近期过曝 / 缺少证据 / 节奏正常”以及原因。
+
+取舍：
+- 本轮不新增独立 scheduler API，也不自动改写 chapter plan；先保持 file-backed、实时计算、可解释。
+- 关系证据仍保持保守规则，不用 LLM 推断隐性关系，避免把不确定内容写成事实。
