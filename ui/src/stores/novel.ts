@@ -36,6 +36,11 @@ import type {
   PlatformLibrary,
   PlotPilotLearningItem,
   ProjectAuditReport,
+  RuntimeCheckpoint,
+  RuntimeDerivativeBranch,
+  RuntimeEvent,
+  RuntimeRun,
+  RuntimeStatusSnapshot,
   SceneCard,
   SavePipelineStep,
   SavePipelineStepId,
@@ -159,6 +164,15 @@ export const useNovelStore = defineStore("novel", () => {
   const currentDashboard = ref<ChapterDashboard | null>(null);
   const currentChapterSummary = ref<ChapterSummary | null>(null);
   const currentRuntimeSnapshot = ref<CreationRuntimeSnapshot | null>(null);
+  const runtimeStatus = ref<RuntimeStatusSnapshot | null>(null);
+  const runtimeEvents = ref<RuntimeEvent[]>([]);
+  const activeRuntimeRun = computed<RuntimeRun | undefined>(() => runtimeStatus.value?.activeRun);
+  const runtimeCheckpoints = computed<RuntimeCheckpoint[]>(() => runtimeStatus.value?.checkpoints || []);
+  const runtimeBranches = computed<RuntimeDerivativeBranch[]>(() => runtimeStatus.value?.branches || []);
+  const latestRuntimeNarrativeSnapshot = computed(() => runtimeStatus.value?.latestSnapshot);
+  const runtimeKnowledgeRefs = computed(() => runtimeStatus.value?.knowledgeRefs || []);
+  const isRuntimeEventsConnected = ref(false);
+  const isStartingRuntime = ref(false);
   const sceneCards = ref<SceneCard[]>([]);
   const storyControl = ref<StoryControl | null>(null);
   const storyGraph = ref<StoryGraphProjection | null>(null);
@@ -209,6 +223,7 @@ export const useNovelStore = defineStore("novel", () => {
   const autoRunSavePipeline = ref(false);
   const savePipelineSteps = ref<SavePipelineStep[]>([]);
   const isRunningSavePipeline = ref(false);
+  let runtimeEventSource: EventSource | null = null;
 
   const hasProject = computed(() => currentProject.value !== null);
   const openWorkspaceProjects = computed(() =>
@@ -1566,6 +1581,10 @@ export const useNovelStore = defineStore("novel", () => {
     currentDashboard.value = null;
     currentChapterSummary.value = null;
     currentRuntimeSnapshot.value = null;
+    runtimeStatus.value = null;
+    runtimeEvents.value = [];
+    isRuntimeEventsConnected.value = false;
+    disconnectRuntimeEvents();
     sceneCards.value = [];
     storyControl.value = null;
     storyGraph.value = null;
@@ -1659,6 +1678,8 @@ export const useNovelStore = defineStore("novel", () => {
     currentDashboard.value = cached.dashboard;
     currentChapterSummary.value = cached.chapterSummary || null;
     currentRuntimeSnapshot.value = cached.runtimeSnapshot || null;
+    runtimeStatus.value = null;
+    runtimeEvents.value = [];
     sceneCards.value = cached.sceneCards;
     storyControl.value = cached.storyControl;
     storyGraph.value = cached.storyGraph || null;
@@ -1856,6 +1877,151 @@ export const useNovelStore = defineStore("novel", () => {
   async function loadCreationRuntimeSnapshot(chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId) {
     if (!currentProject.value || !chapterId) return;
     currentRuntimeSnapshot.value = await novelApi.readCreationRuntimeSnapshot(currentProject.value.slug, chapterId);
+  }
+
+  async function loadRuntimeStatus() {
+    if (!currentProject.value) return null;
+    runtimeStatus.value = await novelApi.readRuntimeStatus(currentProject.value.slug);
+    runtimeEvents.value = runtimeStatus.value.events.slice(-100);
+    return runtimeStatus.value;
+  }
+
+  function disconnectRuntimeEvents() {
+    runtimeEventSource?.close();
+    runtimeEventSource = null;
+    isRuntimeEventsConnected.value = false;
+  }
+
+  function connectRuntimeEvents() {
+    if (!currentProject.value) return;
+    if (typeof EventSource === "undefined") {
+      isRuntimeEventsConnected.value = false;
+      return;
+    }
+    const projectSlug = currentProject.value.slug;
+    disconnectRuntimeEvents();
+    const lastEventId = runtimeEvents.value.at(-1)?.id || 0;
+    const source = new EventSource(novelApi.runtimeEventsUrl(projectSlug, lastEventId));
+    runtimeEventSource = source;
+    source.onopen = () => {
+      isRuntimeEventsConnected.value = true;
+    };
+    source.onerror = () => {
+      isRuntimeEventsConnected.value = false;
+    };
+    source.onmessage = (event) => mergeRuntimeEvent(event.data);
+    for (const type of ["command", "run", "stage", "checkpoint", "write", "quality", "review", "error", "system"]) {
+      source.addEventListener(type, (event) => mergeRuntimeEvent((event as MessageEvent).data));
+    }
+  }
+
+  function mergeRuntimeEvent(raw: string) {
+    if (!raw) return;
+    try {
+      const event = JSON.parse(raw) as RuntimeEvent;
+      if (!event.id || runtimeEvents.value.some((item) => item.id === event.id)) return;
+      runtimeEvents.value = [...runtimeEvents.value, event].sort((left, right) => left.id - right.id).slice(-160);
+      if (["run", "review", "quality", "error"].includes(event.type)) {
+        loadRuntimeStatus().catch(() => undefined);
+      }
+      if (event.type === "write" && currentProject.value && currentChapter.value && event.payload?.path === currentFilePath.value) {
+        openChapter(currentChapter.value, currentDocumentKind.value, { skipLeaveCheck: true }).catch(() => undefined);
+      }
+    } catch {
+      // Ignore malformed SSE payloads from interrupted connections.
+    }
+  }
+
+  async function startAutopilotRuntime(direction = "") {
+    if (!currentProject.value || !currentChapter.value || isStartingRuntime.value) return null;
+    isStartingRuntime.value = true;
+    try {
+      const result = await novelApi.startRuntime(currentProject.value.slug, {
+        chapterId: currentChapter.value.id,
+        direction
+      });
+      await loadRuntimeStatus();
+      connectRuntimeEvents();
+      return result;
+    } finally {
+      isStartingRuntime.value = false;
+    }
+  }
+
+  async function pauseAutopilotRuntime() {
+    if (!currentProject.value) return;
+    await novelApi.pauseRuntime(currentProject.value.slug, activeRuntimeRun.value?.id);
+    await loadRuntimeStatus();
+  }
+
+  async function resumeAutopilotRuntime() {
+    if (!currentProject.value) return;
+    await novelApi.resumeRuntime(currentProject.value.slug, activeRuntimeRun.value?.id);
+    await loadRuntimeStatus();
+    connectRuntimeEvents();
+  }
+
+  async function stopAutopilotRuntime() {
+    if (!currentProject.value) return;
+    await novelApi.stopRuntime(currentProject.value.slug, activeRuntimeRun.value?.id);
+    await loadRuntimeStatus();
+  }
+
+  async function acceptAutopilotReview() {
+    if (!currentProject.value) return;
+    await novelApi.acceptRuntimeReview(currentProject.value.slug, activeRuntimeRun.value?.id);
+    await loadRuntimeStatus();
+  }
+
+  async function rewriteAutopilotReview(direction = "") {
+    if (!currentProject.value) return;
+    await novelApi.rewriteRuntimeReview(currentProject.value.slug, { runId: activeRuntimeRun.value?.id, direction });
+    await loadRuntimeStatus();
+    connectRuntimeEvents();
+  }
+
+  async function sendAutopilotDirection(direction: string) {
+    if (!currentProject.value || !direction.trim()) return;
+    await novelApi.sendRuntimeDirection(currentProject.value.slug, { runId: activeRuntimeRun.value?.id, direction });
+    await loadRuntimeStatus();
+  }
+
+  async function createAutopilotDerivative(input: { title: string; type?: "side_story" | "branch" | "adaptation"; direction?: string }) {
+    if (!currentProject.value) return null;
+    const result = await novelApi.createRuntimeDerivative(currentProject.value.slug, {
+      baseRunId: activeRuntimeRun.value?.id,
+      sourceChapterId: currentChapter.value?.id,
+      ...input
+    });
+    await loadRuntimeStatus();
+    return result;
+  }
+
+  async function mergeAutopilotDerivative(
+    branchId: string,
+    input: { note?: string; mode?: "new_chapter" | "replace_source_chapter"; draftContent?: string } = {}
+  ) {
+    if (!currentProject.value || !branchId) return null;
+    const projectSlug = currentProject.value.slug;
+    const result = await novelApi.mergeRuntimeDerivative(projectSlug, branchId, input);
+    if (result.chapterId) {
+      await loadProjects();
+      const mergedProject = projects.value.find((project) => project.slug === projectSlug);
+      if (mergedProject) {
+        await openProject(mergedProject, { skipLeaveCheck: true });
+      }
+    }
+    await loadRuntimeStatus();
+    return result;
+  }
+
+  async function restoreAutopilotCheckpoint(checkpointId: string) {
+    if (!currentProject.value || !checkpointId) return;
+    await novelApi.restoreRuntimeCheckpoint(currentProject.value.slug, checkpointId);
+    await loadRuntimeStatus();
+    if (currentChapter.value) {
+      await openChapter(currentChapter.value, currentDocumentKind.value, { skipLeaveCheck: true });
+    }
   }
 
   async function loadStoryControl() {
@@ -2436,7 +2602,11 @@ export const useNovelStore = defineStore("novel", () => {
       openWorkspaceSlugs.value = [...openWorkspaceSlugs.value, project.slug];
     }
 
-    if (restoreCachedWorkspace(project)) return;
+    if (restoreCachedWorkspace(project)) {
+      await loadRuntimeStatus().catch(() => undefined);
+      connectRuntimeEvents();
+      return;
+    }
 
     currentProject.value = project;
     currentDocumentKind.value = "content";
@@ -2452,6 +2622,8 @@ export const useNovelStore = defineStore("novel", () => {
     await loadTaskHistory();
     await loadAiInvocations();
     await loadBackgroundJobs();
+    await loadRuntimeStatus().catch(() => undefined);
+    connectRuntimeEvents();
   }
 
   function showProjectHub(options: WorkspaceSwitchOptions = {}) {
@@ -2863,6 +3035,15 @@ export const useNovelStore = defineStore("novel", () => {
     currentDashboard,
     currentChapterSummary,
     currentRuntimeSnapshot,
+    runtimeStatus,
+    runtimeEvents,
+    activeRuntimeRun,
+    runtimeCheckpoints,
+    runtimeBranches,
+    latestRuntimeNarrativeSnapshot,
+    runtimeKnowledgeRefs,
+    isRuntimeEventsConnected,
+    isStartingRuntime,
     currentSeriesQualityMetrics,
     sceneCards,
     storyControl,
@@ -2933,6 +3114,19 @@ export const useNovelStore = defineStore("novel", () => {
     linkSharedAsset,
     loadChapterCockpit,
     loadCreationRuntimeSnapshot,
+    loadRuntimeStatus,
+    connectRuntimeEvents,
+    disconnectRuntimeEvents,
+    startAutopilotRuntime,
+    pauseAutopilotRuntime,
+    resumeAutopilotRuntime,
+    stopAutopilotRuntime,
+    acceptAutopilotReview,
+    rewriteAutopilotReview,
+    sendAutopilotDirection,
+    createAutopilotDerivative,
+    mergeAutopilotDerivative,
+    restoreAutopilotCheckpoint,
     loadSeriesQualityMetrics,
     loadStoryControl,
     loadStoryGraph,

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
-import NovelWorkspace from "@/components/novel/NovelWorkspace.vue";
 import { useNovelStore } from "@/stores/novel";
+
+const NovelWorkspace = () => import("@/components/novel/NovelWorkspace.vue");
 
 export const router = createRouter({
   history: createWebHistory(),

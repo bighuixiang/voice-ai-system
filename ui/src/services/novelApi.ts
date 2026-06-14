@@ -27,6 +27,11 @@ import type {
   PlatformAssetType,
   PlatformLibrary,
   ProjectAuditReport,
+  RuntimeCheckpoint,
+  RuntimeCommand,
+  RuntimeDerivativeBranch,
+  RuntimeRun,
+  RuntimeStatusSnapshot,
   SceneCard,
   SeriesQualityMetrics,
   StoryControl,
@@ -197,6 +202,104 @@ export const novelApi = {
   async readCreationRuntimeSnapshot(projectId: string, chapterId: string): Promise<CreationRuntimeSnapshot> {
     const data = await request<{ snapshot: CreationRuntimeSnapshot }>(`/api/novel/projects/${projectId}/runtime/${chapterId}`);
     return data.snapshot;
+  },
+
+  async startRuntime(projectId: string, input: { chapterId?: string; direction?: string; branchId?: string } = {}): Promise<{ run: RuntimeRun; command: RuntimeCommand }> {
+    return request<{ run: RuntimeRun; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/start`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+  },
+
+  async readRuntimeStatus(projectId: string): Promise<RuntimeStatusSnapshot> {
+    const data = await request<{ status: RuntimeStatusSnapshot }>(`/api/novel/projects/${projectId}/runtime/status`);
+    return data.status;
+  },
+
+  runtimeEventsUrl(projectId: string, after = 0): string {
+    return `/api/novel/projects/${encodeURIComponent(projectId)}/runtime/events?after=${encodeURIComponent(String(after))}`;
+  },
+
+  async pauseRuntime(projectId: string, runId?: string): Promise<{ run: RuntimeRun | null; command: RuntimeCommand }> {
+    return request<{ run: RuntimeRun | null; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/pause`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ runId })
+    });
+  },
+
+  async resumeRuntime(projectId: string, runId?: string): Promise<{ run: RuntimeRun | null; command: RuntimeCommand }> {
+    return request<{ run: RuntimeRun | null; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/resume`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ runId })
+    });
+  },
+
+  async stopRuntime(projectId: string, runId?: string): Promise<{ run: RuntimeRun | null; command: RuntimeCommand }> {
+    return request<{ run: RuntimeRun | null; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/stop`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ runId })
+    });
+  },
+
+  async acceptRuntimeReview(projectId: string, runId?: string): Promise<{ run: RuntimeRun | null; command: RuntimeCommand }> {
+    return request<{ run: RuntimeRun | null; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/review/accept`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ runId })
+    });
+  },
+
+  async rewriteRuntimeReview(projectId: string, input: { runId?: string; direction?: string } = {}): Promise<{ run: RuntimeRun | null; command: RuntimeCommand }> {
+    return request<{ run: RuntimeRun | null; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/review/rewrite`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+  },
+
+  async sendRuntimeDirection(projectId: string, input: { runId?: string; direction: string }): Promise<{ run: RuntimeRun | null; command: RuntimeCommand }> {
+    return request<{ run: RuntimeRun | null; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/direction`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+  },
+
+  async createRuntimeDerivative(
+    projectId: string,
+    input: { baseRunId?: string; sourceChapterId?: string; type?: "side_story" | "branch" | "adaptation"; title: string; direction?: string }
+  ): Promise<{ branch: RuntimeDerivativeBranch; run: RuntimeRun; command: RuntimeCommand }> {
+    return request<{ branch: RuntimeDerivativeBranch; run: RuntimeRun; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/derivatives`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+  },
+
+  async mergeRuntimeDerivative(
+    projectId: string,
+    branchId: string,
+    input: { note?: string; mode?: "new_chapter" | "replace_source_chapter"; draftContent?: string } = {}
+  ): Promise<{ branch: RuntimeDerivativeBranch; run?: RuntimeRun; merged: boolean; chapterId?: string }> {
+    return request<{ branch: RuntimeDerivativeBranch; run?: RuntimeRun; merged: boolean; chapterId?: string }>(
+      `/api/novel/projects/${projectId}/runtime/derivatives/${branchId}/merge`,
+      {
+        method: "POST",
+        headers: jsonHeaders,
+        body: JSON.stringify(input)
+      }
+    );
+  },
+
+  async restoreRuntimeCheckpoint(projectId: string, checkpointId: string): Promise<{ checkpoint: RuntimeCheckpoint; restored: boolean }> {
+    return request<{ checkpoint: RuntimeCheckpoint; restored: boolean }>(
+      `/api/novel/projects/${projectId}/runtime/checkpoints/${checkpointId}/restore`,
+      { method: "POST" }
+    );
   },
 
   async saveChapterDashboard(projectId: string, dashboard: ChapterDashboard): Promise<ChapterDashboard> {

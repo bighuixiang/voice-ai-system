@@ -20,6 +20,16 @@ async function waitForFinishedJob(root: string, projectId: string, jobId: string
   throw new Error("Timed out waiting for background job");
 }
 
+async function waitForHistoryLine(root: string, expected: string): Promise<string> {
+  const target = path.join(root, "tasks", "background-jobs.jsonl");
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const history = await fs.readFile(target, "utf8").catch(() => "");
+    if (history.includes(expected)) return history;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  return fs.readFile(target, "utf8");
+}
+
 describe("background job persistence", () => {
   let tempRoot = "";
 
@@ -75,7 +85,7 @@ describe("background job persistence", () => {
     const cancelled = await cancelBackgroundJob(tempRoot, "demo", started.id);
     finishHandler();
     const finished = await waitForFinishedJob(tempRoot, "demo", started.id);
-    const history = await fs.readFile(path.join(tempRoot, "tasks", "background-jobs.jsonl"), "utf8");
+    const history = await waitForHistoryLine(tempRoot, '"status":"cancelled"');
 
     expect(cancelled).toMatchObject({ id: started.id, status: "running", cancelRequestedAt: expect.any(String) });
     expect(finished).toMatchObject({ id: started.id, status: "cancelled", cancelRequestedAt: expect.any(String) });

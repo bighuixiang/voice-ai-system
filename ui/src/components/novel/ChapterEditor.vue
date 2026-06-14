@@ -362,15 +362,15 @@ watch(
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 14px 16px 10px;
+  gap: 10px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--app-border);
   background: var(--app-bg);
 
   h2 {
-    margin: 3px 0 4px;
+    margin: 2px 0;
     color: var(--app-text-primary);
-    font-size: 20px;
+    font-size: 16px;
     line-height: 1.25;
   }
 
@@ -382,6 +382,9 @@ watch(
 }
 
 .editor-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 
   h2,
@@ -390,26 +393,32 @@ watch(
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  p {
+    display: none;
+  }
 }
 
 .mode-line {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 6px;
-  min-height: 22px;
+  min-height: 18px;
 }
 
 .mode-kicker,
 .mode-name {
   display: inline-flex;
   align-items: center;
-  min-height: 22px;
+  min-height: 18px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .mode-kicker {
+  display: none;
   padding: 0 7px;
   background: var(--app-bg-muted);
   color: var(--app-text-secondary);
@@ -430,15 +439,15 @@ watch(
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 6px;
   flex: 0 0 auto;
 }
 
 .save-state {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
-  padding: 0 8px;
+  min-height: 24px;
+  padding: 0 7px;
   border: 1px solid rgba(34, 197, 94, 0.35);
   border-radius: 6px;
   background: var(--app-success-soft);
@@ -457,8 +466,8 @@ watch(
 .word-count {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
-  padding: 0 8px;
+  min-height: 24px;
+  padding: 0 7px;
   border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: 6px;
   background: var(--app-primary-soft);
@@ -469,21 +478,37 @@ watch(
 }
 
 .save-button {
-  min-width: 84px;
+  min-width: 72px;
 }
 
 .document-mode-strip {
-  padding: 8px 16px 10px;
+  padding: 4px 12px;
   border-bottom: 1px solid var(--app-border);
   background: var(--app-bg-soft);
+}
+
+.document-mode-strip :deep(.workbench-segmented) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 2px;
+}
+
+.document-mode-strip :deep(.segment-option) {
+  min-height: 30px;
+  padding: 4px 8px;
+}
+
+.document-mode-strip :deep(.option-icon) {
+  width: 20px;
+  height: 20px;
 }
 
 .editor-textarea,
 .monaco-host {
   box-sizing: border-box;
-  flex: 1;
+  flex: 1 1 auto;
   width: 100%;
-  min-height: 480px;
+  min-height: 0;
 }
 
 .monaco-host {

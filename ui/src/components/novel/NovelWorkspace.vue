@@ -1,6 +1,6 @@
 <template>
-  <div class="novel-workspace">
-    <header class="workspace-header">
+  <div class="novel-workspace" :class="{ 'is-project-workspace': isProjectRoute }">
+    <header class="workspace-header" :class="{ 'is-workspace-shell': isProjectRoute }">
       <div>
         <h1>创作生产平台</h1>
         <p>从小说项目开始，逐步扩展到素材、剧本、图片和视频生成管理。</p>
@@ -104,142 +104,191 @@
       </aside>
 
       <section class="center-stage">
-        <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
-        <CreationLoopPanel
-          :steps="store.creationLoopSteps"
-          :next-actions="store.nextWorkbenchActions"
-          :risk-signals="store.workbenchRiskSignals"
-          :runtime-snapshot="store.currentRuntimeSnapshot"
-          :loading="store.isLoading || store.isSavingContent"
-          @action="handleCreationLoopAction"
-          @command="handleWorkbenchCommand"
-        />
-        <PlotPilotLearningPanel
-          :items="store.plotPilotLearningItems"
-          @action="handleCreationLoopAction"
-          @command="handleWorkbenchCommand"
-        />
-        <SavePipelinePanel
-          :auto-run="store.autoRunSavePipeline"
-          :steps="store.savePipelineSteps"
-          :is-running="store.isRunningSavePipeline"
-          @update:auto-run="store.setAutoRunSavePipeline"
-          @run="store.runPostSavePipelineFromCurrentContent"
-        />
-        <CollapsiblePanel
-          title="快速指引"
-          :collapsed="panelCollapsed('quick-start', hasWorkspaceDraft || hasWorkspaceStructure)"
-          @update:collapsed="setPanelCollapsed('quick-start', $event)"
-        >
-          <QuickStartGuidePanel
-            variant="workspace"
-            :mode="store.writingMode"
-            :has-structure="hasWorkspaceStructure"
-            :has-draft="hasWorkspaceDraft"
-            @open-mode="store.setWritingMode"
-          />
-        </CollapsiblePanel>
-        <CollapsiblePanel
-          v-if="store.writingMode === 'focus'"
-          title="专注写作"
-          :collapsed="panelCollapsed('focus-writing')"
-          @update:collapsed="setPanelCollapsed('focus-writing', $event)"
-        >
-          <FocusWritingPanel
-            :guide="store.focusWritingGuide"
-            :instruction="store.focusDraftInstruction"
-            :can-generate="store.canRequestFocusDraft"
-            :is-generating="store.isLoading"
-            @update-target="store.updateFocusTargetWords"
-            @update-instruction="store.updateFocusDraftInstruction"
-            @generate-draft="store.requestFocusDraft"
-            @open-structure="store.setWritingMode('structure')"
-            @open-review="store.setWritingMode('review')"
-          />
-        </CollapsiblePanel>
-        <CollapsiblePanel
-          v-if="store.writingMode === 'focus' && store.rewriteCandidate"
-          title="候选改写"
-          :collapsed="panelCollapsed('focus-rewrite')"
-          @update:collapsed="setPanelCollapsed('focus-rewrite', $event)"
-        >
-          <RewriteComparison
-            :result="store.rewriteCandidate"
-            original-text="当前章节末尾"
-            empty-original-text="AI 会把建议稿追加到当前正文末尾。"
-            accept-label="追加到正文"
-            :can-accept="Boolean(store.rewriteCandidate?.content)"
-            :can-tune="store.canRequestFocusDraft"
-            :tune-options="focusDraftTuneOptions"
-            @accept="store.acceptFocusDraft"
-            @reject="store.rejectRewrite"
-            @tune="store.requestFocusDraftRevision"
-            @apply-patches="store.applyTaskPatches"
-            @request="store.requestFocusDraft"
-          />
-        </CollapsiblePanel>
-        <CollapsiblePanel
-          v-if="store.writingMode === 'focus' && store.recapCandidate"
-          title="写作回顾"
-          :collapsed="panelCollapsed('focus-recap')"
-          @update:collapsed="setPanelCollapsed('focus-recap', $event)"
-        >
-          <WritingRecapPanel
-            :candidate="store.recapCandidate"
-            :can-request="Boolean(store.currentChapter && store.currentContent.trim())"
-            :loading="store.isLoading"
-            @accept="store.acceptWritingRecap"
-            @reject="store.rejectWritingRecap"
-            @request="store.requestWritingRecap"
-          />
-        </CollapsiblePanel>
-        <CollapsiblePanel
-          v-if="store.writingMode === 'structure'"
-          title="结构生成"
-          :collapsed="panelCollapsed('structure-quick-start')"
-          @update:collapsed="setPanelCollapsed('structure-quick-start', $event)"
-        >
-          <StructureQuickStartPanel
-            :idea="store.structureIdeaInput"
-            :can-reverse-engineer="store.canReverseEngineerStructure"
-            :can-save-structure="Boolean(store.currentDashboard)"
-            :is-saving="store.isSavingDashboard || store.isSavingScenes"
-            :is-reverse-engineering="store.isReverseEngineeringStructure"
-            @update:idea="store.updateStructureIdeaInput"
-            @reverse-from-draft="store.reverseEngineerStructureFromDraft"
-            @generate-from-idea="store.generateStructureFromIdea"
-            @save-structure="handleSaveCurrentStructure"
-          />
-        </CollapsiblePanel>
-        <CollapsiblePanel
-          v-if="store.writingMode === 'structure'"
-          title="章节仪表盘"
-          :collapsed="panelCollapsed('chapter-dashboard')"
-          @update:collapsed="setPanelCollapsed('chapter-dashboard', $event)"
-        >
-          <ChapterDashboardPanel
-            :dashboard="store.currentDashboard"
-            :is-saving="store.isSavingDashboard"
-            :revision="store.structureDraftVersion"
-            @update:dashboard="store.updateDashboard"
-            @save="store.saveCurrentDashboard"
-          />
-        </CollapsiblePanel>
-        <CollapsiblePanel
-          v-if="store.writingMode === 'structure'"
-          title="场景卡"
-          :subtitle="`${store.sceneCards.length} 张`"
-          :collapsed="panelCollapsed('scene-cards', store.sceneCards.length === 0)"
-          @update:collapsed="setPanelCollapsed('scene-cards', $event)"
-        >
-          <SceneCardPanel
-            :cards="store.sceneCards"
-            :is-saving="store.isSavingScenes"
-            :revision="store.structureDraftVersion"
-            @update:cards="store.updateSceneCards"
-            @save="store.saveCurrentSceneCards"
-          />
-        </CollapsiblePanel>
+        <div class="autopilot-zone">
+          <div class="autopilot-toolbar">
+            <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
+            <SavePipelinePanel
+              :auto-run="store.autoRunSavePipeline"
+              :steps="store.savePipelineSteps"
+              :is-running="store.isRunningSavePipeline"
+              @update:auto-run="store.setAutoRunSavePipeline"
+              @run="store.runPostSavePipelineFromCurrentContent"
+            />
+          </div>
+          <CollapsiblePanel
+            title="自动驾驶运行时"
+            :subtitle="store.activeRuntimeRun?.status || 'idle'"
+            hide-toggle-test-hook
+            :collapsed="panelCollapsed('runtime-autopilot')"
+            @update:collapsed="setPanelCollapsed('runtime-autopilot', $event)"
+          >
+            <AutopilotRuntimePanel
+              :active-run="store.activeRuntimeRun"
+              :events="store.runtimeEvents"
+              :checkpoints="store.runtimeCheckpoints"
+              :branches="store.runtimeBranches"
+              :latest-snapshot="store.latestRuntimeNarrativeSnapshot"
+              :knowledge-refs="store.runtimeKnowledgeRefs"
+              :event-connected="store.isRuntimeEventsConnected"
+              :starting="store.isStartingRuntime"
+              @start="store.startAutopilotRuntime"
+              @pause="store.pauseAutopilotRuntime"
+              @resume="store.resumeAutopilotRuntime"
+              @stop="store.stopAutopilotRuntime"
+              @accept="store.acceptAutopilotReview"
+              @rewrite="store.rewriteAutopilotReview"
+              @direction="store.sendAutopilotDirection"
+              @derivative="store.createAutopilotDerivative"
+              @merge-derivative="store.mergeAutopilotDerivative"
+              @restore="store.restoreAutopilotCheckpoint"
+              @refresh="store.loadRuntimeStatus"
+            />
+          </CollapsiblePanel>
+          <CollapsiblePanel
+            title="自动驾驶状态"
+            :collapsed="panelCollapsed('autopilot-loop', true)"
+            @update:collapsed="setPanelCollapsed('autopilot-loop', $event)"
+          >
+            <CreationLoopPanel
+              :steps="store.creationLoopSteps"
+              :next-actions="store.nextWorkbenchActions"
+              :risk-signals="store.workbenchRiskSignals"
+              :runtime-snapshot="store.currentRuntimeSnapshot"
+              :loading="store.isLoading || store.isSavingContent"
+              @action="handleCreationLoopAction"
+              @command="handleWorkbenchCommand"
+            />
+          </CollapsiblePanel>
+          <CollapsiblePanel
+            v-if="store.plotPilotLearningItems.length"
+            title="机制学习"
+            :subtitle="`${store.plotPilotLearningItems.length} 项`"
+            :collapsed="panelCollapsed('plotpilot-learning', true)"
+            @update:collapsed="setPanelCollapsed('plotpilot-learning', $event)"
+          >
+            <PlotPilotLearningPanel
+              :items="store.plotPilotLearningItems"
+              @action="handleCreationLoopAction"
+              @command="handleWorkbenchCommand"
+            />
+          </CollapsiblePanel>
+        </div>
+        <div class="workspace-assist-stack">
+          <CollapsiblePanel
+            title="快速指引"
+            :collapsed="panelCollapsed('quick-start', hasWorkspaceDraft || hasWorkspaceStructure)"
+            @update:collapsed="setPanelCollapsed('quick-start', $event)"
+          >
+            <QuickStartGuidePanel
+              variant="workspace"
+              :mode="store.writingMode"
+              :has-structure="hasWorkspaceStructure"
+              :has-draft="hasWorkspaceDraft"
+              @open-mode="store.setWritingMode"
+            />
+          </CollapsiblePanel>
+          <CollapsiblePanel
+            v-if="store.writingMode === 'focus'"
+            title="专注写作"
+            :collapsed="panelCollapsed('focus-writing')"
+            @update:collapsed="setPanelCollapsed('focus-writing', $event)"
+          >
+            <FocusWritingPanel
+              :guide="store.focusWritingGuide"
+              :instruction="store.focusDraftInstruction"
+              :can-generate="store.canRequestFocusDraft"
+              :is-generating="store.isLoading"
+              @update-target="store.updateFocusTargetWords"
+              @update-instruction="store.updateFocusDraftInstruction"
+              @generate-draft="store.requestFocusDraft"
+              @open-structure="store.setWritingMode('structure')"
+              @open-review="store.setWritingMode('review')"
+            />
+          </CollapsiblePanel>
+          <CollapsiblePanel
+            v-if="store.writingMode === 'focus' && store.rewriteCandidate"
+            title="候选改写"
+            :collapsed="panelCollapsed('focus-rewrite')"
+            @update:collapsed="setPanelCollapsed('focus-rewrite', $event)"
+          >
+            <RewriteComparison
+              :result="store.rewriteCandidate"
+              original-text="当前章节末尾"
+              empty-original-text="AI 会把建议稿追加到当前正文末尾。"
+              accept-label="追加到正文"
+              :can-accept="Boolean(store.rewriteCandidate?.content)"
+              :can-tune="store.canRequestFocusDraft"
+              :tune-options="focusDraftTuneOptions"
+              @accept="store.acceptFocusDraft"
+              @reject="store.rejectRewrite"
+              @tune="store.requestFocusDraftRevision"
+              @apply-patches="store.applyTaskPatches"
+              @request="store.requestFocusDraft"
+            />
+          </CollapsiblePanel>
+          <CollapsiblePanel
+            v-if="store.writingMode === 'focus' && store.recapCandidate"
+            title="写作回顾"
+            :collapsed="panelCollapsed('focus-recap')"
+            @update:collapsed="setPanelCollapsed('focus-recap', $event)"
+          >
+            <WritingRecapPanel
+              :candidate="store.recapCandidate"
+              :can-request="Boolean(store.currentChapter && store.currentContent.trim())"
+              :loading="store.isLoading"
+              @accept="store.acceptWritingRecap"
+              @reject="store.rejectWritingRecap"
+              @request="store.requestWritingRecap"
+            />
+          </CollapsiblePanel>
+          <CollapsiblePanel
+            v-if="store.writingMode === 'structure'"
+            title="结构生成"
+            :collapsed="panelCollapsed('structure-quick-start', hasWorkspaceStructure || hasWorkspaceDraft)"
+            @update:collapsed="setPanelCollapsed('structure-quick-start', $event)"
+          >
+            <StructureQuickStartPanel
+              :idea="store.structureIdeaInput"
+              :can-reverse-engineer="store.canReverseEngineerStructure"
+              :can-save-structure="Boolean(store.currentDashboard)"
+              :is-saving="store.isSavingDashboard || store.isSavingScenes"
+              :is-reverse-engineering="store.isReverseEngineeringStructure"
+              @update:idea="store.updateStructureIdeaInput"
+              @reverse-from-draft="store.reverseEngineerStructureFromDraft"
+              @generate-from-idea="store.generateStructureFromIdea"
+              @save-structure="handleSaveCurrentStructure"
+            />
+          </CollapsiblePanel>
+          <CollapsiblePanel
+            v-if="store.writingMode === 'structure'"
+            title="章节仪表盘"
+            :collapsed="panelCollapsed('chapter-dashboard', true)"
+            @update:collapsed="setPanelCollapsed('chapter-dashboard', $event)"
+          >
+            <ChapterDashboardPanel
+              :dashboard="store.currentDashboard"
+              :is-saving="store.isSavingDashboard"
+              :revision="store.structureDraftVersion"
+              @update:dashboard="store.updateDashboard"
+              @save="store.saveCurrentDashboard"
+            />
+          </CollapsiblePanel>
+          <CollapsiblePanel
+            v-if="store.writingMode === 'structure'"
+            title="场景卡"
+            :subtitle="`${store.sceneCards.length} 张`"
+            :collapsed="panelCollapsed('scene-cards', store.sceneCards.length === 0)"
+            @update:collapsed="setPanelCollapsed('scene-cards', $event)"
+          >
+            <SceneCardPanel
+              :cards="store.sceneCards"
+              :is-saving="store.isSavingScenes"
+              :revision="store.structureDraftVersion"
+              @update:cards="store.updateSceneCards"
+              @save="store.saveCurrentSceneCards"
+            />
+          </CollapsiblePanel>
+        </div>
         <ChapterEditor
           class="editor-area"
           :chapter="store.currentChapter"
@@ -441,7 +490,7 @@
       <el-icon class="is-loading"><Loading /></el-icon>
       <span>{{ store.error || "正在载入工作台" }}</span>
     </main>
-    <el-dialog v-model="storyControlDialogOpen" title="故事总控台" width="min(1180px, 96vw)" destroy-on-close @closed="storyGraphFocus = null">
+    <el-dialog v-model="storyControlDialogOpen" title="故事总控台" width="min(1360px, 96vw)" destroy-on-close @closed="storyGraphFocus = null">
       <div class="story-control-dialog-body">
         <StoryControlPanel
           :story-control="store.storyControl"
@@ -512,45 +561,47 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Close, Collection, Folder, Loading, Moon, Refresh, Setting, Sunny } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
 import { useThemeStore } from "@/stores/theme";
 import type { CreationLoopAction, NovelProject, PlatformAiConfig, StoryGraphFocus, WorkbenchCommand } from "@/types/novel";
-import ProjectManagerPanel from "./ProjectManagerPanel.vue";
-import ProjectCreatePanel from "./ProjectCreatePanel.vue";
-import AiConfigPanel from "./AiConfigPanel.vue";
-import ChapterTree from "./ChapterTree.vue";
-import FocusWritingPanel from "./FocusWritingPanel.vue";
-import StructureQuickStartPanel from "./StructureQuickStartPanel.vue";
-import StoryControlPanel from "./StoryControlPanel.vue";
-import QuickReferencePanel from "./QuickReferencePanel.vue";
-import StoryGraphPanel from "./StoryGraphPanel.vue";
-import KnowledgeIndexPanel from "./KnowledgeIndexPanel.vue";
-import BackgroundJobPanel from "./BackgroundJobPanel.vue";
-import ChapterDashboardPanel from "./ChapterDashboardPanel.vue";
-import SceneCardPanel from "./SceneCardPanel.vue";
-import ChapterEditor from "./ChapterEditor.vue";
-import FileVersionDiffPanel from "./FileVersionDiffPanel.vue";
-import SelectionToolbar from "./SelectionToolbar.vue";
-import ReviewQualityPanel from "./ReviewQualityPanel.vue";
-import RewriteComparison from "./RewriteComparison.vue";
-import AIOperationPanel from "./AIOperationPanel.vue";
-import WritingRecapPanel from "./WritingRecapPanel.vue";
 import WritingModeSwitcher from "./WritingModeSwitcher.vue";
-import TaskHistoryPanel from "./TaskHistoryPanel.vue";
-import AuditReportPanel from "./AuditReportPanel.vue";
-import ContextPanel from "./ContextPanel.vue";
-import SupportFilePanel from "./SupportFilePanel.vue";
-import LedgerPanel from "./LedgerPanel.vue";
-import PlatformLibraryPanel from "./PlatformLibraryPanel.vue";
-import QuickStartGuidePanel from "./QuickStartGuidePanel.vue";
 import CollapsiblePanel from "./CollapsiblePanel.vue";
-import CreationLoopPanel from "./CreationLoopPanel.vue";
-import PlotPilotLearningPanel from "./PlotPilotLearningPanel.vue";
-import SavePipelinePanel from "./SavePipelinePanel.vue";
+
+const ProjectManagerPanel = defineAsyncComponent(() => import("./ProjectManagerPanel.vue"));
+const ProjectCreatePanel = defineAsyncComponent(() => import("./ProjectCreatePanel.vue"));
+const AiConfigPanel = defineAsyncComponent(() => import("./AiConfigPanel.vue"));
+const ChapterTree = defineAsyncComponent(() => import("./ChapterTree.vue"));
+const FocusWritingPanel = defineAsyncComponent(() => import("./FocusWritingPanel.vue"));
+const StructureQuickStartPanel = defineAsyncComponent(() => import("./StructureQuickStartPanel.vue"));
+const StoryControlPanel = defineAsyncComponent(() => import("./StoryControlPanel.vue"));
+const QuickReferencePanel = defineAsyncComponent(() => import("./QuickReferencePanel.vue"));
+const StoryGraphPanel = defineAsyncComponent(() => import("./StoryGraphPanel.vue"));
+const KnowledgeIndexPanel = defineAsyncComponent(() => import("./KnowledgeIndexPanel.vue"));
+const BackgroundJobPanel = defineAsyncComponent(() => import("./BackgroundJobPanel.vue"));
+const ChapterDashboardPanel = defineAsyncComponent(() => import("./ChapterDashboardPanel.vue"));
+const SceneCardPanel = defineAsyncComponent(() => import("./SceneCardPanel.vue"));
+const ChapterEditor = defineAsyncComponent(() => import("./ChapterEditor.vue"));
+const FileVersionDiffPanel = defineAsyncComponent(() => import("./FileVersionDiffPanel.vue"));
+const SelectionToolbar = defineAsyncComponent(() => import("./SelectionToolbar.vue"));
+const ReviewQualityPanel = defineAsyncComponent(() => import("./ReviewQualityPanel.vue"));
+const RewriteComparison = defineAsyncComponent(() => import("./RewriteComparison.vue"));
+const AIOperationPanel = defineAsyncComponent(() => import("./AIOperationPanel.vue"));
+const WritingRecapPanel = defineAsyncComponent(() => import("./WritingRecapPanel.vue"));
+const TaskHistoryPanel = defineAsyncComponent(() => import("./TaskHistoryPanel.vue"));
+const AuditReportPanel = defineAsyncComponent(() => import("./AuditReportPanel.vue"));
+const ContextPanel = defineAsyncComponent(() => import("./ContextPanel.vue"));
+const SupportFilePanel = defineAsyncComponent(() => import("./SupportFilePanel.vue"));
+const LedgerPanel = defineAsyncComponent(() => import("./LedgerPanel.vue"));
+const PlatformLibraryPanel = defineAsyncComponent(() => import("./PlatformLibraryPanel.vue"));
+const QuickStartGuidePanel = defineAsyncComponent(() => import("./QuickStartGuidePanel.vue"));
+const CreationLoopPanel = defineAsyncComponent(() => import("./CreationLoopPanel.vue"));
+const PlotPilotLearningPanel = defineAsyncComponent(() => import("./PlotPilotLearningPanel.vue"));
+const SavePipelinePanel = defineAsyncComponent(() => import("./SavePipelinePanel.vue"));
+const AutopilotRuntimePanel = defineAsyncComponent(() => import("./AutopilotRuntimePanel.vue"));
 
 defineOptions({
   name: "NovelWorkspace"
@@ -843,9 +894,14 @@ watch(
 
 <style scoped lang="scss">
 .novel-workspace {
+  --workspace-chrome-height: 116px;
   min-height: 100vh;
   background: var(--app-bg-page);
   color: var(--app-text-primary);
+}
+
+.novel-workspace.is-project-workspace {
+  --workspace-chrome-height: 86px;
 }
 
 .workspace-header {
@@ -869,12 +925,31 @@ watch(
   }
 }
 
+.workspace-header.is-workspace-shell {
+  min-height: 42px;
+  padding: 6px 12px;
+
+  h1 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  p {
+    display: none;
+  }
+}
+
 .header-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.workspace-header.is-workspace-shell .header-actions {
+  gap: 6px;
 }
 
 .workspace-tabs {
@@ -886,6 +961,11 @@ watch(
   border-bottom: 1px solid var(--app-border);
   background: var(--app-bg);
   overflow-x: auto;
+}
+
+.is-project-workspace .workspace-tabs {
+  min-height: 36px;
+  padding: 4px 10px;
 }
 
 .workspace-tab {
@@ -911,6 +991,10 @@ watch(
     background: var(--app-primary-soft);
     color: var(--app-primary-text);
   }
+}
+
+.is-project-workspace .workspace-tab {
+  padding: 3px 4px 3px 9px;
 }
 
 .story-control-dialog-body {
@@ -984,9 +1068,9 @@ watch(
 .workspace-grid {
   display: grid;
   grid-template-columns: minmax(220px, 280px) minmax(420px, 1fr) minmax(300px, 380px);
-  gap: 14px;
-  height: calc(100vh - 116px);
-  padding: 14px;
+  gap: 10px;
+  height: calc(100vh - var(--workspace-chrome-height));
+  padding: 10px 12px;
 
   &.mode-focus {
     grid-template-columns: minmax(0, 980px);
@@ -1002,7 +1086,7 @@ watch(
 .right-rail {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   min-height: 0;
   overflow: auto;
 }
@@ -1010,24 +1094,102 @@ watch(
 .center-stage {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding-right: 2px;
 }
 
-.center-stage > :not(.editor-area) {
+.autopilot-zone,
+.workspace-assist-stack,
+.center-stage > .collapsible-panel {
   flex: 0 0 auto;
 }
 
-.editor-area {
-  min-height: 560px;
-  flex: 1 0 560px;
+.autopilot-zone {
+  display: grid;
+  gap: 6px;
+  min-height: 0;
+  overflow: visible;
 }
 
-.mode-focus .editor-area {
+.autopilot-toolbar {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.45fr) minmax(360px, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+.workspace-assist-stack {
+  order: 3;
+  display: grid;
+  gap: 6px;
   min-height: 0;
-  flex: 1 1 auto;
+  overflow: visible;
+}
+
+.center-stage > .editor-area {
+  order: 2;
+  height: clamp(460px, 62vh, 680px);
+  min-height: 460px;
+  flex: 0 0 auto;
+}
+
+.mode-focus .center-stage > .editor-area {
+  height: clamp(520px, 70vh, 760px);
+  min-height: 520px;
+  flex: 0 0 auto;
+}
+
+.center-stage > .collapsible-panel {
+  order: 4;
+}
+
+.autopilot-zone :deep(.collapsible-panel) {
+  gap: 6px;
+}
+
+.autopilot-zone :deep(.collapse-toggle),
+.workspace-assist-stack :deep(.collapse-toggle) {
+  min-height: 30px;
+  padding: 4px 7px;
+}
+
+.autopilot-toolbar :deep(.writing-mode-switcher),
+.autopilot-toolbar :deep(.save-pipeline-panel) {
+  padding: 8px;
+  border-radius: 7px;
+}
+
+.autopilot-toolbar :deep(.save-pipeline-panel) {
+  gap: 6px;
+}
+
+.autopilot-toolbar :deep(.save-pipeline-panel p) {
+  display: none;
+}
+
+.autopilot-toolbar :deep(.workbench-segmented) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.autopilot-toolbar :deep(.segment-option) {
+  min-height: 30px;
+  padding: 4px 6px;
+}
+
+.autopilot-toolbar :deep(.option-icon) {
+  width: 20px;
+  height: 20px;
+}
+
+.autopilot-toolbar :deep(.step-list) {
+  display: none;
+}
+
+.autopilot-toolbar :deep(.step-item) {
+  padding: 5px;
 }
 
 .workspace-error {
@@ -1042,7 +1204,7 @@ watch(
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: calc(100vh - 116px);
+  min-height: calc(100vh - var(--workspace-chrome-height));
   color: var(--app-text-secondary);
 }
 
@@ -1055,6 +1217,14 @@ watch(
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .autopilot-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .autopilot-zone {
+    overflow: visible;
   }
 }
 
@@ -1075,11 +1245,20 @@ watch(
   }
 
   .workspace-grid {
-    height: auto;
+    height: calc(100vh - var(--workspace-chrome-height));
+    min-height: 0;
   }
 
   .right-rail {
     display: flex;
+  }
+
+  .autopilot-zone {
+    overflow: visible;
+  }
+
+  .workspace-assist-stack {
+    overflow: visible;
   }
 }
 </style>

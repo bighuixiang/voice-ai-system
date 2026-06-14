@@ -425,6 +425,8 @@ describe("NovelWorkspace writing modes", () => {
     };
 
     const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".autopilot-zone .collapse-toggle").trigger("click");
+    await wrapper.vm.$nextTick();
     await wrapper.find(".creation-loop-stub").trigger("click");
 
     expect(storeRef.value.runCreationLoopAction).toHaveBeenCalledWith("save-draft");
@@ -434,6 +436,8 @@ describe("NovelWorkspace writing modes", () => {
     storeRef.value = makeStore("focus");
 
     const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.find(".autopilot-zone .collapse-toggle").trigger("click");
+    await wrapper.vm.$nextTick();
     await wrapper.find(".creation-loop-command-stub").trigger("click");
     await wrapper.vm.$nextTick();
 
@@ -442,9 +446,25 @@ describe("NovelWorkspace writing modes", () => {
   });
 
   it("routes character scheduling commands to the focused story graph", async () => {
-    storeRef.value = makeStore("focus");
+    storeRef.value = {
+      ...makeStore("focus"),
+      plotPilotLearningItems: [
+        {
+          id: "learning-shadow",
+          label: "Shadow character timing",
+          status: "warning",
+          sourcePattern: "Premature reveal",
+          localLanding: "Delay first visible appearance",
+          userValue: "Keep reveal causal",
+          active: true,
+          evidenceCount: 1
+        }
+      ]
+    };
 
     const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    await wrapper.findAll(".autopilot-zone .collapse-toggle")[1].trigger("click");
+    await wrapper.vm.$nextTick();
     await wrapper.find(".plotpilot-learning-stub").trigger("click");
     await wrapper.vm.$nextTick();
 
@@ -517,15 +537,15 @@ describe("NovelWorkspace writing modes", () => {
     expect(wrapper.find(".recap-stub").exists()).toBe(true);
   });
 
-  it("shows review tools without structure planning panels in review mode", () => {
+  it("shows active review tools without mounting collapsed panels", () => {
     storeRef.value = makeStore("review");
 
     const wrapper = mount(NovelWorkspace, { global: { stubs } });
 
-    expect(wrapper.find(".rewrite-stub").exists()).toBe(true);
     expect(wrapper.find(".quality-stub").exists()).toBe(true);
-    expect(wrapper.find(".ledger-stub").exists()).toBe(true);
-    expect(wrapper.find(".history-stub").exists()).toBe(true);
+    expect(wrapper.find(".rewrite-stub").exists()).toBe(false);
+    expect(wrapper.find(".ledger-stub").exists()).toBe(false);
+    expect(wrapper.find(".history-stub").exists()).toBe(false);
     expect(wrapper.find(".scene-stub").exists()).toBe(false);
     expect(wrapper.find(".ai-stub").exists()).toBe(false);
   });
@@ -543,6 +563,11 @@ describe("NovelWorkspace writing modes", () => {
     storeRef.value = makeStore("review");
 
     const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    const historyToggle = wrapper.findAll(".collapse-toggle").find((button) => button.text().includes("任务历史"));
+
+    expect(historyToggle).toBeTruthy();
+    await historyToggle?.trigger("click");
+
     await wrapper.find(".preview-report-stub").trigger("click");
     await flushPromises();
 
@@ -584,14 +609,18 @@ describe("NovelWorkspace writing modes", () => {
     expect(storeRef.value.saveCurrentContent).toHaveBeenCalledTimes(1);
   });
 
-  it("shows quick structure generation tools in structure mode", () => {
+  it("shows quick structure generation tools in structure mode", async () => {
     storeRef.value = makeStore("structure");
 
     const wrapper = mount(NovelWorkspace, { global: { stubs } });
+    const assistToggles = wrapper.findAll(".workspace-assist-stack .collapse-toggle");
+    await assistToggles[1].trigger("click");
+    await assistToggles[2].trigger("click");
+    await wrapper.vm.$nextTick();
 
     expect(wrapper.find(".quick-start-stub").exists()).toBe(true);
     expect(wrapper.find(".dashboard-stub").exists()).toBe(true);
-    expect(wrapper.find(".scene-stub").exists()).toBe(true);
+    expect(wrapper.find(".scene-stub").exists()).toBe(false);
     expect(wrapper.find(".editor-stub").exists()).toBe(true);
     expect(wrapper.find(".story-control-stub").exists()).toBe(false);
   });

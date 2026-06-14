@@ -799,6 +799,30 @@ describe("novelApi", () => {
     );
   });
 
+  it("merges a runtime derivative branch with review metadata", async () => {
+    mockJson({
+      merged: true,
+      chapterId: "derivative-branch-1",
+      branch: { id: "branch-1", status: "merged" },
+      run: { id: "run-1", status: "completed" }
+    });
+
+    await expect(
+      novelApi.mergeRuntimeDerivative("demo", "branch-1", {
+        note: "Accepted after review.",
+        mode: "new_chapter"
+      })
+    ).resolves.toMatchObject({ merged: true, chapterId: "derivative-branch-1" });
+
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/projects/demo/runtime/derivatives/branch-1/merge",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ note: "Accepted after review.", mode: "new_chapter" })
+      })
+    );
+  });
+
   it("throws the API error message when a request fails", async () => {
     mockJson({ error: "Unsafe file path" }, false, 400);
 

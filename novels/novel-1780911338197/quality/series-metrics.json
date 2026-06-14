@@ -2,7 +2,7 @@
   "projectSlug": "novel-1780911338197",
   "chapterCount": 198,
   "reportCount": 1,
-  "averageOverallScore": 85,
+  "averageOverallScore": 86,
   "metricAverages": [
     {
       "key": "hook",
@@ -13,19 +13,13 @@
     {
       "key": "rhythm",
       "label": "节奏",
-      "averageScore": 70,
+      "averageScore": 69,
       "reportCount": 1
     },
     {
       "key": "tension",
       "label": "张力",
       "averageScore": 83,
-      "reportCount": 1
-    },
-    {
-      "key": "information",
-      "label": "信息",
-      "averageScore": 92,
       "reportCount": 1
     },
     {
@@ -37,6 +31,12 @@
     {
       "key": "emotion",
       "label": "情绪",
+      "averageScore": 100,
+      "reportCount": 1
+    },
+    {
+      "key": "information",
+      "label": "信息",
       "averageScore": 100,
       "reportCount": 1
     },
@@ -51,24 +51,24 @@
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "overallScore": 85,
+      "overallScore": 86,
       "weakestMetricKey": "hook",
       "weakestMetricLabel": "钩子",
       "weakestMetricScore": 50,
-      "updatedAt": "2026-06-12T19:33:22.370Z"
+      "updatedAt": "2026-06-14T11:07:01.774Z"
     }
   ],
   "rhythmSignals": [
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "rhythmScore": 70,
-      "overallScore": 85,
+      "rhythmScore": 69,
+      "overallScore": 86,
       "wordCount": 5747,
       "sceneCount": 7,
-      "beatCount": 0,
+      "beatCount": 1,
       "note": "句段节奏偏单一，适合拆出动作、反应和停顿。",
-      "updatedAt": "2026-06-12T19:33:22.370Z"
+      "updatedAt": "2026-06-14T11:07:01.774Z"
     }
   ],
   "characterArcSignals": [],
@@ -80,12 +80,12 @@
         {
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 85,
-          "updatedAt": "2026-06-12T19:33:22.370Z"
+          "score": 86,
+          "updatedAt": "2026-06-14T11:07:01.774Z"
         }
       ],
-      "averageScore": 85,
-      "latestScore": 85
+      "averageScore": 86,
+      "latestScore": 86
     },
     {
       "key": "hook",
@@ -95,7 +95,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 50,
-          "updatedAt": "2026-06-12T19:33:22.370Z"
+          "updatedAt": "2026-06-14T11:07:01.774Z"
         }
       ],
       "averageScore": 50,
@@ -108,12 +108,12 @@
         {
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 70,
-          "updatedAt": "2026-06-12T19:33:22.370Z"
+          "score": 69,
+          "updatedAt": "2026-06-14T11:07:01.774Z"
         }
       ],
-      "averageScore": 70,
-      "latestScore": 70
+      "averageScore": 69,
+      "latestScore": 69
     },
     {
       "key": "tension",
@@ -123,25 +123,11 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 83,
-          "updatedAt": "2026-06-12T19:33:22.370Z"
+          "updatedAt": "2026-06-14T11:07:01.774Z"
         }
       ],
       "averageScore": 83,
       "latestScore": 83
-    },
-    {
-      "key": "information",
-      "label": "信息",
-      "points": [
-        {
-          "chapterId": "chapter-001",
-          "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 92,
-          "updatedAt": "2026-06-12T19:33:22.370Z"
-        }
-      ],
-      "averageScore": 92,
-      "latestScore": 92
     },
     {
       "key": "conflict",
@@ -151,7 +137,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 100,
-          "updatedAt": "2026-06-12T19:33:22.370Z"
+          "updatedAt": "2026-06-14T11:07:01.774Z"
         }
       ],
       "averageScore": 100,
@@ -165,7 +151,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 100,
-          "updatedAt": "2026-06-12T19:33:22.370Z"
+          "updatedAt": "2026-06-14T11:07:01.774Z"
         }
       ],
       "averageScore": 100,
@@ -179,7 +165,21 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 100,
-          "updatedAt": "2026-06-12T19:33:22.370Z"
+          "updatedAt": "2026-06-14T11:07:01.774Z"
+        }
+      ],
+      "averageScore": 100,
+      "latestScore": 100
+    },
+    {
+      "key": "information",
+      "label": "信息",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 100,
+          "updatedAt": "2026-06-14T11:07:01.774Z"
         }
       ],
       "averageScore": 100,
@@ -194,13 +194,13 @@
       "conflictScore": 100,
       "hookScore": 50,
       "emotionScore": 100,
-      "rhythmScore": 70,
+      "rhythmScore": 69,
       "sceneCount": 7,
       "note": "情节、情绪、节奏和钩子形成了有效张力。",
-      "updatedAt": "2026-06-12T19:33:22.370Z"
+      "updatedAt": "2026-06-14T11:07:01.774Z"
     }
   ],
   "styleDriftSignals": [],
   "narrativeDebtSignals": [],
-  "updatedAt": "2026-06-12T19:33:22.407Z"
+  "updatedAt": "2026-06-14T11:07:01.816Z"
 }

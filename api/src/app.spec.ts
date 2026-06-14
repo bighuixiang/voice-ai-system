@@ -782,6 +782,72 @@ describe("novel API routes", () => {
     );
   });
 
+  it("creates and accepts a runtime derivative branch through API routes", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Derivative API", roughIdea: "Branch route coverage." })
+    });
+    const slug = created.data.project.slug;
+
+    const derivative = await jsonFetch<{
+      branch: { id: string; title: string; status: string };
+      run: { id: string; command: string; branchId: string };
+      command: { id: string; type: string };
+    }>(`/api/novel/projects/${slug}/runtime/derivatives`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sourceChapterId: "chapter-001",
+        type: "side_story",
+        title: "Side Canon Candidate",
+        direction: "Write an isolated aftermath."
+      })
+    });
+
+    const merged = await jsonFetch<{
+      branch: { id: string; status: string; payload: Record<string, unknown> };
+      run: { id: string; status: string };
+      merged: boolean;
+      chapterId: string;
+    }>(
+      `/api/novel/projects/${slug}/runtime/derivatives/${derivative.data.branch.id}/merge`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note: "Accepted after review.", draftContent: "# Side Canon Candidate\n\nMerged derivative prose.\n" })
+      }
+    );
+    const projectJson = JSON.parse(await fs.readFile(path.join(tempRoot, slug, "project.json"), "utf8"));
+
+    expect(derivative.status).toBe(202);
+    expect(derivative.data.branch).toMatchObject({ title: "Side Canon Candidate", status: "draft" });
+    expect(derivative.data.run).toMatchObject({ command: "derivative", branchId: derivative.data.branch.id });
+    expect(derivative.data.command).toMatchObject({ type: "derivative" });
+    expect(merged.status).toBe(200);
+    expect(merged.data).toMatchObject({
+      merged: true,
+      run: { status: "completed" },
+      branch: {
+        id: derivative.data.branch.id,
+        status: "merged",
+        payload: expect.objectContaining({
+          canonPolicy: "accepted_for_canon",
+          mergeMode: "new_chapter",
+          mergeNote: "Accepted after review.",
+          mergedChapterId: merged.data.chapterId
+        })
+      }
+    });
+    expect(projectJson.lastOpenedChapterId).toBe(merged.data.chapterId);
+    expect(projectJson.chapters).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: merged.data.chapterId, title: "Side Canon Candidate", status: "drafted" })])
+    );
+    await expect(fs.readFile(path.join(tempRoot, slug, `chapters/${merged.data.chapterId}.md`), "utf8")).resolves.toContain(
+      "Merged derivative prose."
+    );
+  });
+
   it("keeps duplicate project titles in separate folders", async () => {
     const body = JSON.stringify({
       title: "Demo Novel",

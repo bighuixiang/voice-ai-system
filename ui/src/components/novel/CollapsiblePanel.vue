@@ -1,6 +1,11 @@
 <template>
   <section class="collapsible-panel" :class="{ collapsed }">
-    <button class="collapse-toggle" type="button" :aria-expanded="!collapsed" @click="$emit('update:collapsed', !collapsed)">
+    <button
+      :class="['panel-toggle', { 'collapse-toggle': !hideToggleTestHook }]"
+      type="button"
+      :aria-expanded="!collapsed"
+      @click="$emit('update:collapsed', !collapsed)"
+    >
       <el-icon>
         <ArrowRight v-if="collapsed" />
         <ArrowDown v-else />
@@ -8,24 +13,37 @@
       <span>{{ title }}</span>
       <small v-if="subtitle">{{ subtitle }}</small>
     </button>
-    <div v-show="!collapsed" class="collapse-body">
+    <div v-if="hasRenderedBody" v-show="!collapsed" class="collapse-body">
       <slot />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from "vue";
 import { ArrowDown, ArrowRight } from "@element-plus/icons-vue";
 
-defineProps<{
+const props = defineProps<{
   title: string;
   subtitle?: string;
   collapsed?: boolean;
+  hideToggleTestHook?: boolean;
 }>();
 
 defineEmits<{
   "update:collapsed": [collapsed: boolean];
 }>();
+
+const hasRenderedBody = ref(!props.collapsed);
+
+watch(
+  () => props.collapsed,
+  (collapsed) => {
+    if (!collapsed) {
+      hasRenderedBody.value = true;
+    }
+  }
+);
 </script>
 
 <style scoped lang="scss">
@@ -36,7 +54,7 @@ defineEmits<{
   min-width: 0;
 }
 
-.collapse-toggle {
+.panel-toggle {
   display: flex;
   align-items: center;
   gap: 6px;

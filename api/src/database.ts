@@ -138,6 +138,119 @@ export function migrateDatabase(database = openDatabase()): void {
     CREATE INDEX IF NOT EXISTS idx_projects_updated_at ON projects(updated_at);
     CREATE INDEX IF NOT EXISTS idx_assets_type ON platform_assets(type);
     CREATE INDEX IF NOT EXISTS idx_asset_links_project ON asset_project_links(project_slug);
+
+    CREATE TABLE IF NOT EXISTS runtime_runs (
+      id TEXT PRIMARY KEY,
+      project_slug TEXT NOT NULL,
+      chapter_id TEXT,
+      branch_id TEXT,
+      status TEXT NOT NULL,
+      current_stage TEXT,
+      command TEXT NOT NULL,
+      input_json TEXT NOT NULL,
+      result_json TEXT,
+      error TEXT,
+      failure_count INTEGER NOT NULL DEFAULT 0,
+      rewrite_count INTEGER NOT NULL DEFAULT 0,
+      quality_score REAL,
+      created_at TEXT NOT NULL,
+      started_at TEXT,
+      updated_at TEXT NOT NULL,
+      finished_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS runtime_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL UNIQUE,
+      run_id TEXT,
+      project_slug TEXT NOT NULL,
+      type TEXT NOT NULL,
+      stage TEXT,
+      message TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS runtime_checkpoints (
+      id TEXT PRIMARY KEY,
+      project_slug TEXT NOT NULL,
+      run_id TEXT,
+      chapter_id TEXT,
+      label TEXT NOT NULL,
+      manifest_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS runtime_write_commands (
+      id TEXT PRIMARY KEY,
+      project_slug TEXT NOT NULL,
+      run_id TEXT,
+      type TEXT NOT NULL,
+      status TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      idempotency_key TEXT UNIQUE,
+      error TEXT,
+      created_at TEXT NOT NULL,
+      claimed_at TEXT,
+      finished_at TEXT,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS runtime_snapshots (
+      id TEXT PRIMARY KEY,
+      project_slug TEXT NOT NULL,
+      run_id TEXT NOT NULL,
+      chapter_id TEXT NOT NULL,
+      snapshot_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS runtime_branches (
+      id TEXT PRIMARY KEY,
+      project_slug TEXT NOT NULL,
+      base_run_id TEXT,
+      source_chapter_id TEXT,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      status TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS runtime_quality_scores (
+      id TEXT PRIMARY KEY,
+      project_slug TEXT NOT NULL,
+      run_id TEXT NOT NULL,
+      chapter_id TEXT NOT NULL,
+      score REAL NOT NULL,
+      payload_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS runtime_knowledge_refs (
+      id TEXT PRIMARY KEY,
+      project_slug TEXT NOT NULL,
+      run_id TEXT NOT NULL,
+      chapter_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      ref_id TEXT NOT NULL,
+      label TEXT NOT NULL,
+      score REAL,
+      payload_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_runtime_runs_project_updated ON runtime_runs(project_slug, updated_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_runtime_runs_status ON runtime_runs(status);
+    CREATE INDEX IF NOT EXISTS idx_runtime_events_project_id ON runtime_events(project_slug, id);
+    CREATE INDEX IF NOT EXISTS idx_runtime_events_run ON runtime_events(run_id, id);
+    CREATE INDEX IF NOT EXISTS idx_runtime_commands_pending ON runtime_write_commands(status, created_at);
+    CREATE INDEX IF NOT EXISTS idx_runtime_commands_project ON runtime_write_commands(project_slug, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_runtime_checkpoints_project ON runtime_checkpoints(project_slug, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_runtime_snapshots_run ON runtime_snapshots(run_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_runtime_branches_project ON runtime_branches(project_slug, updated_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_runtime_knowledge_refs_run ON runtime_knowledge_refs(run_id, created_at DESC);
   `);
 }
 

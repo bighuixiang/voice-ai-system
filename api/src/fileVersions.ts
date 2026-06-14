@@ -55,7 +55,8 @@ export async function createWritingFileSnapshot(
   root: string,
   project: NovelProject,
   relativePath: string,
-  nextContent: string
+  nextContent: string,
+  metadata: Pick<FileVersionSnapshot, "source" | "reason" | "runId"> = {}
 ): Promise<FileVersionSnapshot | null> {
   const safePath = assertSafeNovelPath(relativePath);
   if (!isVersionedWritingPath(project, safePath)) return null;
@@ -72,7 +73,8 @@ export async function createWritingFileSnapshot(
     filePath: safePath,
     versionPath,
     createdAt,
-    size: Buffer.byteLength(currentContent, "utf8")
+    size: Buffer.byteLength(currentContent, "utf8"),
+    ...metadata
   };
 
   const absoluteVersionPath = resolveInside(root, versionPath);

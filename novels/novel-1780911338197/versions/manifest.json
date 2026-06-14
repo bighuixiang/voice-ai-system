@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "snapshots": [
+    {
+      "id": "2026-06-14T09-38-16-052Z-idcxrj",
+      "filePath": "chapters/chapter-001.md",
+      "versionPath": "versions/chapters__chapter-001.md/2026-06-14T09-38-16-052Z-idcxrj.md",
+      "createdAt": "2026-06-14T09:38:16.052Z",
+      "size": 18436,
+      "source": "runtime",
+      "reason": "chapter_draft",
+      "runId": "run-1781429570766-eyf38z"
+    }
+  ]
+}

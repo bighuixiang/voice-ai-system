@@ -13,6 +13,180 @@ export type CodexTaskType =
 
 export type NovelTaskStatus = "pending" | "running" | "success" | "error" | "cancelled";
 
+export type RuntimeRunStatus = "queued" | "running" | "paused" | "review_required" | "completed" | "failed" | "cancelled";
+export type RuntimeCommandType = "start" | "pause" | "resume" | "stop" | "rewrite" | "accept" | "direction" | "derivative";
+export type RuntimeCommandStatus = "pending" | "claimed" | "succeeded" | "failed" | "cancelled";
+export type RuntimeEventType = "command" | "run" | "stage" | "checkpoint" | "write" | "quality" | "review" | "error" | "system";
+export type RuntimePipelineStage =
+  | "find_next_chapter"
+  | "checkpoint_before_run"
+  | "prepare_narrative_snapshot"
+  | "chapter_plan"
+  | "context_assemble"
+  | "chapter_draft"
+  | "content_validate"
+  | "quality_review"
+  | "recap_and_ledger"
+  | "knowledge_index_update"
+  | "story_graph_update"
+  | "finalize_or_gate";
+export type RuntimeDerivativeType = "side_story" | "branch" | "adaptation";
+
+export interface RuntimeRun {
+  id: string;
+  projectSlug: string;
+  chapterId?: string;
+  branchId?: string;
+  status: RuntimeRunStatus;
+  currentStage?: RuntimePipelineStage;
+  command: RuntimeCommandType;
+  input: Record<string, unknown>;
+  result?: Record<string, unknown>;
+  error?: string;
+  failureCount: number;
+  rewriteCount: number;
+  qualityScore?: number;
+  createdAt: string;
+  startedAt?: string;
+  updatedAt: string;
+  finishedAt?: string;
+}
+
+export interface RuntimeCommand {
+  id: string;
+  projectSlug: string;
+  runId?: string;
+  type: RuntimeCommandType;
+  status: RuntimeCommandStatus;
+  payload: Record<string, unknown>;
+  idempotencyKey?: string;
+  error?: string;
+  createdAt: string;
+  claimedAt?: string;
+  finishedAt?: string;
+  updatedAt: string;
+}
+
+export interface RuntimeEvent {
+  id: number;
+  eventId: string;
+  runId?: string;
+  projectSlug: string;
+  type: RuntimeEventType;
+  stage?: RuntimePipelineStage;
+  message: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface RuntimeCheckpointFile {
+  relativePath: string;
+  checkpointPath: string;
+  existed: boolean;
+  size: number;
+  sha256?: string;
+}
+
+export interface RuntimeCheckpoint {
+  id: string;
+  projectSlug: string;
+  runId?: string;
+  chapterId?: string;
+  label: string;
+  manifest: RuntimeCheckpointFile[];
+  createdAt: string;
+}
+
+export interface RuntimeContextBudgetBlock {
+  title: string;
+  tier?: "T0" | "T1" | "T2" | "T3";
+  limit?: number;
+  originalLength: number;
+  finalLength: number;
+  truncated: boolean;
+  reason: string;
+}
+
+export interface RuntimeContextBudget {
+  totalOriginalChars: number;
+  totalFinalChars: number;
+  blockCount: number;
+  truncatedBlocks: RuntimeContextBudgetBlock[];
+  blocks: RuntimeContextBudgetBlock[];
+  policy: string;
+}
+
+export interface NarrativeSnapshot {
+  projectSlug: string;
+  chapterId: string;
+  chapterTitle: string;
+  contextBlocks: Array<{ title: string; length: number; preview: string }>;
+  contextBudget?: RuntimeContextBudget;
+  storyControl?: Pick<StoryControl, "version" | "premise" | "currentArcId" | "updatedAt"> & {
+    arcCount: number;
+    characterCount: number;
+    eventCount: number;
+  };
+  summarySignals: Array<Pick<ChapterSummary, "chapterId" | "summary" | "keyEvents" | "updatedAt">>;
+  ledgerSignals: Array<Pick<LedgerEntry, "id" | "kind" | "title" | "status" | "severity" | "chapterIds" | "updatedAt">>;
+  knowledgeSignals: {
+    factCount: number;
+    tripleCount: number;
+    indexedChapterCount: number;
+    vectorSummary?: KnowledgeVectorSummary;
+  };
+  qualityRisks: string[];
+  blockingReasons?: string[];
+  createdAt: string;
+}
+
+export interface RuntimeSnapshotRecord {
+  id: string;
+  projectSlug: string;
+  runId: string;
+  chapterId: string;
+  snapshot: NarrativeSnapshot;
+  createdAt: string;
+}
+
+export type RuntimeKnowledgeRefKind = "context_block" | "fact" | "triple" | "chapter" | "summary" | "ledger" | "quality";
+
+export interface RuntimeKnowledgeRef {
+  id: string;
+  projectSlug: string;
+  runId: string;
+  chapterId: string;
+  kind: RuntimeKnowledgeRefKind;
+  refId: string;
+  label: string;
+  score?: number;
+  payload: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface RuntimeDerivativeBranch {
+  id: string;
+  projectSlug: string;
+  baseRunId?: string;
+  sourceChapterId?: string;
+  type: RuntimeDerivativeType;
+  title: string;
+  status: "draft" | "active" | "merged" | "archived";
+  payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RuntimeStatusSnapshot {
+  activeRun?: RuntimeRun;
+  runs: RuntimeRun[];
+  events: RuntimeEvent[];
+  checkpoints: RuntimeCheckpoint[];
+  branches: RuntimeDerivativeBranch[];
+  latestSnapshot?: RuntimeSnapshotRecord;
+  knowledgeRefs: RuntimeKnowledgeRef[];
+}
+
 export type CreativeModuleKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
 export type AiAgentProvider = "codex" | "claude-code";
 export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
@@ -667,6 +841,9 @@ export interface FileVersionSnapshot {
   versionPath: string;
   createdAt: string;
   size: number;
+  source?: "manual" | "runtime" | "ai";
+  reason?: string;
+  runId?: string;
 }
 
 export interface FileDiffResult {

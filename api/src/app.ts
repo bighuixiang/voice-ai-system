@@ -53,6 +53,21 @@ import type {
 } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
 import {
+  appendRuntimeEvent,
+  createRuntimeBranch,
+  createRuntimeRun,
+  enqueueRuntimeCommand,
+  getRuntimeBranch,
+  getRuntimeCheckpoint,
+  getRuntimeRun,
+  latestActiveRun,
+  listRuntimeEvents,
+  runtimeStatus,
+  updateRuntimeBranch,
+  updateRuntimeRun
+} from "./runtimeStore.js";
+import { createRuntimeCheckpoint, dispatchRuntimeWrites, restoreRuntimeCheckpoint, RuntimeWriteConflictError } from "./runtimeFiles.js";
+import {
   acceptWritingRecapPatches,
   buildSeriesQualityMetrics,
   readChapterDashboard,
@@ -507,6 +522,348 @@ export function createApp() {
     const project = await readProject(req.params.projectId);
     const dashboard = await readChapterDashboard(projectRoot(project.slug), req.params.chapterId);
     res.json({ dashboard });
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/start", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const chapterId = typeof req.body.chapterId === "string" ? req.body.chapterId : undefined;
+    const run = createRuntimeRun({
+      projectSlug: project.slug,
+      chapterId,
+      branchId: typeof req.body.branchId === "string" ? req.body.branchId : undefined,
+      payload: req.body || {}
+    });
+    const command = enqueueRuntimeCommand({
+      projectSlug: project.slug,
+      runId: run.id,
+      type: "start",
+      payload: req.body || {},
+      idempotencyKey: typeof req.body.idempotencyKey === "string" ? req.body.idempotencyKey : undefined
+    });
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: run.id,
+      type: "command",
+      message: "Runtime start queued",
+      payload: { commandId: command.id, chapterId }
+    });
+    res.status(202).json({ run, command });
+  }));
+
+  app.get("/api/novel/projects/:projectId/runtime/status", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    res.json({ status: runtimeStatus(project.slug) });
+  }));
+
+  app.get("/api/novel/projects/:projectId/runtime/events", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no"
+    });
+    res.write("retry: 2000\n\n");
+    let lastId = Number(req.query.after || req.header("last-event-id") || 0) || 0;
+    const send = () => {
+      const events = listRuntimeEvents(project.slug, lastId, 50);
+      for (const event of events) {
+        lastId = event.id;
+        res.write(`id: ${event.id}\n`);
+        res.write(`event: ${event.type}\n`);
+        res.write(`data: ${JSON.stringify(event)}\n\n`);
+      }
+    };
+    send();
+    const interval = setInterval(send, 1500);
+    req.on("close", () => {
+      clearInterval(interval);
+      res.end();
+    });
+  }));
+
+  function resolveRuntimeRunForControl(projectSlug: string, input: Record<string, unknown>) {
+    const runId = typeof input.runId === "string" ? input.runId : undefined;
+    return runId ? getRuntimeRun(runId) : latestActiveRun(projectSlug);
+  }
+
+  async function enqueueRuntimeControl(projectId: string, type: "pause" | "resume" | "stop" | "rewrite" | "accept" | "direction", body: Record<string, unknown>) {
+    const project = await readProject(projectId);
+    const run = resolveRuntimeRunForControl(project.slug, body);
+    if (!run) {
+      throw new Error("Runtime run not found");
+    }
+    if (type === "pause") {
+      updateRuntimeRun(run.id, { status: "paused" });
+    } else if (type === "stop") {
+      updateRuntimeRun(run.id, { status: "cancelled", finishedAt: new Date().toISOString() });
+    } else if (type === "resume" || type === "rewrite") {
+      updateRuntimeRun(run.id, { status: "queued", error: undefined, finishedAt: undefined });
+    } else if (type === "accept") {
+      updateRuntimeRun(run.id, { status: "completed", finishedAt: new Date().toISOString() });
+    }
+    const command = enqueueRuntimeCommand({
+      projectSlug: project.slug,
+      runId: run.id,
+      type,
+      payload: body || {}
+    });
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: run.id,
+      type: "command",
+      message: `Runtime ${type} queued`,
+      payload: { commandId: command.id }
+    });
+    return { run: getRuntimeRun(run.id), command };
+  }
+
+  app.post("/api/novel/projects/:projectId/runtime/pause", asyncRoute(async (req, res) => {
+    res.status(202).json(await enqueueRuntimeControl(req.params.projectId, "pause", req.body || {}));
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/resume", asyncRoute(async (req, res) => {
+    res.status(202).json(await enqueueRuntimeControl(req.params.projectId, "resume", req.body || {}));
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/stop", asyncRoute(async (req, res) => {
+    res.status(202).json(await enqueueRuntimeControl(req.params.projectId, "stop", req.body || {}));
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/review/accept", asyncRoute(async (req, res) => {
+    res.status(202).json(await enqueueRuntimeControl(req.params.projectId, "accept", req.body || {}));
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/review/rewrite", asyncRoute(async (req, res) => {
+    res.status(202).json(await enqueueRuntimeControl(req.params.projectId, "rewrite", req.body || {}));
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/direction", asyncRoute(async (req, res) => {
+    res.status(202).json(await enqueueRuntimeControl(req.params.projectId, "direction", req.body || {}));
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/derivatives", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const branch = createRuntimeBranch({
+      projectSlug: project.slug,
+      baseRunId: typeof req.body.baseRunId === "string" ? req.body.baseRunId : undefined,
+      sourceChapterId: typeof req.body.sourceChapterId === "string" ? req.body.sourceChapterId : undefined,
+      type: req.body.type === "adaptation" || req.body.type === "branch" ? req.body.type : "side_story",
+      title: String(req.body.title || "Derivative branch"),
+      payload: req.body || {}
+    });
+    const run = createRuntimeRun({
+      projectSlug: project.slug,
+      chapterId: branch.sourceChapterId,
+      branchId: branch.id,
+      command: "derivative",
+      payload: { ...req.body, branchId: branch.id, mode: "derivative" }
+    });
+    const command = enqueueRuntimeCommand({
+      projectSlug: project.slug,
+      runId: run.id,
+      type: "derivative",
+      payload: { ...req.body, branchId: branch.id }
+    });
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: run.id,
+      type: "system",
+      message: "Derivative branch queued",
+      payload: { branchId: branch.id, commandId: command.id }
+    });
+    res.status(202).json({ branch, run, command });
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/derivatives/:branchId/merge", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const root = projectRoot(project.slug);
+    const branch = getRuntimeBranch(req.params.branchId);
+    if (!branch || branch.projectSlug !== project.slug) {
+      res.status(404).json({ error: "Runtime branch not found" });
+      return;
+    }
+    const mode = req.body.mode === "replace_source_chapter" ? "replace_source_chapter" : "new_chapter";
+    const draftPath = typeof branch.payload.draftPath === "string" ? branch.payload.draftPath : "";
+    let draftContent = typeof req.body.draftContent === "string" ? req.body.draftContent : "";
+    if (!draftContent && draftPath) {
+      draftContent = await fs.readFile(resolveInside(root, assertSafeNovelPath(draftPath)), "utf8");
+    }
+    if (!draftContent.trim()) {
+      res.status(409).json({ error: "Runtime branch has no generated draft to merge", branch });
+      return;
+    }
+
+    const mergedAt = new Date().toISOString();
+    const sourceChapter = branch.sourceChapterId ? project.chapters.find((chapter) => chapter.id === branch.sourceChapterId) : undefined;
+    if (mode === "replace_source_chapter" && !sourceChapter) {
+      res.status(409).json({ error: "Replacing source chapter requires an existing sourceChapterId", branch });
+      return;
+    }
+    const mergeRun = createRuntimeRun({
+      projectSlug: project.slug,
+      chapterId: sourceChapter?.id,
+      branchId: branch.id,
+      command: "accept",
+      payload: { branchId: branch.id, mode, note: req.body.note }
+    });
+    updateRuntimeRun(mergeRun.id, { status: "running", currentStage: "checkpoint_before_run", startedAt: mergedAt });
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: mergeRun.id,
+      type: "command",
+      stage: "checkpoint_before_run",
+      message: "Derivative merge accepted by user",
+      payload: { branchId: branch.id, mode }
+    });
+    const checkpoint = await createRuntimeCheckpoint({
+      root,
+      project,
+      run: mergeRun,
+      chapterId: sourceChapter?.id,
+      label: `Before merging derivative ${branch.title}`
+    });
+
+    const nextProject = { ...project, chapters: project.chapters.map((chapter) => ({ ...chapter })) };
+    let mergedChapterId = sourceChapter?.id || "";
+    let contentPath = sourceChapter?.contentPath || "";
+    let outlinePath = sourceChapter?.outlinePath || "";
+    const writes: Array<{ relativePath: string; content: string }> = [];
+    if (mode === "replace_source_chapter" && sourceChapter) {
+      const index = nextProject.chapters.findIndex((chapter) => chapter.id === sourceChapter.id);
+      nextProject.chapters[index] = { ...nextProject.chapters[index], status: "drafted" };
+      mergedChapterId = sourceChapter.id;
+      contentPath = sourceChapter.contentPath;
+      outlinePath = sourceChapter.outlinePath;
+      writes.push({ relativePath: contentPath, content: draftContent.endsWith("\n") ? draftContent : `${draftContent}\n` });
+    } else {
+      const seed = branch.id.replace(/[^a-zA-Z0-9-]/g, "-").slice(0, 28) || String(Date.now());
+      let chapterId = `derivative-${seed}`;
+      let suffix = 2;
+      while (nextProject.chapters.some((chapter) => chapter.id === chapterId)) {
+        chapterId = `derivative-${seed}-${suffix}`;
+        suffix += 1;
+      }
+      const sourceIndex = sourceChapter ? nextProject.chapters.findIndex((chapter) => chapter.id === sourceChapter.id) : -1;
+      const maxOrder = nextProject.chapters.reduce((max, chapter, index) => Math.max(max, chapter.order ?? index + 1), 0);
+      contentPath = `chapters/${chapterId}.md`;
+      outlinePath = `outline/${chapterId}.md`;
+      mergedChapterId = chapterId;
+      const newChapter = {
+        id: chapterId,
+        title: branch.title,
+        outlinePath,
+        contentPath,
+        status: "drafted" as const,
+        order: maxOrder + 1,
+        volumeId: sourceChapter?.volumeId,
+        volumeTitle: sourceChapter?.volumeTitle,
+        volumeOrder: sourceChapter?.volumeOrder
+      };
+      if (sourceIndex >= 0) nextProject.chapters.splice(sourceIndex + 1, 0, newChapter);
+      else nextProject.chapters.push(newChapter);
+      writes.push(
+        {
+          relativePath: outlinePath,
+          content: [
+            `# ${branch.title}`,
+            "",
+            `Merged from derivative branch: ${branch.id}`,
+            `Source chapter: ${sourceChapter?.id || "none"}`,
+            `Merge note: ${typeof req.body.note === "string" ? req.body.note : ""}`,
+            ""
+          ].join("\n")
+        },
+        { relativePath: contentPath, content: draftContent.endsWith("\n") ? draftContent : `${draftContent}\n` }
+      );
+    }
+
+    nextProject.lastOpenedChapterId = mergedChapterId;
+    nextProject.updatedAt = mergedAt;
+    writes.push({ relativePath: "project.json", content: `${JSON.stringify(nextProject, null, 2)}\n` });
+    try {
+      updateRuntimeRun(mergeRun.id, { currentStage: "finalize_or_gate" });
+      await dispatchRuntimeWrites({
+        root,
+        project,
+        run: mergeRun,
+        reason: "derivative_merge",
+        checkpoint,
+        allowProjectJson: true,
+        writes
+      });
+    } catch (error) {
+      if (error instanceof RuntimeWriteConflictError) {
+        const reviewRun = updateRuntimeRun(mergeRun.id, {
+          status: "review_required",
+          result: {
+            branchId: branch.id,
+            reason: "runtime_write_conflict",
+            path: error.relativePath,
+            expectedSha256: error.expectedSha256,
+            actualSha256: error.actualSha256
+          },
+          finishedAt: new Date().toISOString()
+        });
+        appendRuntimeEvent({
+          projectSlug: project.slug,
+          runId: mergeRun.id,
+          type: "review",
+          stage: "finalize_or_gate",
+          message: "Derivative merge paused because target files changed after checkpoint",
+          payload: { branchId: branch.id, path: error.relativePath }
+        });
+        res.status(409).json({ branch, run: reviewRun || mergeRun, merged: false, conflict: error.relativePath });
+        return;
+      }
+      throw error;
+    }
+    upsertProjectRecord(nextProject, root);
+    const updated = updateRuntimeBranch(branch.id, {
+      status: "merged",
+      payload: {
+        ...branch.payload,
+        mergeAcceptedAt: mergedAt,
+        mergeNote: typeof req.body.note === "string" ? req.body.note : undefined,
+        mergeMode: mode,
+        mergedChapterId,
+        contentPath,
+        outlinePath,
+        checkpointId: checkpoint.id,
+        canonPolicy: "accepted_for_canon"
+      }
+    });
+    const completedRun = updateRuntimeRun(mergeRun.id, {
+      status: "completed",
+      result: { branchId: branch.id, mergedChapterId, contentPath, outlinePath, checkpointId: checkpoint.id, mode },
+      finishedAt: new Date().toISOString()
+    });
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: mergeRun.id,
+      type: "system",
+      message: "Derivative branch accepted for canon merge",
+      payload: { branchId: branch.id, mergedAt, mergedChapterId, contentPath, outlinePath, checkpointId: checkpoint.id, mode }
+    });
+    res.json({ branch: updated || branch, run: completedRun || mergeRun, merged: true, chapterId: mergedChapterId });
+  }));
+
+  app.get("/api/novel/projects/:projectId/runtime/checkpoints", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    res.json({ checkpoints: runtimeStatus(project.slug).checkpoints });
+  }));
+
+  app.post("/api/novel/projects/:projectId/runtime/checkpoints/:checkpointId/restore", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const checkpoint = getRuntimeCheckpoint(req.params.checkpointId);
+    if (!checkpoint || checkpoint.projectSlug !== project.slug) {
+      res.status(404).json({ error: "Runtime checkpoint not found" });
+      return;
+    }
+    await restoreRuntimeCheckpoint(projectRoot(project.slug), checkpoint);
+    project.updatedAt = new Date().toISOString();
+    await writeProject(project);
+    res.json({ checkpoint, restored: true });
   }));
 
   app.get("/api/novel/projects/:projectId/runtime/:chapterId", asyncRoute(async (req, res) => {
