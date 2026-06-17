@@ -392,6 +392,81 @@ export function recoverStaleRuntimeCommands(maxAgeMs = 10 * 60 * 1000): number {
   }
 }
 
+export function recoverStaleRuntimeRuns(maxAgeMs = 10 * 60 * 1000): number {
+  const cutoff = Date.now() - maxAgeMs;
+  const timestamp = nowIso();
+  const database = openDatabase();
+  try {
+    const staleRuns = database
+      .prepare(
+        `
+        SELECT * FROM runtime_runs
+        WHERE status = 'running'
+          AND NOT EXISTS (
+            SELECT 1 FROM runtime_write_commands
+            WHERE runtime_write_commands.run_id = runtime_runs.id
+              AND runtime_write_commands.status IN ('pending', 'claimed')
+          )
+      `
+      )
+      .all()
+      .filter((row) => {
+        const updatedAt = typeof row.updated_at === "string" ? Date.parse(row.updated_at) : Number.NaN;
+        const startedAt = typeof row.started_at === "string" ? Date.parse(row.started_at) : Number.NaN;
+        const observedAt = Number.isFinite(updatedAt) ? updatedAt : startedAt;
+        return Number.isFinite(observedAt) && observedAt <= cutoff;
+      });
+    if (!staleRuns.length) return 0;
+
+    const updateRun = database.prepare(
+      `
+      UPDATE runtime_runs SET
+        status = 'review_required',
+        result_json = ?,
+        error = ?,
+        updated_at = ?,
+        finished_at = ?
+      WHERE id = ? AND status = 'running'
+    `
+    );
+    const insertEvent = database.prepare(
+      `
+      INSERT INTO runtime_events (event_id, run_id, project_slug, type, stage, message, payload_json, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `
+    );
+    for (const row of staleRuns) {
+      const run = rowToRun(row);
+      const result = {
+        ...(run.result || {}),
+        reason: "stale_runtime_recovery",
+        previousStage: run.currentStage,
+        recoveredAt: timestamp
+      };
+      updateRun.run(
+        json(result),
+        "Runtime worker stopped while this run was active; review before resuming.",
+        timestamp,
+        timestamp,
+        run.id
+      );
+      insertEvent.run(
+        id("evt"),
+        run.id,
+        run.projectSlug,
+        "review",
+        run.currentStage || null,
+        "Runtime run recovered after worker restart",
+        json({ reason: "stale_runtime_recovery", previousStage: run.currentStage }),
+        timestamp
+      );
+    }
+    return staleRuns.length;
+  } finally {
+    database.close();
+  }
+}
+
 export function finishRuntimeCommand(commandId: string, status: Extract<RuntimeCommandStatus, "succeeded" | "failed" | "cancelled">, error?: string): void {
   const timestamp = nowIso();
   const database = openDatabase();

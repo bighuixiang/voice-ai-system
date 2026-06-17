@@ -152,7 +152,8 @@ describe("ReviewQualityPanel", () => {
         seriesMetrics,
         selectedTone: "elegant",
         canDiagnose: true,
-        canTuneSelection: false
+        canTuneSelection: false,
+        canImproveQuality: true
       },
       global: { stubs }
     });
@@ -178,9 +179,15 @@ describe("ReviewQualityPanel", () => {
     expect(wrapper.text()).toContain("林澈");
     expect(wrapper.text()).toContain("2 次 · 更谨慎地处理血符。");
 
+    expect(wrapper.text()).toContain("86分改造清单");
+
     await wrapper.findAll("button")[0].trigger("click");
     await wrapper.findAll("button")[1].trigger("click");
+    await wrapper.findAll("button")[2].trigger("click");
+    await wrapper.findAll("button")[8].trigger("click");
     expect(wrapper.emitted("diagnose")).toHaveLength(1);
+    expect(wrapper.emitted("improve-all-metrics")).toHaveLength(1);
+    expect(wrapper.emitted("improve-metric")?.[0]).toEqual(["hook"]);
     expect(wrapper.emitted("rebuild-series")).toHaveLength(1);
   });
 

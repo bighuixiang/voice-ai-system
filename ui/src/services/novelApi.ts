@@ -204,7 +204,10 @@ export const novelApi = {
     return data.snapshot;
   },
 
-  async startRuntime(projectId: string, input: { chapterId?: string; direction?: string; branchId?: string } = {}): Promise<{ run: RuntimeRun; command: RuntimeCommand }> {
+  async startRuntime(
+    projectId: string,
+    input: { chapterId?: string; direction?: string; branchId?: string; autoContinue?: boolean } = {}
+  ): Promise<{ run: RuntimeRun; command: RuntimeCommand }> {
     return request<{ run: RuntimeRun; command: RuntimeCommand }>(`/api/novel/projects/${projectId}/runtime/start`, {
       method: "POST",
       headers: jsonHeaders,

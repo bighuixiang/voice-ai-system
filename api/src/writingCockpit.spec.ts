@@ -409,6 +409,12 @@ describe("writingCockpit", () => {
       overdueCount: 1,
       severity: "blocked"
     });
+    expect(metrics.craftCoverageSignals?.find((signal) => signal.chapterId === "chapter-001")).toMatchObject({
+      craftBeatCount: 2,
+      foreshadowingCount: 1,
+      progressionCount: 1,
+      severity: "stable"
+    });
 
     const saved = JSON.parse(await fs.readFile(path.join(tempRoot, "quality", "series-metrics.json"), "utf8"));
     expect(saved.averageOverallScore).toBe(76);
@@ -418,6 +424,7 @@ describe("writingCockpit", () => {
     expect(saved.tensionCurve[0].tensionScore).toBe(78.2);
     expect(saved.styleDriftSignals[0].chapterId).toBe("chapter-002");
     expect(saved.narrativeDebtSignals[0].chapterId).toBe("chapter-001");
+    expect(saved.craftCoverageSignals.length).toBeGreaterThan(0);
     await expect(readSeriesQualityMetrics(tempRoot, project())).resolves.toMatchObject({ reportCount: 2 });
   });
 

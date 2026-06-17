@@ -7,6 +7,8 @@ import type {
   ChapterSummary,
   CharacterArcSignal,
   CharacterStatePatch,
+  CraftBeat,
+  CraftCoverageSignal,
   EmotionLedger,
   EmotionLedgerItem,
   LedgerEntry,
@@ -106,6 +108,15 @@ export function defaultStoryControl(): StoryControl {
         knownSecrets: "只记录当前章节前已经知道的信息。",
         relationshipNotes: "记录队友、竞争者、债主或师承关系。",
         powerLevel: "初始能力待补充。",
+        signatureTraits: ["one concrete habit", "one pressure reaction", "one speech texture"],
+        coreWound: "The private hurt or shame that makes this character overreact.",
+        desire: "What the character wants in the next visible chapter window.",
+        misbelief: "The wrong belief that creates repeated choices and eventual growth.",
+        redemptionArc: "How the character may repair a mistake through costly action.",
+        sublimationGoal: "How private desire can rise into duty, oath, or larger value.",
+        smallPersonHighlight: "A concrete high-light moment where an ordinary person changes the scene.",
+        relationshipPressure: "The relationship debt, rivalry, trust gap, or obligation pushing choices.",
+        growthStage: "seed",
         status: "seed",
         updatedAt: now
       }
@@ -123,6 +134,19 @@ export function defaultStoryControl(): StoryControl {
         cost: "留下代价、伤势、债务、敌意或更大的追踪风险。",
         foreshadowing: "提前 2-3 章埋入异常物件、传闻或地图碎片。",
         chapterRange: "待安排",
+        readerPayoff: "Setup a visible payoff with pressure, cost, action, reward, and aftershock.",
+        craftBeats: [
+          {
+            id: "craft-first-dungeon-payoff",
+            type: "payoff",
+            label: "first earned payoff",
+            setup: "The protagonist lacks a resource or status.",
+            payoff: "A small but irreversible gain changes future options.",
+            cost: "The gain leaves debt, exposure, injury, or a stronger enemy.",
+            required: true,
+            status: "planned"
+          }
+        ],
         status: "seed",
         updatedAt: now
       }
@@ -664,6 +688,103 @@ function buildNarrativeDebtSignals(
     .slice(0, 10);
 }
 
+function sceneCraftBeats(scene: SceneCard): CraftBeat[] {
+  const explicit = Array.isArray(scene.craftBeats) ? scene.craftBeats : [];
+  const inferred: CraftBeat[] = [];
+  if (scene.readerPayoff?.trim()) {
+    inferred.push({
+      id: `craft-${scene.id}-payoff`,
+      type: "payoff",
+      label: scene.readerPayoff.trim(),
+      required: false,
+      status: "drafted"
+    });
+  }
+  if (scene.powerProgression?.trim() || scene.progressionChange?.trim()) {
+    inferred.push({
+      id: `craft-${scene.id}-progression`,
+      type: "progression",
+      label: scene.progressionChange || scene.powerProgression,
+      required: false,
+      status: "drafted"
+    });
+  }
+  if (scene.foreshadowingIds?.length) {
+    inferred.push({
+      id: `craft-${scene.id}-foreshadow`,
+      type: "foreshadow_setup",
+      label: scene.foreshadowingIds.join(", "),
+      required: false,
+      status: "drafted"
+    });
+  }
+  if (scene.narrativeFunction?.toLowerCase().includes("daily") || scene.narrativeFunction?.includes("日常")) {
+    inferred.push({
+      id: `craft-${scene.id}-slice`,
+      type: "slice_of_life",
+      label: scene.narrativeFunction,
+      required: false,
+      status: "drafted"
+    });
+  }
+  return mergeById(explicit, inferred);
+}
+
+function craftCoverageSeverity(input: { requiredBeatCount: number; missingRequiredBeatCount: number; craftBeatCount: number }): CraftCoverageSignal["severity"] {
+  if (input.requiredBeatCount > 0 && input.missingRequiredBeatCount > 0) return "blocked";
+  if (input.craftBeatCount === 0) return "watch";
+  return "stable";
+}
+
+function buildCraftCoverageSignals(
+  chapters: Array<{
+    chapter: NovelProject["chapters"][number];
+    scenes: SceneCard[];
+    report: ChapterQualityReport | null;
+    dashboard: ChapterDashboard;
+    summary: ChapterSummary;
+  }>
+): CraftCoverageSignal[] {
+  return chapters
+    .map(({ chapter, scenes, report, dashboard, summary }) => {
+      const beats = scenes.flatMap(sceneCraftBeats);
+      const requiredBeatCount = beats.filter((beat) => beat.required).length;
+      const missingRequiredBeatCount = beats.filter((beat) => beat.required && beat.status === "missed").length;
+      const countByType = (types: CraftBeat["type"][]) => beats.filter((beat) => types.includes(beat.type)).length;
+      const payoffCount = countByType(["payoff"]);
+      const foreshadowingCount = countByType(["foreshadow_setup", "foreshadow_payoff"]);
+      const progressionCount = countByType(["progression"]);
+      const sliceOfLifeCount = countByType(["slice_of_life"]);
+      const redemptionCount = countByType(["redemption", "sublimation"]);
+      const severity = craftCoverageSeverity({ requiredBeatCount, missingRequiredBeatCount, craftBeatCount: beats.length });
+      const note =
+        beats.length > 0
+          ? `${beats.length} craft beats tracked: payoff ${payoffCount}, foreshadowing ${foreshadowingCount}, progression ${progressionCount}.`
+          : summary.summary || dashboard.goal || report?.summary || "No craft beats tracked for this chapter yet.";
+      return {
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        craftBeatCount: beats.length,
+        requiredBeatCount,
+        missingRequiredBeatCount,
+        payoffCount,
+        foreshadowingCount,
+        progressionCount,
+        sliceOfLifeCount,
+        redemptionCount,
+        note,
+        severity,
+        updatedAt: report?.updatedAt || summary.updatedAt || dashboard.updatedAt
+      };
+    })
+    .filter((signal) => signal.craftBeatCount > 0 || signal.severity !== "stable")
+    .sort((left, right) => {
+      const severityRank = { blocked: 2, watch: 1, stable: 0 };
+      return severityRank[right.severity] - severityRank[left.severity] || right.craftBeatCount - left.craftBeatCount;
+    })
+    .slice(0, 10);
+}
+
 function buildQualityTrend(
   key: SeriesQualityTrend["key"],
   label: string,
@@ -793,6 +914,7 @@ export async function buildSeriesQualityMetrics(root: string, project: NovelProj
     tensionCurve: buildTensionCurve(chapterSignals),
     styleDriftSignals: buildStyleDriftSignals(reports),
     narrativeDebtSignals: buildNarrativeDebtSignals(project, chapterSignals, allLedgers),
+    craftCoverageSignals: buildCraftCoverageSignals(chapterSignals),
     updatedAt: nowIso()
   };
 
@@ -807,7 +929,8 @@ export async function readSeriesQualityMetrics(root: string, project: NovelProje
     cached.qualityTrends &&
     cached.tensionCurve &&
     cached.styleDriftSignals &&
-    cached.narrativeDebtSignals
+    cached.narrativeDebtSignals &&
+    cached.craftCoverageSignals
     ? cached
     : buildSeriesQualityMetrics(root, project);
 }

@@ -1,4 +1,4 @@
-import { claimNextRuntimeCommand, recoverStaleRuntimeCommands } from "./runtimeStore.js";
+import { claimNextRuntimeCommand, recoverStaleRuntimeCommands, recoverStaleRuntimeRuns } from "./runtimeStore.js";
 import { processRuntimeCommand } from "./runtimeEngine.js";
 
 const pollIntervalMs = Number(process.env.RUNTIME_WORKER_POLL_MS || 1500);
@@ -13,6 +13,10 @@ async function tick(): Promise<void> {
   const recovered = recoverStaleRuntimeCommands(staleCommandMs);
   if (recovered) {
     log(`recovered ${recovered} stale command${recovered === 1 ? "" : "s"}`);
+  }
+  const recoveredRuns = recoverStaleRuntimeRuns(staleCommandMs);
+  if (recoveredRuns) {
+    log(`moved ${recoveredRuns} stale run${recoveredRuns === 1 ? "" : "s"} to review`);
   }
   const command = claimNextRuntimeCommand();
   if (!command) return;

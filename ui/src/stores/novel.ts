@@ -8,6 +8,7 @@ import type {
   AiStageDefinition,
   ChapterDashboard,
   ChapterSummary,
+  ChapterQualityMetric,
   ChapterQualityReport,
   CreationRuntimeSnapshot,
   CodexTaskResult,
@@ -36,6 +37,7 @@ import type {
   PlatformLibrary,
   PlotPilotLearningItem,
   ProjectAuditReport,
+  QualityMetricKey,
   RuntimeCheckpoint,
   RuntimeDerivativeBranch,
   RuntimeEvent,
@@ -188,6 +190,7 @@ export const useNovelStore = defineStore("novel", () => {
   const isSavingStoryControl = ref(false);
   const isRebuildingKnowledgeIndex = ref(false);
   const isRebuildingSeriesQualityMetrics = ref(false);
+  const isImprovingQualityMetrics = ref(false);
   const isRebuildingStoryGraph = ref(false);
   const isSearchingKnowledge = ref(false);
   const isReverseEngineeringStructure = ref(false);
@@ -243,7 +246,41 @@ export const useNovelStore = defineStore("novel", () => {
   const canUseSelection = computed(() => Boolean(selection.value?.selectedText));
   const canTuneSelection = computed(() => Boolean(selection.value?.selectedText?.trim()));
   const activeRewriteSelection = computed(() => rewriteSelection.value || selection.value);
+  const rewriteCandidateTargetsCurrentFile = computed(() =>
+    Boolean(
+      currentFilePath.value &&
+        rewriteCandidate.value?.patches.some(
+          (patch) => patch.target === currentFilePath.value && patch.mode === "replace-file" && Boolean(patch.content?.trim())
+        )
+    )
+  );
+  const rewriteComparisonOriginalText = computed(() =>
+    rewriteCandidateTargetsCurrentFile.value ? currentContent.value : activeRewriteSelection.value?.selectedText || ""
+  );
+  const rewriteComparisonEmptyOriginalText = computed(() =>
+    rewriteCandidateTargetsCurrentFile.value ? "当前章节正文为空，无法形成整章对比。" : "当前没有选区，不能直接接受为选区改写。"
+  );
+  const rewritePatchApplyLabel = computed(() =>
+    rewriteCandidateTargetsCurrentFile.value ? "应用整章改造" : "应用补丁"
+  );
+  const canAcceptSelectedRewrite = computed(() =>
+    Boolean(activeRewriteSelection.value?.selectedText && rewriteCandidate.value?.content)
+  );
   const canDiagnoseChapter = computed(() => currentDocumentKind.value === "content" && countDraftWords(currentContent.value) >= 30);
+  const qualityTargetScore = 86;
+  const qualityMetricsBelowTarget = computed<ChapterQualityMetric[]>(() =>
+    [...(currentQualityReport.value?.metrics || [])]
+      .filter((metric) => metric.score < qualityTargetScore)
+      .sort((left, right) => left.score - right.score)
+  );
+  const canImproveQualityMetrics = computed(
+    () =>
+      Boolean(currentProject.value && currentChapter.value && currentFilePath.value && currentDocumentKind.value === "content") &&
+      qualityMetricsBelowTarget.value.length > 0 &&
+      !isLoading.value &&
+      !isSavingContent.value &&
+      !isImprovingQualityMetrics.value
+  );
   const canReverseEngineerStructure = computed(
     () =>
       currentDocumentKind.value === "content" &&
@@ -1354,6 +1391,53 @@ export const useNovelStore = defineStore("novel", () => {
     return true;
   }
 
+  async function improveQualityMetrics(metricKey?: QualityMetricKey) {
+    if (!currentProject.value || !currentChapter.value || currentDocumentKind.value !== "content" || !currentFilePath.value) return false;
+    if (hasUnsavedChanges.value) {
+      await saveCurrentContent({ runPipeline: false });
+    }
+    if (!currentQualityReport.value) {
+      await diagnoseCurrentChapter();
+    }
+    const report = currentQualityReport.value;
+    if (!report) return false;
+    const targetMetrics = report.metrics
+      .filter((metric) => metric.score < qualityTargetScore && (!metricKey || metric.key === metricKey))
+      .sort((left, right) => left.score - right.score);
+    if (!targetMetrics.length) return false;
+
+    isImprovingQualityMetrics.value = true;
+    try {
+      const task = await runTask("quality.rewrite", {
+        mode: metricKey ? "single-metric" : "all-under-target",
+        chapterId: currentChapter.value.id,
+        filePath: currentFilePath.value,
+        documentKind: currentDocumentKind.value,
+        targetScore: qualityTargetScore,
+        targetMetrics: targetMetrics.map((metric) => ({
+          key: metric.key,
+          label: metric.label,
+          score: metric.score,
+          note: metric.note,
+          gap: qualityTargetScore - metric.score
+        })),
+        currentQualityReport: report,
+        currentChapterTitle: currentChapter.value.title,
+        currentWordCount: countDraftWords(currentContent.value),
+        instruction:
+          "Generate a reviewable full-chapter replacement patch. Preserve canon and POV. Improve only the metrics below target unless a local bridge is required."
+      });
+
+      const normalizedRewrite = normalizeCurrentChapterQualityRewrite(task?.result || null);
+      if (normalizedRewrite) {
+        rewriteCandidate.value = normalizedRewrite;
+      }
+      return Boolean(task?.result);
+    } finally {
+      isImprovingQualityMetrics.value = false;
+    }
+  }
+
   function wait(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
@@ -1547,6 +1631,28 @@ export const useNovelStore = defineStore("novel", () => {
     });
   }
 
+  function normalizeCurrentChapterQualityRewrite(result: CodexTaskResult | null) {
+    if (!result || !currentFilePath.value) return null;
+    const currentFilePatch = result.patches.find(
+      (patch) => patch.target === currentFilePath.value && patch.mode === "replace-file" && Boolean(patch.content.trim())
+    );
+    const firstReplacementPatch = result.patches.find((patch) => patch.mode === "replace-file" && Boolean(patch.content.trim()));
+    const replacementContent = currentFilePatch?.content || result.content.trim() || firstReplacementPatch?.content || "";
+    if (!replacementContent.trim()) return null;
+
+    return {
+      ...result,
+      content: replacementContent,
+      patches: [
+        {
+          target: currentFilePath.value,
+          mode: "replace-file" as const,
+          content: replacementContent
+        }
+      ]
+    };
+  }
+
   function finishTaskProgress(success: boolean) {
     const fallbackStatus = success ? "done" : "error";
     taskProgress.value = taskProgress.value.map((step) => ({
@@ -1597,6 +1703,7 @@ export const useNovelStore = defineStore("novel", () => {
     isLoadingFileDiff.value = false;
     savePipelineSteps.value = [];
     isRunningSavePipeline.value = false;
+    isImprovingQualityMetrics.value = false;
     structureIdeaInput.value = "";
     structureDraftVersion.value = 0;
     activeLedgerKind.value = "foreshadowing";
@@ -1932,13 +2039,16 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  async function startAutopilotRuntime(direction = "") {
+  async function startAutopilotRuntime(input: string | { direction?: string; autoContinue?: boolean } = "") {
     if (!currentProject.value || !currentChapter.value || isStartingRuntime.value) return null;
+    const direction = typeof input === "string" ? input : input.direction || "";
+    const autoContinue = typeof input === "object" && input.autoContinue === true;
     isStartingRuntime.value = true;
     try {
       const result = await novelApi.startRuntime(currentProject.value.slug, {
         chapterId: currentChapter.value.id,
-        direction
+        direction,
+        autoContinue
       });
       await loadRuntimeStatus();
       connectRuntimeEvents();
@@ -2694,7 +2804,7 @@ export const useNovelStore = defineStore("novel", () => {
     selection.value = nextSelection;
   }
 
-  async function saveCurrentContent() {
+  async function saveCurrentContent(options: { runPipeline?: boolean } = {}) {
     if (!currentProject.value || !currentFilePath.value) return;
     isSavingContent.value = true;
     error.value = "";
@@ -2712,7 +2822,7 @@ export const useNovelStore = defineStore("novel", () => {
         await loadCreationRuntimeSnapshot();
       }
       lastSavedAt.value = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-      if (autoRunSavePipeline.value) {
+      if (autoRunSavePipeline.value && options.runPipeline !== false) {
         await runPostSavePipeline(previousContent);
       }
     } catch (err) {
@@ -2896,10 +3006,24 @@ export const useNovelStore = defineStore("novel", () => {
     if (!currentProject.value || !rewriteCandidate.value?.patches.length) return;
     if (!canLeaveCurrentChapter()) return;
 
-    await novelApi.applyPatches(currentProject.value.slug, withSelectionPatchAnchors(rewriteCandidate.value.patches), currentTask.value?.id);
+    const appliedTaskType = currentTask.value?.type || null;
+    let patchesToApply = withSelectionPatchAnchors(rewriteCandidate.value.patches);
+    if (appliedTaskType === "quality.rewrite") {
+      const normalizedQualityRewrite = normalizeCurrentChapterQualityRewrite(rewriteCandidate.value);
+      if (!normalizedQualityRewrite) {
+        error.value = "质量改造候选缺少可应用的当前章节正文补丁，请重新生成。";
+        return;
+      }
+      patchesToApply = normalizedQualityRewrite.patches;
+    }
+    await novelApi.applyPatches(currentProject.value.slug, patchesToApply, currentTask.value?.id);
     await refreshAiInvocations();
     if (currentChapter.value) {
       await openChapter(currentChapter.value, currentDocumentKind.value);
+      if (appliedTaskType === "quality.rewrite" && currentDocumentKind.value === "content") {
+        currentQualityReport.value = null;
+        await diagnoseCurrentChapter();
+      }
     }
   }
 
@@ -3011,6 +3135,11 @@ export const useNovelStore = defineStore("novel", () => {
     selection,
     rewriteSelection,
     activeRewriteSelection,
+    rewriteCandidateTargetsCurrentFile,
+    rewriteComparisonOriginalText,
+    rewriteComparisonEmptyOriginalText,
+    rewritePatchApplyLabel,
+    canAcceptSelectedRewrite,
     currentTask,
     activeTaskType,
     taskProgress,
@@ -3060,6 +3189,7 @@ export const useNovelStore = defineStore("novel", () => {
     isSavingStoryControl,
     isRebuildingKnowledgeIndex,
     isRebuildingSeriesQualityMetrics,
+    isImprovingQualityMetrics,
     isRebuildingStoryGraph,
     isSearchingKnowledge,
     isReverseEngineeringStructure,
@@ -3094,6 +3224,9 @@ export const useNovelStore = defineStore("novel", () => {
     canUseSelection,
     canTuneSelection,
     canDiagnoseChapter,
+    canImproveQualityMetrics,
+    qualityTargetScore,
+    qualityMetricsBelowTarget,
     canReverseEngineerStructure,
     canRequestFocusDraft,
     canRequestStoryOrchestration,
@@ -3158,6 +3291,7 @@ export const useNovelStore = defineStore("novel", () => {
     requestFocusDraftRevision,
     requestStoryOrchestration,
     diagnoseCurrentChapter,
+    improveQualityMetrics,
     updateStyleTone,
     tuneSelectionStyle,
     requestWritingRecap,

@@ -9,6 +9,7 @@ import { insertRuntimeCheckpoint, runtimeId, runtimeNow, appendRuntimeEvent } fr
 interface RuntimeWrite {
   relativePath: string;
   content: string;
+  failIfExists?: boolean;
 }
 
 const projectQueues = new Map<string, Promise<unknown>>();
@@ -195,6 +196,15 @@ export async function dispatchRuntimeWrites(input: {
     for (const write of input.writes) {
       const safePath = assertSafeNovelPath(write.relativePath);
       await assertCheckpointBaseline(input.root, input.checkpoint, safePath);
+      if (write.failIfExists) {
+        const exists = await fs
+          .access(resolveInside(input.root, safePath))
+          .then(() => true)
+          .catch(() => false);
+        if (exists) {
+          throw new RuntimeWriteConflictError(safePath);
+        }
+      }
       await createWritingFileSnapshot(input.root, input.project, safePath, write.content, {
         source: "runtime",
         reason: input.reason,

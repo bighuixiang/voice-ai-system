@@ -7,6 +7,7 @@ import { resolveInside } from "./pathSafety.js";
 import { listWritingFileVersions } from "./fileVersions.js";
 import { createRuntimeCheckpoint, dispatchRuntimeWrites, restoreRuntimeCheckpoint, RuntimeWriteConflictError } from "./runtimeFiles.js";
 import { processRuntimeCommand } from "./runtimeEngine.js";
+import { buildCreationRuntimeSnapshot } from "./runtimeSnapshot.js";
 import {
   appendRuntimeEvent,
   claimNextRuntimeCommand,
@@ -22,9 +23,11 @@ import {
   listRuntimeEvents,
   listRuntimeKnowledgeRefs,
   recoverStaleRuntimeCommands,
+  recoverStaleRuntimeRuns,
   runtimeStatus,
   updateRuntimeRun
 } from "./runtimeStore.js";
+import { acceptWritingRecapPatches, appendWritingRecap } from "./writingCockpit.js";
 
 let tempRoot = "";
 
@@ -180,6 +183,26 @@ describe("runtime autopilot infrastructure", () => {
     await expect(fs.readFile(chapterPath, "utf8")).resolves.toBe("manual user edit\n");
   });
 
+  it("blocks runtime creation writes when the target file already exists", async () => {
+    const project = createProjectSkeleton({ title: "Runtime Existing File", roughIdea: "New files must not be overwritten." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const run = createRuntimeRun({ projectSlug: project.slug });
+    const targetPath = "chapters/derivative-existing.md";
+    await fs.writeFile(resolveInside(root, targetPath), "existing draft\n", "utf8");
+
+    await expect(
+      dispatchRuntimeWrites({
+        root,
+        project,
+        run,
+        reason: "new_derivative_chapter",
+        writes: [{ relativePath: targetPath, content: "new draft\n", failIfExists: true }]
+      })
+    ).rejects.toBeInstanceOf(RuntimeWriteConflictError);
+    await expect(fs.readFile(resolveInside(root, targetPath), "utf8")).resolves.toBe("existing draft\n");
+  });
+
   it("treats pause/stop during a start command as controlled runtime state, not failure", async () => {
     const project = createProjectSkeleton({ title: "Runtime Pause", roughIdea: "Pause must not fail the run." });
     await createProjectFiles(project);
@@ -193,6 +216,102 @@ describe("runtime autopilot infrastructure", () => {
     expect(listRuntimeEvents(project.slug).at(-1)).toEqual(expect.objectContaining({ type: "command", message: "Runtime run paused" }));
   });
 
+  it("finalizes project metadata through runtime write dispatch", async () => {
+    process.env.RUNTIME_WORKER_MOCK = "1";
+    const project = createProjectSkeleton({ title: "Runtime Finalize", roughIdea: "Project metadata writes must be guarded." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const chapter = project.chapters[0];
+    const run = createRuntimeRun({ projectSlug: project.slug, chapterId: chapter.id });
+    const command = enqueueRuntimeCommand({ projectSlug: project.slug, runId: run.id, type: "start", payload: { chapterId: chapter.id } });
+
+    await processRuntimeCommand(command);
+
+    expect(getRuntimeRun(run.id)).toEqual(
+      expect.objectContaining({
+        status: "review_required",
+        qualityScore: expect.any(Number),
+        result: expect.objectContaining({ reason: "recap_patches_pending", pendingRecapPatchCount: expect.any(Number) })
+      })
+    );
+    const projectVersions = await listWritingFileVersions(root, "project.json");
+    expect(projectVersions[0]).toEqual(expect.objectContaining({ source: "runtime", reason: "runtime_project_finalize", runId: run.id }));
+    expect(listRuntimeEvents(project.slug)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "write",
+          payload: expect.objectContaining({ path: "project.json", reason: "runtime_project_finalize", source: "runtime" })
+        }),
+        expect.objectContaining({
+          type: "review",
+          stage: "finalize_or_gate",
+          message: "Runtime paused for recap patch approval"
+        })
+      ])
+    );
+    const recapLines = (await fs.readFile(resolveInside(root, "tasks/recaps.jsonl"), "utf8")).trim().split(/\r?\n/);
+    expect(JSON.parse(recapLines[0])).toEqual(expect.objectContaining({ chapterId: chapter.id }));
+  });
+
+  it("holds auto continue while recap patches are pending", async () => {
+    process.env.RUNTIME_WORKER_MOCK = "1";
+    const project = createProjectSkeleton({ title: "Runtime Auto Continue", roughIdea: "Autopilot should keep moving." });
+    await createProjectFiles(project);
+    const chapter = project.chapters[0];
+    const nextChapter = project.chapters[1];
+    const run = createRuntimeRun({ projectSlug: project.slug, chapterId: chapter.id, payload: { chapterId: chapter.id, autoContinue: true } });
+    const command = enqueueRuntimeCommand({
+      projectSlug: project.slug,
+      runId: run.id,
+      type: "start",
+      payload: { chapterId: chapter.id, autoContinue: true }
+    });
+
+    await processRuntimeCommand(command);
+
+    const completed = getRuntimeRun(run.id);
+    expect(completed).toEqual(
+      expect.objectContaining({
+        status: "review_required",
+        result: expect.objectContaining({ reason: "recap_patches_pending", pendingRecapPatchCount: expect.any(Number) })
+      })
+    );
+    expect(claimNextRuntimeCommand()).toBeNull();
+    expect(completed?.result?.nextChapterId).not.toBe(nextChapter.id);
+    expect(listRuntimeEvents(project.slug)).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "review", message: "Runtime paused for recap patch approval" })])
+    );
+  });
+
+  it("clears pending recap patch count after the recap is accepted", async () => {
+    const project = createProjectSkeleton({ title: "Runtime Recap Acceptance", roughIdea: "Accepted recaps should unblock runtime." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const chapter = project.chapters[0];
+    const recap = {
+      chapterId: chapter.id,
+      summary: "The protagonist accepts a cost.",
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-11T00:00:00.000Z",
+      summaryPatch: {
+        summary: "The protagonist accepts a cost.",
+        keyEvents: ["The seal answers."]
+      }
+    };
+
+    await appendWritingRecap(root, recap);
+    const before = await buildCreationRuntimeSnapshot(root, project, chapter.id);
+    expect(before.signals.pendingRecapPatchCount).toBeGreaterThan(0);
+
+    await acceptWritingRecapPatches(root, recap);
+    const after = await buildCreationRuntimeSnapshot(root, project, chapter.id);
+    expect(after.signals.pendingRecapPatchCount).toBe(0);
+  });
+
   it("requeues stale claimed commands so a restarted worker can continue", () => {
     const run = createRuntimeRun({ projectSlug: "demo", chapterId: "chapter-001" });
     const command = enqueueRuntimeCommand({ projectSlug: "demo", runId: run.id, type: "start" });
@@ -203,6 +322,27 @@ describe("runtime autopilot infrastructure", () => {
     expect(recoverStaleRuntimeCommands(0)).toBe(1);
     expect(getRuntimeRun(run.id)).toEqual(expect.objectContaining({ status: "queued" }));
     expect(claimNextRuntimeCommand()).toEqual(expect.objectContaining({ id: command.id, status: "claimed" }));
+  });
+
+  it("moves stale running runs without active commands into review instead of leaving them orphaned", () => {
+    const run = createRuntimeRun({ projectSlug: "demo", chapterId: "chapter-001" });
+    updateRuntimeRun(run.id, { status: "running", currentStage: "chapter_draft" });
+
+    expect(recoverStaleRuntimeRuns(0)).toBe(1);
+    expect(getRuntimeRun(run.id)).toEqual(
+      expect.objectContaining({
+        status: "review_required",
+        error: "Runtime worker stopped while this run was active; review before resuming.",
+        result: expect.objectContaining({ reason: "stale_runtime_recovery", previousStage: "chapter_draft" })
+      })
+    );
+    expect(listRuntimeEvents("demo").at(-1)).toEqual(
+      expect.objectContaining({
+        type: "review",
+        stage: "chapter_draft",
+        message: "Runtime run recovered after worker restart"
+      })
+    );
   });
 
   it("generates derivative branches in isolated runtime storage", async () => {

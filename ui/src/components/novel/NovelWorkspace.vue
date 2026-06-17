@@ -349,10 +349,15 @@
             :selected-tone="store.styleTone"
             :can-diagnose="store.canDiagnoseChapter"
             :can-tune-selection="store.canTuneSelection"
+            :can-improve-quality="store.canImproveQualityMetrics"
+            :is-improving-quality="store.isImprovingQualityMetrics"
+            :quality-target-score="store.qualityTargetScore"
             :is-rebuilding-series="store.isRebuildingSeriesQualityMetrics"
             @diagnose="store.diagnoseCurrentChapter"
             @update:tone="store.updateStyleTone"
             @tune-selection="store.tuneSelectionStyle"
+            @improve-metric="store.improveQualityMetrics"
+            @improve-all-metrics="store.improveQualityMetrics"
             @rebuild-series="store.rebuildSeriesQualityMetrics"
           />
         </CollapsiblePanel>
@@ -364,8 +369,10 @@
         >
           <RewriteComparison
             :result="store.rewriteCandidate"
-            :original-text="store.activeRewriteSelection?.selectedText"
-            :can-accept="Boolean(store.activeRewriteSelection?.selectedText && store.rewriteCandidate?.content)"
+            :original-text="store.rewriteComparisonOriginalText"
+            :empty-original-text="store.rewriteComparisonEmptyOriginalText"
+            :apply-patches-label="store.rewritePatchApplyLabel"
+            :can-accept="store.canAcceptSelectedRewrite"
             :can-request="Boolean(store.selection?.selectedText && !store.isLoading)"
             @accept="store.acceptRewrite"
             @reject="store.rejectRewrite"

@@ -2,6 +2,16 @@
   "version": 1,
   "snapshots": [
     {
+      "id": "2026-06-14T13-23-55-902Z-1uxqqt",
+      "filePath": "chapters/chapter-001.md",
+      "versionPath": "versions/chapters__chapter-001.md/2026-06-14T13-23-55-902Z-1uxqqt.md",
+      "createdAt": "2026-06-14T13:23:55.902Z",
+      "size": 10995,
+      "source": "runtime",
+      "reason": "chapter_draft",
+      "runId": "run-1781443056791-igfry5"
+    },
+    {
       "id": "2026-06-14T09-38-16-052Z-idcxrj",
       "filePath": "chapters/chapter-001.md",
       "versionPath": "versions/chapters__chapter-001.md/2026-06-14T09-38-16-052Z-idcxrj.md",

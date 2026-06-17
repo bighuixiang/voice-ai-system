@@ -5,6 +5,7 @@ export type CodexTaskType =
   | "chapter.plan"
   | "chapter.draft"
   | "selection.polish"
+  | "quality.rewrite"
   | "continuity.check"
   | "idea.suggest"
   | "writing.briefing"
@@ -74,7 +75,20 @@ export interface PlotPilotLearningItem {
   activeReason?: string;
   sourceRefs?: WorkbenchSourceRef[];
 }
-export type QualityMetricKey = "rhythm" | "conflict" | "emotion" | "information" | "prose" | "hook" | "tension";
+export type QualityMetricKey =
+  | "rhythm"
+  | "conflict"
+  | "emotion"
+  | "information"
+  | "prose"
+  | "hook"
+  | "tension"
+  | "character_arc"
+  | "payoff"
+  | "foreshadowing_health"
+  | "progression"
+  | "slice_of_life"
+  | "redemption";
 export type StyleToneKey = "elegant" | "restrained" | "tense" | "cinematic" | "web-serial" | "lower-ai";
 export type AiAgentProvider = "codex" | "claude-code";
 export type AiUsageScenarioKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
@@ -86,6 +100,7 @@ export type AiStageKey =
   | "pipeline.chapter.plan"
   | "pipeline.chapter.prose"
   | "pipeline.selection.polish"
+  | "pipeline.quality.rewrite"
   | "pipeline.chapter.validate"
   | "pipeline.idea.suggest"
   | "pipeline.writing.briefing"
@@ -198,8 +213,40 @@ export interface SceneCard {
   informationReleased: string[];
   foreshadowingIds: string[];
   powerProgression: string;
+  narrativeFunction?: string;
+  characterFunction?: string;
+  emotionalShift?: string;
+  progressionChange?: string;
+  readerPayoff?: string;
+  craftBeats?: CraftBeat[];
   draftAnchor?: string;
   updatedAt: string;
+}
+
+export type CraftBeatType =
+  | "payoff"
+  | "foreshadow_setup"
+  | "foreshadow_payoff"
+  | "reversal"
+  | "setback"
+  | "progression"
+  | "redemption"
+  | "sublimation"
+  | "slice_of_life"
+  | "relationship_turn"
+  | "hook";
+
+export interface CraftBeat {
+  id: string;
+  type: CraftBeatType;
+  label: string;
+  setup?: string;
+  payoff?: string;
+  cost?: string;
+  characterName?: string;
+  relatedEntities?: string[];
+  required?: boolean;
+  status?: "planned" | "drafted" | "paid_off" | "missed";
 }
 
 export type StoryEventType = "event" | "dungeon" | "team-fight" | "training" | "reveal";
@@ -225,6 +272,15 @@ export interface StoryCharacterProfile {
   knownSecrets: string;
   relationshipNotes: string;
   powerLevel: string;
+  signatureTraits?: string[];
+  coreWound?: string;
+  desire?: string;
+  misbelief?: string;
+  redemptionArc?: string;
+  sublimationGoal?: string;
+  smallPersonHighlight?: string;
+  relationshipPressure?: string;
+  growthStage?: string;
   firstChapterId?: string;
   lastSeenChapterId?: string;
   status: StoryControlStatus;
@@ -242,6 +298,8 @@ export interface StoryEventCard {
   reward: string;
   cost: string;
   foreshadowing: string;
+  readerPayoff?: string;
+  craftBeats?: CraftBeat[];
   chapterRange: string;
   status: StoryControlStatus;
   updatedAt: string;
@@ -446,6 +504,7 @@ export interface WritingRecapCandidate {
   ledgerPatches?: LedgerEntry[];
   characterStatePatches?: CharacterStatePatch[];
   riskPatches?: LedgerEntry[];
+  craftBeatPatches?: CraftBeat[];
 }
 
 export type KnowledgeSourceType = "chapter-summary" | "ledger" | "story-control";
@@ -661,6 +720,22 @@ export interface NarrativeDebtSignal {
   updatedAt: string;
 }
 
+export interface CraftCoverageSignal {
+  chapterId: string;
+  chapterTitle: string;
+  craftBeatCount: number;
+  requiredBeatCount: number;
+  missingRequiredBeatCount: number;
+  payoffCount: number;
+  foreshadowingCount: number;
+  progressionCount: number;
+  sliceOfLifeCount: number;
+  redemptionCount: number;
+  note: string;
+  severity: "stable" | "watch" | "blocked";
+  updatedAt: string;
+}
+
 export interface SeriesQualityMetrics {
   projectSlug: string;
   chapterCount: number;
@@ -674,6 +749,7 @@ export interface SeriesQualityMetrics {
   tensionCurve?: SeriesTensionPoint[];
   styleDriftSignals?: SeriesStyleDriftSignal[];
   narrativeDebtSignals?: NarrativeDebtSignal[];
+  craftCoverageSignals?: CraftCoverageSignal[];
   updatedAt: string;
 }
 
@@ -720,6 +796,9 @@ export interface CreationRuntimeSnapshot {
     hasQualityReport: boolean;
     hasWritingRecap: boolean;
     acceptedLedgerCount: number;
+    pendingRecapPatchCount?: number;
+    craftBeatCount?: number;
+    craftGateRisks?: string[];
     narrativeDebt?: Pick<NarrativeDebtSignal, "debtCount" | "openForeshadowingCount" | "riskCount" | "openLoopCount" | "overdueCount" | "severity">;
   };
   updatedAt: string;
@@ -848,6 +927,7 @@ export interface NarrativeSnapshot {
     vectorSummary?: KnowledgeVectorSummary;
   };
   qualityRisks: string[];
+  craftRisks?: string[];
   blockingReasons?: string[];
   createdAt: string;
 }

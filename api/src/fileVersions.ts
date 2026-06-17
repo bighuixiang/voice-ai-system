@@ -9,13 +9,14 @@ interface FileVersionManifest {
 }
 
 const manifestPath = "versions/manifest.json";
+const runtimeVersionedPaths = new Set(["project.json"]);
 
 function writingPaths(project: NovelProject): Set<string> {
   return new Set(project.chapters.flatMap((chapter) => [chapter.contentPath, chapter.outlinePath]));
 }
 
 export function isVersionedWritingPath(project: NovelProject, relativePath: string): boolean {
-  return writingPaths(project).has(relativePath);
+  return runtimeVersionedPaths.has(relativePath) || writingPaths(project).has(relativePath);
 }
 
 function snapshotFolderName(relativePath: string): string {

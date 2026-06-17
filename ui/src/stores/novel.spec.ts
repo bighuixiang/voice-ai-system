@@ -2008,6 +2008,134 @@ describe("useNovelStore", () => {
     });
   });
 
+  it("requests AI quality rewrite for metrics below 86 and prepares a full-file patch", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateContent("他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然传来回应，他必须选择是否暴露身份。");
+    store.setAutoRunSavePipeline(true);
+    store.currentQualityReport = {
+      chapterId: "chapter-001",
+      overallScore: 82,
+      summary: "Hook is weak.",
+      metrics: [
+        { key: "hook", label: "钩子", score: 68, note: "结尾缺少未完成后果。" },
+        { key: "conflict", label: "冲突", score: 90, note: "阻力明确。" }
+      ],
+      strengths: ["冲突成立"],
+      fixes: ["钩子：补一个未完成后果"],
+      updatedAt: "2026-06-14T00:00:00.000Z"
+    };
+    vi.clearAllMocks();
+    mockNovelApi.startTask.mockResolvedValueOnce(
+      taskWithResult({
+        id: "task-quality-1",
+        type: "quality.rewrite",
+        status: "running",
+        result: undefined,
+        finishedAt: undefined,
+        durationMs: undefined
+      })
+    );
+    mockNovelApi.readTask.mockResolvedValueOnce(
+      taskWithResult({
+        id: "task-quality-1",
+        type: "quality.rewrite",
+        result: {
+          summary: "质量改造候选",
+          content: "他在雨夜发现封印，却不能靠近。门后的人叫出了他的真名。",
+          changes: ["钩子：补入未完成后果，目标超过 86"],
+          risks: [],
+          questions: [],
+          patches: [{ target: "outline/chapter-001.md", mode: "replace-file", content: "wrong target" }]
+        }
+      })
+    );
+
+    await expect(store.improveQualityMetrics()).resolves.toBe(true);
+
+    expect(mockNovelApi.saveFile).toHaveBeenCalledWith(
+      "demo",
+      "chapters/chapter-001.md",
+      "他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然传来回应，他必须选择是否暴露身份。"
+    );
+    expect(mockNovelApi.startBackgroundJob).not.toHaveBeenCalled();
+    expect(mockNovelApi.startTask).toHaveBeenCalledWith(
+      "demo",
+      "quality.rewrite",
+      expect.objectContaining({
+        chapterId: "chapter-001",
+        filePath: "chapters/chapter-001.md",
+        targetScore: 86,
+        targetMetrics: [expect.objectContaining({ key: "hook", score: 68, gap: 18 })]
+      })
+    );
+    expect(store.rewriteCandidate).toMatchObject({
+      summary: "质量改造候选",
+      patches: [
+        {
+          target: "chapters/chapter-001.md",
+          mode: "replace-file",
+          content: expect.stringContaining("真名")
+        }
+      ]
+    });
+    expect(store.rewriteCandidate?.patches).toHaveLength(1);
+    expect(store.rewriteCandidateTargetsCurrentFile).toBe(true);
+    expect(store.rewriteComparisonOriginalText).toContain("雨夜发现封印");
+    expect(store.rewritePatchApplyLabel).toBe("应用整章改造");
+    expect(store.canAcceptSelectedRewrite).toBe(false);
+    expect(store.isImprovingQualityMetrics).toBe(false);
+  });
+
+  it("prefers the current-file quality rewrite patch over commentary content", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    await store.openChapter(project.chapters[0]);
+    store.updateContent("他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然传来回应。");
+    store.currentQualityReport = {
+      chapterId: "chapter-001",
+      overallScore: 82,
+      summary: "Hook is weak.",
+      metrics: [{ key: "hook", label: "钩子", score: 68, note: "结尾缺少未完成后果。" }],
+      strengths: ["冲突成立"],
+      fixes: ["钩子：补一个未完成后果"],
+      updatedAt: "2026-06-14T00:00:00.000Z"
+    };
+    vi.clearAllMocks();
+    mockNovelApi.startTask.mockResolvedValueOnce(
+      taskWithResult({
+        id: "task-quality-patch-priority",
+        type: "quality.rewrite",
+        status: "running",
+        result: undefined,
+        finishedAt: undefined,
+        durationMs: undefined
+      })
+    );
+    mockNovelApi.readTask.mockResolvedValueOnce(
+      taskWithResult({
+        id: "task-quality-patch-priority",
+        type: "quality.rewrite",
+        result: {
+          summary: "质量改造候选",
+          content: "Commentary: the rewritten chapter is in the patch.",
+          changes: ["钩子：补入未完成后果，目标超过 86"],
+          risks: [],
+          questions: [],
+          patches: [{ target: "chapters/chapter-001.md", mode: "replace-file", content: "完整正文：门后的人叫出了他的真名。" }]
+        }
+      })
+    );
+
+    await expect(store.improveQualityMetrics()).resolves.toBe(true);
+
+    expect(store.rewriteCandidate?.content).toBe("完整正文：门后的人叫出了他的真名。");
+    expect(store.rewriteCandidate?.patches).toEqual([
+      { target: "chapters/chapter-001.md", mode: "replace-file", content: "完整正文：门后的人叫出了他的真名。" }
+    ]);
+  });
+
   it("adds macro pacing guardrails for early chapter over-reveal", async () => {
     const store = useNovelStore();
     store.currentProject = project;
@@ -2412,6 +2540,61 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readAiInvocations).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readFile).toHaveBeenCalledWith("demo", "chapters/chapter-001.md");
     expect(store.currentContent).toBe("draft:chapters/chapter-001.md");
+  });
+
+  it("re-diagnoses automatically after applying a quality rewrite patch", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
+    store.currentFilePath = "chapters/chapter-001.md";
+    store.currentTask = taskWithResult({ id: "task-quality-1", type: "quality.rewrite" });
+    store.rewriteCandidate = {
+      summary: "Quality patch",
+      content: "",
+      changes: [],
+      risks: [],
+      questions: [],
+      patches: [{ target: "chapters/chapter-001.md", mode: "replace-file", content: "accepted quality rewrite" }]
+    };
+    mockNovelApi.readFile.mockResolvedValueOnce(
+      "他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然叫出他的真名，他必须选择是否暴露身份，并承担失去藏身处的代价。"
+    );
+
+    await store.applyTaskPatches();
+
+    expect(mockNovelApi.applyPatches).toHaveBeenCalledWith("demo", [
+      { target: "chapters/chapter-001.md", mode: "replace-file", content: "accepted quality rewrite" }
+    ], "task-quality-1");
+    expect(mockNovelApi.saveChapterQualityReport).toHaveBeenCalledWith(
+      "demo",
+      expect.objectContaining({ chapterId: "chapter-001" })
+    );
+    expect(store.currentQualityReport?.chapterId).toBe("chapter-001");
+  });
+
+  it("normalizes cached quality rewrite patches before applying them", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
+    store.currentFilePath = "chapters/chapter-001.md";
+    store.currentTask = taskWithResult({ id: "task-quality-2", type: "quality.rewrite" });
+    store.rewriteCandidate = {
+      summary: "Cached quality patch",
+      content: "",
+      changes: [],
+      risks: [],
+      questions: [],
+      patches: [{ target: "outline/chapter-001.md", mode: "replace-file", content: "cached full chapter rewrite" }]
+    };
+    mockNovelApi.readFile.mockResolvedValueOnce(
+      "他在雨夜发现封印，却不能靠近。门后的人叫出他的真名，他必须付出代价。"
+    );
+
+    await store.applyTaskPatches();
+
+    expect(mockNovelApi.applyPatches).toHaveBeenCalledWith("demo", [
+      { target: "chapters/chapter-001.md", mode: "replace-file", content: "cached full chapter rewrite" }
+    ], "task-quality-2");
   });
 
   it("fills replace-selection patch coordinates from the polished selection anchor", async () => {

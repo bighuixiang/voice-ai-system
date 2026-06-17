@@ -1,0 +1,66 @@
+{
+  "id": "demo",
+  "slug": "demo",
+  "title": "Demo",
+  "genre": "未定",
+  "roughIdea": "少年修行。",
+  "createdAt": "2026-06-17T08:58:01.390Z",
+  "updatedAt": "2026-06-17T08:58:01.760Z",
+  "lastOpenedChapterId": "chapter-001",
+  "codex": {
+    "command": "codex"
+  },
+  "ai": {
+    "profileId": "codex-cli"
+  },
+  "modules": [
+    {
+      "key": "novel",
+      "label": "Novel Writing",
+      "status": "active"
+    },
+    {
+      "key": "assets",
+      "label": "Asset Management",
+      "status": "planned"
+    },
+    {
+      "key": "script",
+      "label": "Script Production",
+      "status": "planned"
+    },
+    {
+      "key": "image-generation",
+      "label": "Image Generation",
+      "status": "planned"
+    },
+    {
+      "key": "video-generation",
+      "label": "Video Generation",
+      "status": "planned"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chapter-001",
+      "title": "第 1 章",
+      "outlinePath": "outline/chapter-001.md",
+      "contentPath": "chapters/chapter-001.md",
+      "status": "empty"
+    },
+    {
+      "id": "chapter-002",
+      "title": "第 2 章",
+      "outlinePath": "outline/chapter-002.md",
+      "contentPath": "chapters/chapter-002.md",
+      "status": "empty"
+    },
+    {
+      "id": "chapter-003",
+      "title": "第 3 章",
+      "outlinePath": "outline/chapter-003.md",
+      "contentPath": "chapters/chapter-003.md",
+      "status": "empty"
+    }
+  ]
+}

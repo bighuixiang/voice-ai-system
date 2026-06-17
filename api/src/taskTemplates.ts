@@ -15,12 +15,44 @@ const taskGoals: Partial<Record<CodexTaskType, string>> = {
   "chapter.plan": "为指定章节生成章纲设定，包含章节目标、场景卡、冲突、转折、伏笔、POV 限制和结尾钩子。",
   "chapter.draft": "基于章纲和上下文起草章节正文，并标出风险和修改建议。",
   "selection.polish": "只改写选区文本，保持剧情事实，优先修复 POV、因果和可读性。",
+  "quality.rewrite": "根据质量体检报告整章改造低于目标线的评分项，确保节奏、冲突、情绪、信息、文笔、钩子和张力都达到目标分以上。",
   "continuity.check": "检查章节与故事圣经、伏笔、升级节奏和相邻章节的连续性风险。",
   "idea.suggest": "在作者卡住时给出符合当前剧情状态的下一步灵感候选。",
   "assistant.free": "根据作者随时交代的临时指令，在当前小说上下文中给出分析、建议、改写或安全补丁。"
 };
 
 function buildTaskContract(type: CodexTaskType) {
+  if (type === "chapter.plan") {
+    return [
+      {
+        title: "Chapter Craft Planning Contract",
+        content: [
+          "Return a CodexTaskResult JSON. Its `content` field should be a chapter plan that includes a stringified JSON block for dashboard and scenes.",
+          "Every planned scene must include narrativeFunction, characterFunction, emotionalShift, progressionChange, readerPayoff, and craftBeats.",
+          "Use CraftBeat objects with id, type, label, setup, payoff, cost, characterName, relatedEntities, required, and status.",
+          "At minimum, plan one reader payoff or hook, one cost/pressure beat, and one character-state beat. For genre profiles that require progression or foreshadowing, include those beats explicitly.",
+          "Do not plan empty daily-life scenes. Slice-of-life scenes must advance relationship, information, emotion, or later setup."
+        ].join("\n")
+      }
+    ];
+  }
+
+  if (type === "chapter.draft") {
+    return [
+      {
+        title: "Craft Drafting Contract",
+        content: [
+          "Draft the chapter prose according to the Chapter Dashboard, Scene Cards, Craft Profile, and planned CraftBeats.",
+          "Make character texture observable through desire, wound, misbelief, pressure reaction, and concrete choices rather than explanation.",
+          "Give minor characters one useful high-light moment when they are scene-relevant.",
+          "Deliver satisfying beats only after setup, cost, action, and aftershock.",
+          "Daily-life passages must move relationship, information, emotion, or foreshadowing; remove inert filler.",
+          "If a planned required CraftBeat cannot be delivered, put the blocker in `risks` and `questions` rather than silently dropping it."
+        ].join("\n")
+      }
+    ];
+  }
+
   if (type === "writing.briefing") {
     return [
       {
@@ -146,12 +178,26 @@ function buildTaskContract(type: CodexTaskType) {
                   note: "Specific risk and suggested follow-up.",
                   updatedAt: "ISO timestamp"
                 }
+              ],
+              craftBeatPatches: [
+                {
+                  id: "craft-chapter-001-001",
+                  type: "payoff",
+                  label: "Visible craft beat changed by this chapter",
+                  setup: "What prepared the beat.",
+                  payoff: "What the reader receives or what changes.",
+                  cost: "What this beat costs or risks.",
+                  characterName: "Character name if applicable",
+                  relatedEntities: ["character/location/item/faction"],
+                  required: false,
+                  status: "drafted"
+                }
               ]
             },
             null,
             2
           ),
-          "Patch ids must be stable, specific, and scoped to the chapter. Patch statuses must start as `pending`.",
+          "Patch ids must be stable, specific, and scoped to the chapter. State patch statuses must start as `pending`.",
           "Do not auto-apply ledger updates. The application will merge accepted patches only after author approval before merge."
         ].join("\n")
       }
@@ -200,11 +246,29 @@ function buildTaskContract(type: CodexTaskType) {
     ];
   }
 
+  if (type === "quality.rewrite") {
+    return [
+      {
+        title: "Quality Rewrite Contract",
+        content: [
+          "Return a CodexTaskResult JSON only.",
+          "The `content` field must contain the complete rewritten chapter text, not commentary.",
+          "The first patch must be `{ target: payload.filePath, mode: \"replace-file\", content: <complete rewritten chapter text> }`.",
+          "Do not change chapter title, canon facts, POV owner, timeline order, power progression facts, or unresolved foreshadowing unless the payload explicitly asks for it.",
+          "For every metric in `payload.targetMetrics`, add a concrete item in `changes` explaining how that metric is designed to exceed `payload.targetScore`.",
+          "If a target metric cannot credibly exceed the target without new author direction, put the blocker in `questions` and still provide the safest improvement patch.",
+          "Prefer scene-level fixes over cosmetic wording: raise conflict through a sharper obstacle, raise emotion through embodied reaction, raise information through one concrete reveal, raise hook through an unresolved consequence, raise rhythm through shorter action/reaction beats, raise prose through specific sensory detail, and raise tension by linking cost, pressure, and delayed payoff.",
+          "For craft metrics, repair the underlying beat: character_arc needs desire/wound/choice movement, payoff needs setup/cost/reward/aftershock, foreshadowing_health needs trackable setup/payoff/delay, progression needs visible step and cost, slice_of_life needs relationship/information/emotion movement, and redemption needs costly corrective action."
+        ].join("\n")
+      }
+    ];
+  }
+
   return [];
 }
 
 export function buildTaskPrompt(type: CodexTaskType, context: PromptContext): string {
-  const cockpitInstruction = ["structure.reverse", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "writing.briefing", "writing.recap"].includes(type)
+  const cockpitInstruction = ["structure.reverse", "chapter.plan", "chapter.draft", "quality.rewrite", "continuity.check", "idea.suggest", "writing.briefing", "writing.recap"].includes(type)
     ? [
         {
           title: "Cockpit Boundaries",

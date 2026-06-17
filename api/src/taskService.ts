@@ -364,9 +364,11 @@ export async function runNovelTask(
       status: "running",
       projectId: project.slug,
       inputSummary: JSON.stringify(payload).slice(0, 500),
+      payload,
       startedAt: new Date(started).toISOString(),
       timeoutMs: options.timeoutMs || defaultTaskTimeoutMs()
     };
+  task.payload = task.payload || payload;
   task.timeoutMs = task.timeoutMs || options.timeoutMs || defaultTaskTimeoutMs();
   const invocation = createInvocationSession(task);
   if (options.appendInitialHistory) {
@@ -461,6 +463,7 @@ export async function startNovelTaskAsync(
     status: "running",
     projectId: project.slug,
     inputSummary: JSON.stringify(payload).slice(0, 500),
+    payload,
     startedAt,
     timeoutMs: defaultTaskTimeoutMs()
   };

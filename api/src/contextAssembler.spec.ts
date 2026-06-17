@@ -119,6 +119,46 @@ describe("contextAssembler", () => {
     expect(profile?.content).not.toContain("升级必须有代价");
   });
 
+  it("injects the default craft profile into draft context", async () => {
+    const project = createProjectSkeleton({ title: "Craft Demo", genre: "xuanhuan", roughIdea: "Craft matters." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+    const profile = blocks.find((block) => block.title === "Craft Profile");
+
+    expect(profile?.content).toContain("Novel craft autopilot profile");
+    expect(profile?.content).toContain("payoff");
+    expect(profile?.content).toContain("matchedGenreProfiles");
+  });
+
+  it("uses a project-level craft profile override when present", async () => {
+    const project = createProjectSkeleton({ title: "Craft Override", genre: "romance", roughIdea: "Project craft rules should win." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(
+      path.join(root, "bible", "craft-profile.json"),
+      JSON.stringify(
+        {
+          version: 1,
+          title: "Custom craft lab",
+          principles: ["Every quiet dinner must move a relationship or clue."],
+          qualityGates: ["Reject inert daily scenes."]
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+    const profile = blocks.find((block) => block.title === "Craft Profile");
+
+    expect(profile?.content).toContain("project");
+    expect(profile?.content).toContain("Custom craft lab");
+    expect(profile?.content).toContain("Every quiet dinner must move a relationship or clue.");
+  });
+
   it("limits selection polish context to the selected range and nearby text", async () => {
     const project = createProjectSkeleton({ title: "Selection Demo", roughIdea: "Selection matters." });
     await createProjectFiles(project);

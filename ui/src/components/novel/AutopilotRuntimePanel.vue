@@ -11,10 +11,11 @@
     </div>
 
     <div class="runtime-controls">
-      <el-button type="primary" :loading="starting" :disabled="isRunning" @click="$emit('start', direction)">
+      <el-button type="primary" :loading="starting" :disabled="isRunning" @click="$emit('start', { direction, autoContinue })">
         <el-icon><VideoPlay /></el-icon>
         启动自动驾驶
       </el-button>
+      <el-switch v-model="autoContinue" active-text="连续章节" />
       <el-button :disabled="!canPause" @click="$emit('pause')">
         <el-icon><VideoPause /></el-icon>
         暂停
@@ -177,7 +178,7 @@ const props = withDefaults(defineProps<{
 });
 
 defineEmits<{
-  start: [direction: string];
+  start: [input: { direction: string; autoContinue: boolean }];
   pause: [];
   resume: [];
   stop: [];
@@ -191,6 +192,7 @@ defineEmits<{
 }>();
 
 const direction = ref("");
+const autoContinue = ref(false);
 const derivativeTitle = ref("");
 const derivativeType = ref<"side_story" | "branch" | "adaptation">("side_story");
 

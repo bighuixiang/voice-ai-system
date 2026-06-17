@@ -51,7 +51,7 @@
         </el-button>
         <el-button @click="$emit('reject')">拒绝</el-button>
         <el-button v-if="result.content" type="primary" :disabled="!canAccept" @click="$emit('accept')">{{ acceptLabel }}</el-button>
-        <el-button v-if="result.patches.length" type="success" @click="$emit('apply-patches')">应用补丁</el-button>
+        <el-button v-if="result.patches.length" type="success" @click="$emit('apply-patches')">{{ applyPatchesLabel }}</el-button>
       </footer>
     </template>
   </section>
@@ -70,6 +70,7 @@ withDefaults(defineProps<{
   originalText?: string;
   emptyOriginalText?: string;
   acceptLabel?: string;
+  applyPatchesLabel?: string;
   canAccept?: boolean;
   canTune?: boolean;
   tuneOptions?: TuneOption[];
@@ -81,6 +82,7 @@ withDefaults(defineProps<{
   originalText: "",
   emptyOriginalText: "当前没有选区，不能直接接受为选区改写。",
   acceptLabel: "接受选区改写",
+  applyPatchesLabel: "应用补丁",
   canAccept: false,
   canTune: false,
   tuneOptions: () => [],

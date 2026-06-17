@@ -13,6 +13,7 @@ import type {
 } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 import { searchKnowledgeIndex } from "./knowledgeIndex.js";
+import { buildCraftProfileBlock } from "./craftProfile.js";
 
 type ContextTier = "T0" | "T1" | "T2" | "T3";
 
@@ -62,6 +63,7 @@ function trimContext(content: string, limit = 6000): string {
 }
 
 function contextTierForTitle(title: string): ContextTier {
+  if (title === "Craft Profile") return "T0";
   if (["项目配置", "叙事承诺锁"].includes(title) || title.endsWith("题材 Profile")) return "T0";
   if (["文风规则", "角色档案", "世界观", "力量体系", "故事总控台", "章节仪表盘", "场景卡", "相邻章节摘要"].includes(title)) {
     return "T1";
@@ -101,14 +103,15 @@ const broadContextTypes: CodexTaskType[] = [
   "structure.reverse",
   "chapter.plan",
   "chapter.draft",
+  "quality.rewrite",
   "continuity.check",
   "idea.suggest",
   "assistant.free"
 ];
 
-const targetChapterTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
-const cockpitContextTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "continuity.check", "idea.suggest", "assistant.free"];
-const memoryContextTypes: CodexTaskType[] = ["chapter.plan", "chapter.draft", "writing.briefing", "writing.recap", "continuity.check", "idea.suggest"];
+const targetChapterTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "quality.rewrite", "continuity.check", "idea.suggest", "assistant.free"];
+const cockpitContextTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "quality.rewrite", "continuity.check", "idea.suggest", "assistant.free"];
+const memoryContextTypes: CodexTaskType[] = ["chapter.plan", "chapter.draft", "quality.rewrite", "writing.briefing", "writing.recap", "continuity.check", "idea.suggest"];
 
 function orderedChapters(project: NovelProject): NovelChapter[] {
   return [...project.chapters].sort((a, b) => {
@@ -557,10 +560,12 @@ export async function assembleContext(
   const chapter = project.chapters.find((item) => item.id === chapterId);
   const narrativePromiseBlock = buildNarrativePromiseBlock(project, chapter);
   const genreProfileBlock = await buildGenreProfileBlock(root, project);
+  const craftProfileBlock = await buildCraftProfileBlock(root, project);
   const blocks = [
     { title: "项目配置", content: JSON.stringify(project, null, 2) },
     ...(narrativePromiseBlock ? [narrativePromiseBlock] : []),
     ...(genreProfileBlock ? [genreProfileBlock] : []),
+    craftProfileBlock,
     { title: "文风规则", content: await readOptional(root, "style/style-guide.md") },
     { title: "角色档案", content: await readOptional(root, "bible/characters.md") },
     { title: "世界观", content: await readOptional(root, "bible/world.md") },
@@ -610,6 +615,22 @@ export async function assembleContext(
           beforeText: selection?.beforeText,
           selectedText: selection?.selectedText,
           afterText: selection?.afterText
+        },
+        null,
+        2
+      )
+    });
+  }
+
+  if (type === "quality.rewrite" && chapter) {
+    blocks.push({
+      title: "Quality Rewrite Targets",
+      content: JSON.stringify(
+        {
+          targetScore: payload.targetScore,
+          targetMetrics: payload.targetMetrics,
+          mode: payload.mode,
+          qualityReport: payload.currentQualityReport || (await readOptionalJson(root, `quality/${chapter.id}.json`))
         },
         null,
         2

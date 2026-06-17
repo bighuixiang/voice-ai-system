@@ -31,6 +31,11 @@ novels/*/knowledge/
 novels/*/memory/
 novels/*/tasks/background-jobs.jsonl
 novels/*/tasks/invocations.jsonl
+novels/*/runtime/checkpoints/
+novels/*/versions/**/*.md
+
+# Local reference clones used for analysis only.
+.codex-reference/
 
 # Coverage directory used by tools like istanbul
 coverage/

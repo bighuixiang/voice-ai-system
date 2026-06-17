@@ -25,6 +25,9 @@ describe("taskTemplates", () => {
     expect(prompt).toContain("chapter.plan 优先产出章纲设定");
     expect(prompt).toContain("outline/chapter-xxx.md");
     expect(prompt).toContain("chapters/chapter-xxx.md");
+    expect(prompt).toContain("craftBeats");
+    expect(prompt).toContain("narrativeFunction");
+    expect(prompt).toContain("readerPayoff");
   });
 
   it("treats cockpit data as writing boundaries for planning and drafting", () => {
@@ -40,6 +43,8 @@ describe("taskTemplates", () => {
     expect(prompt).toContain("Scene Cards");
     expect(prompt).toContain("structured ledgers");
     expect(prompt).toContain("Make the choice unavoidable.");
+    expect(prompt).toContain("planned CraftBeats");
+    expect(prompt).toContain("Daily-life");
   });
 
   it("builds prewriting briefing and post-save recap instructions", () => {
@@ -63,6 +68,7 @@ describe("taskTemplates", () => {
     expect(recapPrompt).toContain("ledgerPatches");
     expect(recapPrompt).toContain("characterStatePatches");
     expect(recapPrompt).toContain("riskPatches");
+    expect(recapPrompt).toContain("craftBeatPatches");
     expect(recapPrompt).toContain("author approval before merge");
     expect(recapPrompt).toContain("Do not auto-apply ledger updates");
   });
@@ -78,6 +84,15 @@ describe("taskTemplates", () => {
     expect(prompt).toContain("SceneCard");
     expect(prompt).toContain("dashboard");
     expect(prompt).toContain("scenes");
+    expect(buildTaskPrompt("quality.rewrite", {
+      contextBlocks: [{ title: "Quality Rewrite Targets", content: JSON.stringify({ targetScore: 86 }) }],
+      payload: {
+        chapterId: "chapter-001",
+        filePath: "chapters/chapter-001.md",
+        targetScore: 86,
+        targetMetrics: [{ key: "hook", label: "Hook", score: 68, note: "Flat ending." }]
+      }
+    })).toContain("Quality Rewrite Contract");
     expect(prompt).toContain("过滤标题、写作日期、版本号");
   });
 });

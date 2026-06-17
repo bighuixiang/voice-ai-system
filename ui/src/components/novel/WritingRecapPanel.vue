@@ -77,6 +77,17 @@
         <span v-if="emotionLedgerItems.length">情绪 {{ emotionLedgerItems.length }}</span>
       </div>
 
+      <div v-if="candidate.craftBeatPatches?.length" class="recap-section">
+        <h3>Craft beat patches</h3>
+        <ul>
+          <li v-for="beat in candidate.craftBeatPatches" :key="beat.id">
+            <strong>{{ beat.label }}</strong>
+            <span> - {{ beat.type }} / {{ beat.status }}</span>
+            <small v-if="beat.payoff || beat.cost">{{ beat.payoff || beat.cost }}</small>
+          </li>
+        </ul>
+      </div>
+
       <div v-if="ledgerPatchItems.length" class="recap-section">
         <h3>账本补丁</h3>
         <ul>

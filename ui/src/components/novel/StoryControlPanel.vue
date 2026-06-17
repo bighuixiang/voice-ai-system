@@ -235,6 +235,33 @@
                 />
               </label>
               <label class="wide-field">
+                <span>Core wound</span>
+                <el-input
+                  :model-value="selectedCharacter.coreWound || ''"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 4 }"
+                  @update:model-value="updateCharacter(selectedCharacter.id, 'coreWound', String($event))"
+                />
+              </label>
+              <label class="wide-field">
+                <span>Desire</span>
+                <el-input
+                  :model-value="selectedCharacter.desire || ''"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 4 }"
+                  @update:model-value="updateCharacter(selectedCharacter.id, 'desire', String($event))"
+                />
+              </label>
+              <label class="wide-field">
+                <span>Misbelief</span>
+                <el-input
+                  :model-value="selectedCharacter.misbelief || ''"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 4 }"
+                  @update:model-value="updateCharacter(selectedCharacter.id, 'misbelief', String($event))"
+                />
+              </label>
+              <label class="wide-field">
                 <span>当前状态</span>
                 <el-input
                   :model-value="selectedCharacter.currentState"
@@ -259,6 +286,47 @@
                   type="textarea"
                   :autosize="{ minRows: 2, maxRows: 4 }"
                   @update:model-value="updateCharacter(selectedCharacter.id, 'relationshipNotes', String($event))"
+                />
+              </label>
+              <label class="wide-field">
+                <span>Redemption arc</span>
+                <el-input
+                  :model-value="selectedCharacter.redemptionArc || ''"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 4 }"
+                  @update:model-value="updateCharacter(selectedCharacter.id, 'redemptionArc', String($event))"
+                />
+              </label>
+              <label class="wide-field">
+                <span>Sublimation goal</span>
+                <el-input
+                  :model-value="selectedCharacter.sublimationGoal || ''"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 4 }"
+                  @update:model-value="updateCharacter(selectedCharacter.id, 'sublimationGoal', String($event))"
+                />
+              </label>
+              <label class="wide-field">
+                <span>Small-person highlight</span>
+                <el-input
+                  :model-value="selectedCharacter.smallPersonHighlight || ''"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 4 }"
+                  @update:model-value="updateCharacter(selectedCharacter.id, 'smallPersonHighlight', String($event))"
+                />
+              </label>
+              <label>
+                <span>Relationship pressure</span>
+                <el-input
+                  :model-value="selectedCharacter.relationshipPressure || ''"
+                  @update:model-value="updateCharacter(selectedCharacter.id, 'relationshipPressure', String($event))"
+                />
+              </label>
+              <label>
+                <span>Growth stage</span>
+                <el-input
+                  :model-value="selectedCharacter.growthStage || ''"
+                  @update:model-value="updateCharacter(selectedCharacter.id, 'growthStage', String($event))"
                 />
               </label>
             </div>
@@ -630,6 +698,15 @@ function makeCharacter(): StoryCharacterProfile {
     knownSecrets: "",
     relationshipNotes: "",
     powerLevel: "",
+    signatureTraits: [],
+    coreWound: "",
+    desire: "",
+    misbelief: "",
+    redemptionArc: "",
+    sublimationGoal: "",
+    smallPersonHighlight: "",
+    relationshipPressure: "",
+    growthStage: "",
     status: "planned",
     updatedAt: nowIso()
   };

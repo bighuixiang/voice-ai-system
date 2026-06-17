@@ -29,6 +29,45 @@
         </div>
       </div>
 
+      <div v-if="metricsBelowTarget.length" class="quality-upgrade">
+        <div class="quality-upgrade-head">
+          <div>
+            <strong>86分改造清单</strong>
+            <p>{{ metricsBelowTarget.length }} 个指标未达标，建议先做整章级改造，再复检。</p>
+          </div>
+          <el-button
+            type="primary"
+            :loading="isImprovingQuality"
+            :disabled="!canImproveQuality || isImprovingQuality"
+            @click="$emit('improve-all-metrics')"
+          >
+            <el-icon><MagicStick /></el-icon>
+            一键改造全部
+          </el-button>
+        </div>
+        <div class="quality-upgrade-list">
+          <div v-for="metric in metricsBelowTarget" :key="metric.key" class="quality-upgrade-row">
+            <div>
+              <span>{{ metric.label }}</span>
+              <p>{{ metric.note }}</p>
+            </div>
+            <b>{{ metric.score }} / {{ qualityTargetScore }}</b>
+            <el-button
+              size="small"
+              :loading="isImprovingQuality"
+              :disabled="!canImproveQuality || isImprovingQuality"
+              @click="$emit('improve-metric', metric.key)"
+            >
+              AI改造
+            </el-button>
+          </div>
+        </div>
+      </div>
+      <div v-else class="quality-upgrade passed">
+        <strong>全部评分项已达 {{ qualityTargetScore }} 分以上</strong>
+        <p>可以进入最终审稿；后续改正文后会重新触发体检与改造清单。</p>
+      </div>
+
       <div class="advice-grid">
         <div>
           <strong>亮点</strong>
@@ -116,6 +155,16 @@
         </div>
       </div>
 
+      <div v-if="visibleCraftCoverageSignals.length" class="signal-block">
+        <strong>Craft coverage</strong>
+        <div class="signal-list">
+          <div v-for="signal in visibleCraftCoverageSignals" :key="signal.chapterId" class="signal-row">
+            <span>{{ signal.chapterTitle }}</span>
+            <em>{{ craftCoverageLabel(signal) }}</em>
+          </div>
+        </div>
+      </div>
+
       <div v-if="visibleRhythmSignals.length" class="signal-block">
         <strong>章节节奏</strong>
         <div class="signal-list">
@@ -161,22 +210,31 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { DataAnalysis, MagicStick, Refresh } from "@element-plus/icons-vue";
-import type { ChapterQualityReport, SeriesQualityMetrics, StyleToneKey } from "@/types/novel";
+import type { ChapterQualityReport, QualityMetricKey, SeriesQualityMetrics, StyleToneKey } from "@/types/novel";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   report: ChapterQualityReport | null;
   seriesMetrics?: SeriesQualityMetrics | null;
   selectedTone: StyleToneKey;
   canDiagnose: boolean;
   canTuneSelection: boolean;
+  canImproveQuality?: boolean;
+  isImprovingQuality?: boolean;
+  qualityTargetScore?: number;
   isRebuildingSeries?: boolean;
-}>();
+}>(), {
+  canImproveQuality: false,
+  isImprovingQuality: false,
+  qualityTargetScore: 86
+});
 
 const emit = defineEmits<{
   diagnose: [];
   "update:tone": [tone: StyleToneKey];
   "tune-selection": [];
   "rebuild-series": [];
+  "improve-metric": [metricKey: QualityMetricKey];
+  "improve-all-metrics": [];
 }>();
 
 const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
@@ -193,8 +251,14 @@ const visibleQualityTrends = computed(() => props.seriesMetrics?.qualityTrends?.
 const visibleTensionCurve = computed(() => props.seriesMetrics?.tensionCurve?.slice(0, 4) || []);
 const visibleStyleDriftSignals = computed(() => props.seriesMetrics?.styleDriftSignals?.slice(0, 4) || []);
 const visibleNarrativeDebtSignals = computed(() => props.seriesMetrics?.narrativeDebtSignals?.slice(0, 4) || []);
+const visibleCraftCoverageSignals = computed(() => props.seriesMetrics?.craftCoverageSignals?.slice(0, 4) || []);
 const visibleRhythmSignals = computed(() => props.seriesMetrics?.rhythmSignals?.slice(0, 3) || []);
 const visibleCharacterArcSignals = computed(() => props.seriesMetrics?.characterArcSignals?.slice(0, 3) || []);
+const metricsBelowTarget = computed(() =>
+  [...(props.report?.metrics || [])]
+    .filter((metric) => metric.score < props.qualityTargetScore)
+    .sort((left, right) => left.score - right.score)
+);
 
 function updateTone(value: string) {
   emit("update:tone", value as StyleToneKey);
@@ -223,6 +287,10 @@ function styleDriftLabel(signal: NonNullable<SeriesQualityMetrics["styleDriftSig
 function narrativeDebtLabel(signal: NonNullable<SeriesQualityMetrics["narrativeDebtSignals"]>[number]) {
   const severity = signal.severity === "blocked" ? "需交付" : signal.severity === "watch" ? "观察" : "稳定";
   return `${severity} · ${signal.debtCount} 项 · 伏笔 ${signal.openForeshadowingCount} / 风险 ${signal.riskCount} / 回路 ${signal.openLoopCount}`;
+}
+function craftCoverageLabel(signal: NonNullable<SeriesQualityMetrics["craftCoverageSignals"]>[number]) {
+  const severity = signal.severity === "blocked" ? "blocked" : signal.severity === "watch" ? "watch" : "stable";
+  return `${severity} / beats ${signal.craftBeatCount} / payoff ${signal.payoffCount} / foreshadow ${signal.foreshadowingCount} / progression ${signal.progressionCount}`;
 }
 </script>
 
@@ -345,6 +413,75 @@ p {
     color: var(--app-text-secondary);
     font-size: 12px;
     line-height: 1.5;
+  }
+}
+
+.quality-upgrade {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--app-primary);
+  border-radius: 7px;
+  background: var(--app-primary-soft);
+}
+
+.quality-upgrade.passed {
+  border-color: var(--app-success);
+  background: var(--app-bg-soft);
+
+  strong {
+    color: var(--app-success);
+    font-size: 13px;
+  }
+}
+
+.quality-upgrade-head,
+.quality-upgrade-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.quality-upgrade-head {
+  strong {
+    color: var(--app-text-primary);
+    font-size: 13px;
+  }
+}
+
+.quality-upgrade-list {
+  display: grid;
+  gap: 6px;
+}
+
+.quality-upgrade-row {
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: var(--app-bg);
+
+  > div {
+    min-width: 0;
+  }
+
+  span {
+    color: var(--app-text-primary);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  b {
+    color: var(--app-primary);
+    font-size: 12px;
+    white-space: nowrap;
   }
 }
 

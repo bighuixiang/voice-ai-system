@@ -1460,6 +1460,189 @@ describe("novel API routes", () => {
     });
   });
 
+  it("normalizes quality rewrite patches to the task current chapter target", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Quality Rewrite Demo", roughIdea: "Rewrite the active chapter safely." })
+    });
+    await jsonFetch("/api/novel/projects/quality-rewrite-demo/files/chapters/chapter-001.md", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: "original chapter" })
+    });
+
+    const task = {
+      id: "task-quality-1",
+      type: "quality.rewrite",
+      status: "success",
+      projectId: "quality-rewrite-demo",
+      inputSummary: JSON.stringify({ filePath: "chapters/chapter-001.md", documentKind: "content", targetScore: 86 }),
+      outputSummary: "quality rewrite complete",
+      result: {
+        summary: "wrong target candidate",
+        content: "",
+        changes: [],
+        risks: [],
+        questions: [],
+        patches: [{ target: "chapters/wrong-chapter.md", mode: "replace-file", content: "task result replacement" }]
+      },
+      startedAt: "2026-06-11T00:00:00.000Z",
+      finishedAt: "2026-06-11T00:00:01.000Z",
+      durationMs: 1000
+    };
+    const invocation = {
+      id: "invocation-quality-1",
+      taskId: "task-quality-1",
+      projectId: "quality-rewrite-demo",
+      taskType: "quality.rewrite",
+      stageKey: "pipeline.quality.rewrite",
+      status: "success",
+      promptSnapshot: { length: 100, preview: "Quality", contextTitles: ["Chapter"] },
+      contextSnapshot: { blockCount: 1, totalChars: 20, blocks: [{ title: "Chapter", length: 20 }] },
+      attempt: { index: 1, startedAt: "2026-06-11T00:00:00.000Z", durationMs: 12, exitCode: 0 },
+      adoptionDecision: "pending",
+      proposedPatchTargets: ["chapters/wrong-chapter.md"],
+      acceptedPatchTargets: [],
+      commitResult: { historyAppended: true, invocationAppended: true },
+      createdAt: "2026-06-11T00:00:00.000Z",
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    };
+    await fs.appendFile(path.join(tempRoot, "quality-rewrite-demo", "tasks", "history.jsonl"), `${JSON.stringify(task)}\n`, "utf8");
+    await fs.appendFile(path.join(tempRoot, "quality-rewrite-demo", "tasks", "invocations.jsonl"), `${JSON.stringify(invocation)}\n`, "utf8");
+
+    const patched = await jsonFetch<{ applied: number; invocationUpdated: boolean; invocationId?: string }>(
+      "/api/novel/projects/quality-rewrite-demo/patches",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId: "task-quality-1",
+          patches: [{ target: "chapters/wrong-chapter.md", mode: "replace-file", content: "client rewrite replacement" }]
+        })
+      }
+    );
+    const currentChapter = await jsonFetch<{ content: string }>("/api/novel/projects/quality-rewrite-demo/files/chapters/chapter-001.md");
+    const auditAfter = await jsonFetch<{ invocations: Array<{ adoptionDecision: string; acceptedPatchTargets: string[] }> }>(
+      "/api/novel/projects/quality-rewrite-demo/tasks/invocations"
+    );
+
+    expect(patched.status).toBe(200);
+    expect(patched.data.applied).toBe(1);
+    expect(patched.data.invocationUpdated).toBe(true);
+    expect(patched.data.invocationId).toBe("invocation-quality-1");
+    expect(currentChapter.data.content).toBe("client rewrite replacement");
+    expect(
+      await fs
+        .readFile(path.join(tempRoot, "quality-rewrite-demo", "chapters", "wrong-chapter.md"), "utf8")
+        .then(() => true)
+        .catch(() => false)
+    ).toBe(false);
+    expect(auditAfter.data.invocations[0]).toMatchObject({
+      adoptionDecision: "accepted",
+      acceptedPatchTargets: ["chapters/chapter-001.md"]
+    });
+  });
+
+  it("uses the quality rewrite target patch before result commentary content", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Quality Rewrite Patch Priority", roughIdea: "Prefer concrete rewrite patches." })
+    });
+    await jsonFetch("/api/novel/projects/quality-rewrite-patch-priority/files/chapters/chapter-001.md", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: "original chapter" })
+    });
+
+    const task = {
+      id: "task-quality-priority",
+      type: "quality.rewrite",
+      status: "success",
+      projectId: "quality-rewrite-patch-priority",
+      inputSummary: JSON.stringify({ filePath: "chapters/chapter-001.md", documentKind: "content", targetScore: 86 }),
+      outputSummary: "quality rewrite complete",
+      result: {
+        summary: "target patch candidate",
+        content: "Commentary: the rewritten chapter is provided as a patch.",
+        changes: [],
+        risks: [],
+        questions: [],
+        patches: [{ target: "chapters/chapter-001.md", mode: "replace-file", content: "complete patched chapter" }]
+      },
+      startedAt: "2026-06-11T00:00:00.000Z",
+      finishedAt: "2026-06-11T00:00:01.000Z",
+      durationMs: 1000
+    };
+    await fs.appendFile(path.join(tempRoot, "quality-rewrite-patch-priority", "tasks", "history.jsonl"), `${JSON.stringify(task)}\n`, "utf8");
+
+    const patched = await jsonFetch<{ applied: number }>(
+      "/api/novel/projects/quality-rewrite-patch-priority/patches",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId: "task-quality-priority",
+          patches: []
+        })
+      }
+    );
+    const currentChapter = await jsonFetch<{ content: string }>(
+      "/api/novel/projects/quality-rewrite-patch-priority/files/chapters/chapter-001.md"
+    );
+
+    expect(patched.status).toBe(200);
+    expect(currentChapter.data.content).toBe("complete patched chapter");
+  });
+
+  it("rejects quality rewrite patches without a current chapter content target", async () => {
+    await jsonFetch("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Quality Rewrite Guard", roughIdea: "Reject ambiguous rewrite targets." })
+    });
+    await jsonFetch("/api/novel/projects/quality-rewrite-guard/files/chapters/chapter-001.md", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: "original chapter" })
+    });
+    const task = {
+      id: "task-quality-guard",
+      type: "quality.rewrite",
+      status: "success",
+      projectId: "quality-rewrite-guard",
+      inputSummary: JSON.stringify({ documentKind: "content", targetScore: 86 }),
+      outputSummary: "quality rewrite complete",
+      result: {
+        summary: "ambiguous",
+        content: "replacement",
+        changes: [],
+        risks: [],
+        questions: [],
+        patches: []
+      },
+      startedAt: "2026-06-11T00:00:00.000Z",
+      finishedAt: "2026-06-11T00:00:01.000Z",
+      durationMs: 1000
+    };
+    await fs.appendFile(path.join(tempRoot, "quality-rewrite-guard", "tasks", "history.jsonl"), `${JSON.stringify(task)}\n`, "utf8");
+
+    const patched = await jsonFetch<{ error: string }>("/api/novel/projects/quality-rewrite-guard/patches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        taskId: "task-quality-guard",
+        patches: [{ target: "chapters/chapter-001.md", mode: "replace-file", content: "replacement" }]
+      })
+    });
+    const currentChapter = await jsonFetch<{ content: string }>("/api/novel/projects/quality-rewrite-guard/files/chapters/chapter-001.md");
+
+    expect(patched.status).toBe(400);
+    expect(patched.data.error).toContain("Quality rewrite task is missing");
+    expect(currentChapter.data.content).toBe("original chapter");
+  });
+
   it("rejects unsupported task types before invoking Codex", async () => {
     await jsonFetch("/api/novel/projects", {
       method: "POST",

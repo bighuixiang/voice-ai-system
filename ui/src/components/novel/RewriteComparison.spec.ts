@@ -80,6 +80,22 @@ describe("RewriteComparison", () => {
     expect(wrapper.text()).toContain("追加到正文");
     expect(wrapper.emitted("accept")).toHaveLength(1);
   });
+  it("supports a custom patch application label", async () => {
+    const wrapper = mount(RewriteComparison, {
+      props: {
+        result,
+        applyPatchesLabel: "Apply full chapter"
+      },
+      global: { stubs }
+    });
+
+    const buttons = wrapper.findAll("button");
+    await buttons[buttons.length - 1].trigger("click");
+
+    expect(wrapper.text()).toContain("Apply full chapter");
+    expect(wrapper.emitted("apply-patches")).toHaveLength(1);
+  });
+
   it("emits a tuning direction for candidate drafts", async () => {
     const wrapper = mount(RewriteComparison, {
       props: {

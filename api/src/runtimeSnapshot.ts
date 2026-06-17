@@ -1,6 +1,15 @@
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
-import type { CreationRuntimeSnapshot, CreationRuntimeStep, LedgerEntry, NarrativeDebtSignal, NovelProject } from "./types.js";
+import type {
+  CraftBeat,
+  CreationRuntimeSnapshot,
+  CreationRuntimeStep,
+  LedgerEntry,
+  NarrativeDebtSignal,
+  NovelProject,
+  SceneCard,
+  WritingRecapCandidate
+} from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 import { readChapterDashboard, readChapterQualityReport, readChapterSummary, readLedgerEntries, readSceneCards } from "./writingCockpit.js";
 
@@ -59,6 +68,96 @@ async function readTaskHistory(root: string): Promise<Array<{ type?: string; sta
     });
 }
 
+async function readWritingRecaps(root: string): Promise<WritingRecapCandidate[]> {
+  let content = "";
+  try {
+    content = await fs.readFile(resolveInside(root, "tasks/recaps.jsonl"), "utf8");
+  } catch {
+    return [];
+  }
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .flatMap((line) => {
+      try {
+        return [JSON.parse(line) as WritingRecapCandidate];
+      } catch {
+        return [];
+      }
+    });
+}
+
+function pendingPatchCount(recap: WritingRecapCandidate): number {
+  const patchGroups = [
+    recap.factPatches || [],
+    recap.characterStatePatches || [],
+    recap.ledgerPatches || [],
+    recap.riskPatches || [],
+    recap.emotionLedgerPatch?.wounds || [],
+    recap.emotionLedgerPatch?.boons || [],
+    recap.emotionLedgerPatch?.powerShifts || [],
+    recap.emotionLedgerPatch?.openLoops || []
+  ];
+  const structuredCount = patchGroups.flat().filter((item) => !("status" in item) || item.status === "pending").length;
+  return structuredCount + (recap.summaryPatch ? 1 : 0) + (recap.craftBeatPatches?.length || 0);
+}
+
+function recapAcceptanceId(recap: WritingRecapCandidate): string {
+  return `${recap.chapterId}:${recap.createdAt}`;
+}
+
+function sceneCraftBeats(scene: SceneCard): CraftBeat[] {
+  const beats = [...(scene.craftBeats || [])];
+  if (scene.readerPayoff?.trim()) {
+    beats.push({
+      id: `${scene.id}:reader-payoff`,
+      type: "payoff",
+      label: scene.readerPayoff,
+      status: "planned"
+    });
+  }
+  if (scene.progressionChange?.trim() || scene.powerProgression?.trim()) {
+    beats.push({
+      id: `${scene.id}:progression`,
+      type: "progression",
+      label: scene.progressionChange || scene.powerProgression || "Progression",
+      status: "planned"
+    });
+  }
+  for (const foreshadowingId of scene.foreshadowingIds || []) {
+    beats.push({
+      id: `${scene.id}:foreshadowing:${foreshadowingId}`,
+      type: "foreshadow_setup",
+      label: foreshadowingId,
+      status: "planned"
+    });
+  }
+  if (/daily|slice|日常/i.test(scene.narrativeFunction || "")) {
+    beats.push({
+      id: `${scene.id}:slice-of-life`,
+      type: "slice_of_life",
+      label: scene.narrativeFunction || "Slice of life",
+      status: "planned"
+    });
+  }
+  return [...new Map(beats.map((beat) => [beat.id, beat])).values()];
+}
+
+function buildCraftGateRisks(report: Awaited<ReturnType<typeof readChapterQualityReport>>, scenes: SceneCard[]): string[] {
+  const craftMetricKeys = new Set(["character_arc", "payoff", "foreshadowing_health", "progression", "slice_of_life", "redemption"]);
+  const risks =
+    report?.metrics
+      .filter((metric) => craftMetricKeys.has(metric.key) && metric.score < 70)
+      .map((metric) => `${metric.label || metric.key}:${metric.score}`)
+      .slice(0, 6) || [];
+  const plannedBeats = scenes.flatMap(sceneCraftBeats);
+  const missedRequired = plannedBeats.filter((beat) => beat.required && beat.status === "missed");
+  if (!plannedBeats.length && scenes.length) risks.push("missing_scene_craft_beats");
+  if (missedRequired.length) risks.push(`missed_required_craft_beats:${missedRequired.length}`);
+  return risks;
+}
+
 export async function buildCreationRuntimeSnapshot(
   root: string,
   project: NovelProject,
@@ -69,13 +168,14 @@ export async function buildCreationRuntimeSnapshot(
     throw new Error("Project has no chapters");
   }
 
-  const [content, dashboard, scenes, summary, qualityReport, history, ledgers] = await Promise.all([
+  const [content, dashboard, scenes, summary, qualityReport, history, recaps, ledgers] = await Promise.all([
     fs.readFile(resolveInside(root, chapter.contentPath), "utf8").catch(() => ""),
     readChapterDashboard(root, chapter.id),
     readSceneCards(root, chapter.id),
     readChapterSummary(root, chapter.id),
     readChapterQualityReport(root, chapter.id),
     readTaskHistory(root),
+    readWritingRecaps(root),
     Promise.all(ledgerKinds.map((kind) => readLedgerEntries(root, kind))).then((items) => items.flat())
   ]);
 
@@ -90,7 +190,7 @@ export async function buildCreationRuntimeSnapshot(
       task.type === "writing.recap" &&
       task.status === "success" &&
       (`${task.inputSummary || ""} ${task.result?.content || ""}`).includes(chapter.id)
-  );
+  ) || recaps.some((recap) => recap.chapterId === chapter.id);
   const acceptedLedgers = ledgers.filter((entry) => entry.chapterIds.includes(chapter.id));
   const hasLedger = acceptedLedgers.length > 0 || hasChapterSummary;
   const savedDraftBlocked = !hasDraft;
@@ -109,6 +209,11 @@ export async function buildCreationRuntimeSnapshot(
     overdueCount,
     severity: narrativeDebtSeverity({ debtCount: unresolvedDebts.length + openLoopCount, riskCount, openLoopCount, overdueCount })
   };
+  const acceptedRecapIds = new Set(summary.acceptedRecapIds || []);
+  const chapterRecaps = recaps.filter((recap) => recap.chapterId === chapter.id && !acceptedRecapIds.has(recapAcceptanceId(recap)));
+  const pendingRecapPatchCount = chapterRecaps.reduce((total, recap) => total + pendingPatchCount(recap), 0);
+  const craftBeatCount = scenes.reduce((total, scene) => total + sceneCraftBeats(scene).length, 0);
+  const craftGateRisks = buildCraftGateRisks(qualityReport, scenes);
 
   const steps: CreationRuntimeStep[] = [
     {
@@ -169,6 +274,9 @@ export async function buildCreationRuntimeSnapshot(
       hasQualityReport,
       hasWritingRecap,
       acceptedLedgerCount: acceptedLedgers.length,
+      pendingRecapPatchCount,
+      craftBeatCount,
+      craftGateRisks,
       narrativeDebt
     }
   };

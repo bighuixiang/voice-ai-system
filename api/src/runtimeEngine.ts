@@ -16,23 +16,27 @@ import type {
   WritingRecapCandidate
 } from "./types.js";
 import { assembleContext } from "./contextAssembler.js";
-import { readProject, projectRoot, writeProject } from "./novelProject.js";
+import { upsertProjectRecord } from "./database.js";
+import { readProject, projectRoot } from "./novelProject.js";
 import { resolveInside, assertSafeNovelPath } from "./pathSafety.js";
 import { runNovelTask } from "./taskService.js";
 import { rebuildKnowledgeIndex, readKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
 import { buildStoryGraphProjection } from "./storyGraph.js";
 import {
-  acceptWritingRecapPatches,
+  appendWritingRecap,
   buildSeriesQualityMetrics,
   readChapterQualityReport,
   readChapterSummary,
   readLedgerEntries,
+  readSceneCards,
   readStoryControl,
   saveChapterQualityReport
 } from "./writingCockpit.js";
 import {
   appendRuntimeEvent,
   createRuntimeBranch,
+  createRuntimeRun,
+  enqueueRuntimeCommand,
   finishRuntimeCommand,
   getRuntimeBranch,
   getRuntimeRun,
@@ -74,6 +78,13 @@ function selectTargetChapter(project: NovelProject, requestedChapterId?: string)
   if (opened && opened.status !== "checked") return opened;
   const next = orderedChapters(project).find((chapter) => chapter.status === "empty" || chapter.status === "planned" || chapter.status === "drafted");
   return next || orderedChapters(project)[0];
+}
+
+function selectNextAutopilotChapter(project: NovelProject, completedChapterId: string): NovelChapter | undefined {
+  const chapters = orderedChapters(project);
+  const completedIndex = chapters.findIndex((chapter) => chapter.id === completedChapterId);
+  const candidates = chapters.filter((chapter) => chapter.status === "empty" || chapter.status === "planned");
+  return candidates.find((chapter) => chapters.indexOf(chapter) > completedIndex) || candidates.find((chapter) => chapter.id !== completedChapterId);
 }
 
 function stageMessage(stage: RuntimePipelineStage): string {
@@ -298,21 +309,23 @@ function searchKnowledgeRefs(input: {
   return [...facts, ...triples, ...chapters];
 }
 
-function buildSnapshotBlockingReasons(snapshot: Pick<NarrativeSnapshot, "contextBudget" | "summarySignals" | "knowledgeSignals" | "qualityRisks">): string[] {
+function buildSnapshotBlockingReasons(snapshot: Pick<NarrativeSnapshot, "contextBudget" | "summarySignals" | "knowledgeSignals" | "qualityRisks" | "craftRisks">): string[] {
   const reasons: string[] = [];
   if (!snapshot.summarySignals.length) reasons.push("missing_chapter_summary_chain");
   if (!snapshot.knowledgeSignals.factCount && !snapshot.knowledgeSignals.tripleCount) reasons.push("missing_knowledge_index");
   if (snapshot.qualityRisks.length) reasons.push("open_high_risk_ledger_items");
+  if (snapshot.craftRisks?.length) reasons.push("open_craft_gate_risks");
   if (snapshot.contextBudget?.truncatedBlocks.length) reasons.push("context_budget_truncated_sources");
   return reasons;
 }
 
 async function buildNarrativeSnapshot(root: string, project: NovelProject, chapter: NovelChapter): Promise<NarrativeSnapshot> {
-  const [contextBlocks, storyControl, knowledge, currentSummary] = await Promise.all([
+  const [contextBlocks, storyControl, knowledge, currentSummary, currentScenes] = await Promise.all([
     assembleContext("chapter.draft", root, project, { chapterId: chapter.id }),
     readStoryControl(root),
     readKnowledgeIndex(root, project),
-    readChapterSummary(root, chapter.id)
+    readChapterSummary(root, chapter.id),
+    readSceneCards(root, chapter.id)
   ]);
   const ledgers = await Promise.all(
     (["foreshadowing", "continuity", "power", "character", "risk"] as const).map((kind) => readLedgerEntries(root, kind))
@@ -322,6 +335,12 @@ async function buildNarrativeSnapshot(root: string, project: NovelProject, chapt
     .filter((entry) => entry.status === "blocked" || entry.severity === "high")
     .slice(0, 12)
     .map((entry) => `${entry.kind}:${entry.title}`);
+  const craftRisks = currentScenes.length
+    ? currentScenes
+        .flatMap((scene) => scene.craftBeats || [])
+        .filter((beat) => beat.required && beat.status === "missed")
+        .map((beat) => `missed_craft_beat:${beat.id}:${beat.label}`)
+    : ["missing_scene_craft_beats"];
   const snapshot: NarrativeSnapshot = {
     projectSlug: project.slug,
     chapterId: chapter.id,
@@ -358,6 +377,7 @@ async function buildNarrativeSnapshot(root: string, project: NovelProject, chapt
       vectorSummary: knowledge.vectorSummary
     },
     qualityRisks,
+    craftRisks,
     createdAt: runtimeNow()
   };
   snapshot.blockingReasons = buildSnapshotBlockingReasons(snapshot);
@@ -451,7 +471,13 @@ function buildQualityReport(chapter: NovelChapter, score: number, notes: string[
     metrics: [
       { key: "tension", label: "Tension", score, note: "Runtime score based on draft/check signals." },
       { key: "prose", label: "Prose", score: Math.max(0, score - 3), note: "Generated prose baseline." },
-      { key: "rhythm", label: "Rhythm", score: Math.max(0, score - 5), note: "Estimated by content length and pipeline result." }
+      { key: "rhythm", label: "Rhythm", score: Math.max(0, score - 5), note: "Estimated by content length and pipeline result." },
+      { key: "character_arc", label: "Character Arc", score: Math.max(0, score - 6), note: "Checks desire, wound, pressure, and observable state movement." },
+      { key: "payoff", label: "Payoff", score: Math.max(0, score - 4), note: "Checks setup, cost, reader reward, and aftershock." },
+      { key: "foreshadowing_health", label: "Foreshadowing", score: Math.max(0, score - 7), note: "Checks setup, payoff, delay, and ledger traceability." },
+      { key: "progression", label: "Progression", score: Math.max(0, score - 5), note: "Checks power, status, resource, or plan movement with cost." },
+      { key: "slice_of_life", label: "Daily Motion", score: Math.max(0, score - 8), note: "Checks daily-life scenes for relationship, information, emotion, or setup value." },
+      { key: "redemption", label: "Redemption", score: Math.max(0, score - 8), note: "Checks costly corrective action and sublimation movement when applicable." }
     ],
     strengths: score >= 70 ? ["Draft passed runtime quality gate."] : [],
     fixes: score < 70 ? ["Rewrite with clearer conflict, stronger hook, and fewer continuity risks."] : [],
@@ -477,6 +503,67 @@ function recapFromTask(chapter: NovelChapter, content: string, summary: string):
       updatedAt: createdAt
     }
   };
+}
+
+function normalizeRecapCandidate(chapter: NovelChapter, candidate: Partial<WritingRecapCandidate>): WritingRecapCandidate {
+  const createdAt = candidate.createdAt || runtimeNow();
+  return {
+    chapterId: candidate.chapterId || chapter.id,
+    summary: candidate.summary || "",
+    newFacts: Array.isArray(candidate.newFacts) ? candidate.newFacts : [],
+    characterStateChanges: Array.isArray(candidate.characterStateChanges) ? candidate.characterStateChanges : [],
+    foreshadowingUpdates: Array.isArray(candidate.foreshadowingUpdates) ? candidate.foreshadowingUpdates : [],
+    continuityRisks: Array.isArray(candidate.continuityRisks) ? candidate.continuityRisks : [],
+    powerProgressionUpdates: Array.isArray(candidate.powerProgressionUpdates) ? candidate.powerProgressionUpdates : [],
+    createdAt,
+    summaryPatch: candidate.summaryPatch,
+    emotionLedgerPatch: candidate.emotionLedgerPatch,
+    factPatches: candidate.factPatches,
+    ledgerPatches: candidate.ledgerPatches,
+    characterStatePatches: candidate.characterStatePatches,
+    riskPatches: candidate.riskPatches,
+    craftBeatPatches: candidate.craftBeatPatches
+  };
+}
+
+function parseWritingRecapCandidate(chapter: NovelChapter, raw?: string): WritingRecapCandidate | null {
+  if (!raw?.trim()) return null;
+  const candidates = [raw.trim()];
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1]?.trim();
+  if (fenced) candidates.unshift(fenced);
+  for (const content of candidates) {
+    try {
+      const parsed = JSON.parse(content) as Partial<WritingRecapCandidate>;
+      if (parsed && typeof parsed === "object") {
+        return normalizeRecapCandidate(chapter, parsed);
+      }
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+function reviewablePatchCount(recap: WritingRecapCandidate): number {
+  return (
+    (recap.summaryPatch ? 1 : 0) +
+    (recap.emotionLedgerPatch ? 1 : 0) +
+    (recap.factPatches?.length || recap.newFacts.length) +
+    (recap.characterStatePatches?.length || recap.characterStateChanges.length) +
+    recap.foreshadowingUpdates.length +
+    recap.continuityRisks.length +
+    recap.powerProgressionUpdates.length +
+    (recap.ledgerPatches?.length || 0) +
+    (recap.riskPatches?.length || 0) +
+    (recap.craftBeatPatches?.length || 0)
+  );
+}
+
+function craftGateRisks(report: ChapterQualityReport, threshold = 70): string[] {
+  const craftKeys = new Set(["character_arc", "payoff", "foreshadowing_health", "progression", "slice_of_life", "redemption"]);
+  return report.metrics
+    .filter((metric) => craftKeys.has(metric.key) && metric.score < threshold)
+    .map((metric) => `${metric.key}:${metric.score}`);
 }
 
 async function ensureRunActive(runId: string): Promise<RuntimeRun> {
@@ -589,20 +676,32 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
   );
   insertRuntimeQualityScore({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, score: report.overallScore, payload: { report } });
   currentRun = updateRuntimeRun(currentRun.id, { qualityScore: report.overallScore }) || currentRun;
+  const craftRisks = craftGateRisks(report);
   appendRuntimeEvent({
     projectSlug: project.slug,
     runId: currentRun.id,
     type: "quality",
     stage: "quality_review",
     message: `Quality score ${report.overallScore}`,
-    payload: { score: report.overallScore }
+    payload: { score: report.overallScore, craftRisks }
   });
 
   await ensureRunActive(currentRun.id);
   currentRun = await markStage(currentRun, "recap_and_ledger");
   const recapTask = await runRuntimeTask(project, "writing.recap", { chapterId: chapter.id }, chapter);
-  const recap = recapFromTask(chapter, savedContent, recapTask.result?.summary || draftResult?.summary || "");
-  await acceptWritingRecapPatches(root, recap);
+  const recap =
+    parseWritingRecapCandidate(chapter, recapTask.result?.content) ||
+    recapFromTask(chapter, savedContent, recapTask.result?.summary || draftResult?.summary || "");
+  const pendingRecapPatchCount = reviewablePatchCount(recap);
+  await appendWritingRecap(root, recap);
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "review",
+    stage: "recap_and_ledger",
+    message: "Writing recap candidate saved for author approval",
+    payload: { chapterId: chapter.id, pendingRecapPatchCount }
+  });
 
   await ensureRunActive(currentRun.id);
   currentRun = await markStage(currentRun, "knowledge_index_update");
@@ -644,17 +743,110 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     };
     project.lastOpenedChapterId = chapter.id;
     project.updatedAt = runtimeNow();
-    await writeProject(project);
+    try {
+      await dispatchRuntimeWrites({
+        root,
+        project,
+        run: currentRun,
+        reason: "runtime_project_finalize",
+        checkpoint: writeCheckpoint,
+        allowProjectJson: true,
+        writes: [{ relativePath: "project.json", content: `${JSON.stringify(project, null, 2)}\n` }]
+      });
+      upsertProjectRecord(project, root);
+    } catch (error) {
+      if (error instanceof RuntimeWriteConflictError) {
+        const reviewRun = updateRuntimeRun(currentRun.id, {
+          status: "review_required",
+          result: {
+            chapterId: chapter.id,
+            reason: "runtime_project_conflict",
+            path: error.relativePath,
+            expectedSha256: error.expectedSha256,
+            actualSha256: error.actualSha256
+          },
+          finishedAt: runtimeNow()
+        });
+        appendRuntimeEvent({
+          projectSlug: project.slug,
+          runId: currentRun.id,
+          type: "review",
+          stage: "finalize_or_gate",
+          message: "Runtime paused because project metadata changed after checkpoint",
+          payload: {
+            path: error.relativePath,
+            action: "review_project_metadata_before_overwrite"
+          }
+        });
+        return reviewRun || currentRun;
+      }
+      throw error;
+    }
+  }
+
+  if (pendingRecapPatchCount > 0) {
+    const blockingReasons = ["recap_patches_pending", ...(craftRisks.length ? ["craft_gate_review_needed"] : []), ...(snapshot.blockingReasons || [])];
+    const review = updateRuntimeRun(currentRun.id, {
+      status: "review_required",
+      result: {
+        chapterId: chapter.id,
+        qualityScore: report.overallScore,
+        graphNodes: graph.nodes.length,
+        averageSeriesScore: seriesMetrics.averageOverallScore,
+        reason: "recap_patches_pending",
+        pendingRecapPatchCount,
+        craftRisks,
+        blockingReasons
+      },
+      finishedAt: runtimeNow()
+    });
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: currentRun.id,
+      type: "review",
+      stage: "finalize_or_gate",
+      message: "Runtime paused for recap patch approval",
+      payload: { chapterId: chapter.id, pendingRecapPatchCount, craftRisks, blockingReasons }
+    });
+    return review || currentRun;
   }
 
   if (report.overallScore >= 70) {
+    const shouldAutoContinue = run.input.autoContinue === true && !currentRun.branchId;
+    const nextChapter = shouldAutoContinue ? selectNextAutopilotChapter(project, chapter.id) : undefined;
+    const nextRun = nextChapter
+      ? createRuntimeRun({
+          projectSlug: project.slug,
+          chapterId: nextChapter.id,
+          command: "start",
+          payload: {
+            ...run.input,
+            chapterId: nextChapter.id,
+            previousRunId: currentRun.id,
+            autoContinue: true
+          }
+        })
+      : undefined;
+    const nextCommand = nextRun
+      ? enqueueRuntimeCommand({
+          projectSlug: project.slug,
+          runId: nextRun.id,
+          type: "start",
+          payload: nextRun.input,
+          idempotencyKey: `runtime:auto:${project.slug}:${currentRun.id}:${nextChapter?.id || "none"}`
+        })
+      : undefined;
     const completed = updateRuntimeRun(currentRun.id, {
       status: "completed",
       result: {
         chapterId: chapter.id,
         qualityScore: report.overallScore,
         graphNodes: graph.nodes.length,
-        averageSeriesScore: seriesMetrics.averageOverallScore
+        averageSeriesScore: seriesMetrics.averageOverallScore,
+        autoContinue: shouldAutoContinue,
+        nextRunId: nextRun?.id,
+        nextCommandId: nextCommand?.id,
+        nextChapterId: nextChapter?.id
       },
       finishedAt: runtimeNow()
     });
@@ -664,8 +856,27 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       type: "run",
       stage: "finalize_or_gate",
       message: "Runtime run completed",
-      payload: { chapterId: chapter.id, score: report.overallScore }
+      payload: { chapterId: chapter.id, score: report.overallScore, autoContinue: shouldAutoContinue, nextChapterId: nextChapter?.id }
     });
+    if (shouldAutoContinue && nextRun && nextCommand && nextChapter) {
+      appendRuntimeEvent({
+        projectSlug: project.slug,
+        runId: currentRun.id,
+        type: "command",
+        stage: "finalize_or_gate",
+        message: "Next autopilot chapter queued",
+        payload: { chapterId: nextChapter.id, runId: nextRun.id, commandId: nextCommand.id }
+      });
+    } else if (shouldAutoContinue) {
+      appendRuntimeEvent({
+        projectSlug: project.slug,
+        runId: currentRun.id,
+        type: "run",
+        stage: "finalize_or_gate",
+        message: "Autopilot sequence completed",
+        payload: { chapterId: chapter.id, reason: "no_remaining_planned_chapters" }
+      });
+    }
     return completed || currentRun;
   }
 

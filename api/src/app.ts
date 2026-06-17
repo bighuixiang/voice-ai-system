@@ -49,6 +49,7 @@ import type {
   KnowledgeSearchQuery,
   LedgerEntry,
   NovelFilePatch,
+  NovelTask,
   PlatformAiConfig
 } from "./types.js";
 import { databaseInfo, listProjectRecords, upsertProjectRecord } from "./database.js";
@@ -92,6 +93,7 @@ const taskTypes: CodexTaskType[] = [
   "chapter.plan",
   "chapter.draft",
   "selection.polish",
+  "quality.rewrite",
   "continuity.check",
   "idea.suggest",
   "writing.briefing",
@@ -119,6 +121,64 @@ function isLedgerKind(kind: string): kind is LedgerEntry["kind"] {
 
 function isBackgroundJobType(type: string): type is BackgroundJobType {
   return backgroundJobTypes.has(type as BackgroundJobType);
+}
+
+function parseTaskInputSummary(task: NovelTask): Record<string, unknown> {
+  if (task.payload && typeof task.payload === "object") {
+    return task.payload;
+  }
+  try {
+    const parsed = JSON.parse(task.inputSummary);
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeQualityRewritePatches(task: NovelTask | null, patches: NovelFilePatch[]): NovelFilePatch[] {
+  if (task?.type !== "quality.rewrite") return patches;
+
+  for (const patch of patches) {
+    assertSafeNovelPath(patch.target);
+  }
+  for (const patch of task.result?.patches || []) {
+    assertSafeNovelPath(patch.target);
+  }
+
+  const input = parseTaskInputSummary(task);
+  const target = typeof input.filePath === "string" ? assertSafeNovelPath(input.filePath.trim()) : "";
+  const documentKind = typeof input.documentKind === "string" ? input.documentKind : "";
+  if (!target || documentKind !== "content") {
+    throw new Error("Quality rewrite task is missing a current chapter content target");
+  }
+
+  const requestTargetPatch = patches.find(
+    (patch) => assertSafeNovelPath(patch.target) === target && patch.mode === "replace-file" && Boolean(patch.content.trim())
+  );
+  const requestReplacementPatch = patches.find((patch) => patch.mode === "replace-file" && Boolean(patch.content.trim()));
+  const resultTargetPatch = task.result?.patches.find(
+    (patch) => assertSafeNovelPath(patch.target) === target && patch.mode === "replace-file" && Boolean(patch.content.trim())
+  );
+  const resultReplacementPatch = task.result?.patches.find((patch) => patch.mode === "replace-file" && Boolean(patch.content.trim()));
+  const replacementContent =
+    requestTargetPatch?.content ||
+    resultTargetPatch?.content ||
+    (task.result?.content.trim() ? task.result.content : "") ||
+    requestReplacementPatch?.content ||
+    resultReplacementPatch?.content ||
+    "";
+
+  if (!replacementContent.trim()) {
+    throw new Error("Quality rewrite task has no full-chapter replacement content");
+  }
+
+  return [
+    {
+      target,
+      mode: "replace-file",
+      content: replacementContent
+    }
+  ];
 }
 
 function allowedOrigins(): Set<string> {
@@ -279,7 +339,11 @@ const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
     status = 403;
   } else if (message.includes("Project not found")) {
     status = 404;
-  } else if (message.includes("Unsafe file path") || message.includes("escapes project root")) {
+  } else if (
+    message.includes("Unsafe file path") ||
+    message.includes("escapes project root") ||
+    message.includes("Quality rewrite task")
+  ) {
     status = 400;
   }
 
@@ -728,7 +792,7 @@ export function createApp() {
     let mergedChapterId = sourceChapter?.id || "";
     let contentPath = sourceChapter?.contentPath || "";
     let outlinePath = sourceChapter?.outlinePath || "";
-    const writes: Array<{ relativePath: string; content: string }> = [];
+    const writes: Array<{ relativePath: string; content: string; failIfExists?: boolean }> = [];
     if (mode === "replace_source_chapter" && sourceChapter) {
       const index = nextProject.chapters.findIndex((chapter) => chapter.id === sourceChapter.id);
       nextProject.chapters[index] = { ...nextProject.chapters[index], status: "drafted" };
@@ -765,6 +829,7 @@ export function createApp() {
       writes.push(
         {
           relativePath: outlinePath,
+          failIfExists: true,
           content: [
             `# ${branch.title}`,
             "",
@@ -774,7 +839,7 @@ export function createApp() {
             ""
           ].join("\n")
         },
-        { relativePath: contentPath, content: draftContent.endsWith("\n") ? draftContent : `${draftContent}\n` }
+        { relativePath: contentPath, content: draftContent.endsWith("\n") ? draftContent : `${draftContent}\n`, failIfExists: true }
       );
     }
 
@@ -1175,14 +1240,16 @@ export function createApp() {
 
   app.post("/api/novel/projects/:projectId/patches", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
-    const patches = (req.body.patches || []) as NovelFilePatch[];
+    const root = projectRoot(project.slug);
+    const task = typeof req.body.taskId === "string" ? await readNovelTask(root, req.body.taskId) : null;
+    const patches = normalizeQualityRewritePatches(task, (req.body.patches || []) as NovelFilePatch[]);
     for (const patch of patches) {
-      await applyPatch(projectRoot(project.slug), patch);
+      await applyPatch(root, patch);
     }
     const acceptedTargets = patches.map((patch) => patch.target);
     const invocationUpdate =
       typeof req.body.taskId === "string"
-        ? await markInvocationPatchesAccepted(projectRoot(project.slug), req.body.taskId, acceptedTargets)
+        ? await markInvocationPatchesAccepted(root, req.body.taskId, acceptedTargets)
         : { updated: false };
     res.json({ applied: patches.length, invocationUpdated: invocationUpdate.updated, invocationId: invocationUpdate.invocationId });
   }));
