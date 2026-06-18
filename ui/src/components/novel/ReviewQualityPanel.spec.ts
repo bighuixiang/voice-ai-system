@@ -179,7 +179,9 @@ describe("ReviewQualityPanel", () => {
     expect(wrapper.text()).toContain("林澈");
     expect(wrapper.text()).toContain("2 次 · 更谨慎地处理血符。");
 
-    expect(wrapper.text()).toContain("86分改造清单");
+    expect(wrapper.text()).toContain("超过 86 分改造清单");
+    expect(wrapper.text()).toContain("68 / 100");
+    expect(wrapper.text()).toContain("目标 > 86");
 
     await wrapper.findAll("button")[0].trigger("click");
     await wrapper.findAll("button")[1].trigger("click");

@@ -2,7 +2,7 @@
   "projectSlug": "novel-1780911338197",
   "chapterCount": 198,
   "reportCount": 1,
-  "averageOverallScore": 86,
+  "averageOverallScore": 84,
   "metricAverages": [
     {
       "key": "hook",
@@ -13,13 +13,19 @@
     {
       "key": "rhythm",
       "label": "节奏",
-      "averageScore": 68,
+      "averageScore": 66,
       "reportCount": 1
     },
     {
       "key": "tension",
       "label": "张力",
-      "averageScore": 83,
+      "averageScore": 82,
+      "reportCount": 1
+    },
+    {
+      "key": "information",
+      "label": "信息",
+      "averageScore": 93,
       "reportCount": 1
     },
     {
@@ -31,12 +37,6 @@
     {
       "key": "emotion",
       "label": "情绪",
-      "averageScore": 100,
-      "reportCount": 1
-    },
-    {
-      "key": "information",
-      "label": "信息",
       "averageScore": 100,
       "reportCount": 1
     },
@@ -51,24 +51,24 @@
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "overallScore": 86,
+      "overallScore": 84,
       "weakestMetricKey": "hook",
       "weakestMetricLabel": "钩子",
       "weakestMetricScore": 50,
-      "updatedAt": "2026-06-14T13:59:11.718Z"
+      "updatedAt": "2026-06-17T18:54:53.822Z"
     }
   ],
   "rhythmSignals": [
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "rhythmScore": 68,
-      "overallScore": 86,
+      "rhythmScore": 66,
+      "overallScore": 84,
       "wordCount": 5747,
       "sceneCount": 7,
       "beatCount": 1,
       "note": "句段节奏偏单一，适合拆出动作、反应和停顿。",
-      "updatedAt": "2026-06-14T13:59:11.718Z"
+      "updatedAt": "2026-06-17T18:54:53.822Z"
     }
   ],
   "characterArcSignals": [],
@@ -80,12 +80,12 @@
         {
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 86,
-          "updatedAt": "2026-06-14T13:59:11.718Z"
+          "score": 84,
+          "updatedAt": "2026-06-17T18:54:53.822Z"
         }
       ],
-      "averageScore": 86,
-      "latestScore": 86
+      "averageScore": 84,
+      "latestScore": 84
     },
     {
       "key": "hook",
@@ -95,7 +95,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 50,
-          "updatedAt": "2026-06-14T13:59:11.718Z"
+          "updatedAt": "2026-06-17T18:54:53.822Z"
         }
       ],
       "averageScore": 50,
@@ -108,12 +108,12 @@
         {
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 68,
-          "updatedAt": "2026-06-14T13:59:11.718Z"
+          "score": 66,
+          "updatedAt": "2026-06-17T18:54:53.822Z"
         }
       ],
-      "averageScore": 68,
-      "latestScore": 68
+      "averageScore": 66,
+      "latestScore": 66
     },
     {
       "key": "tension",
@@ -122,12 +122,26 @@
         {
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 83,
-          "updatedAt": "2026-06-14T13:59:11.718Z"
+          "score": 82,
+          "updatedAt": "2026-06-17T18:54:53.822Z"
         }
       ],
-      "averageScore": 83,
-      "latestScore": 83
+      "averageScore": 82,
+      "latestScore": 82
+    },
+    {
+      "key": "information",
+      "label": "信息",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 93,
+          "updatedAt": "2026-06-17T18:54:53.822Z"
+        }
+      ],
+      "averageScore": 93,
+      "latestScore": 93
     },
     {
       "key": "conflict",
@@ -137,7 +151,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 100,
-          "updatedAt": "2026-06-14T13:59:11.718Z"
+          "updatedAt": "2026-06-17T18:54:53.822Z"
         }
       ],
       "averageScore": 100,
@@ -151,7 +165,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 100,
-          "updatedAt": "2026-06-14T13:59:11.718Z"
+          "updatedAt": "2026-06-17T18:54:53.822Z"
         }
       ],
       "averageScore": 100,
@@ -165,21 +179,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 100,
-          "updatedAt": "2026-06-14T13:59:11.718Z"
-        }
-      ],
-      "averageScore": 100,
-      "latestScore": 100
-    },
-    {
-      "key": "information",
-      "label": "信息",
-      "points": [
-        {
-          "chapterId": "chapter-001",
-          "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 100,
-          "updatedAt": "2026-06-14T13:59:11.718Z"
+          "updatedAt": "2026-06-17T18:54:53.822Z"
         }
       ],
       "averageScore": 100,
@@ -190,14 +190,14 @@
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "tensionScore": 83,
+      "tensionScore": 82,
       "conflictScore": 100,
       "hookScore": 50,
       "emotionScore": 100,
-      "rhythmScore": 68,
+      "rhythmScore": 66,
       "sceneCount": 7,
       "note": "情节、情绪、节奏和钩子形成了有效张力。",
-      "updatedAt": "2026-06-14T13:59:11.718Z"
+      "updatedAt": "2026-06-17T18:54:53.822Z"
     }
   ],
   "styleDriftSignals": [],
@@ -216,7 +216,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.206Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-003",
@@ -231,7 +231,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.206Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-004",
@@ -246,7 +246,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.206Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-005",
@@ -261,7 +261,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.206Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-006",
@@ -276,7 +276,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.206Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-007",
@@ -291,7 +291,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.206Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-008",
@@ -306,7 +306,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.206Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-009",
@@ -321,7 +321,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.207Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-010",
@@ -336,7 +336,7 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.207Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     },
     {
       "chapterId": "chapter-011",
@@ -351,8 +351,8 @@
       "redemptionCount": 0,
       "note": "No craft beats tracked for this chapter yet.",
       "severity": "watch",
-      "updatedAt": "2026-06-17T08:36:09.207Z"
+      "updatedAt": "2026-06-17T19:45:01.126Z"
     }
   ],
-  "updatedAt": "2026-06-17T08:36:09.263Z"
+  "updatedAt": "2026-06-17T19:45:01.144Z"
 }

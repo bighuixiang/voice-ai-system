@@ -9,6 +9,14 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+        additionalData: `@use "@/styles/variables.scss" as *;`,
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

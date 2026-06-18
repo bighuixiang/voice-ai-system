@@ -254,8 +254,9 @@ function buildTaskContract(type: CodexTaskType) {
           "Return a CodexTaskResult JSON only.",
           "The `content` field must contain the complete rewritten chapter text, not commentary.",
           "The first patch must be `{ target: payload.filePath, mode: \"replace-file\", content: <complete rewritten chapter text> }`.",
+          "`payload.targetScore` is the pass line to exceed, not the maximum score. `payload.maxScore` is the score ceiling, usually 100.",
           "Do not change chapter title, canon facts, POV owner, timeline order, power progression facts, or unresolved foreshadowing unless the payload explicitly asks for it.",
-          "For every metric in `payload.targetMetrics`, add a concrete item in `changes` explaining how that metric is designed to exceed `payload.targetScore`.",
+          "For every metric in `payload.targetMetrics`, add a concrete item in `changes` explaining how that metric is designed to exceed `payload.targetScore` and move as close to `payload.maxScore` as the chapter can credibly support.",
           "If a target metric cannot credibly exceed the target without new author direction, put the blocker in `questions` and still provide the safest improvement patch.",
           "Prefer scene-level fixes over cosmetic wording: raise conflict through a sharper obstacle, raise emotion through embodied reaction, raise information through one concrete reveal, raise hook through an unresolved consequence, raise rhythm through shorter action/reaction beats, raise prose through specific sensory detail, and raise tension by linking cost, pressure, and delayed payoff.",
           "For craft metrics, repair the underlying beat: character_arc needs desire/wound/choice movement, payoff needs setup/cost/reward/aftershock, foreshadowing_health needs trackable setup/payoff/delay, progression needs visible step and cost, slice_of_life needs relationship/information/emotion movement, and redemption needs costly corrective action."

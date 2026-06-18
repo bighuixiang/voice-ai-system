@@ -53,17 +53,17 @@
 
       <el-tab-pane label="提示词" name="prompts">
         <article v-for="prompt in library?.prompts || []" :key="prompt.id" class="prompt-item">
-          <strong>{{ prompt.title }}</strong>
+          <strong>{{ promptTitle(prompt.id, prompt.title) }}</strong>
           <p>{{ roleName(prompt.roleId) }} · {{ prompt.category }}</p>
-          <span>{{ prompt.prompt }}</span>
+          <span>{{ promptText(prompt.id, prompt.prompt) }}</span>
         </article>
       </el-tab-pane>
 
       <el-tab-pane label="角色" name="roles">
         <article v-for="role in library?.roles || []" :key="role.id" class="prompt-item">
-          <strong>{{ role.name }}</strong>
+          <strong>{{ roleTitle(role.id, role.name) }}</strong>
           <p>{{ role.domain }}</p>
-          <span>{{ role.systemPrompt }}</span>
+          <span>{{ rolePrompt(role.id, role.systemPrompt) }}</span>
         </article>
       </el-tab-pane>
 
@@ -71,7 +71,7 @@
         <article v-for="skill in library?.skills || []" :key="skill.id" class="skill-item">
           <div>
             <strong>{{ skill.name }}</strong>
-            <p>{{ skill.description }}</p>
+            <p>{{ skillDescription(skill.id, skill.description) }}</p>
           </div>
           <el-tag size="small" :type="skill.enabled ? 'success' : 'info'">{{ skill.scope }}</el-tag>
         </article>
@@ -84,6 +84,13 @@
 import { computed, ref } from "vue";
 import { Connection, Plus, Refresh } from "@element-plus/icons-vue";
 import type { PlatformAsset, PlatformAssetType, PlatformLibrary } from "@/types/novel";
+import {
+  promptText,
+  promptTitle,
+  rolePrompt,
+  roleTitle,
+  skillDescription
+} from "./novelSystemSkillCopy";
 
 const props = defineProps<{
   library: PlatformLibrary | null;
@@ -104,7 +111,8 @@ const assetType = ref<PlatformAssetType>("character");
 const visibleAssets = computed(() => props.library?.assets || []);
 
 function roleName(roleId: string) {
-  return props.library?.roles.find((role) => role.id === roleId)?.name || roleId;
+  const role = props.library?.roles.find((item) => item.id === roleId);
+  return roleTitle(roleId, role?.name || roleId);
 }
 
 function submitAsset() {

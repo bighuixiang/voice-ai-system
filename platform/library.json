@@ -16,6 +16,20 @@
       "isSystem": true
     },
     {
+      "id": "prompt-long-novel-writer",
+      "title": "Longform Chapter Drafting",
+      "category": "novel",
+      "roleId": "role-long-novel-writer",
+      "prompt": "Define the irreversible chapter change and the price attached to it before drafting scenes. Every scene should contain a goal, pressure, action, reveal, and consequence.",
+      "tags": [
+        "draft",
+        "quality",
+        "longform",
+        "scene-design"
+      ],
+      "isSystem": true
+    },
+    {
       "id": "prompt-scene-polish",
       "title": "POV 安全润色",
       "category": "novel",
@@ -92,6 +106,15 @@
       ]
     },
     {
+      "id": "role-long-novel-writer",
+      "name": "Long Novel Writer",
+      "domain": "novel",
+      "systemPrompt": "Turn outlines and chapter plans into publishable longform prose. Prioritize causality, honest POV, credible motivation, and chapter-level change before decorative prose.",
+      "defaultPromptIds": [
+        "prompt-long-novel-writer"
+      ]
+    },
+    {
       "id": "role-continuity-auditor",
       "name": "连续性审稿人",
       "domain": "novel",
@@ -139,6 +162,19 @@
   ],
   "skills": [
     {
+      "id": "skill-long-novel-writer",
+      "name": "long-novel-writer",
+      "scope": "system",
+      "description": "Quality-first longform drafting: design scene goals, escalate pressure, then pay off with consequence and a forward hook.",
+      "tags": [
+        "novel",
+        "quality",
+        "draft",
+        "longform"
+      ],
+      "enabled": true
+    },
+    {
       "id": "skill-novel-continuity-check",
       "name": "novel-continuity-check",
       "scope": "system",
@@ -172,5 +208,5 @@
       "enabled": true
     }
   ],
-  "updatedAt": "2026-06-17T08:37:16.932Z"
+  "updatedAt": "2026-06-18T12:51:14.571Z"
 }

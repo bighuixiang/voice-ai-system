@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "lint": "eslint . --ext vue,js,jsx,ts,tsx --quiet --fix"
+    "lint": "eslint . --ext vue,js,jsx,ts,tsx --quiet",
+    "lint:fix": "eslint . --ext vue,js,jsx,ts,tsx --quiet --fix"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

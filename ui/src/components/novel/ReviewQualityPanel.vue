@@ -32,8 +32,8 @@
       <div v-if="metricsBelowTarget.length" class="quality-upgrade">
         <div class="quality-upgrade-head">
           <div>
-            <strong>86分改造清单</strong>
-            <p>{{ metricsBelowTarget.length }} 个指标未达标，建议先做整章级改造，再复检。</p>
+            <strong>超过 {{ qualityTargetScore }} 分改造清单</strong>
+            <p>{{ metricsBelowTarget.length }} 个指标未超过目标线，满分 {{ qualityMaxScore }}，建议整章级改造后再复检。</p>
           </div>
           <el-button
             type="primary"
@@ -51,7 +51,10 @@
               <span>{{ metric.label }}</span>
               <p>{{ metric.note }}</p>
             </div>
-            <b>{{ metric.score }} / {{ qualityTargetScore }}</b>
+            <b>
+              <span>{{ metric.score }} / {{ qualityMaxScore }}</span>
+              <small>目标 &gt; {{ qualityTargetScore }}</small>
+            </b>
             <el-button
               size="small"
               :loading="isImprovingQuality"
@@ -64,8 +67,8 @@
         </div>
       </div>
       <div v-else class="quality-upgrade passed">
-        <strong>全部评分项已达 {{ qualityTargetScore }} 分以上</strong>
-        <p>可以进入最终审稿；后续改正文后会重新触发体检与改造清单。</p>
+        <strong>全部评分项已超过 {{ qualityTargetScore }} 分</strong>
+        <p>当前已越过目标线，满分仍是 {{ qualityMaxScore }}；继续精修可追求更高上限。</p>
       </div>
 
       <div class="advice-grid">
@@ -221,11 +224,13 @@ const props = withDefaults(defineProps<{
   canImproveQuality?: boolean;
   isImprovingQuality?: boolean;
   qualityTargetScore?: number;
+  qualityMaxScore?: number;
   isRebuildingSeries?: boolean;
 }>(), {
   canImproveQuality: false,
   isImprovingQuality: false,
-  qualityTargetScore: 86
+  qualityTargetScore: 86,
+  qualityMaxScore: 100
 });
 
 const emit = defineEmits<{
@@ -479,9 +484,18 @@ p {
   }
 
   b {
+    display: grid;
+    gap: 2px;
     color: var(--app-primary);
     font-size: 12px;
+    text-align: right;
     white-space: nowrap;
+  }
+
+  small {
+    color: var(--app-text-muted);
+    font-size: 10px;
+    font-weight: 700;
   }
 }
 

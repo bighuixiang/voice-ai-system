@@ -119,7 +119,7 @@
             title="自动驾驶运行时"
             :subtitle="store.activeRuntimeRun?.status || 'idle'"
             hide-toggle-test-hook
-            :collapsed="panelCollapsed('runtime-autopilot')"
+            :collapsed="panelCollapsed('runtime-autopilot', store.writingMode !== 'focus')"
             @update:collapsed="setPanelCollapsed('runtime-autopilot', $event)"
           >
             <AutopilotRuntimePanel
@@ -352,6 +352,7 @@
             :can-improve-quality="store.canImproveQualityMetrics"
             :is-improving-quality="store.isImprovingQualityMetrics"
             :quality-target-score="store.qualityTargetScore"
+            :quality-max-score="store.qualityMaxScore"
             :is-rebuilding-series="store.isRebuildingSeriesQualityMetrics"
             @diagnose="store.diagnoseCurrentChapter"
             @update:tone="store.updateStyleTone"
@@ -383,7 +384,7 @@
         <CollapsiblePanel
           v-if="store.writingMode === 'structure'"
           title="AI 操作"
-          :collapsed="panelCollapsed('ai-operation')"
+          :collapsed="panelCollapsed('ai-operation', true)"
           @update:collapsed="setPanelCollapsed('ai-operation', $event)"
         >
           <AIOperationPanel
@@ -432,8 +433,8 @@
         </CollapsiblePanel>
         <CollapsiblePanel
           v-if="store.writingMode === 'structure'"
-          title="上下文"
-          :collapsed="panelCollapsed('context-panel', true)"
+          title="创作方法"
+          :collapsed="panelCollapsed('context-panel')"
           @update:collapsed="setPanelCollapsed('context-panel', $event)"
         >
           <ContextPanel
@@ -442,6 +443,7 @@
             :ai-summary="store.activeNovelAiSummary"
             :ai-status="store.activeNovelAgentCheck?.available ? store.activeNovelAgentCheck.version || '连接正常' : store.activeNovelAgentCheck?.error"
             :ai-available="store.activeNovelAgentCheck?.available"
+            :active-skills="activeNovelSkills"
           />
         </CollapsiblePanel>
         <CollapsiblePanel
@@ -575,6 +577,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
 import { useThemeStore } from "@/stores/theme";
 import type { CreationLoopAction, NovelProject, PlatformAiConfig, StoryGraphFocus, WorkbenchCommand } from "@/types/novel";
+import { useWorkspacePanelState } from "./useWorkspacePanelState";
 import WritingModeSwitcher from "./WritingModeSwitcher.vue";
 import CollapsiblePanel from "./CollapsiblePanel.vue";
 
@@ -625,14 +628,24 @@ const storyControlDialogOpen = ref(false);
 const auditReportDialogOpen = ref(false);
 const storyGraphFocus = ref<StoryGraphFocus | null>(null);
 const auditReportFocusSection = ref<"ai-control-plane" | null>(null);
-const collapsedPanels = ref<Record<string, boolean>>({});
 const isProjectRoute = computed(() => route.name === "project-workspace");
 const editorWordCount = computed(() => store.currentDashboard?.wordCount ?? store.currentContent.replace(/\s+/g, "").length);
 const hasWorkspaceStructure = computed(() => Boolean(store.currentDashboard?.goal || store.sceneCards.length));
 const hasWorkspaceDraft = computed(() => store.currentContent.replace(/\s+/g, "").length >= 30);
+const activeNovelSkills = computed(() =>
+  (store.platformLibrary?.skills || []).filter((skill) => skill.enabled && skill.tags.includes("novel")).slice(0, 4)
+);
 const collapseStorageKey = computed(
   () => `novel-workspace:${store.currentProject?.slug || "hub"}:${store.writingMode}:collapsed-panels`
 );
+const { panelCollapsed, setPanelCollapsed } = useWorkspacePanelState({
+  storageKey: collapseStorageKey,
+  onExpand(key) {
+    if (key === "file-diff") {
+      store.loadCurrentFileVersions();
+    }
+  }
+});
 const focusDraftTuneOptions = [
   { label: "更有压迫感", value: "增强压迫感，让角色被更明确的危险、代价或时间压力推动" },
   { label: "更优雅", value: "提升文笔质感，保留清晰动作线，减少直白说明" },
@@ -845,38 +858,6 @@ function closeAuditReportPreview() {
   auditReportFocusSection.value = null;
   store.clearAuditReportPreview();
 }
-
-function panelCollapsed(key: string, defaultCollapsed = false) {
-  return typeof collapsedPanels.value[key] === "boolean" ? collapsedPanels.value[key] : defaultCollapsed;
-}
-
-function setPanelCollapsed(key: string, collapsed: boolean) {
-  collapsedPanels.value = {
-    ...collapsedPanels.value,
-    [key]: collapsed
-  };
-  if (key === "file-diff" && !collapsed) {
-    store.loadCurrentFileVersions();
-  }
-}
-
-function loadCollapsedPanels() {
-  try {
-    collapsedPanels.value = JSON.parse(window.localStorage.getItem(collapseStorageKey.value) || "{}") as Record<string, boolean>;
-  } catch {
-    collapsedPanels.value = {};
-  }
-}
-
-watch(collapseStorageKey, loadCollapsedPanels, { immediate: true });
-
-watch(
-  collapsedPanels,
-  (value) => {
-    window.localStorage.setItem(collapseStorageKey.value, JSON.stringify(value));
-  },
-  { deep: true }
-);
 
 onMounted(() => {
   window.addEventListener("keydown", handleGlobalKeydown);

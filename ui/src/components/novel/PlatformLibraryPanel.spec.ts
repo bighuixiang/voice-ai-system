@@ -103,4 +103,51 @@ describe("PlatformLibraryPanel", () => {
 
     expect(wrapper.emitted("link-asset")?.[0]).toEqual([library.assets[0]]);
   });
+
+  it("renders the platform library copy returned by the API", () => {
+    const wrapper = mount(PlatformLibraryPanel, {
+      props: {
+        library: {
+          ...library,
+          prompts: [
+            {
+              id: "prompt-long-novel-writer",
+              title: "Longform Chapter Drafting",
+              category: "novel",
+              roleId: "role-long-novel-writer",
+              prompt: "Define the irreversible chapter change and the price attached to it before drafting scenes.",
+              tags: [],
+              isSystem: true
+            }
+          ],
+          roles: [
+            {
+              id: "role-long-novel-writer",
+              name: "Long Novel Writer",
+              domain: "novel",
+              systemPrompt: "Turn outlines and chapter plans into publishable longform prose.",
+              defaultPromptIds: ["prompt-long-novel-writer"]
+            }
+          ],
+          skills: [
+            {
+              id: "skill-long-novel-writer",
+              name: "long-novel-writer",
+              scope: "system",
+              description:
+                "Quality-first longform drafting: design scene goals, escalate pressure, then pay off with consequence and a forward hook.",
+              tags: ["novel"],
+              enabled: true
+            }
+          ]
+        },
+        projectSlug: "demo"
+      },
+      global: { stubs }
+    });
+
+    expect(wrapper.text()).toContain("Longform Chapter Drafting");
+    expect(wrapper.text()).toContain("Long Novel Writer");
+    expect(wrapper.text()).toContain("Quality-first longform drafting:");
+  });
 });

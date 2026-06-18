@@ -1,6 +1,18 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import { novelApi } from "@/services/novelApi";
+import {
+  analyzeChapterQuality as analyzeChapterQualityHelper,
+  chapterOrdinal as chapterOrdinalHelper
+} from "@/stores/novel/quality";
+import {
+  buildSceneCardsFromDraft as buildSceneCardsFromDraftHelper,
+  buildSceneCardsFromIdea as buildSceneCardsFromIdeaHelper,
+  countDraftWords as countDraftWordsHelper,
+  inferPov as inferPovHelper,
+  pickConflict as pickConflictHelper,
+  splitTextUnits as splitTextUnitsHelper
+} from "@/stores/novel/structure";
 import type {
   AiAgentCheckResult,
   AiAgentProfile,
@@ -266,8 +278,9 @@ export const useNovelStore = defineStore("novel", () => {
   const canAcceptSelectedRewrite = computed(() =>
     Boolean(activeRewriteSelection.value?.selectedText && rewriteCandidate.value?.content)
   );
-  const canDiagnoseChapter = computed(() => currentDocumentKind.value === "content" && countDraftWords(currentContent.value) >= 30);
+  const canDiagnoseChapter = computed(() => currentDocumentKind.value === "content" && countDraftWordsHelper(currentContent.value) >= 30);
   const qualityTargetScore = 86;
+  const qualityMaxScore = 100;
   const qualityMetricsBelowTarget = computed<ChapterQualityMetric[]>(() =>
     [...(currentQualityReport.value?.metrics || [])]
       .filter((metric) => metric.score < qualityTargetScore)
@@ -303,7 +316,7 @@ export const useNovelStore = defineStore("novel", () => {
       "默认模型";
     return `${profileLabel} · ${modelLabel}`;
   });
-  const currentWordCount = computed(() => countDraftWords(currentContent.value));
+  const currentWordCount = computed(() => countDraftWordsHelper(currentContent.value));
   const focusProgressPercent = computed(() => {
     if (!focusTargetWords.value) return 0;
     return clampScore((currentWordCount.value / focusTargetWords.value) * 100);
@@ -1114,13 +1127,15 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function buildSceneCardsFromDraft(content: string, chapterId: string) {
+    return buildSceneCardsFromDraftHelper(content, chapterId);
+
     const units = splitTextUnits(content);
     const beats = units.length ? units.slice(0, 5) : [content.trim()];
     return beats.map((unit, index) =>
       makeSceneCard(chapterId, index + 1, {
         title: compactSnippet(unit, 14),
         location: inferLocation(unit),
-        pov: inferPov(content),
+        pov: inferPovHelper(content),
         conflict: pickConflict([unit]),
         turn: compactSnippet(unit, 42),
         powerProgression: inferPowerProgression(unit),
@@ -1130,6 +1145,8 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function buildSceneCardsFromIdea(idea: string, chapterId: string) {
+    return buildSceneCardsFromIdeaHelper(idea, chapterId);
+
     const seed = compactSnippet(idea, 28);
     const beats = [
       {
@@ -1238,6 +1255,7 @@ export const useNovelStore = defineStore("novel", () => {
     return Math.max(0, Math.min(100, Math.round(score)));
   }
 
+/*
   function countMatches(content: string, pattern: RegExp) {
     return content.match(pattern)?.length || 0;
   }
@@ -1271,6 +1289,7 @@ export const useNovelStore = defineStore("novel", () => {
     return risks;
   }
 
+*/
   function currentNarrativeDebtRisks() {
     const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
     if (!chapterId) return [];
@@ -1290,6 +1309,23 @@ export const useNovelStore = defineStore("novel", () => {
     const chapterId = currentChapter.value?.id || currentDashboard.value?.chapterId;
     const content = currentContent.value.trim();
     if (!chapterId || !content || !canDiagnoseChapter.value) return false;
+
+    const narrativeDebtWarnings = currentNarrativeDebtRisks();
+    const analyzedReport: ChapterQualityReport = analyzeChapterQualityHelper({
+      chapterId,
+      content,
+      ordinal: chapterOrdinalHelper(currentProject.value, currentChapter.value),
+      narrativeDebtRisks: narrativeDebtWarnings
+    });
+    currentQualityReport.value = analyzedReport;
+    if (currentProject.value) {
+      const saved = await novelApi.saveChapterQualityReport(currentProject.value.slug, analyzedReport);
+      currentQualityReport.value = saved.report;
+      currentSeriesQualityMetrics.value = saved.seriesMetrics;
+      await loadCreationRuntimeSnapshot(chapterId);
+    }
+    return true;
+/*
 
     const units = splitTextUnits(content);
     const wordCount = countDraftWords(content);
@@ -1389,6 +1425,7 @@ export const useNovelStore = defineStore("novel", () => {
       await loadCreationRuntimeSnapshot(chapterId);
     }
     return true;
+*/
   }
 
   async function improveQualityMetrics(metricKey?: QualityMetricKey) {
@@ -1414,6 +1451,7 @@ export const useNovelStore = defineStore("novel", () => {
         filePath: currentFilePath.value,
         documentKind: currentDocumentKind.value,
         targetScore: qualityTargetScore,
+        maxScore: qualityMaxScore,
         targetMetrics: targetMetrics.map((metric) => ({
           key: metric.key,
           label: metric.label,
@@ -1912,7 +1950,8 @@ export const useNovelStore = defineStore("novel", () => {
       await novelApi.deleteProject(project.slug);
       projects.value = projects.value.filter((item) => item.slug !== project.slug);
       openWorkspaceSlugs.value = openWorkspaceSlugs.value.filter((slug) => slug !== project.slug);
-      const { [project.slug]: _deletedWorkspace, ...restCache } = workspaceCache.value;
+      const restCache = { ...workspaceCache.value };
+      delete restCache[project.slug];
       workspaceCache.value = restCache;
       if (currentProject.value?.slug === project.slug) {
         resetActiveWorkspace();
@@ -2472,15 +2511,15 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function applyLocalReverseStructure(content: string, chapterId: string) {
-    const units = splitTextUnits(content);
-    const conflict = pickConflict(units);
+    const units = splitTextUnitsHelper(content);
+    const conflict = pickConflictHelper(units);
     return applyGeneratedStructure(
       {
         goal: `反写：梳理“${compactSnippet(units[0] || content, 28)}”这一章的目标、阻力和结尾钩子。`,
         pov: inferPov(content),
         mainConflict: compactSnippet(conflict || "主角需要在目标与代价之间做选择。", 54),
         endingHook: compactSnippet(units[units.length - 1] || content, 54),
-        status: countDraftWords(content) > 80 ? "drafted" : "drafting"
+        status: countDraftWordsHelper(content) > 80 ? "drafted" : "drafting"
       },
       buildSceneCardsFromDraft(content, chapterId)
     );
@@ -2746,7 +2785,8 @@ export const useNovelStore = defineStore("novel", () => {
     if (currentProject.value?.slug === projectSlug && !options.skipLeaveCheck && !canLeaveCurrentWorkspace()) return;
 
     openWorkspaceSlugs.value = openWorkspaceSlugs.value.filter((slug) => slug !== projectSlug);
-    const { [projectSlug]: _closedWorkspace, ...restCache } = workspaceCache.value;
+    const restCache = { ...workspaceCache.value };
+    delete restCache[projectSlug];
     workspaceCache.value = restCache;
     if (currentProject.value?.slug !== projectSlug) return;
 
@@ -3226,6 +3266,7 @@ export const useNovelStore = defineStore("novel", () => {
     canDiagnoseChapter,
     canImproveQualityMetrics,
     qualityTargetScore,
+    qualityMaxScore,
     qualityMetricsBelowTarget,
     canReverseEngineerStructure,
     canRequestFocusDraft,

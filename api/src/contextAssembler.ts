@@ -14,6 +14,17 @@ import type {
 import { resolveInside } from "./pathSafety.js";
 import { searchKnowledgeIndex } from "./knowledgeIndex.js";
 import { buildCraftProfileBlock } from "./craftProfile.js";
+import {
+  buildContinuityReviewSkillBlock,
+  buildLongNovelWriterContextBlock,
+  describeNovelSkill,
+  displayNovelPromptTitle,
+  displayNovelRoleName,
+  longNovelWriterPrompt,
+  longNovelWriterRole,
+  longNovelWriterSkill
+} from "./novelSystemSkills.js";
+import { readPlatformLibrarySnapshot } from "./platformLibrary.js";
 
 type ContextTier = "T0" | "T1" | "T2" | "T3";
 
@@ -276,6 +287,64 @@ async function buildGenreProfileBlock(root: string, project: NovelProject): Prom
   const source = `${project.genre || ""} ${project.roughIdea || ""}`.toLowerCase();
   const profile = genreProfiles.find((item) => item.patterns?.some((pattern) => source.includes(pattern.toLowerCase())));
   return profile ? genreProfileBlock(profile, "内置题材 Profile") : undefined;
+}
+
+const novelSkillContextTypes: CodexTaskType[] = [
+  "outline.generate",
+  "structure.reverse",
+  "chapter.plan",
+  "chapter.draft",
+  "writing.briefing",
+  "writing.recap",
+  "quality.rewrite",
+  "continuity.check",
+  "idea.suggest",
+  "assistant.free"
+];
+
+const continuitySkillContextTypes: CodexTaskType[] = [
+  "chapter.plan",
+  "chapter.draft",
+  "writing.briefing",
+  "writing.recap",
+  "quality.rewrite",
+  "continuity.check",
+  "assistant.free"
+];
+
+async function buildPlatformSkillBlocks(type: CodexTaskType): Promise<ContextBlock[]> {
+  if (!novelSkillContextTypes.includes(type)) return [];
+
+  const library = await readPlatformLibrarySnapshot().catch(() => undefined);
+  if (!library) return [];
+
+  const activeNovelSkills = library.skills.filter((skill) => skill.enabled && skill.tags.includes("novel"));
+  if (!activeNovelSkills.length) return [];
+
+  const blocks: ContextBlock[] = [
+    {
+      title: "Active Novel Skills",
+      tier: "T1",
+      content: activeNovelSkills.map((skill) => `- ${skill.name}: ${describeNovelSkill(skill.id, skill.description)}`).join("\n")
+    }
+  ];
+
+  if (activeNovelSkills.some((skill) => skill.id === longNovelWriterSkill.id)) {
+    const activeRole = library.roles.find((role) => role.id === longNovelWriterRole.id);
+    const activePrompt = library.prompts.find((prompt) => prompt.id === longNovelWriterPrompt.id);
+    blocks.unshift(
+      buildLongNovelWriterContextBlock(
+        displayNovelRoleName(activeRole?.id || "", activeRole?.name || longNovelWriterRole.name),
+        displayNovelPromptTitle(activePrompt?.id || "", activePrompt?.title || longNovelWriterPrompt.title)
+      )
+    );
+  }
+
+  if (activeNovelSkills.some((skill) => skill.id === "skill-novel-continuity-check") && continuitySkillContextTypes.includes(type)) {
+    blocks.push(buildContinuityReviewSkillBlock());
+  }
+
+  return blocks;
 }
 
 function emptyTierStats() {
@@ -561,11 +630,13 @@ export async function assembleContext(
   const narrativePromiseBlock = buildNarrativePromiseBlock(project, chapter);
   const genreProfileBlock = await buildGenreProfileBlock(root, project);
   const craftProfileBlock = await buildCraftProfileBlock(root, project);
+  const platformSkillBlocks = await buildPlatformSkillBlocks(type);
   const blocks = [
     { title: "项目配置", content: JSON.stringify(project, null, 2) },
     ...(narrativePromiseBlock ? [narrativePromiseBlock] : []),
     ...(genreProfileBlock ? [genreProfileBlock] : []),
     craftProfileBlock,
+    ...platformSkillBlocks,
     { title: "文风规则", content: await readOptional(root, "style/style-guide.md") },
     { title: "角色档案", content: await readOptional(root, "bible/characters.md") },
     { title: "世界观", content: await readOptional(root, "bible/world.md") },
@@ -628,6 +699,7 @@ export async function assembleContext(
       content: JSON.stringify(
         {
           targetScore: payload.targetScore,
+          maxScore: payload.maxScore,
           targetMetrics: payload.targetMetrics,
           mode: payload.mode,
           qualityReport: payload.currentQualityReport || (await readOptionalJson(root, `quality/${chapter.id}.json`))

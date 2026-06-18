@@ -12,11 +12,13 @@ describe("contextAssembler", () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-context-"));
     process.env.NOVELS_ROOT = tempRoot;
     process.env.NOVEL_DB_PATH = path.join(tempRoot, "data", "creative-platform.sqlite");
+    process.env.PLATFORM_ROOT = path.join(tempRoot, "platform");
   });
 
   afterEach(async () => {
     delete process.env.NOVELS_ROOT;
     delete process.env.NOVEL_DB_PATH;
+    delete process.env.PLATFORM_ROOT;
     await fs.rm(tempRoot, { recursive: true, force: true });
   });
 
@@ -130,6 +132,34 @@ describe("contextAssembler", () => {
     expect(profile?.content).toContain("Novel craft autopilot profile");
     expect(profile?.content).toContain("payoff");
     expect(profile?.content).toContain("matchedGenreProfiles");
+  });
+
+  it("injects the long novel writer playbook when the system skill is enabled", async () => {
+    const project = createProjectSkeleton({ title: "Longform Demo", genre: "fantasy", roughIdea: "Quality-first drafting matters." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+    const longformSkill = blocks.find((block) => block.title === "Long Novel Writer Skill");
+    const activeSkills = blocks.find((block) => block.title === "Active Novel Skills");
+
+    expect(longformSkill?.content).toContain("qualityPriority");
+    expect(longformSkill?.content).toContain("irreversible chapter change");
+    expect(longformSkill?.content).toContain("visible price");
+    expect(activeSkills?.content).toContain("long-novel-writer");
+    expect(activeSkills?.content).toContain("novel-continuity-check");
+  });
+
+  it("reads platform skills during context assembly without persisting the platform library", async () => {
+    const project = createProjectSkeleton({ title: "Platform Snapshot", genre: "fantasy", roughIdea: "Context reads should stay side-effect free." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const platformLibraryPath = path.join(process.env.PLATFORM_ROOT || "", "library.json");
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+
+    expect(blocks.some((block) => block.title === "Active Novel Skills")).toBe(true);
+    await expect(fs.access(platformLibraryPath)).rejects.toThrow();
   });
 
   it("uses a project-level craft profile override when present", async () => {

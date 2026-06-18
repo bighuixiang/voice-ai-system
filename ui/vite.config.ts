@@ -33,11 +33,25 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/monaco-editor')) return 'editor'
-          if (id.includes('node_modules/element-plus') || id.includes('node_modules/@element-plus')) return 'ui'
+          if (id.includes('node_modules/monaco-editor')) {
+            const monacoPath = id.split('/esm/vs/')[1]
+            if (!monacoPath) return 'editor'
+
+            const segments = monacoPath.split('/')
+            const [scope, area] = segments
+
+            if (scope === 'editor' && area) {
+              return `editor-${scope}-${area}`
+            }
+
+            return scope ? `editor-${scope}` : 'editor'
+          }
+          if (id.includes('node_modules/@element-plus/icons-vue')) return 'ui-icons'
+          if (id.includes('node_modules/element-plus')) return 'ui-core'
           if (id.includes('node_modules/vue') || id.includes('node_modules/pinia') || id.includes('node_modules/vue-router')) {
             return 'vendor'
           }
@@ -48,6 +62,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
+        api: 'modern-compiler',
         additionalData: `@use "@/styles/variables.scss" as *;`
       }
     },

@@ -24,6 +24,7 @@ const mockNovelApi = vi.hoisted(() => ({
   listProjects: vi.fn(),
   createProject: vi.fn(),
   importProject: vi.fn(),
+  deleteProject: vi.fn(),
   readPlatformLibrary: vi.fn(),
   readAiStages: vi.fn(),
   createPlatformAsset: vi.fn(),
@@ -594,6 +595,7 @@ describe("useNovelStore", () => {
     mockNovelApi.readTask.mockResolvedValue(taskWithResult());
     mockNovelApi.cancelTask.mockResolvedValue(taskWithResult({ status: "cancelled", error: "cancelled" }));
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
+    mockNovelApi.deleteProject.mockResolvedValue(undefined);
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
     mockNovelApi.readAiStages.mockResolvedValue(aiStages);
     mockNovelApi.createPlatformAsset.mockResolvedValue({
@@ -1069,6 +1071,22 @@ describe("useNovelStore", () => {
     await store.closeWorkspace("demo");
 
     expect(store.openWorkspaceProjects).toEqual([]);
+  });
+
+  it("deletes a project and clears its cached workspace state", async () => {
+    const store = useNovelStore();
+    store.projects = [project];
+    await store.openProject(project);
+    store.showProjectHub();
+
+    expect(store.workspaceCache.demo).toBeDefined();
+
+    await store.deleteProject(project);
+
+    expect(mockNovelApi.deleteProject).toHaveBeenCalledWith("demo");
+    expect(store.projects).toEqual([]);
+    expect(store.workspaceCache.demo).toBeUndefined();
+    expect(store.currentProject).toBeNull();
   });
 
   it("tracks dirty content and marks it clean after saving", async () => {
@@ -2008,7 +2026,7 @@ describe("useNovelStore", () => {
     });
   });
 
-  it("requests AI quality rewrite for metrics below 86 and prepares a full-file patch", async () => {
+  it("applies an all-metric quality rewrite and re-diagnoses the current chapter", async () => {
     const store = useNovelStore();
     store.currentProject = project;
     await store.openChapter(project.chapters[0]);
@@ -2051,6 +2069,9 @@ describe("useNovelStore", () => {
         }
       })
     );
+    mockNovelApi.readFile.mockResolvedValueOnce(
+      "他在雨夜发现封印，却不能靠近。门后的人叫出了他的真名，他必须选择是否暴露身份，并承担失去藏身处的代价。"
+    );
 
     await expect(store.improveQualityMetrics()).resolves.toBe(true);
 
@@ -2064,26 +2085,37 @@ describe("useNovelStore", () => {
       "demo",
       "quality.rewrite",
       expect.objectContaining({
+        mode: "all-under-target",
         chapterId: "chapter-001",
         filePath: "chapters/chapter-001.md",
+        documentKind: "content",
         targetScore: 86,
-        targetMetrics: [expect.objectContaining({ key: "hook", score: 68, gap: 18 })]
+        maxScore: 100,
+        currentChapterTitle: "Chapter 1",
+        currentWordCount: 48,
+        instruction: expect.stringContaining("Generate a reviewable full-chapter replacement patch"),
+        currentQualityReport: expect.objectContaining({
+          chapterId: "chapter-001",
+          overallScore: 82
+        }),
+        targetMetrics: [expect.objectContaining({ key: "hook", label: "钩子", score: 68, note: "结尾缺少未完成后果。", gap: 18 })]
       })
     );
+    expect(mockNovelApi.applyPatches).not.toHaveBeenCalled();
+    expect(mockNovelApi.saveChapterQualityReport).not.toHaveBeenCalled();
     expect(store.rewriteCandidate).toMatchObject({
-      summary: "质量改造候选",
+      content: "他在雨夜发现封印，却不能靠近。门后的人叫出了他的真名。",
       patches: [
         {
           target: "chapters/chapter-001.md",
           mode: "replace-file",
-          content: expect.stringContaining("真名")
+          content: "他在雨夜发现封印，却不能靠近。门后的人叫出了他的真名。"
         }
       ]
     });
-    expect(store.rewriteCandidate?.patches).toHaveLength(1);
-    expect(store.rewriteCandidateTargetsCurrentFile).toBe(true);
-    expect(store.rewriteComparisonOriginalText).toContain("雨夜发现封印");
-    expect(store.rewritePatchApplyLabel).toBe("应用整章改造");
+    expect(store.currentContent).toBe(
+      "他在雨夜发现封印，却不能靠近。风声很冷，血落在石阶上。门后突然传来回应，他必须选择是否暴露身份。"
+    );
     expect(store.canAcceptSelectedRewrite).toBe(false);
     expect(store.isImprovingQualityMetrics).toBe(false);
   });
@@ -2128,7 +2160,7 @@ describe("useNovelStore", () => {
       })
     );
 
-    await expect(store.improveQualityMetrics()).resolves.toBe(true);
+    await expect(store.improveQualityMetrics("hook")).resolves.toBe(true);
 
     expect(store.rewriteCandidate?.content).toBe("完整正文：门后的人叫出了他的真名。");
     expect(store.rewriteCandidate?.patches).toEqual([

@@ -84,15 +84,19 @@ describe("taskTemplates", () => {
     expect(prompt).toContain("SceneCard");
     expect(prompt).toContain("dashboard");
     expect(prompt).toContain("scenes");
-    expect(buildTaskPrompt("quality.rewrite", {
-      contextBlocks: [{ title: "Quality Rewrite Targets", content: JSON.stringify({ targetScore: 86 }) }],
+    const qualityRewritePrompt = buildTaskPrompt("quality.rewrite", {
+      contextBlocks: [{ title: "Quality Rewrite Targets", content: JSON.stringify({ targetScore: 86, maxScore: 100 }) }],
       payload: {
         chapterId: "chapter-001",
         filePath: "chapters/chapter-001.md",
         targetScore: 86,
+        maxScore: 100,
         targetMetrics: [{ key: "hook", label: "Hook", score: 68, note: "Flat ending." }]
       }
-    })).toContain("Quality Rewrite Contract");
+    });
+    expect(qualityRewritePrompt).toContain("Quality Rewrite Contract");
+    expect(qualityRewritePrompt).toContain("pass line to exceed");
+    expect(qualityRewritePrompt).toContain("score ceiling");
     expect(prompt).toContain("过滤标题、写作日期、版本号");
   });
 });

@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { PlatformAsset, PlatformAssetType, PlatformLibrary, PlatformRelationTarget } from "./types.js";
+import { longNovelWriterPrompt, longNovelWriterRole, longNovelWriterSkill } from "./novelSystemSkills.js";
 import { getPlatformRoot } from "./workspace.js";
 import {
   hasPlatformLibraryData,
@@ -53,6 +54,7 @@ function defaultPlatformLibrary(): PlatformLibrary {
           "负责把粗略创意设计成长篇小说结构。优先保证因果逻辑、POV 诚实、人物动机可信、伏笔可回收、升级一步一步来，不追求浮夸爽点。",
         defaultPromptIds: ["prompt-novel-outline"]
       },
+      longNovelWriterRole,
       {
         id: "role-continuity-auditor",
         name: "连续性审稿人",
@@ -105,6 +107,7 @@ function defaultPlatformLibrary(): PlatformLibrary {
         tags: ["outline", "causality", "foreshadowing"],
         isSystem: true
       },
+      longNovelWriterPrompt,
       {
         id: "prompt-scene-polish",
         title: "POV 安全润色",
@@ -157,6 +160,7 @@ function defaultPlatformLibrary(): PlatformLibrary {
       }
     ],
     skills: [
+      longNovelWriterSkill,
       {
         id: "skill-novel-continuity-check",
         name: "novel-continuity-check",
@@ -190,13 +194,11 @@ function libraryPath(): string {
   return path.join(getPlatformRoot(), libraryFileName);
 }
 
-export async function readPlatformLibrary(): Promise<PlatformLibrary> {
+async function resolvePlatformLibrary(): Promise<PlatformLibrary> {
   const defaults = defaultPlatformLibrary();
   if (!hasPlatformLibraryData()) {
     const legacyLibrary = await readLegacyJsonLibrary();
-    const seeded = replaceSystemDefaults(legacyLibrary || defaults, defaults);
-    await writePlatformLibrary(seeded);
-    return seeded;
+    return replaceSystemDefaults(legacyLibrary || defaults, defaults);
   }
 
   const library = readPlatformLibraryFromDatabase(defaults);
@@ -207,11 +209,19 @@ export async function readPlatformLibrary(): Promise<PlatformLibrary> {
     mergedLibrary.skills.length ||
     mergedLibrary.assets.length
   ) {
-    await writePlatformLibrary(mergedLibrary);
     return mergedLibrary;
   }
-  await writePlatformLibrary(defaults);
   return defaults;
+}
+
+export async function readPlatformLibrarySnapshot(): Promise<PlatformLibrary> {
+  return resolvePlatformLibrary();
+}
+
+export async function readPlatformLibrary(): Promise<PlatformLibrary> {
+  const library = await resolvePlatformLibrary();
+  await writePlatformLibrary(library);
+  return library;
 }
 
 export async function writePlatformLibrary(library: PlatformLibrary): Promise<void> {
