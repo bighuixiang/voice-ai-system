@@ -559,6 +559,37 @@ describe("NovelWorkspace writing modes", () => {
     expect(storeRef.value.loadAiStages).toHaveBeenCalledTimes(1);
   });
 
+  it("loads global workspace data in parallel during startup", async () => {
+    const store = makeStore("review");
+    const gates = {
+      agentProfiles: Promise.withResolvers<void>(),
+      platformAiConfig: Promise.withResolvers<void>(),
+      platformLibrary: Promise.withResolvers<void>(),
+      aiStages: Promise.withResolvers<void>()
+    };
+
+    store.loadAgentProfiles = vi.fn().mockReturnValue(gates.agentProfiles.promise);
+    store.loadPlatformAiConfig = vi.fn().mockReturnValue(gates.platformAiConfig.promise);
+    store.loadPlatformLibrary = vi.fn().mockReturnValue(gates.platformLibrary.promise);
+    store.loadAiStages = vi.fn().mockReturnValue(gates.aiStages.promise);
+    storeRef.value = store;
+
+    mount(NovelWorkspace, { global: { stubs } });
+    await Promise.resolve();
+
+    expect(store.loadAgentProfiles).toHaveBeenCalledTimes(1);
+    expect(store.loadPlatformAiConfig).toHaveBeenCalledTimes(1);
+    expect(store.loadPlatformLibrary).toHaveBeenCalledTimes(1);
+    expect(store.loadAiStages).toHaveBeenCalledTimes(1);
+
+    gates.agentProfiles.resolve();
+    gates.platformAiConfig.resolve();
+    gates.platformLibrary.resolve();
+    gates.aiStages.resolve();
+
+    await flushPromises();
+  });
+
   it("opens audit report preview from task history", async () => {
     storeRef.value = makeStore("review");
 

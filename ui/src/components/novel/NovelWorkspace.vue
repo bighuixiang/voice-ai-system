@@ -354,11 +354,14 @@
             :quality-target-score="store.qualityTargetScore"
             :quality-max-score="store.qualityMaxScore"
             :is-rebuilding-series="store.isRebuildingSeriesQualityMetrics"
+            :quality-improvement="store.qualityImprovementState"
+            :task-progress="store.taskProgress"
             @diagnose="store.diagnoseCurrentChapter"
             @update:tone="store.updateStyleTone"
             @tune-selection="store.tuneSelectionStyle"
             @improve-metric="store.improveQualityMetrics"
             @improve-all-metrics="store.improveQualityMetrics"
+            @open-diff="openFileDiffPanel"
             @rebuild-series="store.rebuildSeriesQualityMetrics"
           />
         </CollapsiblePanel>
@@ -621,6 +624,18 @@ const store = useNovelStore();
 const themeStore = useThemeStore();
 const route = useRoute();
 const router = useRouter();
+const globalWorkspaceDataLoaded = {
+  agentProfiles: false,
+  platformAiConfig: false,
+  platformLibrary: false,
+  aiStages: false
+};
+const globalWorkspaceDataPending: Record<keyof typeof globalWorkspaceDataLoaded, Promise<void> | null> = {
+  agentProfiles: null,
+  platformAiConfig: null,
+  platformLibrary: null,
+  aiStages: null
+};
 const sampleStarterIdea = "一个被逐出山门的少年在雨夜发现旧封印松动；他想证明自己还能修行，却必须在救人和暴露身份之间做选择。";
 const starterIdea = ref("");
 const aiConfigDialogOpen = ref(false);
@@ -658,22 +673,57 @@ function routeProjectSlug() {
   return typeof slug === "string" ? slug : "";
 }
 
+function queueGlobalWorkspaceLoad(
+  key: keyof typeof globalWorkspaceDataLoaded,
+  loader: () => Promise<unknown>,
+  onError: () => void
+) {
+  if (globalWorkspaceDataLoaded[key]) {
+    return null;
+  }
+  if (globalWorkspaceDataPending[key]) {
+    return globalWorkspaceDataPending[key];
+  }
+  const request = loader()
+    .then(() => {
+      globalWorkspaceDataLoaded[key] = true;
+    })
+    .catch(() => {
+      onError();
+    })
+    .finally(() => {
+      globalWorkspaceDataPending[key] = null;
+    });
+  globalWorkspaceDataPending[key] = request;
+  return request;
+}
+
+async function ensureGlobalWorkspaceDataLoaded() {
+  const pendingLoads = [
+    queueGlobalWorkspaceLoad("agentProfiles", () => store.loadAgentProfiles(), () => {
+      // AI profiles are optional while the API service is booting.
+    }),
+    queueGlobalWorkspaceLoad("platformAiConfig", () => store.loadPlatformAiConfig(), () => {
+      // Global AI config falls back to Codex CLI until the API service is ready.
+    }),
+    queueGlobalWorkspaceLoad("platformLibrary", () => store.loadPlatformLibrary(), () => {
+      // Platform library is optional until the API service is running.
+    }),
+    queueGlobalWorkspaceLoad("aiStages", () => store.loadAiStages(), () => {
+      // AI stage labels are optional while the API service is booting.
+    })
+  ].filter((request): request is Promise<void> => Boolean(request));
+
+  if (pendingLoads.length) {
+    await Promise.all(pendingLoads);
+  }
+}
+
 async function syncWorkspaceFromRoute() {
   if (!store.projects.length) {
     await store.loadProjects();
   }
-  await store.loadAgentProfiles().catch(() => {
-    // AI profiles are optional while the API service is booting.
-  });
-  await store.loadPlatformAiConfig().catch(() => {
-    // Global AI config falls back to Codex CLI until the API service is ready.
-  });
-  await store.loadPlatformLibrary().catch(() => {
-    // Platform library is optional until the API service is running.
-  });
-  await store.loadAiStages().catch(() => {
-    // AI stage labels are optional while the API service is booting.
-  });
+  await ensureGlobalWorkspaceDataLoaded();
 
   if (!isProjectRoute.value) {
     store.showProjectHub({ skipLeaveCheck: true });
@@ -761,6 +811,10 @@ async function handleSaveCurrentContent() {
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : "保存失败");
   }
+}
+
+function openFileDiffPanel() {
+  setPanelCollapsed("file-diff", false);
 }
 
 async function handleCreationLoopAction(action: CreationLoopAction) {
@@ -876,6 +930,15 @@ watch(
     syncWorkspaceFromRoute().catch(() => {
       // Keep the cached workspace visible if the API is temporarily unavailable.
     });
+  }
+);
+
+watch(
+  () => store.currentFileDiff?.fromVersion.id,
+  (versionId) => {
+    if (versionId) {
+      openFileDiffPanel();
+    }
   }
 );
 </script>

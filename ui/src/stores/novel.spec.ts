@@ -14,6 +14,9 @@ import type {
   NovelProject,
   NovelTask,
   ProjectAuditReport,
+  RuntimeEvent,
+  RuntimeRun,
+  RuntimeStatusSnapshot,
   SceneCard,
   StoryControl,
   WritingBriefing,
@@ -66,7 +69,19 @@ const mockNovelApi = vi.hoisted(() => ({
   readTask: vi.fn(),
   cancelTask: vi.fn(),
   polishSelection: vi.fn(),
-  applyPatches: vi.fn()
+  applyPatches: vi.fn(),
+  readRuntimeStatus: vi.fn(),
+  runtimeEventsUrl: vi.fn(),
+  startRuntime: vi.fn(),
+  pauseRuntime: vi.fn(),
+  resumeRuntime: vi.fn(),
+  stopRuntime: vi.fn(),
+  acceptRuntimeReview: vi.fn(),
+  rewriteRuntimeReview: vi.fn(),
+  sendRuntimeDirection: vi.fn(),
+  createRuntimeDerivative: vi.fn(),
+  mergeRuntimeDerivative: vi.fn(),
+  restoreRuntimeCheckpoint: vi.fn()
 }));
 
 vi.mock("@/services/novelApi", () => ({
@@ -219,6 +234,35 @@ function invocationForTask(taskId = "task-1"): AiInvocationSession {
     commitResult: { historyAppended: true, invocationAppended: true },
     createdAt: "2026-06-03T00:00:00.000Z",
     updatedAt: "2026-06-03T00:00:00.000Z"
+  };
+}
+
+function runtimeRun(overrides: Partial<RuntimeRun> = {}): RuntimeRun {
+  return {
+    id: "run-1",
+    projectSlug: "demo",
+    chapterId: "chapter-001",
+    status: "running",
+    command: "start",
+    input: {},
+    failureCount: 0,
+    rewriteCount: 0,
+    createdAt: "2026-06-19T00:00:00.000Z",
+    updatedAt: "2026-06-19T00:00:00.000Z",
+    ...overrides
+  };
+}
+
+function runtimeStatusSnapshot(overrides: Partial<RuntimeStatusSnapshot> = {}): RuntimeStatusSnapshot {
+  const activeRun = overrides.activeRun || runtimeRun();
+  return {
+    activeRun,
+    runs: [activeRun],
+    events: [],
+    checkpoints: [],
+    branches: [],
+    knowledgeRefs: [],
+    ...overrides
   };
 }
 
@@ -596,6 +640,18 @@ describe("useNovelStore", () => {
     mockNovelApi.cancelTask.mockResolvedValue(taskWithResult({ status: "cancelled", error: "cancelled" }));
     mockNovelApi.applyPatches.mockResolvedValue(undefined);
     mockNovelApi.deleteProject.mockResolvedValue(undefined);
+    mockNovelApi.readRuntimeStatus.mockResolvedValue(runtimeStatusSnapshot({ activeRun: undefined, runs: [] }));
+    mockNovelApi.runtimeEventsUrl.mockImplementation((projectId: string, after = 0) => `/runtime/${projectId}?after=${after}`);
+    mockNovelApi.startRuntime.mockResolvedValue({ run: runtimeRun(), command: {} });
+    mockNovelApi.pauseRuntime.mockResolvedValue({ run: runtimeRun({ status: "paused" }), command: {} });
+    mockNovelApi.resumeRuntime.mockResolvedValue({ run: runtimeRun({ status: "queued" }), command: {} });
+    mockNovelApi.stopRuntime.mockResolvedValue({ run: runtimeRun({ status: "cancelled" }), command: {} });
+    mockNovelApi.acceptRuntimeReview.mockResolvedValue({ run: runtimeRun({ status: "completed" }), command: {} });
+    mockNovelApi.rewriteRuntimeReview.mockResolvedValue({ run: runtimeRun({ status: "queued" }), command: {} });
+    mockNovelApi.sendRuntimeDirection.mockResolvedValue({ run: runtimeRun(), command: {} });
+    mockNovelApi.createRuntimeDerivative.mockResolvedValue({ branch: {}, run: runtimeRun(), command: {} });
+    mockNovelApi.mergeRuntimeDerivative.mockResolvedValue({});
+    mockNovelApi.restoreRuntimeCheckpoint.mockResolvedValue({});
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
     mockNovelApi.readAiStages.mockResolvedValue(aiStages);
     mockNovelApi.createPlatformAsset.mockResolvedValue({
@@ -619,6 +675,62 @@ describe("useNovelStore", () => {
     expect(store.projects).toEqual([project]);
     expect(store.currentProject).toBeNull();
     expect(store.openWorkspaceProjects).toEqual([]);
+  });
+
+  it("updates runtime stage from SSE and refreshes runtime status", async () => {
+    vi.useFakeTimers();
+    const sources: Array<{
+      listeners: Record<string, (event: MessageEvent) => void>;
+      close: () => void;
+    }> = [];
+    class FakeEventSource {
+      onopen: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      onmessage: ((event: MessageEvent) => void) | null = null;
+      listeners: Record<string, (event: MessageEvent) => void> = {};
+
+      constructor() {
+        sources.push(this);
+      }
+
+      addEventListener(type: string, listener: EventListener) {
+        this.listeners[type] = listener as (event: MessageEvent) => void;
+      }
+
+      close() {
+        return undefined;
+      }
+    }
+    vi.stubGlobal("EventSource", FakeEventSource);
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.runtimeStatus = runtimeStatusSnapshot({ activeRun: runtimeRun({ currentStage: "chapter_plan" }) });
+    mockNovelApi.readRuntimeStatus.mockResolvedValueOnce(
+      runtimeStatusSnapshot({ activeRun: runtimeRun({ currentStage: "chapter_draft" }) })
+    );
+
+    store.connectRuntimeEvents();
+    const stageEvent: RuntimeEvent = {
+      id: 12,
+      eventId: "event-12",
+      projectSlug: "demo",
+      runId: "run-1",
+      type: "stage",
+      stage: "context_assemble",
+      message: "Assembling context",
+      payload: { stage: "context_assemble" },
+      createdAt: "2026-06-19T00:01:00.000Z"
+    };
+
+    sources[0].listeners.stage({ data: JSON.stringify(stageEvent) } as MessageEvent);
+
+    expect(store.activeRuntimeRun?.currentStage).toBe("context_assemble");
+
+    await vi.advanceTimersByTimeAsync(130);
+
+    expect(mockNovelApi.readRuntimeStatus).toHaveBeenCalledWith("demo");
+    expect(store.activeRuntimeRun?.currentStage).toBe("chapter_draft");
+    vi.useRealTimers();
   });
 
   it("accepts writing cockpit data contract fixtures", () => {
@@ -790,6 +902,190 @@ describe("useNovelStore", () => {
     expect(store.knowledgeIndex?.facts).toEqual([expect.objectContaining({ id: "fact:gate" })]);
     expect(store.sceneCards).toEqual(scenes);
     expect(store.activeLedgerKind).toBe("foreshadowing");
+  });
+
+  it("starts workspace support loaders in parallel after opening a project", async () => {
+    const storyGraph = {
+      projectSlug: "demo",
+      nodes: [{ id: "chapter:chapter-001", type: "chapter", label: "Chapter 1" }],
+      edges: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    };
+    const knowledgeIndex = {
+      projectSlug: "demo",
+      facts: [],
+      triples: [],
+      chapterIndex: {
+        projectSlug: "demo",
+        chapters: [],
+        keywords: {},
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      },
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    };
+    const gates = {
+      storyControl: deferred<StoryControl>(),
+      storyGraph: deferred<typeof storyGraph>(),
+      knowledgeIndex: deferred<typeof knowledgeIndex>(),
+      ledgerEntries: deferred<LedgerEntry[]>(),
+      taskHistory: deferred<NovelTask[]>(),
+      aiInvocations: deferred<AiInvocationSession[]>(),
+      backgroundJobs: deferred<BackgroundJob[]>()
+    };
+
+    mockNovelApi.readStoryControl.mockReturnValueOnce(gates.storyControl.promise);
+    mockNovelApi.readStoryGraph.mockReturnValueOnce(gates.storyGraph.promise);
+    mockNovelApi.readKnowledgeIndex.mockReturnValueOnce(gates.knowledgeIndex.promise);
+    mockNovelApi.readLedgerEntries.mockReturnValueOnce(gates.ledgerEntries.promise);
+    mockNovelApi.listTasks.mockReturnValueOnce(gates.taskHistory.promise);
+    mockNovelApi.readAiInvocations.mockReturnValueOnce(gates.aiInvocations.promise);
+    mockNovelApi.listBackgroundJobs.mockReturnValueOnce(gates.backgroundJobs.promise);
+
+    const store = useNovelStore();
+    store.projects = [project];
+    const openPromise = store.openProject(project);
+
+    await vi.waitFor(() => {
+      expect(mockNovelApi.readStoryControl).toHaveBeenCalledWith("demo");
+    });
+
+    expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
+    expect(mockNovelApi.listTasks).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readAiInvocations).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.listBackgroundJobs).toHaveBeenCalledWith("demo");
+
+    gates.storyControl.resolve(storyControl);
+    gates.storyGraph.resolve(storyGraph);
+    gates.knowledgeIndex.resolve(knowledgeIndex);
+    gates.ledgerEntries.resolve([]);
+    gates.taskHistory.resolve([]);
+    gates.aiInvocations.resolve([]);
+    gates.backgroundJobs.resolve([]);
+
+    await openPromise;
+  });
+
+  it("ignores stale project loads when a newer project switch finishes first", async () => {
+    const otherProject: NovelProject = {
+      ...project,
+      id: "other",
+      slug: "other",
+      title: "Other Novel",
+      lastOpenedChapterId: "chapter-001"
+    };
+    const demoChapterGate = deferred<string>();
+    const demoSupportGate = deferred<string>();
+    const demoStoryControlGate = deferred<StoryControl>();
+
+    mockNovelApi.readFile.mockImplementation((projectId: string, filePath: string) => {
+      if (projectId === "demo" && filePath === "chapters/chapter-002.md") {
+        return demoChapterGate.promise;
+      }
+      if (projectId === "demo" && filePath === "bible/characters.md") {
+        return demoSupportGate.promise;
+      }
+      return Promise.resolve(`${projectId}:${filePath}`);
+    });
+    mockNovelApi.readChapterDashboard.mockImplementation(async (projectId: string, chapterId: string) => ({
+      chapterId,
+      goal: `goal:${projectId}:${chapterId}`,
+      pov: "",
+      mainConflict: "",
+      endingHook: "",
+      wordCount: 0,
+      status: "planned",
+      unresolvedForeshadowingIds: [],
+      continuityRiskIds: [],
+      updatedAt: "2026-06-04T00:00:00.000Z"
+    }));
+    mockNovelApi.readCreationRuntimeSnapshot.mockImplementation(async (projectId: string, chapterId: string) => ({
+      projectSlug: projectId,
+      chapterId,
+      chapterTitle: chapterId,
+      activeStepId: "review",
+      fingerprint: `${projectId}-${chapterId}`,
+      steps: [],
+      signals: {
+        wordCount: 120,
+        sceneCount: 0,
+        hasDashboard: true,
+        hasChapterSummary: false,
+        hasQualityReport: false,
+        hasWritingRecap: false,
+        acceptedLedgerCount: 0
+      },
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    }));
+    mockNovelApi.readSeriesQualityMetrics.mockImplementation(async (projectId: string) => ({
+      projectSlug: projectId,
+      chapterCount: 2,
+      reportCount: 0,
+      averageOverallScore: 0,
+      metricAverages: [],
+      weakestChapters: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    }));
+    mockNovelApi.readStoryControl.mockImplementation((projectId: string) => {
+      if (projectId === "demo") {
+        return demoStoryControlGate.promise;
+      }
+      return Promise.resolve({
+        ...storyControl,
+        premise: `premise:${projectId}`
+      });
+    });
+    mockNovelApi.readStoryGraph.mockImplementation(async (projectId: string) => ({
+      projectSlug: projectId,
+      nodes: [{ id: `chapter:${projectId}`, type: "chapter", label: `Chapter ${projectId}` }],
+      edges: [],
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    }));
+    mockNovelApi.readKnowledgeIndex.mockImplementation(async (projectId: string) => ({
+      projectSlug: projectId,
+      facts: [],
+      triples: [],
+      chapterIndex: {
+        projectSlug: projectId,
+        chapters: [],
+        keywords: {},
+        updatedAt: "2026-06-11T00:00:00.000Z"
+      },
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    }));
+
+    const store = useNovelStore();
+    store.projects = [project, otherProject];
+
+    const demoOpenPromise = store.openProject(project);
+
+    await vi.waitFor(() => {
+      expect(mockNovelApi.readFile).toHaveBeenCalledWith("demo", "chapters/chapter-002.md");
+    });
+
+    await store.openProject(otherProject, { skipLeaveCheck: true });
+
+    expect(store.currentProject?.slug).toBe("other");
+    expect(store.currentContent).toBe("other:chapters/chapter-001.md");
+    expect(store.supportContent).toBe("other:bible/characters.md");
+    expect(store.currentDashboard?.goal).toBe("goal:other:chapter-001");
+    expect(store.storyControl?.premise).toBe("premise:other");
+
+    demoChapterGate.resolve("demo:chapters/chapter-002.md");
+    demoSupportGate.resolve("demo:bible/characters.md");
+    demoStoryControlGate.resolve({
+      ...storyControl,
+      premise: "premise:demo"
+    });
+
+    await demoOpenPromise;
+
+    expect(store.currentProject?.slug).toBe("other");
+    expect(store.currentContent).toBe("other:chapters/chapter-001.md");
+    expect(store.supportContent).toBe("other:bible/characters.md");
+    expect(store.currentDashboard?.goal).toBe("goal:other:chapter-001");
+    expect(store.storyControl?.premise).toBe("premise:other");
   });
 
   it("loads shared AI stage definitions", async () => {

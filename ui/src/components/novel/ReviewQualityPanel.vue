@@ -71,6 +71,54 @@
         <p>当前已越过目标线，满分仍是 {{ qualityMaxScore }}；继续精修可追求更高上限。</p>
       </div>
 
+      <div v-if="showQualityImprovement" class="quality-improvement">
+        <div class="quality-improvement-head">
+          <div>
+            <strong>{{ qualityImprovementTitle }}</strong>
+            <p v-if="qualityImprovement?.summary">{{ qualityImprovement.summary }}</p>
+            <p v-else>从低分项生成候选稿、确认改动、应用后复检并打开版本对比。</p>
+          </div>
+          <div class="quality-improvement-status">
+            <el-tag size="small" :type="qualityImprovementTagType">{{ qualityImprovement?.status }}</el-tag>
+            <b v-if="qualityScoreDelta">{{ qualityScoreDelta }}</b>
+          </div>
+        </div>
+
+        <ol class="quality-stage-list">
+          <li v-for="item in qualityStageItems" :key="item.id" :class="item.status">
+            <span />
+            <div>
+              <strong>{{ item.label }}</strong>
+              <small>{{ item.detail }}</small>
+            </div>
+          </li>
+        </ol>
+
+        <div v-if="qualityImprovement?.targetMetrics.length" class="quality-target-strip">
+          <span v-for="metric in qualityImprovement.targetMetrics" :key="metric.key">
+            {{ metric.label }} {{ metric.beforeScore }} -> {{ metric.targetScore }}
+          </span>
+        </div>
+
+        <div v-if="qualityImprovement?.changes.length" class="quality-change-list">
+          <strong>可感知改动</strong>
+          <ul>
+            <li v-for="change in qualityImprovement.changes" :key="change">{{ change }}</li>
+          </ul>
+        </div>
+
+        <p v-if="qualityImprovement?.error" class="quality-improvement-error">{{ qualityImprovement.error }}</p>
+        <el-button
+          v-if="qualityImprovement?.diffVersionId"
+          size="small"
+          type="primary"
+          plain
+          @click="$emit('open-diff')"
+        >
+          打开版本对比
+        </el-button>
+      </div>
+
       <div class="advice-grid">
         <div>
           <strong>亮点</strong>
@@ -213,7 +261,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { DataAnalysis, MagicStick, Refresh } from "@element-plus/icons-vue";
-import type { ChapterQualityReport, QualityMetricKey, SeriesQualityMetrics, StyleToneKey } from "@/types/novel";
+import type { ChapterQualityReport, QualityImprovementState, QualityMetricKey, SeriesQualityMetrics, StyleToneKey, TaskProgressStep } from "@/types/novel";
 
 const props = withDefaults(defineProps<{
   report: ChapterQualityReport | null;
@@ -226,11 +274,14 @@ const props = withDefaults(defineProps<{
   qualityTargetScore?: number;
   qualityMaxScore?: number;
   isRebuildingSeries?: boolean;
+  qualityImprovement?: QualityImprovementState;
+  taskProgress?: TaskProgressStep[];
 }>(), {
   canImproveQuality: false,
   isImprovingQuality: false,
   qualityTargetScore: 86,
-  qualityMaxScore: 100
+  qualityMaxScore: 100,
+  taskProgress: () => []
 });
 
 const emit = defineEmits<{
@@ -240,6 +291,7 @@ const emit = defineEmits<{
   "rebuild-series": [];
   "improve-metric": [metricKey: QualityMetricKey];
   "improve-all-metrics": [];
+  "open-diff": [];
 }>();
 
 const toneOptions: Array<{ value: StyleToneKey; label: string }> = [
@@ -264,6 +316,66 @@ const metricsBelowTarget = computed(() =>
     .filter((metric) => metric.score < props.qualityTargetScore)
     .sort((left, right) => left.score - right.score)
 );
+const showQualityImprovement = computed(() => Boolean(props.qualityImprovement && props.qualityImprovement.status !== "idle"));
+const qualityImprovementTitle = computed(() => {
+  const status = props.qualityImprovement?.status;
+  const labels: Record<NonNullable<QualityImprovementState["status"]>, string> = {
+    idle: "等待改造",
+    preparing: "准备改造上下文",
+    running: "AI 正在生成候选稿",
+    candidate: "候选稿已生成",
+    applying: "正在应用改动",
+    reviewing: "正在重新评分",
+    applied: "改造已完成",
+    error: "改造需要处理"
+  };
+  return labels[status || "idle"];
+});
+const qualityImprovementTagType = computed(() => {
+  const status = props.qualityImprovement?.status;
+  if (status === "applied") return "success";
+  if (status === "error") return "danger";
+  if (status === "candidate") return "warning";
+  return "info";
+});
+const qualityScoreDelta = computed(() => {
+  const state = props.qualityImprovement;
+  if (typeof state?.beforeOverallScore !== "number" || typeof state.afterOverallScore !== "number") return "";
+  const delta = state.afterOverallScore - state.beforeOverallScore;
+  return `${state.beforeOverallScore} -> ${state.afterOverallScore}${delta === 0 ? "（持平）" : `（${delta > 0 ? "+" : ""}${delta}）`}`;
+});
+const qualityStageItems = computed(() => {
+  const status = props.qualityImprovement?.status || "idle";
+  const order: QualityImprovementState["status"][] = ["preparing", "running", "candidate", "applying", "reviewing", "applied"];
+  const currentIndex = order.indexOf(status);
+  return [
+    { id: "preparing", label: "准备上下文", detail: "保存当前正文并锁定低分指标" },
+    { id: "running", label: "生成候选稿", detail: activeTaskProgressText.value || "调用 AI 生成整章替换候选" },
+    { id: "candidate", label: "确认改动", detail: "在改写对比中检查新旧内容" },
+    { id: "applying", label: "应用 patch", detail: "写入正文并保留改造前快照" },
+    { id: "reviewing", label: "重新评分", detail: "应用后自动复检质量指标" },
+    { id: "applied", label: "版本对比", detail: "打开快照 diff 查看实际改动" }
+  ].map((item, index) => ({
+    ...item,
+    status:
+      status === "error"
+        ? index <= Math.max(0, currentIndex)
+          ? "done"
+          : "waiting"
+        : index < currentIndex
+          ? "done"
+          : index === currentIndex
+            ? "running"
+            : "waiting"
+  }));
+});
+const activeTaskProgressText = computed(() => {
+  const running = props.taskProgress.find((step) => step.status === "running");
+  if (running) return running.label;
+  const failed = props.taskProgress.find((step) => step.status === "error");
+  if (failed) return failed.label;
+  return "";
+});
 
 function updateTone(value: string) {
   emit("update:tone", value as StyleToneKey);
@@ -499,6 +611,142 @@ p {
   }
 }
 
+.quality-improvement {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-bg-soft);
+}
+
+.quality-improvement-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+
+  strong {
+    color: var(--app-text-primary);
+    font-size: 13px;
+  }
+}
+
+.quality-improvement-status {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  flex: 0 0 auto;
+
+  b {
+    color: var(--app-success-text);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+.quality-stage-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 7px;
+    align-items: start;
+    min-width: 0;
+    padding: 7px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    background: var(--app-bg);
+    color: var(--app-text-muted);
+  }
+
+  li > span {
+    width: 8px;
+    height: 8px;
+    margin-top: 4px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  li.running {
+    border-color: var(--app-primary);
+    color: var(--app-primary);
+  }
+
+  li.done {
+    color: var(--app-success-text);
+  }
+
+  div {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  strong,
+  small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    color: var(--app-text-primary);
+    font-size: 12px;
+  }
+
+  small {
+    color: var(--app-text-muted);
+    font-size: 11px;
+  }
+}
+
+.quality-target-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  span {
+    padding: 4px 7px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    background: var(--app-bg);
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.quality-change-list {
+  display: grid;
+  gap: 5px;
+
+  strong {
+    color: var(--app-text-primary);
+    font-size: 12px;
+  }
+
+  ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+.quality-improvement-error {
+  color: var(--app-danger-text);
+}
+
 .empty-state {
   padding: 10px;
   border: 1px solid var(--app-border);
@@ -687,9 +935,18 @@ p {
   .tone-controls,
   .advice-grid,
   .series-list,
-  .signal-row {
+  .signal-row,
+  .quality-stage-list {
     grid-template-columns: 1fr;
     align-items: stretch;
+  }
+
+  .quality-improvement-head {
+    flex-direction: column;
+  }
+
+  .quality-improvement-status {
+    justify-items: start;
   }
 }
 </style>

@@ -132,6 +132,9 @@ describe("contextAssembler", () => {
     expect(profile?.content).toContain("Novel craft autopilot profile");
     expect(profile?.content).toContain("payoff");
     expect(profile?.content).toContain("matchedGenreProfiles");
+    expect(profile?.content).toContain("original eastern epic fantasy direction");
+    expect(profile?.content).toContain("concrete sensory pressure");
+    expect(profile?.content).toContain("derivative imitation of a specific novel or author");
   });
 
   it("injects the long novel writer playbook when the system skill is enabled", async () => {

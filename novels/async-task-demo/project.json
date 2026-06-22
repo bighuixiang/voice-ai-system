@@ -1,0 +1,66 @@
+{
+  "id": "async-task-demo",
+  "slug": "async-task-demo",
+  "title": "Async Task Demo",
+  "genre": "未定",
+  "roughIdea": "Run AI without blocking the UI.",
+  "createdAt": "2026-06-19T09:10:27.996Z",
+  "updatedAt": "2026-06-19T09:10:28.166Z",
+  "lastOpenedChapterId": "chapter-001",
+  "codex": {
+    "command": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\novel-api-routes-1L8hRv\\mock-codex.cmd"
+  },
+  "ai": {
+    "profileId": "codex-cli"
+  },
+  "modules": [
+    {
+      "key": "novel",
+      "label": "Novel Writing",
+      "status": "active"
+    },
+    {
+      "key": "assets",
+      "label": "Asset Management",
+      "status": "planned"
+    },
+    {
+      "key": "script",
+      "label": "Script Production",
+      "status": "planned"
+    },
+    {
+      "key": "image-generation",
+      "label": "Image Generation",
+      "status": "planned"
+    },
+    {
+      "key": "video-generation",
+      "label": "Video Generation",
+      "status": "planned"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chapter-001",
+      "title": "第 1 章",
+      "outlinePath": "outline/chapter-001.md",
+      "contentPath": "chapters/chapter-001.md",
+      "status": "empty"
+    },
+    {
+      "id": "chapter-002",
+      "title": "第 2 章",
+      "outlinePath": "outline/chapter-002.md",
+      "contentPath": "chapters/chapter-002.md",
+      "status": "empty"
+    },
+    {
+      "id": "chapter-003",
+      "title": "第 3 章",
+      "outlinePath": "outline/chapter-003.md",
+      "contentPath": "chapters/chapter-003.md",
+      "status": "empty"
+    }
+  ]
+}

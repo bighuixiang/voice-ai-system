@@ -49,6 +49,7 @@ import type {
   KnowledgeSearchQuery,
   LedgerEntry,
   NovelFilePatch,
+  NovelProject,
   NovelTask,
   PlatformAiConfig
 } from "./types.js";
@@ -179,6 +180,25 @@ function normalizeQualityRewritePatches(task: NovelTask | null, patches: NovelFi
       content: replacementContent
     }
   ];
+}
+
+async function createPatchSnapshotBeforeApply(root: string, project: NovelProject, patch: NovelFilePatch): Promise<void> {
+  const safeTarget = assertSafeNovelPath(patch.target);
+  if (isProtectedWritePath(safeTarget)) return;
+
+  const target = resolveInside(root, safeTarget);
+  const original = await fs.readFile(target, "utf8").catch(() => "");
+  const nextContent =
+    patch.mode === "replace-file"
+      ? patch.content
+      : patch.selection
+        ? `${original.slice(0, patch.selection.start)}${patch.content}${original.slice(patch.selection.end)}`
+        : original;
+
+  await createWritingFileSnapshot(root, project, safeTarget, nextContent, {
+    source: "ai",
+    reason: "apply-patch"
+  });
 }
 
 function allowedOrigins(): Set<string> {
@@ -1244,6 +1264,7 @@ export function createApp() {
     const task = typeof req.body.taskId === "string" ? await readNovelTask(root, req.body.taskId) : null;
     const patches = normalizeQualityRewritePatches(task, (req.body.patches || []) as NovelFilePatch[]);
     for (const patch of patches) {
+      await createPatchSnapshotBeforeApply(root, project, patch);
       await applyPatch(root, patch);
     }
     const acceptedTargets = patches.map((patch) => patch.target);

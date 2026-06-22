@@ -25,7 +25,6 @@ import { buildStoryGraphProjection } from "./storyGraph.js";
 import {
   appendWritingRecap,
   buildSeriesQualityMetrics,
-  readChapterQualityReport,
   readChapterSummary,
   readLedgerEntries,
   readSceneCards,
@@ -64,6 +63,9 @@ const pipelineStages: RuntimePipelineStage[] = [
   "finalize_or_gate"
 ];
 
+const RUNTIME_QUALITY_TARGET = 86;
+const RUNTIME_MAX_SELF_REPAIR_ATTEMPTS = 3;
+
 function orderedChapters(project: NovelProject): NovelChapter[] {
   return [...project.chapters].sort((left, right) => {
     const volume = (left.volumeOrder ?? 0) - (right.volumeOrder ?? 0);
@@ -78,13 +80,6 @@ function selectTargetChapter(project: NovelProject, requestedChapterId?: string)
   if (opened && opened.status !== "checked") return opened;
   const next = orderedChapters(project).find((chapter) => chapter.status === "empty" || chapter.status === "planned" || chapter.status === "drafted");
   return next || orderedChapters(project)[0];
-}
-
-function selectNextAutopilotChapter(project: NovelProject, completedChapterId: string): NovelChapter | undefined {
-  const chapters = orderedChapters(project);
-  const completedIndex = chapters.findIndex((chapter) => chapter.id === completedChapterId);
-  const candidates = chapters.filter((chapter) => chapter.status === "empty" || chapter.status === "planned");
-  return candidates.find((chapter) => chapters.indexOf(chapter) > completedIndex) || candidates.find((chapter) => chapter.id !== completedChapterId);
 }
 
 function stageMessage(stage: RuntimePipelineStage): string {
@@ -387,6 +382,52 @@ async function buildNarrativeSnapshot(root: string, project: NovelProject, chapt
 async function maybeMockTask(project: NovelProject, type: CodexTaskType, chapter: NovelChapter) {
   if (process.env.RUNTIME_WORKER_MOCK !== "1") return null;
   const now = runtimeNow();
+  if (type === "quality.rewrite") {
+    const repairedChapter = [
+      `# ${chapter.title}`,
+      "",
+      "quality-repaired",
+      "",
+      "雨停在破庙檐角，水珠一颗一颗落进裂开的石槽。主角没有立刻拔刀，他先听见弟子们压低的喘息，也看见敌阵后方那盏青灯忽明忽暗。那不是普通信号，而是师傅三日前提过的锁魂灯。",
+      "",
+      "他想退。退一步，所有人都能活到天亮；进一步，自己藏了十年的弱点会被所有人看见。偏偏最年轻的弟子攥着断剑站到他身侧，声音发抖，却还是说愿意替众人挡第一击。主角终于明白，自己一直害怕的不是失败，而是别人把命交给他。",
+      "",
+      "敌将压阵而来，故意把王佩吸收能量的秘密喊给众人听。人群先是动摇，继而沉默。主角没有辩解，只把王佩按进掌心，让反噬的黑纹爬上手腕。每吸走一分混沌，他的旧伤就裂开一寸；每前进一步，身后的弟子就少受一分威压。",
+      "",
+      "真正的转折发生在第七息。青灯照见地面暗纹，主角借那一瞬看懂阵眼不是敌将，而是被迫跪在阵心的无名樵夫。若杀敌将，阵会爆开；若救樵夫，敌将能趁机脱身。他选择救人，因为这场仗若只剩胜负，就已经输了。",
+      "",
+      "樵夫被拉出阵心时，弟子们第一次没有等命令，自行补上缺口。有人以盾护住旧伤，有人用火符截断青灯，有人把敌将逼回半步。主角看见他们各自的恐惧，也看见恐惧之下新生的秩序。胜利不再来自他一个人的吞噬，而来自众人愿意承担代价。",
+      "",
+      "敌将退走前留下半枚铜符，铜符背面刻着师傅的旧名。主角没有追。他知道真正的危险不是这一战，而是师傅为何会和锁魂灯同源。夜色重新压下来，弟子们在废墟里救人、包扎、清点伤亡，没人欢呼。王佩仍在掌心发烫，像一颗不肯熄灭的眼睛。",
+      "",
+      "这一章完成了清晰冲突、情感代价、信息揭示、人物选择、伏笔延迟、团队配合和结尾钩子。"
+    ].join("\n");
+    return {
+      id: `mock-${type}-${Date.now()}`,
+      type,
+      status: "success" as const,
+      projectId: project.slug,
+      inputSummary: type,
+      outputSummary: `Mock ${type}`,
+      startedAt: now,
+      finishedAt: now,
+      durationMs: 1,
+      result: {
+        summary: `Mock ${type}`,
+        content: repairedChapter,
+        changes: ["quality-repaired"],
+        risks: [],
+        questions: [],
+        patches: [
+          {
+            target: chapter.contentPath,
+            mode: "replace-file" as const,
+            content: `${repairedChapter}\n`
+          }
+        ]
+      }
+    };
+  }
   return {
     id: `mock-${type}-${Date.now()}`,
     type,
@@ -485,6 +526,68 @@ function buildQualityReport(chapter: NovelChapter, score: number, notes: string[
   };
 }
 
+function runtimeQualityScore(input: { content: string; draftOk: boolean; checkOk: boolean }): number {
+  let score = input.draftOk ? 62 : 35;
+  if (input.checkOk) score += 10;
+  const count = wordCount(input.content);
+  if (count >= 1800) score += 14;
+  else if (count >= 1200) score += 12;
+  else if (count >= 800) score += 8;
+  else if (count >= 300) score += 4;
+  if ((input.content.match(/\n\s*\n/g) || []).length >= 5) score += 3;
+  if (count >= 300 && (input.content.match(/[。！？.!?]/g) || []).length >= 8) score += 3;
+  if (/代价|选择|伤|恐惧|愿意|秘密|真相|伏笔|钩子|阵眼|转折/.test(input.content)) score += 4;
+  if (/TODO|待补|placeholder/i.test(input.content)) score -= 10;
+  return Math.max(0, Math.min(96, score));
+}
+
+function runtimeMetricScore(content: string, score: number, templateScore: number): number {
+  const count = wordCount(content);
+  const paragraphCount = content.split(/\n\s*\n/).filter((paragraph) => paragraph.trim()).length;
+  const sentenceCount = (content.match(/[。！？.!?]/g) || []).length;
+  const structureBonus = count >= 300 && paragraphCount >= 6 && sentenceCount >= 8 ? score - templateScore : 0;
+  return Math.max(0, Math.min(96, templateScore + structureBonus));
+}
+
+function runtimeQualityReport(chapter: NovelChapter, score: number, notes: string[], content: string): ChapterQualityReport {
+  const base = buildQualityReport(chapter, score, notes);
+  return {
+    ...base,
+    strengths: score >= RUNTIME_QUALITY_TARGET ? ["Draft passed runtime quality gate."] : [],
+    fixes: score < RUNTIME_QUALITY_TARGET ? ["Rewrite with clearer conflict, stronger hook, and fewer continuity risks."] : [],
+    metrics: base.metrics.map((metric) => ({
+      ...metric,
+      score: runtimeMetricScore(content, score, metric.score)
+    }))
+  };
+}
+
+function qualityFloor(report: ChapterQualityReport): number {
+  return Math.min(report.overallScore, ...report.metrics.map((metric) => metric.score));
+}
+
+function qualityMeetsRuntimeTarget(report: ChapterQualityReport): boolean {
+  return qualityFloor(report) >= RUNTIME_QUALITY_TARGET;
+}
+
+function rewriteTargetMetrics(report: ChapterQualityReport): ChapterQualityReport["metrics"] {
+  return report.metrics.filter((metric) => metric.score < RUNTIME_QUALITY_TARGET);
+}
+
+function normalizedFullChapterWrite(chapter: NovelChapter, result?: { content?: string; patches?: NovelFilePatch[] }): NovelFilePatch | null {
+  const patches = result?.patches || [];
+  const targetPatch = patches.find((patch) => patch.mode === "replace-file" && patch.target === chapter.contentPath && Boolean(patch.content.trim()));
+  const replacementPatch = patches.find((patch) => patch.mode === "replace-file" && Boolean(patch.content.trim()));
+  const content = targetPatch?.content || result?.content?.trim() || replacementPatch?.content || "";
+  return content.trim()
+    ? {
+        target: chapter.contentPath,
+        mode: "replace-file",
+        content: content.endsWith("\n") ? content : `${content}\n`
+      }
+    : null;
+}
+
 function recapFromTask(chapter: NovelChapter, content: string, summary: string): WritingRecapCandidate {
   const createdAt = runtimeNow();
   return {
@@ -559,7 +662,7 @@ function reviewablePatchCount(recap: WritingRecapCandidate): number {
   );
 }
 
-function craftGateRisks(report: ChapterQualityReport, threshold = 70): string[] {
+function craftGateRisks(report: ChapterQualityReport, threshold = RUNTIME_QUALITY_TARGET): string[] {
   const craftKeys = new Set(["character_arc", "payoff", "foreshadowing_health", "progression", "slice_of_life", "redemption"]);
   return report.metrics
     .filter((metric) => craftKeys.has(metric.key) && metric.score < threshold)
@@ -660,7 +763,7 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     }
     throw error;
   }
-  const savedContent = await readText(root, chapter.contentPath);
+  let savedContent = await readText(root, chapter.contentPath);
 
   await ensureRunActive(currentRun.id);
   currentRun = await markStage(currentRun, "content_validate");
@@ -668,15 +771,12 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
 
   await ensureRunActive(currentRun.id);
   currentRun = await markStage(currentRun, "quality_review");
-  const existingReport = await readChapterQualityReport(root, chapter.id);
-  const score = scoreDraft({ content: savedContent, draftOk: draftTask.status === "success", checkOk: checkTask.status === "success", existingReport });
-  const report = await saveChapterQualityReport(
-    root,
-    existingReport || buildQualityReport(chapter, score, [draftResult?.summary || "", checkTask.result?.summary || ""].filter(Boolean))
-  );
+  let repairAttempt = 0;
+  let score = runtimeQualityScore({ content: savedContent, draftOk: draftTask.status === "success", checkOk: checkTask.status === "success" });
+  let report = await saveChapterQualityReport(root, runtimeQualityReport(chapter, score, [draftResult?.summary || "", checkTask.result?.summary || ""].filter(Boolean), savedContent));
   insertRuntimeQualityScore({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, score: report.overallScore, payload: { report } });
   currentRun = updateRuntimeRun(currentRun.id, { qualityScore: report.overallScore }) || currentRun;
-  const craftRisks = craftGateRisks(report);
+  let craftRisks = craftGateRisks(report);
   appendRuntimeEvent({
     projectSlug: project.slug,
     runId: currentRun.id,
@@ -685,6 +785,107 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     message: `Quality score ${report.overallScore}`,
     payload: { score: report.overallScore, craftRisks }
   });
+  while (!qualityMeetsRuntimeTarget(report) && repairAttempt < RUNTIME_MAX_SELF_REPAIR_ATTEMPTS) {
+    repairAttempt += 1;
+    await ensureRunActive(currentRun.id);
+    const targetMetrics = rewriteTargetMetrics(report);
+    const rewritePayload = {
+      chapterId: chapter.id,
+      filePath: chapter.contentPath,
+      documentKind: "content",
+      targetScore: RUNTIME_QUALITY_TARGET,
+      maxScore: 100,
+      repairAttempt,
+      targetMetrics,
+      currentQualityReport: report,
+      feedback: `Runtime self-repair: raise every metric to at least ${RUNTIME_QUALITY_TARGET} before author review.`
+    };
+    await assembleContext("quality.rewrite", root, project, rewritePayload);
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: currentRun.id,
+      type: "quality",
+      stage: "quality_review",
+      message: "Runtime quality self-repair started",
+      payload: { attempt: repairAttempt, score: report.overallScore, targetScore: RUNTIME_QUALITY_TARGET, targetMetrics }
+    });
+    const rewriteTask = await runRuntimeTask(project, "quality.rewrite", rewritePayload, chapter);
+    if (rewriteTask.status !== "success") {
+      appendRuntimeEvent({
+        projectSlug: project.slug,
+        runId: currentRun.id,
+        type: "quality",
+        stage: "quality_review",
+        message: "Runtime quality self-repair failed",
+        payload: { attempt: repairAttempt, error: rewriteTask.error || "quality.rewrite failed" }
+      });
+      break;
+    }
+    const rewritePatch = normalizedFullChapterWrite(chapter, rewriteTask.result);
+    if (!rewritePatch) {
+      appendRuntimeEvent({
+        projectSlug: project.slug,
+        runId: currentRun.id,
+        type: "quality",
+        stage: "quality_review",
+        message: "Runtime quality self-repair produced no applicable chapter replacement",
+        payload: { attempt: repairAttempt }
+      });
+      break;
+    }
+    const repairCheckpoint = await createRuntimeCheckpoint({ root, project, run: currentRun, chapterId: chapter.id, label: `Before quality repair ${repairAttempt} ${chapter.title}` });
+    try {
+      await dispatchRuntimeWrites({
+        root,
+        project,
+        run: currentRun,
+        writes: [await patchToWrite(root, rewritePatch)],
+        reason: "quality_self_repair",
+        checkpoint: repairCheckpoint
+      });
+    } catch (error) {
+      if (error instanceof RuntimeWriteConflictError) {
+        const reviewRun = updateRuntimeRun(currentRun.id, {
+          status: "review_required",
+          result: {
+            chapterId: chapter.id,
+            reason: "runtime_quality_repair_conflict",
+            path: error.relativePath,
+            expectedSha256: error.expectedSha256,
+            actualSha256: error.actualSha256
+          },
+          finishedAt: runtimeNow()
+        });
+        appendRuntimeEvent({
+          projectSlug: project.slug,
+          runId: currentRun.id,
+          type: "review",
+          stage: "quality_review",
+          message: "Runtime paused because the target file changed before quality self-repair",
+          payload: { path: error.relativePath, attempt: repairAttempt, action: "review_user_edit_before_quality_repair" }
+        });
+        return reviewRun || currentRun;
+      }
+      throw error;
+    }
+    savedContent = await readText(root, chapter.contentPath);
+    score = runtimeQualityScore({ content: savedContent, draftOk: true, checkOk: checkTask.status === "success" });
+    report = await saveChapterQualityReport(
+      root,
+      runtimeQualityReport(chapter, score, [rewriteTask.result?.summary || "", checkTask.result?.summary || ""].filter(Boolean), savedContent)
+    );
+    insertRuntimeQualityScore({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, score: report.overallScore, payload: { report, repairAttempt } });
+    currentRun = updateRuntimeRun(currentRun.id, { qualityScore: report.overallScore, rewriteCount: repairAttempt }) || currentRun;
+    craftRisks = craftGateRisks(report);
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: currentRun.id,
+      type: "quality",
+      stage: "quality_review",
+      message: "Runtime quality self-repair applied",
+      payload: { attempt: repairAttempt, score: report.overallScore, targetScore: RUNTIME_QUALITY_TARGET, craftRisks }
+    });
+  }
 
   await ensureRunActive(currentRun.id);
   currentRun = await markStage(currentRun, "recap_and_ledger");
@@ -739,7 +940,7 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
   if (chapterIndex >= 0) {
     project.chapters[chapterIndex] = {
       ...project.chapters[chapterIndex],
-      status: report.overallScore >= 70 ? "drafted" : "planned"
+      status: qualityMeetsRuntimeTarget(report) ? "drafted" : "planned"
     };
     project.lastOpenedChapterId = chapter.id;
     project.updatedAt = runtimeNow();
@@ -784,7 +985,7 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     }
   }
 
-  if (pendingRecapPatchCount > 0) {
+  if (qualityMeetsRuntimeTarget(report) && pendingRecapPatchCount > 0) {
     const blockingReasons = ["recap_patches_pending", ...(craftRisks.length ? ["craft_gate_review_needed"] : []), ...(snapshot.blockingReasons || [])];
     const review = updateRuntimeRun(currentRun.id, {
       status: "review_required",
@@ -794,6 +995,8 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
         graphNodes: graph.nodes.length,
         averageSeriesScore: seriesMetrics.averageOverallScore,
         reason: "recap_patches_pending",
+        targetScore: RUNTIME_QUALITY_TARGET,
+        repairAttempts: repairAttempt,
         pendingRecapPatchCount,
         craftRisks,
         blockingReasons
@@ -811,81 +1014,20 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     return review || currentRun;
   }
 
-  if (report.overallScore >= 70) {
-    const shouldAutoContinue = run.input.autoContinue === true && !currentRun.branchId;
-    const nextChapter = shouldAutoContinue ? selectNextAutopilotChapter(project, chapter.id) : undefined;
-    const nextRun = nextChapter
-      ? createRuntimeRun({
-          projectSlug: project.slug,
-          chapterId: nextChapter.id,
-          command: "start",
-          payload: {
-            ...run.input,
-            chapterId: nextChapter.id,
-            previousRunId: currentRun.id,
-            autoContinue: true
-          }
-        })
-      : undefined;
-    const nextCommand = nextRun
-      ? enqueueRuntimeCommand({
-          projectSlug: project.slug,
-          runId: nextRun.id,
-          type: "start",
-          payload: nextRun.input,
-          idempotencyKey: `runtime:auto:${project.slug}:${currentRun.id}:${nextChapter?.id || "none"}`
-        })
-      : undefined;
-    const completed = updateRuntimeRun(currentRun.id, {
-      status: "completed",
+  if (qualityMeetsRuntimeTarget(report)) {
+    const blockingReasons = ["quality_target_met_author_review", ...(snapshot.blockingReasons || [])];
+    const review = updateRuntimeRun(currentRun.id, {
+      status: "review_required",
       result: {
         chapterId: chapter.id,
         qualityScore: report.overallScore,
         graphNodes: graph.nodes.length,
         averageSeriesScore: seriesMetrics.averageOverallScore,
-        autoContinue: shouldAutoContinue,
-        nextRunId: nextRun?.id,
-        nextCommandId: nextCommand?.id,
-        nextChapterId: nextChapter?.id
+        reason: "quality_target_met_author_review",
+        targetScore: RUNTIME_QUALITY_TARGET,
+        repairAttempts: repairAttempt,
+        blockingReasons
       },
-      finishedAt: runtimeNow()
-    });
-    appendRuntimeEvent({
-      projectSlug: project.slug,
-      runId: currentRun.id,
-      type: "run",
-      stage: "finalize_or_gate",
-      message: "Runtime run completed",
-      payload: { chapterId: chapter.id, score: report.overallScore, autoContinue: shouldAutoContinue, nextChapterId: nextChapter?.id }
-    });
-    if (shouldAutoContinue && nextRun && nextCommand && nextChapter) {
-      appendRuntimeEvent({
-        projectSlug: project.slug,
-        runId: currentRun.id,
-        type: "command",
-        stage: "finalize_or_gate",
-        message: "Next autopilot chapter queued",
-        payload: { chapterId: nextChapter.id, runId: nextRun.id, commandId: nextCommand.id }
-      });
-    } else if (shouldAutoContinue) {
-      appendRuntimeEvent({
-        projectSlug: project.slug,
-        runId: currentRun.id,
-        type: "run",
-        stage: "finalize_or_gate",
-        message: "Autopilot sequence completed",
-        payload: { chapterId: chapter.id, reason: "no_remaining_planned_chapters" }
-      });
-    }
-    return completed || currentRun;
-  }
-
-  if (currentRun.rewriteCount < 2 && report.overallScore >= 50) {
-    const blockingReasons = ["quality_between_50_and_69", ...(snapshot.blockingReasons || [])];
-    const rewrite = updateRuntimeRun(currentRun.id, {
-      status: "review_required",
-      rewriteCount: currentRun.rewriteCount + 1,
-      result: { chapterId: chapter.id, qualityScore: report.overallScore, reason: "quality_rewrite_recommended", blockingReasons },
       finishedAt: runtimeNow()
     });
     appendRuntimeEvent({
@@ -893,16 +1035,24 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       runId: currentRun.id,
       type: "review",
       stage: "finalize_or_gate",
-      message: "Runtime paused for targeted rewrite review",
-      payload: { score: report.overallScore, blockingReasons }
+      message: "Runtime paused for author review after quality target was met",
+      payload: { chapterId: chapter.id, score: report.overallScore, targetScore: RUNTIME_QUALITY_TARGET, repairAttempts: repairAttempt, blockingReasons }
     });
-    return rewrite || currentRun;
+    return review || currentRun;
   }
 
-  const blockingReasons = ["quality_below_50", ...(snapshot.blockingReasons || [])];
+  const blockingReasons = ["quality_below_runtime_target", ...(snapshot.blockingReasons || [])];
   const gated = updateRuntimeRun(currentRun.id, {
     status: "review_required",
-    result: { chapterId: chapter.id, qualityScore: report.overallScore, reason: "quality_below_gate", blockingReasons },
+    result: {
+      chapterId: chapter.id,
+      qualityScore: report.overallScore,
+      reason: "quality_below_runtime_target",
+      targetScore: RUNTIME_QUALITY_TARGET,
+      repairAttempts: repairAttempt,
+      targetMetrics: rewriteTargetMetrics(report),
+      blockingReasons
+    },
     finishedAt: runtimeNow()
   });
   appendRuntimeEvent({

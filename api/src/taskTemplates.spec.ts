@@ -28,6 +28,8 @@ describe("taskTemplates", () => {
     expect(prompt).toContain("craftBeats");
     expect(prompt).toContain("narrativeFunction");
     expect(prompt).toContain("readerPayoff");
+    expect(prompt).toContain("do not copy or closely imitate");
+    expect(prompt).toContain("original epic atmosphere");
   });
 
   it("treats cockpit data as writing boundaries for planning and drafting", () => {
@@ -45,6 +47,7 @@ describe("taskTemplates", () => {
     expect(prompt).toContain("Make the choice unavoidable.");
     expect(prompt).toContain("planned CraftBeats");
     expect(prompt).toContain("Daily-life");
+    expect(prompt).toContain("cosmic scale must enter through immediate danger");
   });
 
   it("builds prewriting briefing and post-save recap instructions", () => {
@@ -97,6 +100,8 @@ describe("taskTemplates", () => {
     expect(qualityRewritePrompt).toContain("Quality Rewrite Contract");
     expect(qualityRewritePrompt).toContain("pass line to exceed");
     expect(qualityRewritePrompt).toContain("score ceiling");
+    expect(qualityRewritePrompt).toContain("Repair toward original genre-level craft only");
+    expect(qualityRewritePrompt).toContain("replace empty grandeur with concrete pressure");
     expect(prompt).toContain("过滤标题、写作日期、版本号");
   });
 });

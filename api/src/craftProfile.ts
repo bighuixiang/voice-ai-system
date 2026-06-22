@@ -16,12 +16,23 @@ const defaultGenreProfiles: CraftGenreProfile[] = [
     patterns: ["玄幻", "xuanhuan", "fantasy"],
     title: "Xuanhuan upgrade craft",
     formulas: [
+      "Use original eastern epic fantasy direction only; do not copy or closely imitate any named copyrighted novel, scene, phrasing, or living author style.",
       "Every progression beat needs setup, visible cost, and a delayed consequence.",
       "Pressure should come from hierarchy, resource scarcity, oath, bloodline, seal, sect, or public humiliation.",
-      "A satisfying payoff must change status, leverage, relationship, or knowledge."
+      "A satisfying payoff must change status, leverage, relationship, or knowledge.",
+      "Open major scenes with a pressure-bearing omen, object, ritual, ruin, wound, or hierarchy signal that forces an immediate character choice.",
+      "Ancient mystery must be concrete: each reveal should answer one visible trace and open one sharper unresolved consequence.",
+      "Keep web-serial momentum through threat, choice, cost, partial payoff, and aftershock; avoid static lore tours."
     ],
     requiredBeats: ["progression", "payoff", "hook"],
-    risks: ["free power-up", "villain exits without consequence", "new setting replaces character choice"]
+    risks: [
+      "free power-up",
+      "villain exits without consequence",
+      "new setting replaces character choice",
+      "derivative imitation of a specific novel or author",
+      "cosmic scale without local pressure",
+      "mystery fog without traceable evidence"
+    ]
   },
   {
     patterns: ["悬疑", "suspense", "mystery"],
@@ -55,7 +66,9 @@ export const defaultCraftProfile: CraftProfile = {
     "Small characters still need one specific high-light moment when their value becomes plot-relevant.",
     "A satisfying beat needs setup, cost, action, payoff, and aftershock.",
     "Foreshadowing is healthy only when setup, tracking, payoff, or intentional delay is visible.",
-    "Slice-of-life scenes must advance relationship, information, emotion, or future setup."
+    "Slice-of-life scenes must advance relationship, information, emotion, or future setup.",
+    "Do not imitate any named copyrighted work or living author style; derive only abstract genre-level craft constraints.",
+    "Epic atmosphere must be grounded in concrete sensory pressure, hierarchy, artifact, omen, cost, and character choice."
   ],
   beatDefinitions: [
     { type: "payoff", label: "Satisfying payoff", purpose: "Deliver reader reward after pressure, setup, and cost." },
@@ -76,7 +89,9 @@ export const defaultCraftProfile: CraftProfile = {
     "Progression without cost is a review risk.",
     "Foreshadowing setup without tracking or payoff must remain in a ledger.",
     "Slice-of-life scenes without relationship, information, emotion, or setup value are low-value scenes.",
-    "Major character state changes must remain pending until author approval."
+    "Major character state changes must remain pending until author approval.",
+    "Reject prose that only sounds grand but lacks concrete pressure, action, cost, payoff, or hook.",
+    "Reject passages that reproduce recognizable scenes, signature phrasing, or author mannerisms from a named source."
   ]
 };
 

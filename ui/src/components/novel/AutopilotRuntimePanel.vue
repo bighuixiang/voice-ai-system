@@ -1,5 +1,5 @@
 <template>
-  <div class="autopilot-runtime-panel">
+  <div class="autopilot-runtime-panel" :class="{ 'is-runtime-active': isRuntimeActive }">
     <div class="runtime-status-row">
       <div>
         <strong>{{ statusLabel }}</strong>
@@ -10,8 +10,24 @@
       </el-tag>
     </div>
 
+    <div v-if="activeRun" class="runtime-progress-card">
+      <div class="runtime-progress-head">
+        <span>{{ runtimeProgressText }}</span>
+        <b>{{ runtimeProgressPercent }}%</b>
+      </div>
+      <div class="runtime-progress-track" aria-hidden="true">
+        <span :style="{ width: `${runtimeProgressPercent}%` }" />
+      </div>
+      <ol class="runtime-stage-list" aria-label="自动驾驶阶段">
+        <li v-for="stage in runtimeStageItems" :key="stage.id" :class="stage.status">
+          <span />
+          <small>{{ stage.label }}</small>
+        </li>
+      </ol>
+    </div>
+
     <div class="runtime-controls">
-      <el-button type="primary" :loading="starting" :disabled="isRunning" @click="$emit('start', { direction, autoContinue })">
+      <el-button type="primary" :loading="starting" :disabled="isRunning" @click="emitStart()">
         <el-icon><VideoPlay /></el-icon>
         启动自动驾驶
       </el-button>
@@ -41,10 +57,10 @@
       placeholder="给自动驾驶补充本章方向、审稿意见或改写要求"
     />
     <div class="direction-actions">
-      <el-button :disabled="!direction.trim() || !activeRun" @click="$emit('direction', direction)">
+      <el-button :disabled="!canSendDirection" @click="handleDirectionAction()">
         发送方向
       </el-button>
-      <el-button type="warning" :disabled="!activeRun" @click="$emit('rewrite', direction)">
+      <el-button type="warning" :disabled="!canRequestRewrite" @click="handleRewriteAction()">
         要求重写
       </el-button>
       <el-button type="success" :disabled="activeRun?.status !== 'review_required'" @click="$emit('accept')">
@@ -177,7 +193,7 @@ const props = withDefaults(defineProps<{
   starting: false
 });
 
-defineEmits<{
+const emit = defineEmits<{
   start: [input: { direction: string; autoContinue: boolean }];
   pause: [];
   resume: [];
@@ -195,10 +211,63 @@ const direction = ref("");
 const autoContinue = ref(false);
 const derivativeTitle = ref("");
 const derivativeType = ref<"side_story" | "branch" | "adaptation">("side_story");
+const runtimeStages: Array<{ id: NonNullable<RuntimeRun["currentStage"]>; label: string }> = [
+  { id: "find_next_chapter", label: "找章节" },
+  { id: "checkpoint_before_run", label: "快照" },
+  { id: "prepare_narrative_snapshot", label: "叙事快照" },
+  { id: "chapter_plan", label: "规划" },
+  { id: "context_assemble", label: "上下文" },
+  { id: "chapter_draft", label: "起草" },
+  { id: "content_validate", label: "校验" },
+  { id: "quality_review", label: "质检" },
+  { id: "recap_and_ledger", label: "复盘" },
+  { id: "knowledge_index_update", label: "索引" },
+  { id: "story_graph_update", label: "故事图" },
+  { id: "finalize_or_gate", label: "收尾" }
+];
 
+const trimmedDirection = computed(() => direction.value.trim());
+const hasActiveRun = computed(() => Boolean(props.activeRun));
 const isRunning = computed(() => props.activeRun?.status === "queued" || props.activeRun?.status === "running");
+const isRuntimeActive = computed(() => props.activeRun?.status === "queued" || props.activeRun?.status === "running");
 const canPause = computed(() => props.activeRun?.status === "running" || props.activeRun?.status === "queued");
 const canResume = computed(() => props.activeRun?.status === "paused");
+const canStartFromDirection = computed(() => Boolean(trimmedDirection.value) && !props.starting && !isRunning.value);
+const canSendDirection = computed(() => (hasActiveRun.value ? Boolean(trimmedDirection.value) : canStartFromDirection.value));
+const canRequestRewrite = computed(() => (hasActiveRun.value ? true : canStartFromDirection.value));
+const currentStageIndex = computed(() => {
+  const stage = props.activeRun?.currentStage;
+  if (!stage) return props.activeRun?.status === "completed" ? runtimeStages.length - 1 : -1;
+  return runtimeStages.findIndex((item) => item.id === stage);
+});
+const runtimeProgressPercent = computed(() => {
+  if (!props.activeRun) return 0;
+  if (props.activeRun.status === "completed") return 100;
+  if (props.activeRun.status === "failed" || props.activeRun.status === "cancelled") return Math.max(0, Math.round(((currentStageIndex.value + 1) / runtimeStages.length) * 100));
+  return Math.max(8, Math.round(((currentStageIndex.value + 1) / runtimeStages.length) * 100));
+});
+const runtimeProgressText = computed(() => {
+  if (!props.activeRun) return "未启动";
+  if (props.activeRun.status === "review_required") return "等待人工审稿确认";
+  if (props.activeRun.status === "completed") return "自动驾驶已完成";
+  if (props.activeRun.status === "failed") return "自动驾驶失败";
+  if (props.activeRun.status === "cancelled") return "自动驾驶已停止";
+  const stage = runtimeStages[currentStageIndex.value];
+  return stage ? `当前阶段：${stage.label}` : "正在进入队列";
+});
+const runtimeStageItems = computed(() =>
+  runtimeStages.map((stage, index) => ({
+    ...stage,
+    status:
+      props.activeRun?.status === "completed" || index < currentStageIndex.value
+        ? "done"
+        : index === currentStageIndex.value
+          ? props.activeRun?.status === "failed"
+            ? "error"
+            : "running"
+          : "waiting"
+  }))
+);
 const contextBlocks = computed(() => props.latestSnapshot?.snapshot.contextBlocks || []);
 const explanationRefs = computed(() => props.knowledgeRefs.filter((ref) => ref.kind !== "context_block").slice(0, 16));
 const snapshotTitle = computed(() => {
@@ -250,10 +319,35 @@ function scoreLabel(score?: number) {
   if (score > 1) return String(Math.round(score));
   return score.toFixed(2);
 }
+
+function emitStart() {
+  if (props.starting || isRunning.value) return;
+  emit("start", { direction: trimmedDirection.value, autoContinue: autoContinue.value });
+}
+
+function handleDirectionAction() {
+  if (hasActiveRun.value) {
+    if (!trimmedDirection.value) return;
+    emit("direction", trimmedDirection.value);
+    return;
+  }
+  if (!canStartFromDirection.value) return;
+  emitStart();
+}
+
+function handleRewriteAction() {
+  if (hasActiveRun.value) {
+    emit("rewrite", trimmedDirection.value);
+    return;
+  }
+  if (!canStartFromDirection.value) return;
+  emitStart();
+}
 </script>
 
 <style scoped lang="scss">
 .autopilot-runtime-panel {
+  position: relative;
   display: grid;
   gap: 10px;
 }
@@ -279,6 +373,166 @@ function scoreLabel(score?: number) {
   span {
     color: var(--app-text-secondary);
     font-size: 12px;
+  }
+}
+
+.runtime-progress-card {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-bg-soft);
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+
+  &::before,
+  &::after {
+    position: absolute;
+    inset: -55%;
+    z-index: 0;
+    content: "";
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+
+  &::before {
+    background:
+      conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(69, 199, 255, 0.2) 54deg,
+        rgba(126, 255, 184, 0.18) 112deg,
+        transparent 178deg,
+        rgba(116, 144, 255, 0.16) 246deg,
+        transparent 360deg
+      );
+    filter: blur(18px);
+  }
+
+  &::after {
+    inset: 1px;
+    border-radius: 6px;
+    background:
+      radial-gradient(circle at 18% 20%, rgba(69, 199, 255, 0.12), transparent 28%),
+      radial-gradient(circle at 86% 64%, rgba(126, 255, 184, 0.1), transparent 34%),
+      var(--app-bg-soft);
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.is-runtime-active .runtime-progress-card {
+  border-color: color-mix(in srgb, var(--app-primary) 58%, var(--app-border));
+  box-shadow:
+    0 0 0 1px rgba(69, 199, 255, 0.06),
+    0 0 24px rgba(69, 199, 255, 0.12),
+    0 0 42px rgba(126, 255, 184, 0.08);
+
+  &::before {
+    opacity: 1;
+    animation: runtimeAuraFlow 4.8s linear infinite;
+  }
+
+  &::after {
+    opacity: 1;
+  }
+}
+
+.runtime-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--app-text-secondary);
+  font-size: 12px;
+
+  b {
+    color: var(--app-primary);
+    font-size: 16px;
+  }
+}
+
+.runtime-progress-track {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--app-bg-muted);
+
+  span {
+    position: relative;
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background:
+      linear-gradient(90deg, var(--app-primary), var(--app-success)),
+      linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.58), transparent);
+    background-size: 100% 100%, 42px 100%;
+    background-position: 0 0, -42px 0;
+    box-shadow: 0 0 16px color-mix(in srgb, var(--app-primary) 45%, transparent);
+    transition: width 260ms ease;
+  }
+}
+
+.is-runtime-active .runtime-progress-track span {
+  animation: runtimeProgressShimmer 1.35s ease-in-out infinite;
+}
+
+.runtime-stage-list {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 5px;
+    align-items: center;
+    min-width: 0;
+    color: var(--app-text-muted);
+  }
+
+  li > span {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  li.running {
+    color: var(--app-primary);
+
+    > span {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--app-primary) 38%, transparent);
+      animation: runtimeStagePulse 1.45s ease-out infinite;
+    }
+  }
+
+  li.done {
+    color: var(--app-success-text);
+  }
+
+  li.error {
+    color: var(--app-danger-text);
+  }
+
+  small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
   }
 }
 
@@ -456,10 +710,58 @@ section {
   }
 }
 
+@keyframes runtimeAuraFlow {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes runtimeProgressShimmer {
+  0% {
+    background-position: 0 0, -42px 0;
+  }
+  100% {
+    background-position: 0 0, calc(100% + 42px) 0;
+  }
+}
+
+@keyframes runtimeStagePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--app-primary) 34%, transparent);
+  }
+  70% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 7px transparent;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-runtime-active .runtime-progress-card::before,
+  .is-runtime-active .runtime-progress-track span,
+  .runtime-stage-list li.running > span {
+    animation: none;
+  }
+}
+
 @media (max-width: 760px) {
   .runtime-grid,
   .derivative-row {
     grid-template-columns: 1fr;
+  }
+
+  .runtime-stage-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 </style>

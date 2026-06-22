@@ -28,6 +28,8 @@ function buildTaskContract(type: CodexTaskType) {
         title: "Chapter Craft Planning Contract",
         content: [
           "Return a CodexTaskResult JSON. Its `content` field should be a chapter plan that includes a stringified JSON block for dashboard and scenes.",
+          "Style safety: do not copy or closely imitate any named copyrighted novel, scene, phrasing, or living author style.",
+          "When the project is xuanhuan/eastern fantasy, plan an original epic atmosphere through ancient omen, hierarchy pressure, concrete artifact/ritual/ruin, visible cost, and unresolved consequence.",
           "Every planned scene must include narrativeFunction, characterFunction, emotionalShift, progressionChange, readerPayoff, and craftBeats.",
           "Use CraftBeat objects with id, type, label, setup, payoff, cost, characterName, relatedEntities, required, and status.",
           "At minimum, plan one reader payoff or hook, one cost/pressure beat, and one character-state beat. For genre profiles that require progression or foreshadowing, include those beats explicitly.",
@@ -43,6 +45,8 @@ function buildTaskContract(type: CodexTaskType) {
         title: "Craft Drafting Contract",
         content: [
           "Draft the chapter prose according to the Chapter Dashboard, Scene Cards, Craft Profile, and planned CraftBeats.",
+          "Style safety: do not copy or closely imitate any named copyrighted novel, scene, phrasing, or living author style.",
+          "For xuanhuan/eastern fantasy, make the epic tone original and concrete: cosmic scale must enter through immediate danger, sensory pressure, hierarchy, artifact/omen, visible cost, and chapter-ending aftershock.",
           "Make character texture observable through desire, wound, misbelief, pressure reaction, and concrete choices rather than explanation.",
           "Give minor characters one useful high-light moment when they are scene-relevant.",
           "Deliver satisfying beats only after setup, cost, action, and aftershock.",
@@ -258,6 +262,8 @@ function buildTaskContract(type: CodexTaskType) {
           "Do not change chapter title, canon facts, POV owner, timeline order, power progression facts, or unresolved foreshadowing unless the payload explicitly asks for it.",
           "For every metric in `payload.targetMetrics`, add a concrete item in `changes` explaining how that metric is designed to exceed `payload.targetScore` and move as close to `payload.maxScore` as the chapter can credibly support.",
           "If a target metric cannot credibly exceed the target without new author direction, put the blocker in `questions` and still provide the safest improvement patch.",
+          "Style safety: do not copy or closely imitate any named copyrighted novel, scene, phrasing, or living author style. Repair toward original genre-level craft only.",
+          "For xuanhuan/eastern fantasy rewrites, replace empty grandeur with concrete pressure: immediate danger, hierarchy, artifact/omen, visible cost, traceable mystery, partial payoff, and unresolved aftershock.",
           "Prefer scene-level fixes over cosmetic wording: raise conflict through a sharper obstacle, raise emotion through embodied reaction, raise information through one concrete reveal, raise hook through an unresolved consequence, raise rhythm through shorter action/reaction beats, raise prose through specific sensory detail, and raise tension by linking cost, pressure, and delayed payoff.",
           "For craft metrics, repair the underlying beat: character_arc needs desire/wound/choice movement, payoff needs setup/cost/reward/aftershock, foreshadowing_health needs trackable setup/payoff/delay, progression needs visible step and cost, slice_of_life needs relationship/information/emotion movement, and redemption needs costly corrective action."
         ].join("\n")

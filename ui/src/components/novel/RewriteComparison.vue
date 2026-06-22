@@ -25,6 +25,21 @@
         </div>
       </div>
 
+      <div v-if="result.changes.length || diffSummary.length" class="comparison-summary">
+        <div v-if="diffSummary.length">
+          <strong>实际变化</strong>
+          <div class="summary-chip-list">
+            <span v-for="item in diffSummary" :key="item">{{ item }}</span>
+          </div>
+        </div>
+        <div v-if="result.changes.length">
+          <strong>AI 改动说明</strong>
+          <ul>
+            <li v-for="change in result.changes" :key="change">{{ change }}</li>
+          </ul>
+        </div>
+      </div>
+
       <div v-if="result.risks.length" class="notice risk">
         <strong>风险</strong>
         <ul>
@@ -58,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import type { CodexTaskResult } from "@/types/novel";
 
 interface TuneOption {
@@ -65,7 +81,7 @@ interface TuneOption {
   value: string;
 }
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   result: CodexTaskResult | null;
   originalText?: string;
   emptyOriginalText?: string;
@@ -91,6 +107,48 @@ withDefaults(defineProps<{
   requestLabel: "润色选区",
   canRequest: false
 });
+
+const diffSummary = computed(() => {
+  if (!props.result?.content || !props.originalText) return [];
+  const original = props.originalText;
+  const next = props.result.content;
+  const originalWords = original.replace(/\s+/g, "").length;
+  const nextWords = next.replace(/\s+/g, "").length;
+  const wordDelta = nextWords - originalWords;
+  const originalParagraphs = original.split(/\n\s*\n/).filter((item) => item.trim()).length;
+  const nextParagraphs = next.split(/\n\s*\n/).filter((item) => item.trim()).length;
+  const lineStats = changedLineStats(original, next);
+  const summary = [
+    wordDelta === 0 ? `字数持平 ${nextWords}` : `字数 ${wordDelta > 0 ? "+" : ""}${wordDelta}`,
+    originalParagraphs === nextParagraphs ? `段落持平 ${nextParagraphs}` : `段落 ${nextParagraphs - originalParagraphs > 0 ? "+" : ""}${nextParagraphs - originalParagraphs}`,
+    `改动区 ${lineStats.removed} 行旧 / ${lineStats.added} 行新`
+  ];
+  if (original.trim() === next.trim()) {
+    summary.unshift("候选稿与原文几乎一致");
+  }
+  return summary;
+});
+
+function changedLineStats(original: string, next: string) {
+  const originalLines = original.split(/\r?\n/);
+  const nextLines = next.split(/\r?\n/);
+  let prefix = 0;
+  while (prefix < originalLines.length && prefix < nextLines.length && originalLines[prefix] === nextLines[prefix]) {
+    prefix += 1;
+  }
+  let suffix = 0;
+  while (
+    suffix + prefix < originalLines.length &&
+    suffix + prefix < nextLines.length &&
+    originalLines[originalLines.length - 1 - suffix] === nextLines[nextLines.length - 1 - suffix]
+  ) {
+    suffix += 1;
+  }
+  return {
+    removed: Math.max(0, originalLines.length - prefix - suffix),
+    added: Math.max(0, nextLines.length - prefix - suffix)
+  };
+}
 
 defineEmits<{
   accept: [];
@@ -179,6 +237,49 @@ defineEmits<{
 .suggested .pane-content {
   border-color: var(--app-primary);
   background: var(--app-primary-soft);
+}
+
+.comparison-summary {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: var(--app-bg);
+
+  strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--app-text-primary);
+    font-size: 12px;
+  }
+
+  ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+.summary-chip-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  span {
+    padding: 4px 7px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    background: var(--app-bg-soft);
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+  }
 }
 
 .notice {

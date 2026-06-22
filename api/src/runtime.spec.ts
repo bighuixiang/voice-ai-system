@@ -27,7 +27,7 @@ import {
   runtimeStatus,
   updateRuntimeRun
 } from "./runtimeStore.js";
-import { acceptWritingRecapPatches, appendWritingRecap } from "./writingCockpit.js";
+import { acceptWritingRecapPatches, appendWritingRecap, readChapterQualityReport } from "./writingCockpit.js";
 
 let tempRoot = "";
 
@@ -251,6 +251,36 @@ describe("runtime autopilot infrastructure", () => {
     );
     const recapLines = (await fs.readFile(resolveInside(root, "tasks/recaps.jsonl"), "utf8")).trim().split(/\r?\n/);
     expect(JSON.parse(recapLines[0])).toEqual(expect.objectContaining({ chapterId: chapter.id }));
+  });
+
+  it("self-repairs autopilot drafts until the runtime quality target is met before review", async () => {
+    process.env.RUNTIME_WORKER_MOCK = "1";
+    const project = createProjectSkeleton({ title: "Runtime Quality Repair", roughIdea: "Weak drafts must be repaired before author review." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const chapter = project.chapters[0];
+    const run = createRuntimeRun({ projectSlug: project.slug, chapterId: chapter.id });
+    const command = enqueueRuntimeCommand({ projectSlug: project.slug, runId: run.id, type: "start", payload: { chapterId: chapter.id } });
+
+    await processRuntimeCommand(command);
+
+    const completed = getRuntimeRun(run.id);
+    const report = await readChapterQualityReport(root, chapter.id);
+    const content = await fs.readFile(resolveInside(root, chapter.contentPath), "utf8");
+    expect(completed).toEqual(
+      expect.objectContaining({
+        status: "review_required",
+        qualityScore: expect.any(Number),
+        result: expect.objectContaining({ qualityScore: expect.any(Number) })
+      })
+    );
+    expect(completed?.qualityScore).toBeGreaterThanOrEqual(86);
+    expect(report?.overallScore).toBeGreaterThanOrEqual(86);
+    expect(report?.metrics.every((metric) => metric.score >= 86)).toBe(true);
+    expect(content).toContain("quality-repaired");
+    expect(listRuntimeEvents(project.slug)).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "quality", message: "Runtime quality self-repair applied" })])
+    );
   });
 
   it("holds auto continue while recap patches are pending", async () => {

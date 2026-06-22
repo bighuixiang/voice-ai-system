@@ -49,6 +49,7 @@ import type {
   PlatformLibrary,
   PlotPilotLearningItem,
   ProjectAuditReport,
+  QualityImprovementState,
   QualityMetricKey,
   RuntimeCheckpoint,
   RuntimeDerivativeBranch,
@@ -125,6 +126,20 @@ interface ReverseStructurePayload {
   sceneCards?: Array<Partial<SceneCard>>;
 }
 
+interface WorkspaceLoadState {
+  requestId: number;
+  projectSlug: string;
+}
+
+interface ChapterLoadState extends WorkspaceLoadState {
+  chapterId: string;
+  filePath: string;
+}
+
+interface SupportFileLoadState extends WorkspaceLoadState {
+  filePath: string;
+}
+
 function makeDefaultPlatformAiConfig(): PlatformAiConfig {
   return {
     version: 1,
@@ -187,6 +202,7 @@ export const useNovelStore = defineStore("novel", () => {
   const runtimeKnowledgeRefs = computed(() => runtimeStatus.value?.knowledgeRefs || []);
   const isRuntimeEventsConnected = ref(false);
   const isStartingRuntime = ref(false);
+  let runtimeStatusRefreshTimer: ReturnType<typeof setTimeout> | null = null;
   const sceneCards = ref<SceneCard[]>([]);
   const storyControl = ref<StoryControl | null>(null);
   const storyGraph = ref<StoryGraphProjection | null>(null);
@@ -203,6 +219,12 @@ export const useNovelStore = defineStore("novel", () => {
   const isRebuildingKnowledgeIndex = ref(false);
   const isRebuildingSeriesQualityMetrics = ref(false);
   const isImprovingQualityMetrics = ref(false);
+  const qualityImprovementState = ref<QualityImprovementState>({
+    status: "idle",
+    targetMetrics: [],
+    changes: [],
+    patchCount: 0
+  });
   const isRebuildingStoryGraph = ref(false);
   const isSearchingKnowledge = ref(false);
   const isReverseEngineeringStructure = ref(false);
@@ -239,6 +261,51 @@ export const useNovelStore = defineStore("novel", () => {
   const savePipelineSteps = ref<SavePipelineStep[]>([]);
   const isRunningSavePipeline = ref(false);
   let runtimeEventSource: EventSource | null = null;
+  let workspaceLoadRequestId = 0;
+  let chapterLoadRequestId = 0;
+  let supportFileLoadRequestId = 0;
+
+  function beginWorkspaceLoad(projectSlug: string): WorkspaceLoadState {
+    workspaceLoadRequestId += 1;
+    return { requestId: workspaceLoadRequestId, projectSlug };
+  }
+
+  function isWorkspaceLoadCurrent(loadState: WorkspaceLoadState) {
+    return workspaceLoadRequestId === loadState.requestId && currentProject.value?.slug === loadState.projectSlug;
+  }
+
+  function beginChapterLoad(projectSlug: string, chapterId: string, filePath: string): ChapterLoadState {
+    chapterLoadRequestId += 1;
+    return { requestId: chapterLoadRequestId, projectSlug, chapterId, filePath };
+  }
+
+  function isChapterLoadCurrent(loadState: ChapterLoadState) {
+    return (
+      chapterLoadRequestId === loadState.requestId &&
+      currentProject.value?.slug === loadState.projectSlug &&
+      currentChapter.value?.id === loadState.chapterId &&
+      currentFilePath.value === loadState.filePath
+    );
+  }
+
+  function beginSupportFileLoad(projectSlug: string, filePath: string): SupportFileLoadState {
+    supportFileLoadRequestId += 1;
+    return { requestId: supportFileLoadRequestId, projectSlug, filePath };
+  }
+
+  function isSupportFileLoadCurrent(loadState: SupportFileLoadState) {
+    return (
+      supportFileLoadRequestId === loadState.requestId &&
+      currentProject.value?.slug === loadState.projectSlug &&
+      currentSupportPath.value === loadState.filePath
+    );
+  }
+
+  function invalidateWorkspaceLoadState() {
+    workspaceLoadRequestId += 1;
+    chapterLoadRequestId += 1;
+    supportFileLoadRequestId += 1;
+  }
 
   const hasProject = computed(() => currentProject.value !== null);
   const openWorkspaceProjects = computed(() =>
@@ -286,6 +353,55 @@ export const useNovelStore = defineStore("novel", () => {
       .filter((metric) => metric.score < qualityTargetScore)
       .sort((left, right) => left.score - right.score)
   );
+  function lineChangeStats(before: string, after: string) {
+    const beforeLines = before.split(/\r?\n/);
+    const afterLines = after.split(/\r?\n/);
+    let prefix = 0;
+    while (prefix < beforeLines.length && prefix < afterLines.length && beforeLines[prefix] === afterLines[prefix]) {
+      prefix += 1;
+    }
+    let suffix = 0;
+    while (
+      suffix + prefix < beforeLines.length &&
+      suffix + prefix < afterLines.length &&
+      beforeLines[beforeLines.length - 1 - suffix] === afterLines[afterLines.length - 1 - suffix]
+    ) {
+      suffix += 1;
+    }
+    return {
+      added: Math.max(0, afterLines.length - prefix - suffix),
+      removed: Math.max(0, beforeLines.length - prefix - suffix)
+    };
+  }
+
+  function buildQualityImprovementChanges(before: string, after: string, result?: CodexTaskResult | null) {
+    const changes = (result?.changes || []).map((item) => item.trim()).filter(Boolean);
+    const beforeWords = countDraftWords(before);
+    const afterWords = countDraftWords(after);
+    const wordDelta = afterWords - beforeWords;
+    const beforeParagraphs = before.split(/\n\s*\n/).filter((item) => item.trim()).length;
+    const afterParagraphs = after.split(/\n\s*\n/).filter((item) => item.trim()).length;
+    const stats = lineChangeStats(before, after);
+    const measuredChanges = [
+      wordDelta === 0 ? `字数未变化（${afterWords} 字）` : `字数 ${wordDelta > 0 ? "+" : ""}${wordDelta}（${beforeWords} -> ${afterWords}）`,
+      beforeParagraphs === afterParagraphs
+        ? `段落数未变化（${afterParagraphs} 段）`
+        : `段落 ${afterParagraphs - beforeParagraphs > 0 ? "+" : ""}${afterParagraphs - beforeParagraphs}（${beforeParagraphs} -> ${afterParagraphs}）`,
+      `候选稿改动区约 ${stats.removed} 行旧内容 / ${stats.added} 行新内容`
+    ];
+    if (before.trim() === after.trim()) {
+      measuredChanges.unshift("候选稿与当前正文几乎一致，建议重新生成或提高改造要求。");
+    }
+    return [...changes, ...measuredChanges].slice(0, 8);
+  }
+
+  function setQualityImprovementState(next: Partial<QualityImprovementState>) {
+    qualityImprovementState.value = {
+      ...qualityImprovementState.value,
+      ...next,
+      updatedAt: new Date().toISOString()
+    };
+  }
   const canImproveQualityMetrics = computed(
     () =>
       Boolean(currentProject.value && currentChapter.value && currentFilePath.value && currentDocumentKind.value === "content") &&
@@ -1430,6 +1546,17 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function improveQualityMetrics(metricKey?: QualityMetricKey) {
     if (!currentProject.value || !currentChapter.value || currentDocumentKind.value !== "content" || !currentFilePath.value) return false;
+    setQualityImprovementState({
+      status: "preparing",
+      chapterId: currentChapter.value.id,
+      filePath: currentFilePath.value,
+      targetMetrics: [],
+      changes: [],
+      patchCount: 0,
+      error: undefined,
+      diffVersionId: undefined,
+      afterOverallScore: undefined
+    });
     if (hasUnsavedChanges.value) {
       await saveCurrentContent({ runPipeline: false });
     }
@@ -1441,9 +1568,25 @@ export const useNovelStore = defineStore("novel", () => {
     const targetMetrics = report.metrics
       .filter((metric) => metric.score < qualityTargetScore && (!metricKey || metric.key === metricKey))
       .sort((left, right) => left.score - right.score);
-    if (!targetMetrics.length) return false;
+    if (!targetMetrics.length) {
+      setQualityImprovementState({ status: "idle", targetMetrics: [], changes: [], patchCount: 0 });
+      return false;
+    }
 
     isImprovingQualityMetrics.value = true;
+    setQualityImprovementState({
+      status: "running",
+      beforeOverallScore: report.overallScore,
+      targetMetrics: targetMetrics.map((metric) => ({
+        key: metric.key,
+        label: metric.label,
+        beforeScore: metric.score,
+        targetScore: qualityTargetScore,
+        note: metric.note
+      })),
+      changes: [],
+      patchCount: 0
+    });
     try {
       const task = await runTask("quality.rewrite", {
         mode: metricKey ? "single-metric" : "all-under-target",
@@ -1469,8 +1612,31 @@ export const useNovelStore = defineStore("novel", () => {
       const normalizedRewrite = normalizeCurrentChapterQualityRewrite(task?.result || null);
       if (normalizedRewrite) {
         rewriteCandidate.value = normalizedRewrite;
+        setQualityImprovementState({
+          status: "candidate",
+          taskId: task?.id,
+          summary: normalizedRewrite.summary,
+          changes: buildQualityImprovementChanges(currentContent.value, normalizedRewrite.content, normalizedRewrite),
+          patchCount: normalizedRewrite.patches.length,
+          error: normalizedRewrite.content.trim() === currentContent.value.trim() ? "候选稿与当前正文几乎一致，建议重新生成或缩小/强化改造目标。" : undefined
+        });
+      } else {
+        setQualityImprovementState({
+          status: "error",
+          taskId: task?.id,
+          summary: task?.result?.summary,
+          changes: task?.result?.changes || [],
+          patchCount: task?.result?.patches.length || 0,
+          error: "AI 没有返回可应用的整章替换 patch。"
+        });
       }
       return Boolean(task?.result);
+    } catch (err) {
+      setQualityImprovementState({
+        status: "error",
+        error: err instanceof Error ? err.message : String(err)
+      });
+      throw err;
     } finally {
       isImprovingQualityMetrics.value = false;
     }
@@ -1700,6 +1866,7 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function resetActiveWorkspace() {
+    invalidateWorkspaceLoadState();
     currentProject.value = null;
     currentChapter.value = null;
     currentDocumentKind.value = "content";
@@ -1994,16 +2161,18 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  async function loadChapterCockpit(chapterId: string) {
-    if (!currentProject.value) return;
+  async function loadChapterCockpit(chapterId: string, loadState?: ChapterLoadState) {
+    const projectSlug = loadState?.projectSlug || currentProject.value?.slug;
+    if (!projectSlug) return;
     const [dashboard, cards, summary, qualityReport, runtimeSnapshot, seriesQualityMetrics] = await Promise.all([
-      novelApi.readChapterDashboard(currentProject.value.slug, chapterId),
-      novelApi.readSceneCards(currentProject.value.slug, chapterId),
-      novelApi.readChapterSummary(currentProject.value.slug, chapterId),
-      novelApi.readChapterQualityReport(currentProject.value.slug, chapterId),
-      novelApi.readCreationRuntimeSnapshot(currentProject.value.slug, chapterId),
-      novelApi.readSeriesQualityMetrics(currentProject.value.slug)
+      novelApi.readChapterDashboard(projectSlug, chapterId),
+      novelApi.readSceneCards(projectSlug, chapterId),
+      novelApi.readChapterSummary(projectSlug, chapterId),
+      novelApi.readChapterQualityReport(projectSlug, chapterId),
+      novelApi.readCreationRuntimeSnapshot(projectSlug, chapterId),
+      novelApi.readSeriesQualityMetrics(projectSlug)
     ]);
+    if (loadState && !isChapterLoadCurrent(loadState)) return;
     currentDashboard.value = {
       ...dashboard,
       wordCount: countDraftWords(currentContent.value)
@@ -2032,7 +2201,36 @@ export const useNovelStore = defineStore("novel", () => {
     return runtimeStatus.value;
   }
 
+  function scheduleRuntimeStatusRefresh(delayMs = 120) {
+    if (runtimeStatusRefreshTimer) return;
+    runtimeStatusRefreshTimer = setTimeout(() => {
+      runtimeStatusRefreshTimer = null;
+      loadRuntimeStatus().catch(() => undefined);
+    }, delayMs);
+  }
+
+  function applyRuntimeEventToStatus(event: RuntimeEvent) {
+    const status = runtimeStatus.value;
+    if (!status?.activeRun || !event.runId || status.activeRun.id !== event.runId) return;
+
+    if (event.type === "stage" && event.stage) {
+      runtimeStatus.value = {
+        ...status,
+        activeRun: {
+          ...status.activeRun,
+          status: "running",
+          currentStage: event.stage,
+          updatedAt: event.createdAt || status.activeRun.updatedAt
+        }
+      };
+    }
+  }
+
   function disconnectRuntimeEvents() {
+    if (runtimeStatusRefreshTimer) {
+      clearTimeout(runtimeStatusRefreshTimer);
+      runtimeStatusRefreshTimer = null;
+    }
     runtimeEventSource?.close();
     runtimeEventSource = null;
     isRuntimeEventsConnected.value = false;
@@ -2067,8 +2265,9 @@ export const useNovelStore = defineStore("novel", () => {
       const event = JSON.parse(raw) as RuntimeEvent;
       if (!event.id || runtimeEvents.value.some((item) => item.id === event.id)) return;
       runtimeEvents.value = [...runtimeEvents.value, event].sort((left, right) => left.id - right.id).slice(-160);
-      if (["run", "review", "quality", "error"].includes(event.type)) {
-        loadRuntimeStatus().catch(() => undefined);
+      applyRuntimeEventToStatus(event);
+      if (["command", "run", "stage", "checkpoint", "write", "quality", "review", "error"].includes(event.type)) {
+        scheduleRuntimeStatusRefresh();
       }
       if (event.type === "write" && currentProject.value && currentChapter.value && event.payload?.path === currentFilePath.value) {
         openChapter(currentChapter.value, currentDocumentKind.value, { skipLeaveCheck: true }).catch(() => undefined);
@@ -2746,13 +2945,16 @@ export const useNovelStore = defineStore("novel", () => {
   async function openProject(project: NovelProject, options: WorkspaceSwitchOptions = {}) {
     if (currentProject.value?.slug !== project.slug && !options.skipLeaveCheck && !canLeaveCurrentWorkspace()) return;
 
+    const workspaceLoad = beginWorkspaceLoad(project.slug);
     cacheCurrentWorkspace();
     if (!openWorkspaceSlugs.value.includes(project.slug)) {
       openWorkspaceSlugs.value = [...openWorkspaceSlugs.value, project.slug];
     }
 
     if (restoreCachedWorkspace(project)) {
+      if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
       await loadRuntimeStatus().catch(() => undefined);
+      if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
       connectRuntimeEvents();
       return;
     }
@@ -2762,16 +2964,21 @@ export const useNovelStore = defineStore("novel", () => {
     const chapter = project.chapters.find((item) => item.id === project.lastOpenedChapterId) || project.chapters[0];
     if (chapter) {
       await openChapter(chapter, currentDocumentKind.value, { skipLeaveCheck: true });
+      if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
     }
     await openSupportFile(currentSupportPath.value, { skipLeaveCheck: true });
-    await loadStoryControl();
-    await loadStoryGraph();
-    await loadKnowledgeIndex();
-    await loadLedger(activeLedgerKind.value);
-    await loadTaskHistory();
-    await loadAiInvocations();
-    await loadBackgroundJobs();
-    await loadRuntimeStatus().catch(() => undefined);
+    if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
+    await Promise.all([
+      loadStoryControl(),
+      loadStoryGraph(),
+      loadKnowledgeIndex(),
+      loadLedger(activeLedgerKind.value),
+      loadTaskHistory(),
+      loadAiInvocations(),
+      loadBackgroundJobs(),
+      loadRuntimeStatus().catch(() => undefined)
+    ]);
+    if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
     connectRuntimeEvents();
   }
 
@@ -2807,11 +3014,21 @@ export const useNovelStore = defineStore("novel", () => {
     if (!currentProject.value) return;
     const nextFilePath = documentKind === "outline" ? chapter.outlinePath : chapter.contentPath;
     if (currentFilePath.value !== nextFilePath && !options.skipLeaveCheck && !canLeaveCurrentChapter()) return;
+    if (currentFilePath.value !== nextFilePath) {
+      qualityImprovementState.value = {
+        status: "idle",
+        targetMetrics: [],
+        changes: [],
+        patchCount: 0
+      };
+    }
 
     currentChapter.value = chapter;
     currentDocumentKind.value = documentKind;
     currentFilePath.value = nextFilePath;
+    const chapterLoad = beginChapterLoad(currentProject.value.slug, chapter.id, nextFilePath);
     const content = await novelApi.readFile(currentProject.value.slug, nextFilePath);
+    if (!isChapterLoadCurrent(chapterLoad)) return;
     currentContent.value = content;
     savedContent.value = content;
     lastSavedAt.value = "";
@@ -2822,7 +3039,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentQualityReport.value = null;
     fileVersions.value = [];
     currentFileDiff.value = null;
-    await loadChapterCockpit(chapter.id);
+    await loadChapterCockpit(chapter.id, chapterLoad);
   }
 
   async function openChapterDocument(documentKind: ChapterDocumentKind) {
@@ -2878,7 +3095,9 @@ export const useNovelStore = defineStore("novel", () => {
     if (currentSupportPath.value !== filePath && !options.skipLeaveCheck && !canLeaveCurrentSupportFile()) return;
 
     currentSupportPath.value = filePath;
+    const supportFileLoad = beginSupportFileLoad(currentProject.value.slug, filePath);
     const content = await novelApi.readFile(currentProject.value.slug, filePath);
+    if (!isSupportFileLoadCurrent(supportFileLoad)) return;
     supportContent.value = content;
     savedSupportContent.value = content;
   }
@@ -3047,23 +3266,51 @@ export const useNovelStore = defineStore("novel", () => {
     if (!canLeaveCurrentChapter()) return;
 
     const appliedTaskType = currentTask.value?.type || null;
+    const applyingQualityRewrite =
+      appliedTaskType === "quality.rewrite" ||
+      (qualityImprovementState.value.status === "candidate" && rewriteCandidateTargetsCurrentFile.value);
     let patchesToApply = withSelectionPatchAnchors(rewriteCandidate.value.patches);
-    if (appliedTaskType === "quality.rewrite") {
+    if (applyingQualityRewrite) {
       const normalizedQualityRewrite = normalizeCurrentChapterQualityRewrite(rewriteCandidate.value);
       if (!normalizedQualityRewrite) {
+        setQualityImprovementState({ status: "error", error: "质量改造候选缺少可应用的当前章节正文 patch。" });
         error.value = "质量改造候选缺少可应用的当前章节正文补丁，请重新生成。";
         return;
       }
       patchesToApply = normalizedQualityRewrite.patches;
+      setQualityImprovementState({ status: "applying", error: undefined });
     }
-    await novelApi.applyPatches(currentProject.value.slug, patchesToApply, currentTask.value?.id);
-    await refreshAiInvocations();
-    if (currentChapter.value) {
-      await openChapter(currentChapter.value, currentDocumentKind.value);
-      if (appliedTaskType === "quality.rewrite" && currentDocumentKind.value === "content") {
-        currentQualityReport.value = null;
-        await diagnoseCurrentChapter();
+    try {
+      await novelApi.applyPatches(currentProject.value.slug, patchesToApply, currentTask.value?.id);
+      await refreshAiInvocations();
+      if (currentChapter.value) {
+        await openChapter(currentChapter.value, currentDocumentKind.value);
+        if (applyingQualityRewrite && currentDocumentKind.value === "content") {
+          setQualityImprovementState({ status: "reviewing" });
+          currentQualityReport.value = null;
+          await diagnoseCurrentChapter();
+          const versions = await loadCurrentFileVersions();
+          const latestVersion = versions[0];
+          if (latestVersion) {
+            await previewCurrentFileDiff(latestVersion.id);
+          }
+          const afterReport = currentQualityReport.value as ChapterQualityReport | null;
+          setQualityImprovementState({
+            status: "applied",
+            afterOverallScore: afterReport?.overallScore,
+            diffVersionId: latestVersion?.id,
+            error: undefined
+          });
+        }
       }
+    } catch (err) {
+      if (applyingQualityRewrite) {
+        setQualityImprovementState({
+          status: "error",
+          error: err instanceof Error ? err.message : String(err)
+        });
+      }
+      throw err;
     }
   }
 
@@ -3230,6 +3477,7 @@ export const useNovelStore = defineStore("novel", () => {
     isRebuildingKnowledgeIndex,
     isRebuildingSeriesQualityMetrics,
     isImprovingQualityMetrics,
+    qualityImprovementState,
     isRebuildingStoryGraph,
     isSearchingKnowledge,
     isReverseEngineeringStructure,

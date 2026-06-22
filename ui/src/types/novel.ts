@@ -626,6 +626,32 @@ export interface ChapterQualityReport {
   updatedAt: string;
 }
 
+export type QualityImprovementStatus = "idle" | "preparing" | "running" | "candidate" | "applying" | "reviewing" | "applied" | "error";
+
+export interface QualityImprovementMetric {
+  key: QualityMetricKey;
+  label: string;
+  beforeScore: number;
+  targetScore: number;
+  note: string;
+}
+
+export interface QualityImprovementState {
+  status: QualityImprovementStatus;
+  chapterId?: string;
+  filePath?: string;
+  targetMetrics: QualityImprovementMetric[];
+  beforeOverallScore?: number;
+  afterOverallScore?: number;
+  summary?: string;
+  changes: string[];
+  patchCount: number;
+  taskId?: string;
+  diffVersionId?: string;
+  error?: string;
+  updatedAt?: string;
+}
+
 export interface SeriesQualityMetricAverage {
   key: QualityMetricKey;
   label: string;

@@ -2,7 +2,7 @@
   "projectSlug": "novel-1780911338197",
   "chapterCount": 198,
   "reportCount": 1,
-  "averageOverallScore": 84,
+  "averageOverallScore": 79,
   "metricAverages": [
     {
       "key": "hook",
@@ -13,25 +13,25 @@
     {
       "key": "rhythm",
       "label": "节奏",
-      "averageScore": 66,
+      "averageScore": 68,
+      "reportCount": 1
+    },
+    {
+      "key": "conflict",
+      "label": "冲突",
+      "averageScore": 71,
       "reportCount": 1
     },
     {
       "key": "tension",
       "label": "张力",
-      "averageScore": 82,
+      "averageScore": 73,
       "reportCount": 1
     },
     {
       "key": "information",
       "label": "信息",
       "averageScore": 93,
-      "reportCount": 1
-    },
-    {
-      "key": "conflict",
-      "label": "冲突",
-      "averageScore": 100,
       "reportCount": 1
     },
     {
@@ -51,24 +51,24 @@
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "overallScore": 84,
+      "overallScore": 79,
       "weakestMetricKey": "hook",
       "weakestMetricLabel": "钩子",
       "weakestMetricScore": 50,
-      "updatedAt": "2026-06-17T18:54:53.822Z"
+      "updatedAt": "2026-06-19T08:28:28.538Z"
     }
   ],
   "rhythmSignals": [
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "rhythmScore": 66,
-      "overallScore": 84,
-      "wordCount": 5747,
+      "rhythmScore": 68,
+      "overallScore": 79,
+      "wordCount": 5540,
       "sceneCount": 7,
       "beatCount": 1,
       "note": "句段节奏偏单一，适合拆出动作、反应和停顿。",
-      "updatedAt": "2026-06-17T18:54:53.822Z"
+      "updatedAt": "2026-06-19T08:28:28.538Z"
     }
   ],
   "characterArcSignals": [],
@@ -80,12 +80,12 @@
         {
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 84,
-          "updatedAt": "2026-06-17T18:54:53.822Z"
+          "score": 79,
+          "updatedAt": "2026-06-19T08:28:28.538Z"
         }
       ],
-      "averageScore": 84,
-      "latestScore": 84
+      "averageScore": 79,
+      "latestScore": 79
     },
     {
       "key": "hook",
@@ -95,7 +95,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 50,
-          "updatedAt": "2026-06-17T18:54:53.822Z"
+          "updatedAt": "2026-06-19T08:28:28.538Z"
         }
       ],
       "averageScore": 50,
@@ -108,12 +108,26 @@
         {
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 66,
-          "updatedAt": "2026-06-17T18:54:53.822Z"
+          "score": 68,
+          "updatedAt": "2026-06-19T08:28:28.538Z"
         }
       ],
-      "averageScore": 66,
-      "latestScore": 66
+      "averageScore": 68,
+      "latestScore": 68
+    },
+    {
+      "key": "conflict",
+      "label": "冲突",
+      "points": [
+        {
+          "chapterId": "chapter-001",
+          "chapterTitle": "第1章 尸王破封·天狗食月",
+          "score": 71,
+          "updatedAt": "2026-06-19T08:28:28.538Z"
+        }
+      ],
+      "averageScore": 71,
+      "latestScore": 71
     },
     {
       "key": "tension",
@@ -122,12 +136,12 @@
         {
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 82,
-          "updatedAt": "2026-06-17T18:54:53.822Z"
+          "score": 73,
+          "updatedAt": "2026-06-19T08:28:28.538Z"
         }
       ],
-      "averageScore": 82,
-      "latestScore": 82
+      "averageScore": 73,
+      "latestScore": 73
     },
     {
       "key": "information",
@@ -137,25 +151,11 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 93,
-          "updatedAt": "2026-06-17T18:54:53.822Z"
+          "updatedAt": "2026-06-19T08:28:28.538Z"
         }
       ],
       "averageScore": 93,
       "latestScore": 93
-    },
-    {
-      "key": "conflict",
-      "label": "冲突",
-      "points": [
-        {
-          "chapterId": "chapter-001",
-          "chapterTitle": "第1章 尸王破封·天狗食月",
-          "score": 100,
-          "updatedAt": "2026-06-17T18:54:53.822Z"
-        }
-      ],
-      "averageScore": 100,
-      "latestScore": 100
     },
     {
       "key": "emotion",
@@ -165,7 +165,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 100,
-          "updatedAt": "2026-06-17T18:54:53.822Z"
+          "updatedAt": "2026-06-19T08:28:28.538Z"
         }
       ],
       "averageScore": 100,
@@ -179,7 +179,7 @@
           "chapterId": "chapter-001",
           "chapterTitle": "第1章 尸王破封·天狗食月",
           "score": 100,
-          "updatedAt": "2026-06-17T18:54:53.822Z"
+          "updatedAt": "2026-06-19T08:28:28.538Z"
         }
       ],
       "averageScore": 100,
@@ -190,169 +190,17 @@
     {
       "chapterId": "chapter-001",
       "chapterTitle": "第1章 尸王破封·天狗食月",
-      "tensionScore": 82,
-      "conflictScore": 100,
+      "tensionScore": 73,
+      "conflictScore": 71,
       "hookScore": 50,
       "emotionScore": 100,
-      "rhythmScore": 66,
+      "rhythmScore": 68,
       "sceneCount": 7,
       "note": "情节、情绪、节奏和钩子形成了有效张力。",
-      "updatedAt": "2026-06-17T18:54:53.822Z"
+      "updatedAt": "2026-06-19T08:28:28.538Z"
     }
   ],
   "styleDriftSignals": [],
   "narrativeDebtSignals": [],
-  "craftCoverageSignals": [
-    {
-      "chapterId": "chapter-002",
-      "chapterTitle": "第2章 空间乱流·师徒失散",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-003",
-      "chapterTitle": "第3章 异界苏醒·将臣认主",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-004",
-      "chapterTitle": "第4章 星辰学院·异界来客",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-005",
-      "chapterTitle": "第5章 师徒之约·前往学院",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-006",
-      "chapterTitle": "第6章 异界货币·初次狩猎",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-007",
-      "chapterTitle": "第7章 玉佩的发热·初次感应",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-008",
-      "chapterTitle": "第8章 学院歧视·三连打脸",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-009",
-      "chapterTitle": "第9章 结识伙伴·四人相遇",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-010",
-      "chapterTitle": "第10章 炼器惊艳·尸骨炼狱枪",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    },
-    {
-      "chapterId": "chapter-011",
-      "chapterTitle": "第11章 校花索菲亚·挡箭牌",
-      "craftBeatCount": 0,
-      "requiredBeatCount": 0,
-      "missingRequiredBeatCount": 0,
-      "payoffCount": 0,
-      "foreshadowingCount": 0,
-      "progressionCount": 0,
-      "sliceOfLifeCount": 0,
-      "redemptionCount": 0,
-      "note": "No craft beats tracked for this chapter yet.",
-      "severity": "watch",
-      "updatedAt": "2026-06-17T19:45:01.126Z"
-    }
-  ],
-  "updatedAt": "2026-06-17T19:45:01.144Z"
+  "updatedAt": "2026-06-19T12:05:54.379Z"
 }
