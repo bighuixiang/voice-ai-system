@@ -48,6 +48,9 @@ describe("taskTemplates", () => {
     expect(prompt).toContain("planned CraftBeats");
     expect(prompt).toContain("Daily-life");
     expect(prompt).toContain("cosmic scale must enter through immediate danger");
+    expect(prompt).toContain("first screen");
+    expect(prompt).toContain("environmental feedback");
+    expect(prompt).toContain("summary-style emotion lines");
   });
 
   it("builds prewriting briefing and post-save recap instructions", () => {
@@ -102,6 +105,25 @@ describe("taskTemplates", () => {
     expect(qualityRewritePrompt).toContain("score ceiling");
     expect(qualityRewritePrompt).toContain("Repair toward original genre-level craft only");
     expect(qualityRewritePrompt).toContain("replace empty grandeur with concrete pressure");
+    expect(qualityRewritePrompt).toContain("inert paragraphs");
+    expect(qualityRewritePrompt).toContain("fake-suspense ending lines");
     expect(prompt).toContain("过滤标题、写作日期、版本号");
+  });
+  it("builds structured quality review instructions for runtime critique", () => {
+    const prompt = buildTaskPrompt("quality.review", {
+      contextBlocks: [{ title: "Quality Review Targets", content: JSON.stringify({ targetScore: 86 }) }],
+      payload: {
+        chapterId: "chapter-001",
+        filePath: "chapters/chapter-001.md",
+        targetScore: 86
+      }
+    });
+
+    expect(prompt).toContain("Quality Review Contract");
+    expect(prompt).toContain("ChapterQualityReport JSON");
+    expect(prompt).toContain("openingVerdict");
+    expect(prompt).toContain("endingVerdict");
+    expect(prompt).toContain("antiPatternsHit");
+    expect(prompt).toContain("rules-based signals");
   });
 });

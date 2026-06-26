@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+﻿import fs from "node:fs/promises";
 import path from "node:path";
 import type {
   ChapterQualityReport,
@@ -16,6 +16,7 @@ import type {
   WritingRecapCandidate
 } from "./types.js";
 import { assembleContext } from "./contextAssembler.js";
+import { qualityMeetsTarget, reviewChapterQuality, targetMetricsBelow, type QualityReviewOutcome } from "./chapterQualityReview.js";
 import { upsertProjectRecord } from "./database.js";
 import { readProject, projectRoot } from "./novelProject.js";
 import { resolveInside, assertSafeNovelPath } from "./pathSafety.js";
@@ -25,6 +26,7 @@ import { buildStoryGraphProjection } from "./storyGraph.js";
 import {
   appendWritingRecap,
   buildSeriesQualityMetrics,
+  readChapterDashboard,
   readChapterSummary,
   readLedgerEntries,
   readSceneCards,
@@ -64,7 +66,7 @@ const pipelineStages: RuntimePipelineStage[] = [
 ];
 
 const RUNTIME_QUALITY_TARGET = 86;
-const RUNTIME_MAX_SELF_REPAIR_ATTEMPTS = 3;
+const RUNTIME_MAX_SELF_REPAIR_ATTEMPTS = 1;
 
 function orderedChapters(project: NovelProject): NovelChapter[] {
   return [...project.chapters].sort((left, right) => {
@@ -379,28 +381,26 @@ async function buildNarrativeSnapshot(root: string, project: NovelProject, chapt
   return snapshot;
 }
 
-async function maybeMockTask(project: NovelProject, type: CodexTaskType, chapter: NovelChapter) {
+async function maybeMockTask(project: NovelProject, type: CodexTaskType, chapter: NovelChapter, payload: Record<string, unknown>) {
   if (process.env.RUNTIME_WORKER_MOCK !== "1") return null;
   const now = runtimeNow();
   if (type === "quality.rewrite") {
     const repairedChapter = [
       `# ${chapter.title}`,
       "",
-      "quality-repaired",
+      "咚咚。九莲宝山在夜色里猛然下沉，封印大阵沿着山壁一寸寸亮起血色裂纹。林玄喉间先是一腥，连呼吸都像被铁钩钉住。",
       "",
-      "雨停在破庙檐角，水珠一颗一颗落进裂开的石槽。主角没有立刻拔刀，他先听见弟子们压低的喘息，也看见敌阵后方那盏青灯忽明忽暗。那不是普通信号，而是师傅三日前提过的锁魂灯。",
+      "将臣并未急着破封，只在裂隙深处抬了一下眼。那一眼像寒潮漫过骨缝，逼得最前排弟子齐齐后退半步，可镇守千年的九脉主峰同时轰鸣，阵纹沿着祭坛、断崖、云层一层层推进。",
       "",
-      "他想退。退一步，所有人都能活到天亮；进一步，自己藏了十年的弱点会被所有人看见。偏偏最年轻的弟子攥着断剑站到他身侧，声音发抖，却还是说愿意替众人挡第一击。主角终于明白，自己一直害怕的不是失败，而是别人把命交给他。",
+      "林玄按住胸前玉佩，旧伤当场崩开，血顺着指缝往下滴。他第一次看清，玉佩背面刻着和师父旧印同源的锁纹，而山下负责补阵的师兄已经被震碎半边护甲。",
       "",
-      "敌将压阵而来，故意把王佩吸收能量的秘密喊给众人听。人群先是动摇，继而沉默。主角没有辩解，只把王佩按进掌心，让反噬的黑纹爬上手腕。每吸走一分混沌，他的旧伤就裂开一寸；每前进一步，身后的弟子就少受一分威压。",
+      "他没有退，反而借着玉佩反震冲进阵眼，一剑斩断偏移的主链。整座宝山随之一震，坠落的山石在半空尽数爆碎，封印重新咬住将臣半边身躯，可林玄也因此吐血跪地。",
       "",
-      "真正的转折发生在第七息。青灯照见地面暗纹，主角借那一瞬看懂阵眼不是敌将，而是被迫跪在阵心的无名樵夫。若杀敌将，阵会爆开；若救樵夫，敌将能趁机脱身。他选择救人，因为这场仗若只剩胜负，就已经输了。",
+      "这一战结束时，九莲宝山少了三座副峰，弟子们在废墟里抬人止血，没人欢呼。林玄掌心的玉佩仍在发烫，像是在提醒他，今夜镇住的不是结局，只是旧债重新抬头。",
       "",
-      "樵夫被拉出阵心时，弟子们第一次没有等命令，自行补上缺口。有人以盾护住旧伤，有人用火符截断青灯，有人把敌将逼回半步。主角看见他们各自的恐惧，也看见恐惧之下新生的秩序。胜利不再来自他一个人的吞噬，而来自众人愿意承担代价。",
+      "The rewrite now lands concrete conflict, visible cost, and an aftershock ending.",
       "",
-      "敌将退走前留下半枚铜符，铜符背面刻着师傅的旧名。主角没有追。他知道真正的危险不是这一战，而是师傅为何会和锁魂灯同源。夜色重新压下来，弟子们在废墟里救人、包扎、清点伤亡，没人欢呼。王佩仍在掌心发烫，像一颗不肯熄灭的眼睛。",
-      "",
-      "这一章完成了清晰冲突、情感代价、信息揭示、人物选择、伏笔延迟、团队配合和结尾钩子。"
+      "quality-repaired"
     ].join("\n");
     return {
       id: `mock-${type}-${Date.now()}`,
@@ -428,6 +428,82 @@ async function maybeMockTask(project: NovelProject, type: CodexTaskType, chapter
       }
     };
   }
+  if (type === "quality.review") {
+    const currentContent = await readText(projectRoot(project.slug), chapter.contentPath);
+    const improved = currentContent.includes("quality-repaired");
+    const reviewPayload = improved
+      ? {
+          report: {
+            chapterId: chapter.id,
+            overallScore: 92,
+            summary: "The rewrite now lands pressure, visible cost, and a real aftershock.",
+            metrics: [
+              { key: "rhythm", label: "Rhythm", score: 90, note: "Action and reaction beats are varied enough." },
+              { key: "conflict", label: "Conflict", score: 93, note: "Opposition is concrete and escalating." },
+              { key: "emotion", label: "Emotion", score: 91, note: "Emotion appears through embodied reaction." },
+              { key: "information", label: "Information", score: 90, note: "The chapter reveals concrete new leverage." },
+              { key: "prose", label: "Prose", score: 90, note: "Specific imagery replaced hollow elevation." },
+              { key: "hook", label: "Hook", score: 94, note: "The ending leaves an aftershock with consequence." },
+              { key: "tension", label: "Tension", score: 93, note: "Pressure stays active from opening through aftermath." }
+            ],
+            strengths: ["Pressure lands on page immediately.", "The ending changes what comes next."],
+            fixes: ["Tighten a few explanatory lines if later drafts expand them."],
+            updatedAt: now
+          },
+          topIssues: ["Trim any remaining explanation that does not change leverage."],
+          antiPatternsHit: [],
+          openingVerdict: "The first screen now lands pressure, hierarchy, and protagonist predicament.",
+          endingVerdict: "The ending carries concrete aftershock instead of fake suspense.",
+          rulesBasedSignals: ["combat scale includes environmental feedback"]
+        }
+      : {
+          report: {
+            chapterId: chapter.id,
+            overallScore: 71,
+            summary: "The draft is functional but still too explanatory and flat at key beats.",
+            metrics: [
+              { key: "rhythm", label: "Rhythm", score: 72, note: "Paragraph movement is serviceable but drag remains." },
+              { key: "conflict", label: "Conflict", score: 74, note: "Pressure exists but does not escalate enough." },
+              { key: "emotion", label: "Emotion", score: 68, note: "Too much summary emotion, not enough embodied reaction." },
+              { key: "information", label: "Information", score: 71, note: "Some reveal exists but the chapter still explains instead of landing it." },
+              { key: "prose", label: "Prose", score: 69, note: "The prose still leans on hollow grandeur and inert explanation." },
+              { key: "hook", label: "Hook", score: 70, note: "The ending signals suspense more than consequence." },
+              { key: "tension", label: "Tension", score: 73, note: "The opening has pressure but not enough aftermath and bodily cost." }
+            ],
+            strengths: ["There is a usable conflict frame."],
+            fixes: ["Cut explanation, strengthen bodily cost, and land consequence."],
+            updatedAt: now
+          },
+          topIssues: [
+            "Open with harder pressure and less explanation.",
+            "Replace summary emotion lines with embodied reaction.",
+            "Turn the ending into consequence instead of fake suspense."
+          ],
+          antiPatternsHit: ["summary_style_emotion", "explanation_overload", "fake_suspense_ending"],
+          openingVerdict: "The opening has some pressure, but it still warms up with explanation before fully landing the predicament.",
+          endingVerdict: "The ending gestures at suspense but does not cash it out into concrete aftermath.",
+          rulesBasedSignals: ["summary-style emotion paragraphs x1", "ending relies on fake suspense phrasing"]
+        };
+    return {
+      id: `mock-${type}-${Date.now()}`,
+      type,
+      status: "success" as const,
+      projectId: project.slug,
+      inputSummary: JSON.stringify(payload).slice(0, 500),
+      outputSummary: `Mock ${type}`,
+      startedAt: now,
+      finishedAt: now,
+      durationMs: 1,
+      result: {
+        summary: `Mock ${type}`,
+        content: JSON.stringify(reviewPayload, null, 2),
+        changes: [],
+        risks: [],
+        questions: [],
+        patches: []
+      }
+    };
+  }
   return {
     id: `mock-${type}-${Date.now()}`,
     type,
@@ -442,7 +518,7 @@ async function maybeMockTask(project: NovelProject, type: CodexTaskType, chapter
       summary: `Mock ${type}`,
       content:
         type === "chapter.draft"
-          ? `# ${chapter.title}\n\n这一章由自动驾驶运行时生成。主角在既有目标和风险之间作出选择，留下新的代价与钩子。\n`
+          ? `# ${chapter.title}\n\n林玄站在九莲宝山的石阶尽头，先听见封印发出第二声闷响，才看见夜空被血色阵纹撕开。山风卷着腥气往上冲，他知道自己若再退半步，身后的师弟就要先替他去死。\n\n将臣的影子在裂隙里抬眼，整片山壁跟着发震。林玄按住胸前玉佩，旧伤立刻崩开，血顺着指缝往下滴。今晚不是解释来历的时候，他只能带着代价往前走。\n\n而山下那道忽然亮起的旧印，也说明这场镇压远没有表面那么简单。\n`
           : `Mock result for ${chapter.title}`,
       changes: [],
       risks: [],
@@ -453,7 +529,7 @@ async function maybeMockTask(project: NovelProject, type: CodexTaskType, chapter
 }
 
 async function runRuntimeTask(project: NovelProject, type: CodexTaskType, payload: Record<string, unknown>, chapter: NovelChapter) {
-  return (await maybeMockTask(project, type, chapter)) || runNovelTask(project.slug, type, payload);
+  return (await maybeMockTask(project, type, chapter, payload)) || runNovelTask(project.slug, type, payload);
 }
 
 async function readText(root: string, relativePath: string): Promise<string> {
@@ -484,94 +560,47 @@ function matchingRuntimePatches(project: NovelProject, chapter: NovelChapter, pa
   return patches.filter((patch) => allowed.has(patch.target));
 }
 
-function wordCount(content: string): number {
-  const compact = content.replace(/\s+/g, "");
-  const cjk = compact.match(/[\u4e00-\u9fff]/g)?.length || 0;
-  const words = content.match(/[a-zA-Z0-9]+/g)?.length || 0;
-  return cjk + words;
+interface RuntimeQualityReviewResult {
+  outcome: QualityReviewOutcome;
+  taskStatus: "success" | "failed";
+  taskError?: string;
 }
 
-function scoreDraft(input: { content: string; draftOk: boolean; checkOk: boolean; existingReport?: ChapterQualityReport | null }): number {
-  if (input.existingReport) return input.existingReport.overallScore;
-  let score = input.draftOk ? 62 : 35;
-  if (input.checkOk) score += 10;
-  const count = wordCount(input.content);
-  if (count >= 1500) score += 12;
-  else if (count >= 800) score += 8;
-  else if (count >= 300) score += 4;
-  if (/TODO|待补|placeholder/i.test(input.content)) score -= 10;
-  return Math.max(0, Math.min(95, score));
-}
-
-function buildQualityReport(chapter: NovelChapter, score: number, notes: string[]): ChapterQualityReport {
-  const updatedAt = runtimeNow();
-  return {
-    chapterId: chapter.id,
-    overallScore: score,
-    summary: notes.join("；") || "Runtime deterministic quality review.",
-    metrics: [
-      { key: "tension", label: "Tension", score, note: "Runtime score based on draft/check signals." },
-      { key: "prose", label: "Prose", score: Math.max(0, score - 3), note: "Generated prose baseline." },
-      { key: "rhythm", label: "Rhythm", score: Math.max(0, score - 5), note: "Estimated by content length and pipeline result." },
-      { key: "character_arc", label: "Character Arc", score: Math.max(0, score - 6), note: "Checks desire, wound, pressure, and observable state movement." },
-      { key: "payoff", label: "Payoff", score: Math.max(0, score - 4), note: "Checks setup, cost, reader reward, and aftershock." },
-      { key: "foreshadowing_health", label: "Foreshadowing", score: Math.max(0, score - 7), note: "Checks setup, payoff, delay, and ledger traceability." },
-      { key: "progression", label: "Progression", score: Math.max(0, score - 5), note: "Checks power, status, resource, or plan movement with cost." },
-      { key: "slice_of_life", label: "Daily Motion", score: Math.max(0, score - 8), note: "Checks daily-life scenes for relationship, information, emotion, or setup value." },
-      { key: "redemption", label: "Redemption", score: Math.max(0, score - 8), note: "Checks costly corrective action and sublimation movement when applicable." }
-    ],
-    strengths: score >= 70 ? ["Draft passed runtime quality gate."] : [],
-    fixes: score < 70 ? ["Rewrite with clearer conflict, stronger hook, and fewer continuity risks."] : [],
-    updatedAt
+async function performQualityReview(input: {
+  root: string;
+  project: NovelProject;
+  chapter: NovelChapter;
+  content: string;
+  targetScore: number;
+  currentQualityReport?: ChapterQualityReport | null;
+}): Promise<RuntimeQualityReviewResult> {
+  const [dashboard, scenes] = await Promise.all([readChapterDashboard(input.root, input.chapter.id), readSceneCards(input.root, input.chapter.id)]);
+  const payload = {
+    chapterId: input.chapter.id,
+    filePath: input.chapter.contentPath,
+    documentKind: "content",
+    chapterContent: input.content,
+    dashboard,
+    scenes,
+    targetScore: input.targetScore,
+    targetMetrics: input.currentQualityReport ? targetMetricsBelow(input.currentQualityReport, input.targetScore) : undefined,
+    currentQualityReport: input.currentQualityReport || undefined
   };
-}
-
-function runtimeQualityScore(input: { content: string; draftOk: boolean; checkOk: boolean }): number {
-  let score = input.draftOk ? 62 : 35;
-  if (input.checkOk) score += 10;
-  const count = wordCount(input.content);
-  if (count >= 1800) score += 14;
-  else if (count >= 1200) score += 12;
-  else if (count >= 800) score += 8;
-  else if (count >= 300) score += 4;
-  if ((input.content.match(/\n\s*\n/g) || []).length >= 5) score += 3;
-  if (count >= 300 && (input.content.match(/[。！？.!?]/g) || []).length >= 8) score += 3;
-  if (/代价|选择|伤|恐惧|愿意|秘密|真相|伏笔|钩子|阵眼|转折/.test(input.content)) score += 4;
-  if (/TODO|待补|placeholder/i.test(input.content)) score -= 10;
-  return Math.max(0, Math.min(96, score));
-}
-
-function runtimeMetricScore(content: string, score: number, templateScore: number): number {
-  const count = wordCount(content);
-  const paragraphCount = content.split(/\n\s*\n/).filter((paragraph) => paragraph.trim()).length;
-  const sentenceCount = (content.match(/[。！？.!?]/g) || []).length;
-  const structureBonus = count >= 300 && paragraphCount >= 6 && sentenceCount >= 8 ? score - templateScore : 0;
-  return Math.max(0, Math.min(96, templateScore + structureBonus));
-}
-
-function runtimeQualityReport(chapter: NovelChapter, score: number, notes: string[], content: string): ChapterQualityReport {
-  const base = buildQualityReport(chapter, score, notes);
+  const reviewTask = await runRuntimeTask(input.project, "quality.review", payload, input.chapter);
   return {
-    ...base,
-    strengths: score >= RUNTIME_QUALITY_TARGET ? ["Draft passed runtime quality gate."] : [],
-    fixes: score < RUNTIME_QUALITY_TARGET ? ["Rewrite with clearer conflict, stronger hook, and fewer continuity risks."] : [],
-    metrics: base.metrics.map((metric) => ({
-      ...metric,
-      score: runtimeMetricScore(content, score, metric.score)
-    }))
+    outcome: reviewChapterQuality({
+      chapterId: input.chapter.id,
+      content: input.content,
+      dashboard,
+      scenes,
+      targetScore: input.targetScore,
+      currentQualityReport: input.currentQualityReport,
+      aiReviewContent: reviewTask.status === "success" ? reviewTask.result?.content : undefined,
+      aiReviewSummary: reviewTask.status === "success" ? reviewTask.result?.summary : reviewTask.error
+    }),
+    taskStatus: reviewTask.status === "success" ? "success" : "failed",
+    taskError: reviewTask.status === "success" ? undefined : reviewTask.error || "quality.review failed"
   };
-}
-
-function qualityFloor(report: ChapterQualityReport): number {
-  return Math.min(report.overallScore, ...report.metrics.map((metric) => metric.score));
-}
-
-function qualityMeetsRuntimeTarget(report: ChapterQualityReport): boolean {
-  return qualityFloor(report) >= RUNTIME_QUALITY_TARGET;
-}
-
-function rewriteTargetMetrics(report: ChapterQualityReport): ChapterQualityReport["metrics"] {
-  return report.metrics.filter((metric) => metric.score < RUNTIME_QUALITY_TARGET);
 }
 
 function normalizedFullChapterWrite(chapter: NovelChapter, result?: { content?: string; patches?: NovelFilePatch[] }): NovelFilePatch | null {
@@ -629,8 +658,11 @@ function normalizeRecapCandidate(chapter: NovelChapter, candidate: Partial<Writi
   };
 }
 
-function parseWritingRecapCandidate(chapter: NovelChapter, raw?: string): WritingRecapCandidate | null {
-  if (!raw?.trim()) return null;
+function parseWritingRecapCandidate(chapter: NovelChapter, raw?: unknown): WritingRecapCandidate | null {
+  if (raw && typeof raw === "object") {
+    return normalizeRecapCandidate(chapter, raw as Partial<WritingRecapCandidate>);
+  }
+  if (typeof raw !== "string" || !raw.trim()) return null;
   const candidates = [raw.trim()];
   const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1]?.trim();
   if (fenced) candidates.unshift(fenced);
@@ -660,13 +692,6 @@ function reviewablePatchCount(recap: WritingRecapCandidate): number {
     (recap.riskPatches?.length || 0) +
     (recap.craftBeatPatches?.length || 0)
   );
-}
-
-function craftGateRisks(report: ChapterQualityReport, threshold = RUNTIME_QUALITY_TARGET): string[] {
-  const craftKeys = new Set(["character_arc", "payoff", "foreshadowing_health", "progression", "slice_of_life", "redemption"]);
-  return report.metrics
-    .filter((metric) => craftKeys.has(metric.key) && metric.score < threshold)
-    .map((metric) => `${metric.key}:${metric.score}`);
 }
 
 async function ensureRunActive(runId: string): Promise<RuntimeRun> {
@@ -772,23 +797,51 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
   await ensureRunActive(currentRun.id);
   currentRun = await markStage(currentRun, "quality_review");
   let repairAttempt = 0;
-  let score = runtimeQualityScore({ content: savedContent, draftOk: draftTask.status === "success", checkOk: checkTask.status === "success" });
-  let report = await saveChapterQualityReport(root, runtimeQualityReport(chapter, score, [draftResult?.summary || "", checkTask.result?.summary || ""].filter(Boolean), savedContent));
-  insertRuntimeQualityScore({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, score: report.overallScore, payload: { report } });
+  let qualityReview = await performQualityReview({
+    root,
+    project,
+    chapter,
+    content: savedContent,
+    targetScore: RUNTIME_QUALITY_TARGET
+  });
+  let report = await saveChapterQualityReport(root, qualityReview.outcome.report);
+  insertRuntimeQualityScore({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    chapterId: chapter.id,
+    score: report.overallScore,
+    payload: {
+      report,
+      topIssues: qualityReview.outcome.topIssues,
+      antiPatternsHit: qualityReview.outcome.antiPatternsHit,
+      openingVerdict: qualityReview.outcome.openingVerdict,
+      endingVerdict: qualityReview.outcome.endingVerdict,
+      rulesBasedSignals: qualityReview.outcome.rulesBasedSignals
+    }
+  });
   currentRun = updateRuntimeRun(currentRun.id, { qualityScore: report.overallScore }) || currentRun;
-  let craftRisks = craftGateRisks(report);
+  let craftRisks = qualityReview.outcome.antiPatternsHit;
   appendRuntimeEvent({
     projectSlug: project.slug,
     runId: currentRun.id,
     type: "quality",
     stage: "quality_review",
-    message: `Quality score ${report.overallScore}`,
-    payload: { score: report.overallScore, craftRisks }
+    message: "Runtime quality review completed",
+    payload: {
+      score: report.overallScore,
+      targetScore: RUNTIME_QUALITY_TARGET,
+      craftRisks,
+      topIssues: qualityReview.outcome.topIssues,
+      openingVerdict: qualityReview.outcome.openingVerdict,
+      endingVerdict: qualityReview.outcome.endingVerdict,
+      reviewTaskStatus: qualityReview.taskStatus,
+      reviewTaskError: qualityReview.taskError
+    }
   });
-  while (!qualityMeetsRuntimeTarget(report) && repairAttempt < RUNTIME_MAX_SELF_REPAIR_ATTEMPTS) {
+  while (!qualityMeetsTarget(report, RUNTIME_QUALITY_TARGET) && repairAttempt < RUNTIME_MAX_SELF_REPAIR_ATTEMPTS) {
     repairAttempt += 1;
     await ensureRunActive(currentRun.id);
-    const targetMetrics = rewriteTargetMetrics(report);
+    const targetMetrics = targetMetricsBelow(report, RUNTIME_QUALITY_TARGET);
     const rewritePayload = {
       chapterId: chapter.id,
       filePath: chapter.contentPath,
@@ -798,6 +851,10 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       repairAttempt,
       targetMetrics,
       currentQualityReport: report,
+      topIssues: qualityReview.outcome.topIssues,
+      antiPatternsHit: qualityReview.outcome.antiPatternsHit,
+      openingVerdict: qualityReview.outcome.openingVerdict,
+      endingVerdict: qualityReview.outcome.endingVerdict,
       feedback: `Runtime self-repair: raise every metric to at least ${RUNTIME_QUALITY_TARGET} before author review.`
     };
     await assembleContext("quality.rewrite", root, project, rewritePayload);
@@ -869,29 +926,60 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       throw error;
     }
     savedContent = await readText(root, chapter.contentPath);
-    score = runtimeQualityScore({ content: savedContent, draftOk: true, checkOk: checkTask.status === "success" });
-    report = await saveChapterQualityReport(
+    qualityReview = await performQualityReview({
       root,
-      runtimeQualityReport(chapter, score, [rewriteTask.result?.summary || "", checkTask.result?.summary || ""].filter(Boolean), savedContent)
-    );
-    insertRuntimeQualityScore({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, score: report.overallScore, payload: { report, repairAttempt } });
+      project,
+      chapter,
+      content: savedContent,
+      targetScore: RUNTIME_QUALITY_TARGET,
+      currentQualityReport: report
+    });
+    report = await saveChapterQualityReport(root, qualityReview.outcome.report);
+    insertRuntimeQualityScore({
+      projectSlug: project.slug,
+      runId: currentRun.id,
+      chapterId: chapter.id,
+      score: report.overallScore,
+      payload: {
+        report,
+        repairAttempt,
+        topIssues: qualityReview.outcome.topIssues,
+        antiPatternsHit: qualityReview.outcome.antiPatternsHit,
+        openingVerdict: qualityReview.outcome.openingVerdict,
+        endingVerdict: qualityReview.outcome.endingVerdict,
+        rulesBasedSignals: qualityReview.outcome.rulesBasedSignals
+      }
+    });
     currentRun = updateRuntimeRun(currentRun.id, { qualityScore: report.overallScore, rewriteCount: repairAttempt }) || currentRun;
-    craftRisks = craftGateRisks(report);
+    craftRisks = qualityReview.outcome.antiPatternsHit;
     appendRuntimeEvent({
       projectSlug: project.slug,
       runId: currentRun.id,
       type: "quality",
       stage: "quality_review",
       message: "Runtime quality self-repair applied",
-      payload: { attempt: repairAttempt, score: report.overallScore, targetScore: RUNTIME_QUALITY_TARGET, craftRisks }
+      payload: {
+        attempt: repairAttempt,
+        score: report.overallScore,
+        targetScore: RUNTIME_QUALITY_TARGET,
+        craftRisks,
+        topIssues: qualityReview.outcome.topIssues,
+        openingVerdict: qualityReview.outcome.openingVerdict,
+        endingVerdict: qualityReview.outcome.endingVerdict,
+        reviewTaskStatus: qualityReview.taskStatus,
+        reviewTaskError: qualityReview.taskError
+      }
     });
   }
 
   await ensureRunActive(currentRun.id);
   currentRun = await markStage(currentRun, "recap_and_ledger");
   const recapTask = await runRuntimeTask(project, "writing.recap", { chapterId: chapter.id }, chapter);
+  const recapSource =
+    (recapTask.result as { content?: unknown; rawOutput?: string } | undefined)?.content ||
+    (recapTask.result as { rawOutput?: string } | undefined)?.rawOutput;
   const recap =
-    parseWritingRecapCandidate(chapter, recapTask.result?.content) ||
+    parseWritingRecapCandidate(chapter, recapSource) ||
     recapFromTask(chapter, savedContent, recapTask.result?.summary || draftResult?.summary || "");
   const pendingRecapPatchCount = reviewablePatchCount(recap);
   await appendWritingRecap(root, recap);
@@ -940,7 +1028,7 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
   if (chapterIndex >= 0) {
     project.chapters[chapterIndex] = {
       ...project.chapters[chapterIndex],
-      status: qualityMeetsRuntimeTarget(report) ? "drafted" : "planned"
+      status: qualityMeetsTarget(report, RUNTIME_QUALITY_TARGET) ? "drafted" : "planned"
     };
     project.lastOpenedChapterId = chapter.id;
     project.updatedAt = runtimeNow();
@@ -985,8 +1073,8 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     }
   }
 
-  if (qualityMeetsRuntimeTarget(report) && pendingRecapPatchCount > 0) {
-    const blockingReasons = ["recap_patches_pending", ...(craftRisks.length ? ["craft_gate_review_needed"] : []), ...(snapshot.blockingReasons || [])];
+  if (qualityMeetsTarget(report, RUNTIME_QUALITY_TARGET) && pendingRecapPatchCount > 0) {
+    const blockingReasons = ["recap_patches_pending", ...(craftRisks.length ? ["quality_review_followup_needed"] : []), ...(snapshot.blockingReasons || [])];
     const review = updateRuntimeRun(currentRun.id, {
       status: "review_required",
       result: {
@@ -999,6 +1087,7 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
         repairAttempts: repairAttempt,
         pendingRecapPatchCount,
         craftRisks,
+        topIssues: qualityReview.outcome.topIssues,
         blockingReasons
       },
       finishedAt: runtimeNow()
@@ -1014,7 +1103,7 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     return review || currentRun;
   }
 
-  if (qualityMeetsRuntimeTarget(report)) {
+  if (qualityMeetsTarget(report, RUNTIME_QUALITY_TARGET)) {
     const blockingReasons = ["quality_target_met_author_review", ...(snapshot.blockingReasons || [])];
     const review = updateRuntimeRun(currentRun.id, {
       status: "review_required",
@@ -1050,7 +1139,9 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       reason: "quality_below_runtime_target",
       targetScore: RUNTIME_QUALITY_TARGET,
       repairAttempts: repairAttempt,
-      targetMetrics: rewriteTargetMetrics(report),
+      targetMetrics: targetMetricsBelow(report, RUNTIME_QUALITY_TARGET),
+      topIssues: qualityReview.outcome.topIssues,
+      antiPatternsHit: qualityReview.outcome.antiPatternsHit,
       blockingReasons
     },
     finishedAt: runtimeNow()
@@ -1260,3 +1351,4 @@ export async function processRuntimeCommand(command: RuntimeCommand): Promise<vo
 export function runtimePipelineStages(): RuntimePipelineStage[] {
   return pipelineStages;
 }
+

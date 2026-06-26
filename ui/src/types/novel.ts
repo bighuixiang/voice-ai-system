@@ -4,6 +4,7 @@ export type CodexTaskType =
   | "structure.reverse"
   | "chapter.plan"
   | "chapter.draft"
+  | "quality.review"
   | "selection.polish"
   | "quality.rewrite"
   | "continuity.check"
@@ -99,6 +100,7 @@ export type AiStageKey =
   | "pipeline.structure.reverse"
   | "pipeline.chapter.plan"
   | "pipeline.chapter.prose"
+  | "pipeline.quality.review"
   | "pipeline.selection.polish"
   | "pipeline.quality.rewrite"
   | "pipeline.chapter.validate"
@@ -995,6 +997,14 @@ export interface RuntimeDerivativeBranch {
   updatedAt: string;
 }
 
+export interface RuntimeWorkerHealth {
+  status: "online" | "stale" | "offline";
+  lastHeartbeatAt?: string;
+  lastCommandClaimedAt?: string;
+  pollIntervalMs: number;
+  staleAfterMs: number;
+}
+
 export interface RuntimeStatusSnapshot {
   activeRun?: RuntimeRun;
   runs: RuntimeRun[];
@@ -1003,6 +1013,7 @@ export interface RuntimeStatusSnapshot {
   branches: RuntimeDerivativeBranch[];
   latestSnapshot?: RuntimeSnapshotRecord;
   knowledgeRefs: RuntimeKnowledgeRef[];
+  worker: RuntimeWorkerHealth;
 }
 
 export interface NovelProject {

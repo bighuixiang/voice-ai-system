@@ -108,6 +108,7 @@ const stageLabels: Record<string, string> = {
   "pipeline.chapter.plan": "规划章节",
   "pipeline.chapter.prose": "起草正文",
   "pipeline.selection.polish": "选区润色",
+  "pipeline.quality.review": "质量评审",
   "pipeline.quality.rewrite": "质量改造",
   "pipeline.chapter.validate": "章节验证",
   "pipeline.idea.suggest": "创意建议",

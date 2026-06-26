@@ -262,6 +262,12 @@ function runtimeStatusSnapshot(overrides: Partial<RuntimeStatusSnapshot> = {}): 
     checkpoints: [],
     branches: [],
     knowledgeRefs: [],
+    worker: {
+      status: "online",
+      lastHeartbeatAt: "2026-06-26T00:00:00.000Z",
+      pollIntervalMs: 1500,
+      staleAfterMs: 15000
+    },
     ...overrides
   };
 }
@@ -434,6 +440,7 @@ describe("useNovelStore", () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     vi.unstubAllGlobals();
+    window.localStorage.clear();
     mockNovelApi.readFile.mockImplementation(async (_projectId: string, filePath: string) => {
       if (filePath.startsWith("chapters/")) return `draft:${filePath}`;
       return `support:${filePath}`;
@@ -847,6 +854,25 @@ describe("useNovelStore", () => {
     expect(store.currentContent).toBe("draft:chapters/chapter-002.md");
     expect(store.supportContent).toBe("support:bible/characters.md");
     expect(store.hasUnsavedChanges).toBe(false);
+  });
+
+  it("restores the last opened chapter and document kind from local preferences", async () => {
+    const firstStore = useNovelStore();
+    firstStore.projects = [project];
+
+    await firstStore.openProject(project);
+    await firstStore.openChapter(project.chapters[0], "outline");
+
+    setActivePinia(createPinia());
+    const secondStore = useNovelStore();
+    secondStore.projects = [project];
+
+    await secondStore.openProject(project);
+
+    expect(secondStore.currentChapter?.id).toBe("chapter-001");
+    expect(secondStore.currentDocumentKind).toBe("outline");
+    expect(secondStore.currentFilePath).toBe("outline/chapter-001.md");
+    expect(secondStore.currentContent).toBe("support:outline/chapter-001.md");
   });
 
   it("loads dashboard, scene cards, and ledger data for the active workspace", async () => {

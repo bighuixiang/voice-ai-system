@@ -5,10 +5,18 @@
         <strong>{{ statusLabel }}</strong>
         <span>{{ stageLabel }}</span>
       </div>
-      <el-tag size="small" :type="eventConnected ? 'success' : 'info'">
-        {{ eventConnected ? "SSE connected" : "SSE offline" }}
-      </el-tag>
+      <div class="runtime-status-tags">
+        <el-tag size="small" :type="eventConnected ? 'success' : 'info'">
+          {{ eventConnected ? "事件流已连接" : "事件流未连接" }}
+        </el-tag>
+        <el-tag size="small" :type="workerHealthTagType">
+          {{ workerHealthLabel }}
+        </el-tag>
+      </div>
     </div>
+    <p v-if="activeRun" class="runtime-target">当前章节：{{ runtimeTargetLabel }}</p>
+
+    <p v-if="workerBlockedHint" class="runtime-warning">{{ workerBlockedHint }}</p>
 
     <div v-if="activeRun" class="runtime-progress-card">
       <div class="runtime-progress-head">
@@ -107,8 +115,8 @@
         </header>
         <ol class="event-list">
           <li v-for="event in events.slice(-24).reverse()" :key="event.id">
-            <span>{{ event.stage || event.type }}</span>
-            <p>{{ event.message }}</p>
+            <span>{{ formatRuntimeEventLabel(event) }}</span>
+            <p>{{ formatRuntimeEventMessage(event) }}</p>
           </li>
         </ol>
       </section>
@@ -167,8 +175,10 @@ import type {
   RuntimeDerivativeBranch,
   RuntimeEvent,
   RuntimeKnowledgeRef,
+  RuntimePipelineStage,
   RuntimeRun,
-  RuntimeSnapshotRecord
+  RuntimeSnapshotRecord,
+  RuntimeWorkerHealth
 } from "@/types/novel";
 
 defineOptions({
@@ -177,11 +187,13 @@ defineOptions({
 
 const props = withDefaults(defineProps<{
   activeRun?: RuntimeRun;
+  activeChapterLabel?: string;
   events: RuntimeEvent[];
   checkpoints: RuntimeCheckpoint[];
   branches: RuntimeDerivativeBranch[];
   latestSnapshot?: RuntimeSnapshotRecord;
   knowledgeRefs: RuntimeKnowledgeRef[];
+  worker?: RuntimeWorkerHealth;
   eventConnected: boolean;
   starting: boolean;
 }>(), {
@@ -225,6 +237,18 @@ const runtimeStages: Array<{ id: NonNullable<RuntimeRun["currentStage"]>; label:
   { id: "story_graph_update", label: "故事图" },
   { id: "finalize_or_gate", label: "收尾" }
 ];
+
+const runtimeEventTypeLabels: Record<RuntimeEvent["type"], string> = {
+  command: "指令",
+  run: "运行",
+  stage: "阶段",
+  checkpoint: "快照",
+  write: "写入",
+  quality: "质量",
+  review: "审阅",
+  error: "错误",
+  system: "系统"
+};
 
 const trimmedDirection = computed(() => direction.value.trim());
 const hasActiveRun = computed(() => Boolean(props.activeRun));
@@ -301,6 +325,127 @@ const statusLabel = computed(() => {
   return labels[status];
 });
 const stageLabel = computed(() => props.activeRun?.currentStage || props.activeRun?.chapterId || "等待指令");
+const runtimeTargetLabel = computed(() => props.activeChapterLabel || props.activeRun?.chapterId || "未指定章节");
+
+const workerHealthLabel = computed(() => {
+  const labels: Record<RuntimeWorkerHealth["status"], string> = {
+    online: "执行引擎在线",
+    stale: "执行引擎心跳过期",
+    offline: "执行引擎离线"
+  };
+  return labels[props.worker?.status || "offline"];
+});
+const workerHealthTagType = computed(() => {
+  const status = props.worker?.status || "offline";
+  if (status === "online") return "success";
+  if (status === "stale") return "warning";
+  return "danger";
+});
+const workerBlockedHint = computed(() => {
+  if (!props.activeRun) return "";
+  if (props.worker?.status === "online") return "";
+  if (props.activeRun.status !== "queued" && props.activeRun.status !== "running") return "";
+  return "当前指令已入队，但执行引擎未在线，任务不会继续推进。请启动 npm --prefix api run dev。";
+});
+
+function runtimeStageLabel(stage?: RuntimePipelineStage) {
+  if (!stage) return "";
+  return runtimeStages.find((item) => item.id === stage)?.label || stage;
+}
+
+function runtimeCommandLabel(action: string) {
+  const labels: Record<string, string> = {
+    start: "启动",
+    pause: "暂停",
+    resume: "恢复",
+    stop: "停止",
+    rewrite: "重写",
+    accept: "接受审稿",
+    direction: "发送方向",
+    derivative: "衍生分支"
+  };
+  return labels[action] || action;
+}
+
+function formatRuntimeEventLabel(event: RuntimeEvent) {
+  const stage = runtimeStageLabel(event.stage);
+  const type = runtimeEventTypeLabels[event.type] || event.type;
+  if (!stage) return type;
+  return event.type === "stage" ? stage : `${stage} · ${type}`;
+}
+
+function formatRuntimeEventMessage(event: RuntimeEvent) {
+  const exactMessages: Record<string, string> = {
+    "Selecting target chapter": "正在选择目标章节",
+    "Creating checkpoint": "正在创建快照",
+    "Preparing narrative snapshot": "正在整理叙事快照",
+    "Planning chapter": "正在规划章节",
+    "Assembling context budget": "正在组装上下文预算",
+    "Drafting prose": "正在起草正文",
+    "Validating content": "正在校验内容",
+    "Scoring quality": "正在评估质量",
+    "Updating recap and ledgers": "正在更新回顾与账本",
+    "Updating knowledge index": "正在更新知识索引",
+    "Updating story graph": "正在更新故事图谱",
+    "Finalizing or opening review gate": "正在收尾或进入审阅闸口",
+    "Narrative snapshot prepared": "叙事快照已生成",
+    "Runtime paused because the target file changed after checkpoint": "目标文件在快照后发生变更，自动驾驶已暂停",
+    "Runtime quality self-repair started": "自动质量自修已开始",
+    "Runtime quality self-repair failed": "自动质量自修失败",
+    "Runtime quality self-repair produced no applicable chapter replacement": "自动质量自修未产出可应用的章节替换",
+    "Runtime paused because the target file changed before quality self-repair": "质量自修前目标文件发生变更，自动驾驶已暂停",
+    "Runtime quality self-repair applied": "自动质量自修已应用",
+    "Writing recap candidate saved for author approval": "写作回顾候选已保存，等待作者确认",
+    "Knowledge index updated": "知识索引已更新",
+    "Runtime paused because project metadata changed after checkpoint": "项目元数据在快照后发生变更，自动驾驶已暂停",
+    "Runtime paused for recap patch approval": "写作回顾补丁待确认，自动驾驶已暂停",
+    "Runtime paused for author review after quality target was met": "已达到质量目标，等待作者审阅",
+    "Runtime requires human review": "需要人工审阅",
+    "Runtime start command claimed": "启动指令已接管",
+    "Derivative branch generated in isolated runtime storage": "衍生分支已在隔离运行空间生成",
+    "Runtime start queued": "自动驾驶启动已进入队列",
+    "Derivative branch queued": "衍生分支任务已进入队列",
+    "Derivative merge accepted by user": "用户已确认合并衍生分支",
+    "Derivative merge paused because target files changed after checkpoint": "目标文件在快照后发生变更，衍生分支合并已暂停",
+    "Derivative branch accepted for canon merge": "衍生分支已并入正篇"
+  };
+  if (exactMessages[event.message]) {
+    return exactMessages[event.message];
+  }
+
+  const qualityScoreMatch = event.message.match(/^Quality score (\d+)$/);
+  if (qualityScoreMatch) {
+    return `质量评分：${qualityScoreMatch[1]}`;
+  }
+
+  const checkpointCreatedMatch = event.message.match(/^Checkpoint created: (.+)$/);
+  if (checkpointCreatedMatch) {
+    return `已创建快照：${checkpointCreatedMatch[1]}`;
+  }
+
+  const checkpointRestoredMatch = event.message.match(/^Checkpoint restored: (.+)$/);
+  if (checkpointRestoredMatch) {
+    return `已恢复快照：${checkpointRestoredMatch[1]}`;
+  }
+
+  const writeMatch = event.message.match(/^Runtime wrote (.+)$/);
+  if (writeMatch) {
+    return `已写入文件：${writeMatch[1]}`;
+  }
+
+  const queuedCommandMatch = event.message.match(/^Runtime (\w+) queued$/);
+  if (queuedCommandMatch) {
+    return `自动驾驶${runtimeCommandLabel(queuedCommandMatch[1])}指令已进入队列`;
+  }
+
+  const appliedCommandMatch = event.message.match(/^Runtime (\w+) command applied$/);
+  if (appliedCommandMatch) {
+    return `自动驾驶${runtimeCommandLabel(appliedCommandMatch[1])}指令已执行`;
+  }
+
+  return event.message;
+}
+
 function kindLabel(kind: RuntimeKnowledgeRef["kind"]) {
   const labels: Record<RuntimeKnowledgeRef["kind"], string> = {
     context_block: "上下文",
@@ -374,6 +519,29 @@ function handleRewriteAction() {
     color: var(--app-text-secondary);
     font-size: 12px;
   }
+}
+
+.runtime-status-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.runtime-target {
+  margin: 0;
+  color: var(--app-text-secondary);
+  font-size: 12px;
+}
+
+.runtime-warning {
+  margin: -2px 0 0;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--app-danger) 24%, var(--app-border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--app-danger-soft) 74%, transparent);
+  color: var(--app-danger-text);
+  font-size: 12px;
 }
 
 .runtime-progress-card {

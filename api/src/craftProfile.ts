@@ -92,7 +92,34 @@ export const defaultCraftProfile: CraftProfile = {
     "Major character state changes must remain pending until author approval.",
     "Reject prose that only sounds grand but lacks concrete pressure, action, cost, payoff, or hook.",
     "Reject passages that reproduce recognizable scenes, signature phrasing, or author mannerisms from a named source."
-  ]
+  ],
+  voiceRules: [
+    "The first screen must land visible pressure, anomaly, hierarchy, and the protagonist's immediate position.",
+    "Epic scenes need concrete scale through environmental feedback, formation or phenomenon size, visible bodily cost, and changing tactical judgment.",
+    "Character aura must be shown through action, pause, contempt, restraint, pressure, sensory distortion, or other observable effects.",
+    "Mystery should arrive through traces, aftermath, omen, wound, object, ritual, or contradiction instead of abstract lore explanation."
+  ],
+  antiPatterns: [
+    "Do not open with empty exposition before pressure appears on the page.",
+    "Do not use summary-style emotion lines in place of embodied reaction.",
+    "Do not use hollow grandeur, floating setting lectures, or inert explanation paragraphs.",
+    "Do not end scenes with fake-suspense summary lines that announce mystery without consequence."
+  ],
+  sceneContracts: {
+    chapterOpening: [
+      "First screen must show an omen, pressure source, hierarchy signal, and protagonist predicament.",
+      "Opening motion should force a judgment, hesitation, or survival choice before backstory expansion."
+    ],
+    combat: [
+      "Combat must alter space: terrain, weather, formation, ruins, light, sound, or shockwave should answer the clash.",
+      "Major power should show cost on body, weapon, formation, or allies instead of only sounding large.",
+      "Enemy and ally judgments should change mid-fight as new leverage, weakness, or sacrifice appears."
+    ],
+    chapterEnding: [
+      "End on consequence, aftershock, or a sharpened unresolved cost.",
+      "The final beat should change what the next chapter must deal with."
+    ]
+  }
 };
 
 function validCraftProfile(profile?: Partial<CraftProfile>): profile is CraftProfile {
@@ -115,7 +142,18 @@ function mergeCraftProfile(override?: Partial<CraftProfile>): CraftProfile {
     principles: override.principles?.length ? override.principles : defaultCraftProfile.principles,
     beatDefinitions: override.beatDefinitions?.length ? override.beatDefinitions : defaultCraftProfile.beatDefinitions,
     genreProfiles: override.genreProfiles?.length ? override.genreProfiles : defaultCraftProfile.genreProfiles,
-    qualityGates: override.qualityGates?.length ? override.qualityGates : defaultCraftProfile.qualityGates
+    qualityGates: override.qualityGates?.length ? override.qualityGates : defaultCraftProfile.qualityGates,
+    voiceRules: override.voiceRules?.length ? override.voiceRules : defaultCraftProfile.voiceRules,
+    antiPatterns: override.antiPatterns?.length ? override.antiPatterns : defaultCraftProfile.antiPatterns,
+    sceneContracts: {
+      chapterOpening: override.sceneContracts?.chapterOpening?.length
+        ? override.sceneContracts.chapterOpening
+        : defaultCraftProfile.sceneContracts?.chapterOpening,
+      combat: override.sceneContracts?.combat?.length ? override.sceneContracts.combat : defaultCraftProfile.sceneContracts?.combat,
+      chapterEnding: override.sceneContracts?.chapterEnding?.length
+        ? override.sceneContracts.chapterEnding
+        : defaultCraftProfile.sceneContracts?.chapterEnding
+    }
   };
 }
 
@@ -138,7 +176,10 @@ export async function buildCraftProfileBlock(root: string, project: NovelProject
         principles: profile.principles,
         beatDefinitions: profile.beatDefinitions,
         matchedGenreProfiles,
-        qualityGates: profile.qualityGates
+        qualityGates: profile.qualityGates,
+        voiceRules: profile.voiceRules,
+        antiPatterns: profile.antiPatterns,
+        sceneContracts: profile.sceneContracts
       },
       null,
       2

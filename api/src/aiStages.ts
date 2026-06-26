@@ -6,6 +6,7 @@ export const aiStageDefinitions: AiStageDefinition[] = [
   { key: "pipeline.structure.reverse", label: "Structure reverse engineering", taskTypes: ["structure.reverse"] },
   { key: "pipeline.chapter.plan", label: "Chapter planning", taskTypes: ["chapter.plan"] },
   { key: "pipeline.chapter.prose", label: "Chapter prose drafting", taskTypes: ["chapter.draft"] },
+  { key: "pipeline.quality.review", label: "Chapter quality review", taskTypes: ["quality.review"] },
   { key: "pipeline.selection.polish", label: "Selection polishing", taskTypes: ["selection.polish"] },
   { key: "pipeline.quality.rewrite", label: "Quality-targeted rewrite", taskTypes: ["quality.rewrite"] },
   { key: "pipeline.chapter.validate", label: "Chapter validation", taskTypes: ["continuity.check"] },

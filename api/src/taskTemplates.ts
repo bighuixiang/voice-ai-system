@@ -9,16 +9,17 @@ export interface PromptContext {
 }
 
 const taskGoals: Partial<Record<CodexTaskType, string>> = {
-  "project.create": "从作者粗略想法创建小说项目骨架、故事圣经、大纲草案和第一章入口。",
-  "outline.generate": "基于故事圣经生成或重写卷纲、章纲、情节因果链和伏笔安排。",
-  "structure.reverse": "调用 AI 阅读当前章节正文，反向提炼章节仪表盘和多张场景卡，过滤标题、写作日期、版本号等非叙事元信息。",
-  "chapter.plan": "为指定章节生成章纲设定，包含章节目标、场景卡、冲突、转折、伏笔、POV 限制和结尾钩子。",
-  "chapter.draft": "基于章纲和上下文起草章节正文，并标出风险和修改建议。",
-  "selection.polish": "只改写选区文本，保持剧情事实，优先修复 POV、因果和可读性。",
-  "quality.rewrite": "根据质量体检报告整章改造低于目标线的评分项，确保节奏、冲突、情绪、信息、文笔、钩子和张力都达到目标分以上。",
-  "continuity.check": "检查章节与故事圣经、伏笔、升级节奏和相邻章节的连续性风险。",
-  "idea.suggest": "在作者卡住时给出符合当前剧情状态的下一步灵感候选。",
-  "assistant.free": "根据作者随时交代的临时指令，在当前小说上下文中给出分析、建议、改写或安全补丁。"
+  "project.create": "Create the novel project skeleton, story bible, outline draft, and first chapter entry from the author's rough idea.",
+  "outline.generate": "Generate or rewrite the volume outline, chapter outline, causal chain, and foreshadowing plan from the story bible.",
+  "structure.reverse": "Read the current chapter prose and reverse-engineer dashboard and scene cards while filtering non-narrative metadata.",
+  "chapter.plan": "Produce a chapter plan with goals, scene cards, conflicts, turns, foreshadowing, POV limits, and ending hook.",
+  "chapter.draft": "Draft the chapter prose from the chapter plan and context, then call out risks and revision advice.",
+  "quality.review": "Review the chapter against the target score and current report, recompute the seven quality metrics, and surface the top-priority issues.",
+  "selection.polish": "Rewrite only the selected text while preserving story facts and prioritizing POV, causality, and readability fixes.",
+  "quality.rewrite": "Rewrite the full chapter against the quality report so rhythm, conflict, emotion, information, prose, hook, and tension all meet the target.",
+  "continuity.check": "Inspect continuity risks against the story bible, foreshadowing, progression pacing, and neighboring chapters.",
+  "idea.suggest": "Offer next-step ideas that fit the current story state when the author is stuck.",
+  "assistant.free": "Follow the author's ad hoc instruction within the current novel context and return analysis, advice, rewrites, or safe patches."
 };
 
 function buildTaskContract(type: CodexTaskType) {
@@ -46,8 +47,11 @@ function buildTaskContract(type: CodexTaskType) {
         content: [
           "Draft the chapter prose according to the Chapter Dashboard, Scene Cards, Craft Profile, and planned CraftBeats.",
           "Style safety: do not copy or closely imitate any named copyrighted novel, scene, phrasing, or living author style.",
+          "The first screen must land an anomaly, pressure source, hierarchy signal, and the protagonist's predicament before broad explanation.",
           "For xuanhuan/eastern fantasy, make the epic tone original and concrete: cosmic scale must enter through immediate danger, sensory pressure, hierarchy, artifact/omen, visible cost, and chapter-ending aftershock.",
+          "Large clashes must show environmental feedback, formation or phenomenon scale, bodily cost, and changing tactical judgment.",
           "Make character texture observable through desire, wound, misbelief, pressure reaction, and concrete choices rather than explanation.",
+          "Do not use summary-style emotion lines, empty elevation, lore-dump setup paragraphs, or fake-suspense closing tags.",
           "Give minor characters one useful high-light moment when they are scene-relevant.",
           "Deliver satisfying beats only after setup, cost, action, and aftershock.",
           "Daily-life passages must move relationship, information, emotion, or foreshadowing; remove inert filler.",
@@ -264,8 +268,54 @@ function buildTaskContract(type: CodexTaskType) {
           "If a target metric cannot credibly exceed the target without new author direction, put the blocker in `questions` and still provide the safest improvement patch.",
           "Style safety: do not copy or closely imitate any named copyrighted novel, scene, phrasing, or living author style. Repair toward original genre-level craft only.",
           "For xuanhuan/eastern fantasy rewrites, replace empty grandeur with concrete pressure: immediate danger, hierarchy, artifact/omen, visible cost, traceable mystery, partial payoff, and unresolved aftershock.",
+          "Prioritize structural surgery over synonym swaps: cut inert paragraphs, compress explanation, strengthen pressure, increase cost, and make consequence visible.",
+          "Delete fake-suspense ending lines, summary-only emotional commentary, and ceremonial grandstanding that does not change the chapter outcome.",
           "Prefer scene-level fixes over cosmetic wording: raise conflict through a sharper obstacle, raise emotion through embodied reaction, raise information through one concrete reveal, raise hook through an unresolved consequence, raise rhythm through shorter action/reaction beats, raise prose through specific sensory detail, and raise tension by linking cost, pressure, and delayed payoff.",
           "For craft metrics, repair the underlying beat: character_arc needs desire/wound/choice movement, payoff needs setup/cost/reward/aftershock, foreshadowing_health needs trackable setup/payoff/delay, progression needs visible step and cost, slice_of_life needs relationship/information/emotion movement, and redemption needs costly corrective action."
+        ].join("\n")
+      }
+    ];
+  }
+
+  if (type === "quality.review") {
+    return [
+      {
+        title: "Quality Review Contract",
+        content: [
+          "Return a CodexTaskResult JSON only.",
+          "The `content` field must contain a stringified JSON object shaped like a ChapterQualityReport JSON plus review metadata.",
+          "Use this shape:",
+          JSON.stringify(
+            {
+              report: {
+                chapterId: "chapter-001",
+                overallScore: 84,
+                summary: "Short verdict for the chapter's current quality.",
+                metrics: [
+                  { key: "rhythm", label: "Rhythm", score: 82, note: "Short explanation." },
+                  { key: "conflict", label: "Conflict", score: 88, note: "Short explanation." },
+                  { key: "emotion", label: "Emotion", score: 80, note: "Short explanation." },
+                  { key: "information", label: "Information", score: 83, note: "Short explanation." },
+                  { key: "prose", label: "Prose", score: 79, note: "Short explanation." },
+                  { key: "hook", label: "Hook", score: 86, note: "Short explanation." },
+                  { key: "tension", label: "Tension", score: 87, note: "Short explanation." }
+                ],
+                strengths: ["High-signal strengths only."],
+                fixes: ["Highest-value fixes only."],
+                updatedAt: "ISO timestamp"
+              },
+              topIssues: ["Most damaging issue first."],
+              antiPatternsHit: ["Concrete anti-pattern labels hit by the chapter."],
+              openingVerdict: "Did the first screen land pressure, anomaly, hierarchy, and protagonist position?",
+              endingVerdict: "Did the ending land consequence, aftershock, or only float a fake hook?",
+              rulesBasedSignals: ["Report rules-based signals such as abstract density, paragraph drag, repeated syntax, flat ending, or explanation overload."]
+            },
+            null,
+            2
+          ),
+          "Score only these seven metrics: rhythm, conflict, emotion, information, prose, hook, tension.",
+          "Use mixed judgment: combine rules-based signals with literary evaluation of opening pressure, scene specificity, character aura, conflict advancement, combat scale, and ending aftershock.",
+          "Flag summary-style emotion lines, inert explanation blocks, hollow grandeur, lore-dump setup, and fake-suspense ending lines when present."
         ].join("\n")
       }
     ];
@@ -275,7 +325,7 @@ function buildTaskContract(type: CodexTaskType) {
 }
 
 export function buildTaskPrompt(type: CodexTaskType, context: PromptContext): string {
-  const cockpitInstruction = ["structure.reverse", "chapter.plan", "chapter.draft", "quality.rewrite", "continuity.check", "idea.suggest", "writing.briefing", "writing.recap"].includes(type)
+  const cockpitInstruction = ["structure.reverse", "chapter.plan", "chapter.draft", "quality.review", "quality.rewrite", "continuity.check", "idea.suggest", "writing.briefing", "writing.recap"].includes(type)
     ? [
         {
           title: "Cockpit Boundaries",

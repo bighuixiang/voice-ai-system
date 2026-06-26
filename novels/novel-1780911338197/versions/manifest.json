@@ -2,6 +2,73 @@
   "version": 1,
   "snapshots": [
     {
+      "id": "2026-06-26T06-17-42-948Z-vvz3q3",
+      "filePath": "chapters/chapter-002.md",
+      "versionPath": "versions/chapters__chapter-002.md/2026-06-26T06-17-42-948Z-vvz3q3.md",
+      "createdAt": "2026-06-26T06:17:42.948Z",
+      "size": 15237,
+      "source": "runtime",
+      "reason": "chapter_draft",
+      "runId": "run-1782453415556-v0eozf"
+    },
+    {
+      "id": "2026-06-26T06-05-14-530Z-rwvq4x",
+      "filePath": "chapters/chapter-002.md",
+      "versionPath": "versions/chapters__chapter-002.md/2026-06-26T06-05-14-530Z-rwvq4x.md",
+      "createdAt": "2026-06-26T06:05:14.530Z",
+      "size": 15001,
+      "source": "runtime",
+      "reason": "chapter_draft",
+      "runId": "run-1782453415556-v0eozf"
+    },
+    {
+      "id": "2026-06-26T05-36-13-289Z-4bo11c",
+      "filePath": "chapters/chapter-002.md",
+      "versionPath": "versions/chapters__chapter-002.md/2026-06-26T05-36-13-289Z-4bo11c.md",
+      "createdAt": "2026-06-26T05:36:13.290Z",
+      "size": 14969
+    },
+    {
+      "id": "2026-06-26T04-16-42-353Z-gov1of",
+      "filePath": "chapters/chapter-002.md",
+      "versionPath": "versions/chapters__chapter-002.md/2026-06-26T04-16-42-353Z-gov1of.md",
+      "createdAt": "2026-06-26T04:16:42.353Z",
+      "size": 6218,
+      "source": "runtime",
+      "reason": "chapter_draft",
+      "runId": "run-1782446959153-byoajb"
+    },
+    {
+      "id": "2026-06-26T04-00-18-150Z-qz9dfk",
+      "filePath": "chapters/chapter-001.md",
+      "versionPath": "versions/chapters__chapter-001.md/2026-06-26T04-00-18-150Z-qz9dfk.md",
+      "createdAt": "2026-06-26T04:00:18.150Z",
+      "size": 19365,
+      "source": "runtime",
+      "reason": "chapter_draft",
+      "runId": "run-1782446118450-8b2wxe"
+    },
+    {
+      "id": "2026-06-26T03-55-08-743Z-7qsfxz",
+      "filePath": "chapters/chapter-001.md",
+      "versionPath": "versions/chapters__chapter-001.md/2026-06-26T03-55-08-743Z-7qsfxz.md",
+      "createdAt": "2026-06-26T03:55:08.743Z",
+      "size": 12848,
+      "source": "runtime",
+      "reason": "chapter_draft",
+      "runId": "run-1781867337319-q26y1a"
+    },
+    {
+      "id": "2026-06-26T03-42-17-400Z-wgws2t",
+      "filePath": "chapters/chapter-001.md",
+      "versionPath": "versions/chapters__chapter-001.md/2026-06-26T03-42-17-400Z-wgws2t.md",
+      "createdAt": "2026-06-26T03:42:17.400Z",
+      "size": 18776,
+      "source": "runtime",
+      "reason": "chapter_draft",
+      "runId": "run-1781867337319-q26y1a"
+    },
+    {
       "id": "2026-06-19T12-41-07-684Z-2755l7",
       "filePath": "chapters/chapter-001.md",
       "versionPath": "versions/chapters__chapter-001.md/2026-06-19T12-41-07-684Z-2755l7.md",

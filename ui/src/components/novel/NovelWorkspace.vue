@@ -117,18 +117,24 @@
           </div>
           <CollapsiblePanel
             title="自动驾驶运行时"
-            :subtitle="store.activeRuntimeRun?.status || 'idle'"
+            :subtitle="
+              store.activeRuntimeRun
+                ? `${store.activeRuntimeRun.status} · ${store.activeRuntimeChapterLabel || store.activeRuntimeRun.chapterId || 'unknown'}`
+                : 'idle'
+            "
             hide-toggle-test-hook
             :collapsed="panelCollapsed('runtime-autopilot', store.writingMode !== 'focus')"
             @update:collapsed="setPanelCollapsed('runtime-autopilot', $event)"
           >
             <AutopilotRuntimePanel
               :active-run="store.activeRuntimeRun"
+              :active-chapter-label="store.activeRuntimeChapterLabel"
               :events="store.runtimeEvents"
               :checkpoints="store.runtimeCheckpoints"
               :branches="store.runtimeBranches"
               :latest-snapshot="store.latestRuntimeNarrativeSnapshot"
               :knowledge-refs="store.runtimeKnowledgeRefs"
+              :worker="store.runtimeWorkerHealth"
               :event-connected="store.isRuntimeEventsConnected"
               :starting="store.isStartingRuntime"
               @start="store.startAutopilotRuntime"

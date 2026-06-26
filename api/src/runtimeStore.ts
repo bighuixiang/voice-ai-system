@@ -12,9 +12,14 @@ import type {
   RuntimeRun,
   RuntimeRunStatus,
   RuntimeSnapshotRecord,
-  RuntimeStatusSnapshot
+  RuntimeStatusSnapshot,
+  RuntimeWorkerHealth
 } from "./types.js";
 import { openDatabase } from "./database.js";
+
+const runtimeWorkerMetadataKey = "runtime_worker_health";
+const defaultRuntimeWorkerPollMs = 1500;
+const minimumRuntimeWorkerStaleMs = 15_000;
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -35,6 +40,74 @@ function parseJson<T>(value: unknown, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+interface StoredRuntimeWorkerHealthRecord {
+  lastHeartbeatAt?: string;
+  lastCommandClaimedAt?: string;
+  pollIntervalMs?: number;
+  staleAfterMs?: number;
+}
+
+function normalizePositiveNumber(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function readRuntimeWorkerHealthRecord(): StoredRuntimeWorkerHealthRecord {
+  const database = openDatabase();
+  try {
+    const row = database.prepare("SELECT value FROM metadata WHERE key = ?").get(runtimeWorkerMetadataKey) as { value?: unknown } | undefined;
+    return parseJson<StoredRuntimeWorkerHealthRecord>(row?.value, {});
+  } finally {
+    database.close();
+  }
+}
+
+function staleThresholdForPoll(pollIntervalMs: number): number {
+  return Math.max(pollIntervalMs * 4, minimumRuntimeWorkerStaleMs);
+}
+
+export function touchRuntimeWorkerHeartbeat(input: {
+  heartbeatAt?: string;
+  lastCommandClaimedAt?: string;
+  pollIntervalMs?: number;
+  staleAfterMs?: number;
+} = {}): RuntimeWorkerHealth {
+  const current = readRuntimeWorkerHealthRecord();
+  const pollIntervalMs = normalizePositiveNumber(input.pollIntervalMs ?? current.pollIntervalMs, defaultRuntimeWorkerPollMs);
+  const staleAfterMs = normalizePositiveNumber(input.staleAfterMs ?? current.staleAfterMs, staleThresholdForPoll(pollIntervalMs));
+  const next: StoredRuntimeWorkerHealthRecord = {
+    lastHeartbeatAt: input.heartbeatAt ?? current.lastHeartbeatAt ?? nowIso(),
+    lastCommandClaimedAt: input.lastCommandClaimedAt ?? current.lastCommandClaimedAt,
+    pollIntervalMs,
+    staleAfterMs
+  };
+  const database = openDatabase();
+  try {
+    database.prepare("INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)").run(runtimeWorkerMetadataKey, json(next));
+  } finally {
+    database.close();
+  }
+  return runtimeWorkerHealth();
+}
+
+export function runtimeWorkerHealth(now = Date.now()): RuntimeWorkerHealth {
+  const current = readRuntimeWorkerHealthRecord();
+  const pollIntervalMs = normalizePositiveNumber(current.pollIntervalMs, defaultRuntimeWorkerPollMs);
+  const staleAfterMs = normalizePositiveNumber(current.staleAfterMs, staleThresholdForPoll(pollIntervalMs));
+  const heartbeatAt = typeof current.lastHeartbeatAt === "string" ? current.lastHeartbeatAt : undefined;
+  const heartbeatTs = heartbeatAt ? Date.parse(heartbeatAt) : Number.NaN;
+  const ageMs = Number.isFinite(heartbeatTs) ? Math.max(0, now - heartbeatTs) : Number.POSITIVE_INFINITY;
+  const status: RuntimeWorkerHealth["status"] =
+    !heartbeatAt || !Number.isFinite(heartbeatTs) ? "offline" : ageMs <= staleAfterMs ? "online" : ageMs <= staleAfterMs * 3 ? "stale" : "offline";
+
+  return {
+    status,
+    lastHeartbeatAt: heartbeatAt,
+    lastCommandClaimedAt: typeof current.lastCommandClaimedAt === "string" ? current.lastCommandClaimedAt : undefined,
+    pollIntervalMs,
+    staleAfterMs
+  };
 }
 
 function rowToRun(row: Record<string, unknown>): RuntimeRun {
@@ -785,7 +858,8 @@ export function runtimeStatus(projectSlug: string): RuntimeStatusSnapshot {
     checkpoints: listRuntimeCheckpoints(projectSlug, 20),
     branches: listRuntimeBranches(projectSlug, 20),
     latestSnapshot: getLatestRuntimeSnapshot(projectSlug, runId),
-    knowledgeRefs: listRuntimeKnowledgeRefs(projectSlug, runId, 30)
+    knowledgeRefs: listRuntimeKnowledgeRefs(projectSlug, runId, 30),
+    worker: runtimeWorkerHealth()
   };
 }
 

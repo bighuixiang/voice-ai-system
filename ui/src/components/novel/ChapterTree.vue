@@ -109,6 +109,17 @@ type VirtualRowDraft = Omit<ChapterRow, "index"> | Omit<GroupRow, "index">;
 const ROW_HEIGHT = 48;
 const OVERSCAN = 8;
 const RANGE_GROUP_SIZE = 100;
+const sortPreferenceStoragePrefix = "voice-ai-chapter-tree-sort:";
+
+function readStoredSortMode(projectSlug: string): SortMode {
+  if (typeof window === "undefined") return "desc";
+  return window.localStorage.getItem(`${sortPreferenceStoragePrefix}${projectSlug}`) === "asc" ? "asc" : "desc";
+}
+
+function writeStoredSortMode(projectSlug: string, mode: SortMode) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(`${sortPreferenceStoragePrefix}${projectSlug}`, mode);
+}
 
 const props = defineProps<{
   project: NovelProject;
@@ -328,6 +339,21 @@ onMounted(() => {
   }
   scrollToActive();
 });
+
+watch(
+  () => props.project.slug,
+  (projectSlug) => {
+    sortMode.value = readStoredSortMode(projectSlug);
+  },
+  { immediate: true }
+);
+
+watch(
+  () => sortMode.value,
+  (mode) => {
+    writeStoredSortMode(props.project.slug, mode);
+  }
+);
 
 watch(
   () => [props.activeChapterId, props.project.slug, sortMode.value, groupEnabled.value],

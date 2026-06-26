@@ -4,7 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx scripts/dev.ts",
+    "dev:server": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/runtimeWorker.ts",
     "serve:ts": "tsx src/server.ts",
     "start": "node dist/server.js",
     "worker:runtime": "tsx src/runtimeWorker.ts",

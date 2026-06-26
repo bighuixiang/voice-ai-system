@@ -24,6 +24,7 @@ import {
   listRuntimeKnowledgeRefs,
   recoverStaleRuntimeCommands,
   recoverStaleRuntimeRuns,
+  touchRuntimeWorkerHeartbeat,
   runtimeStatus,
   updateRuntimeRun
 } from "./runtimeStore.js";
@@ -130,6 +131,33 @@ describe("runtime autopilot infrastructure", () => {
       ])
     );
     expect(listRuntimeKnowledgeRefs("demo", run.id)).toHaveLength(2);
+  });
+
+  it("reports runtime worker heartbeat health in the runtime status snapshot", () => {
+    expect(runtimeStatus("demo").worker).toEqual(
+      expect.objectContaining({
+        status: "offline",
+        pollIntervalMs: 1500
+      })
+    );
+
+    const heartbeatAt = new Date().toISOString();
+    touchRuntimeWorkerHeartbeat({
+      heartbeatAt,
+      lastCommandClaimedAt: heartbeatAt,
+      pollIntervalMs: 2200,
+      staleAfterMs: 20000
+    });
+
+    expect(runtimeStatus("demo").worker).toEqual(
+      expect.objectContaining({
+        status: "online",
+        lastHeartbeatAt: heartbeatAt,
+        lastCommandClaimedAt: heartbeatAt,
+        pollIntervalMs: 2200,
+        staleAfterMs: 20000
+      })
+    );
   });
 
   it("creates checkpoints before runtime writes and restores protected files", async () => {
@@ -279,8 +307,21 @@ describe("runtime autopilot infrastructure", () => {
     expect(report?.metrics.every((metric) => metric.score >= 86)).toBe(true);
     expect(content).toContain("quality-repaired");
     expect(listRuntimeEvents(project.slug)).toEqual(
-      expect.arrayContaining([expect.objectContaining({ type: "quality", message: "Runtime quality self-repair applied" })])
+      expect.arrayContaining([
+        expect.objectContaining({ type: "quality", message: "Runtime quality review completed" }),
+        expect.objectContaining({ type: "quality", message: "Runtime quality self-repair applied" })
+      ])
     );
+  });
+
+  it("does not keep legacy deterministic runtime quality helper functions", async () => {
+    const source = await fs.readFile(new URL("./runtimeEngine.ts", import.meta.url), "utf8");
+
+    expect(source).not.toContain("function runtimeQualityScore(");
+    expect(source).not.toContain("function runtimeQualityReport(");
+    expect(source).not.toContain("function qualityMeetsRuntimeTarget(");
+    expect(source).not.toContain("function rewriteTargetMetrics(");
+    expect(source).not.toContain("function craftGateRisks(");
   });
 
   it("holds auto continue while recap patches are pending", async () => {

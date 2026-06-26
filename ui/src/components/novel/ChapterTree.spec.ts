@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import ChapterTree from "./ChapterTree.vue";
 import type { NovelChapter, NovelProject } from "@/types/novel";
@@ -63,6 +63,10 @@ function mountTree(input: { chapters: NovelChapter[]; activeChapterId?: string }
 }
 
 describe("ChapterTree", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   it("defaults to descending grouped virtual rows for very long chapter lists", () => {
     const chapters = Array.from({ length: 1000 }, (_, index) => chapter(index + 1));
     const wrapper = mountTree({ chapters, activeChapterId: "chapter-1000" });
@@ -104,5 +108,21 @@ describe("ChapterTree", () => {
     await wrapper.find(".chapter-item").trigger("click");
 
     expect(wrapper.emitted("open")?.[0][0]).toMatchObject({ id: "chapter-003" });
+  });
+
+  it("persists sort preference per project", async () => {
+    const chapters = [chapter(1), chapter(2), chapter(3)];
+    const firstWrapper = mountTree({ chapters });
+
+    const sortButton = firstWrapper.findAll("button").find((button) => button.text().includes("倒序"));
+    expect(sortButton).toBeDefined();
+
+    await sortButton!.trigger("click");
+    firstWrapper.unmount();
+
+    const secondWrapper = mountTree({ chapters });
+    await secondWrapper.find(".chapter-item").trigger("click");
+
+    expect(secondWrapper.emitted("open")?.[0][0]).toMatchObject({ id: "chapter-001" });
   });
 });

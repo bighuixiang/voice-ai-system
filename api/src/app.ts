@@ -93,6 +93,7 @@ const taskTypes: CodexTaskType[] = [
   "structure.reverse",
   "chapter.plan",
   "chapter.draft",
+  "quality.review",
   "selection.polish",
   "quality.rewrite",
   "continuity.check",

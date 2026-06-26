@@ -412,6 +412,49 @@ describe("taskService", () => {
     expect(invocation.attempt.error).toContain("network unavailable");
   });
 
+  it("keeps clean exits successful when the JSON payload embeds markdown fences in content", async () => {
+    const nestedFenceRunner: ProcessRunner = {
+      async run() {
+        return {
+          stdout: "",
+          stderr: "",
+          exitCode: 0,
+          durationMs: 8,
+          finalMessage: '{"summary":"ok","content":"```json\\n{\\"broken\\":true}\\n```","changes":[],"risks":[],"questions":[],"patches":[]}'
+        };
+      }
+    };
+
+    const task = await runNovelTask("demo", "chapter.plan", { chapterId: "chapter-001" }, nestedFenceRunner);
+
+    expect(task.status).toBe("success");
+    expect(task.result?.parseError).toBeUndefined();
+  });
+
+  it("marks parse failures as task errors even when the runner exits cleanly", async () => {
+    const parseFailingRunner: ProcessRunner = {
+      async run() {
+        return {
+          stdout: "",
+          stderr: "",
+          exitCode: 0,
+          durationMs: 8,
+          finalMessage: '{"summary":"broken","content":"oops"'
+        };
+      }
+    };
+
+    const task = await runNovelTask("demo", "chapter.plan", { chapterId: "chapter-001" }, parseFailingRunner);
+
+    expect(task.status).toBe("error");
+    expect(task.result?.parseError).toBeTruthy();
+    expect(task.error).toContain("Failed to parse");
+
+    const [invocation] = await readInvocations();
+    expect(invocation.status).toBe("error");
+    expect(invocation.attempt.error).toContain("Failed to parse");
+  });
+
   it("applies replace-file and replace-selection patches inside the project", async () => {
     const root = path.join(tempRoot, "demo");
     await applyPatch(root, {

@@ -56,6 +56,7 @@ import type {
   RuntimeEvent,
   RuntimeRun,
   RuntimeStatusSnapshot,
+  RuntimeWorkerHealth,
   SceneCard,
   SavePipelineStep,
   SavePipelineStepId,
@@ -140,6 +141,13 @@ interface SupportFileLoadState extends WorkspaceLoadState {
   filePath: string;
 }
 
+interface StoredWorkspacePreference {
+  chapterId?: string | null;
+  documentKind?: ChapterDocumentKind;
+}
+
+const workspacePreferenceStorageKey = "voice-ai-novel-workspace";
+
 function makeDefaultPlatformAiConfig(): PlatformAiConfig {
   return {
     version: 1,
@@ -159,6 +167,49 @@ function makeDefaultPlatformAiConfig(): PlatformAiConfig {
     },
     updatedAt: new Date().toISOString()
   };
+}
+
+function normalizeStoredDocumentKind(value?: string | null): ChapterDocumentKind {
+  return value === "outline" ? "outline" : "content";
+}
+
+function readStoredWorkspacePreferences(): Record<string, StoredWorkspacePreference> {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  try {
+    const raw = window.localStorage.getItem(workspacePreferenceStorageKey);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, StoredWorkspacePreference>;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function readStoredWorkspacePreference(projectSlug: string): StoredWorkspacePreference {
+  return readStoredWorkspacePreferences()[projectSlug] || {};
+}
+
+function writeStoredWorkspacePreference(projectSlug: string, nextPreference: StoredWorkspacePreference) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const stored = readStoredWorkspacePreferences();
+  stored[projectSlug] = {
+    ...stored[projectSlug],
+    ...nextPreference
+  };
+  window.localStorage.setItem(workspacePreferenceStorageKey, JSON.stringify(stored));
+}
+
+function resolvePreferredChapter(project: NovelProject, preferredChapterId?: string | null): NovelChapter | null {
+  return (
+    project.chapters.find((chapter) => chapter.id === preferredChapterId) ||
+    project.chapters.find((chapter) => chapter.id === project.lastOpenedChapterId) ||
+    project.chapters[0] ||
+    null
+  );
 }
 
 export const useNovelStore = defineStore("novel", () => {
@@ -196,10 +247,17 @@ export const useNovelStore = defineStore("novel", () => {
   const runtimeStatus = ref<RuntimeStatusSnapshot | null>(null);
   const runtimeEvents = ref<RuntimeEvent[]>([]);
   const activeRuntimeRun = computed<RuntimeRun | undefined>(() => runtimeStatus.value?.activeRun);
+  const activeRuntimeChapter = computed<NovelChapter | undefined>(() => {
+    const chapterId = activeRuntimeRun.value?.chapterId;
+    if (!chapterId || !currentProject.value) return undefined;
+    return currentProject.value.chapters.find((chapter) => chapter.id === chapterId);
+  });
+  const activeRuntimeChapterLabel = computed(() => activeRuntimeChapter.value?.title || activeRuntimeRun.value?.chapterId || "");
   const runtimeCheckpoints = computed<RuntimeCheckpoint[]>(() => runtimeStatus.value?.checkpoints || []);
   const runtimeBranches = computed<RuntimeDerivativeBranch[]>(() => runtimeStatus.value?.branches || []);
   const latestRuntimeNarrativeSnapshot = computed(() => runtimeStatus.value?.latestSnapshot);
   const runtimeKnowledgeRefs = computed(() => runtimeStatus.value?.knowledgeRefs || []);
+  const runtimeWorkerHealth = computed<RuntimeWorkerHealth | undefined>(() => runtimeStatus.value?.worker);
   const isRuntimeEventsConnected = ref(false);
   const isStartingRuntime = ref(false);
   let runtimeStatusRefreshTimer: ReturnType<typeof setTimeout> | null = null;
@@ -1966,10 +2024,13 @@ export const useNovelStore = defineStore("novel", () => {
   function restoreCachedWorkspace(project: NovelProject) {
     const cached = workspaceCache.value[project.slug];
     if (!cached) return false;
+    const cachedChapter = cached.chapterId ? project.chapters.find((chapter) => chapter.id === cached.chapterId) : null;
+    if (cached.chapterId && !cachedChapter) return false;
+    const storedPreference = readStoredWorkspacePreference(project.slug);
 
     currentProject.value = project;
-    currentChapter.value = project.chapters.find((chapter) => chapter.id === cached.chapterId) || project.chapters[0] || null;
-    currentDocumentKind.value = cached.documentKind;
+    currentChapter.value = cachedChapter || resolvePreferredChapter(project, storedPreference.chapterId);
+    currentDocumentKind.value = normalizeStoredDocumentKind(cached.documentKind || storedPreference.documentKind);
     currentFilePath.value = cached.filePath;
     currentContent.value = cached.content;
     savedContent.value = cached.savedContent;
@@ -2960,8 +3021,9 @@ export const useNovelStore = defineStore("novel", () => {
     }
 
     currentProject.value = project;
-    currentDocumentKind.value = "content";
-    const chapter = project.chapters.find((item) => item.id === project.lastOpenedChapterId) || project.chapters[0];
+    const storedPreference = readStoredWorkspacePreference(project.slug);
+    currentDocumentKind.value = normalizeStoredDocumentKind(storedPreference.documentKind);
+    const chapter = resolvePreferredChapter(project, storedPreference.chapterId);
     if (chapter) {
       await openChapter(chapter, currentDocumentKind.value, { skipLeaveCheck: true });
       if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
@@ -3025,6 +3087,31 @@ export const useNovelStore = defineStore("novel", () => {
 
     currentChapter.value = chapter;
     currentDocumentKind.value = documentKind;
+    if (currentProject.value) {
+      writeStoredWorkspacePreference(currentProject.value.slug, {
+        chapterId: chapter.id,
+        documentKind
+      });
+      currentProject.value = {
+        ...currentProject.value,
+        lastOpenedChapterId: chapter.id
+      };
+      projects.value = projects.value.map((item) =>
+        item.slug === currentProject.value?.slug ? { ...item, lastOpenedChapterId: chapter.id } : item
+      );
+      if (workspaceCache.value[currentProject.value.slug]) {
+        workspaceCache.value = {
+          ...workspaceCache.value,
+          [currentProject.value.slug]: {
+            ...workspaceCache.value[currentProject.value.slug],
+            project: {
+              ...workspaceCache.value[currentProject.value.slug].project,
+              lastOpenedChapterId: chapter.id
+            }
+          }
+        };
+      }
+    }
     currentFilePath.value = nextFilePath;
     const chapterLoad = beginChapterLoad(currentProject.value.slug, chapter.id, nextFilePath);
     const content = await novelApi.readFile(currentProject.value.slug, nextFilePath);
@@ -3454,10 +3541,12 @@ export const useNovelStore = defineStore("novel", () => {
     runtimeStatus,
     runtimeEvents,
     activeRuntimeRun,
+    activeRuntimeChapterLabel,
     runtimeCheckpoints,
     runtimeBranches,
     latestRuntimeNarrativeSnapshot,
     runtimeKnowledgeRefs,
+    runtimeWorkerHealth,
     isRuntimeEventsConnected,
     isStartingRuntime,
     currentSeriesQualityMetrics,

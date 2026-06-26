@@ -4,16 +4,18 @@ import type {
   ChapterMemoryIndex,
   ChapterSummary,
   CodexTaskType,
+  CraftProfile,
   KnowledgeFact,
   KnowledgeTriple,
   LedgerEntry,
   NovelChapter,
   NovelProject,
-  SelectionPayload
+  SelectionPayload,
+  StyleSample
 } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 import { searchKnowledgeIndex } from "./knowledgeIndex.js";
-import { buildCraftProfileBlock } from "./craftProfile.js";
+import { buildCraftProfileBlock, readCraftProfile } from "./craftProfile.js";
 import {
   buildContinuityReviewSkillBlock,
   buildLongNovelWriterContextBlock,
@@ -74,7 +76,8 @@ function trimContext(content: string, limit = 6000): string {
 }
 
 function contextTierForTitle(title: string): ContextTier {
-  if (title === "Craft Profile") return "T0";
+  if (title === "Craft Profile" || title === "Voice Contract") return "T0";
+  if (title === "Style Samples") return "T1";
   if (["项目配置", "叙事承诺锁"].includes(title) || title.endsWith("题材 Profile")) return "T0";
   if (["文风规则", "角色档案", "世界观", "力量体系", "故事总控台", "章节仪表盘", "场景卡", "相邻章节摘要"].includes(title)) {
     return "T1";
@@ -114,15 +117,43 @@ const broadContextTypes: CodexTaskType[] = [
   "structure.reverse",
   "chapter.plan",
   "chapter.draft",
+  "quality.review",
   "quality.rewrite",
   "continuity.check",
   "idea.suggest",
   "assistant.free"
 ];
 
-const targetChapterTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "quality.rewrite", "continuity.check", "idea.suggest", "assistant.free"];
-const cockpitContextTypes: CodexTaskType[] = ["structure.reverse", "chapter.plan", "chapter.draft", "quality.rewrite", "continuity.check", "idea.suggest", "assistant.free"];
-const memoryContextTypes: CodexTaskType[] = ["chapter.plan", "chapter.draft", "quality.rewrite", "writing.briefing", "writing.recap", "continuity.check", "idea.suggest"];
+const targetChapterTypes: CodexTaskType[] = [
+  "structure.reverse",
+  "chapter.plan",
+  "chapter.draft",
+  "quality.review",
+  "quality.rewrite",
+  "continuity.check",
+  "idea.suggest",
+  "assistant.free"
+];
+const cockpitContextTypes: CodexTaskType[] = [
+  "structure.reverse",
+  "chapter.plan",
+  "chapter.draft",
+  "quality.review",
+  "quality.rewrite",
+  "continuity.check",
+  "idea.suggest",
+  "assistant.free"
+];
+const memoryContextTypes: CodexTaskType[] = [
+  "chapter.plan",
+  "chapter.draft",
+  "quality.review",
+  "quality.rewrite",
+  "writing.briefing",
+  "writing.recap",
+  "continuity.check",
+  "idea.suggest"
+];
 
 function orderedChapters(project: NovelProject): NovelChapter[] {
   return [...project.chapters].sort((a, b) => {
@@ -294,6 +325,7 @@ const novelSkillContextTypes: CodexTaskType[] = [
   "structure.reverse",
   "chapter.plan",
   "chapter.draft",
+  "quality.review",
   "writing.briefing",
   "writing.recap",
   "quality.rewrite",
@@ -305,6 +337,7 @@ const novelSkillContextTypes: CodexTaskType[] = [
 const continuitySkillContextTypes: CodexTaskType[] = [
   "chapter.plan",
   "chapter.draft",
+  "quality.review",
   "writing.briefing",
   "writing.recap",
   "quality.rewrite",
@@ -345,6 +378,48 @@ async function buildPlatformSkillBlocks(type: CodexTaskType): Promise<ContextBlo
   }
 
   return blocks;
+}
+
+function buildVoiceContractBlock(profile: CraftProfile): ContextBlock {
+  const lines = [
+    "Voice rules:",
+    ...(profile.voiceRules || []).map((item) => `- ${item}`),
+    "Avoid these anti-patterns:",
+    ...(profile.antiPatterns || []).map((item) => `- ${item}`),
+    "Scene contracts:",
+    ...((profile.sceneContracts?.chapterOpening || []).map((item) => `- Opening: ${item}`)),
+    ...((profile.sceneContracts?.combat || []).map((item) => `- Combat: ${item}`)),
+    ...((profile.sceneContracts?.chapterEnding || []).map((item) => `- Ending: ${item}`))
+  ];
+  return {
+    title: "Voice Contract",
+    tier: "T0",
+    content: lines.join("\n")
+  };
+}
+
+function sampleUseCasesForTask(type: CodexTaskType): StyleSample["useCase"][] {
+  if (type === "chapter.draft") return ["opening", "combat", "mystery", "ending", "general"];
+  if (type === "quality.review" || type === "quality.rewrite") return ["opening", "combat", "mystery", "ending", "general"];
+  if (type === "chapter.plan") return ["opening", "combat", "ending", "general"];
+  return ["general", "opening"];
+}
+
+async function buildStyleSamplesBlock(root: string, type: CodexTaskType): Promise<ContextBlock | undefined> {
+  const samples = await readOptionalJson<StyleSample[]>(root, "bible/style-samples.json");
+  if (!Array.isArray(samples) || !samples.length) return undefined;
+
+  const selected = sampleUseCasesForTask(type)
+    .flatMap((useCase) => samples.filter((sample) => sample.useCase === useCase))
+    .filter((sample, index, list) => list.findIndex((item) => item.id === sample.id) === index)
+    .slice(0, 4);
+  if (!selected.length) return undefined;
+
+  return {
+    title: "Style Samples",
+    tier: "T1",
+    content: JSON.stringify(selected, null, 2)
+  };
 }
 
 function emptyTierStats() {
@@ -629,13 +704,18 @@ export async function assembleContext(
   const chapter = project.chapters.find((item) => item.id === chapterId);
   const narrativePromiseBlock = buildNarrativePromiseBlock(project, chapter);
   const genreProfileBlock = await buildGenreProfileBlock(root, project);
+  const craftProfile = await readCraftProfile(root);
   const craftProfileBlock = await buildCraftProfileBlock(root, project);
+  const voiceContractBlock = buildVoiceContractBlock(craftProfile);
+  const styleSamplesBlock = await buildStyleSamplesBlock(root, type);
   const platformSkillBlocks = await buildPlatformSkillBlocks(type);
   const blocks = [
     { title: "项目配置", content: JSON.stringify(project, null, 2) },
     ...(narrativePromiseBlock ? [narrativePromiseBlock] : []),
     ...(genreProfileBlock ? [genreProfileBlock] : []),
     craftProfileBlock,
+    voiceContractBlock,
+    ...(styleSamplesBlock ? [styleSamplesBlock] : []),
     ...platformSkillBlocks,
     { title: "文风规则", content: await readOptional(root, "style/style-guide.md") },
     { title: "角色档案", content: await readOptional(root, "bible/characters.md") },
@@ -703,6 +783,23 @@ export async function assembleContext(
           targetMetrics: payload.targetMetrics,
           mode: payload.mode,
           qualityReport: payload.currentQualityReport || (await readOptionalJson(root, `quality/${chapter.id}.json`))
+        },
+        null,
+        2
+      )
+    });
+  }
+
+  if (type === "quality.review" && chapter) {
+    blocks.push({
+      title: "Quality Review Targets",
+      content: JSON.stringify(
+        {
+          targetScore: payload.targetScore,
+          targetMetrics: payload.targetMetrics,
+          currentQualityReport: payload.currentQualityReport || (await readOptionalJson(root, `quality/${chapter.id}.json`)),
+          dashboard: await readOptional(root, `dashboard/${chapter.id}.json`),
+          scenes: await readOptional(root, `scenes/${chapter.id}.json`)
         },
         null,
         2

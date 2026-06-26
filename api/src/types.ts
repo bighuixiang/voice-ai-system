@@ -4,6 +4,7 @@ export type CodexTaskType =
   | "structure.reverse"
   | "chapter.plan"
   | "chapter.draft"
+  | "quality.review"
   | "selection.polish"
   | "quality.rewrite"
   | "continuity.check"
@@ -179,6 +180,14 @@ export interface RuntimeDerivativeBranch {
   updatedAt: string;
 }
 
+export interface RuntimeWorkerHealth {
+  status: "online" | "stale" | "offline";
+  lastHeartbeatAt?: string;
+  lastCommandClaimedAt?: string;
+  pollIntervalMs: number;
+  staleAfterMs: number;
+}
+
 export interface RuntimeStatusSnapshot {
   activeRun?: RuntimeRun;
   runs: RuntimeRun[];
@@ -187,6 +196,7 @@ export interface RuntimeStatusSnapshot {
   branches: RuntimeDerivativeBranch[];
   latestSnapshot?: RuntimeSnapshotRecord;
   knowledgeRefs: RuntimeKnowledgeRef[];
+  worker: RuntimeWorkerHealth;
 }
 
 export type CreativeModuleKey = "novel" | "assets" | "script" | "image-generation" | "video-generation";
@@ -213,6 +223,7 @@ export type AiStageKey =
   | "pipeline.structure.reverse"
   | "pipeline.chapter.plan"
   | "pipeline.chapter.prose"
+  | "pipeline.quality.review"
   | "pipeline.selection.polish"
   | "pipeline.quality.rewrite"
   | "pipeline.chapter.validate"
@@ -455,7 +466,21 @@ export interface CraftProfile {
   beatDefinitions: Array<{ type: CraftBeatType; label: string; purpose: string }>;
   genreProfiles: CraftGenreProfile[];
   qualityGates: string[];
+  voiceRules?: string[];
+  antiPatterns?: string[];
+  sceneContracts?: {
+    chapterOpening?: string[];
+    combat?: string[];
+    chapterEnding?: string[];
+  };
   updatedAt?: string;
+}
+
+export interface StyleSample {
+  id: string;
+  tags: string[];
+  excerpt: string;
+  useCase: "opening" | "combat" | "mystery" | "ending" | "general";
 }
 
 export interface CraftCoverageSignal {

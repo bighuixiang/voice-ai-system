@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import AutopilotRuntimePanel from "./AutopilotRuntimePanel.vue";
-import type { RuntimeRun } from "@/types/novel";
+import type { RuntimeEvent, RuntimeRun } from "@/types/novel";
 
 const activeRun: RuntimeRun = {
   id: "run-001",
@@ -71,6 +71,77 @@ function mountPanel(props?: Partial<InstanceType<typeof AutopilotRuntimePanel>["
 }
 
 describe("AutopilotRuntimePanel", () => {
+  it("translates runtime event labels and messages into Chinese", () => {
+    const events: RuntimeEvent[] = [
+      {
+        id: 1,
+        eventId: "event-1",
+        projectSlug: "demo",
+        runId: "run-001",
+        type: "stage",
+        stage: "chapter_plan",
+        message: "Planning chapter",
+        payload: {},
+        createdAt: "2026-06-26T00:00:00.000Z"
+      },
+      {
+        id: 2,
+        eventId: "event-2",
+        projectSlug: "demo",
+        runId: "run-001",
+        type: "quality",
+        stage: "quality_review",
+        message: "Quality score 88",
+        payload: {},
+        createdAt: "2026-06-26T00:00:01.000Z"
+      },
+      {
+        id: 3,
+        eventId: "event-3",
+        projectSlug: "demo",
+        runId: "run-001",
+        type: "checkpoint",
+        stage: "checkpoint_before_run",
+        message: "Checkpoint created: chapter-001",
+        payload: {},
+        createdAt: "2026-06-26T00:00:02.000Z"
+      }
+    ];
+    const wrapper = mountPanel({ events });
+    const text = wrapper.find(".event-list").text();
+
+    expect(text).toContain("规划");
+    expect(text).toContain("正在规划章节");
+    expect(text).toContain("质检 · 质量");
+    expect(text).toContain("质量评分：88");
+    expect(text).toContain("快照 · 快照");
+    expect(text).toContain("已创建快照：chapter-001");
+  });
+
+  it("shows the current chapter label for the active runtime", () => {
+    const wrapper = mountPanel({
+      activeRun,
+      activeChapterLabel: "第1章 尸王破封"
+    });
+
+    expect(wrapper.find(".runtime-target").text()).toContain("第1章 尸王破封");
+  });
+
+  it("shows a clear worker offline warning when the run is queued", () => {
+    const wrapper = mountPanel({
+      activeRun: { ...activeRun, status: "queued" },
+      worker: {
+        status: "offline",
+        lastHeartbeatAt: "2026-06-26T00:00:00.000Z",
+        pollIntervalMs: 1500,
+        staleAfterMs: 15000
+      }
+    });
+
+    expect(wrapper.text()).toContain("执行引擎离线");
+    expect(wrapper.find(".runtime-warning").text()).toContain("npm --prefix api run dev");
+  });
+
   it("starts the runtime from the direction action when idle text is provided", async () => {
     const wrapper = mountPanel();
 

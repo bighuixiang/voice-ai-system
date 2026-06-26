@@ -137,6 +137,108 @@ describe("contextAssembler", () => {
     expect(profile?.content).toContain("derivative imitation of a specific novel or author");
   });
 
+  it("injects a voice contract and project style samples near the top of draft context", async () => {
+    const project = createProjectSkeleton({ title: "Voice Demo", genre: "xuanhuan", roughIdea: "Need sharper prose." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(
+      path.join(root, "bible", "craft-profile.json"),
+      JSON.stringify(
+        {
+          version: 1,
+          title: "Voice contract",
+          principles: ["Pressure first."],
+          qualityGates: ["Reject hollow grandeur."],
+          voiceRules: ["Open with visible danger before explanation."],
+          antiPatterns: ["Do not end scenes with fake suspense summary lines."],
+          sceneContracts: {
+            chapterOpening: ["First screen must land omen, hierarchy, and protagonist position."],
+            combat: ["Combat must show environmental feedback and bodily cost."],
+            chapterEnding: ["End on aftermath or consequence."]
+          }
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+    await fs.writeFile(
+      path.join(root, "bible", "style-samples.json"),
+      JSON.stringify(
+        [
+          {
+            id: "opening-1",
+            tags: ["opening", "omen"],
+            useCase: "opening",
+            excerpt: "Thunder pressed against the ridge before anyone dared breathe."
+          },
+          {
+            id: "combat-1",
+            tags: ["battle"],
+            useCase: "combat",
+            excerpt: "The altar cracked first, then the cliff answered a breath later."
+          }
+        ],
+        null,
+        2
+      ),
+      "utf8"
+    );
+
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" });
+    const craftIndex = blocks.findIndex((block) => block.title === "Craft Profile");
+    const voiceIndex = blocks.findIndex((block) => block.title === "Voice Contract");
+    const sampleIndex = blocks.findIndex((block) => block.title === "Style Samples");
+
+    expect(voiceIndex).toBeGreaterThan(craftIndex);
+    expect(sampleIndex).toBeGreaterThan(voiceIndex);
+    expect(blocks[voiceIndex]?.content).toContain("Open with visible danger before explanation.");
+    expect(blocks[voiceIndex]?.content).toContain("fake suspense summary lines");
+    expect(blocks[sampleIndex]?.content).toContain("opening-1");
+    expect(blocks[sampleIndex]?.content).toContain("combat-1");
+  });
+
+  it("includes mystery style samples for quality rewrites", async () => {
+    const project = createProjectSkeleton({ title: "Rewrite Samples", genre: "xuanhuan", roughIdea: "Mystery threads need stronger rewrites." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(
+      path.join(root, "bible", "style-samples.json"),
+      JSON.stringify(
+        [
+          {
+            id: "opening-1",
+            tags: ["opening"],
+            useCase: "opening",
+            excerpt: "The bell rang before the first crack appeared."
+          },
+          {
+            id: "mystery-1",
+            tags: ["jade", "origin"],
+            useCase: "mystery",
+            excerpt: "The pendant answered the seal before the boy understood why."
+          },
+          {
+            id: "ending-1",
+            tags: ["aftermath"],
+            useCase: "ending",
+            excerpt: "The ruin stayed behind after the shouting ended."
+          }
+        ],
+        null,
+        2
+      ),
+      "utf8"
+    );
+
+    const blocks = await assembleContext("quality.rewrite", root, project, { chapterId: "chapter-001" });
+    const styleSamples = blocks.find((block) => block.title === "Style Samples");
+
+    expect(styleSamples?.content).toContain("opening-1");
+    expect(styleSamples?.content).toContain("mystery-1");
+    expect(styleSamples?.content).toContain("ending-1");
+  });
+
   it("injects the long novel writer playbook when the system skill is enabled", async () => {
     const project = createProjectSkeleton({ title: "Longform Demo", genre: "fantasy", roughIdea: "Quality-first drafting matters." });
     await createProjectFiles(project);

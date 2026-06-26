@@ -408,9 +408,14 @@ export async function runNovelTask(
       task.outputSummary = "AI task cancelled.";
       task.error = output.stderr || "AI task cancelled.";
     } else {
-      task.status = output.exitCode === 0 && !output.timedOut ? "success" : "error";
+      const completedWithoutProcessError = output.exitCode === 0 && !output.timedOut;
+      task.status = completedWithoutProcessError && !result.parseError ? "success" : "error";
       task.outputSummary = result.summary;
-      task.error = output.exitCode === 0 && !output.timedOut ? undefined : output.stderr || `${config.label} exited with ${output.exitCode}`;
+      if (completedWithoutProcessError && result.parseError) {
+        task.error = `Failed to parse ${config.label} output: ${result.parseError}`;
+      } else {
+        task.error = completedWithoutProcessError ? undefined : output.stderr || `${config.label} exited with ${output.exitCode}`;
+      }
     }
     task.result = result;
     task.durationMs = output.durationMs;

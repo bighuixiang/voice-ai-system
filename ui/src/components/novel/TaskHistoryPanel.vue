@@ -80,6 +80,7 @@ const labels: Partial<Record<CodexTaskType, string>> = {
   "chapter.plan": "规划章节",
   "chapter.draft": "起草正文",
   "selection.polish": "选区润色",
+  "quality.review": "质量评审",
   "quality.rewrite": "质量改造",
   "continuity.check": "连续性检查",
   "idea.suggest": "补灵感",
