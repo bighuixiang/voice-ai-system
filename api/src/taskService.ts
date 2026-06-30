@@ -341,7 +341,11 @@ export async function applyPatch(root: string, patch: NovelFilePatch): Promise<v
       throw new Error("replace-selection patch requires selection");
     }
     const original = await fs.readFile(target, "utf8");
-    const next = `${original.slice(0, patch.selection.start)}${patch.content}${original.slice(patch.selection.end)}`;
+    const { start, end } = patch.selection;
+    if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || end > original.length) {
+      throw new Error(`Invalid patch selection range for ${safeTarget}`);
+    }
+    const next = `${original.slice(0, start)}${patch.content}${original.slice(end)}`;
     await fs.writeFile(target, next, "utf8");
   }
 }

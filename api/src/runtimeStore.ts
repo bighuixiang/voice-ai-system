@@ -412,17 +412,37 @@ export function enqueueRuntimeCommand(input: {
 
 export function claimNextRuntimeCommand(): RuntimeCommand | null {
   const database = openDatabase();
+  let inTransaction = false;
   try {
+    database.exec("BEGIN IMMEDIATE;");
+    inTransaction = true;
     const row = database
       .prepare("SELECT * FROM runtime_write_commands WHERE status = 'pending' ORDER BY created_at ASC LIMIT 1")
       .get();
-    if (!row) return null;
+    if (!row) {
+      database.exec("COMMIT;");
+      inTransaction = false;
+      return null;
+    }
     const timestamp = nowIso();
-    database
+    const result = database
       .prepare("UPDATE runtime_write_commands SET status = 'claimed', claimed_at = ?, updated_at = ? WHERE id = ? AND status = 'pending'")
-      .run(timestamp, timestamp, row.id);
+      .run(timestamp, timestamp, row.id) as { changes?: number | bigint };
+    if (Number(result.changes ?? 0) !== 1) {
+      database.exec("ROLLBACK;");
+      inTransaction = false;
+      return null;
+    }
     const claimed = database.prepare("SELECT * FROM runtime_write_commands WHERE id = ?").get(row.id);
-    return claimed ? rowToCommand(claimed) : null;
+    const command = claimed ? rowToCommand(claimed) : null;
+    database.exec("COMMIT;");
+    inTransaction = false;
+    return command;
+  } catch (error) {
+    if (inTransaction) {
+      database.exec("ROLLBACK;");
+    }
+    throw error;
   } finally {
     database.close();
   }

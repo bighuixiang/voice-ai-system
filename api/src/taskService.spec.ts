@@ -487,4 +487,40 @@ describe("taskService", () => {
     const content = await fs.readFile(path.join(root, "outline", "chapter-001.md"), "utf8");
     expect(content).toBe("# 精修章纲\n");
   });
+
+  it("rejects replace-selection patches with invalid ranges", async () => {
+    const root = path.join(tempRoot, "demo");
+    await applyPatch(root, {
+      target: "outline/chapter-001.md",
+      mode: "replace-file",
+      content: "abcdef"
+    });
+
+    await expect(
+      applyPatch(root, {
+        target: "outline/chapter-001.md",
+        mode: "replace-selection",
+        content: "x",
+        selection: { start: -1, end: 2 }
+      })
+    ).rejects.toThrow("Invalid patch selection range");
+    await expect(
+      applyPatch(root, {
+        target: "outline/chapter-001.md",
+        mode: "replace-selection",
+        content: "x",
+        selection: { start: 4, end: 3 }
+      })
+    ).rejects.toThrow("Invalid patch selection range");
+    await expect(
+      applyPatch(root, {
+        target: "outline/chapter-001.md",
+        mode: "replace-selection",
+        content: "x",
+        selection: { start: 0, end: 7 }
+      })
+    ).rejects.toThrow("Invalid patch selection range");
+
+    await expect(fs.readFile(path.join(root, "outline", "chapter-001.md"), "utf8")).resolves.toBe("abcdef");
+  });
 });

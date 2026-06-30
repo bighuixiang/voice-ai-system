@@ -363,7 +363,8 @@ const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   } else if (
     message.includes("Unsafe file path") ||
     message.includes("escapes project root") ||
-    message.includes("Quality rewrite task")
+    message.includes("Quality rewrite task") ||
+    message.includes("Invalid patch selection range")
   ) {
     status = 400;
   }

@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import { router } from "./router";
 
 describe("App.vue", () => {
+  let wrapper: VueWrapper | null = null;
+
   beforeEach(() => {
     vi.stubGlobal(
       "fetch",
@@ -23,6 +25,8 @@ describe("App.vue", () => {
   });
 
   afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
     vi.unstubAllGlobals();
   });
 
@@ -30,11 +34,12 @@ describe("App.vue", () => {
     await router.push("/");
     await router.isReady();
 
-    const wrapper = mount(App, {
+    wrapper = mount(App, {
       global: {
         plugins: [createPinia(), router]
       }
     });
+    await flushPromises();
 
     expect(wrapper.text()).toContain("创作生产平台");
     expect(wrapper.text()).toContain("先选项目，再进入工作台");

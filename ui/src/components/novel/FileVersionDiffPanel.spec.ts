@@ -1,6 +1,5 @@
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
-import ElementPlus from "element-plus";
 import FileVersionDiffPanel from "./FileVersionDiffPanel.vue";
 
 const version = {
@@ -14,7 +13,6 @@ const version = {
 describe("FileVersionDiffPanel", () => {
   it("emits refresh, preview, and close events", async () => {
     const wrapper = mount(FileVersionDiffPanel, {
-      global: { plugins: [ElementPlus] },
       props: {
         versions: [version],
         diff: {

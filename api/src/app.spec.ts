@@ -1458,6 +1458,26 @@ describe("novel API routes", () => {
       adoptionDecision: "accepted",
       acceptedPatchTargets: ["chapters/chapter-001.md"]
     });
+
+    const invalidPatch = await jsonFetch<{ error: string }>("/api/novel/projects/patch-demo/patches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        patches: [
+          {
+            target: "chapters/chapter-001.md",
+            mode: "replace-selection",
+            content: "bad",
+            selection: { start: 0, end: 999 }
+          }
+        ]
+      })
+    });
+    const readAfterInvalid = await jsonFetch<{ content: string }>("/api/novel/projects/patch-demo/files/chapters/chapter-001.md");
+
+    expect(invalidPatch.status).toBe(400);
+    expect(invalidPatch.data.error).toContain("Invalid patch selection range");
+    expect(readAfterInvalid.data.content).toBe("before sharper line after");
   });
 
   it("normalizes quality rewrite patches to the task current chapter target", async () => {
