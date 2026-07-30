@@ -1,0 +1,2477 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited-policy-selected-not-implemented",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP5-drafting",
+  "profileKind": "user-release",
+  "isUserRelease": true,
+  "journey": "Turn an executable outline into evidence-bounded, structurally clean prose candidates, adopt only validated text atomically, settle chapters, capture author feedback, and continue across the book under explicit cost, pause, recovery, text-integrity, and quality policy.",
+  "protocol": {
+    "blueQuestion": "Does this requirement directly protect the first real prose candidate, its review and adoption, chapter settlement, first feedback evidence, or the continuous drafting run that schedules the next chapter?",
+    "redQuestion": "Can a task-success flag, direct file write, fixed score, same-model review, unapproved recap, or one Q-003 speed preference make this requirement appear satisfied without trustworthy prose evidence?",
+    "rule": "RP5 owns all first-prose and continuous-run invariants; Q-003 selects review intensity and resource policy only, never requirement membership or hard-gate strength."
+  },
+  "currentPlatformEvidence": {
+    "present": [
+      "chapter.plan, chapter.draft, quality.review, selection.polish, quality.rewrite, continuity.check, and writing.recap task templates",
+      "A single-chapter runtime pipeline with checkpoints, narrative snapshots, context assembly, quality review, recap, knowledge rebuild, story-graph update, pause, rewrite, and author-review states",
+      "ChapterQualityReport, series quality metrics, rewrite comparison UI, task invocation history, adoption decisions, and accepted patch targets",
+      "Real projects with chapter plans, drafted prose, scene cards, ledgers, summaries, and quality files that can serve as migration fixtures",
+      "Monaco edits Markdown and all current save/import/runtime paths preserve the provided UTF-8 string directly"
+    ],
+    "contradictoryOrInsufficient": [
+      "runSingleChapterPipeline dispatches chapter_draft writes to the chapter content path before continuity validation, quality review, or author adoption",
+      "The self-repair loop dispatches full-chapter quality_self_repair writes before the final author-review gate",
+      "RUNTIME_QUALITY_TARGET is a fixed 86 and qualityMeetsTarget requires every one of the same seven metrics to reach it, regardless of chapter function",
+      "quality.rewrite is instructed to rewrite the full chapter and raise every metric, which can erase valid quiet-chapter strengths and author-locked prose",
+      "The start path executes one single-chapter pipeline; no first-class BookRun dependency graph proves autoContinue, authorization expiry, lease fencing, or honest whole-book progress",
+      "No ProseCandidate, ProseAdoptionTransaction, SceneExecutionLedger, DraftingQualityPolicy, hard-versus-aesthetic verdict, immutable AuthorFeedbackEvent, or settled chapter certificate authority was found",
+      "Recap and knowledge rebuilding occur after direct draft writes, so rejected prose can influence derived assets before governed settlement",
+      "No TextProfile, structure snapshot, contamination quarantine, source map, bounded normalization receipt, cross-entry round-trip proof, or TextSettlement was found"
+    ]
+  },
+  "q003Boundary": {
+    "decisionStatus": "confirmed",
+    "selectedOption": "C",
+    "selectedPolicyId": "tiered-quality",
+    "runtimeActivationStatus": "not-implemented-not-verified",
+    "policyCandidateRef": "policy-candidates/Q-003-drafting-quality.json",
+    "invariantRequirementCount": 148,
+    "effect": "C applies ordinary/elevated/key tiers to candidate count, independent review, pairwise depth, repair budget and milestone cadence only.",
+    "forbiddenEffect": "The selected policy cannot weaken hard guards, candidate-before-canon, atomic adoption, rights, evidence, feedback capture, runtime safety, or chapter settlement semantics."
+  },
+  "counts": {
+    "originalRequirements": 148,
+    "retainedRequirements": 148,
+    "retainedMustRequirements": 144,
+    "retainedShouldRequirements": 1,
+    "retainedExperimentRequirements": 3,
+    "movedRequirements": 0,
+    "remainingMustBudgetHeadroom": 0
+  },
+  "retained": [
+    {
+      "requirementId": "FR-COLLAB-004",
+      "title": "先看一版的安全语义",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-043",
+        "AT-204"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-023",
+      "title": "探索性正文回流",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-287"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-016",
+      "title": "声音随状态与关系变化",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-295",
+        "AT-437"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-001",
+      "title": "写前上下文契约",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-289"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-002",
+      "title": "场景级创作",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-292"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-003",
+      "title": "工艺模式库",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-045",
+        "AT-259"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-004",
+      "title": "多候选与择优",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-058",
+        "AT-305"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-005",
+      "title": "定向改写",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-053",
+        "AT-308"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-006",
+      "title": "章节创作契约",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-289",
+        "AT-312"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-007",
+      "title": "分层工艺优先级",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-044",
+        "AT-045"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-008",
+      "title": "人物声音档案",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-046",
+        "AT-295",
+        "AT-437"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-009",
+      "title": "POV 与知识边界门禁",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-048",
+        "AT-297"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-010",
+      "title": "场景到章节的连贯生成",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-049",
+        "AT-303"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-011",
+      "title": "长章与中断恢复",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-050",
+        "AT-304"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-012",
+      "title": "作者段落锁",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-051"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-013",
+      "title": "跨章反模板检查",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-052"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-014",
+      "title": "局部修复优先",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-053",
+        "AT-308"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-015",
+      "title": "候选比较与组合",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-058",
+        "AT-309"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WRITE-016",
+      "title": "写作停止条件",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-305",
+        "AT-312"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-001",
+      "title": "正文生成清单",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-289"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-002",
+      "title": "候选先于 canon",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-290"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-003",
+      "title": "稳定正文片段身份",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-291"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-004",
+      "title": "场景执行账本",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-292"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-005",
+      "title": "节拍兑现证据",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-293"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-006",
+      "title": "人物能动性链",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-294"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-007",
+      "title": "人物声音与状态一致性",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-295"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-008",
+      "title": "对话行动与潜台词",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-296"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-009",
+      "title": "POV 信息状态追踪",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-297"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-010",
+      "title": "叙述距离契约",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-298"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-011",
+      "title": "情绪因果与余波",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-299"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-012",
+      "title": "具体性与设定进入方式",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-300"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-013",
+      "title": "信息释放与认知预算",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-301"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-014",
+      "title": "微观节奏可解释",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-302"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-015",
+      "title": "场景接缝验证",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-303"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-016",
+      "title": "长章分段续写",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-304"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-017",
+      "title": "候选收敛与停止发散",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-305"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-018",
+      "title": "生成与评审逻辑隔离",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-306"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-019",
+      "title": "正文验证档案",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-307"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-020",
+      "title": "证据驱动修复计划",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-308"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-021",
+      "title": "改善与回归证明",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-309"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-022",
+      "title": "原子局部采纳",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-310"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-023",
+      "title": "先采纳正文再结算事实",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-311"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-PROSE-024",
+      "title": "正文成熟度状态",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-312"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-001",
+      "title": "参考素材来源清单",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-110",
+        "AT-251"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-002",
+      "title": "可解释工艺抽取",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-253"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-003",
+      "title": "工艺模式生命周期",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-262",
+        "AT-267",
+        "AT-268"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-004",
+      "title": "项目内对照试验",
+      "normativeStrength": "EXPERIMENT",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-262"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-005",
+      "title": "负偏好与防复发",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-056",
+        "AT-266"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-006",
+      "title": "隔离、撤销与遗忘",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-268"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-007",
+      "title": "来源资格先于发布",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-054",
+        "AT-110",
+        "AT-251"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-008",
+      "title": "原文样例隔离区",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-251",
+        "AT-252"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-009",
+      "title": "工艺单位可解释抽取",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-253"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-010",
+      "title": "表层与机制分离",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-254"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-011",
+      "title": "“为什么有效”证据",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-255"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-012",
+      "title": "适用边界与反例",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-256"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-013",
+      "title": "抽象迁移编译器",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-257"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-014",
+      "title": "生成前后反模仿守卫",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-258",
+        "AT-264"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-015",
+      "title": "任务化模式检索",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-259"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-016",
+      "title": "上下文预算与证据最小集",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-260"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-017",
+      "title": "模式冲突与优先级",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-261"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-018",
+      "title": "工艺实验而非自证",
+      "normativeStrength": "EXPERIMENT",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-055",
+        "AT-262"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-019",
+      "title": "Holdout 与跨场景验证",
+      "normativeStrength": "EXPERIMENT",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-263"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-020",
+      "title": "原创性不等于随机改词",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-264"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-021",
+      "title": "作者归因与可撤销采纳",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-265"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-022",
+      "title": "负模式与防复发",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-056",
+        "AT-266"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-023",
+      "title": "来源谱系贯穿生成与发布",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-267"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CRAFT-024",
+      "title": "删除与权利变更即时失效",
+      "normativeStrength": "MUST",
+      "category": "craft-learning-and-rights-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-268"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-001",
+      "title": "质量不是单一分数",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-011",
+        "AT-012",
+        "AT-307"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-002",
+      "title": "证据化质量声明",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-127",
+        "AT-307"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-003",
+      "title": "多尺度评审",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-130",
+        "AT-307"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-004",
+      "title": "功能适配而非统一高压",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-044",
+        "AT-119"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-005",
+      "title": "红蓝双视角审稿",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-015",
+        "AT-306"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-006",
+      "title": "作者偏好校准",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-013",
+        "AT-124"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-007",
+      "title": "成对比较优先",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-123"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-008",
+      "title": "质量改写回归保护",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-014",
+        "AT-309"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-009",
+      "title": "工艺学习闭环",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-055",
+        "AT-262"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUALITY-010",
+      "title": "反指标投机",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-012",
+        "AT-222"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-001",
+      "title": "读者体验契约",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-390"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-002",
+      "title": "体验结论是有边界的假设",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-391"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-003",
+      "title": "密封冷读视图",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-392"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-004",
+      "title": "问题、信念与预测状态",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-393"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-005",
+      "title": "定向与有意模糊分离",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-394"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-006",
+      "title": "新奇度与认知负荷预算",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-395"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-007",
+      "title": "人物依附与能动性归因",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-396"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-008",
+      "title": "情绪轨迹与余波",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-397"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-009",
+      "title": "好奇缺口与答案节奏",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-398"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-010",
+      "title": "回报必须改变阅读状态",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-399"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-011",
+      "title": "场景必要性反事实",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-400"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-012",
+      "title": "惊讶、公平与可预测区间",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-401"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-013",
+      "title": "多尺度体验时间线",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-402"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-014",
+      "title": "多类读者分歧保真",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-403"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-015",
+      "title": "模拟评审必须经人类校准",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-404"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-016",
+      "title": "正文证据优先于创作意图",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-405"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-017",
+      "title": "修订影响与失效",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-406"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-018",
+      "title": "体验修复保持优势",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-407"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-019",
+      "title": "真实反馈自愿、最小化与可撤回",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-408"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-READER-020",
+      "title": "覆盖与可证明边界",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-409"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MEMORY-001",
+      "title": "章后补丁覆盖",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-311",
+        "AT-312",
+        "AT-384"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MEMORY-002",
+      "title": "风险分级采纳",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-310",
+        "AT-311",
+        "AT-384"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MEMORY-003",
+      "title": "资产覆盖率",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-385"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MIGRATE-002",
+      "title": "预览式回填",
+      "normativeStrength": "MUST",
+      "category": "compatibility-and-interface-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-010",
+        "AT-180"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-014",
+      "title": "正文证据标记",
+      "normativeStrength": "MUST",
+      "category": "compatibility-and-interface-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-088"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-015",
+      "title": "专注写作",
+      "normativeStrength": "MUST",
+      "category": "compatibility-and-interface-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-089"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-011",
+      "title": "内容寻址缓存",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-104"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-004",
+      "title": "创作任务不使用逐字金标准",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-120"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-005",
+      "title": "章节功能自适应量表",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-119"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-006",
+      "title": "硬守卫与审美判断分离",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-121"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-009",
+      "title": "独立评审与聚合",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-125"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-010",
+      "title": "评审校准集",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-126"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-011",
+      "title": "证据锚定评价",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-127"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-012",
+      "title": "不确定、平局与分歧",
+      "normativeStrength": "MUST",
+      "category": "prose-evidence-gate",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-128"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-001",
+      "title": "一等整书运行",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-144"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-002",
+      "title": "显式依赖任务图",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-164"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-003",
+      "title": "多时间尺度滚动规划",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-159"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-004",
+      "title": "有范围的自治授权",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-146",
+        "AT-164"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-005",
+      "title": "多重执行上限",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-162"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-006",
+      "title": "启动前预测与预检",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-145"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-007",
+      "title": "状态语义分层",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-143",
+        "AT-144",
+        "AT-158"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-008",
+      "title": "工作项幂等与产物契约",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-153",
+        "AT-154"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-009",
+      "title": "章节结算事务",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-142",
+        "AT-154"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-010",
+      "title": "风险门禁与批量审阅",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-147"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-011",
+      "title": "`autoContinue` 可验证语义",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-142",
+        "AT-143"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-012",
+      "title": "作者方向的因果生效",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-148",
+        "AT-149"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-013",
+      "title": "分级暂停与恢复",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-150"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-014",
+      "title": "停止与紧急制动",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-151"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-015",
+      "title": "租约、心跳与单写者",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-152"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-016",
+      "title": "阶段感知恢复",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-150",
+        "AT-153",
+        "AT-154"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-017",
+      "title": "公平调度与资源互斥",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-155",
+        "AT-156"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-018",
+      "title": "停滞与循环检测",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-157"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-019",
+      "title": "证据化重规划",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-159"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-020",
+      "title": "版本与新鲜度传播",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-160"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-021",
+      "title": "失败隔离与降级",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-161"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-022",
+      "title": "真实进度与预测",
+      "normativeStrength": "MUST",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-144",
+        "AT-158"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RUN-023",
+      "title": "安静时段与通知摘要",
+      "normativeStrength": "SHOULD",
+      "category": "drafting-runtime-invariant",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-163"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-005",
+      "title": "优先级不是永久权重",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-219"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-007",
+      "title": "反目标守卫",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-221"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-008",
+      "title": "目标可验证但不指标投机",
+      "normativeStrength": "MUST",
+      "category": "direct-drafting-journey",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-222"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-012",
+      "title": "Q-003 参数槽",
+      "normativeStrength": "MUST",
+      "category": "policy-decision-slot",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-226",
+        "AT-363"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-001",
+      "title": "一等作者反馈事件",
+      "normativeStrength": "MUST",
+      "category": "first-feedback-foundation",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-227"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-002",
+      "title": "低负担反馈",
+      "normativeStrength": "MUST",
+      "category": "first-feedback-foundation",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-228"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-003",
+      "title": "部分采纳与片段归因",
+      "normativeStrength": "MUST",
+      "category": "first-feedback-foundation",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-229"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-004",
+      "title": "手工编辑差异不是自动偏好",
+      "normativeStrength": "MUST",
+      "category": "first-feedback-foundation",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-230"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-005",
+      "title": "删除、撤销与恢复的语义",
+      "normativeStrength": "MUST",
+      "category": "first-feedback-foundation",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-231"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-006",
+      "title": "反馈作用域与对象",
+      "normativeStrength": "MUST",
+      "category": "first-feedback-foundation",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-232"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-TEXT-001",
+      "title": "版本化 TextProfile 与无声归一化禁令",
+      "normativeStrength": "MUST",
+      "category": "text-integrity-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-512"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-TEXT-002",
+      "title": "结构化正文解析与生成污染隔离",
+      "normativeStrength": "MUST",
+      "category": "text-integrity-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-514"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-TEXT-003",
+      "title": "可解释诊断、分级修复与作者例外",
+      "normativeStrength": "MUST",
+      "category": "text-integrity-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-513"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-TEXT-004",
+      "title": "跨入口 round-trip、锚点保持与文本结算",
+      "normativeStrength": "MUST",
+      "category": "text-integrity-guard",
+      "firstSliceScope": "Only the behavior required to turn an executable outline into governed prose candidates, validate and adopt them atomically, settle chapters, capture first feedback, and run continuously without weakening canon, POV, rights, author-lock, obligation, or stale-input gates; Q-003 changes execution intensity, not these invariants.",
+      "acceptanceRefs": [
+        "AT-515"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    }
+  ],
+  "moved": [],
+  "conclusion": "RP5 retains all 148 first-prose, text-integrity, and continuous-run requirements as one common contract: 144 MUST, one SHOULD, and three EXPERIMENT. Q-003 is author-confirmed as C/tiered-quality, so the profile is specification-locked but remains unimplemented; current direct-string/direct-to-canon paths still contradict the required candidate/adoption and text-settlement boundaries."
+}

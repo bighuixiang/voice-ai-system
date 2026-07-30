@@ -1,0 +1,478 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited-dependencies-specified-not-implemented",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP8-completion",
+  "profileKind": "user-release",
+  "isUserRelease": true,
+  "journey": "Prove that the frozen publication scope is complete, coherent, closed or contractually open, replayably audited, stale-safe, terminated with no active writer or transaction, and delivered as an immutable reader-safe edition with verifiable artifacts.",
+  "protocol": {
+    "blueQuestion": "Does this requirement consume a frozen full-book publication scope to prove completion, cross-domain closure, audit replay, staleness, source coverage, or safe terminal quiescence?",
+    "redQuestion": "Is it actually a control needed from the first continuous drafting chapter, or does it infer book completion from file counts, one completed runtime, an empty queue, a model score, or a mutable status?",
+    "rule": "RP5 owns continuous-run safety from the first drafting action; RP8 owns only terminal evidence that cannot exist until the book, obligations, revision, and active writers have converged."
+  },
+  "currentPlatformEvidence": {
+    "present": [
+      "A single-chapter runtime pipeline supports queued, running, paused, review_required, completed, failed, and cancelled statuses",
+      "The runtime UI projects a completed run as 100 percent and labels it as autopilot completed",
+      "A real imported project contains 198 planned chapters and substantial drafted content",
+      "The browser can download a mutable project audit report as JSON"
+    ],
+    "contradictoryOrInsufficient": [
+      "The runtime start path calls runSingleChapterPipeline rather than a first-class BookRun work graph",
+      "The UI completion label has no draft/review/closure/audited completion denominator",
+      "The sampled 198-chapter project has 70 drafted and 128 planned chapters, contradicting full-book completion",
+      "No full-book CompletionReport, replayable CompletionAudit, ObligationCoverageCertificate, quiescence proof, or stale audited_complete authority was found",
+      "No ManuscriptRelease, EditionManifest, publication tree, reader-safe manuscript artifact, deterministic renderer, artifact hash set, or DeliveryProof was found"
+    ]
+  },
+  "counts": {
+    "originalRequirements": 39,
+    "retainedMustRequirements": 16,
+    "movedToDraftingRequirements": 23,
+    "remainingMustBudgetHeadroom": 0
+  },
+  "retained": [
+    {
+      "requirementId": "FR-CHAR-020",
+      "title": "人物弧闭环证书",
+      "category": "cross-domain-certificate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-441"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-WORLD-020",
+      "title": "世界完整性证书",
+      "category": "cross-domain-certificate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-481"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-LONGMEM-024",
+      "title": "长时连续性审计",
+      "category": "cross-domain-certificate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-388"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-COMPLETE-001",
+      "title": "全书完成门禁",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-007",
+        "AT-165",
+        "AT-189"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-COMPLETE-002",
+      "title": "完成分级",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-144",
+        "AT-158"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-COMPLETE-003",
+      "title": "完结报告",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-007",
+        "AT-165"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-COMPLETE-004",
+      "title": "可重放审计流程",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-504"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-COMPLETE-005",
+      "title": "反假闭环",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-031",
+        "AT-114"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-COMPLETE-006",
+      "title": "审计失效与增量重算",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-038",
+        "AT-330"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-COMPLETE-007",
+      "title": "开放悬念契约",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-040",
+        "AT-175",
+        "AT-189"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-RUN-024",
+      "title": "完稿终止证明",
+      "category": "termination-invariant",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-165"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-OBL-023",
+      "title": "组合级完成门禁",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-189"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-CLOSURE-019",
+      "title": "来源覆盖证明",
+      "category": "direct-completion-gate",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-331"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-PUBLISH-001",
+      "title": "不可变成稿版本与发布清单",
+      "category": "release-artifact",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-505"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-PUBLISH-002",
+      "title": "统一出版树与确定性多格式渲染",
+      "category": "release-artifact",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-506"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    },
+    {
+      "requirementId": "FR-PUBLISH-003",
+      "title": "原子产物集、验证与交付凭证",
+      "category": "release-artifact",
+      "firstSliceScope": "Only the terminal behavior required to distinguish draft/review/closure/audited completion, prove cross-domain closure and source coverage against a frozen publication scope, invalidate stale audits, and terminate with no active writers or transactions.",
+      "acceptanceRefs": [
+        "AT-507"
+      ],
+      "extensionMode": "terminal-evidence",
+      "extensionSlices": []
+    }
+  ],
+  "moved": [
+    {
+      "requirementId": "FR-RUN-001",
+      "title": "一等整书运行",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "BookRun becomes the governing continuous-drafting aggregate before the first autonomous chapter, not after the manuscript is finished."
+    },
+    {
+      "requirementId": "FR-RUN-002",
+      "title": "显式依赖任务图",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "The dependency work graph must order planning, drafting, review, and settlement from the first chapter."
+    },
+    {
+      "requirementId": "FR-RUN-003",
+      "title": "多时间尺度滚动规划",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Rolling book, volume, near-chapter, and scene horizons govern continuous drafting decisions."
+    },
+    {
+      "requirementId": "FR-RUN-004",
+      "title": "有范围的自治授权",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Autonomy scope must constrain the first unattended drafting action."
+    },
+    {
+      "requirementId": "FR-RUN-005",
+      "title": "多重执行上限",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Call, cost, time, chapter, and failure ceilings are pre-execution safety controls."
+    },
+    {
+      "requirementId": "FR-RUN-006",
+      "title": "启动前预测与预检",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Readiness and cost prediction are required before starting a continuous drafting run."
+    },
+    {
+      "requirementId": "FR-RUN-007",
+      "title": "状态语义分层",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Run state semantics must distinguish pause, gate, scope completion, and audited completion throughout execution."
+    },
+    {
+      "requirementId": "FR-RUN-008",
+      "title": "工作项幂等与产物契约",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Idempotency and artifact contracts protect every drafting work item from duplicate writes and charges."
+    },
+    {
+      "requirementId": "FR-RUN-009",
+      "title": "章节结算事务",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Chapter settlement is the dependency boundary that unlocks the next chapter."
+    },
+    {
+      "requirementId": "FR-RUN-010",
+      "title": "风险门禁与批量审阅",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Risk gates and review bundling govern decisions during drafting, not only at completion."
+    },
+    {
+      "requirementId": "FR-RUN-011",
+      "title": "`autoContinue` 可验证语义",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "autoContinue semantics are first exercised when one settled chapter schedules the next."
+    },
+    {
+      "requirementId": "FR-RUN-012",
+      "title": "作者方向的因果生效",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Author direction must causally affect in-flight and future drafting work."
+    },
+    {
+      "requirementId": "FR-RUN-013",
+      "title": "分级暂停与恢复",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Pause and resumable checkpoints are runtime safety controls for continuous drafting."
+    },
+    {
+      "requirementId": "FR-RUN-014",
+      "title": "停止与紧急制动",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Stop and emergency fencing must exist before any unattended canon write."
+    },
+    {
+      "requirementId": "FR-RUN-015",
+      "title": "租约、心跳与单写者",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Leases, heartbeats, and fencing prevent concurrent chapter or canon writes."
+    },
+    {
+      "requirementId": "FR-RUN-016",
+      "title": "阶段感知恢复",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Stage-aware recovery is needed after planning, model, candidate, or commit interruption."
+    },
+    {
+      "requirementId": "FR-RUN-017",
+      "title": "公平调度与资源互斥",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Fair scheduling and write-set exclusion govern long runs while other projects remain usable."
+    },
+    {
+      "requirementId": "FR-RUN-018",
+      "title": "停滞与循环检测",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Loop and stagnation detection must stop waste during repeated drafting or repair."
+    },
+    {
+      "requirementId": "FR-RUN-019",
+      "title": "证据化重规划",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Evidence-driven replanning reacts to settled chapters and author direction during the run."
+    },
+    {
+      "requirementId": "FR-RUN-020",
+      "title": "版本与新鲜度传播",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Freshness propagation prevents old contract and outline inputs from being settled during drafting."
+    },
+    {
+      "requirementId": "FR-RUN-021",
+      "title": "失败隔离与降级",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Failure classification and isolation determine whether drafting pauses, degrades, or safely continues."
+    },
+    {
+      "requirementId": "FR-RUN-022",
+      "title": "真实进度与预测",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Real chapter, work-item, coverage, and obligation progress must be visible throughout the run."
+    },
+    {
+      "requirementId": "FR-RUN-023",
+      "title": "安静时段与通知摘要",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Quiet-hour policy and notification summaries govern unattended drafting communication."
+    }
+  ],
+  "conclusion": "RP8 retains 16 terminal completion and manuscript-delivery requirements and moves 23 continuous-run controls to RP5; Q-003 is closed at specification level, while RP5 remains unimplemented and no evidence proves full-book completion or artifact delivery."
+}

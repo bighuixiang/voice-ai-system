@@ -1,0 +1,623 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-trace-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "The author supplies a rough idea; the platform understands, asks one valuable question at a time, compares consequential alternatives, assembles governed artifacts, and continues through a fully audited book.",
+  "sourceFiles": [
+    {
+      "path": "ui/src/components/novel/QuickStartGuidePanel.vue",
+      "sha256": "c8e61ebdeb4a7ddbf2870fe38f0c132036a3eabe2211241b4e449bb5f667f653"
+    },
+    {
+      "path": "ui/src/components/novel/ProjectCreatePanel.vue",
+      "sha256": "39b2682cecf230b9af964a8c33d1237fe48482d8b8ecdb2bb702eb3f40c2b35a"
+    },
+    {
+      "path": "ui/src/components/novel/StructureQuickStartPanel.vue",
+      "sha256": "fabd7dc9f66b44b767bf2b7311374dcc8043c28f66f5a76ddd729dd79808e06f"
+    },
+    {
+      "path": "ui/src/components/novel/AIOperationPanel.vue",
+      "sha256": "6be3aa125c430174db7808aa06d325d2ad2adfc2d47d4b277926b7523f170b71"
+    },
+    {
+      "path": "ui/src/components/novel/RewriteComparison.vue",
+      "sha256": "4c62b5e96921bda12e7ed9d2357cdb694e29594381e0e3c0d4933fefb97519f0"
+    },
+    {
+      "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
+      "sha256": "01d4ff436dbee1f27f12aef0b253e2e53f723ae417ca6b983d879328e076b31e"
+    },
+    {
+      "path": "ui/src/components/novel/NovelWorkspace.vue",
+      "sha256": "f4bc939c36c8890caec1b85518b70dc35b9ac6373366f32a730dcd468d1344bf"
+    },
+    {
+      "path": "ui/src/services/novelApi.ts",
+      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    },
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/novelProject.ts",
+      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "api/src/contextManifest.ts",
+      "sha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc"
+    },
+    {
+      "path": "api/src/taskService.ts",
+      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+    },
+    {
+      "path": "api/src/creativeJourney.ts",
+      "sha256": "83726cbde2f77204c805acbbf58f23742cd65666bda54e34758b366d9b2a656b"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/proseAdoption.ts",
+      "sha256": "4580625cc0112d5dbe14800cf1ed967932dff1c12c2176d58785ee23f3482349"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/editionManifest.ts",
+      "sha256": "603898e0ceb1d513d8214b9a464c2222a67a2ad5b7439dffebfc3d0f471f25e7"
+    },
+    {
+      "path": "api/src/publicationTree.ts",
+      "sha256": "5670360025ad853525f8e437f03310101bc2cb0516859b639f5d130f4b2c3541"
+    },
+    {
+      "path": "api/src/publicationArtifacts.ts",
+      "sha256": "8f842d060b71181f5af819c447ba244fec95bafc5baa9d081e1c71de7b592b32"
+    },
+    {
+      "path": "api/src/deliveryProof.ts",
+      "sha256": "a9d3cb656be94b60c5ad76156001cf3e385ae51c52dc07779be8e2d826170eb5"
+    },
+    {
+      "path": "api/src/deliveryAccessGrant.ts",
+      "sha256": "5004e3c1bc4b29877cd461e2dc007f5a30d451e79fe67f0df484edc19e690926"
+    },
+    {
+      "path": "api/src/releasePreflight.ts",
+      "sha256": "47a371106a61dc06e6e5be3c39059e8ca5e4cb6e239887bea3a32fdfa3956034"
+    },
+    {
+      "path": "api/src/closureCertificate.ts",
+      "sha256": "c69444822955e26bd7bf36e65122ec0ae9208028a43ec47a472e7a325c5085e6"
+    },
+    {
+      "path": "api/src/revisionIntent.ts",
+      "sha256": "3d93dddd8080c534544bb8e55fe86770da4eaeb6d8ee39026daadef8e69a4d82"
+    },
+    {
+      "path": "api/src/revisionImpact.ts",
+      "sha256": "890e633adcfe27dcc479b587405420aff1675916689172ffaaf44002d4be4ca3"
+    },
+    {
+      "path": "api/src/narrativeObligation.ts",
+      "sha256": "e4cb7d0e298387064803777331a28bfbede96aae59c252decf82ed226ab19b11"
+    },
+    {
+      "path": "api/src/obligationCoverage.ts",
+      "sha256": "412d8bbcefe5c3de1dbd295192cd35b3c295142e2fd79265c41882dbec6d8c31"
+    },
+    {
+      "path": "api/src/obligationCandidates.ts",
+      "sha256": "8e1776e3a0870b5196a0f8a7a6b19fe1fcd3f30ec61e1f16be79d13f76e21d8a"
+    },
+    {
+      "path": "api/src/obligationCertificate.ts",
+      "sha256": "f64d56a8491eb5aeb25ec74ba3677a21157bb576d9aaf299595bc43473ad7245"
+    },
+    {
+      "path": "api/src/dialogueQuestions.ts",
+      "sha256": "ad8813eb29fc06c10686ee7aa3d3eeadbcb63d45048f9b66afc2cea40e0c6ce7"
+    }
+  ],
+  "uiQuestionSurfaceScan": {
+    "scannedVueComponentCount": 43,
+    "aggregateSha256": "6807217579fb99d874ee8f94dd7e338c3acd422f263ea01b9a40cef536a4eeec",
+    "passiveQuestionRendererFiles": [
+      "ui/src/components/novel/RewriteComparison.vue"
+    ],
+    "structuredQuestionAnswerFiles": []
+  },
+  "summary": {
+    "tracedStages": 12,
+    "byCurrentStatus": {
+      "client-local-generic-template": 1,
+      "copy-promises-end-to-end": 1,
+      "declared-but-unreachable-from-create-journey": 1,
+      "generic-skeleton-only": 1,
+      "manual-modes-and-button-grid": 1,
+      "missing-authoritative-state": 1,
+      "not-in-create-to-first-artifact-chain": 1,
+      "passive-string-output-only": 1,
+      "project-and-chapter-existence-only": 1,
+      "project-field-only": 1,
+      "task-and-single-run-proxies": 1,
+      "ui-and-transport-only": 1
+    },
+    "byRisk": {
+      "critical": 7,
+      "high": 5
+    },
+    "persistedAuthorUtteranceExists": false,
+    "interactiveSocraticDecisionExists": false,
+    "governedRedBlueContractExists": false,
+    "endToEndLowInputJourneyVerified": false,
+    "autoContinueExecutedByRuntimeEngine": false,
+    "implementationVerified": false
+  },
+  "strengthsToReuse": [
+    "Rough idea persistence and lightweight project bootstrap",
+    "Task/invocation history and explicit candidate UI on some manual paths",
+    "Runtime command queue, events, worker health, snapshots, and checkpoints",
+    "Existing outline, chapter planning, drafting, recap, ledgers, knowledge index, and story graph primitives"
+  ],
+  "rootCause": {
+    "statement": "The primary gap is not a missing chat widget; it is the absence of an authoritative CreativeJourney state machine connecting author utterances, understanding, decisions, contracts, candidates, adoption, settlement, and whole-book work.",
+    "consequence": "Independent buttons and task types can each succeed while the promised author journey remains absent, unrecoverable, or semantically false."
+  },
+  "stages": [
+    {
+      "stageId": "JOURNEY-001",
+      "label": "一句话产品承诺",
+      "currentStatus": "copy-promises-end-to-end",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/QuickStartGuidePanel.vue",
+          "line": 83,
+          "evidence": "系统会把它拆成项目、结构、正文和审稿动作"
+        },
+        {
+          "path": "api/src/creativeJourney.ts",
+          "line": 40,
+          "evidence": "export function buildCreativeJourneyProjection"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 959,
+          "evidence": "app.get(\"/api/novel/projects/:projectId/session/journey\""
+        }
+      ],
+      "currentStrengths": [
+        "The copy correctly lowers the author's expected input burden.",
+        "The API now exposes a server-authoritative journey stage and primary action for capture/understanding."
+      ],
+      "gaps": [
+        "The projection is displayed in the session panel but does not yet drive the primary command, and browser refresh/restart evidence is still missing."
+      ],
+      "requiredDisposition": "Route the default shell command through the CreativeJourney projection and add representative browser recovery evidence before retiring old button-grid navigation.",
+      "risk": "high"
+    },
+    {
+      "stageId": "JOURNEY-002",
+      "label": "粗略想法捕获",
+      "currentStatus": "project-field-only",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/ProjectCreatePanel.vue",
+          "line": 81,
+          "evidence": "roughIdea: roughIdea.value"
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 149,
+          "evidence": "roughIdea: input.roughIdea.trim()"
+        }
+      ],
+      "currentStrengths": [
+        "Rough idea is required by the UI and persisted in project.json.",
+        "Title and genre have safe defaults."
+      ],
+      "gaps": [
+        "No immutable AuthorUtterance, idempotency key, message identity, or conversation/session cursor.",
+        "Editing project metadata cannot preserve original words versus later interpretation."
+      ],
+      "requiredDisposition": "Persist AuthorUtterance before asynchronous compilation and link it to a lightweight project container without overwriting later interpretations.",
+      "risk": "critical"
+    },
+    {
+      "stageId": "JOURNEY-003",
+      "label": "项目创建与轻量容器",
+      "currentStatus": "generic-skeleton-only",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 652,
+          "evidence": "const project = await createUniqueProjectSkeleton"
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 162,
+          "evidence": "chapters: createDefaultChapters()"
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 285,
+          "evidence": "\"outline/volume-01.md\": \"# 第一卷大纲\\n\\n待生成。\\n\""
+        }
+      ],
+      "currentStrengths": [
+        "Creation is fast and creates isolated, path-safe project files.",
+        "Empty ledgers and three chapters make later work possible."
+      ],
+      "gaps": [
+        "Success only proves filesystem bootstrap, not understanding, story contract, outline, or first-chapter readiness.",
+        "No resumable compilation run is created."
+      ],
+      "requiredDisposition": "Return containerCreated plus a durable SeedCompilationRun; never label bootstrap as story understanding or creative completion.",
+      "risk": "high"
+    },
+    {
+      "stageId": "JOURNEY-004",
+      "label": "project.create 语义入口",
+      "currentStatus": "declared-but-unreachable-from-create-journey",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 12,
+          "evidence": "\"project.create\": \"Create the novel project skeleton"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 658,
+          "evidence": "result: fallbackProjectCreateResult(project.title)"
+        },
+        {
+          "path": "ui/src/services/novelApi.ts",
+          "line": 129,
+          "evidence": "const data = await request<{ project: NovelProject }>(\"/api/novel/projects\""
+        }
+      ],
+      "currentStrengths": [
+        "A task vocabulary and conservative fallback message already exist."
+      ],
+      "gaps": [
+        "The create route invokes no AI task.",
+        "The UI client discards the fallback result.",
+        "A declared stage can appear in audit vocabulary without ever executing."
+      ],
+      "requiredDisposition": "Retire project.create as a misleading monolith or adapt it behind SeedCompilationRun; expose actual state rather than an unused result object.",
+      "risk": "high"
+    },
+    {
+      "stageId": "JOURNEY-005",
+      "label": "意图理解与竞争解释",
+      "currentStatus": "missing-authoritative-state",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 699,
+          "evidence": "if (type === \"project.create\")"
+        }
+      ],
+      "currentStrengths": [
+        "The SDD already defines explicit/inferred/provisional/unknown/conflicted semantics."
+      ],
+      "gaps": [
+        "Current project.create context contains only a generic long-novel constraint.",
+        "No UnderstandingSnapshot or competing interpretation is persisted or shown after creation."
+      ],
+      "requiredDisposition": "Compile the utterance into evidence-spanned intent facets, unknowns, conflicts, and reversible hypotheses before requesting a high-impact decision.",
+      "risk": "critical"
+    },
+    {
+      "stageId": "JOURNEY-006",
+      "label": "苏格拉底单问题闭环",
+      "currentStatus": "passive-string-output-only",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 1006,
+          "evidence": "questions: string[];"
+        },
+        {
+          "path": "ui/src/components/novel/RewriteComparison.vue",
+          "line": 53,
+          "evidence": "v-for=\"question in result.questions\""
+        }
+      ],
+      "currentStrengths": [
+        "Task results can surface human-readable questions."
+      ],
+      "gaps": [
+        "Questions have no ID, lifecycle, impact, answer command, expiry, dependency, or delegation semantics.",
+        "Only a rewrite comparison renders the list; it is not an interactive creative-session turn."
+      ],
+      "requiredDisposition": "Use one active DecisionRequest with evidence, why-now, options, delegation, correction, answer idempotency, and stale-answer handling.",
+      "risk": "critical"
+    },
+    {
+      "stageId": "JOURNEY-007",
+      "label": "红蓝辩证与故事契约",
+      "currentStatus": "not-in-create-to-first-artifact-chain",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/AIOperationPanel.vue",
+          "line": 34,
+          "evidence": "随时交给 AI"
+        }
+      ],
+      "currentStrengths": [
+        "Free-form tasks let an expert manually ask for analysis."
+      ],
+      "gaps": [
+        "No independent blue/red evidence set, synthesis, decision record, or field-level contract adoption is part of first use.",
+        "Manual prompting transfers orchestration burden back to the author."
+      ],
+      "requiredDisposition": "Generate red/blue comparison only for consequential ambiguity, then persist the chosen scope as a versioned StoryContractCandidate and DecisionRecord.",
+      "risk": "critical"
+    },
+    {
+      "stageId": "JOURNEY-008",
+      "label": "一句想法生成结构",
+      "currentStatus": "client-local-generic-template",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 2921,
+          "evidence": "function generateStructureFromIdea"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 2931,
+          "evidence": "mainConflict: \"主角必须在目标、阻力和代价之间做选择。\""
+        },
+        {
+          "path": "ui/src/components/novel/StructureQuickStartPanel.vue",
+          "line": 36,
+          "evidence": "@click=\"$emit('generate-from-idea')\""
+        }
+      ],
+      "currentStrengths": [
+        "The author gets an immediate reversible dashboard and scene-card scaffold."
+      ],
+      "gaps": [
+        "No AI understanding, story-contract readiness proof, causal outline candidate, provenance, or red/blue validation.",
+        "Saving structure is a separate manual action and generic text can look story-specific."
+      ],
+      "requiredDisposition": "Keep the local template only as an explicit offline placeholder; primary flow must produce a non-canon outline candidate from an accepted or sufficiently provisional contract.",
+      "risk": "high"
+    },
+    {
+      "stageId": "JOURNEY-009",
+      "label": "下一动作与工具复杂度",
+      "currentStatus": "manual-modes-and-button-grid",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/AIOperationPanel.vue",
+          "line": 94,
+          "evidence": "const actions: Array<{ type: CodexTaskType"
+        },
+        {
+          "path": "ui/src/components/novel/QuickStartGuidePanel.vue",
+          "line": 39,
+          "evidence": "先搭结构"
+        },
+        {
+          "path": "ui/src/components/novel/NovelWorkspace.vue",
+          "line": 207,
+          "evidence": "title=\"自动驾驶运行时\""
+        }
+      ],
+      "currentStrengths": [
+        "Advanced users can access structure, focus, review, tasks, and runtime controls."
+      ],
+      "gaps": [
+        "The beginner must understand modes, task types, save steps, agent health, and runtime before obtaining the promised artifact.",
+        "No authoritative PrimaryActionDecision resolves competing buttons."
+      ],
+      "requiredDisposition": "Show one result-oriented primary action from journey state; keep expert tools behind progressive disclosure and route them through the same commands.",
+      "risk": "high"
+    },
+    {
+      "stageId": "JOURNEY-010",
+      "label": "自动驾驶启动预检",
+      "currentStatus": "project-and-chapter-existence-only",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 2418,
+          "evidence": "if (!currentProject.value || !currentChapter.value || isStartingRuntime.value) return null"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 1738,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/runtime/start\""
+        }
+      ],
+      "currentStrengths": [
+        "Run and command records are durable and the worker exposes health/events/checkpoints."
+      ],
+      "gaps": [
+        "No StoryContractReadinessProof, executable-outline proof, budget/autonomy grant, or structured not_ready response precedes queue creation.",
+        "A queued run can look active even when foundational creative decisions are missing."
+      ],
+      "requiredDisposition": "BookRun preflight must prove contract, outline, authority, budget, worker, and dependency readiness before creating executable work.",
+      "risk": "critical"
+    },
+    {
+      "stageId": "JOURNEY-011",
+      "label": "连续章节开关",
+      "currentStatus": "ui-and-transport-only",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
+          "line": 42,
+          "evidence": "<el-switch v-model=\"autoContinue\" active-text=\"连续章节\" />"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 2417,
+          "evidence": "autoContinue"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1207,
+          "evidence": "await runSingleChapterPipeline(run)"
+        }
+      ],
+      "currentStrengths": [
+        "The UI exposes intended scope and sends it with the start payload."
+      ],
+      "gaps": [
+        "runtimeEngine never consumes autoContinue.",
+        "Accept marks the single run completed but creates no next-chapter work item.",
+        "No BookRun, WorkGraph, chapter settlement dependency, or whole-book termination proof exists."
+      ],
+      "requiredDisposition": "Move autoContinue to a scoped BookRun/AutonomyGrant; after ChapterSettlement schedule the next dependency-ready item or return a structured pause reason.",
+      "risk": "critical"
+    },
+    {
+      "stageId": "JOURNEY-012",
+      "label": "首章与整书完成语义",
+      "currentStatus": "task-and-single-run-proxies",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 780,
+          "evidence": "status: \"review_required\""
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1220,
+          "evidence": "command.type === \"accept\""
+        }
+      ],
+      "currentStrengths": [
+        "The runtime pauses for a visible author review state."
+      ],
+      "gaps": [
+        "Current prose is written before review, accept is status-only, and no chapter settlement receipt proves derived assets converged.",
+        "A completed single run cannot prove the low-input journey, chapter, volume, or book is complete."
+      ],
+      "requiredDisposition": "Separate candidate, adopted, settled, scope-complete, and audited-book-complete states and expose the exact proof behind each label.",
+      "risk": "critical"
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-wire-project-create-task",
+      "verdict": "insufficient-alone",
+      "benefit": "Fastest way to generate an initial artifact from roughIdea.",
+      "failureMode": "One monolithic AI call still lacks durable questions, partial contract adoption, recovery, provenance, and next-action authority."
+    },
+    {
+      "option": "B-add-chat-shell-over-existing-buttons",
+      "verdict": "insufficient-alone",
+      "benefit": "Reduces visible tool complexity and supports natural language input.",
+      "failureMode": "A chat transcript without server-authoritative decision and artifact state can lose answers, duplicate actions, and cosmetically hide the same button graph."
+    },
+    {
+      "option": "C-authoritative-creative-journey",
+      "verdict": "recommended",
+      "benefit": "Reuses existing task/runtime primitives behind durable commands, one active decision, governed candidates, explicit adoption, and recoverable next actions.",
+      "failureMode": "Requires shared schemas and migration discipline before the new shell can truthfully replace current entry points."
+    }
+  ],
+  "targetStateMachine": {
+    "states": [
+      "captured",
+      "compiling",
+      "needs_decision",
+      "contract_candidate_ready",
+      "contract_accepted",
+      "outline_candidate_ready",
+      "outline_accepted",
+      "chapter_ready",
+      "prose_candidate_ready",
+      "chapter_settled",
+      "scope_paused",
+      "book_audit_ready",
+      "audited_complete"
+    ],
+    "commands": [
+      "SubmitAuthorUtterance",
+      "AnswerDecisionRequest",
+      "DelegateDecision",
+      "CorrectUnderstanding",
+      "AdoptContractFields",
+      "AdoptOutlineCandidate",
+      "StartBookRun",
+      "AdoptProseCandidate",
+      "SettleChapter",
+      "PauseScope",
+      "RunBookCompletionAudit"
+    ],
+    "invariant": "Every visible next action derives from durable journey state, and every transition records input/version evidence, authority, affected artifacts, and a recoverable successor or structured blocker."
+  },
+  "releaseGate": {
+    "requirementIds": [
+      "FR-SEED-001",
+      "FR-SEED-002",
+      "FR-SEED-004",
+      "FR-SEED-005",
+      "FR-SEED-016",
+      "FR-SEED-017",
+      "FR-SEED-020",
+      "FR-QUESTION-001",
+      "FR-QUESTION-002",
+      "FR-QUESTION-005",
+      "FR-DEBATE-001",
+      "FR-DEBATE-003",
+      "FR-ARCH-001",
+      "FR-ARCH-018",
+      "FR-ARCH-024",
+      "FR-RUN-006",
+      "FR-RUN-011",
+      "FR-DELIVERY-001",
+      "FR-DELIVERY-003",
+      "FR-DELIVERY-011"
+    ],
+    "acceptanceRefs": [
+      "AT-001",
+      "AT-017",
+      "AT-022",
+      "AT-027",
+      "AT-041",
+      "AT-059",
+      "AT-077",
+      "AT-078",
+      "AT-090",
+      "AT-142",
+      "AT-145",
+      "AT-190",
+      "AT-195",
+      "AT-199",
+      "AT-203",
+      "AT-213",
+      "AT-239",
+      "AT-241",
+      "AT-249",
+      "AT-333"
+    ],
+    "rule": "Do not claim the low-input creative-partner journey until a new user can submit one rough idea, recover the same session after refresh/restart, answer exactly one decision, adopt a story contract and outline without choosing tools, receive a governed prose candidate, and observe truthful chapter/book scope state."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none authorizes runtime activation without implementation evidence. Q-009 selects obligation-led elastic length and does not change this journey state machine."
+}

@@ -20,7 +20,11 @@ import type {
   SceneCard,
   StoryControl,
   WritingBriefing,
-  WritingRecapCandidate
+  WritingRecapCandidate,
+  ProseCandidate,
+  ProseAdoptionReadiness,
+  ProseAdoptionTransaction,
+  ChapterSettlement
 } from "@/types/novel";
 
 const mockNovelApi = vi.hoisted(() => ({
@@ -82,6 +86,66 @@ const mockNovelApi = vi.hoisted(() => ({
   createRuntimeDerivative: vi.fn(),
   mergeRuntimeDerivative: vi.fn(),
   restoreRuntimeCheckpoint: vi.fn()
+  ,readCreativeSession: vi.fn()
+  ,readCreativeJourney: vi.fn()
+  ,captureAuthorMessage: vi.fn()
+  ,readUnderstandingPreview: vi.fn()
+  ,startUnderstanding: vi.fn()
+  ,ensurePrimaryDialogueQuestion: vi.fn()
+  ,compileContractCandidate: vi.fn()
+  ,freezeContextManifest: vi.fn()
+  ,listDialogueQuestions: vi.fn()
+  ,answerDialogueQuestion: vi.fn()
+  ,listContractCandidates: vi.fn(),
+  createContractAdoptionProposal: vi.fn(),
+  commitContractAdoption: vi.fn(),
+  readContractAdoptionProposal: vi.fn()
+  ,listOutlineCandidates: vi.fn(),
+  compileOutlineCandidate: vi.fn(),
+  validateOutlineCandidate: vi.fn()
+  ,createOutlineAdoptionProposal: vi.fn(),
+  authorizeOutlineAdoption: vi.fn(),
+  commitOutlineAdoption: vi.fn()
+  ,readOutlineAdoptionProposal: vi.fn(),
+  readExecutionReadyProof: vi.fn(),
+  checkExecutionReadiness: vi.fn()
+  ,listExecutionWorkItems: vi.fn()
+  ,listBookRuns: vi.fn()
+  ,startBookRun: vi.fn()
+  ,advanceBookRun: vi.fn()
+  ,runBookCompletionAudit: vi.fn()
+  ,readEditionManifest: vi.fn()
+  ,readPublicationTree: vi.fn()
+  ,readPublicationArtifacts: vi.fn()
+  ,verifyDeliveryProof: vi.fn()
+  ,preflightPublicationEdition: vi.fn()
+  ,issueDeliveryProof: vi.fn()
+  ,createEditionManifest: vi.fn()
+  ,compilePublicationTree: vi.fn()
+  ,renderPublicationArtifacts: vi.fn()
+  ,listProseCandidates: vi.fn()
+  ,readProseAdoptionReadiness: vi.fn()
+  ,validateProseCandidate: vi.fn()
+  ,reviewProseCandidate: vi.fn()
+  ,createProseRepairPlan: vi.fn()
+  ,createProseRepairCandidate: vi.fn()
+  ,evaluateProseRepairRegression: vi.fn()
+  ,adoptProseCandidate: vi.fn()
+  ,settleChapter: vi.fn()
+  ,readQualityCalibrationEvidence: vi.fn()
+  ,readQualityCalibrationEvidenceHistory: vi.fn()
+  ,submitQualityCalibrationEvidence: vi.fn()
+  ,readReleaseAcceptance: vi.fn()
+  ,readReleaseActivation: vi.fn()
+  ,activateRelease: vi.fn()
+  ,readLengthContract: vi.fn()
+  ,createLengthContract: vi.fn()
+  ,readLengthForecast: vi.fn()
+  ,decideLengthVariance: vi.fn()
+  ,readUnderstandingReview: vi.fn()
+  ,submitExternalUnderstandingReview: vi.fn()
+  ,readMigrationCutoverReadiness: vi.fn()
+  ,validateAllProjectMigrations: vi.fn()
 }));
 
 vi.mock("@/services/novelApi", () => ({
@@ -660,6 +724,7 @@ describe("useNovelStore", () => {
     mockNovelApi.mergeRuntimeDerivative.mockResolvedValue({});
     mockNovelApi.restoreRuntimeCheckpoint.mockResolvedValue({});
     mockNovelApi.readPlatformLibrary.mockResolvedValue(platformLibrary);
+    mockNovelApi.listContractCandidates.mockResolvedValue([]);
     mockNovelApi.readAiStages.mockResolvedValue(aiStages);
     mockNovelApi.createPlatformAsset.mockResolvedValue({
       ...platformLibrary.assets[0],
@@ -682,6 +747,224 @@ describe("useNovelStore", () => {
     expect(store.projects).toEqual([project]);
     expect(store.currentProject).toBeNull();
     expect(store.openWorkspaceProjects).toEqual([]);
+  });
+
+  it("loads contract candidates for the active workspace and preserves API errors", async () => {
+    const candidate = { candidateId: "candidate-1", status: "candidate", canonWritten: false };
+    mockNovelApi.listContractCandidates.mockResolvedValue([candidate]);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await expect(store.loadContractCandidates()).resolves.toEqual([candidate]);
+    expect(store.contractCandidates).toEqual([candidate]);
+    expect(mockNovelApi.listContractCandidates).toHaveBeenCalledWith("demo");
+
+    mockNovelApi.listContractCandidates.mockRejectedValueOnce(new Error("candidate read failed"));
+    await expect(store.loadContractCandidates()).resolves.toEqual([]);
+    expect(store.contractCandidates).toEqual([]);
+    expect(store.contractCandidatesError).toBe("candidate read failed");
+  });
+
+  it("creates a contract adoption proposal without claiming canon was written", async () => {
+    const proposal = { proposalId: "proposal-1", status: "ready_for_authorization", canonWritten: false };
+    mockNovelApi.createContractAdoptionProposal.mockResolvedValue(proposal);
+    const store = useNovelStore();
+    store.currentProject = project;
+    const input = { candidateId: "candidate-1", expectedCandidateFingerprint: "f".repeat(64), fieldDecisions: [{ fieldId: "field-1", status: "accept" as const }] };
+
+    await expect(store.createContractAdoptionProposal(input)).resolves.toEqual(proposal);
+    expect(store.contractAdoptionProposal).toEqual(proposal);
+    expect(store.contractAdoptionProposal?.canonWritten).toBe(false);
+    expect(mockNovelApi.createContractAdoptionProposal).toHaveBeenCalledWith("demo", input);
+  });
+
+  it("records a committed contract adoption only after the API confirms canon write", async () => {
+    const proposal = { proposalId: "proposal-1", status: "ready_for_authorization", canonWritten: false, fingerprint: "p".repeat(64) };
+    mockNovelApi.commitContractAdoption.mockResolvedValue({ status: "committed", canonWritten: true, mutationId: "mutation-1" });
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.contractAdoptionProposal = proposal;
+
+    await expect(store.commitContractAdoption({ expectedProposalFingerprint: proposal.fingerprint, actorId: "author-1", authorizationId: "auth-1" })).resolves.toMatchObject({ status: "committed" });
+    expect(store.contractAdoptionProposal).toMatchObject({ status: "committed", canonWritten: true });
+    expect(mockNovelApi.commitContractAdoption).toHaveBeenCalledWith("demo", { expectedProposalFingerprint: proposal.fingerprint, authorization: { actorId: "author-1", authorizationId: "auth-1" } });
+  });
+
+  it("restores a durable adoption proposal when it exists", async () => {
+    const proposal = { proposalId: "proposal-restore", status: "ready_for_authorization", canonWritten: false };
+    mockNovelApi.readContractAdoptionProposal.mockResolvedValue(proposal);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await expect(store.loadContractAdoptionProposal()).resolves.toEqual(proposal);
+    expect(store.contractAdoptionProposal).toEqual(proposal);
+  });
+
+  it("loads and validates outline candidates without marking them executable", async () => {
+    const outline = { outlineId: "outline-1", status: "candidate", canonWritten: false };
+    const report = { outlineId: "outline-1", status: "passed", executionReady: false };
+    mockNovelApi.listOutlineCandidates.mockResolvedValue([outline]);
+    mockNovelApi.validateOutlineCandidate.mockResolvedValue(report);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await expect(store.loadOutlineCandidates()).resolves.toEqual([outline]);
+    await expect(store.validateOutlineCandidate(outline)).resolves.toEqual(report);
+    expect(store.outlineValidationReports).toEqual({ "outline-1": report });
+    expect(store.outlineValidationReports["outline-1"].executionReady).toBe(false);
+    expect(store.setOutlineChapterSelection({ outline, chapterIds: ["chapter-001"] })).toEqual(["chapter-001"]);
+    expect(store.outlineChapterSelections).toEqual({ "outline-1": ["chapter-001"] });
+  });
+
+  it("compiles an outline candidate from a contract candidate and refreshes the list", async () => {
+    const outline = { outlineId: "outline-1", status: "candidate", canonWritten: false };
+    mockNovelApi.compileOutlineCandidate.mockResolvedValue({ outline, created: true });
+    mockNovelApi.listOutlineCandidates.mockResolvedValue([outline]);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await expect(store.compileOutlineCandidate("candidate-1", { strongFreezeCount: 3, totalChapterCount: 8 })).resolves.toEqual({ outline, created: true });
+    expect(mockNovelApi.compileOutlineCandidate).toHaveBeenCalledWith("demo", "candidate-1", { strongFreezeCount: 3, totalChapterCount: 8 });
+    expect(mockNovelApi.listOutlineCandidates).toHaveBeenCalledWith("demo");
+    expect(store.outlineCandidates).toEqual([outline]);
+  });
+
+  it("starts chapter production with the execution-ready gate explicitly required", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
+    mockNovelApi.startRuntime.mockResolvedValue({ run: runtimeRun(), command: {} });
+
+    await expect(store.startAutopilotRuntime({ direction: "保持当前章节功能", autoContinue: false })).resolves.toMatchObject({ run: expect.anything() });
+    expect(mockNovelApi.startRuntime).toHaveBeenCalledWith("demo", expect.objectContaining({
+      chapterId: project.chapters[0].id,
+      direction: "保持当前章节功能",
+      autoContinue: false,
+      requireExecutionReady: true
+    }));
+  });
+
+  it("keeps outline adoption behind validation and explicit authorization", async () => {
+    const outline = { outlineId: "outline-1", fingerprint: "o".repeat(64), status: "candidate", canonWritten: false };
+    const report = { outlineId: "outline-1", status: "passed", executionReady: false, fingerprint: "r".repeat(64) };
+    const proposal = { proposalId: "proposal-1", status: "ready_for_authorization", canonWritten: false, fingerprint: "p".repeat(64) };
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.outlineValidationReports = { "outline-1": report };
+    mockNovelApi.createOutlineAdoptionProposal.mockResolvedValue(proposal);
+    mockNovelApi.authorizeOutlineAdoption.mockResolvedValue({ ...proposal, status: "authorized" });
+    mockNovelApi.commitOutlineAdoption.mockResolvedValue({ status: "committed", canonWritten: true, proof: { executionReady: true } });
+
+    await expect(store.createOutlineAdoptionProposal({ outline, chapterIds: ["chapter-001"] })).resolves.toEqual(proposal);
+    await expect(store.authorizeOutlineAdoption({ expectedProposalFingerprint: proposal.fingerprint, actorId: "author-1", authorizationId: "auth-1" })).resolves.toMatchObject({ status: "authorized" });
+    await expect(store.commitOutlineAdoption("p".repeat(64))).resolves.toMatchObject({ status: "committed" });
+    expect(store.outlineAdoptionProposal).toMatchObject({ status: "committed", canonWritten: true });
+  });
+
+  it("keeps chapter execution behind the persisted proof and readiness decision", async () => {
+    const proof = { proofId: "proof-1", status: "ready", executionReady: true, versionId: "version-1" };
+    const readiness = { allowed: true, checks: [{ checkId: "chapter-in-window", status: "passed" }] };
+    mockNovelApi.readExecutionReadyProof.mockResolvedValue(proof);
+    mockNovelApi.checkExecutionReadiness.mockResolvedValue(readiness);
+    const store = useNovelStore();
+    store.currentProject = project;
+    await expect(store.loadExecutionReadyProof()).resolves.toEqual(proof);
+    await expect(store.checkExecutionReadiness("chapter-001")).resolves.toEqual(readiness);
+    expect(store.executionReadyProof).toEqual(proof);
+    expect(store.executionReadiness).toEqual(readiness);
+  });
+
+  it("starts and advances the active book run without bypassing execution work items", async () => {
+    const run = { bookRunId: "book-run-1", status: "ready", projectSlug: "demo" };
+    const advanced = { ...run, status: "running" };
+    mockNovelApi.startBookRun.mockResolvedValue(run);
+    mockNovelApi.advanceBookRun.mockResolvedValue({ run: advanced, graph: { workItems: [] }, scheduled: [], dispatched: [] });
+    mockNovelApi.readRuntimeStatus.mockResolvedValue(runtimeStatusSnapshot({ activeRun: undefined, runs: [] }));
+    mockNovelApi.listExecutionWorkItems.mockResolvedValue([]);
+    const store = useNovelStore();
+    store.currentProject = project;
+
+    await expect(store.startBookRun({ autonomyLevel: "L1", limits: { maxWorkItems: 1 } })).resolves.toMatchObject({ bookRunId: "book-run-1" });
+    await expect(store.advanceActiveBookRun()).resolves.toMatchObject({ run: { status: "running" } });
+    expect(mockNovelApi.startBookRun).toHaveBeenCalledWith("demo", expect.objectContaining({ chapterIds: project.chapters.map((chapter) => chapter.id), autonomyLevel: "L1", limits: { maxWorkItems: 1 } }));
+    expect(mockNovelApi.advanceBookRun).toHaveBeenCalledWith("demo", "book-run-1");
+    expect(store.activeBookRun?.status).toBe("running");
+  });
+
+  it("keeps completion audit behind an explicit source fingerprint", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.activeBookRun = { bookRunId: "book-run-1", projectSlug: "demo", status: "scope_complete" } as any;
+    const audit = { status: "audited_complete", bookRunId: "book-run-1" };
+    mockNovelApi.runBookCompletionAudit.mockResolvedValueOnce(audit);
+    mockNovelApi.listBookRuns.mockResolvedValueOnce([{ ...store.activeBookRun, status: "audited_complete" }]);
+
+    await expect(store.runActiveBookCompletionAudit("closure-source-1")).resolves.toEqual(audit);
+    expect(mockNovelApi.runBookCompletionAudit).toHaveBeenCalledWith("demo", "book-run-1", "closure-source-1");
+    expect(store.activeBookRun?.status).toBe("audited_complete");
+  });
+
+  it("loads the publication evidence bundle as one server-authoritative snapshot", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    const manifest = { editionId: "edition-1", status: "frozen" };
+    const tree = { editionId: "edition-1", fingerprint: "tree" };
+    const artifacts = { editionId: "edition-1", fingerprint: "artifacts" };
+    const proof = { valid: true, reasons: [], proof: { proofId: "proof-1" } };
+    const preflight = { status: "passed", blockers: [] };
+    mockNovelApi.readEditionManifest.mockResolvedValueOnce(manifest);
+    mockNovelApi.readPublicationTree.mockResolvedValueOnce(tree);
+    mockNovelApi.readPublicationArtifacts.mockResolvedValueOnce(artifacts);
+    mockNovelApi.verifyDeliveryProof.mockResolvedValueOnce(proof);
+    mockNovelApi.preflightPublicationEdition.mockResolvedValueOnce(preflight);
+
+    await expect(store.loadPublicationEvidence("edition-1")).resolves.toMatchObject({ manifest, tree, artifacts, proof, preflight });
+    expect(mockNovelApi.verifyDeliveryProof).toHaveBeenCalledWith("demo", "edition-1");
+    expect(store.deliveryProofVerification).toEqual(proof);
+    expect(store.publicationPreflight).toEqual(preflight);
+  });
+
+  it("issues delivery proof only after ready preflight and artifact fingerprint", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.publicationEdition = { editionId: "edition-1" } as any;
+    store.publicationArtifacts = { fingerprint: "artifact-fp" } as any;
+    store.publicationPreflight = { status: "ready" } as any;
+    const proof = { proofId: "proof-1", editionId: "edition-1", status: "issued" } as any;
+    mockNovelApi.issueDeliveryProof.mockResolvedValueOnce(proof);
+    mockNovelApi.verifyDeliveryProof.mockResolvedValueOnce({ valid: true, reasons: [], proof });
+
+    await expect(store.issuePublicationDeliveryProof("approval-1")).resolves.toEqual(proof);
+    expect(mockNovelApi.issueDeliveryProof).toHaveBeenCalledWith("demo", "edition-1", "approval-1", "artifact-fp");
+    expect(store.deliveryProofVerification?.valid).toBe(true);
+  });
+
+  it("creates a frozen edition, then compiles its tree and renders artifacts explicitly", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    const manifest = { editionId: "edition-2", status: "frozen" };
+    const tree = { editionId: "edition-2", fingerprint: "tree-2" };
+    const artifacts = { editionId: "edition-2", fingerprint: "artifacts-2" };
+    mockNovelApi.createEditionManifest.mockResolvedValueOnce(manifest);
+    mockNovelApi.compilePublicationTree.mockResolvedValueOnce(tree);
+    mockNovelApi.renderPublicationArtifacts.mockResolvedValueOnce(artifacts);
+
+    await expect(store.createPublicationEdition({ canonCommitFingerprint: "canon-1", title: "Demo", author: "Author", language: "zh-CN", chapters: [] })).resolves.toEqual(manifest);
+    await expect(store.compilePublicationEditionTree()).resolves.toEqual(tree);
+    await expect(store.renderPublicationEditionArtifacts(["markdown"])).resolves.toEqual(artifacts);
+    expect(mockNovelApi.createEditionManifest).toHaveBeenCalledWith("demo", expect.objectContaining({ canonCommitFingerprint: "canon-1" }));
+    expect(mockNovelApi.renderPublicationArtifacts).toHaveBeenCalledWith("demo", "edition-2", ["markdown"]);
+  });
+
+  it("allows release activation only when the authoritative acceptance is accepted", async () => {
+    const store = useNovelStore();
+    mockNovelApi.activateRelease.mockResolvedValueOnce({ status: "active", fingerprint: "activation-1" });
+    store.releaseAcceptanceDecision = { status: "do-not-activate" } as any;
+    await expect(store.activateAcceptedRelease()).resolves.toBeNull();
+    expect(mockNovelApi.activateRelease).not.toHaveBeenCalled();
+    store.releaseAcceptanceDecision = { status: "accepted" } as any;
+    await expect(store.activateAcceptedRelease()).resolves.toMatchObject({ status: "active" });
+    expect(mockNovelApi.activateRelease).toHaveBeenCalledTimes(1);
   });
 
   it("updates runtime stage from SSE and refreshes runtime status", async () => {
@@ -737,6 +1020,32 @@ describe("useNovelStore", () => {
 
     expect(mockNovelApi.readRuntimeStatus).toHaveBeenCalledWith("demo");
     expect(store.activeRuntimeRun?.currentStage).toBe("chapter_draft");
+    vi.useRealTimers();
+  });
+
+  it("refreshes prose candidates when runtime emits a persisted candidate review event", async () => {
+    vi.useFakeTimers();
+    const sources: Array<{ listeners: Record<string, (event: MessageEvent) => void>; close: () => void }> = [];
+    class FakeEventSource {
+      listeners: Record<string, (event: MessageEvent) => void> = {};
+      constructor() { sources.push(this); }
+      addEventListener(type: string, listener: EventListener) { this.listeners[type] = listener as (event: MessageEvent) => void; }
+      close() { return undefined; }
+    }
+    vi.stubGlobal("EventSource", FakeEventSource);
+    const store = useNovelStore();
+    store.currentProject = project;
+    mockNovelApi.listProseCandidates.mockResolvedValue([{ candidateId: "prose-1", chapterId: "chapter-001", status: "generated" }]);
+    store.connectRuntimeEvents();
+
+    sources[0].listeners.review({ data: JSON.stringify({
+      id: 13, eventId: "event-13", projectSlug: "demo", runId: "run-1", type: "review", stage: "chapter_draft",
+      message: "Prose candidate persisted outside canon", payload: { candidateId: "prose-1", chapterId: "chapter-001" }, createdAt: "2026-07-30T00:02:00.000Z"
+    }) } as MessageEvent);
+
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mockNovelApi.listProseCandidates).toHaveBeenCalledWith("demo");
+    expect(store.proseCandidates[0].candidateId).toBe("prose-1");
     vi.useRealTimers();
   });
 
@@ -854,6 +1163,213 @@ describe("useNovelStore", () => {
     expect(store.currentContent).toBe("draft:chapters/chapter-002.md");
     expect(store.supportContent).toBe("support:bible/characters.md");
     expect(store.hasUnsavedChanges).toBe(false);
+  });
+
+  it("loads the server-authoritative journey projection for the active workspace", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    mockNovelApi.readCreativeJourney.mockResolvedValue({
+      schemaVersion: "creative-journey-projection.v1",
+      projectSlug: "demo",
+      stage: "understanding",
+      primaryAsset: "understanding-preview",
+      primaryAction: { id: "review-understanding", label: "确认当前理解", kind: "review", status: "available" },
+      activeQuestion: { id: "question-primary-desire", text: "What must the protagonist want most?", status: "candidate", impact: "high", source: "deterministic-gap" },
+      sourceMessageIds: ["message-1"],
+      sessionFingerprint: "a".repeat(64)
+    });
+
+    await store.loadCreativeJourney();
+
+    expect(mockNovelApi.readCreativeJourney).toHaveBeenCalledWith("demo");
+    expect(store.creativeJourney?.primaryAction.id).toBe("review-understanding");
+  });
+
+  it("dispatches the journey review action through the context-freeze command", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.creativeJourney = {
+      schemaVersion: "creative-journey-projection.v1",
+      projectSlug: "demo",
+      stage: "understanding",
+      primaryAsset: "understanding-preview",
+      primaryAction: { id: "review-understanding", label: "确认当前理解", kind: "review", status: "available" },
+      sourceMessageIds: ["message-1"],
+      sessionFingerprint: "a".repeat(64)
+    };
+    mockNovelApi.freezeContextManifest.mockResolvedValue({
+      created: true,
+      manifest: { schemaVersion: "context-manifest.v1", manifestId: "manifest-1", projectSlug: "demo", sourceFingerprint: "b".repeat(64), sourceMessages: [], createdAt: "now" }
+    });
+
+    await store.executeCreativeJourneyAction();
+
+    expect(mockNovelApi.freezeContextManifest).toHaveBeenCalledWith("demo");
+  });
+
+  it("loads and answers the active dialogue question through the idempotent API", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    const question = {
+      schemaVersion: "dialogue-question.v1" as const,
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      projectSlug: "demo",
+      status: "active" as const,
+      text: "What must the protagonist want most?",
+      whyNow: "The first contract depends on this.",
+      impact: "high" as const,
+      ambiguity: 0.8,
+      errorCost: "Wrong opening direction",
+      reversibility: "Can revise before canon",
+      delayCost: "Blocks contract compilation",
+      options: [],
+      recommendation: "Choose the desire with the clearest cost.",
+      snapshotFingerprint: "b".repeat(64)
+    };
+    mockNovelApi.listDialogueQuestions.mockResolvedValue([question]);
+    mockNovelApi.answerDialogueQuestion.mockResolvedValue({ question: { ...question, status: "answered", answerText: "Find the lost name", answerStatus: "confirmed" }, replayed: false });
+
+    await store.loadDialogueQuestions();
+    const answered = await store.answerDialogueQuestion("Find the lost name", "confirmed", "answer-1");
+
+    expect(store.dialogueQuestions[0].questionId).toBe("question-primary-desire");
+    expect(mockNovelApi.answerDialogueQuestion).toHaveBeenCalledWith("demo", "question-primary-desire", {
+      questionVersion: 1,
+      expectedSnapshotFingerprint: "b".repeat(64),
+      idempotencyKey: "answer-1",
+      answerText: "Find the lost name",
+      answerStatus: "confirmed"
+    });
+    expect(answered?.question.status).toBe("answered");
+  });
+
+  it("refreshes the journey projection after capturing a new author message", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    const session = {
+      schemaVersion: "creative-session.v1" as const,
+      sessionId: "session-demo",
+      projectSlug: "demo",
+      status: "capturing" as const,
+      messages: [{ id: "message-1", clientMessageId: "client-1", role: "author" as const, text: "A sealed gate opens.", source: { kind: "author" as const }, createdAt: "now" }],
+      createdAt: "now",
+      updatedAt: "now"
+    };
+    mockNovelApi.captureAuthorMessage.mockResolvedValue({ session, created: true });
+    mockNovelApi.readUnderstandingPreview.mockResolvedValue({ schemaVersion: "understanding-preview.v1", projectSlug: "demo", inputFingerprint: "a".repeat(64), sourceMessageIds: ["message-1"], coreExplicit: [], inferred: [], unknowns: [], nextAction: "await-safe-understanding-dependencies", modelCallIssued: false, canonWritten: false });
+    mockNovelApi.readCreativeJourney.mockResolvedValue({ schemaVersion: "creative-journey-projection.v1", projectSlug: "demo", stage: "understanding", primaryAsset: "understanding-preview", primaryAction: { id: "review-understanding", label: "确认当前理解", kind: "review", status: "available" }, sourceMessageIds: ["message-1"], sessionFingerprint: "a".repeat(64) });
+    mockNovelApi.listDialogueQuestions.mockResolvedValue([]);
+
+    await store.captureAuthorMessage("A sealed gate opens.");
+
+    expect(mockNovelApi.readCreativeJourney).toHaveBeenCalledWith("demo");
+    expect(store.creativeJourney?.stage).toBe("understanding");
+  });
+
+  it("prepares the durable primary question through shadow understanding", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    mockNovelApi.startUnderstanding.mockResolvedValue({ task: { taskId: "shadow-1", status: "completed" } });
+    const question = {
+      schemaVersion: "dialogue-question.v1" as const,
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      projectSlug: "demo",
+      status: "active" as const,
+      text: "What must the protagonist want most?",
+      whyNow: "The contract depends on this.",
+      impact: "high" as const,
+      ambiguity: 0.8,
+      errorCost: "Wrong opening",
+      reversibility: "Reversible",
+      delayCost: "Blocks progress",
+      options: [],
+      recommendation: "Choose a concrete desire.",
+      snapshotFingerprint: "b".repeat(64)
+    };
+    mockNovelApi.ensurePrimaryDialogueQuestion.mockResolvedValue({ created: true, question });
+    mockNovelApi.listDialogueQuestions.mockResolvedValue([question]);
+
+    const result = await store.prepareUnderstandingQuestion();
+
+    expect(mockNovelApi.startUnderstanding).toHaveBeenCalledWith("demo", "shadow");
+    expect(mockNovelApi.ensurePrimaryDialogueQuestion).toHaveBeenCalledWith("demo");
+    expect(result?.question.questionId).toBe("question-primary-desire");
+    expect(store.activeDialogueQuestion?.questionId).toBe("question-primary-desire");
+  });
+
+  it("compiles a reviewable contract candidate after a confirmed answer", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.dialogueQuestions = [{
+      schemaVersion: "dialogue-question.v1",
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      projectSlug: "demo",
+      status: "active",
+      text: "What must the protagonist want most?",
+      whyNow: "The contract depends on this.",
+      impact: "high",
+      ambiguity: 0.8,
+      errorCost: "Wrong opening",
+      reversibility: "Reversible",
+      delayCost: "Blocks progress",
+      options: [],
+      recommendation: "Choose a concrete desire.",
+      snapshotFingerprint: "b".repeat(64)
+    }];
+    mockNovelApi.answerDialogueQuestion.mockResolvedValue({ question: { ...store.dialogueQuestions[0], status: "answered", answerText: "Find the lost name", answerStatus: "confirmed" }, decision: { decisionId: "decision-1" } });
+    mockNovelApi.compileContractCandidate.mockResolvedValue({ created: true, candidate: { candidateId: "candidate-1" } });
+    mockNovelApi.listContractCandidates.mockResolvedValue([{ candidateId: "candidate-1" }]);
+
+    await store.answerDialogueQuestion("Find the lost name", "confirmed", "answer-2");
+
+    expect(mockNovelApi.compileContractCandidate).toHaveBeenCalledWith("demo", "decision-1");
+    expect(store.contractCandidates[0].candidateId).toBe("candidate-1");
+  });
+
+  it("keeps a confirmed answer when contract compilation is blocked", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.dialogueQuestions = [{
+      schemaVersion: "dialogue-question.v1",
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      projectSlug: "demo",
+      status: "active",
+      text: "What must the protagonist want most?",
+      whyNow: "The contract depends on this.",
+      impact: "high",
+      ambiguity: 0.8,
+      errorCost: "Wrong opening",
+      reversibility: "Reversible",
+      delayCost: "Blocks progress",
+      options: [],
+      recommendation: "Choose a concrete desire.",
+      snapshotFingerprint: "b".repeat(64)
+    }];
+    mockNovelApi.answerDialogueQuestion.mockResolvedValue({ question: { ...store.dialogueQuestions[0], status: "answered", answerText: "Find the lost name", answerStatus: "confirmed" }, decision: { decisionId: "decision-blocked" } });
+    mockNovelApi.compileContractCandidate.mockRejectedValue(new Error("NO_CONTRACT_FIELDS"));
+
+    const result = await store.answerDialogueQuestion("Find the lost name", "confirmed", "answer-blocked");
+
+    expect(result?.question.status).toBe("answered");
+    expect(store.contractCandidatesError).toContain("NO_CONTRACT_FIELDS");
+  });
+
+  it("retries blocked contract compilation from the saved decision id", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.contractCandidatesError = "NO_CONTRACT_FIELDS";
+    mockNovelApi.compileContractCandidate.mockResolvedValue({ created: true, candidate: { candidateId: "candidate-retry" } });
+    mockNovelApi.listContractCandidates.mockResolvedValue([{ candidateId: "candidate-retry" }]);
+    store.lastContractDecisionId = "decision-retry";
+
+    await store.retryContractCandidateCompilation();
+
+    expect(mockNovelApi.compileContractCandidate).toHaveBeenCalledWith("demo", "decision-retry");
+    expect(store.contractCandidatesError).toBe("");
   });
 
   it("restores the last opened chapter and document kind from local preferences", async () => {
@@ -2990,5 +3506,81 @@ describe("useNovelStore", () => {
         selection: { start: 7, end: 17 }
       }
     ], "task-1");
+  });
+
+  it("loads prose adoption readiness and records adoption then settlement", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
+    store.currentFilePath = project.chapters[0].contentPath;
+    const candidate = { candidateId: "prose-1", chapterId: "chapter-001" } as ProseCandidate;
+    const readiness = { candidateId: "prose-1", chapterId: "chapter-001", targetPath: "chapters/chapter-001.md", expectedCanonSha256: "before", authorizationRequired: true, validationStatus: "passed", canonWritten: false } as ProseAdoptionReadiness;
+    const adoption = { transactionId: "adopt-1", candidateId: "prose-1", status: "committed" } as ProseAdoptionTransaction;
+    const settlement = { settlementId: "settle-1", chapterId: "chapter-001", status: "settled" } as ChapterSettlement;
+    mockNovelApi.readProseAdoptionReadiness.mockResolvedValueOnce(readiness);
+    mockNovelApi.adoptProseCandidate.mockResolvedValueOnce(adoption);
+    mockNovelApi.settleChapter.mockResolvedValueOnce(settlement);
+    mockNovelApi.listProseCandidates.mockResolvedValueOnce([candidate]);
+    mockNovelApi.readRuntimeStatus.mockResolvedValueOnce(runtimeStatusSnapshot({ activeRun: undefined, runs: [] }));
+    mockNovelApi.readFile.mockResolvedValueOnce("settled canonical content");
+    await expect(store.loadProseAdoptionReadiness(candidate)).resolves.toEqual(readiness);
+    await expect(store.adoptProseCandidate(candidate, { expectedCanonSha256: "before", authorizationId: "author-1" })).resolves.toEqual(adoption);
+    await expect(store.settleProseCandidate(candidate, adoption)).resolves.toEqual(settlement);
+    expect(mockNovelApi.adoptProseCandidate).toHaveBeenCalledWith("demo", "prose-1", { expectedCanonSha256: "before", authorizationId: "author-1" });
+    expect(mockNovelApi.settleChapter).toHaveBeenCalledWith("demo", "chapter-001", "adopt-1");
+    expect(mockNovelApi.listProseCandidates).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readRuntimeStatus).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readFile).toHaveBeenCalledWith("demo", project.chapters[0].contentPath);
+    expect(store.currentContent).toBe("settled canonical content");
+    expect(store.proseAdoptions["prose-1"]).toEqual(adoption);
+    expect(store.proseSettlements["chapter-001"]).toEqual(settlement);
+  });
+
+  it("settles against the active book run and reloads its server status", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.currentChapter = project.chapters[0];
+    store.currentFilePath = project.chapters[0].contentPath;
+    store.activeBookRun = { bookRunId: "book-run-1", projectSlug: "demo", status: "running" } as any;
+    const candidate = { candidateId: "prose-2", chapterId: "chapter-001" } as ProseCandidate;
+    const adoption = { transactionId: "adopt-2", candidateId: "prose-2", status: "committed" } as ProseAdoptionTransaction;
+    const settlement = { settlementId: "settle-2", chapterId: "chapter-001", status: "settled" } as ChapterSettlement;
+    const advancedRun = { bookRunId: "book-run-1", projectSlug: "demo", status: "queued" } as any;
+    mockNovelApi.settleChapter.mockResolvedValueOnce(settlement);
+    mockNovelApi.listProseCandidates.mockResolvedValueOnce([candidate]);
+    mockNovelApi.readRuntimeStatus.mockResolvedValueOnce(runtimeStatusSnapshot({ activeRun: undefined, runs: [] }));
+    mockNovelApi.readExecutionReadyProof.mockResolvedValueOnce(null);
+    mockNovelApi.listExecutionWorkItems.mockResolvedValueOnce([]);
+    mockNovelApi.readFile.mockResolvedValueOnce("settled content");
+    mockNovelApi.listBookRuns.mockResolvedValueOnce([advancedRun]);
+
+    await expect(store.settleProseCandidate(candidate, adoption)).resolves.toEqual(settlement);
+    expect(mockNovelApi.settleChapter).toHaveBeenCalledWith("demo", "chapter-001", "adopt-2", "book-run-1");
+    expect(mockNovelApi.listBookRuns).toHaveBeenCalledWith("demo");
+    expect(store.activeBookRun?.status).toBe("queued");
+  });
+
+  it("stores externally attested calibration evidence without creating local labels", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    const evidence = { calibrationId: "calibration-1", sourceKind: "human", status: "calibrated", inputFingerprint: "sealed-human-v1", caseIds: [], labelAccess: "sealed-separate-from-evaluator-input", canonGateEligible: false } as any;
+    mockNovelApi.submitQualityCalibrationEvidence.mockResolvedValueOnce(evidence);
+    const input = { evaluatorVersion: "human-v1", sourceKind: "human" as const, holdoutInputFingerprint: "sealed-human-v1", evaluatedCount: 10, correctCount: 9, accuracy: 0.9, minimumAccuracy: 0.8, attestation: { kind: "human-reviewed" as const, reference: "human://review/v1" }, evidenceRefs: ["audit://human/v1"] };
+    await expect(store.submitQualityCalibrationEvidence(input)).resolves.toEqual(evidence);
+    expect(mockNovelApi.submitQualityCalibrationEvidence).toHaveBeenCalledWith("demo", input);
+    expect(store.qualityCalibrationEvidence).toEqual(evidence);
+    expect(store.qualityCalibrationEvidence.caseIds).toEqual([]);
+  });
+
+  it("refreshes migration cutover after safe batch validation", async () => {
+    const store = useNovelStore();
+    const report = { status: "blocked", projects: [], blockers: [] } as any;
+    const validation = { status: "validated", projects: [], blockers: [] } as any;
+    mockNovelApi.readMigrationCutoverReadiness.mockResolvedValueOnce(report).mockResolvedValueOnce(report);
+    mockNovelApi.validateAllProjectMigrations.mockResolvedValueOnce(validation);
+    await expect(store.loadMigrationCutover()).resolves.toEqual(report);
+    await expect(store.validateAllProjectMigrations()).resolves.toEqual(validation);
+    expect(mockNovelApi.validateAllProjectMigrations).toHaveBeenCalledTimes(1);
+    expect(mockNovelApi.readMigrationCutoverReadiness).toHaveBeenCalledTimes(2);
   });
 });

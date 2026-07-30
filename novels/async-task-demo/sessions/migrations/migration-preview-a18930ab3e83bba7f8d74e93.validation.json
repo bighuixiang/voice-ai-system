@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "project-migration-validation.v1",
+  "migrationId": "migration-preview-a18930ab3e83bba7f8d74e93",
+  "projectSlug": "async-task-demo",
+  "status": "validated",
+  "sourceFingerprint": "a18930ab3e83bba7f8d74e93566e3bb13b5d016ff4f45ce31afed336eb086921",
+  "conflicts": [],
+  "resolvedConflicts": [],
+  "dependencies": {
+    "outlineVersion": "missing"
+  },
+  "validatedAt": "2026-07-29T17:29:23.952Z",
+  "fingerprint": "7c09f948511408d5c1f94a343ebe6edb1b1dc01c7609d518b8ec04b35d21bddb"
+}

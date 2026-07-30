@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "author-selected-specification-not-implementation-verified",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "decisionId": "Q-004",
+  "question": "系统应在什么条件下暂停自动创作并与作者讨论？",
+  "evidenceRefs": [
+    "docs/spec-governance/audits/current-collaboration-dialogue.json",
+    "docs/spec-governance/audits/current-full-book-orchestration.json"
+  ],
+  "selection": {
+    "selectedPolicyId": "adaptive-risk-pause",
+    "selectedLabel": "高风险硬暂停、里程碑软复盘、授权内默认继续",
+    "decisionStatus": "confirmed",
+    "source": "author-accepted-recommendation",
+    "selectedOn": "2026-07-25",
+    "runtimeActivationStatus": "not-implemented-not-verified"
+  },
+  "alternatives": [
+    {
+      "policyId": "always-pause-at-volume-boundary",
+      "status": "unselected-alternative",
+      "blueCase": "Every volume boundary guarantees deliberate author review and makes drift visible before the next arc begins.",
+      "redCase": "Mandatory stops create avoidable author burden even when the settled evidence, next scope, and autonomy grant are unchanged."
+    },
+    {
+      "policyId": "high-risk-only-without-milestone-recap",
+      "status": "unselected-alternative",
+      "blueCase": "Minimizes interruptions and maximizes throughput while preserving explicit L2 and hard-failure gates.",
+      "redCase": "Long quiet runs can hide accumulated drift, deferred debt, changing estimates, or a strategy that remains locally valid but globally undesirable."
+    },
+    {
+      "policyId": "adaptive-risk-pause",
+      "status": "selected-default-specification",
+      "blueCase": "Hard-stop only when author judgment is truly required, but publish compact milestone recaps that preserve oversight without turning silence into new consent.",
+      "redCase": "Requires accurate risk classification, scoped/expiring autonomy grants, stable-boundary control, recap compression, escalation deduplication, and proof that continued work stayed inside authorization."
+    }
+  ],
+  "hardPauseTriggers": [
+    "Any unresolved L2 decision affecting identity, central conflict, core relationship, world rule, canon promise, ending, rights/publication boundary, intentional-open obligation, destructive rewrite, or irreversible cost",
+    "Any unresolved hard gate involving canon, POV, secrecy, rights, author lock, narrative obligation, stale input, text integrity, resource conservation, atomic adoption, recovery, or completion evidence",
+    "A key-chapter red/blue or independent-review disagreement whose alternatives create materially different irreversible outcomes",
+    "A requested scope expansion, retcon, ending change, policy override, destructive migration, publication action, or new external-data authority",
+    "Repeated repair/replan stagnation, loop detection, exhausted bounded retry/repair budget, or failure with no safe degraded path",
+    "Autonomy grant, cost/time/model budget, rights, privacy purpose, lease, or execution capability expires or becomes insufficient",
+    "Author explicitly pauses, stops, corrects direction, revokes authorization, or requests discussion"
+  ],
+  "softMilestoneRecaps": {
+    "triggers": [
+      "volume boundary",
+      "every 10 settled chapters",
+      "major arc/obligation closure",
+      "material forecast or risk change"
+    ],
+    "content": [
+      "what settled",
+      "what changed",
+      "open obligations and risks",
+      "quality/cost/pace evidence",
+      "next authorized scope",
+      "why continuation is safe"
+    ],
+    "defaultAction": "Continue only when no hard trigger exists and the previously explicit scoped AutonomyGrant remains valid; silence is not recorded as a new answer or consent."
+  },
+  "controlRules": [
+    "The author may pause, stop, correct, narrow, or revoke at any time; control commands receive scheduling priority and take effect at the earliest safe boundary.",
+    "One active L2 question blocks only its affected canon boundary; unrelated L0/L1 work may continue inside the grant.",
+    "Equivalent escalation candidates are deduplicated into one question with evidence, consequence, recommendation, and safe fallback.",
+    "A soft recap never requires a click to preserve existing authorization, never expands scope, and never converts missing response into adoption of a new decision.",
+    "Late workers, retries, restored runs, and in-flight candidates remain bound to the pause-policy version, autonomy grant, scope, and fencing token they started with."
+  ],
+  "implementationBoundary": "This decision locks product intent only. No pause classifier, AutonomyGrant, milestone recap, safe-boundary acknowledgement, runtime fencing, notification policy, or end-to-end behavior is implementation-verified by this documentation-only work.",
+  "invariantRequirementIds": [
+    "FR-QUESTION-004",
+    "FR-QUESTION-005",
+    "FR-QUESTION-008",
+    "FR-COLLAB-002",
+    "FR-COLLAB-003",
+    "FR-EFFORT-003",
+    "FR-EFFORT-005",
+    "FR-EFFORT-010",
+    "FR-EFFORT-011",
+    "FR-EFFORT-012",
+    "FR-EFFORT-016",
+    "FR-EFFORT-020",
+    "FR-DIALOGUE-010",
+    "FR-DIALOGUE-014",
+    "FR-DIALOGUE-021",
+    "FR-DIALOGUE-022",
+    "FR-RUN-004",
+    "FR-RUN-005",
+    "FR-RUN-010",
+    "FR-RUN-013",
+    "FR-RUN-014",
+    "FR-RUN-016",
+    "FR-RUN-018",
+    "FR-RUN-021",
+    "FR-RUN-023"
+  ],
+  "acceptanceRefs": [
+    "AT-080",
+    "AT-089",
+    "AT-143",
+    "AT-146",
+    "AT-150",
+    "AT-164",
+    "AT-200",
+    "AT-335",
+    "AT-342",
+    "AT-343",
+    "AT-419",
+    "AT-461"
+  ]
+}

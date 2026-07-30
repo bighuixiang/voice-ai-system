@@ -1,0 +1,501 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP3-contract",
+  "journey": "Create a field-adoptable story contract with core character and world-rule evidence.",
+  "protocol": {
+    "blueQuestion": "What breaks field-level story-contract adoption or core character/world-rule evidence if this requirement is absent?",
+    "redQuestion": "Does the requirement actually need outline milestones, arcs, obligations, or prose before it can be consumed?",
+    "rule": "Retain contract identity, evidence, candidate adoption, atomicity, and compatibility; defer story-engine planning semantics to V4."
+  },
+  "counts": {
+    "originalMustRequirements": 29,
+    "retainedMustRequirements": 27,
+    "movedRequirements": 2,
+    "remainingMustBudgetHeadroom": 5
+  },
+  "retained": [
+    {
+      "requirementId": "FR-ARCH-001",
+      "title": "故事契约",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-214",
+        "AT-461"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-001",
+      "title": "人物身份与文档分类隔离",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-422"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-002",
+      "title": "人物戏剧契约",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-423"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-003",
+      "title": "来源、确认与未知保真",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-424"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-001",
+      "title": "世界规则一等身份",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-462"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-002",
+      "title": "条件—机制—结果—代价契约",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-463"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-003",
+      "title": "规则认识与真实有效性分离",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-464"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-005",
+      "title": "兼容投影适配器",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-062",
+        "AT-063"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-006",
+      "title": "采纳变更计划",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-067"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-007",
+      "title": "可恢复多资产提交",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-068",
+        "AT-355"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-008",
+      "title": "权威提交与投影顺序",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-069"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MIGRATE-004",
+      "title": "可回滚迁移",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-020",
+        "AT-071"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-API-004",
+      "title": "逐项采纳结果",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-082",
+        "AT-455"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-007",
+      "title": "候选与 canon 强区分",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-081"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-008",
+      "title": "变更集审阅",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-082"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-009",
+      "title": "为什么这样写",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-083"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-007",
+      "title": "低风险变更批量结算",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-339"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-009",
+      "title": "选择成本预览",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-341",
+        "AT-454"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-015",
+      "title": "审阅压缩",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-347"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-012",
+      "title": "一轮生成有限契约候选",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-453"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-013",
+      "title": "候选差异可归因",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-454"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-014",
+      "title": "部分采纳与字段稳定性",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-455"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-015",
+      "title": "回答后的增量重编译",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-456"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-019",
+      "title": "编译谱系与可重放",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-460"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-020",
+      "title": "故事契约就绪证明",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-461"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-010",
+      "title": "候选比较按缺口而非总分",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-224"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-016",
+      "title": "K2 候选、canon 与证据内核",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to adopt an evidence-bounded story contract with core character and world-rule fields; downstream planning semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-356"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    }
+  ],
+  "moved": [
+    {
+      "requirementId": "FR-ARCH-005",
+      "title": "故事引擎契约",
+      "targetSlice": "V4-outline",
+      "reason": "StoryEngineContract is explicitly the V4 planning authority and requires outline-level causal structure."
+    },
+    {
+      "requirementId": "FR-ARCH-006",
+      "title": "核心叙事问题",
+      "targetSlice": "V4-outline",
+      "reason": "NarrativeQuestion requires milestone, arc, obligation, and awareness identifiers first created by outline planning."
+    }
+  ],
+  "conclusion": "RP3 is limited to evidence-bounded contract candidates, field-level adoption, core character/world rules, and atomic compatibility; StoryEngineContract and NarrativeQuestion move to V4."
+}

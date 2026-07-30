@@ -1,0 +1,1224 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "The author can provide a rough idea or correction in natural language; the platform preserves the exact intent, asks at most one high-value question when needed, presents evidence-backed red/blue alternatives, records the answer as a versioned creative decision, and proves every downstream outline and prose action consumed the right decision state.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/novelProject.ts",
+      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+    },
+    {
+      "path": "api/src/resultParser.ts",
+      "sha256": "25e7427683edf9a02b3ca953da2be5c3408cbd2ab1d552edb4034cbf77df68a6"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/runtimeWorker.ts",
+      "sha256": "f475c301b1bcd34add67000049015651b41ee75c89fb06fe99a410dbdeb89174"
+    },
+    {
+      "path": "api/src/bookRun.ts",
+      "sha256": "d3075bb1d598f7b1cec68b28e7690ed54abf94155241072df86c08984dcc755c"
+    },
+    {
+      "path": "api/src/quiescenceProof.ts",
+      "sha256": "afdcbb424a3151e331bfa25612c274f5299cbb7620c2278c3f6e773b3cc5bdcc"
+    },
+    {
+      "path": "api/src/completionAudit.ts",
+      "sha256": "a7962c88ebe1ecc3f97c6cf414a950c6edf33abd3c6a1d481ac4ca86ba0f3f42"
+    },
+    {
+      "path": "api/src/executionDispatcher.ts",
+      "sha256": "a29abfa64191a58d4fe19738f33d46943e8b4382c1af006bfb53c8ec47aa55bd"
+    },
+    {
+      "path": "api/src/taskService.ts",
+      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
+      "sha256": "01d4ff436dbee1f27f12aef0b253e2e53f723ae417ca6b983d879328e076b31e"
+    },
+    {
+      "path": "ui/src/components/novel/ProjectCreatePanel.vue",
+      "sha256": "39b2682cecf230b9af964a8c33d1237fe48482d8b8ecdb2bb702eb3f40c2b35a"
+    },
+    {
+      "path": "ui/src/components/novel/RewriteComparison.vue",
+      "sha256": "4c62b5e96921bda12e7ed9d2357cdb694e29594381e0e3c0d4933fefb97519f0"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "rough-idea presence, length, and hash",
+      "task type/status and payload-key names",
+      "question counts and aggregate hashes",
+      "question-bearing adoption enums",
+      "prompt-preview presence and length",
+      "governed-asset existence counts"
+    ],
+    "snapshotExcludes": [
+      "project slug",
+      "title",
+      "genre",
+      "rough idea text",
+      "question text",
+      "answer text",
+      "feedback or direction text",
+      "prompt preview",
+      "input summary",
+      "model output",
+      "novel prose",
+      "character, place, event, or obligation names"
+    ]
+  },
+  "operationalSnapshot": {
+    "totals": {
+      "projects": 8,
+      "roughIdeasPresent": 8,
+      "latestTasks": 86,
+      "questionBearingTasks": 64,
+      "questionStrings": 176,
+      "questionBearingWithPatches": 36,
+      "structuredAnswerPayloads": 0,
+      "feedbackOrDirectionPayloads": 0,
+      "ideaSuggestTasks": 1,
+      "ideaSuggestQuestions": 3,
+      "invocations": 68,
+      "promptPreviewsPersisted": 68
+    },
+    "byTaskType": {
+      "outline.generate": {
+        "tasks": 2,
+        "questionBearingTasks": 1,
+        "questions": 3
+      },
+      "chapter.plan": {
+        "tasks": 16,
+        "questionBearingTasks": 15,
+        "questions": 36
+      },
+      "selection.polish": {
+        "tasks": 2,
+        "questionBearingTasks": 1,
+        "questions": 1
+      },
+      "chapter.draft": {
+        "tasks": 14,
+        "questionBearingTasks": 14,
+        "questions": 38
+      },
+      "continuity.check": {
+        "tasks": 13,
+        "questionBearingTasks": 13,
+        "questions": 43
+      },
+      "idea.suggest": {
+        "tasks": 1,
+        "questionBearingTasks": 1,
+        "questions": 3
+      },
+      "quality.rewrite": {
+        "tasks": 7,
+        "questionBearingTasks": 0,
+        "questions": 0
+      },
+      "structure.reverse": {
+        "tasks": 14,
+        "questionBearingTasks": 3,
+        "questions": 7
+      },
+      "writing.recap": {
+        "tasks": 17,
+        "questionBearingTasks": 16,
+        "questions": 45
+      }
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "taskHistory": null,
+          "invocationHistory": null,
+          "questionAggregate": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "initialIdea": {
+          "present": true,
+          "chars": 31,
+          "fingerprint": "35ce0eeaae3f826e9d022ec24a8c7c5684cd66dfa909a5cd614d476ea67abe1e",
+          "immutableUtteranceEvents": 0,
+          "correctionLineageEntries": 0
+        },
+        "tasks": {
+          "latest": 0,
+          "byType": {},
+          "questionBearingTasks": 0,
+          "questionStrings": 0,
+          "questionCountPerTask": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "questionBearingWithPatches": 0,
+          "questionBearingAdoptionDecisions": {},
+          "payloadsWithStructuredAnswerKeys": 0,
+          "payloadsWithFeedbackOrDirectionKeys": 0,
+          "ideaSuggestTasks": 0,
+          "ideaSuggestQuestions": 0
+        },
+        "auditStorage": {
+          "invocations": 0,
+          "tasksWithPromptPreviewPersisted": 0,
+          "promptPreviewLengths": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "note": "Only preview-presence and length are emitted; preview text, task input summaries, questions, answers, prompts, and model output are excluded."
+        },
+        "governedAssets": {
+          "dialogueDirectoriesPresent": 0,
+          "activeQuestionQueues": 0,
+          "answerEvents": 0,
+          "decisionRecords": 0,
+          "redBlueCases": 0,
+          "decisionImpactReports": 0
+        },
+        "interpretation": {
+          "hasClosedQuestionAnswerDecisionLoop": false,
+          "reason": "String questions embedded in task results are display artifacts. They lack stable identity, answer commands, decision authority, supersession, downstream projection receipts, and replayable session state."
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "taskHistory": "ea4dfc9d692ce486fb8b475b561c8accfcc88ec84998cc22d6d36554259d3b23",
+          "invocationHistory": "d58e98c020c6419456d748d86dd36fd3dc2aa644a0ef130b6a21ac99366f2b30",
+          "questionAggregate": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "initialIdea": {
+          "present": true,
+          "chars": 5,
+          "fingerprint": "56db8430c2182ee2ebbfa78a7daf4f61b96af41cc068b3bb6a92f038f6113e09",
+          "immutableUtteranceEvents": 0,
+          "correctionLineageEntries": 0
+        },
+        "tasks": {
+          "latest": 1,
+          "byType": {
+            "outline.generate": {
+              "tasks": 1,
+              "questionBearingTasks": 0,
+              "questions": 0
+            }
+          },
+          "questionBearingTasks": 0,
+          "questionStrings": 0,
+          "questionCountPerTask": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "questionBearingWithPatches": 0,
+          "questionBearingAdoptionDecisions": {},
+          "payloadsWithStructuredAnswerKeys": 0,
+          "payloadsWithFeedbackOrDirectionKeys": 0,
+          "ideaSuggestTasks": 0,
+          "ideaSuggestQuestions": 0
+        },
+        "auditStorage": {
+          "invocations": 1,
+          "tasksWithPromptPreviewPersisted": 1,
+          "promptPreviewLengths": {
+            "sampleCount": 1,
+            "min": 243,
+            "p50": 243,
+            "p95": 243,
+            "max": 243,
+            "average": 243
+          },
+          "note": "Only preview-presence and length are emitted; preview text, task input summaries, questions, answers, prompts, and model output are excluded."
+        },
+        "governedAssets": {
+          "dialogueDirectoriesPresent": 0,
+          "activeQuestionQueues": 0,
+          "answerEvents": 0,
+          "decisionRecords": 0,
+          "redBlueCases": 0,
+          "decisionImpactReports": 0
+        },
+        "interpretation": {
+          "hasClosedQuestionAnswerDecisionLoop": false,
+          "reason": "String questions embedded in task results are display artifacts. They lack stable identity, answer commands, decision authority, supersession, downstream projection receipts, and replayable session state."
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "taskHistory": "f72c1dd26e2ce261eb6b859340e8ba5c94ef6d6ed227002f226a3fd6a7032ac9",
+          "invocationHistory": null,
+          "questionAggregate": "aaa5f8be8ed80f90f9f5bd667187e2c43be74a4091536b012980e60737eb6e95"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "initialIdea": {
+          "present": true,
+          "chars": 34,
+          "fingerprint": "e4c237ddb98e076cd884c390b1d7cd73e792223b79609a608083b8fcfb77c1c0",
+          "immutableUtteranceEvents": 0,
+          "correctionLineageEntries": 0
+        },
+        "tasks": {
+          "latest": 3,
+          "byType": {
+            "chapter.plan": {
+              "tasks": 1,
+              "questionBearingTasks": 1,
+              "questions": 3
+            },
+            "outline.generate": {
+              "tasks": 1,
+              "questionBearingTasks": 1,
+              "questions": 3
+            },
+            "selection.polish": {
+              "tasks": 1,
+              "questionBearingTasks": 1,
+              "questions": 1
+            }
+          },
+          "questionBearingTasks": 3,
+          "questionStrings": 7,
+          "questionCountPerTask": {
+            "sampleCount": 3,
+            "min": 1,
+            "p50": 3,
+            "p95": 3,
+            "max": 3,
+            "average": 2
+          },
+          "questionBearingWithPatches": 3,
+          "questionBearingAdoptionDecisions": {
+            "missing": 3
+          },
+          "payloadsWithStructuredAnswerKeys": 0,
+          "payloadsWithFeedbackOrDirectionKeys": 0,
+          "ideaSuggestTasks": 0,
+          "ideaSuggestQuestions": 0
+        },
+        "auditStorage": {
+          "invocations": 0,
+          "tasksWithPromptPreviewPersisted": 0,
+          "promptPreviewLengths": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "note": "Only preview-presence and length are emitted; preview text, task input summaries, questions, answers, prompts, and model output are excluded."
+        },
+        "governedAssets": {
+          "dialogueDirectoriesPresent": 0,
+          "activeQuestionQueues": 0,
+          "answerEvents": 0,
+          "decisionRecords": 0,
+          "redBlueCases": 0,
+          "decisionImpactReports": 0
+        },
+        "interpretation": {
+          "hasClosedQuestionAnswerDecisionLoop": false,
+          "reason": "String questions embedded in task results are display artifacts. They lack stable identity, answer commands, decision authority, supersession, downstream projection receipts, and replayable session state."
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "taskHistory": "48c63c511fc0cd3f48a7c0e6a42a77e71c5fc9131dfac010ce1c57f3f6a49d03",
+          "invocationHistory": "fbeeab5ff672ed7dbedcb087d873e70a51f0e72f0b201396c11fa044a9ee5e87",
+          "questionAggregate": "2c9a94cc398125c5e20060b246aec87e581b1d64012e84fa7e15dc9a6b585926"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "initialIdea": {
+          "present": true,
+          "chars": 55,
+          "fingerprint": "d09418fde8b619bddc21e6f36edb1170330555510c40d82f3da358ffe49d7187",
+          "immutableUtteranceEvents": 0,
+          "correctionLineageEntries": 0
+        },
+        "tasks": {
+          "latest": 81,
+          "byType": {
+            "chapter.draft": {
+              "tasks": 14,
+              "questionBearingTasks": 14,
+              "questions": 38
+            },
+            "chapter.plan": {
+              "tasks": 15,
+              "questionBearingTasks": 14,
+              "questions": 33
+            },
+            "continuity.check": {
+              "tasks": 13,
+              "questionBearingTasks": 13,
+              "questions": 43
+            },
+            "idea.suggest": {
+              "tasks": 1,
+              "questionBearingTasks": 1,
+              "questions": 3
+            },
+            "quality.rewrite": {
+              "tasks": 7,
+              "questionBearingTasks": 0,
+              "questions": 0
+            },
+            "selection.polish": {
+              "tasks": 1,
+              "questionBearingTasks": 0,
+              "questions": 0
+            },
+            "structure.reverse": {
+              "tasks": 14,
+              "questionBearingTasks": 3,
+              "questions": 7
+            },
+            "writing.recap": {
+              "tasks": 16,
+              "questionBearingTasks": 16,
+              "questions": 45
+            }
+          },
+          "questionBearingTasks": 61,
+          "questionStrings": 169,
+          "questionCountPerTask": {
+            "sampleCount": 61,
+            "min": 2,
+            "p50": 3,
+            "p95": 3,
+            "max": 5,
+            "average": 3
+          },
+          "questionBearingWithPatches": 33,
+          "questionBearingAdoptionDecisions": {
+            "missing": 3,
+            "not-required": 25,
+            "pending": 33
+          },
+          "payloadsWithStructuredAnswerKeys": 0,
+          "payloadsWithFeedbackOrDirectionKeys": 0,
+          "ideaSuggestTasks": 1,
+          "ideaSuggestQuestions": 3
+        },
+        "auditStorage": {
+          "invocations": 66,
+          "tasksWithPromptPreviewPersisted": 66,
+          "promptPreviewLengths": {
+            "sampleCount": 66,
+            "min": 243,
+            "p50": 243,
+            "p95": 243,
+            "max": 243,
+            "average": 243
+          },
+          "note": "Only preview-presence and length are emitted; preview text, task input summaries, questions, answers, prompts, and model output are excluded."
+        },
+        "governedAssets": {
+          "dialogueDirectoriesPresent": 0,
+          "activeQuestionQueues": 0,
+          "answerEvents": 0,
+          "decisionRecords": 0,
+          "redBlueCases": 0,
+          "decisionImpactReports": 0
+        },
+        "interpretation": {
+          "hasClosedQuestionAnswerDecisionLoop": false,
+          "reason": "String questions embedded in task results are display artifacts. They lack stable identity, answer commands, decision authority, supersession, downstream projection receipts, and replayable session state."
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "questionAggregate": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "initialIdea": {
+          "present": true,
+          "chars": 69,
+          "fingerprint": "beb5b9f079dba9213cd691878f2d86bf4cb2741ea37d89e2cb33db00f3813272",
+          "immutableUtteranceEvents": 0,
+          "correctionLineageEntries": 0
+        },
+        "tasks": {
+          "latest": 0,
+          "byType": {},
+          "questionBearingTasks": 0,
+          "questionStrings": 0,
+          "questionCountPerTask": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "questionBearingWithPatches": 0,
+          "questionBearingAdoptionDecisions": {},
+          "payloadsWithStructuredAnswerKeys": 0,
+          "payloadsWithFeedbackOrDirectionKeys": 0,
+          "ideaSuggestTasks": 0,
+          "ideaSuggestQuestions": 0
+        },
+        "auditStorage": {
+          "invocations": 0,
+          "tasksWithPromptPreviewPersisted": 0,
+          "promptPreviewLengths": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "note": "Only preview-presence and length are emitted; preview text, task input summaries, questions, answers, prompts, and model output are excluded."
+        },
+        "governedAssets": {
+          "dialogueDirectoriesPresent": 0,
+          "activeQuestionQueues": 0,
+          "answerEvents": 0,
+          "decisionRecords": 0,
+          "redBlueCases": 0,
+          "decisionImpactReports": 0
+        },
+        "interpretation": {
+          "hasClosedQuestionAnswerDecisionLoop": false,
+          "reason": "String questions embedded in task results are display artifacts. They lack stable identity, answer commands, decision authority, supersession, downstream projection receipts, and replayable session state."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "questionAggregate": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "initialIdea": {
+          "present": true,
+          "chars": 69,
+          "fingerprint": "beb5b9f079dba9213cd691878f2d86bf4cb2741ea37d89e2cb33db00f3813272",
+          "immutableUtteranceEvents": 0,
+          "correctionLineageEntries": 0
+        },
+        "tasks": {
+          "latest": 0,
+          "byType": {},
+          "questionBearingTasks": 0,
+          "questionStrings": 0,
+          "questionCountPerTask": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "questionBearingWithPatches": 0,
+          "questionBearingAdoptionDecisions": {},
+          "payloadsWithStructuredAnswerKeys": 0,
+          "payloadsWithFeedbackOrDirectionKeys": 0,
+          "ideaSuggestTasks": 0,
+          "ideaSuggestQuestions": 0
+        },
+        "auditStorage": {
+          "invocations": 0,
+          "tasksWithPromptPreviewPersisted": 0,
+          "promptPreviewLengths": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "note": "Only preview-presence and length are emitted; preview text, task input summaries, questions, answers, prompts, and model output are excluded."
+        },
+        "governedAssets": {
+          "dialogueDirectoriesPresent": 0,
+          "activeQuestionQueues": 0,
+          "answerEvents": 0,
+          "decisionRecords": 0,
+          "redBlueCases": 0,
+          "decisionImpactReports": 0
+        },
+        "interpretation": {
+          "hasClosedQuestionAnswerDecisionLoop": false,
+          "reason": "String questions embedded in task results are display artifacts. They lack stable identity, answer commands, decision authority, supersession, downstream projection receipts, and replayable session state."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "questionAggregate": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "initialIdea": {
+          "present": true,
+          "chars": 69,
+          "fingerprint": "beb5b9f079dba9213cd691878f2d86bf4cb2741ea37d89e2cb33db00f3813272",
+          "immutableUtteranceEvents": 0,
+          "correctionLineageEntries": 0
+        },
+        "tasks": {
+          "latest": 0,
+          "byType": {},
+          "questionBearingTasks": 0,
+          "questionStrings": 0,
+          "questionCountPerTask": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "questionBearingWithPatches": 0,
+          "questionBearingAdoptionDecisions": {},
+          "payloadsWithStructuredAnswerKeys": 0,
+          "payloadsWithFeedbackOrDirectionKeys": 0,
+          "ideaSuggestTasks": 0,
+          "ideaSuggestQuestions": 0
+        },
+        "auditStorage": {
+          "invocations": 0,
+          "tasksWithPromptPreviewPersisted": 0,
+          "promptPreviewLengths": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "note": "Only preview-presence and length are emitted; preview text, task input summaries, questions, answers, prompts, and model output are excluded."
+        },
+        "governedAssets": {
+          "dialogueDirectoriesPresent": 0,
+          "activeQuestionQueues": 0,
+          "answerEvents": 0,
+          "decisionRecords": 0,
+          "redBlueCases": 0,
+          "decisionImpactReports": 0
+        },
+        "interpretation": {
+          "hasClosedQuestionAnswerDecisionLoop": false,
+          "reason": "String questions embedded in task results are display artifacts. They lack stable identity, answer commands, decision authority, supersession, downstream projection receipts, and replayable session state."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "taskHistory": "d3fb87fd7556f445db97be68c1229835b7cc8c3717821e6e80612a5ea72f0ede",
+          "invocationHistory": "988f04eb910c93d773aa804596a77201681092a43160a0de961d67f6b7f446b8",
+          "questionAggregate": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "initialIdea": {
+          "present": true,
+          "chars": 69,
+          "fingerprint": "beb5b9f079dba9213cd691878f2d86bf4cb2741ea37d89e2cb33db00f3813272",
+          "immutableUtteranceEvents": 0,
+          "correctionLineageEntries": 0
+        },
+        "tasks": {
+          "latest": 1,
+          "byType": {
+            "writing.recap": {
+              "tasks": 1,
+              "questionBearingTasks": 0,
+              "questions": 0
+            }
+          },
+          "questionBearingTasks": 0,
+          "questionStrings": 0,
+          "questionCountPerTask": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "questionBearingWithPatches": 0,
+          "questionBearingAdoptionDecisions": {},
+          "payloadsWithStructuredAnswerKeys": 0,
+          "payloadsWithFeedbackOrDirectionKeys": 0,
+          "ideaSuggestTasks": 0,
+          "ideaSuggestQuestions": 0
+        },
+        "auditStorage": {
+          "invocations": 1,
+          "tasksWithPromptPreviewPersisted": 1,
+          "promptPreviewLengths": {
+            "sampleCount": 1,
+            "min": 243,
+            "p50": 243,
+            "p95": 243,
+            "max": 243,
+            "average": 243
+          },
+          "note": "Only preview-presence and length are emitted; preview text, task input summaries, questions, answers, prompts, and model output are excluded."
+        },
+        "governedAssets": {
+          "dialogueDirectoriesPresent": 0,
+          "activeQuestionQueues": 0,
+          "answerEvents": 0,
+          "decisionRecords": 0,
+          "redBlueCases": 0,
+          "decisionImpactReports": 0
+        },
+        "interpretation": {
+          "hasClosedQuestionAnswerDecisionLoop": false,
+          "reason": "String questions embedded in task results are display artifacts. They lack stable identity, answer commands, decision authority, supersession, downstream projection receipts, and replayable session state."
+        }
+      }
+    ],
+    "interpretation": "A question string proves only that a task emitted text in its questions array. It does not prove the question was worth asking, asked one-at-a-time, answered, converted into a decision, consumed downstream, or respected after correction."
+  },
+  "summary": {
+    "auditedStages": 13,
+    "projectsScanned": 8,
+    "projectsWithRoughIdea": 8,
+    "latestTasks": 86,
+    "questionBearingTasks": 64,
+    "emittedQuestionStrings": 176,
+    "structuredAnswerPayloads": 0,
+    "activeQuestionQueues": 0,
+    "redBlueCases": 0,
+    "decisionRecords": 0,
+    "decisionConsumptionReceipts": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform models collaboration as a project roughIdea plus independent task payloads/results, not as a versioned loop of utterance, understanding, high-value question, red/blue alternatives, answer, creative decision, downstream projection, and correction impact.",
+    "consequence": "The system can generate many questions without knowing whether the author answered them, repeat or contradict prior decisions, act on a stale interpretation, lose rejection reasons, fail to steer an active run, and force the author to restate context that should have become durable creative intent."
+  },
+  "stages": [
+    {
+      "stageId": "DIALOGUE-TRACE-001",
+      "label": "粗略想法输入",
+      "currentStatus": "single-project-field",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/ProjectCreatePanel.vue",
+          "line": 27,
+          "evidence": "v-model=\"roughIdea\""
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 149,
+          "evidence": "roughIdea: input.roughIdea.trim()"
+        }
+      ],
+      "strength": "The author can begin with one short free-form idea and optional title/genre rather than completing a long form.",
+      "gap": "Only the latest project field remains; there is no immutable utterance, speaker/session identity, correction lineage, evidence span, language intent, or privacy/retention envelope."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-002",
+      "label": "首次理解",
+      "currentStatus": "local-heuristic-plus-fallback-skeleton",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 212,
+          "evidence": "function buildNarrativePromiseBlock"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 24,
+          "evidence": "fallbackProjectCreateResult"
+        }
+      ],
+      "strength": "Simple labels and sentence previews create an immediate narrative-promise hint and usable project skeleton.",
+      "gap": "Project creation invokes no understanding task, produces no competing interpretations, confidence, contradiction report, evidence spans, or author-correctable UnderstandingVersion."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-003",
+      "label": "苏格拉底问题规划",
+      "currentStatus": "absent",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 362,
+          "evidence": "questions: [\"需要作者确认的问题\"]"
+        }
+      ],
+      "strength": "Every generic task result can surface unresolved questions.",
+      "gap": "There is no expected-information-value calculation, decision impact, reversibility, confidence, duplicate suppression, blocking scope, or one-active-question policy before a task proceeds."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-004",
+      "label": "问题呈现",
+      "currentStatus": "versioned-question-and-answer-event-slice",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 1006,
+          "evidence": "questions: string[]"
+        },
+        {
+          "path": "ui/src/components/novel/RewriteComparison.vue",
+          "line": 53,
+          "evidence": "v-for=\"question in result.questions\""
+        }
+      ],
+      "strength": "The first understanding question has identity, version, impact, T0 fingerprint, one-active enforcement, answer control, and structured stale conflicts.",
+      "gap": "The UI has API contracts but no primary question card or downstream contract-field consumer yet."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-005",
+      "label": "红蓝辩证",
+      "currentStatus": "not-a-product-protocol",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 21,
+          "evidence": "\"idea.suggest\": \"Offer next-step ideas"
+        }
+      ],
+      "strength": "idea.suggest and free-form tasks can informally produce alternatives if prompted by the author.",
+      "gap": "No typed alternatives, shared premises, blue value case, red failure case, evidence, uncertainty, recommendation, dissent, or author decision slot is required or stored."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-006",
+      "label": "作者回答",
+      "currentStatus": "no-question-answer-command",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/RewriteComparison.vue",
+          "line": 153,
+          "evidence": "defineEmits<"
+        }
+      ],
+      "strength": "The author can accept, reject, request generic tuning, or type a new task/direction elsewhere.",
+      "gap": "Those actions do not answer a stable question ID; free text is not linked to the question, interpretation, option, confidence, affected fields, or superseded answer."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-007",
+      "label": "决定沉淀",
+      "currentStatus": "append-only-decision-record-slice",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 1029,
+          "evidence": "export type AiInvocationAdoptionDecision = \"pending\" | \"accepted\" | \"rejected\" | \"not-required\""
+        }
+      ],
+      "strength": "Confirmed, tentative, delegated and correction answers produce non-canon DecisionRecord history with source fingerprint and supersession relation.",
+      "gap": "Decision records are not yet consumed by contract candidates or downstream execution proofs."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-008",
+      "label": "下游消费",
+      "currentStatus": "latest-fields-and-ad-hoc-payload",
+      "evidence": [
+        {
+          "path": "api/src/taskService.ts",
+          "line": 388,
+          "evidence": "payload.roughIdea || payload.feedback"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 713,
+          "evidence": "{ title: \"项目配置\""
+        }
+      ],
+      "strength": "Tasks receive current project files plus one roughIdea or feedback string and can therefore react to immediate direction.",
+      "gap": "Context does not include an authoritative decision projection, unresolved decision set, rejected alternatives, confidence, provenance, or proof that outline/prose consumed the intended answer version."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-009",
+      "label": "纠正、反悔与影响传播",
+      "currentStatus": "correction-decision-lineage-slice",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 2989,
+          "evidence": "requestFocusDraftRevision"
+        }
+      ],
+      "strength": "A correction-shaped answer retains previous/replacement text and creates an explicit supersedes relation without overwriting history.",
+      "gap": "Impact propagation to stale plans, candidates, running tasks, and contract fields is not yet implemented."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-010",
+      "label": "低打扰自治",
+      "currentStatus": "task-success-driven",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1207,
+          "evidence": "await runSingleChapterPipeline(run)"
+        }
+      ],
+      "strength": "The runtime can perform many steps without repeatedly asking the author.",
+      "gap": "Silence is not a governed autonomy policy: no L0/L1/L2 decision tier, reversible-default receipt, uncertainty threshold, stop condition, or later explanation proves why the system acted instead of asking."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-011",
+      "label": "运行中方向调整",
+      "currentStatus": "queued-result-note-not-live-steering",
+      "evidence": [
+        {
+          "path": "api/src/runtimeWorker.ts",
+          "line": 55,
+          "evidence": "await processRuntimeCommand(command)"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1223,
+          "evidence": "direction: command.payload.direction"
+        }
+      ],
+      "strength": "The UI and API expose a direction command and preserve it on the runtime result.",
+      "gap": "The single worker awaits the long start command before claiming the queued direction; processing only writes run.result and does not feed the active pipeline, invalidate a candidate, or create an acknowledged steering boundary."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-012",
+      "label": "跨会话恢复",
+      "currentStatus": "project-files-plus-task-history",
+      "evidence": [
+        {
+          "path": "api/src/taskService.ts",
+          "line": 45,
+          "evidence": "tasks/history.jsonl"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3082,
+          "evidence": "async function openProject"
+        }
+      ],
+      "strength": "Projects, task results, invocations, and writing assets survive process restarts.",
+      "gap": "There is no CollaborationSession snapshot with active question, open decisions, last confirmed understanding, user corrections, pending autonomy receipts, or an explainable resume summary."
+    },
+    {
+      "stageId": "DIALOGUE-TRACE-013",
+      "label": "审计与隐私",
+      "currentStatus": "prompt-preview-and-payload-history",
+      "evidence": [
+        {
+          "path": "api/src/taskService.ts",
+          "line": 214,
+          "evidence": "preview: previewText(prompt)"
+        },
+        {
+          "path": "api/src/taskService.ts",
+          "line": 371,
+          "evidence": "inputSummary: JSON.stringify(payload).slice(0, 500)"
+        }
+      ],
+      "strength": "Invocation metadata helps diagnose what context and template produced a result.",
+      "gap": "Prompt previews and payload summaries can duplicate author text without field-level purpose, sensitivity, retention, deletion, or redaction policy; meanwhile they still do not form a semantic answer/decision audit trail."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-chat-transcript-as-truth",
+      "verdict": "insufficient-target",
+      "blueCase": "Feels natural, preserves nuance, and can be implemented quickly as one continuous assistant conversation.",
+      "redCase": "A transcript has no stable field authority, supersession, one-question gate, decision impact, deterministic downstream projection, privacy minimization, or replayable acceptance semantics."
+    },
+    {
+      "option": "B-chat-plus-mutable-decision-ledger",
+      "verdict": "useful-migration-layer-not-final-authority",
+      "blueCase": "Adds explicit decisions and can retrofit the current UI/task system without replacing every prompt immediately.",
+      "redCase": "If chat, project fields, and ledger remain co-equal mutable truth, corrections and automation will drift; last-write-wins cannot prove which answer governed which artifact."
+    },
+    {
+      "option": "C-event-sourced-collaboration-protocol",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "Immutable utterance/answer/decision events with deterministic projections preserve nuance, one-question orchestration, red/blue evidence, correction lineage, low-interruption autonomy, and downstream consumption receipts.",
+      "redCase": "Requires shared schemas, privacy classes, projection rebuilds, semantic IDs, impact analysis, compatibility adapters, and careful UX so governance does not make conversation feel bureaucratic."
+    }
+  ],
+  "targetProtocol": {
+    "states": [
+      "utterance_captured",
+      "understanding_candidates_ready",
+      "understanding_confirmed_or_provisional",
+      "question_planned",
+      "question_active",
+      "answer_captured",
+      "decision_adopted",
+      "projections_current",
+      "action_authorized",
+      "action_receipted",
+      "correction_received",
+      "impact_previewed",
+      "recomputed_or_restored"
+    ],
+    "entities": [
+      "AuthorUtterance",
+      "UnderstandingVersion",
+      "InterpretationCandidate",
+      "UncertaintyRegister",
+      "QuestionPlan",
+      "QuestionCard",
+      "RedBlueCase",
+      "AnswerEvent",
+      "DecisionRecord",
+      "DecisionProjection",
+      "DecisionImpactReport",
+      "AutonomyPolicy",
+      "AutonomyReceipt",
+      "DecisionConsumptionReceipt",
+      "CollaborationSession"
+    ],
+    "invariant": "No chat summary, task result, patch acceptance, current project field, model confidence, runtime direction note, or silence from the author may independently establish a creative decision or prove that downstream work consumed it."
+  },
+  "questionPolicy": {
+    "askOnlyWhen": "Expected reduction in high-impact uncertainty exceeds author interruption cost, the decision cannot be safely inferred from existing evidence, and no current answer or reversible default already covers the scope.",
+    "activeLimit": 1,
+    "tiers": {
+      "L0": "Reversible presentation or implementation detail; act automatically and record a compact receipt.",
+      "L1": "Meaningful but reversible creative choice; recommend and proceed only within the configured autonomy window, with undo and later explanation.",
+      "L2": "Identity, central conflict, major relationship, canon promise, ending, rights, publication boundary, intentional-open obligation, destructive rewrite, or irreversible cost; pause and ask the author."
+    },
+    "cardFields": [
+      "questionId",
+      "decisionSlotId",
+      "plainQuestion",
+      "whyNow",
+      "impact",
+      "blockingScope",
+      "evidenceRefs",
+      "assumptions",
+      "options",
+      "recommendedOptionId",
+      "redBlueCaseId",
+      "freeTextAllowed",
+      "notSureAllowed",
+      "expiresWhen",
+      "askedAt"
+    ],
+    "antiPatterns": [
+      "multiple unrelated questions in one turn",
+      "asking after already acting",
+      "repeating an answered question",
+      "forcing false binary choices",
+      "hiding recommendation",
+      "treating silence as consent",
+      "asking for facts already present",
+      "using a low-impact question to block the whole book"
+    ]
+  },
+  "redBlueProtocol": {
+    "perOption": [
+      "claim",
+      "bestCase",
+      "premises",
+      "evidence",
+      "failureModes",
+      "opportunityCost",
+      "reversibility",
+      "affectedDecisions",
+      "uncertainty"
+    ],
+    "synthesis": [
+      "sharedFacts",
+      "irreducibleTradeoff",
+      "recommendation",
+      "recommendationReason",
+      "dissent",
+      "whatWouldChangeRecommendation"
+    ],
+    "rule": "Blue must defend the strongest viable version, red must attack both correctness and user-goal fit, and synthesis may recommend but cannot fabricate author adoption or average away an unresolved L2 tradeoff."
+  },
+  "correctionProtocol": {
+    "commands": [
+      "ClarifyUtterance",
+      "AnswerQuestion",
+      "AdoptRecommendation",
+      "RejectRecommendation",
+      "SupersedeDecision",
+      "UndoAutonomousDecision",
+      "LockDecision",
+      "ReopenDecision"
+    ],
+    "behavior": "A correction creates a new event, identifies what it supersedes, previews the affected outline/prose/obligation/candidate/projection subgraph, preserves unaffected semantic IDs and author locks, then recomputes only authorized stale artifacts after confirmation appropriate to the impact tier."
+  },
+  "releaseGate": {
+    "requirementIds": [
+      "FR-INTENT-001",
+      "FR-QUESTION-001",
+      "FR-QUESTION-002",
+      "FR-QUESTION-003",
+      "FR-QUESTION-004",
+      "FR-QUESTION-005",
+      "FR-QUESTION-006",
+      "FR-QUESTION-007",
+      "FR-QUESTION-008",
+      "FR-QUESTION-009",
+      "FR-COLLAB-001",
+      "FR-COLLAB-002",
+      "FR-COLLAB-003",
+      "FR-COLLAB-004",
+      "FR-COLLAB-005",
+      "FR-DEBATE-001",
+      "FR-DEBATE-002",
+      "FR-DEBATE-003",
+      "FR-DEBATE-004",
+      "FR-DEBATE-005",
+      "FR-DEBATE-006",
+      "FR-DEBATE-007",
+      "FR-DEBATE-008",
+      "FR-DIALOGUE-001",
+      "FR-DIALOGUE-002",
+      "FR-DIALOGUE-003",
+      "FR-DIALOGUE-004",
+      "FR-DIALOGUE-005",
+      "FR-DIALOGUE-006",
+      "FR-DIALOGUE-007",
+      "FR-DIALOGUE-008",
+      "FR-DIALOGUE-009",
+      "FR-DIALOGUE-010",
+      "FR-DIALOGUE-011",
+      "FR-DIALOGUE-012",
+      "FR-DIALOGUE-013",
+      "FR-DIALOGUE-014",
+      "FR-DIALOGUE-015",
+      "FR-DIALOGUE-016",
+      "FR-DIALOGUE-017",
+      "FR-DIALOGUE-018",
+      "FR-DIALOGUE-019",
+      "FR-DIALOGUE-020",
+      "FR-DIALOGUE-021",
+      "FR-DIALOGUE-022",
+      "FR-DIALOGUE-023",
+      "FR-DIALOGUE-024",
+      "FR-STATE-001",
+      "FR-STATE-002",
+      "FR-STATE-003",
+      "FR-STATE-004",
+      "FR-STATE-005"
+    ],
+    "acceptanceRefs": [
+      "AT-002",
+      "AT-022",
+      "AT-023",
+      "AT-027",
+      "AT-028",
+      "AT-029",
+      "AT-041",
+      "AT-059",
+      "AT-078",
+      "AT-079",
+      "AT-190",
+      "AT-191",
+      "AT-192",
+      "AT-193",
+      "AT-194",
+      "AT-195",
+      "AT-198",
+      "AT-200",
+      "AT-201",
+      "AT-212",
+      "AT-334",
+      "AT-335",
+      "AT-337",
+      "AT-340",
+      "AT-345",
+      "AT-346",
+      "AT-443",
+      "AT-444",
+      "AT-451",
+      "AT-452"
+    ],
+    "rule": "Do not claim Socratic collaboration or red/blue decision support until one active QuestionCard can be answered through a server command, the resulting DecisionRecord and supersession are replayable, downstream artifacts publish DecisionConsumptionReceipts, corrections invalidate only the affected subgraph, runtime steering acknowledges a safe boundary, and privacy tests prove raw utterances and previews follow declared purpose, retention, access, export, and deletion policies."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none can weaken dialogue identity, one-question discipline, red/blue evidence, correction lineage, downstream consumption proof or privacy. Q-009 uses the same protocol."
+}

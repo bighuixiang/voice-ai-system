@@ -1148,7 +1148,7 @@ export interface ProjectAuditReport {
   aiInvocations: AiInvocationSession[];
 }
 
-export type BackgroundJobType = "knowledge.index.rebuild" | "quality.series.rebuild" | "story.graph.rebuild";
+export type BackgroundJobType = "knowledge.index.rebuild" | "quality.series.rebuild" | "story.graph.rebuild" | "understanding.shadow";
 export type BackgroundJobStatus = "pending" | "running" | "success" | "error" | "cancelled";
 
 export interface BackgroundJob {

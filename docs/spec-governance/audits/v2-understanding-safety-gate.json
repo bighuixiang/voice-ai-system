@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "blocked-by-missing-dependencies",
+  "releaseProfile": "RP2-understanding",
+  "verifiedOn": "2026-07-29",
+  "scope": "First interpretation attempt must fail closed before model invocation or understanding persistence",
+  "route": "POST /api/novel/projects/:projectId/session/understanding",
+  "readOnlyPreviewRoute": "GET /api/novel/projects/:projectId/session/understanding-preview",
+  "t0FreezeRoute": "POST /api/novel/projects/:projectId/session/context-manifest",
+  "preflightRoute": "POST /api/novel/projects/:projectId/session/understanding/preflight",
+  "budgetRoute": "POST /api/novel/projects/:projectId/session/understanding/budget",
+  "capabilityAuthorizationRoute": "POST /api/novel/projects/:projectId/session/understanding/capability-authorization",
+  "dependencyContract": [
+    "task-risk-profile",
+    "t0-context-manifest",
+    "budget-reservation",
+    "model-capability-authorization"
+  ],
+  "implementedDependencies": ["task-risk-profile", "t0-context-manifest", "budget-reservation", "model-capability-authorization"],
+  "remainingMissingDependencies": [],
+  "verifiedBehaviors": [
+    "returns HTTP 409 with V2_DEPENDENCY_MISSING",
+    "returns modelCallIssued=false",
+    "returns understandingWritten=false",
+    "does not create or mutate sessions/creative-session.json",
+    "read-only preview exposes explicit claims with message source spans",
+    "preview contains no inferred claims and marks missing intent as unknown",
+    "T0 manifest is idempotent for an unchanged session and supersedes its predecessor after a new message",
+    "preflight returns typed missing/ready dependency reasons and never authorizes a model call while blocked",
+    "capability authorization rejects unknown profiles and leaves preflight blocked",
+    "authorized shadow execution persists a source-fingerprinted snapshot and run without model or canon writes",
+    "authorized shadow execution can be queued as an observable background task and its result remains linked to the same frozen input",
+    "a session mutation invalidates the prior T0 fence and cannot overwrite the prior shadow snapshot",
+    "explicit model execution creates a persisted task card with cancellation and same-task resume routes",
+    "strict model output parsing fails closed without creating a snapshot",
+    "a persisted running task can be resumed with the same taskId after worker recreation",
+    "process crash and malformed model output fail closed without creating a snapshot",
+    "materially different model interpretations remain as at least two candidate branches while exactly one high-impact question is active",
+    "question answers are append-only, idempotent, version/fingerprint guarded, and tentative answers remain deferred",
+    "decision records compile into isolated source-fingerprinted contract candidates with field evidence, provisional epistemic status, and stale correction lineage without canon writes",
+    "an independent deterministic calibration review checks source freshness, evidence spans, interpretation branch separation, question gating, and canon isolation",
+    "field-complete contract adoption proposals require a passed independent review and candidate fingerprint, while remaining non-canon"
+    ,"confirmed world-rule fields compile and are committed through the same author-authorized transaction"
+    ,"materially different interpretation branches compile into distinct attributed candidates with assumptions and downstream impact summaries"
+    ,"partial contract adoption keeps rejected or deferred fields unresolved and commits only explicitly accepted fields"
+    ,"corrected decisions record an incremental recompile trace with affected paths and preserved unrelated field fingerprints"
+    ,"WorldRuleContract candidates require executable condition, mechanism, result, cost, limit, failure, scoped subjects/regions, evidence and separated belief/proposal domains"
+    ,"regional world-rule applicability returns unknown outside the declared region instead of globalizing the rule"
+    ,"core conflict, failure cost, irreversible choice, reader promise, ending direction, inner need and misbelief decisions map into the typed StoryContract skeleton"
+    ,"StoryContractReadinessProof reports coverage for all defined contract fields separately from the minimum fields required for the current scope"
+    ,"author-authorized canon adoption projects accepted StoryContract fields and a fingerprint-checked WorldRuleContract while rejected fields remain absent from compatibility views"
+    ,"canon adoption emits projection invalidation events and rebuild receipts for story graph and knowledge index"
+    ,"canon mutation fencing detects replacement ownership before every write, blocks stale writers, and leaves failed plans to startup recovery"
+    ,"projection freshness monitor checks append auditable current/stale/unknown events without mutating canon"
+    ,"quality evaluator calibration records sealed holdout fingerprints, provider/human labels, threshold metrics, and continuous stale alerts without granting canon authority"
+    ,"long-running canon mutations refresh a durable lease heartbeat and do not reclaim a lease whose heartbeat is fresh"
+    ,"external provider or human calibration submissions require an attestation reference and reproducible aggregate counts, while caller-supplied holdout labels are never accepted"
+    ,"external provider or human understanding reviews require a snapshot fingerprint, complete structural checks, an attestation reference, and canonWritten=false"
+  ],
+  "test": "api/src/app.spec.ts, api/src/understandingWorker.spec.ts, and api/src/dialogueQuestions.spec.ts: block V2 understanding/preflight until safety dependencies are present; freeze T0; verify shadow/model task execution, cancellation, resume, recovery, stale-T0 rejection, strict output failure, snapshot persistence, one-question lifecycle, answer idempotency, and tentative answers; tests/e2e/rp1-capture.spec.ts verifies browser preflight block",
+  "result": "passed (API preflight/risk/manifest/budget/capability/shadow/model-worker/cancellation/resume/recovery/stale-fence/interpretation/question/preview tests; browser freeze/reload evidence)",
+  "notYetImplemented": [
+    "real holdout calibration and independent provider/human review evidence are not yet attached to the current release audit",
+    "cross-process lease durability beyond the local lock file remains incomplete",
+    "real provider/human holdout evidence is not yet attached to the current release audit; synthetic calibration fixtures remain non-authoritative"
+  ],
+  "nextGate": "Add holdout/provider or human calibration evidence, complete the remaining StoryContract fields, and extend local projection freshness receipts into continuous downstream monitoring; keep all broader adoption behind the same atomic author-authorized gateway."
+}

@@ -1,0 +1,1112 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP1-capture",
+  "journey": "Capture the author's original idea before execution and restore the same collaboration state after refresh.",
+  "protocol": {
+    "blueQuestion": "What breaks the capture-and-recovery journey if this requirement is absent?",
+    "redQuestion": "Can the requirement move later without losing the original utterance, recovery, single action, or legacy-path safety?",
+    "rule": "Domain relevance is insufficient; retain only the first behavior actually consumed by RP1."
+  },
+  "counts": {
+    "originalMustRequirements": 64,
+    "retainedMustRequirements": 51,
+    "movedRequirements": 13,
+    "remainingBudgetHeadroom": 13
+  },
+  "retained": [
+    {
+      "requirementId": "FR-COLLAB-002",
+      "title": "持续推进契约",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-239"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-COLLAB-003",
+      "title": "极简控制语言",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-077",
+        "AT-488"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SESSION-001",
+      "title": "持久创作会话",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-076",
+        "AT-210",
+        "AT-239"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SESSION-002",
+      "title": "消息到资产的来源链",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-190",
+        "AT-489"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-001",
+      "title": "可携带真相与运行态分离",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-066"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-003",
+      "title": "投影可重建",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-021"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-004",
+      "title": "共享领域契约",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-060",
+        "AT-242",
+        "AT-354"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-009",
+      "title": "读模型一致性级别",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-490"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MIGRATE-005",
+      "title": "有序 schema 迁移",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-064",
+        "AT-065"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MIGRATE-007",
+      "title": "单一权威切换",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-063",
+        "AT-245",
+        "AT-361"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MIGRATE-008",
+      "title": "回滚安全窗口",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-071",
+        "AT-072",
+        "AT-491"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-API-001",
+      "title": "幂等与并发契约",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-018",
+        "AT-202",
+        "AT-415"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-API-003",
+      "title": "命令与查询分离",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-063",
+        "AT-243",
+        "AT-245"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-001",
+      "title": "阶段自适应双舞台",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-090",
+        "AT-333",
+        "AT-494"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-002",
+      "title": "持久协作时间线",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-076",
+        "AT-239"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-003",
+      "title": "单一自然语言输入框",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-077",
+        "AT-333"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-006",
+      "title": "下一步与自治反馈",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-239",
+        "AT-410",
+        "AT-411"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-010",
+      "title": "AI 运行可见且可控",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-084",
+        "AT-348"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-011",
+      "title": "重要状态不依赖短暂提示",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-085"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-012",
+      "title": "冲突与失败恢复卡",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-086",
+        "AT-418"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-016",
+      "title": "渐进式首次体验",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-090",
+        "AT-333"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-017",
+      "title": "无障碍与键盘流程",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-091"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-018",
+      "title": "响应式能力边界",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-092"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-020",
+      "title": "高级工作台作为证据层",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-094",
+        "AT-412",
+        "AT-421"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-021",
+      "title": "唯一旅程投影",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-410",
+        "AT-495"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-022",
+      "title": "主要动作服务端仲裁",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-410",
+        "AT-411"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-023",
+      "title": "旧表面能力注册",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-412"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-024",
+      "title": "阶段与视图偏好解耦",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-413"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-025",
+      "title": "原话先落账再执行",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-414",
+        "AT-442"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-026",
+      "title": "单动作生命周期与防重复",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-415"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-027",
+      "title": "跨导航任务连续性",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-416"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-028",
+      "title": "工作空间连续性令牌",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-417"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-029",
+      "title": "原位错误与恢复",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-418"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-030",
+      "title": "跨项目隔离",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-419"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-031",
+      "title": "体验壳层影子切换与退役",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-420",
+        "AT-421"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-032",
+      "title": "用户成果而非界面点击证明完成",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-239",
+        "AT-421"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-001",
+      "title": "结果导向入口",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-249",
+        "AT-333"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-011",
+      "title": "“继续”的确定性语义",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-077",
+        "AT-343"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-016",
+      "title": "有意义里程碑通知",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-348"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-017",
+      "title": "会话恢复简报",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-349"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-019",
+      "title": "复杂度防火墙",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-351"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-001",
+      "title": "用户原话不可变来源",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-190",
+        "AT-442"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-002",
+      "title": "多意图原子化",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-041",
+        "AT-191",
+        "AT-414"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-023",
+      "title": "会话恢复与对账",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-076",
+        "AT-210",
+        "AT-211"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-001",
+      "title": "创意原文先落账",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-442"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-016",
+      "title": "创意编译与创建解耦",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-457"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-017",
+      "title": "失败可恢复且不伪进度",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-458"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-014",
+      "title": "K0 共享契约与能力内核",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-242",
+        "AT-354"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-015",
+      "title": "K1 事件、版本与原子变更内核",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-355",
+        "AT-492"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-021",
+      "title": "旧入口跨表面契约测试",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-361",
+        "AT-493"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-022",
+      "title": "旧路径退役门禁",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to capture and recover the original author utterance; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-362"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    }
+  ],
+  "moved": [
+    {
+      "requirementId": "FR-INTENT-001",
+      "title": "粗略想法结构化",
+      "targetSlice": "V2-understanding",
+      "reason": "Structured interpretation is the V2 outcome; RP1 only preserves the source and starts interpretation."
+    },
+    {
+      "requirementId": "FR-COLLAB-001",
+      "title": "单轮消息理解",
+      "targetSlice": "V2-understanding",
+      "reason": "RP1 atomizes the message, while semantic routing to decisions, revisions, and constraints begins in V2."
+    },
+    {
+      "requirementId": "FR-COLLAB-004",
+      "title": "先看一版的安全语义",
+      "targetSlice": "V5-drafting",
+      "reason": "Exploratory prose candidates are explicitly excluded from the capture-only release."
+    },
+    {
+      "requirementId": "FR-COLLAB-005",
+      "title": "误解与漂移纠正",
+      "targetSlice": "V2-understanding",
+      "reason": "Correcting an interpretation graph first requires a V2 understanding snapshot."
+    },
+    {
+      "requirementId": "FR-STATE-002",
+      "title": "资产版本与指纹",
+      "targetSlice": "V2-understanding",
+      "reason": "The first versioned semantic asset is the understanding snapshot; RP1 source events use immutable event identity."
+    },
+    {
+      "requirementId": "FR-STATE-005",
+      "title": "兼容投影适配器",
+      "targetSlice": "V3-contract",
+      "reason": "Compatibility projections for contract, outline, prose, and obligation models are first consumed by the contract slice."
+    },
+    {
+      "requirementId": "FR-STATE-006",
+      "title": "采纳变更计划",
+      "targetSlice": "V3-contract",
+      "reason": "RP1 writes one source event; multi-canon-asset MutationPlan semantics begin with contract adoption."
+    },
+    {
+      "requirementId": "FR-STATE-007",
+      "title": "可恢复多资产提交",
+      "targetSlice": "V3-contract",
+      "reason": "Recoverable multi-canon-asset commit is not exercised by source capture and begins with contract adoption."
+    },
+    {
+      "requirementId": "FR-STATE-008",
+      "title": "权威提交与投影顺序",
+      "targetSlice": "V3-contract",
+      "reason": "Canon commit and projection ordering starts when a semantic candidate can be adopted."
+    },
+    {
+      "requirementId": "FR-MIGRATE-004",
+      "title": "可回滚迁移",
+      "targetSlice": "V3-contract",
+      "reason": "RP1 adds session/event schema but performs no project-content migration; project checkpoints begin before contract migration."
+    },
+    {
+      "requirementId": "FR-API-002",
+      "title": "异步长任务",
+      "targetSlice": "V2-understanding",
+      "reason": "The first newly governed asynchronous AI task is interpretation, not source capture."
+    },
+    {
+      "requirementId": "FR-UX-019",
+      "title": "可分享定位链接",
+      "targetSlice": "V2-understanding",
+      "reason": "Stable links first target a question or understanding artifact; RP1 only restores the project/session location."
+    },
+    {
+      "requirementId": "FR-EFFORT-004",
+      "title": "低风险自动决定回执",
+      "targetSlice": "V2-understanding",
+      "reason": "Autonomy receipts record semantic low-risk decisions, which RP1 is forbidden to make while only capturing source."
+    }
+  ],
+  "conclusion": "RP1 is reduced to source capture, recovery, one-action UX, and compatibility guards; downstream semantic work no longer counts in its denominator."
+}

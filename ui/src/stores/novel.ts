@@ -22,6 +22,34 @@ import type {
   ChapterSummary,
   ChapterQualityMetric,
   ChapterQualityReport,
+  CreativeSession,
+  CreativeJourneyProjection,
+  ContractAdoptionProposal,
+  StoryContractCandidate,
+  OutlineCandidate,
+  OutlineValidationReport,
+  OutlineAdoptionProposal,
+  ExecutionReadyProof,
+  ExecutionReadinessDecision,
+  ExecutionWorkItem,
+  BookRun,
+  CompletionAudit,
+  EditionManifest,
+  PublicationTree,
+  PublicationArtifactSet,
+  DeliveryProofVerification,
+  DeliveryProof,
+  ProseRepairPlan,
+  ProseRepairCandidate,
+  ProseRepairRegression,
+  ReleasePreflightReport,
+  ReleaseActivation,
+  LengthContract,
+  LengthForecast,
+  LengthVarianceDecision,
+  UnderstandingPreview,
+  DialogueQuestion,
+  ContextManifest,
   CreationRuntimeSnapshot,
   CodexTaskResult,
   CodexTaskType,
@@ -73,6 +101,26 @@ import type {
   WritingMode,
   EmotionLedger,
   WritingRecapCandidate
+  ,ProseCandidate,
+  ProseAdoptionReadiness,
+  ProseAdoptionTransaction,
+  ChapterSettlement,
+  QualityCalibrationEvidence,
+  ReleaseAcceptanceDecision,
+  UnderstandingReview,
+  MigrationCutoverReport,
+  MigrationBatchValidationReport,
+  ProseValidationBundle,
+  RedBlueReview,
+  AuthorFeedbackEvent,
+  FeedbackAttribution,
+  PreferenceHypothesis
+  ,LearningPolicy,
+  ExplorationBudget
+  ,CraftPattern,
+  CraftExperiment,
+  CharacterDramaticContract
+  ,CharacterStateSnapshot
 } from "@/types/novel";
 
 type LedgerKind = LedgerEntry["kind"];
@@ -217,6 +265,90 @@ export const useNovelStore = defineStore("novel", () => {
   const openWorkspaceSlugs = ref<string[]>([]);
   const workspaceCache = ref<Record<string, WorkspaceCache>>({});
   const currentProject = ref<NovelProject | null>(null);
+  const creativeSession = ref<CreativeSession | null>(null);
+  const creativeJourney = ref<CreativeJourneyProjection | null>(null);
+  const understandingPreview = ref<UnderstandingPreview | null>(null);
+  const dialogueQuestions = ref<DialogueQuestion[]>([]);
+  const activeDialogueQuestion = computed(() => dialogueQuestions.value.find((question) => question.status === "active") || null);
+  const contextManifest = ref<ContextManifest | null>(null);
+  const isFreezingContextManifest = ref(false);
+  const isLoadingCreativeSession = ref(false);
+  const isSubmittingCreativeMessage = ref(false);
+  const creativeSessionError = ref("");
+  const contractCandidates = ref<StoryContractCandidate[]>([]);
+  const isLoadingContractCandidates = ref(false);
+  const contractCandidatesError = ref("");
+  const lastContractDecisionId = ref("");
+  const contractAdoptionProposal = ref<ContractAdoptionProposal | null>(null);
+  const isCreatingContractAdoptionProposal = ref(false);
+  const contractAdoptionError = ref("");
+  const outlineCandidates = ref<OutlineCandidate[]>([]);
+  const outlineValidationReports = ref<Record<string, OutlineValidationReport>>({});
+  const isLoadingOutlineCandidates = ref(false);
+  const validatingOutlineId = ref("");
+  const outlineCandidatesError = ref("");
+  const outlineChapterSelections = ref<Record<string, string[]>>({});
+  const outlineAdoptionProposal = ref<OutlineAdoptionProposal | null>(null);
+  const isAdoptingOutline = ref(false);
+  const outlineAdoptionError = ref("");
+  const executionReadyProof = ref<ExecutionReadyProof | null>(null);
+  const executionReadiness = ref<ExecutionReadinessDecision | null>(null);
+  const isLoadingExecutionReadiness = ref(false);
+  const executionReadinessError = ref("");
+  const executionWorkItems = ref<ExecutionWorkItem[]>([]);
+  const isLoadingExecutionWorkItems = ref(false);
+  const bookRuns = ref<BookRun[]>([]);
+  const activeBookRun = ref<BookRun | null>(null);
+  const bookRunError = ref("");
+  const isLoadingBookRun = ref(false);
+  const completionAudit = ref<CompletionAudit | null>(null);
+  const publicationEdition = ref<EditionManifest | null>(null);
+  const publicationTree = ref<PublicationTree | null>(null);
+  const publicationArtifacts = ref<PublicationArtifactSet | null>(null);
+  const deliveryProofVerification = ref<DeliveryProofVerification | null>(null);
+  const publicationPreflight = ref<ReleasePreflightReport | null>(null);
+  const publicationEvidenceError = ref("");
+  const isLoadingPublicationEvidence = ref(false);
+  const deliveryProof = ref<DeliveryProof | null>(null);
+  const proseCandidates = ref<ProseCandidate[]>([]);
+  const isLoadingProseCandidates = ref(false);
+  const proseValidations = ref<Record<string, ProseValidationBundle>>({});
+  const proseReviews = ref<Record<string, RedBlueReview>>({});
+  const proseRepairPlans = ref<Record<string, ProseRepairPlan>>({});
+  const proseRepairCandidates = ref<Record<string, ProseRepairCandidate>>({});
+  const proseRepairRegressions = ref<Record<string, ProseRepairRegression>>({});
+  const proseAdoptionReadiness = ref<Record<string, ProseAdoptionReadiness>>({});
+  const proseAdoptions = ref<Record<string, ProseAdoptionTransaction>>({});
+  const proseSettlements = ref<Record<string, ChapterSettlement>>({});
+  const feedbackAttributions = ref<Record<string, FeedbackAttribution>>({});
+  const preferenceHypotheses = ref<Record<string, PreferenceHypothesis>>({});
+  const learningPolicy = ref<LearningPolicy | null>(null);
+  const explorationBudgets = ref<Record<string, ExplorationBudget>>({});
+  const craftPatterns = ref<CraftPattern[]>([]);
+  const craftExperiments = ref<Record<string, CraftExperiment>>({});
+  const characterContracts = ref<CharacterDramaticContract[]>([]);
+  const characterStateSnapshots = ref<Record<string, CharacterStateSnapshot[]>>({});
+  const proseCandidateBusyId = ref("");
+  const proseCandidateError = ref("");
+  const qualityCalibrationEvidence = ref<QualityCalibrationEvidence | null>(null);
+  const qualityCalibrationHistory = ref<QualityCalibrationEvidence[]>([]);
+  const isLoadingQualityCalibration = ref(false);
+  const qualityCalibrationError = ref("");
+  const releaseAcceptanceDecision = ref<ReleaseAcceptanceDecision | null>(null);
+  const releaseActivation = ref<ReleaseActivation | null>(null);
+  const releaseActivationError = ref("");
+  const isActivatingRelease = ref(false);
+  const lengthContract = ref<LengthContract | null>(null);
+  const lengthForecast = ref<LengthForecast | null>(null);
+  const lengthVarianceDecision = ref<LengthVarianceDecision | null>(null);
+  const lengthPlanningError = ref("");
+  const isLoadingLengthPlanning = ref(false);
+  const isLoadingReleaseAcceptance = ref(false);
+  const understandingReview = ref<UnderstandingReview | null>(null);
+  const isLoadingUnderstandingReview = ref(false);
+  const migrationCutoverReport = ref<MigrationCutoverReport | null>(null);
+  const migrationValidationReport = ref<MigrationBatchValidationReport | null>(null);
+  const isLoadingMigrationCutover = ref(false);
   const currentChapter = ref<NovelChapter | null>(null);
   const currentDocumentKind = ref<ChapterDocumentKind>("content");
   const currentFilePath = ref("");
@@ -1926,6 +2058,10 @@ export const useNovelStore = defineStore("novel", () => {
   function resetActiveWorkspace() {
     invalidateWorkspaceLoadState();
     currentProject.value = null;
+    creativeSession.value = null;
+    understandingPreview.value = null;
+    contextManifest.value = null;
+    creativeSessionError.value = "";
     currentChapter.value = null;
     currentDocumentKind.value = "content";
     currentFilePath.value = "";
@@ -2330,6 +2466,9 @@ export const useNovelStore = defineStore("novel", () => {
       if (["command", "run", "stage", "checkpoint", "write", "quality", "review", "error"].includes(event.type)) {
         scheduleRuntimeStatusRefresh();
       }
+      if (event.type === "review" && typeof event.payload?.candidateId === "string") {
+        loadProseCandidates().catch(() => undefined);
+      }
       if (event.type === "write" && currentProject.value && currentChapter.value && event.payload?.path === currentFilePath.value) {
         openChapter(currentChapter.value, currentDocumentKind.value, { skipLeaveCheck: true }).catch(() => undefined);
       }
@@ -2347,7 +2486,8 @@ export const useNovelStore = defineStore("novel", () => {
       const result = await novelApi.startRuntime(currentProject.value.slug, {
         chapterId: currentChapter.value.id,
         direction,
-        autoContinue
+        autoContinue,
+        requireExecutionReady: true
       });
       await loadRuntimeStatus();
       connectRuntimeEvents();
@@ -3015,12 +3155,39 @@ export const useNovelStore = defineStore("novel", () => {
     if (restoreCachedWorkspace(project)) {
       if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
       await loadRuntimeStatus().catch(() => undefined);
+      await loadCreativeSession();
+      await loadCreativeJourney();
+      await loadContractCandidates();
+      await loadContractAdoptionProposal();
+      await loadOutlineCandidates();
+      await loadOutlineAdoptionProposal();
+      await loadExecutionReadyProof();
+      await loadExecutionWorkItems();
+      await loadBookRuns();
+      await loadProseCandidates();
+      await loadQualityCalibrationEvidence();
+      await loadReleaseAcceptance();
+      await loadReleaseActivation();
+      await loadLengthPlanning();
+      await loadUnderstandingReview();
+      await loadMigrationCutover();
+      await loadUnderstandingPreview();
+      await loadDialogueQuestions();
+      await loadContextManifest();
       if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
       connectRuntimeEvents();
       return;
     }
 
     currentProject.value = project;
+    creativeSession.value = null;
+    creativeJourney.value = null;
+    understandingPreview.value = null;
+    dialogueQuestions.value = [];
+    contextManifest.value = null;
+    creativeSessionError.value = "";
+    contractCandidates.value = [];
+    contractCandidatesError.value = "";
     const storedPreference = readStoredWorkspacePreference(project.slug);
     currentDocumentKind.value = normalizeStoredDocumentKind(storedPreference.documentKind);
     const chapter = resolvePreferredChapter(project, storedPreference.chapterId);
@@ -3040,8 +3207,922 @@ export const useNovelStore = defineStore("novel", () => {
       loadBackgroundJobs(),
       loadRuntimeStatus().catch(() => undefined)
     ]);
+    await loadCreativeSession();
+    await loadCreativeJourney();
+    await loadContractCandidates();
+    await loadContractAdoptionProposal();
+    await loadOutlineCandidates();
+    await loadOutlineAdoptionProposal();
+    await loadExecutionReadyProof();
+    await loadExecutionWorkItems();
+    await loadBookRuns();
+    await loadProseCandidates();
+    await loadQualityCalibrationEvidence();
+    await loadReleaseAcceptance();
+    await loadReleaseActivation();
+    await loadLengthPlanning();
+    await loadUnderstandingReview();
+    await loadMigrationCutover();
+    await loadUnderstandingPreview();
+    await loadDialogueQuestions();
+    await loadContextManifest();
     if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
     connectRuntimeEvents();
+  }
+
+  async function startChapterProduction(chapterId: string) {
+    if (currentChapter.value?.id !== chapterId) return null;
+    return startAutopilotRuntime({ direction: "", autoContinue: false });
+  }
+
+  async function loadCreativeSession() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readCreativeSession !== "function") return null;
+    isLoadingCreativeSession.value = true;
+    creativeSessionError.value = "";
+    try {
+      creativeSession.value = await novelApi.readCreativeSession(projectSlug);
+      return creativeSession.value;
+    } catch (cause) {
+      creativeSessionError.value = cause instanceof Error ? cause.message : "Failed to load creative session";
+      return null;
+    } finally {
+      isLoadingCreativeSession.value = false;
+    }
+  }
+
+  async function loadCreativeJourney() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readCreativeJourney !== "function") return null;
+    try {
+      creativeJourney.value = await novelApi.readCreativeJourney(projectSlug);
+      return creativeJourney.value;
+    } catch {
+      creativeJourney.value = null;
+      return null;
+    }
+  }
+
+  async function loadDialogueQuestions() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listDialogueQuestions !== "function") return [];
+    try {
+      dialogueQuestions.value = await novelApi.listDialogueQuestions(projectSlug);
+      return dialogueQuestions.value;
+    } catch {
+      dialogueQuestions.value = [];
+      return [];
+    }
+  }
+
+  async function answerDialogueQuestion(answerText: string, answerStatus: "confirmed" | "tentative" | "delegated" = "confirmed", idempotencyKey = `answer-${Date.now()}`) {
+    const projectSlug = currentProject.value?.slug;
+    const question = dialogueQuestions.value.find((candidate) => candidate.status === "active");
+    if (!projectSlug || !question || typeof novelApi.answerDialogueQuestion !== "function") return null;
+    const result = await novelApi.answerDialogueQuestion(projectSlug, question.questionId, {
+      questionVersion: question.questionVersion,
+      expectedSnapshotFingerprint: question.snapshotFingerprint,
+      idempotencyKey,
+      answerText: answerText.trim(),
+      answerStatus
+    });
+    dialogueQuestions.value = dialogueQuestions.value.map((candidate) => candidate.questionId === result.question.questionId ? result.question : candidate);
+    if (answerStatus === "confirmed" && result.decision?.decisionId && typeof novelApi.compileContractCandidate === "function") {
+      lastContractDecisionId.value = result.decision.decisionId;
+      try {
+        await novelApi.compileContractCandidate(projectSlug, result.decision.decisionId);
+        await loadContractCandidates();
+      } catch (cause) {
+        contractCandidatesError.value = cause instanceof Error ? cause.message : "Contract candidate compilation is blocked";
+      }
+    }
+    return result;
+  }
+
+  async function retryContractCandidateCompilation() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !lastContractDecisionId.value || typeof novelApi.compileContractCandidate !== "function") return null;
+    try {
+      const result = await novelApi.compileContractCandidate(projectSlug, lastContractDecisionId.value);
+      await loadContractCandidates();
+      contractCandidatesError.value = "";
+      return result;
+    } catch (cause) {
+      contractCandidatesError.value = cause instanceof Error ? cause.message : "Contract candidate compilation is blocked";
+      return null;
+    }
+  }
+
+  async function prepareUnderstandingQuestion() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.startUnderstanding !== "function" || typeof novelApi.ensurePrimaryDialogueQuestion !== "function") return null;
+    try {
+      await novelApi.startUnderstanding(projectSlug, "shadow");
+      const result = await novelApi.ensurePrimaryDialogueQuestion(projectSlug);
+      await loadDialogueQuestions();
+      await loadCreativeJourney();
+      return result;
+    } catch (cause) {
+      creativeSessionError.value = cause instanceof Error ? cause.message : "Failed to prepare understanding question";
+      return null;
+    }
+  }
+
+  async function loadContractCandidates() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listContractCandidates !== "function") return [];
+    isLoadingContractCandidates.value = true;
+    contractCandidatesError.value = "";
+    try {
+      contractCandidates.value = await novelApi.listContractCandidates(projectSlug);
+      return contractCandidates.value;
+    } catch (cause) {
+      contractCandidatesError.value = cause instanceof Error ? cause.message : "Failed to load contract candidates";
+      contractCandidates.value = [];
+      return [];
+    } finally {
+      isLoadingContractCandidates.value = false;
+    }
+  }
+
+  async function loadContractAdoptionProposal() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readContractAdoptionProposal !== "function") return null;
+    try {
+      contractAdoptionProposal.value = await novelApi.readContractAdoptionProposal(projectSlug);
+      return contractAdoptionProposal.value;
+    } catch {
+      contractAdoptionProposal.value = null;
+      return null;
+    }
+  }
+
+  async function loadOutlineCandidates() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listOutlineCandidates !== "function") return [];
+    isLoadingOutlineCandidates.value = true;
+    outlineCandidatesError.value = "";
+    try {
+      outlineCandidates.value = await novelApi.listOutlineCandidates(projectSlug);
+      return outlineCandidates.value;
+    } catch (cause) {
+      outlineCandidatesError.value = cause instanceof Error ? cause.message : "Failed to load outline candidates";
+      outlineCandidates.value = [];
+      return [];
+    } finally {
+      isLoadingOutlineCandidates.value = false;
+    }
+  }
+
+  async function compileOutlineCandidate(sourceCandidateId: string, options: { strongFreezeCount?: number; totalChapterCount?: number } = {}) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.compileOutlineCandidate !== "function") return null;
+    outlineCandidatesError.value = "";
+    try {
+      const result = await novelApi.compileOutlineCandidate(projectSlug, sourceCandidateId, options);
+      await loadOutlineCandidates();
+      return result;
+    } catch (cause) {
+      outlineCandidatesError.value = cause instanceof Error ? cause.message : "Failed to compile outline candidate";
+      return null;
+    }
+  }
+
+  async function validateOutlineCandidate(outline: OutlineCandidate) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.validateOutlineCandidate !== "function") return null;
+    validatingOutlineId.value = outline.outlineId;
+    outlineCandidatesError.value = "";
+    try {
+      const report = await novelApi.validateOutlineCandidate(projectSlug, outline.outlineId);
+      outlineValidationReports.value = { ...outlineValidationReports.value, [outline.outlineId]: report };
+      return report;
+    } catch (cause) {
+      outlineCandidatesError.value = cause instanceof Error ? cause.message : "Failed to validate outline candidate";
+      return null;
+    } finally {
+      validatingOutlineId.value = "";
+    }
+  }
+
+  async function loadOutlineAdoptionProposal() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readOutlineAdoptionProposal !== "function") return null;
+    try {
+      outlineAdoptionProposal.value = await novelApi.readOutlineAdoptionProposal(projectSlug);
+      return outlineAdoptionProposal.value;
+    } catch {
+      outlineAdoptionProposal.value = null;
+      return null;
+    }
+  }
+
+  async function loadExecutionReadyProof() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readExecutionReadyProof !== "function") return null;
+    try {
+      executionReadyProof.value = await novelApi.readExecutionReadyProof(projectSlug);
+      return executionReadyProof.value;
+    } catch {
+      executionReadyProof.value = null;
+      return null;
+    }
+  }
+
+  async function checkExecutionReadiness(chapterId: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !chapterId || typeof novelApi.checkExecutionReadiness !== "function") return null;
+    isLoadingExecutionReadiness.value = true;
+    executionReadinessError.value = "";
+    try {
+      executionReadiness.value = await novelApi.checkExecutionReadiness(projectSlug, chapterId);
+      return executionReadiness.value;
+    } catch (cause) {
+      executionReadinessError.value = cause instanceof Error ? cause.message : "Failed to check execution readiness";
+      executionReadiness.value = null;
+      return null;
+    } finally { isLoadingExecutionReadiness.value = false; }
+  }
+
+  async function loadExecutionWorkItems() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listExecutionWorkItems !== "function") return [];
+    isLoadingExecutionWorkItems.value = true;
+    try {
+      executionWorkItems.value = await novelApi.listExecutionWorkItems(projectSlug);
+      return executionWorkItems.value;
+    } catch {
+      executionWorkItems.value = [];
+      return [];
+    } finally { isLoadingExecutionWorkItems.value = false; }
+  }
+
+  async function loadBookRuns() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listBookRuns !== "function") return [];
+    isLoadingBookRun.value = true;
+    bookRunError.value = "";
+    try {
+      bookRuns.value = await novelApi.listBookRuns(projectSlug);
+      activeBookRun.value = bookRuns.value.find((run) => ["ready", "queued", "running", "gate_required", "pausing"].includes(run.status)) || bookRuns.value.at(-1) || null;
+      return bookRuns.value;
+    } catch (cause) {
+      bookRunError.value = cause instanceof Error ? cause.message : "Failed to load book runs";
+      bookRuns.value = [];
+      activeBookRun.value = null;
+      return [];
+    } finally { isLoadingBookRun.value = false; }
+  }
+
+  async function startBookRun(input: { chapterIds?: string[]; objective?: string; autonomyLevel?: "L0" | "L1" | "L2"; limits?: BookRun["limits"] } = {}) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.startBookRun !== "function") return null;
+    isLoadingBookRun.value = true;
+    bookRunError.value = "";
+    try {
+      const run = await novelApi.startBookRun(projectSlug, {
+        chapterIds: input.chapterIds || currentProject.value?.chapters.map((chapter) => chapter.id) || [],
+        objective: input.objective,
+        autonomyLevel: input.autonomyLevel || "L1",
+        limits: input.limits || { maxWorkItems: input.chapterIds?.length || currentProject.value?.chapters.length || 1 }
+      });
+      activeBookRun.value = run;
+      bookRuns.value = [run, ...bookRuns.value.filter((item) => item.bookRunId !== run.bookRunId)];
+      return run;
+    } catch (cause) {
+      bookRunError.value = cause instanceof Error ? cause.message : "Failed to start book run";
+      return null;
+    } finally { isLoadingBookRun.value = false; }
+  }
+
+  async function advanceActiveBookRun() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !activeBookRun.value || typeof novelApi.advanceBookRun !== "function") return null;
+    isLoadingBookRun.value = true;
+    bookRunError.value = "";
+    try {
+      const result = await novelApi.advanceBookRun(projectSlug, activeBookRun.value.bookRunId);
+      activeBookRun.value = result.run;
+      bookRuns.value = bookRuns.value.map((run) => run.bookRunId === result.run.bookRunId ? result.run : run);
+      await Promise.all([loadExecutionWorkItems(), loadRuntimeStatus()]);
+      return result;
+    } catch (cause) {
+      bookRunError.value = cause instanceof Error ? cause.message : "Failed to advance book run";
+      return null;
+    } finally { isLoadingBookRun.value = false; }
+  }
+
+  async function runActiveBookCompletionAudit(sourceFingerprint: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !activeBookRun.value || typeof novelApi.runBookCompletionAudit !== "function" || !sourceFingerprint.trim()) return null;
+    isLoadingBookRun.value = true;
+    bookRunError.value = "";
+    try {
+      const audit = await novelApi.runBookCompletionAudit(projectSlug, activeBookRun.value.bookRunId, sourceFingerprint.trim());
+      completionAudit.value = audit;
+      await loadBookRuns();
+      return audit;
+    } catch (cause) {
+      bookRunError.value = cause instanceof Error ? cause.message : "Failed to run completion audit";
+      return null;
+    } finally { isLoadingBookRun.value = false; }
+  }
+
+  async function loadPublicationEvidence(editionId: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !editionId.trim()) return null;
+    isLoadingPublicationEvidence.value = true;
+    publicationEvidenceError.value = "";
+    try {
+      const [manifest, tree, artifacts, proof, preflight] = await Promise.all([
+        novelApi.readEditionManifest(projectSlug, editionId),
+        novelApi.readPublicationTree(projectSlug, editionId),
+        novelApi.readPublicationArtifacts(projectSlug, editionId),
+        novelApi.verifyDeliveryProof(projectSlug, editionId),
+        novelApi.preflightPublicationEdition(projectSlug, editionId)
+      ]);
+      publicationEdition.value = manifest;
+      publicationTree.value = tree;
+      publicationArtifacts.value = artifacts;
+      deliveryProofVerification.value = proof;
+      publicationPreflight.value = preflight;
+      return { manifest, tree, artifacts, proof, preflight };
+    } catch (cause) {
+      publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to load publication evidence";
+      return null;
+    } finally { isLoadingPublicationEvidence.value = false; }
+  }
+
+  async function issuePublicationDeliveryProof(approvalId: string) {
+    const projectSlug = currentProject.value?.slug;
+    const editionId = publicationEdition.value?.editionId;
+    const artifactFingerprint = publicationArtifacts.value?.fingerprint;
+    if (!projectSlug || !editionId || !artifactFingerprint || publicationPreflight.value?.status !== "ready" || !approvalId.trim() || typeof novelApi.issueDeliveryProof !== "function") return null;
+    isLoadingPublicationEvidence.value = true;
+    publicationEvidenceError.value = "";
+    try {
+      deliveryProof.value = await novelApi.issueDeliveryProof(projectSlug, editionId, approvalId.trim(), artifactFingerprint);
+      deliveryProofVerification.value = await novelApi.verifyDeliveryProof(projectSlug, editionId);
+      return deliveryProof.value;
+    } catch (cause) {
+      publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to issue delivery proof";
+      return null;
+    } finally { isLoadingPublicationEvidence.value = false; }
+  }
+
+  async function createPublicationEdition(input: Parameters<typeof novelApi.createEditionManifest>[1]) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.createEditionManifest !== "function") return null;
+    isLoadingPublicationEvidence.value = true;
+    publicationEvidenceError.value = "";
+    try {
+      publicationEdition.value = await novelApi.createEditionManifest(projectSlug, input);
+      publicationTree.value = null;
+      publicationArtifacts.value = null;
+      deliveryProof.value = null;
+      deliveryProofVerification.value = null;
+      publicationPreflight.value = null;
+      return publicationEdition.value;
+    } catch (cause) {
+      publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to create publication edition";
+      return null;
+    } finally { isLoadingPublicationEvidence.value = false; }
+  }
+
+  async function compilePublicationEditionTree() {
+    const projectSlug = currentProject.value?.slug;
+    const editionId = publicationEdition.value?.editionId;
+    if (!projectSlug || !editionId || typeof novelApi.compilePublicationTree !== "function") return null;
+    try { publicationTree.value = await novelApi.compilePublicationTree(projectSlug, editionId); return publicationTree.value; }
+    catch (cause) { publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to compile publication tree"; return null; }
+  }
+
+  async function renderPublicationEditionArtifacts(formats: Array<"markdown" | "txt"> = ["markdown", "txt"]) {
+    const projectSlug = currentProject.value?.slug;
+    const editionId = publicationEdition.value?.editionId;
+    if (!projectSlug || !editionId || typeof novelApi.renderPublicationArtifacts !== "function") return null;
+    try { publicationArtifacts.value = await novelApi.renderPublicationArtifacts(projectSlug, editionId, formats); return publicationArtifacts.value; }
+    catch (cause) { publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to render publication artifacts"; return null; }
+  }
+
+  async function loadProseCandidates() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listProseCandidates !== "function") return [];
+    isLoadingProseCandidates.value = true;
+    try {
+      proseCandidates.value = await novelApi.listProseCandidates(projectSlug);
+      return proseCandidates.value;
+    } catch { proseCandidates.value = []; return []; }
+    finally { isLoadingProseCandidates.value = false; }
+  }
+
+  async function loadQualityCalibrationEvidence() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readQualityCalibrationEvidence !== "function") return null;
+    isLoadingQualityCalibration.value = true;
+    qualityCalibrationError.value = "";
+    try {
+      qualityCalibrationEvidence.value = await novelApi.readQualityCalibrationEvidence(projectSlug);
+    } catch {
+      qualityCalibrationEvidence.value = null;
+    }
+    try {
+      qualityCalibrationHistory.value = typeof novelApi.readQualityCalibrationEvidenceHistory === "function" ? await novelApi.readQualityCalibrationEvidenceHistory(projectSlug) : [];
+    } catch {
+      qualityCalibrationHistory.value = [];
+    }
+    isLoadingQualityCalibration.value = false;
+    return qualityCalibrationEvidence.value;
+  }
+
+  async function submitQualityCalibrationEvidence(input: Parameters<typeof novelApi.submitQualityCalibrationEvidence>[1]) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.submitQualityCalibrationEvidence !== "function") return null;
+    isLoadingQualityCalibration.value = true;
+    qualityCalibrationError.value = "";
+    try {
+      const evidence = await novelApi.submitQualityCalibrationEvidence(projectSlug, input);
+      qualityCalibrationEvidence.value = evidence;
+      qualityCalibrationHistory.value = [evidence, ...qualityCalibrationHistory.value.filter((item) => item.calibrationId !== evidence.calibrationId)];
+      return evidence;
+    } catch (cause) {
+      qualityCalibrationError.value = cause instanceof Error ? cause.message : "Failed to submit calibration evidence";
+      return null;
+    } finally { isLoadingQualityCalibration.value = false; }
+  }
+
+  async function loadReleaseAcceptance() {
+    if (typeof novelApi.readReleaseAcceptance !== "function") return null;
+    isLoadingReleaseAcceptance.value = true;
+    try { releaseAcceptanceDecision.value = await novelApi.readReleaseAcceptance(); return releaseAcceptanceDecision.value; }
+    catch { releaseAcceptanceDecision.value = null; return null; }
+    finally { isLoadingReleaseAcceptance.value = false; }
+  }
+
+  async function loadReleaseActivation() {
+    if (typeof novelApi.readReleaseActivation !== "function") return null;
+    try { releaseActivation.value = await novelApi.readReleaseActivation(); return releaseActivation.value; }
+    catch { releaseActivation.value = null; return null; }
+  }
+
+  async function activateAcceptedRelease() {
+    if (releaseAcceptanceDecision.value?.status !== "accepted" || typeof novelApi.activateRelease !== "function") return null;
+    isActivatingRelease.value = true;
+    releaseActivationError.value = "";
+    try { releaseActivation.value = await novelApi.activateRelease(); return releaseActivation.value; }
+    catch (cause) { releaseActivationError.value = cause instanceof Error ? cause.message : "Failed to activate release"; return null; }
+    finally { isActivatingRelease.value = false; }
+  }
+
+  async function loadLengthPlanning() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readLengthContract !== "function") return null;
+    isLoadingLengthPlanning.value = true;
+    lengthPlanningError.value = "";
+    try {
+      lengthContract.value = await novelApi.readLengthContract(projectSlug);
+      if (lengthContract.value && typeof novelApi.readLengthForecast === "function") lengthForecast.value = await novelApi.readLengthForecast(projectSlug);
+      return lengthForecast.value;
+    } catch (cause) {
+      lengthPlanningError.value = cause instanceof Error ? cause.message : "Failed to load length planning";
+      return null;
+    } finally { isLoadingLengthPlanning.value = false; }
+  }
+
+  async function createProjectLengthContract(input: { dimensions: LengthContract["dimensions"]; hardLocks?: string[] }) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.createLengthContract !== "function") return null;
+    isLoadingLengthPlanning.value = true;
+    lengthPlanningError.value = "";
+    try {
+      lengthContract.value = await novelApi.createLengthContract(projectSlug, input);
+      lengthForecast.value = typeof novelApi.readLengthForecast === "function" ? await novelApi.readLengthForecast(projectSlug) : null;
+      return lengthContract.value;
+    } catch (cause) {
+      lengthPlanningError.value = cause instanceof Error ? cause.message : "Failed to create length contract";
+      return null;
+    } finally { isLoadingLengthPlanning.value = false; }
+  }
+
+  async function decideProjectLengthVariance(choice: LengthVarianceDecision["choice"] = "pause-and-review") {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !lengthForecast.value || typeof novelApi.decideLengthVariance !== "function") return null;
+    isLoadingLengthPlanning.value = true;
+    lengthPlanningError.value = "";
+    try {
+      lengthVarianceDecision.value = await novelApi.decideLengthVariance(projectSlug, choice);
+      return lengthVarianceDecision.value;
+    } catch (cause) {
+      lengthPlanningError.value = cause instanceof Error ? cause.message : "Failed to record length variance";
+      return null;
+    } finally { isLoadingLengthPlanning.value = false; }
+  }
+
+  async function loadUnderstandingReview() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readUnderstandingReview !== "function") return null;
+    isLoadingUnderstandingReview.value = true;
+    try { understandingReview.value = await novelApi.readUnderstandingReview(projectSlug); return understandingReview.value; }
+    catch { understandingReview.value = null; return null; }
+    finally { isLoadingUnderstandingReview.value = false; }
+  }
+
+  async function submitExternalUnderstandingReview(input: Parameters<typeof novelApi.submitExternalUnderstandingReview>[1]) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.submitExternalUnderstandingReview !== "function") return null;
+    isLoadingUnderstandingReview.value = true;
+    try { understandingReview.value = await novelApi.submitExternalUnderstandingReview(projectSlug, input); return understandingReview.value; }
+    finally { isLoadingUnderstandingReview.value = false; }
+  }
+
+  async function loadMigrationCutover() {
+    if (typeof novelApi.readMigrationCutoverReadiness !== "function") return null;
+    isLoadingMigrationCutover.value = true;
+    try { migrationCutoverReport.value = await novelApi.readMigrationCutoverReadiness(); return migrationCutoverReport.value; }
+    catch { migrationCutoverReport.value = null; return null; }
+    finally { isLoadingMigrationCutover.value = false; }
+  }
+
+  async function validateAllProjectMigrations() {
+    if (typeof novelApi.validateAllProjectMigrations !== "function") return null;
+    isLoadingMigrationCutover.value = true;
+    try { migrationValidationReport.value = await novelApi.validateAllProjectMigrations(); await loadMigrationCutover(); return migrationValidationReport.value; }
+    finally { isLoadingMigrationCutover.value = false; }
+  }
+
+  async function validateProseCandidate(candidate: ProseCandidate) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.validateProseCandidate !== "function") return null;
+    proseCandidateBusyId.value = candidate.candidateId;
+    proseCandidateError.value = "";
+    try { const bundle = await novelApi.validateProseCandidate(projectSlug, candidate.candidateId); proseValidations.value = { ...proseValidations.value, [candidate.candidateId]: bundle }; return bundle; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to validate prose candidate"; return null; }
+    finally { proseCandidateBusyId.value = ""; }
+  }
+
+  async function reviewProseCandidate(candidate: ProseCandidate) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.reviewProseCandidate !== "function") return null;
+    proseCandidateBusyId.value = candidate.candidateId;
+    proseCandidateError.value = "";
+    try { const review = await novelApi.reviewProseCandidate(projectSlug, candidate.candidateId); proseReviews.value = { ...proseReviews.value, [candidate.candidateId]: review }; return review; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to review prose candidate"; return null; }
+    finally { proseCandidateBusyId.value = ""; }
+  }
+
+  async function createProseRepairPlan(candidate: ProseCandidate) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.createProseRepairPlan !== "function") return null;
+    proseCandidateBusyId.value = candidate.candidateId;
+    proseCandidateError.value = "";
+    try { const plan = await novelApi.createProseRepairPlan(projectSlug, candidate.candidateId); proseRepairPlans.value = { ...proseRepairPlans.value, [candidate.candidateId]: plan }; return plan; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to create prose repair plan"; return null; }
+    finally { proseCandidateBusyId.value = ""; }
+  }
+
+  async function createProseRepairCandidate(candidate: ProseCandidate, content: string) {
+    const projectSlug = currentProject.value?.slug;
+    const plan = proseRepairPlans.value[candidate.candidateId];
+    if (!projectSlug || !plan || !content.trim() || typeof novelApi.createProseRepairCandidate !== "function") return null;
+    proseCandidateBusyId.value = candidate.candidateId;
+    proseCandidateError.value = "";
+    try { const result = await novelApi.createProseRepairCandidate(projectSlug, plan.planId, content); proseRepairCandidates.value = { ...proseRepairCandidates.value, [candidate.candidateId]: result.metadata }; proseCandidates.value = [result.candidate, ...proseCandidates.value.filter((item) => item.candidateId !== result.candidate.candidateId)]; return result; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to create repair candidate"; return null; }
+    finally { proseCandidateBusyId.value = ""; }
+  }
+
+  async function evaluateProseRepairRegression(candidate: ProseCandidate) {
+    const projectSlug = currentProject.value?.slug;
+    const metadata = proseRepairCandidates.value[candidate.candidateId];
+    if (!projectSlug || !metadata || typeof novelApi.evaluateProseRepairRegression !== "function") return null;
+    proseCandidateBusyId.value = candidate.candidateId;
+    proseCandidateError.value = "";
+    try { const dossier = await novelApi.evaluateProseRepairRegression(projectSlug, metadata.repairCandidateId); proseRepairRegressions.value = { ...proseRepairRegressions.value, [candidate.candidateId]: dossier }; return dossier; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to evaluate repair regression"; return null; }
+    finally { proseCandidateBusyId.value = ""; }
+  }
+
+  async function loadProseAdoptionReadiness(candidate: ProseCandidate) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readProseAdoptionReadiness !== "function") return null;
+    try { const readiness = await novelApi.readProseAdoptionReadiness(projectSlug, candidate.candidateId); proseAdoptionReadiness.value = { ...proseAdoptionReadiness.value, [candidate.candidateId]: readiness }; return readiness; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to load prose adoption readiness"; return null; }
+  }
+
+  async function adoptProseCandidate(candidate: ProseCandidate, input: { expectedCanonSha256: string; authorizationId: string }) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.adoptProseCandidate !== "function") return null;
+    proseCandidateBusyId.value = candidate.candidateId;
+    proseCandidateError.value = "";
+    try { const transaction = await novelApi.adoptProseCandidate(projectSlug, candidate.candidateId, input); proseAdoptions.value = { ...proseAdoptions.value, [candidate.candidateId]: transaction }; await loadProseCandidates(); return transaction; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to adopt prose candidate"; return null; }
+    finally { proseCandidateBusyId.value = ""; }
+  }
+
+  async function settleProseCandidate(candidate: ProseCandidate, transaction: ProseAdoptionTransaction) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.settleChapter !== "function") return null;
+    proseCandidateBusyId.value = candidate.candidateId;
+    proseCandidateError.value = "";
+    try {
+      const settlement = activeBookRun.value
+        ? await novelApi.settleChapter(projectSlug, candidate.chapterId, transaction.transactionId, activeBookRun.value.bookRunId)
+        : await novelApi.settleChapter(projectSlug, candidate.chapterId, transaction.transactionId);
+      proseSettlements.value = { ...proseSettlements.value, [candidate.chapterId]: settlement };
+      await Promise.all([loadProseCandidates(), loadRuntimeStatus(), loadExecutionReadyProof(), loadExecutionWorkItems(), activeBookRun.value ? loadBookRuns() : Promise.resolve([])]);
+      if (currentChapter.value?.id === candidate.chapterId && currentFilePath.value) {
+        const content = await novelApi.readFile(projectSlug, currentFilePath.value);
+        currentContent.value = content;
+        savedContent.value = content;
+        lastSavedAt.value = "";
+        selection.value = null;
+        rewriteSelection.value = null;
+      }
+      return settlement;
+    }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to settle chapter"; return null; }
+    finally { proseCandidateBusyId.value = ""; }
+  }
+
+  async function createFeedbackAttribution(event: AuthorFeedbackEvent, input: { category: FeedbackAttribution["category"]; pattern?: string; scope: { chapterId?: string; sceneId?: string }; evidenceRefs: string[]; confounders: string[]; confidence: { lower: number; upper: number } }) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.createFeedbackAttribution !== "function") return null;
+    try { const attribution = await novelApi.createFeedbackAttribution(projectSlug, event.eventId, input); feedbackAttributions.value = { ...feedbackAttributions.value, [event.eventId]: attribution }; return attribution; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to attribute author feedback"; return null; }
+  }
+
+  async function derivePreferenceHypothesis(attribution: FeedbackAttribution) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.derivePreferenceHypothesis !== "function") return null;
+    try { const hypothesis = await novelApi.derivePreferenceHypothesis(projectSlug, attribution.attributionId); preferenceHypotheses.value = { ...preferenceHypotheses.value, [hypothesis.hypothesisId]: hypothesis }; return hypothesis; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to derive preference hypothesis"; return null; }
+  }
+
+  async function revokePreferenceHypothesis(hypothesis: PreferenceHypothesis, reason: string, actor = "author") {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.revokePreferenceHypothesis !== "function") return null;
+    try { const result = await novelApi.revokePreferenceHypothesis(projectSlug, hypothesis.hypothesisId, { actor, reason }); preferenceHypotheses.value = { ...preferenceHypotheses.value, [result.hypothesisId]: result }; return result; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to revoke preference hypothesis"; return null; }
+  }
+
+  async function recordPreferenceOpposition(hypothesis: PreferenceHypothesis, oppositionEventId: string, reason: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.recordPreferenceOpposition !== "function") return null;
+    try { const result = await novelApi.recordPreferenceOpposition(projectSlug, hypothesis.hypothesisId, { oppositionEventId, reason }); preferenceHypotheses.value = { ...preferenceHypotheses.value, [result.hypothesisId]: result }; return result; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to record preference opposition"; return null; }
+  }
+
+  async function createLearningPolicy(rollbackVersion: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.createLearningPolicy !== "function") return null;
+    try { learningPolicy.value = await novelApi.createLearningPolicy(projectSlug, rollbackVersion); return learningPolicy.value; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to create learning policy"; return null; }
+  }
+
+  async function loadLearningPolicy() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readLearningPolicy !== "function") return null;
+    try { learningPolicy.value = await novelApi.readLearningPolicy(projectSlug); return learningPolicy.value; } catch { return null; }
+  }
+
+  async function createExplorationBudget(input: Omit<ExplorationBudget, "schemaVersion" | "budgetId" | "projectSlug" | "usedProbes" | "usedCost" | "consumedOperationIds" | "status" | "createdAt" | "updatedAt" | "fingerprint">) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.createExplorationBudget !== "function") return null;
+    try { const budget = await novelApi.createExplorationBudget(projectSlug, input); explorationBudgets.value = { ...explorationBudgets.value, [budget.budgetId]: budget }; return budget; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to create exploration budget"; return null; }
+  }
+
+  async function consumeExplorationBudget(budget: ExplorationBudget, input: { operationId: string; probes: number; cost: number; impact: string }) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.consumeExplorationBudget !== "function") return null;
+    try { const result = await novelApi.consumeExplorationBudget(projectSlug, budget.budgetId, input); explorationBudgets.value = { ...explorationBudgets.value, [result.budgetId]: result }; return result; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to consume exploration budget"; return null; }
+  }
+
+  async function loadExplorationBudget(budgetId: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readExplorationBudget !== "function") return null;
+    try { const budget = await novelApi.readExplorationBudget(projectSlug, budgetId); explorationBudgets.value = { ...explorationBudgets.value, [budget.budgetId]: budget }; return budget; } catch { return null; }
+  }
+
+  async function pauseExplorationBudget(budget: ExplorationBudget, reason: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.pauseExplorationBudget !== "function") return null;
+    try { const result = await novelApi.pauseExplorationBudget(projectSlug, budget.budgetId, reason); explorationBudgets.value = { ...explorationBudgets.value, [result.budgetId]: result }; return result; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to pause exploration budget"; return null; }
+  }
+
+  async function promoteCraftPatternFromExperiment(pattern: CraftPattern, experiment?: CraftExperiment) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !experiment || typeof novelApi.promoteCraftPatternFromExperiment !== "function") return null;
+    try { const result = await novelApi.promoteCraftPatternFromExperiment(projectSlug, pattern.patternId, { experiment, actor: "author", reason: "作者确认实验结果" }); craftPatterns.value = craftPatterns.value.map((item) => item.patternId === result.patternId ? result : item); return result; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to promote craft pattern"; return null; }
+  }
+
+  async function loadCraftPatterns() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listCraftPatterns !== "function") return [];
+    try { craftPatterns.value = await novelApi.listCraftPatterns(projectSlug); return craftPatterns.value; } catch { return []; }
+  }
+
+  async function loadCraftExperiments() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listCraftExperiments !== "function") return {};
+    try {
+      const experiments = await novelApi.listCraftExperiments(projectSlug);
+      craftExperiments.value = Object.fromEntries(experiments.map((experiment) => [experiment.experimentId, experiment]));
+      return craftExperiments.value;
+    } catch { return {}; }
+  }
+
+  async function loadCharacterContracts() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listCharacterDramaticContracts !== "function") return [];
+    try { characterContracts.value = await novelApi.listCharacterDramaticContracts(projectSlug); return characterContracts.value; } catch { return []; }
+  }
+
+  async function confirmCharacterContract(contract: CharacterDramaticContract, reason = "作者确认人物核心契约") {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.confirmCharacterDramaticContract !== "function") return null;
+    try {
+      const result = await novelApi.confirmCharacterDramaticContract(projectSlug, contract.contractId, { actor: "author", reason });
+      characterContracts.value = characterContracts.value.map((item) => item.contractId === result.contractId ? result : item);
+      return result;
+    } catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to confirm character contract"; return null; }
+  }
+
+  async function loadCharacterStateSnapshots(characterId: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.listCharacterStateSnapshots !== "function") return [];
+    try { const snapshots = await novelApi.listCharacterStateSnapshots(projectSlug, characterId); characterStateSnapshots.value = { ...characterStateSnapshots.value, [characterId]: snapshots }; return snapshots; } catch { return []; }
+  }
+
+  async function validateCraftPatternFromExperiment(pattern: CraftPattern, experiment: CraftExperiment) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.validateCraftPatternFromExperiment !== "function") return null;
+    try { const result = await novelApi.validateCraftPatternFromExperiment(projectSlug, pattern.patternId, { experiment, actor: "author", reason: "作者确认第二次 holdout" }); craftPatterns.value = craftPatterns.value.map((item) => item.patternId === result.patternId ? result : item); return result; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to validate craft pattern"; return null; }
+  }
+
+  function setOutlineChapterSelection(input: { outline: OutlineCandidate; chapterIds: string[] }) {
+    outlineChapterSelections.value = { ...outlineChapterSelections.value, [input.outline.outlineId]: [...input.chapterIds] };
+    return outlineChapterSelections.value[input.outline.outlineId];
+  }
+
+  async function createOutlineAdoptionProposal(input: { outline: OutlineCandidate; chapterIds: string[] }) {
+    const projectSlug = currentProject.value?.slug;
+    const report = outlineValidationReports.value[input.outline.outlineId];
+    if (!projectSlug || !report || report.status !== "passed" || typeof novelApi.createOutlineAdoptionProposal !== "function") return null;
+    isAdoptingOutline.value = true;
+    outlineAdoptionError.value = "";
+    try {
+      outlineAdoptionProposal.value = await novelApi.createOutlineAdoptionProposal(projectSlug, { outlineId: input.outline.outlineId, expectedOutlineFingerprint: input.outline.fingerprint, selectedChapterIds: input.chapterIds });
+      return outlineAdoptionProposal.value;
+    } catch (cause) {
+      outlineAdoptionError.value = cause instanceof Error ? cause.message : "Failed to create outline adoption proposal";
+      return null;
+    } finally { isAdoptingOutline.value = false; }
+  }
+
+  async function authorizeOutlineAdoption(input: { expectedProposalFingerprint: string; actorId: string; authorizationId: string }) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.authorizeOutlineAdoption !== "function") return null;
+    isAdoptingOutline.value = true;
+    outlineAdoptionError.value = "";
+    try {
+      outlineAdoptionProposal.value = await novelApi.authorizeOutlineAdoption(projectSlug, input);
+      return outlineAdoptionProposal.value;
+    } catch (cause) {
+      outlineAdoptionError.value = cause instanceof Error ? cause.message : "Failed to authorize outline adoption";
+      return null;
+    } finally { isAdoptingOutline.value = false; }
+  }
+
+  async function commitOutlineAdoption(expectedProposalFingerprint: string) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.commitOutlineAdoption !== "function") return null;
+    isAdoptingOutline.value = true;
+    outlineAdoptionError.value = "";
+    try {
+      const result = await novelApi.commitOutlineAdoption(projectSlug, expectedProposalFingerprint);
+      if (result.status === "committed" && outlineAdoptionProposal.value) outlineAdoptionProposal.value = { ...outlineAdoptionProposal.value, status: "committed", canonWritten: true };
+      if (result.status !== "committed") outlineAdoptionError.value = result.reason || "Outline adoption was blocked";
+      return result;
+    } catch (cause) {
+      outlineAdoptionError.value = cause instanceof Error ? cause.message : "Failed to commit outline adoption";
+      return null;
+    } finally { isAdoptingOutline.value = false; }
+  }
+
+  async function createContractAdoptionProposal(input: {
+    candidateId: string;
+    expectedCandidateFingerprint: string;
+    fieldDecisions: Array<{ fieldId: string; status: "accept" | "keep-provisional" | "reject" | "delegate"; reason?: string }>;
+  }) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.createContractAdoptionProposal !== "function") return null;
+    isCreatingContractAdoptionProposal.value = true;
+    contractAdoptionError.value = "";
+    try {
+      contractAdoptionProposal.value = await novelApi.createContractAdoptionProposal(projectSlug, input);
+      return contractAdoptionProposal.value;
+    } catch (cause) {
+      contractAdoptionError.value = cause instanceof Error ? cause.message : "Failed to create contract adoption proposal";
+      return null;
+    } finally {
+      isCreatingContractAdoptionProposal.value = false;
+    }
+  }
+
+  async function commitContractAdoption(input: { expectedProposalFingerprint: string; actorId: string; authorizationId: string }) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.commitContractAdoption !== "function") return null;
+    isCreatingContractAdoptionProposal.value = true;
+    contractAdoptionError.value = "";
+    try {
+      const result = await novelApi.commitContractAdoption(projectSlug, {
+        expectedProposalFingerprint: input.expectedProposalFingerprint,
+        authorization: { actorId: input.actorId, authorizationId: input.authorizationId }
+      });
+      if (result.status === "committed" && contractAdoptionProposal.value) {
+        contractAdoptionProposal.value = { ...contractAdoptionProposal.value, status: "committed", canonWritten: true };
+      }
+      if (result.status !== "committed") contractAdoptionError.value = result.reason || "Contract adoption was blocked";
+      return result;
+    } catch (cause) {
+      contractAdoptionError.value = cause instanceof Error ? cause.message : "Failed to commit contract adoption";
+      return null;
+    } finally {
+      isCreatingContractAdoptionProposal.value = false;
+    }
+  }
+
+  async function captureAuthorMessage(text: string) {
+    const projectSlug = currentProject.value?.slug;
+    const normalized = text.trim();
+    if (!projectSlug || !normalized || typeof novelApi.captureAuthorMessage !== "function") return null;
+    isSubmittingCreativeMessage.value = true;
+    creativeSessionError.value = "";
+    try {
+      const clientMessageId = globalThis.crypto?.randomUUID?.() || `author-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const result = await novelApi.captureAuthorMessage(projectSlug, { clientMessageId, text: normalized });
+      creativeSession.value = result.session;
+      await loadUnderstandingPreview();
+      await loadCreativeJourney();
+      await loadDialogueQuestions();
+      return result;
+    } catch (cause) {
+      creativeSessionError.value = cause instanceof Error ? cause.message : "Failed to capture author message";
+      return null;
+    } finally {
+      isSubmittingCreativeMessage.value = false;
+    }
+  }
+
+  async function loadUnderstandingPreview() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readUnderstandingPreview !== "function") return null;
+    try {
+      understandingPreview.value = await novelApi.readUnderstandingPreview(projectSlug);
+      return understandingPreview.value;
+    } catch {
+      understandingPreview.value = null;
+      return null;
+    }
+  }
+
+  async function loadContextManifest() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readContextManifest !== "function") return null;
+    try {
+      contextManifest.value = await novelApi.readContextManifest(projectSlug);
+      return contextManifest.value;
+    } catch {
+      contextManifest.value = null;
+      return null;
+    }
+  }
+
+  async function freezeCurrentContextManifest() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.freezeContextManifest !== "function") return null;
+    isFreezingContextManifest.value = true;
+    try {
+      const result = await novelApi.freezeContextManifest(projectSlug);
+      contextManifest.value = result.manifest;
+      return result;
+    } finally {
+      isFreezingContextManifest.value = false;
+    }
+  }
+
+  async function executeCreativeJourneyAction(actionId?: "capture-idea" | "review-understanding") {
+    const currentAction = creativeJourney.value?.primaryAction.id;
+    if (actionId && actionId !== currentAction) return null;
+    if (currentAction === "review-understanding") {
+      return freezeCurrentContextManifest();
+    }
+    return null;
   }
 
   function showProjectHub(options: WorkspaceSwitchOptions = {}) {
@@ -3499,6 +4580,113 @@ export const useNovelStore = defineStore("novel", () => {
     openWorkspaceProjects,
     workspaceCache,
     currentProject,
+    creativeSession,
+    creativeJourney,
+    contractCandidates,
+    isLoadingContractCandidates,
+    contractCandidatesError,
+    lastContractDecisionId,
+    contractAdoptionProposal,
+    isCreatingContractAdoptionProposal,
+    contractAdoptionError,
+    outlineCandidates,
+    compileOutlineCandidate,
+    outlineValidationReports,
+    isLoadingOutlineCandidates,
+    validatingOutlineId,
+    outlineCandidatesError,
+    outlineChapterSelections,
+    outlineAdoptionProposal,
+    isAdoptingOutline,
+    outlineAdoptionError,
+    executionReadyProof,
+    executionReadiness,
+    isLoadingExecutionReadiness,
+    executionReadinessError,
+    executionWorkItems,
+    isLoadingExecutionWorkItems,
+    bookRuns,
+    activeBookRun,
+    bookRunError,
+    isLoadingBookRun,
+    completionAudit,
+    publicationEdition,
+    publicationTree,
+    publicationArtifacts,
+    deliveryProofVerification,
+    publicationPreflight,
+    publicationEvidenceError,
+    isLoadingPublicationEvidence,
+    deliveryProof,
+    lengthContract,
+    lengthForecast,
+    lengthVarianceDecision,
+    lengthPlanningError,
+    isLoadingLengthPlanning,
+    proseCandidates,
+    isLoadingProseCandidates,
+    proseValidations,
+    proseReviews,
+    proseRepairPlans,
+    proseRepairCandidates,
+    proseRepairRegressions,
+    proseAdoptionReadiness,
+    proseAdoptions,
+    proseSettlements,
+    feedbackAttributions,
+    preferenceHypotheses,
+    createFeedbackAttribution,
+    derivePreferenceHypothesis,
+    revokePreferenceHypothesis,
+    recordPreferenceOpposition,
+    learningPolicy,
+    explorationBudgets,
+    createLearningPolicy,
+    loadLearningPolicy,
+    createExplorationBudget,
+    consumeExplorationBudget,
+    loadExplorationBudget,
+    pauseExplorationBudget,
+    craftPatterns,
+    craftExperiments,
+    characterContracts,
+    characterStateSnapshots,
+    loadCraftPatterns,
+    loadCraftExperiments,
+    loadCharacterContracts,
+    confirmCharacterContract,
+    loadCharacterStateSnapshots,
+    promoteCraftPatternFromExperiment,
+    validateCraftPatternFromExperiment,
+    proseCandidateBusyId,
+    proseCandidateError,
+    qualityCalibrationEvidence,
+    qualityCalibrationHistory,
+    isLoadingQualityCalibration,
+    qualityCalibrationError,
+    releaseAcceptanceDecision,
+    releaseActivation,
+    releaseActivationError,
+    isActivatingRelease,
+    isLoadingReleaseAcceptance,
+    understandingReview,
+    isLoadingUnderstandingReview,
+    migrationCutoverReport,
+    migrationValidationReport,
+    isLoadingMigrationCutover,
+    contextManifest,
+    isFreezingContextManifest,
+    understandingPreview,
+    dialogueQuestions,
+    activeDialogueQuestion,
+    isLoadingCreativeSession,
+    isSubmittingCreativeMessage,
+    creativeSessionError,
+    loadCreativeJourney,
+    loadDialogueQuestions,
+    answerDialogueQuestion,
+    prepareUnderstandingQuestion,
+    retryContractCandidateCompilation,
     currentChapter,
     currentDocumentKind,
     currentDocumentLabel,
@@ -3677,6 +4865,57 @@ export const useNovelStore = defineStore("novel", () => {
     acceptWritingRecap,
     rejectWritingRecap,
     openProject,
+    loadCreativeSession,
+    loadContractCandidates,
+    createContractAdoptionProposal,
+    commitContractAdoption,
+    loadContractAdoptionProposal,
+    loadOutlineCandidates,
+    validateOutlineCandidate,
+    setOutlineChapterSelection,
+    createOutlineAdoptionProposal,
+    authorizeOutlineAdoption,
+    commitOutlineAdoption,
+    loadOutlineAdoptionProposal,
+    loadExecutionReadyProof,
+    checkExecutionReadiness,
+    startChapterProduction,
+    loadExecutionWorkItems,
+    loadBookRuns,
+    startBookRun,
+    advanceActiveBookRun,
+    runActiveBookCompletionAudit,
+    loadPublicationEvidence,
+    issuePublicationDeliveryProof,
+    createPublicationEdition,
+    compilePublicationEditionTree,
+    renderPublicationEditionArtifacts,
+    loadProseCandidates,
+    loadQualityCalibrationEvidence,
+    submitQualityCalibrationEvidence,
+    loadReleaseAcceptance,
+    loadReleaseActivation,
+    activateAcceptedRelease,
+    loadLengthPlanning,
+    createProjectLengthContract,
+    decideProjectLengthVariance,
+    loadUnderstandingReview,
+    submitExternalUnderstandingReview,
+    loadMigrationCutover,
+    validateAllProjectMigrations,
+    validateProseCandidate,
+    reviewProseCandidate,
+    createProseRepairPlan,
+    createProseRepairCandidate,
+    evaluateProseRepairRegression,
+    loadProseAdoptionReadiness,
+    adoptProseCandidate,
+    settleProseCandidate,
+    loadUnderstandingPreview,
+    loadContextManifest,
+    freezeCurrentContextManifest,
+    executeCreativeJourneyAction,
+    captureAuthorMessage,
     showProjectHub,
     closeWorkspace,
     openChapter,

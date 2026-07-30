@@ -1,0 +1,645 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "A long-running novel project can survive device, disk, database, process, migration, operator, or partial-object failure without silently losing author work, mixing storage moments, leaking private material, replaying stale workers, or claiming recovery before the whole narrative project is coherent.",
+  "sourceFiles": [
+    {
+      "path": "api/src/fileVersions.ts",
+      "sha256": "d746903790749003667e0944ea4b94fd9b9560399acc4f2c75813734d47ff797"
+    },
+    {
+      "path": "api/src/runtimeFiles.ts",
+      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
+    },
+    {
+      "path": "api/src/database.ts",
+      "sha256": "68f4fbb574e77f8c9a2f1f43f0f0a369d3999c615b4d251214e26523b06cd87f"
+    },
+    {
+      "path": "api/src/projectBackup.ts",
+      "sha256": "807bec8d473603504aa1ee33c3d862f8a3c9ed56cbf9b32afff7feafbee93bcf"
+    },
+    {
+      "path": "api/src/novelProject.ts",
+      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+    },
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/platformLibrary.ts",
+      "sha256": "57082e1bfda1dd74fd7c224813b08c4dba7766402254b31491f0bf16fc2799a5"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "ui/src/components/novel/FileVersionDiffPanel.vue",
+      "sha256": "3a37870b0f4edb878791343fa5b2fb12f8b7a99705e1c53c34b88ec02d1e3add"
+    },
+    {
+      "path": "ui/src/services/novelApi.ts",
+      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "aggregate tree/project/version/database/platform fingerprints",
+      "file/byte/table/snapshot/checkpoint/manifest-entry counts",
+      "source evidence paths and code tokens"
+    ],
+    "snapshotExcludes": [
+      "project slug or ID",
+      "title",
+      "genre",
+      "rough idea",
+      "file/chapter/entity path or identity",
+      "prose, outline, ledger, task/runtime payload or checkpoint manifest content",
+      "asset names/paths/tags",
+      "database row values",
+      "absolute path",
+      "secret or encryption key"
+    ]
+  },
+  "operationalSnapshot": {
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "treeAggregate": "bc4a9074f732a40272a82e955353b014e36ac0e5b4646994a564dff4a661db95",
+          "versionManifest": null
+        },
+        "projectTree": {
+          "files": 3,
+          "bytes": 2690
+        },
+        "fileVersionSafetyLayer": {
+          "manifestExists": false,
+          "manifestValid": true,
+          "snapshots": 0,
+          "distinctPathsCovered": 0,
+          "snapshotsWithContentHash": 0,
+          "snapshotsWithParentOrCanonCursor": 0
+        },
+        "governedDurabilityArtifacts": {
+          "policies": 0,
+          "recoveryObjectives": 0,
+          "backupSets": 0,
+          "backupManifests": 0,
+          "verifications": 0,
+          "restoreDrills": 0,
+          "restorePlans": 0,
+          "recoverySettlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "treeAggregate": "170e6f8aa2011a387349ebdcbc0f8227110c13f88b4dd4c7e83954d3ac64fee9",
+          "versionManifest": null
+        },
+        "projectTree": {
+          "files": 5,
+          "bytes": 5883
+        },
+        "fileVersionSafetyLayer": {
+          "manifestExists": false,
+          "manifestValid": true,
+          "snapshots": 0,
+          "distinctPathsCovered": 0,
+          "snapshotsWithContentHash": 0,
+          "snapshotsWithParentOrCanonCursor": 0
+        },
+        "governedDurabilityArtifacts": {
+          "policies": 0,
+          "recoveryObjectives": 0,
+          "backupSets": 0,
+          "backupManifests": 0,
+          "verifications": 0,
+          "restoreDrills": 0,
+          "restorePlans": 0,
+          "recoverySettlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "treeAggregate": "d13fff06eaa41b46259c2a3d627451cf9e1a5ee6bf25b323456f20ebe0876a45",
+          "versionManifest": null
+        },
+        "projectTree": {
+          "files": 20,
+          "bytes": 134986
+        },
+        "fileVersionSafetyLayer": {
+          "manifestExists": false,
+          "manifestValid": true,
+          "snapshots": 0,
+          "distinctPathsCovered": 0,
+          "snapshotsWithContentHash": 0,
+          "snapshotsWithParentOrCanonCursor": 0
+        },
+        "governedDurabilityArtifacts": {
+          "policies": 0,
+          "recoveryObjectives": 0,
+          "backupSets": 0,
+          "backupManifests": 0,
+          "verifications": 0,
+          "restoreDrills": 0,
+          "restorePlans": 0,
+          "recoverySettlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "treeAggregate": "c944c2ed5a9ad8292d865f83d86e964184e596e8da71c100452db3e0c2b4fdf0",
+          "versionManifest": "d50f440acf6ae5cb62762b16d00377bc86a31a6c6a8930232ab0fd846d637fed"
+        },
+        "projectTree": {
+          "files": 1157,
+          "bytes": 20095166
+        },
+        "fileVersionSafetyLayer": {
+          "manifestExists": true,
+          "manifestValid": true,
+          "snapshots": 18,
+          "distinctPathsCovered": 2,
+          "snapshotsWithContentHash": 0,
+          "snapshotsWithParentOrCanonCursor": 0
+        },
+        "governedDurabilityArtifacts": {
+          "policies": 0,
+          "recoveryObjectives": 0,
+          "backupSets": 0,
+          "backupManifests": 0,
+          "verifications": 0,
+          "restoreDrills": 0,
+          "restorePlans": 0,
+          "recoverySettlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "treeAggregate": "225a83c80ea923db509bf2bb3ae9c7c52a883da4807a00390cea0a8e7e9a2795",
+          "versionManifest": null
+        },
+        "projectTree": {
+          "files": 46,
+          "bytes": 13890
+        },
+        "fileVersionSafetyLayer": {
+          "manifestExists": false,
+          "manifestValid": true,
+          "snapshots": 0,
+          "distinctPathsCovered": 0,
+          "snapshotsWithContentHash": 0,
+          "snapshotsWithParentOrCanonCursor": 0
+        },
+        "governedDurabilityArtifacts": {
+          "policies": 0,
+          "recoveryObjectives": 0,
+          "backupSets": 0,
+          "backupManifests": 0,
+          "verifications": 0,
+          "restoreDrills": 0,
+          "restorePlans": 0,
+          "recoverySettlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "treeAggregate": "9b69086783c07b104cfd2cdb5907ce9c2d42575010fbec45b729ed8b6e364f44",
+          "versionManifest": null
+        },
+        "projectTree": {
+          "files": 46,
+          "bytes": 13890
+        },
+        "fileVersionSafetyLayer": {
+          "manifestExists": false,
+          "manifestValid": true,
+          "snapshots": 0,
+          "distinctPathsCovered": 0,
+          "snapshotsWithContentHash": 0,
+          "snapshotsWithParentOrCanonCursor": 0
+        },
+        "governedDurabilityArtifacts": {
+          "policies": 0,
+          "recoveryObjectives": 0,
+          "backupSets": 0,
+          "backupManifests": 0,
+          "verifications": 0,
+          "restoreDrills": 0,
+          "restorePlans": 0,
+          "recoverySettlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "treeAggregate": "7607e0624b0672f077de3842db87e9da3e065f578cf3e946d43437c661b027e3",
+          "versionManifest": null
+        },
+        "projectTree": {
+          "files": 46,
+          "bytes": 13890
+        },
+        "fileVersionSafetyLayer": {
+          "manifestExists": false,
+          "manifestValid": true,
+          "snapshots": 0,
+          "distinctPathsCovered": 0,
+          "snapshotsWithContentHash": 0,
+          "snapshotsWithParentOrCanonCursor": 0
+        },
+        "governedDurabilityArtifacts": {
+          "policies": 0,
+          "recoveryObjectives": 0,
+          "backupSets": 0,
+          "backupManifests": 0,
+          "verifications": 0,
+          "restoreDrills": 0,
+          "restorePlans": 0,
+          "recoverySettlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "treeAggregate": "a828bb4e7edffadb2f104eeb45bddc5ebe34ab4f4f1f09898e4418f7df0d8ae3",
+          "versionManifest": "d5d1ee18b78b17e34a09dc4d9178a60e08ee70b33d1f92856b0e4b67b15b0e8f"
+        },
+        "projectTree": {
+          "files": 49,
+          "bytes": 33731
+        },
+        "fileVersionSafetyLayer": {
+          "manifestExists": true,
+          "manifestValid": true,
+          "snapshots": 1,
+          "distinctPathsCovered": 1,
+          "snapshotsWithContentHash": 0,
+          "snapshotsWithParentOrCanonCursor": 0
+        },
+        "governedDurabilityArtifacts": {
+          "policies": 0,
+          "recoveryObjectives": 0,
+          "backupSets": 0,
+          "backupManifests": 0,
+          "verifications": 0,
+          "restoreDrills": 0,
+          "restorePlans": 0,
+          "recoverySettlements": 0
+        }
+      }
+    ],
+    "totals": {
+      "projects": 8,
+      "files": 1372,
+      "bytes": 20314126,
+      "fileSnapshots": 19,
+      "distinctSnapshotPaths": 3,
+      "invalidVersionManifests": 0
+    },
+    "database": {
+      "available": true,
+      "bytes": 1204224,
+      "sha256": "44c2ddb494448ebbc8a0e5e6d077ff1b8dbc61ed3f5fcf6147bbf58a6c945358",
+      "tables": 16,
+      "runtimeCheckpoints": 18,
+      "checkpointManifestEntries": 306,
+      "checkpointEntriesWithHashes": 300,
+      "invalidCheckpointManifests": 0,
+      "walPresent": false,
+      "shmPresent": false
+    },
+    "platformMirror": {
+      "exists": true,
+      "bytes": 7157,
+      "sha256": "4d795c6a6e14ebcd70e431f333b17b04fda7fd4d8e58a4a480f3b308b959af52"
+    },
+    "governedDurabilityArtifacts": {
+      "policies": 0,
+      "recoveryObjectives": 0,
+      "backupSets": 0,
+      "backupManifests": 0,
+      "verifications": 0,
+      "catalogs": 0,
+      "restoreDrills": 0,
+      "restorePlans": 0,
+      "recoverySettlements": 0
+    },
+    "interpretation": "Eighteen file snapshots and eighteen runtime checkpoints are useful local safety evidence, not a cross-store backup. File counts, byte hashes, checkpoint manifests, WAL mode, and a readable database do not establish one consistent recovery cursor, off-device durability, privacy-safe packaging, parent-chain integrity, isolated restorability, or narrative resettlement."
+  },
+  "summary": {
+    "auditedStages": 12,
+    "projectsScanned": 8,
+    "projectFiles": 1372,
+    "projectBytes": 20314126,
+    "fileSnapshots": 19,
+    "fileSnapshotPathsCovered": 3,
+    "runtimeCheckpoints": 18,
+    "runtimeCheckpointManifestEntries": 306,
+    "backupPolicies": 0,
+    "backupSets": 0,
+    "verifiedBackupSets": 0,
+    "restoreDrills": 0,
+    "recoverySettlements": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform has local byte safety layers, not project durability governance. File versions cover writing paths, runtime checkpoints cover a bounded path list, SQLite stores runtime/platform state in WAL mode, and import rebuilds a simplified project from Markdown/text; no authority freezes these stores into one backup, verifies it by restore, or resettles the recovered narrative state.",
+    "consequence": "A disk loss, live database copy, corrupt manifest, missing incremental parent, partial upload, migration failure, checkpoint restore, different-machine move, or stale worker can lose work or create a readable but internally inconsistent project while every individual copy operation reports success."
+  },
+  "currentEvidence": [
+    {
+      "claim": "File-version snapshots only cover project.json plus declared chapter content/outline paths, not the whole project/database/platform graph.",
+      "evidence": [
+        {
+          "path": "api/src/fileVersions.ts",
+          "line": 12,
+          "evidence": "const runtimeVersionedPaths = new Set([\"project.json\"])"
+        },
+        {
+          "path": "api/src/fileVersions.ts",
+          "line": 15,
+          "evidence": "project.chapters.flatMap"
+        }
+      ]
+    },
+    {
+      "claim": "A missing or malformed file-version manifest is silently treated as empty history.",
+      "evidence": [
+        {
+          "path": "api/src/fileVersions.ts",
+          "line": 36,
+          "evidence": "async function readManifest"
+        },
+        {
+          "path": "api/src/fileVersions.ts",
+          "line": 45,
+          "evidence": "return { version: 1, snapshots: [] }"
+        }
+      ]
+    },
+    {
+      "claim": "Runtime checkpoints copy a bounded managed path list and restore files sequentially into the live project.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 42,
+          "evidence": "function runtimeManagedPaths"
+        },
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 145,
+          "evidence": "for (const file of checkpoint.manifest)"
+        },
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 153,
+          "evidence": "await fs.copyFile(source, target)"
+        }
+      ]
+    },
+    {
+      "claim": "The operational database uses WAL mode but exposes no online backup, backup-set, verification, or recovery-settlement mechanism.",
+      "evidence": [
+        {
+          "path": "api/src/database.ts",
+          "line": 64,
+          "evidence": "database.exec(\"PRAGMA journal_mode = WAL;\")"
+        },
+        {
+          "path": "api/src/database.ts",
+          "line": 344,
+          "evidence": "export function databaseInfo"
+        }
+      ]
+    },
+    {
+      "claim": "Project import accepts Markdown/text and creates a new project rather than restoring identities, versions, database rows, runtime state, assets and backup lineage.",
+      "evidence": [
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 25,
+          "evidence": "const importableExtensions = new Set([\".md\", \".txt\"])"
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 861,
+          "evidence": "async function importProjectFromImportableFiles"
+        }
+      ]
+    },
+    {
+      "claim": "The product now exposes a same-workspace backup manifest and verification endpoint, but no backup catalog, off-device policy, restore drill, recovery plan or settlement surface.",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2944,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/backups\""
+        },
+        {
+          "path": "api/src/projectBackup.ts",
+          "line": 18,
+          "evidence": "strategy: \"local-project-tree\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2966,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/backups/:backupId/verify\""
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "DUR-TRACE-001",
+      "label": "resolve-authoritative-scope",
+      "current": "Project files, SQLite rows/runtime state, file snapshots, checkpoints, and platform-library data live in separate stores.",
+      "gap": "No manifest identifies which objects and references constitute one recoverable project or why an object is included/excluded.",
+      "target": "Compile a stable logical object graph and rights/privacy-aware inclusion policy before capture."
+    },
+    {
+      "id": "DUR-TRACE-002",
+      "label": "freeze-cross-store-cut",
+      "current": "File snapshots and runtime checkpoints freeze individual or bounded project paths; SQLite continues independently in WAL mode.",
+      "gap": "Directory and database copies can represent different canon/event cursors while each appears locally successful.",
+      "target": "Acquire a project write fence/canon cursor and prove every store belongs to one consistent cut."
+    },
+    {
+      "id": "DUR-TRACE-003",
+      "label": "capture-project-tree-and-online-database",
+      "current": "A local same-workspace project-tree manifest now copies and hashes project files; SQLite and cross-store fencing remain outside this slice.",
+      "gap": "A live `.sqlite` copy can omit WAL-visible commits, while a directory walk can race saves, renames, checkpoints, and background projections.",
+      "target": "Use transaction-consistent database backup plus before/after tree fingerprints under bounded fencing."
+    },
+    {
+      "id": "DUR-TRACE-004",
+      "label": "build-content-addressed-backup-set",
+      "current": "Snapshots store prior bytes but lack whole-project root hash, parent backup, cross-store dependencies, schema, or restore order.",
+      "gap": "Duplicate bytes, missing parents, orphan objects, partial uploads, and incompatible producers cannot be adjudicated as one set.",
+      "target": "Write immutable BackupObjects and a signed BackupManifest with parent chain, hashes, dependencies, schema and completeness proof."
+    },
+    {
+      "id": "DUR-TRACE-005",
+      "label": "enforce-privacy-rights-and-encryption",
+      "current": "Project trees may contain prompts, private sources, internal answers and runtime payloads; platform assets live outside the project.",
+      "gap": "Packing everything leaks secrets/rights-bound material, while excluding external references silently makes restore incomplete.",
+      "target": "Apply explicit include/reference/exclude policy, encryption/key scope, minimization and rights envelopes per object."
+    },
+    {
+      "id": "DUR-TRACE-006",
+      "label": "retain-across-failure-domains",
+      "current": "Local snapshots/checkpoints share the project disk and there is no BackupPolicy, RPO/RTO, generation retention, off-device copy or capacity alarm.",
+      "gap": "Disk loss, ransomware, deletion, quota exhaustion or one bad incremental parent can remove every apparent recovery point.",
+      "target": "Maintain policy-driven generations, at least one independent failure domain, observable lag and safe garbage collection."
+    },
+    {
+      "id": "DUR-TRACE-007",
+      "label": "verify-integrity-and-restorability",
+      "current": "Snapshot creation hashes some bytes, but version-manifest parse failure becomes empty history and checkpoint restore does not recheck source hashes.",
+      "gap": "Presence, file count, upload success, stored hash or database openability do not prove the set can restore coherently.",
+      "target": "Verify signatures, objects, parent chain, keys, schema, references and full/stratified restore before marking verified."
+    },
+    {
+      "id": "DUR-TRACE-008",
+      "label": "drill-in-isolation",
+      "current": "The only restore path writes checkpoint files directly into the live project; import creates a new simplified project from Markdown/text.",
+      "gap": "There is no side-effect-free rehearsal covering identities, database relations, tasks, assets, versions, projections and external-call fencing.",
+      "target": "Restore into an isolated workspace/database, run completeness fixtures, block workers/network writes, and retain a drill receipt."
+    },
+    {
+      "id": "DUR-TRACE-009",
+      "label": "compile-author-visible-restore-plan",
+      "current": "Checkpoint restore is an immediate API action and file version UI is comparison-only.",
+      "gap": "Users cannot compare recovery points, RPO loss, conflicts, missing assets, identity mapping, stale evidence, rollback or new-versus-replace modes.",
+      "target": "Preview a RestorePlan with exact source, target, loss window, conflicts, degraded items, fences, validation and rollback."
+    },
+    {
+      "id": "DUR-TRACE-010",
+      "label": "stage-validate-and-atomically-switch",
+      "current": "Checkpoint restore copies/deletes sequentially, then updates project metadata.",
+      "gap": "Mid-restore failure can leave a partial live tree, database truth unchanged, and no forward history or safe switch boundary.",
+      "target": "Restore to staging, validate, publish a forward CanonCommit/recovery event atomically, and preserve the prior live project."
+    },
+    {
+      "id": "DUR-TRACE-011",
+      "label": "fence-and-resettle-dependent-work",
+      "current": "Restored bytes do not automatically pause pending/running tasks or invalidate summaries, knowledge, obligations, quality and completion proofs.",
+      "gap": "Late workers or stale projections can overwrite recovery and make an apparently restored book narratively inconsistent.",
+      "target": "Fence work, emit damage/invalidation, selectively rebuild and issue RecoverySettlement over all dependent domains."
+    },
+    {
+      "id": "DUR-TRACE-012",
+      "label": "measure-recovery-objectives-and-audit",
+      "current": "No catalog reports latest verified point, backup age, independent copies, restore time, failure cause or uncovered assets.",
+      "gap": "The author cannot know expected loss/time or whether backups have ever survived a real restore.",
+      "target": "Expose truthful RPO/RTO, coverage, last drill, location health, known limits, incidents and current settlement without revealing content."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-expand-local-file-snapshots-and-checkpoints",
+      "verdict": "retain-as-local-safety-layer-not-project-backup",
+      "blueCase": "Fastest compatible improvement: snapshot more paths, retain more checkpoints, and expose more restore controls without introducing new storage infrastructure.",
+      "redCase": "Still omits transaction-consistent SQLite/platform state, common cursor, off-device failure domains, parent integrity, encryption policy, restore drills, stale-worker fencing and narrative settlement."
+    },
+    {
+      "option": "B-schedule-folder-archive-and-database-backup-independently",
+      "verdict": "use-as-storage-adapters-not-recovery-authority",
+      "blueCase": "Mature filesystem and SQLite tools can each produce reliable copies, incremental retention and cloud upload with low implementation complexity.",
+      "redCase": "Independent successes can belong to different moments; asset references, schema, versions, queues and projections may not compose, and neither job proves a side-effect-free full restore."
+    },
+    {
+      "option": "C-fenced-content-addressed-backup-with-restore-drill-and-settlement",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "Freeze one cross-store cursor, create signed content-addressed objects/manifest, enforce rights/encryption/retention, continuously verify by isolated restore, atomically switch as forward history, fence stale work and resettle narrative evidence.",
+      "redCase": "Requires write fencing, online database backup, object/catalog storage, key management, retention/garbage collection, cross-store manifests, isolated environments, schema portability, conflict UX, disaster runbooks and recurring fault-injection drills."
+    }
+  ],
+  "targetAuthority": {
+    "entities": [
+      "BackupPolicy",
+      "RecoveryObjective",
+      "BackupSet",
+      "BackupManifest",
+      "BackupObject",
+      "BackupVerification",
+      "BackupCatalog",
+      "RestoreDrill",
+      "RestorePlan",
+      "RecoverySettlement"
+    ],
+    "recoveryModes": [
+      "new_project",
+      "replace",
+      "repair_missing",
+      "point_in_time",
+      "disaster_failover"
+    ],
+    "invariant": "No save confirmation, file snapshot, checkpoint, archive creation, byte count, hash presence, upload success, database open, table count, import success, HTTP 200, rebuilt empty projection, or readable chapter may independently establish backup completeness, cross-store consistency, restorability, RPO/RTO compliance, narrative coherence, or RecoverySettlement."
+  },
+  "durabilityProtocol": {
+    "order": [
+      "resolve project authority graph, stable logical identities, platform/shared references, rights/privacy classes and desired RecoveryObjective",
+      "acquire a bounded project write fence/canon cursor, pause unsafe mutations, and record in-flight work without silently completing or discarding it",
+      "capture the project tree with before/after fingerprints and take a transaction-consistent SQLite/fallback snapshot at the same logical cursor",
+      "compile immutable content-addressed BackupObjects and signed BackupManifest with schema, producer, dependencies, include/reference/exclude reasons and restore order",
+      "encrypt and replicate according to BackupPolicy, preserve key separation, verify destination read-back and retain at least one independent failure domain",
+      "verify every object, parent chain, signature, key, schema, cross-store reference and privacy/rights invariant; do not label an un-restored upload verified",
+      "periodically restore the chosen set into an isolated workspace/database under outbound/worker/publish fences and record complete coverage, time, cost and differences",
+      "for real recovery compile an author-visible RestorePlan with mode, source/target, loss window, conflicts, missing external assets, stale dependents, rollback and approvals",
+      "restore to staging, validate identities and authoritative/derived boundaries, then atomically publish a forward CanonCommit/recovery event while preserving the prior state",
+      "fence late workers, pause recovered running/pending work, emit damage/invalidation and selectively rebuild projections, obligations, quality and completion proofs",
+      "issue RecoverySettlement only after cross-store coverage, degraded/unknown disclosure, RPO/RTO measurement, author sample check and rollback evidence pass"
+    ],
+    "nonGoal": "This does not turn reader manuscript export into an operational backup, nor promise zero data loss under every catastrophe. It defines measurable recovery objectives, independent copies, verified restore evidence and honest degraded states."
+  },
+  "verificationMatrix": [
+    "save, runtime chapter settlement, background projection and SQLite WAL commit race the same backup cut",
+    "full plus incremental generations with missing parent, duplicate object, truncated chunk, bit flip, wrong key, revoked key and partial upload",
+    "single-disk loss, ransomware-like tree corruption, database-only loss, project-only loss, platform-library loss and destination outage",
+    "restore to a new absolute path, different device/runtime, compatible older/newer schema and unknown higher schema",
+    "private prompts, secrets, runtime payloads, restricted craft/research sources, external asset references and deletion/legal-retention policy",
+    "running/pending tasks, queued writes, live SSE clients, late workers, retry chains and auto-publish during drill/recovery",
+    "new-project restore, replace, repair-missing, point-in-time and disaster-failover with identity/conflict mapping",
+    "chapter bytes, outlines, story contract, character/world state, facts, ledgers, narrative obligations, quality, versions, branches, completion and delivery proofs",
+    "restore fails before staging, during object materialization, after validation, during atomic switch, during recompute and before settlement",
+    "retention pruning preserves verified parents/protected generations and reports capacity/RPO risk before deleting the last viable chain",
+    "same frozen backup restores deterministically to equivalent canonical/semantic hashes while environment-specific paths and secrets are rebound safely"
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-DURABILITY-001",
+      "FR-DURABILITY-002",
+      "FR-DURABILITY-003",
+      "FR-DURABILITY-004"
+    ],
+    "acceptanceRefs": [
+      "AT-516",
+      "AT-517",
+      "AT-518",
+      "AT-519"
+    ],
+    "rule": "Do not claim backed up, portable, disaster-ready, restorable, recovered, RPO/RTO-compliant, or safe to delete/migrate until one cross-store cursor and signed manifest cover all authoritative objects/references, database capture is transaction-consistent, privacy/rights/encryption/retention policy passes, independent copies read back, parent/object integrity verifies, an isolated no-side-effect restore drill succeeds, real recovery stages and atomically switches as forward history, stale work is fenced, dependent evidence is revalidated, and RecoverySettlement records limits and objectives."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none weakens consistent-cut capture, privacy/source boundaries, independent copies, integrity verification, isolated restore drills, stale-worker fencing, forward recovery or settlement."
+}

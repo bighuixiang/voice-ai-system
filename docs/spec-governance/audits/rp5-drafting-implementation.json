@@ -1,0 +1,584 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "implementation-evidence-not-release-approval",
+  "generatedOn": "2026-07-30",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP5-drafting",
+  "slices": [
+    {
+      "slice": "prose-candidate-isolation",
+      "status": "implemented-and-runtime-gated"
+    },
+    {
+      "slice": "validation-bundle",
+      "status": "implemented-and-adoption-required"
+    },
+    {
+      "slice": "red-blue-review",
+      "status": "implemented-and-adoption-required"
+    },
+    {
+      "slice": "atomic-prose-adoption",
+      "status": "implemented-with-rollback-and-idempotency"
+    },
+    {
+      "slice": "author-feedback-event",
+      "status": "implemented-after-commit"
+    },
+    {
+      "slice": "chapter-settlement",
+      "status": "implemented-with-content-fingerprint"
+    },
+    {
+      "slice": "derived-publication",
+      "status": "implemented-with-multi-asset-rollback"
+    },
+    {
+      "slice": "book-work-graph",
+      "status": "implemented-with-settlement-projection"
+    },
+    {
+      "slice": "execution-dispatch",
+      "status": "implemented-with-cross-process-claim-fence"
+    },
+    {
+      "slice": "legacy-canon-surface-cutover",
+      "status": "governed-projects-block-direct-chapter-and-runtime-canon-mutations"
+    },
+    {
+      "slice": "legacy-project-migration-preview",
+      "status": "read-only-idempotent-preview-with-execution-gate"
+    },
+    {
+      "slice": "legacy-project-migration-validation-activation",
+      "status": "source-fenced-validation-and-outline-dependent-activation"
+    },
+    {
+      "slice": "legacy-project-migration-conflict-resolution",
+      "status": "explicit-outline-authority-resolution-before-activation"
+    },
+    {
+      "slice": "legacy-project-migration-rollback",
+      "status": "atomic-revert-to-legacy-read-write-path-with-retained-audit"
+    },
+    {
+      "slice": "release-acceptance-gate",
+      "status": "explicit-do-not-activate-gate-for-migration-calibration-e2e-and-v2-review"
+    },
+    {
+      "slice": "migration-cutover-readiness",
+      "status": "read-only-global-inventory-report-with-per-project-blockers"
+    },
+    {
+      "slice": "migration-batch-preview",
+      "status": "per-project-preview-report-without-canon-activation"
+    },
+    {
+      "slice": "migration-batch-validation",
+      "status": "per-project-validation-report-without-canon-activation"
+    },
+    {
+      "slice": "ordered-schema-migrations",
+      "status": "versioned-checksum-records-with-fail-closed-startup"
+    },
+    {
+      "slice": "local-backup-manifest",
+      "status": "same-workspace-tree-backup-with-object-hash-verification-not-external-durability"
+    },
+    {
+      "slice": "obligation-event-core",
+      "status": "append-only-narrative-obligation-state-machine-with-payoff-evidence-guard"
+    },
+    {
+      "slice": "obligation-source-coverage-audit",
+      "status": "read-only-cross-surface-coverage-report-with-honest-empty-ledger-status"
+    },
+    {
+      "slice": "obligation-candidate-preview",
+      "status": "stable-marker-candidate-association-without-auto-admission"
+    },
+    {
+      "slice": "obligation-coverage-certificate",
+      "status": "fail-closed-frozen-source-and-replayable-terminal-event-proof"
+    },
+    {
+      "slice": "revision-intent-authority",
+      "status": "immutable-author-intent-with-maturity-based-branch-fence"
+    },
+    {
+      "slice": "revision-impact-report",
+      "status": "deterministic-direct-and-transitive-impact-with-unknown-dependency-fence"
+    },
+    {
+      "slice": "revision-change-set-candidate",
+      "status": "typed-immutable-change-operations-with-stale-and-protected-item-fences"
+    },
+    {
+      "slice": "revision-change-set-review",
+      "status": "immutable-author-review-that-never-claims-canon-write"
+    },
+    {
+      "slice": "revision-adoption-proposal",
+      "status": "approved-review-and-impact-gated-proposal-without-canon-write"
+    },
+    {
+      "slice": "revision-adoption-receipt",
+      "status": "binds-approved-revision-to-existing-atomic-prose-adoption-transaction"
+    },
+    {
+      "slice": "revision-settlement",
+      "status": "settles-revision-only-after-current-chapter-settlements-and-adoption-receipt"
+    },
+    {
+      "slice": "edition-manifest-freeze",
+      "status": "freezes-reader-safe-edition-from-integrity-checked-settled-chapters"
+    },
+    {
+      "slice": "publication-tree-compile",
+      "status": "compiles-deterministic-reader-safe-tree-with-stale-and-internal-content-fences"
+    },
+    {
+      "slice": "publication-artifact-validation",
+      "status": "renders-deterministic-markdown-and-text-artifacts-as-one-validated-set"
+    },
+    {
+      "slice": "delivery-proof-issue",
+      "status": "issues-author-approved-proof-and-detects-artifact-tampering"
+    },
+    {
+      "slice": "delivery-proof-events",
+      "status": "records-immutable-revocation-and-supersession-events"
+    },
+    {
+      "slice": "delivery-access-grant",
+      "status": "issues-scoped-reader-or-archive-grant-only-for-current-proof"
+    },
+    {
+      "slice": "delivery-access-grant-revoke",
+      "status": "revokes-individual-grant-through-immutable-event"
+    },
+    {
+      "slice": "release-preflight",
+      "status": "fails-closed-until-current-edition-tree-artifacts-and-delivery-proof-verify"
+    },
+    {
+      "slice": "text-integrity-round-trip",
+      "status": "versioned-text-profile-and-no-silent-normalization-hard-gate"
+    },
+    {
+      "slice": "governed-release-e2e-proof",
+      "status": "settlement-and-derived-publication-backed-release-evidence"
+    },
+    {
+      "slice": "external-calibration-evidence",
+      "status": "semantically-validated-and-integrity-checked-provider-or-human-holdout-artifact"
+    },
+    {
+      "slice": "release-activation-control",
+      "status": "acceptance-fingerprint-bound-fail-closed-production-activation"
+    }
+  ],
+  "evidence": {
+    "sourceFiles": [
+      {
+        "path": "api/src/proseCandidate.ts",
+        "sha256": "b819a2c95762becc59ed88b83df8485936fe6a52cc6f0564cdea2affcebae39d"
+      },
+      {
+        "path": "api/src/proseValidation.ts",
+        "sha256": "5f07efdcf14be88c59bae8614fc4758555e1923482ffa06a367efee648fffc3e"
+      },
+      {
+        "path": "api/src/proseReview.ts",
+        "sha256": "64415f70d9a8128038ccb36c28f93db835cd190cad60f572f9c6efd021529ccc"
+      },
+      {
+        "path": "api/src/proseAdoption.ts",
+        "sha256": "4580625cc0112d5dbe14800cf1ed967932dff1c12c2176d58785ee23f3482349"
+      },
+      {
+        "path": "api/src/authorFeedback.ts",
+        "sha256": "c78d6c10b6f8713281fba2330efc0ebdb4c0cd882f6652eff8260012fbd24139"
+      },
+      {
+        "path": "api/src/chapterSettlement.ts",
+        "sha256": "481906f680153a4ab6cf2f10b563b8195fa2d85aa8e9623b235892b594925ecd"
+      },
+      {
+        "path": "api/src/derivedPublication.ts",
+        "sha256": "e331f9f320f7d11c8d523e747fc08c99864770a8e0e3065ff3c5c8dd9378e3af"
+      },
+      {
+        "path": "api/src/bookWorkGraph.ts",
+        "sha256": "080e74a325fc6a8195e98b4213cfb0e112ecbe1dcbc5a0ebbcf2fb95ba8223ea"
+      },
+      {
+        "path": "api/src/bookWorkScheduler.ts",
+        "sha256": "09f721bc89417c623f1def07c6032bb585eb9103ddf69513c4a09127621306fe"
+      },
+      {
+        "path": "api/src/bookRun.ts",
+        "sha256": "d3075bb1d598f7b1cec68b28e7690ed54abf94155241072df86c08984dcc755c"
+      },
+      {
+        "path": "api/src/quiescenceProof.ts",
+        "sha256": "afdcbb424a3151e331bfa25612c274f5299cbb7620c2278c3f6e773b3cc5bdcc"
+      },
+      {
+        "path": "api/src/completionAudit.ts",
+        "sha256": "a7962c88ebe1ecc3f97c6cf414a950c6edf33abd3c6a1d481ac4ca86ba0f3f42"
+      },
+      {
+        "path": "api/src/executionQueue.ts",
+        "sha256": "313674ce39d6e25eff038633d96cadc42f7438d2313a5036fbba9fcd0fe56563"
+      },
+      {
+        "path": "api/src/executionDispatcher.ts",
+        "sha256": "a29abfa64191a58d4fe19738f33d46943e8b4382c1af006bfb53c8ec47aa55bd"
+      },
+      {
+        "path": "api/src/runtimeEngine.ts",
+        "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      },
+      {
+        "path": "api/src/runtimeWorker.ts",
+        "sha256": "f475c301b1bcd34add67000049015651b41ee75c89fb06fe99a410dbdeb89174"
+      },
+      {
+        "path": "api/src/app.ts",
+        "sha256": "fdad1e9069af3097b4de9e7b60306b699881da2bedb70f0e7207bba71f663d7a"
+      },
+      {
+        "path": "api/src/projectInventory.ts",
+        "sha256": "715a20df0db77fc5282ef6180bb1ced1ade9d6b5c40e5d3014018d1a62dae71f"
+      },
+      {
+        "path": "api/src/migrationPreview.ts",
+        "sha256": "dc5fd131e7e9c5256d15a0546bd457b9918640e6b8039d4700d9b4f56789732f"
+      },
+      {
+        "path": "api/src/migrationValidation.ts",
+        "sha256": "3918be7d68ce98ebb100f220195ac5f57bd4541c768c6292b0d63f22290efee2"
+      },
+      {
+        "path": "api/src/migrationResolution.ts",
+        "sha256": "8c03de041778501554eda42b6eaa904640fb464ac745de60108a90e11d0c7e57"
+      },
+      {
+        "path": "api/src/migrationCutover.ts",
+        "sha256": "b9e0b353acaad66619c6329f064baa402111987307512a4ea6f59ca8b1dd3ae3"
+      },
+      {
+        "path": "api/src/migrationBatchPreview.ts",
+        "sha256": "bfa124c771bcd5a9683b841a43a31454c5509272c803c4ead5df9ad5da5bbd57"
+      },
+      {
+        "path": "api/src/database.ts",
+        "sha256": "68f4fbb574e77f8c9a2f1f43f0f0a369d3999c615b4d251214e26523b06cd87f"
+      },
+      {
+        "path": "api/src/projectBackup.ts",
+        "sha256": "807bec8d473603504aa1ee33c3d862f8a3c9ed56cbf9b32afff7feafbee93bcf"
+      },
+      {
+        "path": "api/src/narrativeObligation.ts",
+        "sha256": "e4cb7d0e298387064803777331a28bfbede96aae59c252decf82ed226ab19b11"
+      },
+      {
+        "path": "api/src/obligationCoverage.ts",
+        "sha256": "412d8bbcefe5c3de1dbd295192cd35b3c295142e2fd79265c41882dbec6d8c31"
+      },
+      {
+        "path": "api/src/obligationCandidates.ts",
+        "sha256": "8e1776e3a0870b5196a0f8a7a6b19fe1fcd3f30ec61e1f16be79d13f76e21d8a"
+      },
+      {
+        "path": "api/src/obligationCertificate.ts",
+        "sha256": "f64d56a8491eb5aeb25ec74ba3677a21157bb576d9aaf299595bc43473ad7245"
+      },
+      {
+        "path": "api/src/revisionIntent.ts",
+        "sha256": "3d93dddd8080c534544bb8e55fe86770da4eaeb6d8ee39026daadef8e69a4d82"
+      },
+      {
+        "path": "api/src/revisionImpact.ts",
+        "sha256": "890e633adcfe27dcc479b587405420aff1675916689172ffaaf44002d4be4ca3"
+      },
+      {
+        "path": "api/src/revisionChangeSet.ts",
+        "sha256": "be3c08c41890ee2dc06dd42b1013d12355c36981a61a04a4700845f7bccffc91"
+      },
+      {
+        "path": "api/src/revisionReview.ts",
+        "sha256": "54e4b3c83a165446c65f919da6366097cc1fc8e3300617a38ee1875d86fb3013"
+      },
+      {
+        "path": "api/src/revisionAdoptionProposal.ts",
+        "sha256": "87ac98fed58d6857b1a38a6dcd2678546d288ff72dbcdb9ef0b3c176900edc9a"
+      },
+      {
+        "path": "api/src/revisionAdoptionReceipt.ts",
+        "sha256": "9e7fdf3c7542ff144787767ef9c85a3568ba461d22fe70183cc0649102e956df"
+      },
+      {
+        "path": "api/src/revisionSettlement.ts",
+        "sha256": "d5fe0a6a433af5eed65d5e78e7def81a16d2e60cbc400bed1cd1d9393b75fae6"
+      },
+      {
+        "path": "api/src/editionManifest.ts",
+        "sha256": "603898e0ceb1d513d8214b9a464c2222a67a2ad5b7439dffebfc3d0f471f25e7"
+      },
+      {
+        "path": "api/src/publicationTree.ts",
+        "sha256": "5670360025ad853525f8e437f03310101bc2cb0516859b639f5d130f4b2c3541"
+      },
+      {
+        "path": "api/src/publicationArtifacts.ts",
+        "sha256": "8f842d060b71181f5af819c447ba244fec95bafc5baa9d081e1c71de7b592b32"
+      },
+      {
+        "path": "api/src/deliveryProof.ts",
+        "sha256": "105cf0ccce56d0180b451ec8da652e47664a115b8665dd87cb533636b4c92cdb"
+      },
+      {
+        "path": "api/src/deliveryAccessGrant.ts",
+        "sha256": "5004e3c1bc4b29877cd461e2dc007f5a30d451e79fe67f0df484edc19e690926"
+      },
+      {
+        "path": "api/src/releasePreflight.ts",
+        "sha256": "d3a8f9385510a15562457dc3fbeba1db6904a7af217ff86faa96cff3e9b93734"
+      },
+      {
+        "path": "api/src/closureCertificate.ts",
+        "sha256": "c69444822955e26bd7bf36e65122ec0ae9208028a43ec47a472e7a325c5085e6"
+      },
+      {
+        "path": "api/src/textIntegrity.ts",
+        "sha256": "f5fc126f33f2fb4d2fc9092d09913f543ac56dcd0c415081f88e2652860a1699"
+      },
+      {
+        "path": "api/src/releaseE2EAcceptance.ts",
+        "sha256": "9fba08d88d19de49e041fa9b756d47b884de6302bcaf557528d256478c3614a1"
+      },
+      {
+        "path": "api/src/releaseAcceptance.ts",
+        "sha256": "25ff5564dcd45dd0ab47c2b69e291deefde296102f447f59d37c978161d05647"
+      },
+      {
+        "path": "api/src/qualityCalibration.ts",
+        "sha256": "f92e5dbf690fb1b515bec6170e99a98100c9ae1c46d58458bc11e63c8dad283b"
+      },
+      {
+        "path": "api/src/releaseActivation.ts",
+        "sha256": "4a222de5fb9b1e92bd2ea386eac60a3e78a335aab520af0826450fad16128125"
+      }
+    ],
+    "testFiles": [
+      {
+        "path": "api/src/proseCandidate.spec.ts",
+        "sha256": "79e7bb38859ff3f285bdfa7a45e36c679ad9eb8ff46729be9dcaab0c1c84ec2d"
+      },
+      {
+        "path": "api/src/proseValidation.spec.ts",
+        "sha256": "24a1227850212ce51d50f654e5b69f60805d2b12a2875b36bbbc2df3d6d071a5"
+      },
+      {
+        "path": "api/src/proseReview.spec.ts",
+        "sha256": "686bf35690958263e5be03a83e5a6745d1de9ad89aba6e60a668230476233302"
+      },
+      {
+        "path": "api/src/proseAdoption.spec.ts",
+        "sha256": "eff70c41250c33a06f117f20df263e0d621b691209ae86e68a7c2e044f989cc4"
+      },
+      {
+        "path": "api/src/authorFeedback.spec.ts",
+        "sha256": "0680577fc51d46c14b511fd1aa76eeac49e2f32e60bb4fc8021bb290edcf1316"
+      },
+      {
+        "path": "api/src/chapterSettlement.spec.ts",
+        "sha256": "7b3cd1ab0f24fa2c2aa8e9f93ca0e974ae0148249449a71bfaa4628d7f6ef839"
+      },
+      {
+        "path": "api/src/derivedPublication.spec.ts",
+        "sha256": "0ac5ae1aa44a9b944ba7e6317c3f281fa058f92f1946f128878187b7ee24b39a"
+      },
+      {
+        "path": "api/src/bookWorkGraph.spec.ts",
+        "sha256": "58c7f7d339f919c1958647ad844ad219b7dc7f2b3c033603c04a71169b89367c"
+      },
+      {
+        "path": "api/src/bookWorkScheduler.spec.ts",
+        "sha256": "e91af1eba89bdabde04bb9eaa9fcfc6fc28191acd161677a5ec5465b6ef649e8"
+      },
+      {
+        "path": "api/src/bookRun.spec.ts",
+        "sha256": "a34b90bd625d91455581d7e64fcb43437b8b8508f0ebe8e4236a00ed96dca7ab"
+      },
+      {
+        "path": "api/src/quiescenceProof.spec.ts",
+        "sha256": "fc86132cd85015e07d97547fdb191ad3626ec62153ae503c8e5984e015c061da"
+      },
+      {
+        "path": "api/src/completionAudit.spec.ts",
+        "sha256": "347b9a5e6b74270156617c05f84844ee79c8637393e658d27279e41ffac83bd3"
+      },
+      {
+        "path": "api/src/executionQueue.spec.ts",
+        "sha256": "6406b2ca6d822b38d097d987456228b449bd50f17eaa3daba3753c65216690bd"
+      },
+      {
+        "path": "api/src/executionDispatcher.spec.ts",
+        "sha256": "f12906473915b03b1b4fb38cd721be22bac430a061bdef3f08ee2524f9a74a9a"
+      },
+      {
+        "path": "api/src/runtime.spec.ts",
+        "sha256": "8a233689caf20704df015d1aed10f134887eb2516bc4565489e1bc53ccf5929e"
+      },
+      {
+        "path": "api/src/runtimeWorker.spec.ts",
+        "sha256": "8086f1fb8905780d2e693b95ed7e72e606c82228f5cf7ab54181cbc08f5a1953"
+      },
+      {
+        "path": "api/src/projectInventory.spec.ts",
+        "sha256": "d24e82d1191c528e9dbad9a3bcc3f70a42904549bfb04f2636591484f1508581"
+      },
+      {
+        "path": "api/src/app.spec.ts",
+        "sha256": "727dab0999545f0277b3db34646753e467103b726ae60ff6e12934004d0629a5"
+      },
+      {
+        "path": "api/src/migrationPreview.spec.ts",
+        "sha256": "c6e660d91f140ea77deab97e2697c137d8f81be025abcea9a22f2e395cbf3803"
+      },
+      {
+        "path": "api/src/migrationValidation.spec.ts",
+        "sha256": "e7758c9760e717f957f94842ba6e4574894e7095906b14652f096025e7254aa3"
+      },
+      {
+        "path": "api/src/migrationResolution.spec.ts",
+        "sha256": "8b595f2cce8eba301150a1f417748c3188c8b2f11eb01fde5cfdcdf55af0c690"
+      },
+      {
+        "path": "api/src/migrationCutover.spec.ts",
+        "sha256": "996d99d80da8b0454fbd423f6e787f518e7d5aa6ab3b0b60727d434c53857e06"
+      },
+      {
+        "path": "api/src/migrationBatchPreview.spec.ts",
+        "sha256": "0f29c6cbedfc07dab4f9f6af7cea1c804d5fb49cbef8ece1e23a90a8ac825be8"
+      },
+      {
+        "path": "api/src/database.spec.ts",
+        "sha256": "e6dd02a1082fe3c08cc37ad4640399add601c247fba479c6ad9b39fa6a901c63"
+      },
+      {
+        "path": "api/src/projectBackup.spec.ts",
+        "sha256": "48008192d5f094259383b4b1af1a7e1d0998471b60b2dfe49c3ac94a560a020b"
+      },
+      {
+        "path": "api/src/narrativeObligation.spec.ts",
+        "sha256": "be4804c3451b064a2a90c142cf75528f8ed41b8aadae2e62a672a167cf4ad07a"
+      },
+      {
+        "path": "api/src/obligationCoverage.spec.ts",
+        "sha256": "fa446885de79135a4db91c3625414681749ed6afe0cd7a80386503561239b18d"
+      },
+      {
+        "path": "api/src/obligationCandidates.spec.ts",
+        "sha256": "9dc0af2f9b0b7b91efaf2ad713524cee6568c1fa1f467075a894a794756138e5"
+      },
+      {
+        "path": "api/src/obligationCertificate.spec.ts",
+        "sha256": "9661afcd41e2a0616d094128b4ae518471bf5b8d6269562de836e1cd36448088"
+      },
+      {
+        "path": "api/src/revisionIntent.spec.ts",
+        "sha256": "a61e54fd409616062369d13f6d021b63e334b6c787eb8fc85c171a413b63a9b1"
+      },
+      {
+        "path": "api/src/revisionImpact.spec.ts",
+        "sha256": "7b3534c7be5a33b37bba035cf6e920750a4607cedbcfa274543c55469515deb8"
+      },
+      {
+        "path": "api/src/revisionChangeSet.spec.ts",
+        "sha256": "7721b189c391c43a39e3388bc5a46e7f95009c29946579e2725ef4706e01e7d1"
+      },
+      {
+        "path": "api/src/revisionReview.spec.ts",
+        "sha256": "fbef9dddddabe4a160ecb672bfd27045a0857430e5c93a2ebc8395bd6654f4b1"
+      },
+      {
+        "path": "api/src/revisionAdoptionProposal.spec.ts",
+        "sha256": "885b7c804c7abd3d471b09a136af393a46d502ce6e37065b1eabf8fbd24786a7"
+      },
+      {
+        "path": "api/src/revisionAdoptionReceipt.spec.ts",
+        "sha256": "3402d37b340c69cfbbacc4335c7096eec8d4cb8166b7a1d9577e1b5e4b69c652"
+      },
+      {
+        "path": "api/src/revisionSettlement.spec.ts",
+        "sha256": "2f9c019ba1f3201672c61201c448d224f649f6caf1b754b9119e6853dc1a6140"
+      },
+      {
+        "path": "api/src/editionManifest.spec.ts",
+        "sha256": "5b104edfe87548e4f8dba83d75d4916585a481de7f8eca89214670957957d791"
+      },
+      {
+        "path": "api/src/publicationTree.spec.ts",
+        "sha256": "dc4c854d2bfff5f7d2b9a47c00676df981a2f1f28b3ab4db8238011268dd981f"
+      },
+      {
+        "path": "api/src/publicationArtifacts.spec.ts",
+        "sha256": "1c88e89514d726fac1ae8e2de8d24c89ed8a6b066c7fe0d7f2fa014c644b6e68"
+      },
+      {
+        "path": "api/src/deliveryProof.spec.ts",
+        "sha256": "8fd46e8d96054dfcfa1e24393f2c98ea93da572a2b85ff9f6ca29cc55fcd7c4c"
+      },
+      {
+        "path": "api/src/deliveryAccessGrant.spec.ts",
+        "sha256": "089b18d466c607206b4b176dbb6124643c0587f9c1218215b786e27babaec20f"
+      },
+      {
+        "path": "api/src/releasePreflight.spec.ts",
+        "sha256": "bda298b68bbceaae6ba3e329a1d2d1cb2c35813220dda4775c4265932dff4d87"
+      },
+      {
+        "path": "api/src/closureCertificate.spec.ts",
+        "sha256": "8971f0809a0f9d802dd40b2026a1237e0aa2ba50bc8ba7cb2908b626a8436ddb"
+      },
+      {
+        "path": "api/src/textIntegrity.spec.ts",
+        "sha256": "8348e9503b1cca3863c0e26eba6222b092b90d3ff1ff0ae72860cfc4e9fd4b36"
+      },
+      {
+        "path": "api/src/releaseE2EAcceptance.spec.ts",
+        "sha256": "84962d86c81a9ea80c437b23a599ff10a90c56ec3acacea6cddac04c9ae2c1a8"
+      },
+      {
+        "path": "api/src/releaseAcceptance.spec.ts",
+        "sha256": "90fa8148e0fca0731dc04a76f428d310c324331f2eebf3fecd67d9b96a7c98a3"
+      },
+      {
+        "path": "api/src/qualityCalibration.spec.ts",
+        "sha256": "fd1c174edb572593e125823a3db51203e97be9c3807d693dc64883bd27c8ed3e"
+      },
+      {
+        "path": "api/src/releaseActivation.spec.ts",
+        "sha256": "a1bf174da6f3caf4b7e079d37f760ffe68879ddfdf18464dba82d304015fbc1c"
+      }
+    ],
+    "requiredCommands": [
+      "cd api && npm test",
+      "cd api && npm run build",
+      "cd ui && npm test",
+      "cd ui && npm run build",
+      "node scripts/generate-spec-governance.mjs --check"
+    ]
+  },
+  "unresolvedGates": [
+    "Legacy canon-capable task/selection/derivative and runtime-control surfaces remain active outside governed outline projects; complete migration cutover is not proven.",
+    "No real provider/human holdout calibration artifact is attached; deterministic review is not external quality evidence.",
+    "Independent human/provider review evidence and full V2 release acceptance remain incomplete; the evaluator is present but evidence is missing."
+  ],
+  "releaseDecision": "do-not-activate"
+}

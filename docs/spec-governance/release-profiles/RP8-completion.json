@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "draft",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP8-completion",
+  "profileKind": "user-release",
+  "isUserRelease": true,
+  "firstSlice": "V8-completion",
+  "journey": "Prove that the frozen publication scope is complete, coherent, closed or contractually open, replayably audited, stale-safe, terminated with no active writer or transaction, and delivered as an immutable reader-safe edition with verifiable artifacts.",
+  "dependencies": [
+    "RP6-obligations",
+    "RP7-revision"
+  ],
+  "missingDependencyProfiles": [],
+  "openDecisionIds": [],
+  "policyCandidateRef": null,
+  "scopeBudget": {
+    "mustRequirementsMax": 16,
+    "actualMustRequirements": 16,
+    "withinBudget": true
+  },
+  "mustRequirementIds": [
+    "FR-CHAR-020",
+    "FR-WORLD-020",
+    "FR-LONGMEM-024",
+    "FR-COMPLETE-001",
+    "FR-COMPLETE-002",
+    "FR-COMPLETE-003",
+    "FR-COMPLETE-004",
+    "FR-COMPLETE-005",
+    "FR-COMPLETE-006",
+    "FR-COMPLETE-007",
+    "FR-RUN-024",
+    "FR-OBL-023",
+    "FR-CLOSURE-019",
+    "FR-PUBLISH-001",
+    "FR-PUBLISH-002",
+    "FR-PUBLISH-003"
+  ],
+  "shouldRequirementIds": [],
+  "experimentRequirementIds": [],
+  "evidenceBundleRefs": [
+    "AT-007",
+    "AT-038..AT-040",
+    "AT-142..AT-189",
+    "AT-439..AT-441",
+    "AT-479..AT-481",
+    "AT-504..AT-507"
+  ],
+  "directAcceptanceStatus": "human-review-required",
+  "firstSliceAcceptance": {
+    "status": "spec-audited",
+    "reviewedRequirements": 16,
+    "totalRequirements": 16
+  },
+  "explicitExclusions": [
+    "No chapter file count or non-empty file treated as audited completion",
+    "No single completed runtime, empty queue, model claim, score, or final-chapter existence treated as book completion",
+    "No unresolved required obligation renamed as an open sequel hook",
+    "No completion certificate when source scans, evidence anchors, cross-domain certificates, or active-write checks are missing",
+    "No stale audit displayed as current after any frozen input changes",
+    "No mutable folder, live audit JSON, partial format set, or download click treated as an immutable delivered manuscript edition"
+  ],
+  "activationGate": "Classification and first-slice acceptance mapping are spec-audited; implementation evidence is still required."
+}

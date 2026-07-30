@@ -104,6 +104,163 @@
       </aside>
 
       <section class="center-stage">
+        <CreativeSessionPanel
+          :session="store.creativeSession"
+          :journey="store.creativeJourney"
+          :question="store.activeDialogueQuestion"
+          :preview="store.understandingPreview"
+          :context-manifest="store.contextManifest"
+          :freezing="store.isFreezingContextManifest"
+          :loading="store.isLoadingCreativeSession"
+          :submitting="store.isSubmittingCreativeMessage"
+          :error="store.creativeSessionError"
+          :contract-error="store.contractCandidatesError"
+          @submit="store.captureAuthorMessage"
+          @freeze="store.freezeCurrentContextManifest"
+          @primary-action="store.executeCreativeJourneyAction"
+          @prepare-question="store.prepareUnderstandingQuestion"
+          @answer="store.answerDialogueQuestion"
+          @retry-contract="store.retryContractCandidateCompilation"
+        />
+        <LearningGovernancePanel
+          :policy="store.learningPolicy || null"
+          :budgets="store.explorationBudgets || {}"
+          :loading="store.isLoading || false"
+          @refresh="handleLearningGovernanceRefresh"
+          @pause="handlePauseExplorationBudget"
+        />
+        <CraftPatternPanel
+          :patterns="store.craftPatterns || []"
+          :experiments="store.craftExperiments || {}"
+          @validate="handleValidateCraftPattern"
+          @promote="handlePromoteCraftPattern"
+          @refresh="handleCraftGovernanceRefresh"
+        />
+        <CharacterContractPanel
+          :contracts="store.characterContracts || []"
+          @refresh="handleCharacterContractsRefresh"
+          @confirm="handleCharacterContractConfirm"
+        />
+        <ContractCandidatePanel
+          :candidates="store.contractCandidates || []"
+          :loading="store.isLoadingContractCandidates || false"
+          :error="store.contractCandidatesError || ''"
+          :adoption-loading="store.isCreatingContractAdoptionProposal || false"
+          :adoption-error="store.contractAdoptionError || ''"
+          :proposal="store.contractAdoptionProposal"
+          @refresh="store.loadContractCandidates?.()"
+          @compile-outline="store.compileOutlineCandidate?.($event.sourceCandidateId)"
+          @adopt="store.createContractAdoptionProposal?.($event)"
+          @commit="store.commitContractAdoption?.($event)"
+        />
+        <OutlineCandidatePanel
+          :candidates="store.outlineCandidates || []"
+          :reports="store.outlineValidationReports || {}"
+          :loading="store.isLoadingOutlineCandidates || false"
+          :validating-id="store.validatingOutlineId || ''"
+          :error="store.outlineCandidatesError || ''"
+          :proposal="store.outlineAdoptionProposal"
+          :adoption-loading="store.isAdoptingOutline || false"
+          :adoption-error="store.outlineAdoptionError || ''"
+          @refresh="store.loadOutlineCandidates?.()"
+          @validate="store.validateOutlineCandidate?.($event)"
+          @select-chapters="store.setOutlineChapterSelection?.($event)"
+          @create-proposal="store.createOutlineAdoptionProposal?.($event)"
+          @authorize="store.authorizeOutlineAdoption?.($event)"
+          @commit="store.commitOutlineAdoption?.($event)"
+        />
+        <ExecutionReadinessPanel
+          :proof="store.executionReadyProof || null"
+          :readiness="store.executionReadiness || null"
+          :work-items="store.executionWorkItems || []"
+          :chapter-id="store.currentChapter?.id || ''"
+          :loading="store.isLoadingExecutionReadiness || false"
+          :error="store.executionReadinessError || ''"
+          @refresh-proof="store.loadExecutionReadyProof?.()"
+          @check-readiness="store.checkExecutionReadiness?.($event)"
+          @start-production="store.startChapterProduction?.($event)"
+        />
+        <BookRunPanel
+          :run="store.activeBookRun"
+          :loading="store.isLoadingBookRun"
+          :error="store.bookRunError"
+          @start="store.startBookRun"
+          @advance="store.advanceActiveBookRun"
+          @completion-audit="store.runActiveBookCompletionAudit"
+        />
+        <LengthPlanningPanel
+          :contract="store.lengthContract || null"
+          :forecast="store.lengthForecast || null"
+          :decision="store.lengthVarianceDecision || null"
+          :loading="store.isLoadingLengthPlanning || false"
+          :error="store.lengthPlanningError || ''"
+          @refresh="store.loadLengthPlanning?.()"
+          @decide="store.decideProjectLengthVariance?.()"
+        />
+        <ProseCandidatePanel
+          :candidates="store.proseCandidates || []"
+          :loading="store.isLoadingProseCandidates || false"
+          :validations="store.proseValidations || {}"
+       :reviews="store.proseReviews || {}"
+          :repair-plans="store.proseRepairPlans || {}"
+          :repair-candidates="store.proseRepairCandidates || {}"
+          :repair-regressions="store.proseRepairRegressions || {}"
+         :readiness="store.proseAdoptionReadiness || {}"
+         :adoptions="store.proseAdoptions || {}"
+          :busy-id="store.proseCandidateBusyId || ''"
+          @refresh="store.loadProseCandidates?.()"
+          @validate="store.validateProseCandidate?.($event)"
+       @review="store.reviewProseCandidate?.($event)"
+          @repair="store.createProseRepairPlan?.($event)"
+          @create-repair-candidate="handleProseRepairCandidate"
+          @evaluate-repair="store.evaluateProseRepairRegression?.($event)"
+         @readiness="store.loadProseAdoptionReadiness?.($event)"
+         @adopt="handleProseAdopt"
+         @settle="handleProseSettle"
+        />
+        <QualityCalibrationPanel
+          :evidence="store.qualityCalibrationEvidence || null"
+          :history="store.qualityCalibrationHistory || []"
+          :loading="store.isLoadingQualityCalibration || false"
+          :error="store.qualityCalibrationError || ''"
+          @refresh="store.loadQualityCalibrationEvidence?.()"
+          @submit="store.submitQualityCalibrationEvidence?.($event)"
+        />
+        <ReleaseAcceptancePanel
+          :decision="store.releaseAcceptanceDecision || null"
+          :activation="store.releaseActivation || null"
+          :loading="store.isLoadingReleaseAcceptance || false"
+          :activating="store.isActivatingRelease || false"
+          :activation-error="store.releaseActivationError || ''"
+          @refresh="store.loadReleaseAcceptance?.()"
+          @activate="store.activateAcceptedRelease?.()"
+        />
+        <PublicationEvidencePanel
+          :manifest="store.publicationEdition"
+          :tree="store.publicationTree"
+          :artifacts="store.publicationArtifacts"
+          :proof="store.deliveryProofVerification"
+          :delivery-proof="store.deliveryProof"
+          :preflight="store.publicationPreflight"
+          :loading="store.isLoadingPublicationEvidence"
+          :error="store.publicationEvidenceError"
+          @load="store.loadPublicationEvidence"
+          @create="store.createPublicationEdition"
+          @compile-tree="store.compilePublicationEditionTree"
+          @render-artifacts="store.renderPublicationEditionArtifacts"
+          @issue-proof="store.issuePublicationDeliveryProof"
+        />
+        <IndependentReviewPanel
+          :review="store.understandingReview || null"
+          :loading="store.isLoadingUnderstandingReview || false"
+          @refresh="store.loadUnderstandingReview?.()"
+          @submit="store.submitExternalUnderstandingReview?.($event)"
+        />
+        <MigrationCutoverPanel
+          :report="store.migrationCutoverReport || null"
+          :loading="store.isLoadingMigrationCutover || false"
+          @validate="store.validateAllProjectMigrations?.()"
+        />
         <div class="autopilot-zone">
           <div class="autopilot-toolbar">
             <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
@@ -152,6 +309,7 @@
           </CollapsiblePanel>
           <CollapsiblePanel
             title="自动驾驶状态"
+            class="autopilot-loop-panel"
             :collapsed="panelCollapsed('autopilot-loop', true)"
             @update:collapsed="setPanelCollapsed('autopilot-loop', $event)"
           >
@@ -621,12 +779,60 @@ const CreationLoopPanel = defineAsyncComponent(() => import("./CreationLoopPanel
 const PlotPilotLearningPanel = defineAsyncComponent(() => import("./PlotPilotLearningPanel.vue"));
 const SavePipelinePanel = defineAsyncComponent(() => import("./SavePipelinePanel.vue"));
 const AutopilotRuntimePanel = defineAsyncComponent(() => import("./AutopilotRuntimePanel.vue"));
+const CreativeSessionPanel = defineAsyncComponent(() => import("./CreativeSessionPanel.vue"));
+const ContractCandidatePanel = defineAsyncComponent(() => import("./ContractCandidatePanel.vue"));
+const BookRunPanel = defineAsyncComponent(() => import("./BookRunPanel.vue"));
+const LengthPlanningPanel = defineAsyncComponent(() => import("./LengthPlanningPanel.vue"));
+const PublicationEvidencePanel = defineAsyncComponent(() => import("./PublicationEvidencePanel.vue"));
+const OutlineCandidatePanel = defineAsyncComponent(() => import("./OutlineCandidatePanel.vue"));
+const ExecutionReadinessPanel = defineAsyncComponent(() => import("./ExecutionReadinessPanel.vue"));
+const ProseCandidatePanel = defineAsyncComponent(() => import("./ProseCandidatePanel.vue"));
+const QualityCalibrationPanel = defineAsyncComponent(() => import("./QualityCalibrationPanel.vue"));
+const ReleaseAcceptancePanel = defineAsyncComponent(() => import("./ReleaseAcceptancePanel.vue"));
+const IndependentReviewPanel = defineAsyncComponent(() => import("./IndependentReviewPanel.vue"));
+const MigrationCutoverPanel = defineAsyncComponent(() => import("./MigrationCutoverPanel.vue"));
+const LearningGovernancePanel = defineAsyncComponent(() => import("./LearningGovernancePanel.vue"));
+const CraftPatternPanel = defineAsyncComponent(() => import("./CraftPatternPanel.vue"));
+const CharacterContractPanel = defineAsyncComponent(() => import("./CharacterContractPanel.vue"));
 
 defineOptions({
   name: "NovelWorkspace"
 });
 
 const store = useNovelStore();
+function handleProseAdopt(candidate: Parameters<typeof store.adoptProseCandidate>[0], input: Parameters<typeof store.adoptProseCandidate>[1]) {
+  return store.adoptProseCandidate?.(candidate, input);
+}
+function handleProseSettle(candidate: Parameters<typeof store.settleProseCandidate>[0], transaction: Parameters<typeof store.settleProseCandidate>[1]) {
+  return store.settleProseCandidate?.(candidate, transaction);
+}
+function handleProseRepairCandidate(candidate: Parameters<typeof store.createProseRepairCandidate>[0], content: Parameters<typeof store.createProseRepairCandidate>[1]) {
+  return store.createProseRepairCandidate?.(candidate, content);
+}
+function handlePauseExplorationBudget(budget: Parameters<typeof store.pauseExplorationBudget>[0]) {
+  return store.pauseExplorationBudget?.(budget, "author requested pause");
+}
+function handleLearningGovernanceRefresh() {
+  return Promise.all([
+    store.loadLearningPolicy?.(),
+    ...Object.keys(store.explorationBudgets || {}).map((budgetId) => store.loadExplorationBudget?.(budgetId))
+  ]);
+}
+function handleValidateCraftPattern(pattern: Parameters<typeof store.validateCraftPatternFromExperiment>[0], experiment: Parameters<typeof store.validateCraftPatternFromExperiment>[1]) {
+  return store.validateCraftPatternFromExperiment?.(pattern, experiment);
+}
+function handlePromoteCraftPattern(pattern: Parameters<typeof store.promoteCraftPatternFromExperiment>[0]) {
+  return store.promoteCraftPatternFromExperiment?.(pattern);
+}
+function handleCraftGovernanceRefresh() {
+  return Promise.all([store.loadCraftPatterns?.(), store.loadCraftExperiments?.()]);
+}
+function handleCharacterContractsRefresh() {
+  return store.loadCharacterContracts?.();
+}
+function handleCharacterContractConfirm(contract: Parameters<typeof store.confirmCharacterContract>[0]) {
+  return store.confirmCharacterContract?.(contract);
+}
 const themeStore = useThemeStore();
 const route = useRoute();
 const router = useRouter();

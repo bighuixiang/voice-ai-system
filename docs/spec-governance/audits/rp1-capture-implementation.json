@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "partial-implementation-verified",
+  "releaseProfile": "RP1-capture",
+  "firstSlice": "V1-conversation",
+  "isUserRelease": true,
+  "verifiedOn": "2026-07-29",
+  "scope": "Capture and restore the author's original utterance only",
+  "implementation": {
+    "sessionReadRoute": "GET /api/novel/projects/:projectId/session",
+    "messageWriteRoute": "POST /api/novel/projects/:projectId/session/messages",
+    "service": "api/src/creativeSession.ts",
+    "uiApiClient": "ui/src/services/novelApi.ts (readCreativeSession/captureAuthorMessage)",
+    "browserEvidence": "tests/e2e/rp1-capture.spec.ts",
+    "storage": "sessions/creative-session.json",
+    "writeAuthority": "creative-session.json only",
+    "governanceClassification": "WRITE-SURFACE-014 / session-capture",
+    "downstreamUnderstanding": false,
+    "canonGeneration": false,
+    "uiActivation": true
+  },
+  "verifiedBehaviors": [
+    {
+      "id": "RP1-CAPTURE-001",
+      "behavior": "An author message is durably stored with source attribution and survives a fresh read.",
+      "test": "api/src/app.spec.ts: persists the author's original idea and restores the same session after refresh",
+      "result": "passed"
+    },
+    {
+      "id": "RP1-CAPTURE-002",
+      "behavior": "Repeated clientMessageId is idempotent and concurrent submissions create one message.",
+      "test": "api/src/app.spec.ts: persists the author's original idea and restores the same session after refresh",
+      "result": "passed"
+    },
+    {
+      "id": "RP1-CAPTURE-003",
+      "behavior": "Project metadata remains unchanged while conversation state is written to its own authority.",
+      "test": "api/src/app.spec.ts: persists the author's original idea and restores the same session after refresh",
+      "result": "passed"
+    }
+  ],
+  "verificationCommands": [
+    "npm --prefix api run test -- src/app.spec.ts",
+    "npm --prefix api run build"
+  ],
+  "verificationResults": {
+    "focusedTddTest": "passed: 35 passed",
+    "apiBuild": "passed",
+    "apiFullTest": "passed: 139 passed / 1 skipped",
+    "uiServiceTest": "passed: 18 passed",
+    "uiFullTest": "passed: 222 passed",
+    "uiBuild": "passed",
+    "browserRecoveryTest": "passed: 1 (real main-input submit + T0 freeze + reload restore)",
+    "governanceProjectionChecks": "passed"
+  },
+  "notYetProven": [
+    "RP1 full 51-requirement acceptance bundle",
+    "full UI accessibility audit and cross-navigation session restore",
+    "message-to-asset lineage beyond author source metadata",
+    "V2 understanding, contract, outline, or prose generation"
+  ],
+  "nextGate": "Proceed to V2 interpretation only after preserving this capture boundary; cross-navigation restore remains a follow-up evidence gap."
+}

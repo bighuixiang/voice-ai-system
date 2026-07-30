@@ -1,0 +1,1424 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "Characters remain causally alive across a whole novel: each major action follows from what that person wants, believes, knows, fears and can afford; relationships and voices change through on-page evidence; supporting characters keep agency off page; revisions propagate; and every promised arc has an honest ending state.",
+  "sourceFiles": [
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+    },
+    {
+      "path": "api/src/storyGraph.ts",
+      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "api/src/chapterQualityReview.ts",
+      "sha256": "71f72a3497c4924f64ac673fadeaea2a659603614e36328b0f117b1ea5e5a0bf"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "ui/src/components/novel/StoryControlPanel.vue",
+      "sha256": "d09ce9722f830892114276a9d5f05cac18e8df0bbdf318180d0c8edc9f1d7821"
+    },
+    {
+      "path": "ui/src/components/novel/SceneCardPanel.vue",
+      "sha256": "efcb3122146e3f4807914ff1e6166083f6a11c84ea3151c7b2cf73d7ad62b7e5"
+    },
+    {
+      "path": "ui/src/components/novel/WritingRecapPanel.vue",
+      "sha256": "35499ceff7bc2b75a1f8c4e1c130b7fbc9e57e780c5fff1e62ff45c791d42a2b"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "aggregate source fingerprints/bytes/file counts",
+      "profile field coverage",
+      "scene function/state/emotion coverage",
+      "accepted state/emotion counts",
+      "relationship/appearance/quality aggregate counts",
+      "source evidence paths and code tokens"
+    ],
+    "snapshotExcludes": [
+      "project slug or ID",
+      "title",
+      "genre",
+      "rough idea",
+      "character name/ID/alias/role",
+      "chapter/scene/event/entity identity",
+      "character profile, relationship, emotion or state text",
+      "prose/prompt/source content",
+      "file path inside a project",
+      "raw task/recap/model output",
+      "absolute path or secret"
+    ]
+  },
+  "operationalSnapshot": {
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprint": "9816b83cf626d618bef33c52cd07743df473ba9df55f2bb55a35c6eea2893a11",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": false,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 0,
+          "summaryFiles": 0,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": false,
+          "bytes": 0,
+          "sha256": null
+        },
+        "profiles": {
+          "characters": 0,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 0,
+          "withAllDramaticStringFields": 0,
+          "withSignatureTraits": 0,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 0,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 0,
+          "appearanceSignals": 0,
+          "appearanceByStatus": {},
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprint": "9461e5b9de02ac0f92d3aa214d762feff869d0dc28b39d6aabca6e530ac16086",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": false,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 0,
+          "summaryFiles": 0,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": false,
+          "bytes": 0,
+          "sha256": null
+        },
+        "profiles": {
+          "characters": 0,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 0,
+          "withAllDramaticStringFields": 0,
+          "withSignatureTraits": 0,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 0,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 0,
+          "appearanceSignals": 0,
+          "appearanceByStatus": {},
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprint": "399d7b7650030274dacb0a415a6ae67779e674e62d7f6d1c262b980551757e5c",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": false,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 1,
+          "summaryFiles": 0,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": true,
+          "bytes": 114,
+          "sha256": "e9f5727b17979a542624919dca1dfed39ae6c54338f37a27dfed5cd078f0b0e2"
+        },
+        "profiles": {
+          "characters": 0,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 0,
+          "withAllDramaticStringFields": 0,
+          "withSignatureTraits": 0,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 1,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 0,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 0,
+          "appearanceSignals": 0,
+          "appearanceByStatus": {},
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprint": "3f06b7198ca6bfbcee215c4777bf09821cc45d163529c9e797c4c74c22fb58cf",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 198,
+          "summaryFiles": 1,
+          "qualityFiles": 2
+        },
+        "characterBible": {
+          "exists": true,
+          "bytes": 314511,
+          "sha256": "c01872dc5e3bfbb86a140eaab5c9567008294cdb14717159be8e863f85618fee"
+        },
+        "profiles": {
+          "characters": 22,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 0,
+          "withAllDramaticStringFields": 0,
+          "withSignatureTraits": 0,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {
+            "planned": 22
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 7,
+          "withCharacters": 7,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 1,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 22,
+          "appearanceSignals": 22,
+          "appearanceByStatus": {
+            "absent": 10,
+            "should-appear": 12
+          },
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 2,
+          "metricRows": 18,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 2,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprint": "98ffc753dca55eddf13cb33e3515f36875e42bf24e6544277d2841300749b439",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": true,
+          "bytes": 108,
+          "sha256": "8a1c8af355ac54bb3ab9dbd56e847af8b1da076f84cc2a0aba149731cd05d65d"
+        },
+        "profiles": {
+          "characters": 1,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 1,
+          "withAllDramaticStringFields": 1,
+          "withSignatureTraits": 1,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 3,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 1,
+          "appearanceSignals": 1,
+          "appearanceByStatus": {
+            "balanced": 1
+          },
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprint": "fed3660dff58601a739fa6dbbf0d7e6b1e03bf0e27b6073a18dba63a6e35da73",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": true,
+          "bytes": 108,
+          "sha256": "8a1c8af355ac54bb3ab9dbd56e847af8b1da076f84cc2a0aba149731cd05d65d"
+        },
+        "profiles": {
+          "characters": 1,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 1,
+          "withAllDramaticStringFields": 1,
+          "withSignatureTraits": 1,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 3,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 1,
+          "appearanceSignals": 1,
+          "appearanceByStatus": {
+            "balanced": 1
+          },
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprint": "898593b07c0bd7689defee6b8fb00e77f683a246b8a4f93d7710727000828f9e",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": true,
+          "bytes": 108,
+          "sha256": "8a1c8af355ac54bb3ab9dbd56e847af8b1da076f84cc2a0aba149731cd05d65d"
+        },
+        "profiles": {
+          "characters": 1,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 1,
+          "withAllDramaticStringFields": 1,
+          "withSignatureTraits": 1,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 3,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 1,
+          "appearanceSignals": 1,
+          "appearanceByStatus": {
+            "balanced": 1
+          },
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprint": "7ce2508699a4daba5bef8696f6d1c76dc9afc30aed1e54bcd4e5141d946db2e2",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": true,
+          "bytes": 108,
+          "sha256": "8a1c8af355ac54bb3ab9dbd56e847af8b1da076f84cc2a0aba149731cd05d65d"
+        },
+        "profiles": {
+          "characters": 1,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 1,
+          "withAllDramaticStringFields": 1,
+          "withSignatureTraits": 1,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 3,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 1,
+          "appearanceSignals": 1,
+          "appearanceByStatus": {
+            "balanced": 1
+          },
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      }
+    ],
+    "totals": {
+      "projects": 8,
+      "characterBibleFiles": 6,
+      "characterBibleBytes": 315057,
+      "characters": 26,
+      "duplicateStableIds": 0,
+      "profilesWithAllCoreFields": 4,
+      "profilesWithAllDramaticFields": 4,
+      "profilesWithSignatureTraits": 4,
+      "profilesWithPresenceBounds": 0,
+      "scenes": 8,
+      "scenesWithCharacters": 7,
+      "scenesWithCharacterFunction": 0,
+      "scenesWithEmotionalShift": 0,
+      "craftBeats": 0,
+      "relationshipTurnBeats": 0,
+      "redemptionBeats": 0,
+      "statePatches": 0,
+      "acceptedStatePatches": 0,
+      "statePatchesWithStableCharacterId": 0,
+      "statePatchesWithBeforeState": 0,
+      "statePatchesWithCause": 0,
+      "emotionItems": 0,
+      "emotionItemsWithCharacterName": 0,
+      "emotionItemsWithCause": 0,
+      "characterLedgerEntries": 0,
+      "relationships": 0,
+      "isolatedCharacters": 26,
+      "appearanceSignals": 26,
+      "arcSignals": 0,
+      "qualityReports": 2,
+      "emotionMetricRows": 0,
+      "characterArcMetricRows": 2,
+      "relationshipMetricRows": 0,
+      "voiceMetricRows": 0
+    },
+    "profileStatusTotals": {
+      "planned": 22,
+      "seed": 4
+    },
+    "emotionStatusTotals": {},
+    "relationshipSourceTotals": {},
+    "appearanceStatusTotals": {
+      "absent": 10,
+      "balanced": 4,
+      "should-appear": 12
+    },
+    "interpretation": "The platform has valuable character scaffolding—editable profiles, scene participants, recap state patches, emotion ledgers, relationship and appearance projections—but most semantics remain free text, name matching, co-appearance, keyword inference or aggregate recent-state signals. These are authoring aids, not proof of agency, relationship causality, distinct voice or arc closure."
+  },
+  "summary": {
+    "auditedStages": 13,
+    "projectsScanned": 8,
+    "characters": 26,
+    "scenes": 8,
+    "statePatches": 0,
+    "acceptedStatePatches": 0,
+    "emotionItems": 0,
+    "relationships": 0,
+    "arcSignals": 0,
+    "characterArcCertificates": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "Character truth is split among free-text StoryControl profiles, Markdown, scene strings, recap patches, emotion arrays, ledgers, knowledge triples and lossy projections. No authority binds stable identity, dramatic contract, time-indexed multi-dimensional state, belief, choice, directional relationship, voice condition and on-page evidence into one causal character graph.",
+    "consequence": "The model can produce locally plausible dialogue and state summaries while a protagonist acts stupidly for plot convenience, an opponent waits off page, a relationship repairs by label, two voices converge, an emotion resolves without consequence, or a planned growth stage is mistaken for an earned arc—then downstream summaries make the mistake look canonical."
+  },
+  "currentEvidence": [
+    {
+      "claim": "StoryCharacterProfile is a useful editable profile but represents goal/state/secrets/relationships and arc concepts mainly as strings.",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 557,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "export interface StoryCharacterProfile"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 562,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "currentState: string"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 564,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "relationshipNotes: string"
+        }
+      ]
+    },
+    {
+      "claim": "Series character-arc signals group accepted state patches by character name, retain latest state/cause and return only the top eight.",
+      "evidence": [
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 469,
+          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "token": "function buildCharacterArcSignals"
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 476,
+          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "token": "grouped.set(name"
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 497,
+          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "token": ".slice(0, 8)"
+        }
+      ]
+    },
+    {
+      "claim": "Relationship projection infers edges from predicate keywords, event co-appearance and names found in free-text profile notes.",
+      "evidence": [
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 26,
+          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "token": "const relationshipPredicates"
+        },
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 213,
+          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "token": "function addEventRelationships"
+        },
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 237,
+          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "token": "\"co-appears\""
+        },
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 251,
+          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "token": "function addProfileRelationships"
+        }
+      ]
+    },
+    {
+      "claim": "Appearance scheduling uses roles, chapter gaps, counts and upcoming text, which measures exposure rather than narrative function or choice share.",
+      "evidence": [
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 320,
+          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "token": "function buildCharacterAppearanceSignals"
+        },
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 393,
+          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "token": "appearanceCount >= 4"
+        }
+      ]
+    },
+    {
+      "claim": "Drafting and recap prompts request observable desire/wound/misbelief/choice plus reviewable state/emotion patches, but do not create typed choice, belief, relationship or voice evidence.",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 53,
+          "sourceSha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a",
+          "token": "Make character texture observable"
+        },
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 150,
+          "sourceSha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a",
+          "token": "characterStatePatches"
+        },
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 88,
+          "sourceSha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a",
+          "token": "emotionLedgerPatch"
+        }
+      ]
+    },
+    {
+      "claim": "The SceneCard type carries characterFunction/emotionalShift, while the current editor only edits title/location/POV/conflict/turn/power progression.",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 534,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "characterFunction?: string"
+        },
+        {
+          "path": "ui/src/components/novel/SceneCardPanel.vue",
+          "line": 147,
+          "sourceSha256": "efcb3122146e3f4807914ff1e6166083f6a11c84ea3151c7b2cf73d7ad62b7e5",
+          "token": "key: \"title\" | \"location\" | \"pov\" | \"conflict\" | \"turn\" | \"powerProgression\""
+        }
+      ]
+    },
+    {
+      "claim": "Rules-based emotion quality is driven by reaction and summary-emotion patterns; the seven-metric review contract has no separate agency, relationship or voice evidence claim.",
+      "evidence": [
+        {
+          "path": "api/src/chapterQualityReview.ts",
+          "line": 102,
+          "sourceSha256": "71f72a3497c4924f64ac673fadeaea2a659603614e36328b0f117b1ea5e5a0bf",
+          "token": "summaryEmotionPatterns"
+        },
+        {
+          "path": "api/src/chapterQualityReview.ts",
+          "line": 277,
+          "sourceSha256": "71f72a3497c4924f64ac673fadeaea2a659603614e36328b0f117b1ea5e5a0bf",
+          "token": "metrics.set(\"emotion\""
+        },
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 316,
+          "sourceSha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a",
+          "token": "Score only these seven metrics"
+        }
+      ]
+    },
+    {
+      "claim": "The recap UI exposes character state and emotion patches for acceptance, but presents free-text after/cause rather than a source-anchored multi-dimensional settlement.",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/WritingRecapPanel.vue",
+          "line": 51,
+          "sourceSha256": "35499ceff7bc2b75a1f8c4e1c130b7fbc9e57e780c5fff1e62ff45c791d42a2b",
+          "token": "candidate.characterStatePatches"
+        },
+        {
+          "path": "ui/src/components/novel/WritingRecapPanel.vue",
+          "line": 62,
+          "sourceSha256": "35499ceff7bc2b75a1f8c4e1c130b7fbc9e57e780c5fff1e62ff45c791d42a2b",
+          "token": "emotionLedgerItems"
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "CHAR-TRACE-001",
+      "label": "resolve-character-identity-and-authority",
+      "current": "StoryControl has character IDs and a prose character bible exists, while recap patches may identify a character by name only.",
+      "gap": "No entity registry, alias/split/merge history, source priority or document-versus-character classification proves that all surfaces refer to the same person.",
+      "target": "Resolve stable identity, aliases, source/version authority and explicit unknown/conflict before any arc inference."
+    },
+    {
+      "id": "CHAR-TRACE-002",
+      "label": "compile-dramatic-contract",
+      "current": "Profiles offer goal, wound, desire, misbelief, redemption and free-text relationship pressure.",
+      "gap": "These fields are editable descriptions, not a versioned contract connecting want/need/fear/value/strategy/limits to story promise and evidence.",
+      "target": "Adopt a CharacterDramaticContract with provenance, unknowns, forbidden shortcuts and milestone hypotheses."
+    },
+    {
+      "id": "CHAR-TRACE-003",
+      "label": "separate-planned-arc-from-actual-evidence",
+      "current": "Growth stage and redemption text coexist with accepted state-change summaries and a top-eight arc signal projection.",
+      "gap": "A planned label or recent state can masquerade as actual development; projection truncation can hide ensemble characters.",
+      "target": "Keep ArcPlan/ArcMilestone separate from on-page CharacterArcMilestoneEvidence and expose missing/contradictory coverage."
+    },
+    {
+      "id": "CHAR-TRACE-004",
+      "label": "freeze-pre-scene-character-state",
+      "current": "Current state, known secrets, summary patches and emotion ledgers are read from several mutable files.",
+      "gap": "No time-indexed snapshot proves body, goal, belief, knowledge, emotion, resources, obligations, relationships and voice conditions at scene entry.",
+      "target": "Compile a source-versioned CharacterStateSnapshot for each participant and mark unknown/conflict dimensions."
+    },
+    {
+      "id": "CHAR-TRACE-005",
+      "label": "design-choice-pressure-and-cost",
+      "current": "Prompts request desire/wound/misbelief/pressure and concrete choice; scenes have generic conflict/turn fields.",
+      "gap": "No typed choice set proves alternatives, perceived information, pressure, refusal, cost, action and irreversible consequence.",
+      "target": "Create CharacterChoiceEvidence linking state and belief to a costly action and downstream change."
+    },
+    {
+      "id": "CHAR-TRACE-006",
+      "label": "guard-agency-and-belief-lifecycle",
+      "current": "Continuity and quality prompts mention credible motivation and POV knowledge.",
+      "gap": "The system cannot distinguish earned reversal from plot-required stupidity, coercion, forgotten capability or magically corrected misbelief.",
+      "target": "Track belief support/disconfirmation and run an agency counterfactual before validating each major choice."
+    },
+    {
+      "id": "CHAR-TRACE-007",
+      "label": "model-directed-relationship-state",
+      "current": "Relationship edges come from keyword triples, co-appearance and names mentioned in free-text profile notes.",
+      "gap": "Co-presence and a label do not represent asymmetric trust, intimacy, fear, debt, power, knowledge, obligation or misreading over time.",
+      "target": "Maintain directional multi-dimensional RelationshipState; only evidence-bearing RelationshipEvent can change it."
+    },
+    {
+      "id": "CHAR-TRACE-008",
+      "label": "preserve-opponent-and-offpage-agency",
+      "current": "Story events list participants and profiles can describe goals, but scheduling is largely appearance-count based.",
+      "gap": "Opponents and supporting characters can freeze off page, teleport into plot, or exist only to deliver the protagonist's next beat.",
+      "target": "Give major non-POV characters independent goals, resources, decision clocks and OffPageCharacterEvents with causal consequences."
+    },
+    {
+      "id": "CHAR-TRACE-009",
+      "label": "allocate-ensemble-function-and-choice-share",
+      "current": "Appearance signals classify should-appear/overexposed/absent/balanced using role, gaps and counts.",
+      "gap": "Balanced frequency does not prove narrative function, meaningful choice, relationship movement or spotlight equity.",
+      "target": "Plan presence by required function and monitor choice/consequence share, not quotas or raw appearances."
+    },
+    {
+      "id": "CHAR-TRACE-010",
+      "label": "compile-state-conditioned-voice",
+      "current": "Profiles may store signature traits and drafting prompts ask for character texture; quality has no dedicated voice metric.",
+      "gap": "Catchphrases or one global description cannot prove characters remain distinguishable while voice changes with audience, power, emotion, concealment and arc stage.",
+      "target": "Use CharacterVoiceProfile matrices plus blind speaker attribution and state-conditioned drift evidence."
+    },
+    {
+      "id": "CHAR-TRACE-011",
+      "label": "validate-scene-character-change",
+      "current": "SceneCard types include characterFunction/emotionalShift, but the editor omits them and current saved coverage is sparse.",
+      "gap": "A scene can progress plot while every character leaves with the same goal, belief, relationship and emotional position.",
+      "target": "Validate intended versus observed character function, choice, cost, state delta and emotional aftershock per scene."
+    },
+    {
+      "id": "CHAR-TRACE-012",
+      "label": "settle-character-and-relationship-events",
+      "current": "Author-approved recap patches merge character state and emotion items after chapter drafting.",
+      "gap": "Name-based merges and free-text after/cause do not atomically settle belief, relationship, voice and arc evidence against the adopted prose version.",
+      "target": "Settle typed character/relationship events only after prose adoption, with source anchors and reversible impact propagation."
+    },
+    {
+      "id": "CHAR-TRACE-013",
+      "label": "revise-and-certify-arc-closure",
+      "current": "Series metrics summarize recent accepted state changes; no arc certificate exists.",
+      "gap": "Last appearance, death, changed state or high quality score can falsely imply the character arc and relationship obligations are complete.",
+      "target": "Issue CharacterArcCertificate from current canon evidence, listing paid, intentionally open, failed and stale milestones plus impact scope."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-enrich-profiles-prompts-and-keyword-dashboards",
+      "verdict": "retain-as-authoring-adapters-not-character-truth",
+      "blueCase": "Builds on the current UI and files, is easy for authors to edit, and can quickly improve prompt specificity without a large migration.",
+      "redCase": "Longer biographies and stronger instructions remain self-reported text; they cannot prove state-at-time, costly choice, asymmetric relationship change, off-page action, voice distinction or arc completion."
+    },
+    {
+      "option": "B-reread-the-whole-manuscript-with-a-character-critic",
+      "verdict": "use-as-review-evidence-not-authority",
+      "blueCase": "A capable long-context reviewer can notice subtle motives, subtext, voice and relationships that rigid schemas miss, with little up-front modeling.",
+      "redCase": "Its judgment is expensive, non-deterministic and vulnerable to context omission; it can invent evidence, collapse aliases, confuse plan with prose and cannot safely drive canon or selective revision by itself."
+    },
+    {
+      "option": "C-typed-causal-character-graph-with-evidence-and-independent-reader-review",
+      "verdict": "recommended-already-specified-not-implemented",
+      "blueCase": "Combine stable identities, dramatic contracts, time-indexed state/belief/relationship/voice, choice evidence, off-page agency, scene deltas and arc certificates; use model review only as evidence against the graph and prose.",
+      "redCase": "Requires schema/migration, identity resolution, event extraction with author approval, temporal queries, relationship dimensions, voice evaluation, impact propagation, ensemble UX and genre-sensitive calibration without mechanizing characters."
+    }
+  ],
+  "yAGNI": {
+    "newRequirementsAdded": 0,
+    "newAcceptanceTestsAdded": 0,
+    "newDecisionsAdded": 0,
+    "rationale": "FR-CHAR-001..020 already specify the complete causal character contract. The missing work is implementation, migration and evidence; another CHARACTER2 or EMOTION domain would split authority and encourage partial delivery.",
+    "existingContract": {
+      "requirementIds": [
+        "FR-CHAR-001",
+        "FR-CHAR-002",
+        "FR-CHAR-003",
+        "FR-CHAR-004",
+        "FR-CHAR-005",
+        "FR-CHAR-006",
+        "FR-CHAR-007",
+        "FR-CHAR-008",
+        "FR-CHAR-009",
+        "FR-CHAR-010",
+        "FR-CHAR-011",
+        "FR-CHAR-012",
+        "FR-CHAR-013",
+        "FR-CHAR-014",
+        "FR-CHAR-015",
+        "FR-CHAR-016",
+        "FR-CHAR-017",
+        "FR-CHAR-018",
+        "FR-CHAR-019",
+        "FR-CHAR-020",
+        "FR-PROSE-021",
+        "FR-PROSE-023",
+        "FR-QUALITY-001",
+        "FR-QUALITY-003",
+        "FR-READER-007",
+        "FR-READER-008"
+      ],
+      "acceptanceRefs": [
+        "AT-046",
+        "AT-047",
+        "AT-294",
+        "AT-295",
+        "AT-299",
+        "AT-366",
+        "AT-368",
+        "AT-371",
+        "AT-372",
+        "AT-396",
+        "AT-397",
+        "AT-422",
+        "AT-423",
+        "AT-424",
+        "AT-425",
+        "AT-426",
+        "AT-427",
+        "AT-428",
+        "AT-429",
+        "AT-430",
+        "AT-431",
+        "AT-432",
+        "AT-433",
+        "AT-434",
+        "AT-435",
+        "AT-436",
+        "AT-437",
+        "AT-438",
+        "AT-439",
+        "AT-440",
+        "AT-441",
+        "AT-464"
+      ],
+      "decisionRefs": [
+        "D-019",
+        "D-125",
+        "D-126",
+        "D-127",
+        "D-128",
+        "D-129",
+        "D-130"
+      ]
+    }
+  },
+  "targetAuthority": {
+    "entities": [
+      "CharacterDramaticContract",
+      "CharacterStateSnapshot",
+      "CharacterArcPlan",
+      "CharacterArcMilestoneEvidence",
+      "CharacterChoiceEvidence",
+      "CharacterBeliefState",
+      "RelationshipState",
+      "RelationshipEvent",
+      "CharacterVoiceProfile",
+      "CharacterPresencePlan",
+      "OffPageCharacterEvent",
+      "CharacterArcImpactReport",
+      "CharacterArcCertificate"
+    ],
+    "invariant": "No character biography, field completeness, prompt instruction, scene participation, dialogue fluency, emotion keyword, co-appearance, relationship label, latest state string, recap acceptance, appearance count, quality score, last appearance, death or model assertion may independently establish stable identity, credible motivation, agency, belief change, relationship movement, distinct voice, earned growth or arc closure."
+  },
+  "characterProtocol": {
+    "order": [
+      "resolve stable character identity, aliases/splits/merges, source priority, document classification, canon version and honest unknown/conflict",
+      "adopt a dramatic contract connecting want, need, wound, fear, values, misbelief, strategy, limits, story promise and forbidden shortcuts",
+      "separate planned arc milestones from actual on-page evidence and compile state snapshots for every scene participant at one canon/time cursor",
+      "design meaningful alternatives, perceived information, pressures, refusal path, chosen action, cost and irreversible consequence",
+      "run belief and agency checks, including the strongest non-stupid alternative and whether coercion/ignorance/capability constraints are evidenced",
+      "model each directed relationship dimension before/after; only a source-anchored RelationshipEvent may change trust, intimacy, fear, debt, power, obligation or interpretation",
+      "simulate major non-POV goals/resources/off-page decisions and compile presence by narrative function and ensemble choice share",
+      "compile state-conditioned voice rules for audience, power, emotion, concealment and arc stage, then test blind attribution and dialogue function",
+      "generate/validate prose against planned character function, choice, cost, state delta, relationship delta and emotional aftershock without exposing the schema mechanically",
+      "after prose adoption settle character, belief, relationship and emotion events atomically; propagate revision impact and issue an evidence-based arc certificate at completion"
+    ],
+    "nonGoal": "The target does not reduce people to meters, force every scene to change every character, require linear growth, prohibit ambiguity or relapse, or make readers see internal schemas. Typed state preserves causal evidence while prose remains free to imply, contradict and surprise within the contract."
+  },
+  "verificationMatrix": [
+    "same name, alias, disguise, title, identity split/merge, impostor, possession, clone, death, apparent death and resurrection",
+    "plan says growth but prose shows none; prose shows an unplanned turn; relapse preserves prior gains instead of resetting history",
+    "major choice has an obvious safer competent option, hidden information, coercion, intoxication, trauma response or forgotten ability",
+    "relationship is asymmetric, one party misreads it, secret disclosure occurs without forgiveness, apology occurs without restored trust, intimacy rises while power worsens",
+    "opponent and supporting character act off page with their own clocks; protagonist absence does not freeze the world",
+    "ensemble character appears often but never chooses, appears rarely but changes causality, or receives disproportionate exposition without consequence",
+    "same dialogue content spoken by multiple characters under neutral labels; blind attribution and state-conditioned voice changes across audience/power/emotion",
+    "quiet, comic, romantic, mystery, action, tragedy, redemption and anti-growth arcs use different valid evidence patterns",
+    "scene changes plot but not character, changes emotion without behavior, changes state without cost, or records a relationship turn from co-presence only",
+    "chapter rewrite removes the source choice, moves chronology, changes identity or relationship evidence; exact downstream arc/voice/closure proofs become stale",
+    "character dies or exits before milestones, remains intentionally open under the story contract, or closes through refusal rather than transformation",
+    "author correction rejects extracted state/relationship event; projections rebuild without resurrecting the rejected interpretation"
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-CHAR-001",
+      "FR-CHAR-002",
+      "FR-CHAR-003",
+      "FR-CHAR-004",
+      "FR-CHAR-005",
+      "FR-CHAR-006",
+      "FR-CHAR-007",
+      "FR-CHAR-008",
+      "FR-CHAR-009",
+      "FR-CHAR-010",
+      "FR-CHAR-011",
+      "FR-CHAR-012",
+      "FR-CHAR-013",
+      "FR-CHAR-014",
+      "FR-CHAR-015",
+      "FR-CHAR-016",
+      "FR-CHAR-017",
+      "FR-CHAR-018",
+      "FR-CHAR-019",
+      "FR-CHAR-020"
+    ],
+    "acceptanceRefs": [
+      "AT-422",
+      "AT-423",
+      "AT-424",
+      "AT-425",
+      "AT-426",
+      "AT-427",
+      "AT-428",
+      "AT-429",
+      "AT-430",
+      "AT-431",
+      "AT-432",
+      "AT-433",
+      "AT-434",
+      "AT-435",
+      "AT-436",
+      "AT-437",
+      "AT-438",
+      "AT-439",
+      "AT-440",
+      "AT-441"
+    ],
+    "rule": "Do not claim living characters, credible motivation, independent supporting cast, evolving relationships, distinct voices or completed arcs until stable identities and source conflicts are resolved; planned and actual arcs stay separate; state/belief/relationship/voice are time-versioned; major choices have on-page alternatives/pressure/cost/consequence and pass agency checks; off-page actors remain causal; scene deltas settle only from adopted prose; revisions propagate; blind voice and reader evidence are calibrated; and CharacterArcCertificate honestly lists closed, open, failed, unknown and stale milestones."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none weakens stable identity, planned/actual separation, agency hard guards, directional relationship evidence, author-approved settlement, revision invalidation or honest arc closure."
+}

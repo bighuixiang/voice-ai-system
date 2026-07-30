@@ -23,6 +23,7 @@ interface ActiveNovelTask {
   controller: AbortController;
   task: NovelTask;
   root: string;
+  completion?: Promise<void>;
 }
 
 interface NovelTaskRunOptions extends ProcessRunOptions {
@@ -477,10 +478,11 @@ export async function startNovelTaskAsync(
     timeoutMs: defaultTaskTimeoutMs()
   };
   const controller = new AbortController();
-  activeNovelTasks.set(task.id, { controller, task, root });
+  const active: ActiveNovelTask = { controller, task, root };
+  activeNovelTasks.set(task.id, active);
   await appendHistory(root, task);
 
-  setTimeout(() => {
+  active.completion = new Promise<void>((resolve) => setTimeout(() => {
     void runNovelTask(project.slug, type, payload, runner, { task, signal: controller.signal, timeoutMs: task.timeoutMs })
       .catch(async (error) => {
         task.status = controller.signal.aborted ? "cancelled" : "error";
@@ -491,8 +493,9 @@ export async function startNovelTaskAsync(
       })
       .finally(() => {
         activeNovelTasks.delete(task.id);
+        resolve();
       });
-  }, 0);
+  }, 0));
 
   return { ...task };
 }
@@ -505,9 +508,15 @@ export async function cancelNovelTask(projectId: string, id: string): Promise<No
     const timestamp = new Date().toISOString();
     active.task.cancelRequestedAt = active.task.cancelRequestedAt || timestamp;
     active.task.outputSummary = "Cancellation requested.";
-    active.controller.abort();
+    const response = { ...active.task, status: "running" as const };
+    active.task.status = "cancelled";
+    active.task.finishedAt = timestamp;
+    active.task.durationMs = Date.parse(timestamp) - Date.parse(active.task.startedAt);
+    active.task.error = "AI task cancellation requested.";
     await appendHistory(root, active.task);
-    return { ...active.task };
+    active.controller.abort();
+    await active.completion;
+    return response;
   }
 
   const task = (await readTaskHistory(root, { reconcileStaleRunning: false })).find((item) => item.id === id) || null;

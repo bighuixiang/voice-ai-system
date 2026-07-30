@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -6,6 +7,7 @@ import {
   databaseInfo,
   deleteProjectRecord,
   listProjectRecords,
+  readSchemaMigrations,
   readPlatformLibraryFromDatabase,
   replacePlatformLibrary,
   upsertProjectRecord
@@ -13,6 +15,7 @@ import {
 import type { NovelProject, PlatformLibrary } from "./types.js";
 
 let tempRoot = "";
+const require = createRequire(import.meta.url);
 
 const project: NovelProject = {
   id: "demo",
@@ -84,5 +87,40 @@ describe("SQLite database", () => {
     deleteProjectRecord(project.slug);
 
     expect(listProjectRecords()).toEqual([]);
+  });
+
+  it("records an ordered schema migration and does not replay it", () => {
+    upsertProjectRecord(project, path.join(tempRoot, "novels", "demo"));
+
+    expect(readSchemaMigrations()).toEqual([
+      expect.objectContaining({
+        version: 1,
+        name: "creative-platform-baseline",
+        status: "completed",
+        checksum: expect.stringMatching(/^[a-f0-9]{64}$/)
+      })
+    ]);
+
+    upsertProjectRecord({ ...project, title: "Updated" }, path.join(tempRoot, "novels", "demo"));
+
+    expect(readSchemaMigrations()).toHaveLength(1);
+    expect(readSchemaMigrations()[0]?.status).toBe("completed");
+  });
+
+  it("fails closed when the database contains a migration above the supported version", async () => {
+    upsertProjectRecord(project, path.join(tempRoot, "novels", "demo"));
+    const sqlite = require("node:sqlite") as { DatabaseSync: new (dbPath: string) => { prepare(sql: string): { run(...params: unknown[]): unknown }; close(): void } };
+    const database = new sqlite.DatabaseSync(process.env.NOVEL_DB_PATH!);
+    database
+      .prepare(
+        `INSERT INTO schema_migrations (version, name, checksum, started_at, completed_at, error)
+         VALUES (?, ?, ?, ?, ?, ?)`
+      )
+      .run(999, "future", "future", "2026-06-03T00:00:00.000Z", "2026-06-03T00:00:01.000Z", null);
+    database.close();
+
+    delete process.env.NOVEL_DB_PATH;
+    process.env.NOVEL_DB_PATH = path.join(tempRoot, "data", "creative-platform.sqlite");
+    expect(() => listProjectRecords()).toThrow(/DATABASE_SCHEMA_VERSION_UNSUPPORTED/);
   });
 });

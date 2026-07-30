@@ -1,0 +1,1426 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP4-outline",
+  "profileKind": "user-release",
+  "isUserRelease": true,
+  "journey": "Compile the adopted story contract into a comparable, causally reachable, candidate-isolated and research-grounded full-book skeleton with an execution-ready near horizon.",
+  "protocol": {
+    "blueQuestion": "Does this requirement directly make the adopted contract into a causally reachable, truth-bounded, author-adoptable, near-term executable outline?",
+    "redQuestion": "Does it require observed prose, canon revision, a frozen publication draft, or completion evidence that cannot exist in RP4?",
+    "rule": "RP4 may plan full-book structure and prove the near horizon executable; plans remain candidates, while prose evidence and completion certificates stay downstream."
+  },
+  "currentPlatformEvidence": {
+    "present": [
+      "outline.generate and chapter.plan task types",
+      "StoryControl with arcs, characters, and events",
+      "SceneCard persistence and editing",
+      "imported chapter-outline files in real workspace projects",
+      "A platform library can name and link generic reference assets, and the internal knowledge index can search story-derived facts"
+    ],
+    "insufficient": [
+      "No StoryEngineContract or NarrativeQuestion authority was found in current business types",
+      "No OutlineCandidate adoption boundary was found",
+      "No execution_ready proof or causal reachability gate was found",
+      "Existing StoryControl and Markdown outlines therefore do not prove RP4 implementation",
+      "No ResearchObligation, versioned external source snapshot, claim adjudication, prose consumption receipt, or ResearchSettlement was found"
+    ]
+  },
+  "counts": {
+    "originalMustRequirements": 89,
+    "retainedMustRequirements": 83,
+    "movedRequirements": 6,
+    "remainingMustBudgetHeadroom": 5
+  },
+  "retained": [
+    {
+      "requirementId": "FR-ARCH-002",
+      "title": "分层规划",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-277",
+        "AT-288"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-003",
+      "title": "滚动规划",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-281",
+        "AT-286"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-004",
+      "title": "因果链",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-273",
+        "AT-276"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-005",
+      "title": "故事引擎契约",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-269"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-006",
+      "title": "核心叙事问题",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-270"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-007",
+      "title": "结局约束与逆向规划",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-271"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-008",
+      "title": "多类型叙事弧图",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-272"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-009",
+      "title": "叙事里程碑因果图",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-273"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-010",
+      "title": "卷契约",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-274"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-011",
+      "title": "章节功能契约",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-275"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-012",
+      "title": "场景因果装配",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-276"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-013",
+      "title": "跨层双向追踪",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-277"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-014",
+      "title": "回收窗口与认知负载",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-278"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-015",
+      "title": "多维节奏与回报曲线",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-279"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-016",
+      "title": "容量与变化预算",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-280"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-017",
+      "title": "规划置信视界",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-281"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-018",
+      "title": "大纲候选与 canon 隔离",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-282"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-019",
+      "title": "结构方案对比",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-283"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-020",
+      "title": "大纲静态验证",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-284"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-021",
+      "title": "稳定语义标识",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-285"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-022",
+      "title": "最小影响重规划",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-286"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-ARCH-024",
+      "title": "执行就绪证明",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-288"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-004",
+      "title": "计划人物弧与实际人物弧分离",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-425"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-005",
+      "title": "多维人物状态快照",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-426"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-006",
+      "title": "选择—代价—变化证据链",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-427"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-007",
+      "title": "人物能动性守卫",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-428"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-008",
+      "title": "错误信念生命周期",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-429"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-009",
+      "title": "有向多维关系状态",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-430"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-010",
+      "title": "关系变化事件",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-431"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-011",
+      "title": "关系不对称与误读",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-432"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-012",
+      "title": "价值对手与冲突镜像",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-433"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-013",
+      "title": "配角独立目标与离场后行动",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-434"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-014",
+      "title": "出场计划按功能而非频次",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-435"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-015",
+      "title": "群像注意力与选择分配",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-436"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-017",
+      "title": "弧光节奏允许停滞与复发",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-438"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-018",
+      "title": "生死、复活与身份断裂",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-439"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CHAR-019",
+      "title": "改稿影响与最小重规划",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-440"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-004",
+      "title": "世界状态按时间与地域投影",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-465"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-005",
+      "title": "地点与旅行可达性",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-466"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-006",
+      "title": "时间线与持续时间",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-467"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-007",
+      "title": "能力一等契约",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-468"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-008",
+      "title": "成长事件有获得与保留证明",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-469"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-009",
+      "title": "战力比较保留情境与未知",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-470"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-010",
+      "title": "资源与债务守恒",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-471"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-011",
+      "title": "伤势、冷却与恢复约束",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-472"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-012",
+      "title": "组织具有行动能力",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-473"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-013",
+      "title": "规则产生社会后果",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-474"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-014",
+      "title": "新规则准入与解题公平",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-475"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-015",
+      "title": "例外必须产生解释债务",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-476"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-016",
+      "title": "规则交互与冲突",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-477"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-017",
+      "title": "规则披露与悬念边界",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-478"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-018",
+      "title": "世界变更最小影响传播",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-479"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-WORLD-019",
+      "title": "旧资料编译与冲突保真",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-462",
+        "AT-480"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-001",
+      "title": "事实权威与检索投影分离",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-377",
+        "AT-387"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-002",
+      "title": "认识类型显式化",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-366",
+        "AT-372"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-003",
+      "title": "来源、证据与版本",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-381"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-004",
+      "title": "时间有效域",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-367"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-005",
+      "title": "实体身份与别名",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-368"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-006",
+      "title": "主张关系",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-369",
+        "AT-370"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-007",
+      "title": "冲突集合而非最后写入覆盖",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-369"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-008",
+      "title": "结算后方可成为 canon 事实",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-365"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-009",
+      "title": "角色知识状态",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-371"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-010",
+      "title": "读者知识状态",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-373"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-011",
+      "title": "秘密与可见性防火墙",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-374"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-012",
+      "title": "改设定的版本化影响分析",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-375"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-014",
+      "title": "摘要只是可追溯投影",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-377"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-015",
+      "title": "有损压缩可见",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-378"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-016",
+      "title": "先判可用再排相关",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-379"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-017",
+      "title": "目的化认识查询",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-380"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-018",
+      "title": "证据多样性与可靠性",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-381"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-019",
+      "title": "缺失与证据不足诚实呈现",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-382"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-020",
+      "title": "生成前记忆冲突预检",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-383"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-021",
+      "title": "生成后主张增量隔离",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-384"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-022",
+      "title": "记忆健康与覆盖",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-385"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-LONGMEM-023",
+      "title": "确定性重建与提供商无关真相",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-386",
+        "AT-387"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-003",
+      "title": "多层目标与继承",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-277",
+        "AT-280"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-006",
+      "title": "近期与远期双层成功条件",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-275",
+        "AT-288"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-017",
+      "title": "K3 最小叙事义务内核",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-357"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-025",
+      "title": "K5 长篇记忆内核",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-389"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RESEARCH-001",
+      "title": "研究义务识别与作者真实度边界",
+      "category": "research-evidence-foundation",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-508"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RESEARCH-002",
+      "title": "来源快照、权利与不可信内容隔离",
+      "category": "research-evidence-foundation",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-509"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RESEARCH-003",
+      "title": "原子断言、冲突裁决与时效保真",
+      "category": "research-evidence-foundation",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-510"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-RESEARCH-004",
+      "title": "研究消费谱系、事实检查与修订结算",
+      "category": "research-evidence-foundation",
+      "firstSliceScope": "Only the behavior required to compile an adopted story contract into a causally reachable, candidate-isolated, near-term execution-ready outline; actual prose, revision propagation, and completion certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-511"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    }
+  ],
+  "moved": [
+    {
+      "requirementId": "FR-ARCH-023",
+      "title": "探索性正文回流",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V7-revision"
+      ],
+      "reason": "Exploratory prose cannot flow back into structure until a governed prose candidate exists; V4 only prepares the candidate-isolation boundary."
+    },
+    {
+      "requirementId": "FR-CHAR-016",
+      "title": "声音随状态与关系变化",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ],
+      "reason": "Voice variation requires observable prose and relationship-stage evidence, not outline labels alone."
+    },
+    {
+      "requirementId": "FR-CHAR-020",
+      "title": "人物弧闭环证书",
+      "targetSlice": "V8-completion",
+      "reason": "A character-arc certificate requires the frozen publication draft and actual choice, cost, and state-change evidence."
+    },
+    {
+      "requirementId": "FR-WORLD-020",
+      "title": "世界完整性证书",
+      "targetSlice": "V8-completion",
+      "reason": "A world-integrity certificate freezes volume or completion evidence; a planned world model cannot prove published consistency."
+    },
+    {
+      "requirementId": "FR-LONGMEM-013",
+      "title": "修订失效传播",
+      "targetSlice": "V7-revision",
+      "extensionSlices": [
+        "V8-completion"
+      ],
+      "reason": "Deletion and replacement invalidation is first exercised by governed canon revision, not initial outline generation."
+    },
+    {
+      "requirementId": "FR-LONGMEM-024",
+      "title": "长时连续性审计",
+      "targetSlice": "V8-completion",
+      "reason": "Volume and full-book continuity audits require settled prose and a frozen release scope."
+    }
+  ],
+  "conclusion": "RP4 retains 83 outline-journey, research-grounding, and enabling invariants, and moves six prose-, revision-, or completion-dependent requirements downstream; current platform primitives remain implementation evidence only for legacy capabilities, not for RP4 completion."
+}

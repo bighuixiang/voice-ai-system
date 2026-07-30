@@ -1,0 +1,385 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "The platform may research craft broadly across public web and platforms with low author burden, but live writing consumes only source-policy-eligible, mechanism-level, evidence-backed, originality-guarded, reversible patterns rather than raw imitation or self-scored prompt tuning.",
+  "sourceFiles": [
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/craftProfile.ts",
+      "sha256": "6c896b53ee429bcc990df71f42243bb74e3200793cc7e9cf28b9a5a0e1d68ecd"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/novelSystemSkills.ts",
+      "sha256": "c82e67a927d7033b071db116a883e1b9b30a2a61d529acd905deeb29a8a62f84"
+    },
+    {
+      "path": "api/src/platformLibrary.ts",
+      "sha256": "57082e1bfda1dd74fd7c224813b08c4dba7766402254b31491f0bf16fc2799a5"
+    },
+    {
+      "path": "api/src/taskService.ts",
+      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+    },
+    {
+      "path": "api/src/chapterQualityReview.ts",
+      "sha256": "71f72a3497c4924f64ac673fadeaea2a659603614e36328b0f117b1ea5e5a0bf"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    },
+    {
+      "path": "ui/src/components/novel/PlotPilotLearningPanel.vue",
+      "sha256": "ff53476e0a7f22fae1e86bdcd890ea8e2b0920a694f3bef5955b71ccacaa8980"
+    },
+    {
+      "path": "ui/src/components/novel/PlatformLibraryPanel.vue",
+      "sha256": "598c6fbf8927655b402baf96345cf98551b9e5d7e17d57480b0f360c78a62706"
+    }
+  ],
+  "privacy": {
+    "localProjectSnapshotIncludes": [
+      "anonymous ordinal",
+      "file hash",
+      "field names",
+      "sample count",
+      "use cases",
+      "excerpt character counts"
+    ],
+    "localProjectSnapshotExcludes": [
+      "project slug",
+      "title",
+      "rough idea",
+      "sample excerpts",
+      "novel prose",
+      "prompt content",
+      "model output"
+    ]
+  },
+  "localInputSnapshot": {
+    "styleSampleFiles": [
+      {
+        "projectOrdinal": 1,
+        "sha256": "19d7eb3e254994d9258a035941fbfe3122a2c32e7426b77fc85eef77505a3f64",
+        "sampleCount": 4,
+        "fields": [
+          "excerpt",
+          "id",
+          "tags",
+          "useCase"
+        ],
+        "rightsMetadataFields": [],
+        "useCases": [
+          "combat",
+          "ending",
+          "mystery",
+          "opening"
+        ],
+        "excerptChars": {
+          "min": 121,
+          "max": 142,
+          "total": 539
+        }
+      }
+    ],
+    "craftProfileFiles": [
+      {
+        "projectOrdinal": 1,
+        "sha256": "0cca68f44a402e9a2bdcb88943998218016f7b504dd93feb2fea6d6a8c4fb078",
+        "fields": [
+          "antiPatterns",
+          "sceneContracts",
+          "voiceRules"
+        ]
+      }
+    ],
+    "totalStyleSamples": 4,
+    "filesWithRightsMetadata": 0
+  },
+  "summary": {
+    "auditedStages": 10,
+    "staticCraftGuidanceExists": true,
+    "taskUseCaseSampleRetrievalExists": true,
+    "persistedNegativeFeedbackExists": false,
+    "rightsAwareSampleSchemaExists": false,
+    "preAndPostSimilarityGuardExists": false,
+    "governedCraftExperimentExists": false,
+    "governedPreferenceHypothesisExists": false,
+    "craftReleaseAndRollbackExists": false,
+    "implementationVerified": false
+  },
+  "strengthsToReuse": [
+    "Rich built-in craft profile and explicit anti-imitation wording",
+    "Task-aware context assembly with T0/T1/T2/T3 budgeting",
+    "Invocation history, prompt version, patch targets, and accepted adoption metadata",
+    "Rule-based quality fallback and current mechanism observability projections",
+    "Scoped platform library, project-local private-asset boundaries, and a path to cross-project abstract patterns"
+  ],
+  "rootCause": {
+    "statement": "The product currently conflates injected guidance and observed mechanism state with learned craft; it lacks an authoritative evidence lifecycle from broad network discovery and source eligibility to abstract mechanism, controlled trial, author feedback, bounded preference, release, regression, and rollback.",
+    "consequence": "Static rules can homogenize prose, raw network samples can create imitation, hostile-content, privacy, duplication, freshness, and provenance risk, and AI-dominant scores or accepted patches can falsely certify improvement without causal or author evidence."
+  },
+  "stages": [
+    {
+      "stageId": "CRAFT-LEARNING-001",
+      "label": "内置工艺规则",
+      "currentStatus": "static-guidance-not-learning",
+      "evidence": [
+        {
+          "path": "api/src/craftProfile.ts",
+          "line": 160,
+          "evidence": "export async function readCraftProfile"
+        }
+      ],
+      "strength": "Built-in genre, beat, voice, anti-pattern, and scene-contract guidance is immediately reusable.",
+      "gap": "Rules have no observation, experiment, promotion, rollback, expiry, or outcome evidence lifecycle."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-002",
+      "label": "题材匹配",
+      "currentStatus": "substring-match-without-confidence",
+      "evidence": [
+        {
+          "path": "api/src/craftProfile.ts",
+          "line": 169,
+          "evidence": "source.includes(pattern.toLowerCase())"
+        }
+      ],
+      "strength": "Project genre and rough idea can select more relevant built-in profiles.",
+      "gap": "Substring hits expose neither competing classifications, confidence, boundary conditions, nor author confirmation."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-003",
+      "label": "项目工艺覆盖",
+      "currentStatus": "manual-file-override",
+      "evidence": [
+        {
+          "path": "api/src/craftProfile.ts",
+          "line": 161,
+          "evidence": "bible/craft-profile.json"
+        }
+      ],
+      "strength": "A project can override defaults without changing application code.",
+      "gap": "No product write workflow, provenance, author decision receipt, version promotion, or rollback was found."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-004",
+      "label": "原始样例登记",
+      "currentStatus": "raw-excerpt-without-rights-envelope",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 479,
+          "evidence": "export interface StyleSample"
+        }
+      ],
+      "strength": "Samples have IDs, tags, excerpts, and coarse use cases.",
+      "gap": "The schema has no source, ownership, license, allowed use, consent, retention, deletion, or quarantine fields."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-005",
+      "label": "样例检索与注入",
+      "currentStatus": "first-four-raw-json-injection",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 415,
+          "evidence": ".slice(0, 4)"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 421,
+          "evidence": "content: JSON.stringify(selected, null, 2)"
+        }
+      ],
+      "strength": "Use-case filtering and T1 placement prevent completely indiscriminate injection.",
+      "gap": "Selection ignores task deficit, rights, risk, applicability, negative evidence, and semantic redundancy, then injects the excerpts themselves."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-006",
+      "label": "生成前后原创性守卫",
+      "currentStatus": "prompt-warning-only-no-enforcement",
+      "evidence": [
+        {
+          "path": "api/src/taskService.ts",
+          "line": 281,
+          "evidence": "function preCallReview"
+        }
+      ],
+      "strength": "Static prompts explicitly warn against copying or close imitation.",
+      "gap": "Pre-call review checks only context presence, critical tiers, prompt length, and truncation; no rights or pre/post similarity guard was found."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-007",
+      "label": "作者反馈采集",
+      "currentStatus": "accept-fragmented-reject-ephemeral",
+      "evidence": [
+        {
+          "path": "api/src/taskService.ts",
+          "line": 164,
+          "evidence": "markInvocationPatchesAccepted"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3885,
+          "evidence": "function rejectRewrite"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3078,
+          "evidence": "function rejectWritingRecap"
+        }
+      ],
+      "strength": "Applied task patches can mark an invocation accepted and retain accepted targets.",
+      "gap": "Rewrite and recap rejection are local clears; no reason, fragment, scope, confounder, undo, or rejected invocation event is persisted."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-008",
+      "label": "质量证据",
+      "currentStatus": "ai-dominant-proxy-score",
+      "evidence": [
+        {
+          "path": "api/src/chapterQualityReview.ts",
+          "line": 373,
+          "evidence": "metric.score * 0.1 + aiMetric.score * 0.9"
+        },
+        {
+          "path": "api/src/chapterQualityReview.ts",
+          "line": 379,
+          "evidence": "average(metrics.map((metric) => metric.score)) * 0.2 + aiReport.overallScore * 0.8"
+        }
+      ],
+      "strength": "Rule signals and seven named metrics provide a concrete review surface and deterministic fallback.",
+      "gap": "AI review dominates merged metrics and overall score; no blind pairwise, calibrated independent judge, holdout, reader outcome, or causal craft attribution is present."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-009",
+      "label": "机制学习面板",
+      "currentStatus": "observability-projection-mislabeled-learning",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 1077,
+          "evidence": "const plotPilotLearningItems"
+        },
+        {
+          "path": "ui/src/components/novel/PlotPilotLearningPanel.vue",
+          "line": 5,
+          "evidence": "机制学习"
+        }
+      ],
+      "strength": "Six useful mechanism projections expose current structure, context, invocation, emotion, debt, and graph evidence.",
+      "gap": "The projection contains no craft candidate, trial, supporting/opposing evidence, author preference hypothesis, promotion, or rollback; its label overclaims learning."
+    },
+    {
+      "stageId": "CRAFT-LEARNING-010",
+      "label": "模式发布、衰减与撤回",
+      "currentStatus": "governed-loop-absent",
+      "evidence": [
+        {
+          "path": "api/src/platformLibrary.ts",
+          "line": 252,
+          "evidence": "export async function createPlatformAsset"
+        }
+      ],
+      "strength": "The platform library has reusable scoped assets and project links that can be evolved into governed references.",
+      "gap": "No governed craft entity, experiment, preference lifecycle, canary, expiry, regression case, source invalidation, or release decision exists in product code."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-raw-exemplar-rag",
+      "verdict": "reject-as-default",
+      "blueCase": "Fastest route to visible surface-style changes with little new infrastructure.",
+      "redCase": "Copies source surface, obscures rights, invites benchmark leakage and homogenization, and cannot explain why a result transfers."
+    },
+    {
+      "option": "B-tune-profile-from-accepts",
+      "verdict": "insufficient-alone",
+      "blueCase": "Low-cost personalization can reuse existing prompt profiles and accepted patch metadata.",
+      "redCase": "Acceptances are sparse and confounded, rejections disappear, and one choice cannot justify a global stable preference."
+    },
+    {
+      "option": "C-broad-network-mechanism-laboratory",
+      "verdict": "author-selected-specification-not-implemented",
+      "blueCase": "Searches broadly, abstracts mechanisms, freezes variables, separates reviewers, records positive and negative evidence, promotes narrowly, and supports cross-project reuse, expiry, and rollback.",
+      "redCase": "Requires source eligibility, hostile-content isolation, provenance and source-family snapshots, new entities, controlled experiments, independent evaluation, originality guards, and more author-visible evidence before it can improve live drafting."
+    }
+  ],
+  "targetGovernedFlow": {
+    "phases": [
+      "source_quarantined",
+      "observation_abstracted",
+      "pattern_candidate",
+      "pattern_approved",
+      "experiment_shadow",
+      "pattern_probation",
+      "pattern_validated",
+      "release_canary",
+      "release_active",
+      "release_rolled_back"
+    ],
+    "canonicalPatternLifecycle": [
+      "candidate",
+      "approved",
+      "probation",
+      "validated",
+      "rejected",
+      "retired"
+    ],
+    "entities": [
+      "SourceMaterialRecord",
+      "RightsEnvelope",
+      "CraftObservation",
+      "CraftPattern",
+      "PatternEvidence",
+      "ApplicabilityContract",
+      "CraftExperiment",
+      "ExperimentJudgment",
+      "AuthorFeedbackEvent",
+      "PreferenceHypothesis",
+      "LearningPolicy",
+      "SimilarityGuardResult",
+      "ReleaseDecision",
+      "RegressionCase"
+    ],
+    "invariant": "No raw source, search rank, repost count, model self-score, single click, or uncalibrated aggregate may independently promote a pattern; every active use is source-policy-eligible, scope-bounded, evidence-linked, hostile-content-isolated, similarity-guarded, expirable, and reversible."
+  },
+  "releaseGate": {
+    "requirementIds": [
+      "FR-CRAFT-001",
+      "FR-CRAFT-003",
+      "FR-CRAFT-007",
+      "FR-CRAFT-008",
+      "FR-CRAFT-011",
+      "FR-CRAFT-014",
+      "FR-CRAFT-015",
+      "FR-CRAFT-018",
+      "FR-CRAFT-019",
+      "FR-CRAFT-021",
+      "FR-CRAFT-023",
+      "FR-CRAFT-024",
+      "FR-EVAL-006",
+      "FR-EVAL-007",
+      "FR-EVAL-009",
+      "FR-EVAL-019",
+      "FR-EVAL-023",
+      "FR-FEEDBACK-001",
+      "FR-FEEDBACK-003",
+      "FR-FEEDBACK-007",
+      "FR-FEEDBACK-009",
+      "FR-FEEDBACK-012"
+    ],
+    "rule": "Do not claim that the platform learns high-quality craft until legacy and network sources are quarantined, eligible cross-platform evidence yields non-copyable mechanisms, duplicate source families are separated, author accept/reject/edit events are durable, controlled trials separate evidence producers, active patterns survive holdout and similarity guards, and source deletion or regression can stop future use and roll back the policy."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level, including Q-005 broad-network-mechanism-learning with platform-managed source and originality boundaries. No network-learning runtime is implementation-verified."
+}

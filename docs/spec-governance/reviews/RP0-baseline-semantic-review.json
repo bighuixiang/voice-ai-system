@@ -1,0 +1,814 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP0-baseline",
+  "profileKind": "governance-baseline",
+  "isUserRelease": false,
+  "journey": "Freeze a read-only capability, data, and failure baseline.",
+  "protocol": {
+    "blueQuestion": "What read-only evidence or governance rule is needed before the first user-facing slice can be trusted?",
+    "redQuestion": "Does the requirement invoke AI backfill, create a write authority, activate UI, or mutate canon?",
+    "rule": "RP0 may observe, classify, freeze fixtures, and govern future releases; it cannot claim product capability or perform semantic writes."
+  },
+  "counts": {
+    "originalMustRequirements": 39,
+    "retainedMustRequirements": 38,
+    "movedRequirements": 1,
+    "remainingMustBudgetHeadroom": 10
+  },
+  "retained": [
+    {
+      "requirementId": "FR-MIGRATE-001",
+      "title": "旧项目只读盘点",
+      "category": "baseline-observation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-061",
+        "AT-244"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MIGRATE-003",
+      "title": "权威来源冲突",
+      "category": "baseline-observation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-019"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MIGRATE-006",
+      "title": "版本能力声明",
+      "category": "baseline-observation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-065",
+        "AT-073"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-MIGRATE-009",
+      "title": "运行环境能力",
+      "category": "baseline-observation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-073",
+        "AT-074"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-001",
+      "title": "版本化评测套件",
+      "category": "evaluation-foundation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-133",
+        "AT-137",
+        "AT-141"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-002",
+      "title": "评测样例分层",
+      "category": "evaluation-foundation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-118",
+        "AT-119",
+        "AT-129",
+        "AT-132",
+        "AT-140"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-003",
+      "title": "冻结输入与候选可比性",
+      "category": "evaluation-foundation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-122",
+        "AT-141"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-016",
+      "title": "切片回归预算",
+      "category": "evaluation-foundation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-132"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-019",
+      "title": "防评测集污染",
+      "category": "evaluation-foundation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-136",
+        "AT-140"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-023",
+      "title": "权利与项目隔离",
+      "category": "evaluation-foundation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-140"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-024",
+      "title": "可重放评测档案",
+      "category": "evaluation-foundation",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-141"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-001",
+      "title": "端到端垂直切片",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-239",
+        "AT-353"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-002",
+      "title": "复用现有可靠原语",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-240"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-003",
+      "title": "合伙人外观不得早于状态语义",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-241",
+        "AT-421"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-004",
+      "title": "共享 schema 先于双端扩散",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-242",
+        "AT-354"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-005",
+      "title": "项目级能力清单",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-243",
+        "AT-247"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-006",
+      "title": "新项目优先且旧项目不受损",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-244"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-007",
+      "title": "每个语义只有一个写权威",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-245"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-008",
+      "title": "能力切换可回滚",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-246"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-009",
+      "title": "数据迁移与 UI 激活分离",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-247"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-010",
+      "title": "切片证据门禁",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-248",
+        "AT-364"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-011",
+      "title": "用户可感知的完成定义",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-249",
+        "AT-421"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-012",
+      "title": "依赖图与失败隔离",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-250",
+        "AT-359"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-013",
+      "title": "非产品使能内核",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-353"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-019",
+      "title": "切片依赖证明",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-359"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-020",
+      "title": "影子读取先于写权威切换",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-360"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-023",
+      "title": "决策驱动切片参数而非结构返工",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-363"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-024",
+      "title": "需求到证据可计算追踪",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-364"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-026",
+      "title": "需求规范强度显式化",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-482"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-027",
+      "title": "首个消费切片唯一归属",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-483"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-028",
+      "title": "愿景完成与可发布增量分离",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-484"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-029",
+      "title": "范围预算与延期决议",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-485"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-030",
+      "title": "重复、矛盾与孤儿需求 lint",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-486"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-031",
+      "title": "规格收敛与变更替换原则",
+      "category": "governance-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-487"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DURABILITY-001",
+      "title": "一致备份切面与完整性清单",
+      "category": "durability-and-recovery-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-516"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DURABILITY-002",
+      "title": "低负担备份策略、保留与机密边界",
+      "category": "durability-and-recovery-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-517"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DURABILITY-003",
+      "title": "持续校验、腐败检测与隔离恢复演练",
+      "category": "durability-and-recovery-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-517",
+        "AT-518"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DURABILITY-004",
+      "title": "可审阅恢复、灾难切换与 RecoverySettlement",
+      "category": "durability-and-recovery-guard",
+      "firstSliceScope": "Only read-only baseline observation, governance policy, and evaluation fixtures; no product write authority, UI activation, AI backfill, or canon generation.",
+      "acceptanceRefs": [
+        "AT-519"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    }
+  ],
+  "moved": [
+    {
+      "requirementId": "FR-MIGRATE-002",
+      "title": "预览式回填",
+      "targetSlice": "V5-drafting",
+      "extensionSlices": [
+        "V6-obligations"
+      ],
+      "reason": "AI backfill and candidate acceptance mutate semantic assets; RP0 is strictly read-only, while V5 first owns summary/person/fact adoption and V6 revalidates obligation extraction."
+    }
+  ],
+  "conclusion": "RP0 is a governance baseline, not a user release; AI backfill moves to V5/V6, while observation/evaluation guards and the project-durability contract are frozen before later slices depend on recoverability. Current product backup implementation remains unverified."
+}

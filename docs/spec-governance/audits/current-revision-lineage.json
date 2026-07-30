@@ -1,0 +1,778 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "The platform may automatically repair only unaccepted candidates inside a valid grant; accepted or settled prose remains current while a versioned impact-backed revision candidate is reviewed, released editions remain immutable, and every adopted revision proves exact downstream canon, foreshadowing, memory, quality, completion, and publication state again.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/revisionImpact.ts",
+      "sha256": "890e633adcfe27dcc479b587405420aff1675916689172ffaaf44002d4be4ca3"
+    },
+    {
+      "path": "api/src/revisionChangeSet.ts",
+      "sha256": "be3c08c41890ee2dc06dd42b1013d12355c36981a61a04a4700845f7bccffc91"
+    },
+    {
+      "path": "api/src/revisionReview.ts",
+      "sha256": "54e4b3c83a165446c65f919da6366097cc1fc8e3300617a38ee1875d86fb3013"
+    },
+    {
+      "path": "api/src/revisionAdoptionProposal.ts",
+      "sha256": "87ac98fed58d6857b1a38a6dcd2678546d288ff72dbcdb9ef0b3c176900edc9a"
+    },
+    {
+      "path": "api/src/revisionAdoptionReceipt.ts",
+      "sha256": "9e7fdf3c7542ff144787767ef9c85a3568ba461d22fe70183cc0649102e956df"
+    },
+    {
+      "path": "api/src/revisionSettlement.ts",
+      "sha256": "d5fe0a6a433af5eed65d5e78e7def81a16d2e60cbc400bed1cd1d9393b75fae6"
+    },
+    {
+      "path": "api/src/editionManifest.ts",
+      "sha256": "603898e0ceb1d513d8214b9a464c2222a67a2ad5b7439dffebfc3d0f471f25e7"
+    },
+    {
+      "path": "api/src/fileVersions.ts",
+      "sha256": "d746903790749003667e0944ea4b94fd9b9560399acc4f2c75813734d47ff797"
+    },
+    {
+      "path": "api/src/runtimeFiles.ts",
+      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
+    },
+    {
+      "path": "api/src/runtimeStore.ts",
+      "sha256": "575cc0dfa899d35ade781b8c8498e6db8d81d50914433731f49beb2cac6492a5"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "ui/src/components/novel/FileVersionDiffPanel.vue",
+      "sha256": "3a37870b0f4edb878791343fa5b2fb12f8b7a99705e1c53c34b88ec02d1e3add"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    },
+    {
+      "path": "ui/src/types/novel.ts",
+      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "source and manifest hashes",
+      "chapter/path/snapshot/derived-asset counts",
+      "snapshot schema field names",
+      "runtime aggregate counts copied from the privacy-bounded Q-003 audit"
+    ],
+    "snapshotExcludes": [
+      "project slug",
+      "title",
+      "genre",
+      "rough idea",
+      "chapter title or ID value",
+      "file path value",
+      "outline or prose",
+      "snapshot contents",
+      "checkpoint labels/manifests",
+      "runtime messages or payloads",
+      "author direction",
+      "prompt or model output"
+    ]
+  },
+  "operationalSnapshot": {
+    "totals": {
+      "projects": 8,
+      "chapters": 219,
+      "declaredWritingPaths": 438,
+      "fileSnapshots": 19,
+      "snapshotFilesPresent": 19,
+      "snapshotPathsCovered": 3,
+      "snapshotsWithParentOrBaseIdentity": 0,
+      "derivedAssets": 461
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 3,
+          "declaredWritingPaths": 6
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 0,
+          "sceneCards": 0,
+          "summaries": 0,
+          "qualityReports": 0,
+          "ledgers": 0
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 3,
+          "declaredWritingPaths": 6
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 0,
+          "sceneCards": 0,
+          "summaries": 0,
+          "qualityReports": 0,
+          "ledgers": 0
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 3,
+          "declaredWritingPaths": 6
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 0,
+          "sceneCards": 1,
+          "summaries": 0,
+          "qualityReports": 0,
+          "ledgers": 0
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "versionManifest": "d50f440acf6ae5cb62762b16d00377bc86a31a6c6a8930232ab0fd846d637fed"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 198,
+          "declaredWritingPaths": 396
+        },
+        "fileSnapshots": {
+          "count": 18,
+          "filesCovered": 2,
+          "snapshotFilesPresent": 18,
+          "fields": [
+            "createdAt",
+            "filePath",
+            "id",
+            "reason",
+            "runId",
+            "size",
+            "source",
+            "versionPath"
+          ],
+          "bySource": {
+            "missing": 4,
+            "runtime": 14
+          },
+          "byReason": {
+            "chapter_draft": 14,
+            "missing": 4
+          },
+          "withRunId": 14,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 198,
+          "sceneCards": 198,
+          "summaries": 1,
+          "qualityReports": 2,
+          "ledgers": 5
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 3,
+          "declaredWritingPaths": 6
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 3,
+          "sceneCards": 3,
+          "summaries": 3,
+          "qualityReports": 0,
+          "ledgers": 5
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 3,
+          "declaredWritingPaths": 6
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 3,
+          "sceneCards": 3,
+          "summaries": 3,
+          "qualityReports": 0,
+          "ledgers": 5
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 3,
+          "declaredWritingPaths": 6
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 3,
+          "sceneCards": 3,
+          "summaries": 3,
+          "qualityReports": 0,
+          "ledgers": 5
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "versionManifest": "d5d1ee18b78b17e34a09dc4d9178a60e08ee70b33d1f92856b0e4b67b15b0e8f"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 3,
+          "declaredWritingPaths": 6
+        },
+        "fileSnapshots": {
+          "count": 1,
+          "filesCovered": 1,
+          "snapshotFilesPresent": 1,
+          "fields": [
+            "createdAt",
+            "filePath",
+            "id",
+            "size",
+            "versionPath"
+          ],
+          "bySource": {
+            "missing": 1
+          },
+          "byReason": {
+            "missing": 1
+          },
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 3,
+          "sceneCards": 3,
+          "summaries": 3,
+          "qualityReports": 0,
+          "ledgers": 5
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      }
+    ],
+    "runtimeInventory": {
+      "sourceAudit": "docs/spec-governance/audits/current-q003-operational-baseline.json",
+      "sourceFingerprint": "d152ed1fd76045af433403e023771f55b5349cb55b5f79b32f16048a5983e070",
+      "runs": 8,
+      "checkpoints": 18,
+      "branches": 0,
+      "runtimeSnapshots": 18,
+      "checkpointEvents": 18,
+      "warning": "Counts prove stored operational objects only; they do not prove a project-version DAG, semantic ancestry, safe restore, selective invalidation, or revision settlement."
+    },
+    "interpretation": "Snapshots, checkpoints, branches, events, files, and successful writes are safety and inventory signals only. They do not prove semantic ancestry, atomic restore, conflict-free merge, exact invalidation, selective recomputation, author approval, or revision settlement."
+  },
+  "summary": {
+    "auditedStages": 14,
+    "projectsScanned": 8,
+    "chaptersInventoried": 219,
+    "declaredWritingPaths": 438,
+    "fileSnapshots": 19,
+    "fileSnapshotPathsCovered": 3,
+    "snapshotsWithParentOrBaseIdentity": 0,
+    "runtimeCheckpoints": 18,
+    "runtimeBranches": 0,
+    "governedRevisionIntents": 0,
+    "canonCommits": 0,
+    "semanticImpactGraphs": 0,
+    "damageEvents": 0,
+    "selectiveRecomputePlans": 0,
+    "revisionSettlements": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform versions storage surfaces and runtime safety moments, not author intent or semantic canon. File snapshots, bounded checkpoints, derivative branches, mutable derived files, background rebuilds, and run records have no shared content-addressed parent, narrative identity graph, damage event, invalidation cursor, or settlement authority.",
+    "consequence": "A correction, retcon, restore, reorder, rename, branch merge, or early-chapter rewrite can preserve bytes yet leave tasks, summaries, facts, vectors, graph edges, obligations, quality reports, downstream prose, and completion evidence silently stale; full rebuild is both too expensive and still incomplete, while partial overwrite cannot prove what survived."
+  },
+  "currentEvidence": [
+    {
+      "claim": "File snapshots store prior content bytes plus light metadata, without a parent/base/content/canon identity.",
+      "evidence": [
+        {
+          "path": "api/src/fileVersions.ts",
+          "line": 83,
+          "evidence": "fs.writeFile(absoluteVersionPath, currentContent"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 961,
+          "evidence": "export interface FileVersionSnapshot"
+        }
+      ]
+    },
+    {
+      "claim": "File history supports list and snapshot-versus-current diff, but no file-version restore API or semantic diff.",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2619,
+          "evidence": "app.get(\"/api/novel/projects/:projectId/file-versions/*\""
+        },
+        {
+          "path": "api/src/fileVersions.ts",
+          "line": 115,
+          "evidence": "id: \"current\""
+        }
+      ]
+    },
+    {
+      "claim": "Checkpoint restore directly deletes or copies managed files and records an event, without transaction, forward revert commit, invalidation, or settlement.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 148,
+          "evidence": "await fs.rm(target, { force: true })"
+        },
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 153,
+          "evidence": "await fs.copyFile(source, target)"
+        }
+      ]
+    },
+    {
+      "claim": "Runtime multi-file writes are sequential; serialization and per-file baseline checks do not roll back prior successful writes.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 214,
+          "evidence": "for (const write of input.writes)"
+        },
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 231,
+          "evidence": "await atomicWrite(input.root, safePath, write.content"
+        }
+      ]
+    },
+    {
+      "claim": "Derivative merge writes chapter/project files and then declares the branch accepted_for_canon without common-ancestor semantic merge or revision settlement.",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2322,
+          "evidence": "dispatchRuntimeWrites({"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2369,
+          "evidence": "canonPolicy: \"accepted_for_canon\""
+        }
+      ]
+    },
+    {
+      "claim": "The version panel is a read-only textual comparison surface with refresh, preview, close, and no revert control.",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/FileVersionDiffPanel.vue",
+          "line": 118,
+          "evidence": "readOnly: true"
+        },
+        {
+          "path": "ui/src/components/novel/FileVersionDiffPanel.vue",
+          "line": 61,
+          "evidence": "preview: [versionId: string]"
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "REV-TRACE-001",
+      "label": "capture-author-revision-intent",
+      "current": "Manual saves, rewrite commands, directions, derivative requests, and restore clicks are separate actions.",
+      "gap": "No RevisionIntent records what the author changed, why, scope, invariants, protected material, urgency, or whether this is correction, exploration, retcon, reorder, restore, or branch work.",
+      "target": "Capture one immutable RevisionIntent and derive explicit candidate ChangeSets without treating every edit as the same operation."
+    },
+    {
+      "id": "REV-TRACE-002",
+      "label": "freeze-common-base",
+      "current": "Single-file snapshots preserve prior bytes; runtime checkpoints preserve a bounded path list before a run.",
+      "gap": "Neither defines a content-addressed whole-project parent, canon cursor, branch head, policy version, or complete source set.",
+      "target": "Freeze a ProjectVersion/CanonCommit root with parent identities and exact scope before analysis or generation."
+    },
+    {
+      "id": "REV-TRACE-003",
+      "label": "semantic-diff",
+      "current": "Monaco compares one old file image with the current bytes.",
+      "gap": "Moved scenes, renamed/split characters, superseded facts, changed causal edges, obligation damage, and equivalent rewrites are invisible as semantic operations.",
+      "target": "Produce a typed SemanticChangeSet over stable narrative identities plus anchored textual spans."
+    },
+    {
+      "id": "REV-TRACE-004",
+      "label": "impact-analysis",
+      "current": "Save pipeline optionally queues three broad rebuild jobs after content saves.",
+      "gap": "Direct API saves, outline/support edits, checkpoint restore, runtime writes, derivative merges, ledger changes, and project changes do not share one dependency graph or impact receipt.",
+      "target": "Walk an exact RevisionImpactGraph before commit and show affected chapters, facts, obligations, memories, reports, tasks, completion proof, cost, and author decisions."
+    },
+    {
+      "id": "REV-TRACE-005",
+      "label": "candidate-revision-plan",
+      "current": "Quality repair and runtime rewrite can request whole-file replacements; merge writes a branch draft directly.",
+      "gap": "No bounded MutationPlan preserves protected spans/strengths, defines semantic preconditions, or compares minimum-change alternatives.",
+      "target": "Generate one or more reviewable revision candidates with scope, invariants, expected benefit, damage budget, and rollback identity."
+    },
+    {
+      "id": "REV-TRACE-006",
+      "label": "concurrency-and-multi-file-atomicity",
+      "current": "Runtime writes are serialized per project and baseline-hashed per managed file, then written sequentially.",
+      "gap": "A later write failure can leave earlier files committed; manual saves have no parent compare-and-swap; queues do not create an atomic canon transaction.",
+      "target": "Use optimistic parent checks, staged blobs, atomic CanonCommit plus outbox, idempotency, and fencing."
+    },
+    {
+      "id": "REV-TRACE-007",
+      "label": "restore-as-forward-history",
+      "current": "Checkpoint restore copies or deletes files in place and then rewrites project metadata timestamp.",
+      "gap": "It can partially fail, has no pre-restore safety commit, does not preserve restore as a new descendant, and cannot explain what later work was superseded.",
+      "target": "Compile RestorePlan, preview impact, create a new forward revert commit, retain descendants, and settle resulting damage/recompute."
+    },
+    {
+      "id": "REV-TRACE-008",
+      "label": "branch-and-three-way-merge",
+      "current": "Derivative branch stores a base run ID and draft payload; merge inserts/replaces chapter files and labels accepted_for_canon.",
+      "gap": "There is no common-ancestor tree, three-way semantic merge, conflict taxonomy, partial selection, or independent validation before canon claim.",
+      "target": "Merge ProjectVersions by common ancestor; classify text, entity, fact, timeline, obligation, lock, and policy conflicts for author resolution."
+    },
+    {
+      "id": "REV-TRACE-009",
+      "label": "damage-and-invalidation",
+      "current": "Derived summaries, facts, graph, quality, ledgers, tasks, runtime snapshots, and completion views persist independently.",
+      "gap": "Changing an early chapter or restoring a checkpoint emits no shared DamageEvent and cannot deterministically mark all dependent evidence stale.",
+      "target": "Commit typed DamageEvents with source dependency edges and revoke only affected claims, gates, settlements, work items, and completion subproofs."
+    },
+    {
+      "id": "REV-TRACE-010",
+      "label": "selective-recompute",
+      "current": "The save pipeline queues whole series quality, knowledge index, and story graph rebuilds; other mutation paths may queue nothing.",
+      "gap": "Broad rebuild wastes cost while missing obligations, memories, continuity, plans, downstream prose, reader state, and completion; jobs have no invalidation cursor.",
+      "target": "Compile a costed SelectiveRecomputePlan from damage closure, preserve unaffected projections, and fence late results by source commit."
+    },
+    {
+      "id": "REV-TRACE-011",
+      "label": "revalidate-and-resettle",
+      "current": "File writes, branch merge, or restore success are operational endpoints.",
+      "gap": "No RevisionSettlement proves changed intent, canon, obligations, quality, memory, downstream chapters, author locks, and completion state are current after repair.",
+      "target": "Require scoped validation and a replayable RevisionSettlement before dependent work or completion can be current."
+    },
+    {
+      "id": "REV-TRACE-012",
+      "label": "undo-redo-and-author-control",
+      "current": "The UI can view file diffs and restore runtime checkpoints, but file snapshots cannot be directly restored.",
+      "gap": "Byte undo, intent undo, reject candidate, revert canon commit, reopen superseded direction, and abandon branch are not distinguished.",
+      "target": "Expose intent-level undo/redo as new commits with impact preview, permission, receipts, stable links, and no hidden destructive rewind."
+    },
+    {
+      "id": "REV-TRACE-013",
+      "label": "observability-and-cost",
+      "current": "Runtime events record checkpoint and write activity; file manifests list snapshots.",
+      "gap": "No view explains parentage, semantic changes, stale descendants, recompute progress, skipped unaffected work, cost, failures, or final settlement.",
+      "target": "Show a revision timeline/DAG, damage map, recompute queue, conflicts, evidence freshness, cost, and current canon head."
+    },
+    {
+      "id": "REV-TRACE-014",
+      "label": "migration-retention-and-erasure",
+      "current": "Legacy files, snapshots, checkpoints, SQLite branches, and derived assets have separate storage lifecycles.",
+      "gap": "No migration confidence, retention policy, snapshot garbage collection, export lineage, privacy erasure proof, or orphan detector spans all stores.",
+      "target": "Dual-read legacy history, label unproven ancestry, retain protected commits, garbage-collect unreachable blobs safely, and prove export/erasure coverage."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-expand-file-snapshots-and-checkpoints",
+      "verdict": "retain-as-safety-layer-not-authority",
+      "blueCase": "Fastest path: snapshot more paths, keep longer history, add a restore button, and trigger broad rebuilds after restore; easy to explain and compatible with current storage.",
+      "redCase": "More byte copies still lack author intent, whole-project ancestry, semantic moves, common ancestors, exact dependencies, atomic multi-file commit, stale fencing, and settlement; broad rebuild can be expensive yet miss non-file authorities."
+    },
+    {
+      "option": "B-git-like-project-versioning",
+      "verdict": "strong-storage-lineage-but-insufficient-alone",
+      "blueCase": "Content-addressed commits, parents, branches, merges, tags, reverts, and three-way text merge provide durable whole-project history and excellent recovery/export semantics.",
+      "redCase": "Text trees do not inherently understand a renamed character, transformed obligation, changed reader secret, invalidated quality evidence, settled task, or completion subproof; semantic databases and projections can still drift from the commit."
+    },
+    {
+      "option": "C-semantic-revision-transaction-over-content-addressed-canon",
+      "verdict": "author-selected-specification-not-implemented",
+      "blueCase": "Combine maturity-tiered authority, immutable project commits, stable narrative identities, typed ChangeSets, impact/damage graphs, atomic canon events/outbox, selective recomputation, semantic merge, immutable editions, and replayable settlement; byte history, story truth, authorship, and publication remain linked.",
+      "redCase": "Requires authoritative maturity transitions, schema/identity migration, dependency capture, graph/reducer design, staged blobs, transaction/outbox/fencing, conflict UX, cost planning, projection cursors, edition supersession, long-running migration, and extensive crash/concurrency/retcon tests."
+    }
+  ],
+  "targetAuthority": {
+    "entities": [
+      "RevisionIntent",
+      "ProjectVersion",
+      "CanonCommit",
+      "SemanticChangeSet",
+      "MutationPlan",
+      "RevisionImpactGraph",
+      "DamageEvent",
+      "ProjectionInvalidation",
+      "SelectiveRecomputePlan",
+      "SemanticMergeCase",
+      "RestorePlan",
+      "RevisionSettlement"
+    ],
+    "intentTypes": [
+      "correct_fact",
+      "change_direction",
+      "retcon",
+      "reorder",
+      "rename_or_split_entity",
+      "revise_style",
+      "repair_quality",
+      "restore_prior_state",
+      "explore_branch",
+      "merge_branch",
+      "reopen_completed_scope"
+    ],
+    "invariant": "No file save, patch application, checkpoint restore, branch merge, task success, rebuild success, new timestamp, clean diff, score, or author click may independently establish current canon, semantic compatibility, projection freshness, revision success, chapter settlement, or book completion."
+  },
+  "selectedRevisionAuthority": {
+    "policyId": "maturity-tiered-revision-authority",
+    "unacceptedCandidates": "May be regenerated or locally repaired inside a valid scoped AutonomyGrant while remaining isolated, versioned, regression-checked, and discardable.",
+    "acceptedOrSettledProse": "May be diagnosed, branched, impact-analyzed, selectively recomputed, and presented as a candidate, but never silently overwritten; material adoption requires the applicable explicit author authority.",
+    "releasedEditions": "Remain immutable. The platform may prepare a new branch and candidate edition, but publication requires explicit author approval and a supersedes-linked new DeliveryProof.",
+    "emergencyRule": "Contradiction or safety discovery may stale proofs, fence dependent work, and block future publication immediately, but does not authorize silent accepted-text replacement."
+  },
+  "revisionProtocol": {
+    "order": [
+      "capture RevisionIntent, author authority, scope, reason, protected invariants, locks, anti-goals, and expected outcome",
+      "freeze a content-addressed ProjectVersion, canon cursor, branch head, policy/evaluator versions, and in-flight writer fences",
+      "compile typed SemanticChangeSet candidates over stable narrative identities and exact text/source anchors",
+      "walk RevisionImpactGraph to classify direct, transitive, uncertain, protected, conflicting, and unaffected dependents",
+      "preview author-visible consequences, choices, estimated cost/latency, skipped unaffected work, and rollback/revert identity",
+      "validate candidate MutationPlan against canon, POV, secrets, obligations, locks, rights, quality, memory, and downstream contracts",
+      "atomically publish CanonCommit plus semantic events/outbox; never expose a partial multi-file/project/database state",
+      "emit DamageEvents and ProjectionInvalidations at the new commit cursor, cancel/fence stale workers, and revoke dependent gates/proofs",
+      "execute the costed SelectiveRecomputePlan idempotently, preserving unaffected assets and reusing only content-addressed compatible results",
+      "revalidate changed and boundary surfaces, collect author decisions/waivers, and issue RevisionSettlement before downstream unlock or completion recertification"
+    ],
+    "restore": "Restore is a new forward CanonCommit derived from a reviewed RestorePlan; it never destroys descendants or silently rewinds database truth. A pre-restore safety commit, common base, affected scope, later-work disposition, conflicts, damage, recompute, and settlement are mandatory.",
+    "merge": "Use common-ancestor three-way comparison for both bytes and semantic identities. Text overlap, entity identity, fact/time state, reader/POV knowledge, obligation lifecycle, author lock, policy, and generated-derived conflicts remain explicit; no last-write-wins canon merge.",
+    "invalidation": "A source commit change invalidates only transitive dependents whose exact dependency receipts no longer match. Unaffected content and projections retain identities; uncertain or missing dependency edges fail closed for settlement but may use cost-bounded conservative recomputation."
+  },
+  "verificationMatrix": [
+    "revise an early chapter fact after downstream chapters, summaries, facts, vectors, graph, quality gates, obligations, settlements, and completion proof exist",
+    "delete, move, transform, intentionally open, and later restore a foreshadowing setup/payoff pair",
+    "rename, merge, split, disguise, reveal, kill, revive, or correct two same-name entities without corrupting aliases or POV knowledge",
+    "change protagonist, POV, tense, world rule, timeline, relationship, resource, injury, or ending contract mid-book",
+    "restore a checkpoint after later manual edits and prove later descendants are preserved, classified, and not silently lost",
+    "merge two branches that independently edit text, canon facts, obligation states, author locks, and completion scope",
+    "concurrent offline/manual/runtime edits from the same parent; one commits and the other receives a reviewable conflict",
+    "crash after staged blobs, after canon commit but before outbox delivery, during recompute, and during settlement",
+    "late worker completes against an old commit after restore/revert and is fenced without overwriting current projections",
+    "selective recompute failure/retry proves exactly-once visible effects and retains honest stale denominators",
+    "revert the revision itself, then replay both heads deterministically with identical canon, projections, costs, and receipts",
+    "legacy project migration, export/import, retention cleanup, privacy erasure, orphan detection, and damaged-history recovery"
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-STATE-002",
+      "FR-STATE-005",
+      "FR-STATE-006",
+      "FR-STATE-007",
+      "FR-STATE-008",
+      "FR-MIGRATE-004",
+      "FR-API-002",
+      "FR-UX-019",
+      "FR-EFFORT-009",
+      "FR-EFFORT-015",
+      "FR-EFFORT-018",
+      "FR-PROSE-007",
+      "FR-PROSE-008",
+      "FR-PROSE-009",
+      "FR-PROSE-010",
+      "FR-LONGMEM-013",
+      "FR-FORESHADOW-005",
+      "FR-FORESHADOW-007",
+      "FR-EVAL-010",
+      "FR-EVAL-012",
+      "FR-RUN-010",
+      "FR-RUN-014",
+      "FR-RUN-021",
+      "FR-COMPLETE-006"
+    ],
+    "rule": "Do not claim safe or automatically authorized revision, undo, restore, branch merge, selective recomputation, preserved completion, or edition supersession until authoritative maturity, immutable RevisionIntent, content-addressed ancestry, semantic diff/impact, candidate isolation, atomic forward canon commit/outbox, typed damage/invalidation, common-ancestor conflict handling, stale-worker fencing, costed selective recompute, author approval/waiver, immutable prior editions, and replayable RevisionSettlement pass retcon, concurrency, crash, late-result, accepted-prose, and released-edition tests."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; Q-007 selects maturity-tiered revision authority without weakening ancestry, author approval, candidate isolation, atomicity, damage propagation, stale fencing, exact freshness, rollback/revert, immutable editions, or honest settlement. No revision-authority runtime is implementation-verified."
+}

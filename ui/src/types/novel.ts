@@ -1034,6 +1034,1549 @@ export interface NovelProject {
   chapters: NovelChapter[];
 }
 
+export interface CreativeSessionMessage {
+  id: string;
+  clientMessageId: string;
+  role: "author";
+  text: string;
+  source: { kind: "author" };
+  createdAt: string;
+}
+
+export interface CreativeSession {
+  schemaVersion: "creative-session.v1";
+  sessionId: string;
+  projectSlug: string;
+  status: "capturing";
+  messages: CreativeSessionMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreativeJourneyProjection {
+  schemaVersion: "creative-journey-projection.v1";
+  projectSlug: string;
+  stage: "capture" | "understanding";
+  primaryAsset: "creative-session" | "understanding-preview";
+  blockingRef?: string;
+  primaryAction: {
+    id: "capture-idea" | "review-understanding";
+    label: string;
+    kind: "capture" | "review";
+    status: "available";
+  };
+  activeQuestion?: {
+    id: "question-primary-desire";
+    text: string;
+    status: "candidate";
+    impact: "high";
+    source: "deterministic-gap" | "model-gap";
+  };
+  sourceMessageIds: string[];
+  sessionFingerprint: string;
+}
+
+export interface UnderstandingSourceSpan {
+  messageId: string;
+  start: number;
+  end: number;
+}
+
+export interface UnderstandingClaim {
+  id: string;
+  text: string;
+  status: "explicit" | "inferred" | "provisional" | "unknown" | "conflicted";
+  evidence: UnderstandingSourceSpan[];
+}
+
+export interface UnderstandingPreview {
+  schemaVersion: "understanding-preview.v1";
+  projectSlug: string;
+  inputFingerprint: string;
+  sourceMessageIds: string[];
+  coreExplicit: UnderstandingClaim[];
+  inferred: UnderstandingClaim[];
+  unknowns: UnderstandingClaim[];
+  nextAction: "await-safe-understanding-dependencies";
+  modelCallIssued: false;
+  canonWritten: false;
+}
+
+export interface UnderstandingInterpretation {
+  id: string;
+  label: string;
+  summary: string;
+  status: "candidate" | "active" | "rejected" | "merged" | "superseded";
+  differences: string[];
+  supportEvidence: UnderstandingClaim[];
+  counterEvidence: UnderstandingClaim[];
+  downstreamImpacts: string[];
+}
+
+export interface UnderstandingInterpretationSet {
+  schemaVersion: "seed-interpretation-set.v1";
+  commonClaims: UnderstandingClaim[];
+  interpretations: UnderstandingInterpretation[];
+  activeQuestionId: "question-primary-desire";
+}
+
+export interface UnderstandingSnapshot {
+  schemaVersion: "understanding-snapshot.v1";
+  snapshotId: string;
+  projectSlug: string;
+  mode: "shadow" | "model";
+  sourceFingerprint: string;
+  sourceMessageIds: string[];
+  coreExplicit: UnderstandingClaim[];
+  inferred: UnderstandingClaim[];
+  unknowns: UnderstandingClaim[];
+  question: { id: "question-primary-desire"; text: string; status: "candidate"; impact: "high"; source: string };
+  interpretationSet?: UnderstandingInterpretationSet;
+  modelCallIssued: boolean;
+  canonWritten: false;
+  createdAt: string;
+}
+
+export interface UnderstandingTask {
+  schemaVersion: "understanding-task.v1";
+  taskId: string;
+  projectSlug: string;
+  status: "queued" | "running" | "completed" | "cancelled" | "failed" | "stale";
+  sourceFingerprint: string;
+  sourceMessageIds: string[];
+  modelCallIssued: boolean;
+  canonWritten: false;
+  snapshotId?: string;
+  error?: string;
+  startedAt: string;
+  updatedAt: string;
+  finishedAt?: string;
+}
+
+export interface DialogueQuestion {
+  schemaVersion: "dialogue-question.v1";
+  questionId: string;
+  questionVersion: number;
+  projectSlug: string;
+  status: "candidate" | "active" | "answered" | "delegated" | "deferred" | "withdrawn" | "superseded";
+  text: string;
+  whyNow: string;
+  impact: "low" | "medium" | "high";
+  ambiguity: number;
+  errorCost: string;
+  reversibility: string;
+  delayCost: string;
+  options: string[];
+  recommendation: string;
+  snapshotFingerprint: string;
+  answerStatus?: "confirmed" | "tentative" | "delegated";
+  answerText?: string;
+  answeredAt?: string;
+}
+
+export interface DecisionRecord {
+  schemaVersion: "decision-record.v1";
+  decisionId: string;
+  questionId: string;
+  questionVersion: number;
+  answerText: string;
+  answerStatus: "confirmed" | "tentative" | "delegated";
+  projectSlug: string;
+  status: "recorded" | "provisional" | "delegated";
+  sourceFingerprint: string;
+  evidenceRefs: Array<{ kind: "dialogue-question"; refId: string }>;
+  canonWritten: false;
+  supersedesDecisionId?: string;
+  correction?: { relation: "supersedes" | "retracts" | "refines"; previousText?: string; replacementText?: string };
+  createdAt: string;
+}
+
+export interface StoryContractCandidate {
+  schemaVersion: "story-contract-candidate.v1";
+  candidateId: string;
+  projectSlug: string;
+  status: "candidate" | "stale";
+  sourceDecisionId: string;
+  sourceFingerprint: string;
+  variant?: {
+    interpretationId: string;
+    label: string;
+    summary: string;
+    differences: string[];
+  };
+  recompile?: {
+    mode: "initial" | "incremental";
+    affectedPaths: Array<"protagonist.primaryDesire" | "protagonist.innerNeed" | "protagonist.misbelief" | "world.rules.primary" | "conflict.core" | "conflict.opposingPressure" | "stakes.failureCost" | "stakes.irreversibleChoice" | "readerPromise" | "endingDirection">;
+    preservedPaths: Array<"protagonist.primaryDesire" | "protagonist.innerNeed" | "protagonist.misbelief" | "world.rules.primary" | "conflict.core" | "conflict.opposingPressure" | "stakes.failureCost" | "stakes.irreversibleChoice" | "readerPromise" | "endingDirection">;
+    preservedFingerprints: Partial<Record<"protagonist.primaryDesire" | "protagonist.innerNeed" | "protagonist.misbelief" | "world.rules.primary" | "conflict.core" | "conflict.opposingPressure" | "stakes.failureCost" | "stakes.irreversibleChoice" | "readerPromise" | "endingDirection", string>>;
+  };
+  fields: Array<{
+    fieldId: string;
+    path: "protagonist.primaryDesire" | "protagonist.innerNeed" | "protagonist.misbelief" | "world.rules.primary" | "conflict.core" | "conflict.opposingPressure" | "stakes.failureCost" | "stakes.irreversibleChoice" | "readerPromise" | "endingDirection";
+    value: string;
+    epistemicStatus: "explicit" | "provisional";
+    evidenceRefs: Array<{ kind: "dialogue-question"; refId: string }>;
+    sourceDecisionId: string;
+    lock: "unlocked";
+  }>;
+  contract: {
+    protagonist: { primaryDesire: string | null; innerNeed: string | null; misbelief: string | null };
+    conflict: { core: string | null; opposingPressure: string | null };
+    stakes: { failureCost: string | null; irreversibleChoice: string | null };
+    world: { primaryRule: string | null };
+    readerPromise: string | null;
+    endingDirection: string | null;
+  };
+  assumptions: string[];
+  impactSummary: string[];
+  unknowns: string[];
+  supersedesCandidateId?: string;
+  canonWritten: false;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface WorldRuleContract {
+  schemaVersion: "world-rule-contract.v1";
+  ruleId: string;
+  version: number;
+  projectSlug: string;
+  sourceCandidateId: string;
+  sourceFingerprint: string;
+  status: "candidate" | "accepted" | "stale";
+  proposition: {
+    condition: string;
+    mechanism: string;
+    result: string;
+    cost: string;
+    limit: string;
+    failure: string;
+    prohibitedInferences?: string[];
+    exceptions?: string[];
+  };
+  scope: { subjects: string[]; regions: string[]; time?: { from?: string; to?: string } };
+  disclosure: {
+    objectiveStatus: "accepted" | "proposed" | "unknown";
+    domains: Array<{ domainId: string; kind: "objective_canon" | "character_belief" | "institution_belief" | "author_proposal" | "unknown"; claim: string }>;
+  };
+  evidenceRefs: Array<{ kind: "dialogue-question" | "canon-asset" | "decision-record"; refId: string }>;
+  canonWritten: false;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface OutlineCandidate {
+  schemaVersion: "outline-candidate.v1";
+  outlineId: string;
+  projectSlug: string;
+  status: "candidate" | "stale";
+  sourceCandidateId: string;
+  sourceCandidateFingerprint: string;
+  horizon: { strongFreezeCount: number; totalChapterCount: number };
+  chapters: Array<{
+    chapterId: string;
+    order: number;
+    title: string;
+    function: "inciting-pressure" | "complication" | "reversal" | "choice" | "aftermath";
+    goal: string;
+    conflict: string;
+    turningPoint: string;
+    causalInputs: string[];
+    causalOutputs: string[];
+    freeze: "strong" | "tentative";
+    status: "candidate";
+  }>;
+  assumptions: string[];
+  unknowns: string[];
+  canonWritten: false;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface OutlineValidationReport {
+  schemaVersion: "outline-validation-report.v1";
+  reportId: string;
+  projectSlug: string;
+  outlineId: string;
+  outlineFingerprint: string;
+  status: "passed" | "blocked";
+  checks: Array<{ checkId: string; status: "passed" | "failed"; detail: string }>;
+  executionReady: false;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface OutlineAdoptionProposal {
+  schemaVersion: "outline-adoption-proposal.v1";
+  proposalId: string;
+  projectSlug: string;
+  outlineId: string;
+  outlineFingerprint: string;
+  validationReportId: string;
+  validationFingerprint: string;
+  selectedChapterIds: string[];
+  status: "ready_for_authorization" | "blocked" | "authorized" | "committed";
+  authorAuthorization?: { actorId: string; authorizationId: string };
+  canonWritten: false | true;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface OutlineVersion {
+  schemaVersion: "outline-version.v1";
+  versionId: string;
+  projectSlug: string;
+  version: number;
+  outlineId: string;
+  outlineFingerprint: string;
+  selectedChapterIds: string[];
+  strongFreezeCount: number;
+  status: "active";
+  canonWritten: true;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ExecutionReadyProof {
+  schemaVersion: "execution-ready-proof.v1";
+  proofId: string;
+  projectSlug: string;
+  versionId: string;
+  versionFingerprint: string;
+  status: "ready" | "blocked";
+  executionReady: boolean;
+  checks: Array<{ checkId: string; status: "passed" | "failed"; detail: string }>;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ExecutionReadinessDecision {
+  allowed: boolean;
+  reason?: "PROOF_NOT_FOUND" | "PROOF_BLOCKED" | "VERSION_POINTER_STALE" | "CHAPTER_OUTSIDE_WINDOW";
+  proof?: ExecutionReadyProof;
+  version?: OutlineVersion;
+  checks: Array<{ checkId: string; status: "passed" | "failed"; detail: string }>;
+}
+
+export interface ExecutionWorkItem {
+  schemaVersion: "execution-work-item.v1";
+  workItemId: string;
+  projectSlug: string;
+  chapterId: string;
+  versionId: string;
+  proofFingerprint: string;
+  contextManifestId: string;
+  contextFingerprint: string;
+  status: "queued" | "blocked" | "claimed" | "running" | "completed" | "failed";
+  idempotencyKey: string;
+  blockedReason?: string;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ProseGenerationManifest {
+  schemaVersion: "prose-generation-manifest.v1";
+  chapterId: string;
+  outlineVersionId: string;
+  executionProofFingerprint: string;
+  contextManifestId: string;
+  contextFingerprint: string;
+  createdAt: string;
+}
+
+export interface ProseCandidate {
+  schemaVersion: "prose-candidate.v1";
+  candidateId: string;
+  projectSlug: string;
+  chapterId: string;
+  status: "generated" | "validated" | "adopted" | "rejected";
+  content: string;
+  generation: ProseGenerationManifest;
+  sourceFingerprint: string;
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+
+export interface ProseCandidateValidation {
+  candidateId: string;
+  status: "passed" | "blocked";
+  reasons: string[];
+  candidateFingerprint: string;
+  checkedAt: string;
+}
+
+export interface ProseValidationBundle {
+  schemaVersion: "prose-validation-bundle.v1";
+  bundleId: string;
+  candidateId: string;
+  candidateFingerprint: string;
+  status: "passed" | "blocked";
+  checks: Array<{ checkId: string; status: "passed" | "failed"; detail: string }>;
+  hardFailures: string[];
+  reviewer: { kind: "independent-deterministic"; id: "prose-validation-v1" };
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface RedBlueReview {
+  schemaVersion: "red-blue-review.v1";
+  reviewId: string;
+  candidateId: string;
+  candidateFingerprint: string;
+  validationBundleFingerprint: string;
+  status: "passed" | "blocked";
+  redFindings: Array<{ findingId: string; severity: "hard" | "warning"; detail: string }>;
+  blueStrengths: Array<{ strengthId: string; detail: string }>;
+  commonGround: Array<{ claimId: string; detail: string; evidenceRefs: string[] }>;
+  blueArgument: { claims: Array<{ claimId: string; detail: string; evidenceRefs: string[] }>; protectedStrengths: string[] };
+  redArgument: { claims: Array<{ claimId: string; detail: string; evidenceRefs: string[] }>; counterevidenceRefs: string[]; falsifiers: string[] };
+  verdict: "supports-adoption" | "blocks-adoption" | "evidence-insufficient";
+  recommendation: "adopt" | "repair" | "request-evidence";
+  reviewer: { kind: "independent-deterministic"; id: "red-blue-review-v1" };
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface AuthorFeedbackEvent {
+  schemaVersion: "author-feedback-event.v1";
+  eventId: string;
+  projectSlug: string;
+  candidateId: string;
+  adoptionTransactionId: string;
+  decision: "accepted" | "needs_revision" | "rejected";
+  note: string;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export type FeedbackCategory = "content" | "structure" | "language" | "fact" | "presentation";
+export interface FeedbackAttribution {
+  schemaVersion: "feedback-attribution.v1";
+  attributionId: string;
+  eventId: string;
+  adoptionTransactionId: string;
+  projectSlug: string;
+  candidateId: string;
+  category: FeedbackCategory;
+  pattern: string;
+  scope: { chapterId?: string; sceneId?: string };
+  evidenceRefs: string[];
+  confounders: string[];
+  confidence: { lower: number; upper: number };
+  allowPreferenceLearning: false;
+  lifecycle: "candidate";
+  createdAt: string;
+  fingerprint: string;
+}
+export interface PreferenceHypothesis {
+  schemaVersion: "preference-hypothesis.v1";
+  hypothesisId: string;
+  projectSlug: string;
+  pattern: string;
+  category: FeedbackCategory;
+  scope: { chapterId?: string; sceneId?: string };
+  lifecycle: "candidate" | "validated" | "active" | "weakened" | "retired";
+  supportEventIds: string[];
+  oppositionEventIds: string[];
+  confidence: { lower: number; upper: number };
+  minIndependentEvidence: 2;
+  revokeReason?: string;
+  revokedBy?: string;
+  revokedAt?: string;
+  oppositionReasons?: string[];
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+
+export interface LearningPolicy {
+  schemaVersion: "learning-policy.v1";
+  policyId: string;
+  projectSlug: string;
+  minIndependentEvidence: 2;
+  confidenceThreshold: number;
+  decayRate: number;
+  conflictStrategy: "weaken-and-split";
+  explorationRatio: number;
+  privacyBoundary: "project-only";
+  rollbackVersion: string;
+  createdAt: string;
+  fingerprint: string;
+}
+export interface ExplorationBudget {
+  schemaVersion: "exploration-budget.v1";
+  budgetId: string;
+  projectSlug: string;
+  scope: string;
+  maxProbes: number;
+  maxCost: number;
+  maxImpact: string;
+  stopConditions: string[];
+  usedProbes: number;
+  usedCost: number;
+  consumedOperationIds: string[];
+  status: "active" | "exhausted" | "paused";
+  pauseReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+
+export type SourceRightsStatus = "owned" | "licensed" | "public_domain" | "analysis_only" | "unknown";
+export type SourceAllowedUse = "analysis" | "style-experiment" | "generation" | "publication";
+export interface SourceMaterialRecord {
+  schemaVersion: "source-material-record.v1";
+  sourceId: string;
+  projectSlug: string;
+  title: string;
+  type: string;
+  provenance: string;
+  rightsStatus: SourceRightsStatus;
+  licensor: string;
+  licenseExpiresAt?: string;
+  allowedUses: SourceAllowedUse[];
+  projectScope: string;
+  retainExcerpt: boolean;
+  importedBy: string;
+  createdAt: string;
+  fingerprint: string;
+}
+export interface RightsEnvelope {
+  schemaVersion: "rights-envelope.v1";
+  envelopeId: string;
+  sourceId: string;
+  projectSlug: string;
+  rightsStatus: SourceRightsStatus;
+  allowedUses: SourceAllowedUse[];
+  analysisOnly: boolean;
+  status: "valid" | "restricted" | "expired" | "unknown";
+  checkedBy: string;
+  checkedAt: string;
+  sourceFingerprint: string;
+  fingerprint: string;
+}
+
+export interface CraftPattern {
+  schemaVersion: "craft-pattern.v1";
+  patternId: string;
+  projectSlug: string;
+  name: string;
+  mechanism: string;
+  narrativeFunction: string;
+  applicability: string[];
+  counterexamples: string[];
+  sourceEnvelopeIds: string[];
+  evidenceRefs: string[];
+  lifecycle: "candidate" | "approved" | "probation" | "validated" | "rejected" | "retired";
+  approval?: { actor: string; reason: string; approvedAt: string };
+  promotion?: { experimentId: string; actor: string; reason: string; promotedAt: string };
+  validation?: { experimentId: string; actor: string; reason: string; validatedAt: string };
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+export type CharacterSourceProvenance = "author-confirmed" | "canon-fact" | "character-self-report" | "other-view" | "plan" | "inference" | "unknown";
+export interface CharacterContractSource { field: string; provenance: CharacterSourceProvenance; sourceVersion: string; evidenceRefs: string[]; }
+export interface CharacterDramaticContract {
+  schemaVersion: "character-dramatic-contract.v1";
+  contractId: string;
+  projectSlug: string;
+  characterId: string;
+  displayName: string;
+  externalWant: string;
+  internalNeed: string;
+  falseBelief: string;
+  woundOrFear: string;
+  valuesAndBoundaries: string[];
+  contradiction: string;
+  stake: string;
+  unacceptableChoice: string;
+  potentialChange: string;
+  unknown: string[];
+  sources: CharacterContractSource[];
+  lifecycle: "candidate" | "confirmed";
+  confirmation?: { actor: string; reason: string; confirmedAt: string };
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+export interface CharacterRelationshipState { targetCharacterId: string; trust: number; power: number; dependency: number; fear: number; publicStance: string; privateStance: string; boundary: string; unpaidDebt: string; }
+export interface CharacterStateSnapshot {
+  schemaVersion: "character-state-snapshot.v1";
+  snapshotId: string;
+  projectSlug: string;
+  characterId: string;
+  contractId: string;
+  asOf: string;
+  currentGoal: string;
+  priority: string;
+  belief: string;
+  knowledge: string[];
+  emotion: string;
+  injury: string;
+  resources: string[];
+  abilitiesAndIdentity: string[];
+  relationshipStances: CharacterRelationshipState[];
+  obligations: string[];
+  availableChoices: string[];
+  sourceRefs: string[];
+  createdAt: string;
+  fingerprint: string;
+}
+export interface CharacterChoiceEvidence {
+  schemaVersion: "character-choice-evidence.v1";
+  evidenceId: string;
+  projectSlug: string;
+  characterId: string;
+  contractId: string;
+  beforeSnapshotId: string;
+  choice: string;
+  rejectedChoices: string[];
+  immediateCost: string;
+  delayedCost: string;
+  evidenceRefs: string[];
+  status: "planned" | "observed";
+  afterSnapshotId?: string;
+  outcomeRefs?: string[];
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+export interface RelationshipEvent {
+  schemaVersion: "relationship-event.v1";
+  eventId: string;
+  projectSlug: string;
+  relationshipId: string;
+  sourceCharacterId: string;
+  targetCharacterId: string;
+  contractId: string;
+  beforeSnapshotId: string;
+  sharedEventRef: string;
+  sourceCharacterChoice: string;
+  targetCharacterChoice: string;
+  sourceInterpretation: string;
+  targetInterpretation: string;
+  visibleActions: string[];
+  valueExchange: string;
+  immediateCost: string;
+  delayedCost: string;
+  evidenceRefs: string[];
+  status: "planned" | "observed";
+  afterSnapshotId?: string;
+  outcomeRefs?: string[];
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+export interface CharacterArcMilestone { milestoneId: string; choiceEvidenceId: string; milestone: string; actualChange: string; sourceRefs: string[]; recordedAt: string; }
+export interface CharacterArcContract {
+  schemaVersion: "character-arc-contract.v1";
+  arcId: string;
+  projectSlug: string;
+  characterId: string;
+  dramaticContractId: string;
+  startState: string;
+  targetChange: string;
+  keyPressures: string[];
+  plannedChoices: string[];
+  plannedCosts: string[];
+  relationshipImpacts: string[];
+  allowedRegression: string;
+  sourceRefs: string[];
+  lifecycle: "planned" | "active" | "closed";
+  milestones: CharacterArcMilestone[];
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+export interface WorldStateSnapshot {
+  schemaVersion: "world-state-snapshot.v1";
+  snapshotId: string;
+  projectSlug: string;
+  asOf: string;
+  region: string;
+  publicationVersion: string;
+  politicalControl: string[];
+  activeConflicts: string[];
+  institutions: string[];
+  infrastructure: string[];
+  markets: string[];
+  environment: string[];
+  resources: string[];
+  effectiveRuleIds: string[];
+  unknowns: string[];
+  sourceRefs: string[];
+  createdAt: string;
+  fingerprint: string;
+}
+export interface CapabilityContract {
+  schemaVersion: "capability-contract.v1";
+  capabilityId: string;
+  projectSlug: string;
+  holderId: string;
+  name: string;
+  sourceRefs: string[];
+  canDo: string;
+  cannotDo: string[];
+  prerequisites: string[];
+  inputs: string[];
+  consumption: string[];
+  scope: string[];
+  duration: string;
+  cooldown: string;
+  precision: string;
+  counters: string[];
+  progressionPath: string[];
+  disclosure: string;
+  evidenceRefs: string[];
+  permanent: false;
+  status: "candidate" | "confirmed" | "retired";
+  progressionEventIds: string[];
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+export interface ProgressionEvent { schemaVersion: "progression-event.v1"; progressionId: string; capabilityId: string; trigger: string; acquisition: string; retained: string; abandoned: string; limitation: string; newChoice: string; proseRefs: string[]; sourceRefs: string[]; createdAt: string; fingerprint: string; }
+export interface WorldTravelRoute { toLocationId: string; distance: string; travelMode: string; normalDuration: string; blockedDuration: string; accessConditions: string[]; risks: string[]; }
+export interface WorldLocation { schemaVersion: "world-location.v1"; locationId: string; projectSlug: string; name: string; hierarchy: string; region: string; travelRoutes: WorldTravelRoute[]; accessConditions: string[]; currentReachability: "reachable" | "blocked" | "unknown"; sourceRefs: string[]; createdAt: string; updatedAt: string; fingerprint: string; }
+export interface StoryTimeEvent { schemaVersion: "story-time-event.v1"; eventId: string; projectSlug: string; label: string; timelineId: string; start: string; end: string; duration: string; uncertainty: "exact" | "approximate" | "unknown"; parallelLine: string; sourceRefs: string[]; createdAt: string; fingerprint: string; }
+export type CausalityRelation = "requires" | "enables" | "complicates" | "reveals" | "pays_off" | "conflicts_with";
+export interface CausalityEdge { schemaVersion: "narrative-causality-edge.v1"; edgeId: string; projectSlug: string; sourceNodeId: string; targetNodeId: string; relation: CausalityRelation; trigger: string; consequence: string; delayedConsequence: string; evidenceRefs: string[]; status: "candidate" | "validated" | "blocked"; createdAt: string; fingerprint: string; }
+export interface CausalityGraphReport { projectSlug: string; edgeCount: number; status: "passed" | "blocked"; issues: Array<{ kind: "cycle" | "isolated" | "missing-evidence"; edgeIds: string[]; detail: string }>; fingerprint: string; }
+export interface VolumeContract { schemaVersion: "volume-contract.v1"; volumeId: string; projectSlug: string; title: string; openingState: string; stageGoals: string[]; primaryConflict: string; rolePositions: string[]; irreversibleDuties: string[]; climaxChoice: string; stagePayoffs: string[]; endPressure: string; capacityBudget: { chapters: number; words: number }; sourceRefs: string[]; status: "candidate" | "confirmed" | "retired"; createdAt: string; updatedAt: string; fingerprint: string; }
+export interface ChapterFunctionContract { schemaVersion: "chapter-function-contract.v1"; chapterId: string; projectSlug: string; primaryFunction: string; secondaryFunctions: string[]; sceneState: string; localGoal: string; obstacle: string; choice: string; observableChange: string; readerPayoff: string; mustRemember: string[]; mustNotReveal: string[]; sourceRefs: string[]; status: "candidate" | "validated" | "blocked"; createdAt: string; updatedAt: string; fingerprint: string; }
+export interface SceneCardContract { schemaVersion: "scene-card-contract.v1"; sceneId: string; projectSlug: string; chapterId: string; trigger: string; povCharacterId: string; roleGoal: string; conflictStrategy: string; turningPoint: string; informationChange: string; emotionChange: string; relationshipChange: string; resourceChange: string; entryState: string; exitState: string; nextSceneHook: string; sourceRefs: string[]; status: "candidate" | "validated" | "blocked"; createdAt: string; updatedAt: string; fingerprint: string; }
+export type NarrativeTraceRelation = "contains" | "realized_by" | "supports" | "pays_off" | "derived_from" | "constrains" | "revises";
+export interface NarrativeTraceLink { schemaVersion: "narrative-trace-link.v1"; linkId: string; projectSlug: string; sourceLayer: string; sourceId: string; targetLayer: string; targetId: string; relation: NarrativeTraceRelation; evidenceRefs: string[]; createdAt: string; fingerprint: string; }
+export interface NarrativeTraceReport { projectSlug: string; linkCount: number; layers: string[]; status: "passed" | "blocked"; issues: Array<{ kind: "orphan" | "missing-evidence"; linkId: string; detail: string }>; fingerprint: string; }
+export interface ObligationLoadReport { schemaVersion: "obligation-load-report.v1"; projectSlug: string; windowChapterIds: string[]; openObligationCount: number; weightedLoad: number; byImportance: { low: number; medium: number; high: number }; byType: Record<string, number>; recommendations: string[]; status: "stable" | "watch" | "blocked"; canClaimNoOpenObligations: false; fingerprint: string; generatedAt: string; }
+export interface NarrativeCurvePoint { schemaVersion: "narrative-curve-point.v1"; pointId: string; projectSlug: string; chapterId: string; sceneId: string; dimensions: { pressure: number; information: number; emotion: number; relationship: number; progression: number; payoff: number }; whiteSpace: string[]; evidenceRefs: string[]; createdAt: string; fingerprint: string; }
+export interface PlanningNode { schemaVersion: "narrative-planning-node.v1"; nodeId: string; projectSlug: string; layer: string; title: string; status: "committed" | "rolling" | "tentative" | "exploratory"; commitments: string[]; sourceRefs: string[]; autoEvolutionAllowed: boolean; decision?: { actor: string; reason: string; decidedAt: string }; createdAt: string; updatedAt: string; fingerprint: string; }
+export interface StructureAlternative { alternativeId: string; label: string; sequence: string[]; pacing: string; agency: string; suspenseFairness: string; payoffDifficulty: string; lengthImpact: string; changeScope: string; }
+export interface StructureAlternativeSet { schemaVersion: "structure-alternative-set.v1"; setId: string; projectSlug: string; contractFingerprint: string; alternatives: StructureAlternative[]; sourceRefs: string[]; createdAt: string; fingerprint: string; }
+export interface SimilarityGuardResult {
+  schemaVersion: "similarity-guard-result.v1";
+  guardId: string;
+  sourceVersion: string;
+  targetVersion: string;
+  overlapRatio: number;
+  maxTokenOverlap: number;
+  status: "passed" | "blocked";
+  risk: "low" | "high";
+  evidenceRefs: string[];
+  createdAt: string;
+  fingerprint: string;
+}
+export interface PatternTransferPlan {
+  schemaVersion: "pattern-transfer-plan.v1";
+  planId: string;
+  projectSlug: string;
+  patternId: string;
+  sourceEnvelopeId: string;
+  targetChapterId: string;
+  intendedEffect: string;
+  prohibitedActions: string[];
+  guard: SimilarityGuardResult;
+  status: "candidate" | "blocked" | "approved";
+  canonWriteAllowed: false;
+  createdAt: string;
+  fingerprint: string;
+}
+export interface ExperimentJudgment {
+  evaluatorId: string;
+  evaluatorKind: "independent-reviewer" | "author";
+  winner: "baseline" | "treatment" | "tie" | "uncertain";
+  hardGuardsPassed: boolean;
+  authorReason: string;
+  judgedAt: string;
+  fingerprint: string;
+}
+export interface CraftExperiment {
+  schemaVersion: "craft-experiment.v1";
+  experimentId: string;
+  projectSlug: string;
+  transferPlanId: string;
+  baselineCandidateId: string;
+  treatmentCandidateId: string;
+  holdoutSceneIds: string[];
+  targetMetrics: string[];
+  budgetId: string;
+  status: "planned" | "running" | "judged" | "inconclusive" | "failed" | "invalidated";
+  runnerId?: string;
+  judgment?: ExperimentJudgment;
+  createdAt: string;
+  updatedAt: string;
+  fingerprint: string;
+}
+
+export interface DerivedPublicationTransaction {
+  schemaVersion: "derived-publication-transaction.v1";
+  transactionId: string;
+  projectSlug: string;
+  chapterId: string;
+  settlementId: string;
+  writes: Array<{ relativePath: string; contentSha256: string }>;
+  status: "prepared" | "committed" | "rolled_back";
+  createdAt: string;
+  committedAt?: string;
+  error?: string;
+  fingerprint: string;
+}
+
+export interface ProseAdoptionTransaction {
+  schemaVersion: "prose-adoption-transaction.v1";
+  transactionId: string;
+  candidateId: string;
+  targetPath: string;
+  expectedCanonSha256: string;
+  adoptedSha256: string;
+  authorizationId: string;
+  reviewFingerprint: string;
+  reviewVerdict: RedBlueReview["verdict"];
+  status: "prepared" | "committed" | "rolled_back" | "blocked";
+  createdAt: string;
+  committedAt?: string;
+  error?: string;
+  fingerprint: string;
+}
+
+export interface ProseAdoptionReadiness {
+  candidateId: string;
+  chapterId: string;
+  targetPath: string;
+  expectedCanonSha256: string;
+  authorizationRequired: true;
+  validationStatus: "passed" | "blocked";
+  canonWritten: false;
+}
+
+export interface ProseRepairPlan {
+  schemaVersion: "prose-repair-plan.v1";
+  planId: string;
+  projectSlug: string;
+  candidateId: string;
+  reviewFingerprint: string;
+  status: "ready" | "blocked";
+  targetFindings: Array<{ findingId: string; severity: "hard" | "warning"; evidenceRefs: string[]; expectedImprovement: string }>;
+  scope: { kind: "local-span"; chapterId: string; affectedParagraphIndexes: number[]; maxChangedParagraphs: number };
+  protectedStrengths: string[];
+  protectedItems: string[];
+  prohibitedActions: string[];
+  expectedEvidence: string[];
+  regressionChecks: string[];
+  rollbackPoint: { candidateFingerprint: string; canonUntouched: true };
+  authorDecisionRequired: true;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ProseRepairCandidate {
+  schemaVersion: "prose-repair-candidate.v1";
+  repairCandidateId: string;
+  planId: string;
+  parentCandidateId: string;
+  parentCandidateFingerprint: string;
+  candidateId: string;
+  changedParagraphIndexes: number[];
+  status: "generated" | "validated" | "rejected";
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ProseRepairRegression {
+  schemaVersion: "prose-repair-regression.v1";
+  regressionId: string;
+  planId: string;
+  parentCandidateFingerprint: string;
+  repairedCandidateFingerprint: string;
+  parentReviewFingerprint: string;
+  repairedReviewFingerprint: string;
+  repairedValidationFingerprint: string;
+  status: "passed" | "blocked";
+  improvements: Array<{ findingId: string; status: "resolved" | "persisted"; evidenceRefs: string[] }>;
+  regressions: Array<{ findingId: string; detail: string; evidenceRefs: string[] }>;
+  preservedStrengths: string[];
+  canonicalUntouched: true;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ChapterSettlement {
+  schemaVersion: "chapter-settlement.v1";
+  settlementId: string;
+  projectSlug: string;
+  chapterId: string;
+  adoptionTransactionId: string;
+  adoptedContentSha256: string;
+  status: "settled" | "blocked";
+  nextAction: "schedule_dependency_ready_work" | "manual_review";
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface BookWorkItem {
+  workItemId: string;
+  chapterId: string;
+  kind: "draft";
+  dependencyWorkItemIds: string[];
+  status: "ready" | "blocked" | "completed";
+  settlementId?: string;
+}
+
+export interface BookWorkGraph {
+  schemaVersion: "book-work-graph.v1";
+  graphId: string;
+  projectSlug: string;
+  version: number;
+  workItems: BookWorkItem[];
+  updatedAt: string;
+  fingerprint: string;
+}
+
+export type BookRunStatus = "draft" | "ready" | "queued" | "running" | "pausing" | "paused" | "gate_required" | "repair_required" | "stopping" | "stopped" | "failed_recoverable" | "failed_terminal" | "scope_complete" | "audited_complete";
+export interface BookRun {
+  schemaVersion: "book-run.v1";
+  bookRunId: string;
+  projectSlug: string;
+  objective: string;
+  scope: { chapterIds: string[]; scopeFingerprint: string };
+  workGraphRef: string;
+  workGraphFingerprint: string;
+  autonomyGrantRef: string;
+  autonomyLevel: "L0" | "L1" | "L2";
+  limits: { maxWorkItems?: number; maxModelCalls?: number; maxBudgetCents?: number; deadlineAt?: string; maxWallClockMs?: number; maxConsecutiveFailures?: number };
+  status: BookRunStatus;
+  currentGate: "none" | "quiescence_required" | "author_required" | "completion_audit";
+  progress: { totalWorkItems: number; completedWorkItems: number; queuedWorkItems: number; denominator: "frozen-work-graph" };
+  version: number;
+  startedAt: string;
+  createdAt: string;
+  fingerprint: string;
+}
+export interface CompletionAudit {
+  schemaVersion: "completion-audit.v1";
+  status: "audited_complete";
+  bookRunId: string;
+  runVersion: number;
+  workGraphFingerprint: string;
+  closureCertificateFingerprint: string;
+  quiescenceProofFingerprint: string;
+  sourceFingerprint: string;
+  auditedAt: string;
+  fingerprint: string;
+}
+
+export interface UnderstandingReview {
+  schemaVersion: "understanding-review.v1";
+  reviewId: string;
+  projectSlug: string;
+  snapshotId: string;
+  snapshotFingerprint: string;
+  calibrationVersion: "understanding-calibration.v1";
+  reviewer: { kind: "independent-deterministic"; id: string } | { kind: "human" | "provider"; id: string; attestationReference: string };
+  status: "passed" | "blocked";
+  checks: Array<{ checkId: string; status: "passed" | "failed"; detail: string }>;
+  canonWritten: false;
+  createdAt: string;
+  fingerprint: string;
+  evidenceRefs?: string[];
+}
+
+export interface ContractAdoptionProposal {
+  schemaVersion: "story-contract-adoption-proposal.v1";
+  proposalId: string;
+  candidateId: string;
+  worldRuleContractId?: string;
+  candidateFingerprint: string;
+  projectSlug: string;
+  status: "ready_for_authorization" | "blocked" | "committed";
+  fieldDecisions: Array<{ fieldId: string; status: "accept" | "keep-provisional" | "reject" | "delegate"; reason?: string }>;
+  acceptedFields: StoryContractCandidate["fields"];
+  unresolvedFieldIds: string[];
+  reviewId: string;
+  canonWritten: false | true;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ContractMutationPlan {
+  schemaVersion: "mutation-plan.v1";
+  mutationId: string;
+  proposalId: string;
+  projectSlug: string;
+  authorizationId: string;
+  actorId: string;
+  fencingToken: string;
+  status: "prepared" | "committing" | "committed" | "rolling_back" | "rolled_back" | "failed";
+  targets: Array<{ relativePath: string; beforeSha256?: string; afterSha256: string; existed: boolean }>;
+  createdAt: string;
+  updatedAt: string;
+  error?: string;
+}
+
+export interface ProjectionRebuildReceipt {
+  schemaVersion: "projection-rebuild-receipt.v1";
+  receiptId: string;
+  projectSlug: string;
+  mutationIds: string[];
+  projections: Array<{ name: "story-graph" | "knowledge-index"; status: "rebuilt"; outputFingerprint: string }>;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ProjectionFreshness {
+  schemaVersion: "projection-freshness.v1";
+  projectSlug: string;
+  status: "current" | "stale" | "unknown";
+  pendingMutationIds: string[];
+  receiptId?: string;
+  checkedAt: string;
+}
+
+export interface QualityCalibrationEvidence {
+  schemaVersion: "quality-calibration-evidence.v1";
+  calibrationId: string;
+  evaluatorVersion: string;
+  sourceKind: "provider" | "human";
+  split: "holdout";
+  caseIds: string[];
+  inputFingerprint: string;
+  evaluatedCount: number;
+  correctCount: number;
+  accuracy: number;
+  minimumAccuracy: number;
+  status: "calibrated" | "blocked";
+  canonGateEligible: false;
+  labelAccess: "sealed-separate-from-evaluator-input";
+  attestation: { kind: "provider-signed" | "human-reviewed" | "synthetic-fixture"; reference: string };
+  evidenceRefs: string[];
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ReleaseAcceptanceCheck {
+  checkId: "migration-cutover" | "external-calibration" | "governed-e2e" | "v2-independent-review" | "delivery-proof";
+  status: "passed" | "missing";
+  evidence: string[];
+  reason: string;
+}
+
+export interface ReleaseAcceptanceDecision {
+  schemaVersion: "release-acceptance.v1";
+  releaseProfile: "RP5-drafting";
+  status: "accepted" | "do-not-activate";
+  checks: ReleaseAcceptanceCheck[];
+  evaluatedAt: string;
+  fingerprint: string;
+}
+
+export interface ReleaseActivation {
+  schemaVersion: "release-activation.v1";
+  status: "active";
+  releaseProfile: "RP5-drafting";
+  acceptanceFingerprint: string;
+  activatedAt: string;
+  fingerprint: string;
+}
+
+export interface LengthDimension {
+  mode: "hard" | "soft" | "unknown";
+  min?: number;
+  max?: number;
+  exact?: number;
+}
+
+export interface LengthContract {
+  schemaVersion: "length-contract.v1";
+  projectSlug: string;
+  dimensions: { totalWords: LengthDimension; totalChapters: LengthDimension; totalVolumes: LengthDimension; chapterWords: LengthDimension };
+  pauseThresholdRatio: 0.15;
+  hardLocks: string[];
+  source: "author";
+  effectiveScope: "project";
+  revisionLineage: string[];
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface LengthForecast {
+  schemaVersion: "length-forecast.v1";
+  projectSlug: string;
+  contractFingerprint: string;
+  actuals: { totalWords: number; totalChapters: number; totalVolumes: number; chapterWords: number[] };
+  obligationSummary: { total: number; open: number; highImportanceOpen: number; terminal: number; sourceFingerprint: string };
+  completionRange: { totalWords: { min: number; max: number }; totalChapters: { min: number; max: number }; totalVolumes: { min: number; max: number } };
+  confidence: "low" | "medium" | "high";
+  assumptions: string[];
+  bestPath: string;
+  worstPath: string;
+  endingReachability: "reachable" | "at-risk" | "blocked";
+  frozenBaseline: string;
+  status: "within-range" | "pause-required";
+  blockingReasons: string[];
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface LengthVarianceDecision {
+  schemaVersion: "length-variance-decision.v1";
+  decisionId: string;
+  projectSlug: string;
+  contractFingerprint: string;
+  forecastFingerprint: string;
+  detectedDeviation: string[];
+  cause: "forecast-drift" | "hard-lock-conflict" | "external-constraint" | "none";
+  affectedOutlineIds: string[];
+  affectedObligationIds: string[];
+  alternatives: Array<{ optionId: string; label: string; autoAdoptable: false }>;
+  authority: "author" | "external";
+  choice: "pause-and-review" | "keep-plan" | "request-replan";
+  status: "paused" | "recorded";
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface StoryContractReadinessProof {
+  schemaVersion: "story-contract-readiness-proof.v1";
+  proofId: string;
+  projectSlug: string;
+  status: "ready" | "partial" | "blocked";
+  candidateId?: string;
+  proposalId?: string;
+  requiredFields: Array<{ path: "protagonist.primaryDesire" | "world.rules.primary"; status: "confirmed" | "missing" | "provisional"; evidenceCount: number }>;
+  contractFields: Array<{ path: "protagonist.primaryDesire" | "protagonist.innerNeed" | "protagonist.misbelief" | "world.rules.primary" | "conflict.core" | "conflict.opposingPressure" | "stakes.failureCost" | "stakes.irreversibleChoice" | "readerPromise" | "endingDirection"; status: "confirmed" | "missing" | "provisional"; evidenceCount: number }>;
+  unknowns: string[];
+  blockingReasons: string[];
+  projectionStatus: "current" | "stale" | "unknown";
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ContextManifestMessage {
+  id: string;
+  role: "author";
+  text: string;
+  sourceSpan: { start: number; end: number };
+}
+
+export interface ContextManifest {
+  schemaVersion: "context-manifest.v1";
+  manifestId: string;
+  projectSlug: string;
+  purpose: "understanding";
+  sourceSessionId: string;
+  sourceFingerprint: string;
+  sourceMessages: ContextManifestMessage[];
+  frozenAt: string;
+  supersedesManifestId?: string;
+}
+
+export interface MigrationPreview {
+  schemaVersion: "project-migration-preview.v1";
+  migrationId: string;
+  projectSlug: string;
+  status: "preview_only";
+  previewOnly: true;
+  writeAuthority: "legacy_compatibility_only";
+  assetCounts: {
+    chapters: number;
+    outlines: number;
+    sceneCards: number;
+    summaries: number;
+    ledgers: number;
+    qualityReports: number;
+  };
+  conflicts: string[];
+  sourceFingerprint: string;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface MigrationValidation {
+  schemaVersion: "project-migration-validation.v1";
+  migrationId: string;
+  projectSlug: string;
+  status: "validated";
+  sourceFingerprint: string;
+  conflicts: string[];
+  resolvedConflicts: string[];
+  dependencies: { outlineVersion: "ready" | "missing" };
+  validatedAt: string;
+  fingerprint: string;
+}
+
+export interface MigrationResolution {
+  schemaVersion: "project-migration-resolution.v1";
+  migrationId: string;
+  projectSlug: string;
+  status: "resolved";
+  selectedOutlineAuthority: "active" | "archived";
+  resolvedConflicts: string[];
+  resolvedAt: string;
+  fingerprint: string;
+}
+
+export interface MigrationActivation {
+  schemaVersion: "project-migration-activation.v1";
+  migrationId: string;
+  projectSlug: string;
+  status: "activated";
+  writeAuthority: "prose-adoption";
+  sourceFingerprint: string;
+  activatedAt: string;
+  fingerprint: string;
+}
+
+export interface MigrationRollback {
+  schemaVersion: "project-migration-rollback.v1";
+  migrationId: string;
+  projectSlug: string;
+  status: "rolled_back";
+  activationFingerprint: string;
+  rolledBackAt: string;
+  fingerprint: string;
+}
+
+export interface BackupCatalogEntry {
+  backupId: string;
+  projectSlug: string;
+  status: "verified" | "invalid";
+  faultDomain: "same-workspace";
+  createdAt: string;
+  objectCount: number;
+  fingerprint: string;
+}
+
+export interface MigrationCutoverProject {
+  projectSlug: string;
+  classification: "managed" | "unmanaged" | "invalid";
+  governanceState: "legacy" | "migration-preview" | "migration-validated" | "governed" | "migration-activated";
+  status: "ready" | "blocked";
+  blockers: string[];
+}
+
+export interface MigrationCutoverReport {
+  schemaVersion: "project-migration-cutover.v1";
+  status: "ready" | "blocked";
+  projectCount: number;
+  projects: MigrationCutoverProject[];
+  blockers: string[];
+  evaluatedAt: string;
+  fingerprint: string;
+}
+
+export interface MigrationBatchValidationProject {
+  projectSlug: string;
+  status: "validated" | "blocked";
+  migrationId?: string;
+  sourceFingerprint?: string;
+  conflicts?: string[];
+  dependencies?: { outlineVersion: "ready" | "missing" };
+  blockers: string[];
+}
+
+export interface MigrationBatchValidationReport {
+  schemaVersion: "project-migration-batch-validation.v1";
+  status: "validated" | "blocked";
+  projectCount: number;
+  projects: MigrationBatchValidationProject[];
+  blockers: string[];
+  generatedAt: string;
+  fingerprint: string;
+}
+
+export type ObligationType = "mystery" | "prophecy" | "object" | "character_promise" | "relationship_debt" | "emotional_debt" | "rule_exception" | "secret" | "false_clue" | "goal" | "sequel_hook" | "general_foreshadowing";
+export type ObligationStatus = "proposed" | "confirmed" | "planned" | "setup" | "reminder" | "escalated" | "partially_paid" | "paid" | "neutralized" | "transformed" | "waived" | "opened" | "invalidated" | "reanchored" | "merged" | "split";
+
+export interface NarrativeObligation {
+  schemaVersion: "narrative-obligation.v1";
+  obligationId: string;
+  projectSlug: string;
+  type: ObligationType;
+  title: string;
+  questionOrPromise: string;
+  importance: "low" | "medium" | "high";
+  status: ObligationStatus;
+  sourceRefs: string[];
+  entityRefs: string[];
+  version: number;
+  updatedAt: string;
+  fingerprint: string;
+}
+
+export interface ObligationEvent {
+  schemaVersion: "obligation-event.v1";
+  eventId: string;
+  obligationId: string;
+  fromStatus: ObligationStatus;
+  toStatus: ObligationStatus;
+  evidenceRefs: string[];
+  reason: string;
+  actor: "author" | "system" | "migration";
+  expectedVersion: number;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface NarrativeObligationCoverageReport {
+  schemaVersion: "narrative-obligation-coverage.v1";
+  chapterIds: string[];
+  plannedIds: string[];
+  dashboardIds: string[];
+  legacyLedgerIds: string[];
+  registeredIds: string[];
+  orphanPlannedIds: string[];
+  sourceCoverageStatus: "covered" | "partial" | "empty-assets-coverage-unknown" | "no-planned-markers";
+  evidenceBackedPayoffTransitionExists: boolean;
+  canClaimNoOpenObligations: false;
+  generatedAt: string;
+}
+
+export interface NarrativeObligationCandidate {
+  schemaVersion: "narrative-obligation-candidate.v1";
+  candidateId: string;
+  markerId: string;
+  status: "candidate";
+  chapterIds: string[];
+  sourceRefs: string[];
+  existingObligationId: string | null;
+}
+
+export interface ObligationCoverageCertificate {
+  schemaVersion: "obligation-coverage-certificate.v1";
+  status: "issued";
+  sourceFingerprint: string;
+  chapterIds: string[];
+  plannedIds: string[];
+  obligationCount: number;
+  terminalObligationIds: string[];
+  generatedAt: string;
+  fingerprint: string;
+}
+
+export interface ObligationCoverageInvalidation {
+  schemaVersion: "obligation-coverage-invalidation.v1";
+  status: "stale";
+  certificateFingerprint: string;
+  previousSourceFingerprint: string;
+  currentSourceFingerprint: string;
+  reason: "source-fingerprint-changed";
+  invalidatedAt: string;
+}
+
+export type RevisionIntentType = "fact_correction" | "direction_change" | "retcon" | "reorder" | "entity_rename" | "style_edit" | "quality_repair" | "restore" | "exploration_branch" | "merge" | "reopen_completion";
+export type RevisionMaturity = "candidate_generated" | "author_accepted" | "settled" | "publication_ready";
+export type RevisionIntentMode = "in_place" | "branch_candidate";
+
+export interface RevisionIntent {
+  schemaVersion: "revision-intent.v1";
+  intentId: string;
+  projectSlug: string;
+  authorText: string;
+  type: RevisionIntentType;
+  maturity: RevisionMaturity;
+  scope: { chapterIds: string[]; sceneIds?: string[] };
+  requestedChanges: string[];
+  protectedItems: string[];
+  mode: RevisionIntentMode;
+  actor: "author" | "system";
+  status: "proposed";
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface RevisionImpactReport {
+  schemaVersion: "revision-impact-report.v1";
+  intentId: string;
+  status: "needs_review" | "ready_for_candidate";
+  directChapterIds: string[];
+  transitiveChapterIds: string[];
+  protectedItems: string[];
+  unknownDependencies: string[];
+  generatedAt: string;
+  fingerprint: string;
+}
+
+export type RevisionChangeKind = "add" | "update" | "move" | "split" | "merge" | "supersede" | "transform" | "waive";
+export type RevisionTargetKind = "chapter" | "scene" | "text-span" | "obligation" | "fact";
+export interface RevisionChangeOperation { kind: RevisionChangeKind; targetKind: RevisionTargetKind; targetId: string; chapterId: string; rationale: string; }
+export interface RevisionChangeSet {
+  schemaVersion: "revision-change-set.v1";
+  changeSetId: string;
+  intentId: string;
+  expectedIntentFingerprint: string;
+  status: "candidate";
+  operations: RevisionChangeOperation[];
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface RevisionReview {
+  schemaVersion: "revision-review.v1";
+  reviewId: string;
+  changeSetId: string;
+  expectedChangeSetFingerprint: string;
+  decision: "accepted" | "needs_revision" | "rejected";
+  status: "approved_for_adoption" | "needs_revision" | "rejected";
+  note: string;
+  actor: "author";
+  canonWritten: false;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface RevisionAdoptionProposal {
+  schemaVersion: "revision-adoption-proposal.v1";
+  proposalId: string;
+  changeSetId: string;
+  expectedChangeSetFingerprint: string;
+  reviewId: string;
+  baseCanonFingerprint: string;
+  impactFingerprint: string;
+  status: "ready_for_author_adoption";
+  canonWritten: false;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface RevisionAdoptionReceipt {
+  schemaVersion: "revision-adoption-receipt.v1";
+  receiptId: string;
+  proposalId: string;
+  proposalFingerprint: string;
+  proseAdoptionTransactionId: string;
+  canonWriteFingerprint: string;
+  status: "committed";
+  canonWritten: true;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface RevisionSettlement {
+  schemaVersion: "revision-settlement.v1";
+  settlementId: string;
+  receiptId: string;
+  receiptFingerprint: string;
+  chapterSettlementIds: string[];
+  status: "settled";
+  canonWriteFingerprint: string;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface EditionManifest {
+  schemaVersion: "edition-manifest.v1";
+  editionId: string;
+  projectSlug: string;
+  canonCommitFingerprint: string;
+  title: string;
+  author: string;
+  language: string;
+  status: "frozen";
+  readerSafe: true;
+  chapters: Array<{ chapterId: string; title: string; order: number; contentPath: string; settlementId: string; contentSha256: string }>;
+  publicationTreeFingerprint: string;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface PublicationTree {
+  schemaVersion: "publication-tree.v1";
+  editionId: string;
+  projectSlug: string;
+  readerSafe: true;
+  chapters: Array<{ chapterId: string; title: string; order: number; blocks: Array<Record<string, unknown>> }>;
+  fingerprint: string;
+}
+
+export interface PublicationArtifactSet {
+  schemaVersion: "publication-artifact-set.v1";
+  artifactSetId: string;
+  editionId: string;
+  projectSlug: string;
+  manifestFingerprint: string;
+  treeFingerprint: string;
+  status: "validated";
+  artifacts: Array<{ format: "markdown" | "txt"; relativePath: string; mime: string; rendererVersion: string; sha256: string; size: number }>;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface DeliveryProof {
+  schemaVersion: "delivery-proof.v1";
+  proofId: string;
+  editionId: string;
+  projectSlug: string;
+  manifestFingerprint: string;
+  treeFingerprint: string;
+  artifactSetFingerprint: string;
+  artifactHashes: Array<{ format: string; relativePath: string; sha256: string; size: number }>;
+  approvalId: string;
+  approverKind: "author";
+  status: "issued";
+  issuedAt: string;
+  fingerprint: string;
+}
+
+export interface DeliveryProofVerification {
+  valid: boolean;
+  reasons: string[];
+  proof: DeliveryProof | null;
+}
+
+export interface DeliveryProofEvent {
+  schemaVersion: "delivery-proof-event.v1";
+  eventId: string;
+  proofId: string;
+  status: "revoked" | "superseded";
+  actor: "author";
+  reason: string;
+  replacementEditionId?: string;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface DeliveryAccessGrant {
+  schemaVersion: "delivery-access-grant.v1";
+  grantId: string;
+  proofId: string;
+  editionId: string;
+  projectSlug: string;
+  recipientId: string;
+  scope: "reader" | "archive";
+  expiresAt: string;
+  status: "active";
+  issuedAt: string;
+  fingerprint: string;
+}
+
+export interface DeliveryAccessGrantVerification {
+  valid: boolean;
+  reasons: string[];
+  grant: DeliveryAccessGrant | null;
+}
+
+export interface DeliveryAccessGrantEvent {
+  schemaVersion: "delivery-access-grant-event.v1";
+  eventId: string;
+  grantId: string;
+  status: "revoked";
+  actor: "author";
+  reason: string;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface ReleasePreflightReport {
+  schemaVersion: "release-preflight.v1";
+  editionId: string;
+  status: "ready" | "blocked";
+  findings: Array<{ code: string; message: string; evidence: string[] }>;
+  evaluatedAt: string;
+  fingerprint: string;
+}
+
 export interface NovelFilePatch {
   target: string;
   mode: "replace-selection" | "replace-file";

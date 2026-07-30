@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "partial-implementation-verified",
+  "releaseProfile": "RP0-baseline",
+  "firstSlice": "V0-baseline",
+  "isUserRelease": false,
+  "verifiedOn": "2026-07-29",
+  "scope": "Read-only capability, data, and failure baseline endpoint",
+  "implementation": {
+    "route": "GET /api/novel/projects/:projectId/capability-baseline",
+    "service": "api/src/capabilityBaseline.ts",
+    "inventoryRoute": "GET /api/novel/projects/inventory",
+    "inventoryService": "api/src/projectInventory.ts",
+    "environmentDeclaration": "capability-baseline.environment (runtime-capabilities.v1)",
+    "evaluationRoute": "GET /api/novel/evaluation/rp0-baseline",
+    "evaluationService": "api/src/evaluationFixtures.ts",
+    "durabilityRoute": "GET /api/novel/projects/:projectId/durability-baseline",
+    "durabilityService": "api/src/durabilityBaseline.ts",
+    "writeAuthorities": [],
+    "defaultUiChanged": false,
+    "canonGeneration": false
+  },
+  "verifiedBehaviors": [
+    {
+      "id": "RP0-CAP-001",
+      "behavior": "Healthy project returns a deterministic-format read-only baseline with a SHA-256 source fingerprint.",
+      "test": "api/src/app.spec.ts: exposes a read-only capability baseline for a project",
+      "result": "passed"
+    },
+    {
+      "id": "RP0-CAP-002",
+      "behavior": "Missing story-control support file is reported as degraded without granting write authority.",
+      "test": "api/src/app.spec.ts: reports a degraded read-only baseline when a support file is missing",
+      "result": "passed"
+    },
+    {
+      "id": "RP0-CAP-003",
+      "behavior": "Project inventory classifies managed, unmanaged, and invalid folders, while exposing legacy source conflicts without writing.",
+      "test": "api/src/app.spec.ts: inventories managed and legacy project folders without mutating them",
+      "result": "passed"
+    },
+    {
+      "id": "RP0-CAP-004",
+      "behavior": "Baseline declares Node runtime, platform, architecture, and persistence engine without exposing mutable authority.",
+      "test": "api/src/app.spec.ts: exposes a read-only capability baseline for a project",
+      "result": "passed"
+    },
+    {
+      "id": "RP0-EVAL-001",
+      "behavior": "RP0 serves three frozen metadata-only evaluation cases across smoke, failure, and migration layers with stable input fingerprints and contamination guards.",
+      "test": "api/src/app.spec.ts: serves a frozen, content-free RP0 evaluation profile that can be replayed",
+      "result": "passed"
+    },
+    {
+      "id": "RP0-DUR-001",
+      "behavior": "Project tree and persistence readiness are exposed read-only; backup/recovery are explicitly not configured and no backup is created.",
+      "test": "api/src/app.spec.ts: reports read-only durability and recovery readiness without creating a backup",
+      "result": "passed"
+    }
+  ],
+  "verificationCommands": [
+    "npm test",
+    "npm run build",
+    "npm --prefix api run test -- src/app.spec.ts"
+  ],
+  "verificationResults": {
+    "rootTests": "passed: API 135 passed/1 skipped; UI 215 passed",
+    "rootBuild": "passed",
+    "focusedTddTest": "passed: 34 passed"
+  },
+  "notYetProven": [
+    "RP0 full 38-requirement acceptance bundle",
+    "old-project inventory and migration conflict fixtures",
+    "runtime environment capability declaration",
+    "backup/recovery and release evidence gates",
+    "V1 user-facing creative journey"
+  ],
+  "nextGate": "Add replayable RP0 fixtures and evidence checks before starting V1 write-capability work."
+}

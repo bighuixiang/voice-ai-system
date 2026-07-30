@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "draft",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP3-contract",
+  "profileKind": "user-release",
+  "isUserRelease": true,
+  "firstSlice": "V3-contract",
+  "journey": "Create a field-adoptable story contract with core character and world-rule evidence.",
+  "dependencies": [
+    "RP2-understanding"
+  ],
+  "missingDependencyProfiles": [],
+  "openDecisionIds": [],
+  "policyCandidateRef": null,
+  "scopeBudget": {
+    "mustRequirementsMax": 32,
+    "actualMustRequirements": 27,
+    "withinBudget": true
+  },
+  "mustRequirementIds": [
+    "FR-ARCH-001",
+    "FR-CHAR-001",
+    "FR-CHAR-002",
+    "FR-CHAR-003",
+    "FR-WORLD-001",
+    "FR-WORLD-002",
+    "FR-WORLD-003",
+    "FR-STATE-005",
+    "FR-STATE-006",
+    "FR-STATE-007",
+    "FR-STATE-008",
+    "FR-MIGRATE-004",
+    "FR-API-004",
+    "FR-UX-007",
+    "FR-UX-008",
+    "FR-UX-009",
+    "FR-EFFORT-007",
+    "FR-EFFORT-009",
+    "FR-EFFORT-015",
+    "FR-SEED-012",
+    "FR-SEED-013",
+    "FR-SEED-014",
+    "FR-SEED-015",
+    "FR-SEED-019",
+    "FR-SEED-020",
+    "FR-OBJECTIVE-010",
+    "FR-DELIVERY-016"
+  ],
+  "shouldRequirementIds": [],
+  "experimentRequirementIds": [],
+  "evidenceBundleRefs": [
+    "AT-422..AT-441",
+    "AT-453..AT-465"
+  ],
+  "directAcceptanceStatus": "human-review-required",
+  "firstSliceAcceptance": {
+    "status": "spec-audited",
+    "reviewedRequirements": 27,
+    "totalRequirements": 27
+  },
+  "explicitExclusions": [
+    "No claim that a full-book outline is executable",
+    "No autonomous continuous drafting"
+  ],
+  "activationGate": "Classification and first-slice acceptance mapping are spec-audited; implementation evidence is still required."
+}

@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "implementation-slice-acceptance.v1",
+  "status": "partial-implementation-verified",
+  "sourceSdd": "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+  "sourceSddVersion": "v1.18.40",
+  "verifiedOn": "2026-07-30",
+  "profiles": ["RP1-capture", "RP2-understanding"],
+  "scope": "Server-side governance slices for capture, recovery, one primary action, bounded author effort, decision escalation, dialogue timeout, and seed compilation safety.",
+  "verifiedSlices": [
+    {
+      "sliceId": "RP1-session-state-provenance",
+      "requirements": ["FR-SESSION-001", "FR-SESSION-002", "FR-STATE-001", "FR-UX-025"],
+      "implementationRefs": ["api/src/creativeSession.ts", "api/src/contextManifest.ts", "api/src/authorCommandReceipt.ts"],
+      "tests": ["api/src/creativeSession.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP1-surface-and-primary-action",
+      "requirements": ["FR-UX-022", "FR-UX-023", "FR-UX-026"],
+      "implementationRefs": ["api/src/surfaceCapability.ts", "api/src/primaryActionDecision.ts"],
+      "tests": ["api/src/surfaceCapability.spec.ts", "api/src/primaryActionDecision.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP1-journey-continuity",
+      "requirements": ["FR-UX-027", "FR-UX-028", "FR-UX-029", "FR-UX-030"],
+      "implementationRefs": ["api/src/creativeJourney.ts", "api/src/workspaceContinuity.ts"],
+      "tests": ["api/src/creativeJourney.spec.ts", "api/src/workspaceContinuity.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-effort-and-decision-governance",
+      "requirements": ["FR-EFFORT-002", "FR-EFFORT-003", "FR-EFFORT-004", "FR-EFFORT-005", "FR-EFFORT-010"],
+      "implementationRefs": ["api/src/authorEffortBudget.ts", "api/src/authorEffortBudgetStore.ts", "api/src/decisionGovernance.ts"],
+      "tests": ["api/src/authorEffortBudget.spec.ts", "api/src/authorEffortBudgetStore.spec.ts", "api/src/decisionGovernance.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-dialogue-and-seed-safety",
+      "requirements": ["FR-DIALOGUE-022", "FR-DIALOGUE-023", "FR-SEED-016", "FR-SEED-017", "FR-SEED-019"],
+      "implementationRefs": ["api/src/dialogueTimeout.ts", "api/src/dialogueRuntime.ts", "api/src/seedCompilationRun.ts"],
+      "tests": ["api/src/dialogueTimeout.spec.ts", "api/src/dialogueRuntime.spec.ts", "api/src/seedCompilationRun.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-correction-propagation",
+      "requirements": ["FR-EFFORT-014"],
+      "implementationRefs": ["api/src/intentCorrection.ts", "api/src/app.ts"],
+      "tests": ["api/src/intentCorrection.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-decision-bundle-recommendation",
+      "requirements": ["FR-EFFORT-006", "FR-EFFORT-008"],
+      "implementationRefs": ["api/src/decisionBundle.ts", "api/src/app.ts"],
+      "tests": ["api/src/decisionBundle.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-understanding-execution-gates",
+      "requirements": ["FR-AI-001", "FR-AI-002", "FR-CONTEXT-001", "FR-CONTEXT-002"],
+      "implementationRefs": ["api/src/understandingExecutor.ts", "api/src/understandingPreflight.ts"],
+      "tests": ["api/src/understandingExecutor.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-understanding-persistence-integrity",
+      "requirements": ["FR-AI-003", "FR-CONTEXT-003"],
+      "implementationRefs": ["api/src/understandingBudget.ts", "api/src/understandingAuthorization.ts"],
+      "tests": ["api/src/understandingBudget.spec.ts", "api/src/understandingAuthorization.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-misunderstanding-incident-loop",
+      "requirements": ["FR-DIALOGUE-024"],
+      "implementationRefs": ["api/src/misunderstandingIncident.ts", "api/src/app.ts"],
+      "tests": ["api/src/misunderstandingIncident.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-context-plan-gate",
+      "requirements": ["FR-CONTEXT-001", "FR-CONTEXT-002", "FR-CONTEXT-009"],
+      "implementationRefs": ["api/src/contextPlanGate.ts", "api/src/app.ts"],
+      "tests": ["api/src/contextPlanGate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-model-invocation-ledger",
+      "requirements": ["FR-AI-006", "FR-AI-007", "FR-AI-009"],
+      "implementationRefs": ["api/src/modelInvocationLedger.ts", "api/src/app.ts"],
+      "tests": ["api/src/modelInvocationLedger.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-model-routing-policy",
+      "requirements": ["FR-AI-001", "FR-AI-002", "FR-AI-003", "FR-AI-004"],
+      "implementationRefs": ["api/src/modelRoutingPolicy.ts", "api/src/app.ts"],
+      "tests": ["api/src/modelRoutingPolicy.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-independent-review-gate",
+      "requirements": ["FR-AI-005"],
+      "implementationRefs": ["api/src/independentReviewGate.ts", "api/src/app.ts"],
+      "tests": ["api/src/independentReviewGate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-context-source-conflict-gate",
+      "requirements": ["FR-CONTEXT-003", "FR-CONTEXT-004"],
+      "implementationRefs": ["api/src/contextSourceGate.ts", "api/src/app.ts"],
+      "tests": ["api/src/contextSourceGate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-context-privacy-gate",
+      "requirements": ["FR-CONTEXT-006", "FR-CONTEXT-007"],
+      "implementationRefs": ["api/src/contextPrivacyGate.ts", "api/src/app.ts"],
+      "tests": ["api/src/contextPrivacyGate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-context-integrity-gate",
+      "requirements": ["FR-CONTEXT-008"],
+      "implementationRefs": ["api/src/contextIntegrityGate.ts", "api/src/app.ts"],
+      "tests": ["api/src/contextIntegrityGate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-runtime-interruption-lifecycle",
+      "requirements": ["FR-DIALOGUE-021"],
+      "implementationRefs": ["api/src/dialogueRuntime.ts", "api/src/app.ts"],
+      "tests": ["api/src/dialogueRuntime.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-red-blue-debate-decision-contract",
+      "requirements": ["FR-DEBATE-001", "FR-DEBATE-002", "FR-DEBATE-003", "FR-DEBATE-004", "FR-DEBATE-005", "FR-DEBATE-006", "FR-DEBATE-007", "FR-DEBATE-008", "FR-DEBATE-009"],
+      "implementationRefs": ["api/src/debateDecision.ts", "api/src/app.ts"],
+      "tests": ["api/src/debateDecision.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-dialogue-preference-and-memory-governance",
+      "requirements": ["FR-DIALOGUE-018", "FR-DIALOGUE-019", "FR-DIALOGUE-020"],
+      "implementationRefs": ["api/src/dialogueMemoryGovernance.ts", "api/src/app.ts"],
+      "tests": ["api/src/dialogueMemoryGovernance.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    }
+  ],
+  "verification": {
+    "command": "vitest run api/src/seedCompilationRun.spec.ts api/src/seedCompilationState.spec.ts api/src/seedDurability.spec.ts api/src/dialogueTimeout.spec.ts api/src/dialogueLifecycle.spec.ts api/src/dialogueRuntime.spec.ts api/src/decisionGovernance.spec.ts api/src/decisionBundle.spec.ts api/src/authorEffortBudget.spec.ts api/src/authorEffortBudgetStore.spec.ts api/src/intentCorrection.spec.ts api/src/understandingBudget.spec.ts api/src/understandingAuthorization.spec.ts api/src/understandingExecutor.spec.ts api/src/misunderstandingIncident.spec.ts api/src/contextPlanGate.spec.ts api/src/contextSourceGate.spec.ts api/src/contextPrivacyGate.spec.ts api/src/contextIntegrityGate.spec.ts api/src/modelInvocationLedger.spec.ts api/src/modelRoutingPolicy.spec.ts api/src/independentReviewGate.spec.ts api/src/debateDecision.spec.ts api/src/dialogueMemoryGovernance.spec.ts api/src/creativeJourney.spec.ts api/src/app.spec.ts --pool=forks --maxWorkers=1 --minWorkers=1",
+    "result": "passed: 175 tests"
+  },
+  "notYetProven": [
+    "RP1 full 51-requirement release acceptance",
+    "RP2 full 97-requirement release acceptance",
+    "browser accessibility and cross-device navigation evidence",
+    "real provider model quality and cost/latency acceptance",
+    "full RP3 contract release acceptance"
+  ],
+  "nextGate": "Continue RP2 understanding evidence and then run profile-level E2E acceptance; do not mark RP1/RP2 released from this partial bundle."
+}

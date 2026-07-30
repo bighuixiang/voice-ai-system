@@ -49,6 +49,10 @@ import {
   updateRuntimeRun
 } from "./runtimeStore.js";
 import { createRuntimeCheckpoint, dispatchRuntimeWrites, RuntimeWriteConflictError } from "./runtimeFiles.js";
+import { claimExecutionWorkItem, executionWorkItemId, finishExecutionWorkItem, heartbeatExecutionWorkItem } from "./executionQueue.js";
+import { createProseCandidate, validateProseCandidate } from "./proseCandidate.js";
+import { readContextManifest } from "./contextManifest.js";
+import { readExecutionReadyProof } from "./outlineCommit.js";
 
 const pipelineStages: RuntimePipelineStage[] = [
   "find_next_chapter",
@@ -67,6 +71,12 @@ const pipelineStages: RuntimePipelineStage[] = [
 
 const RUNTIME_QUALITY_TARGET = 86;
 const RUNTIME_MAX_SELF_REPAIR_ATTEMPTS = 1;
+
+function governedProject(project: NovelProject): boolean {
+  const outlineVersion = (project as NovelProject & { outlineVersion?: { versionId?: string } }).outlineVersion;
+  const migration = (project as NovelProject & { migration?: { state?: string } }).migration;
+  return Boolean(outlineVersion?.versionId || migration?.state === "activated");
+}
 
 function orderedChapters(project: NovelProject): NovelChapter[] {
   return [...project.chapters].sort((left, right) => {
@@ -748,6 +758,39 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
   const draftTask = await runRuntimeTask(project, "chapter.draft", { chapterId: chapter.id, roughIdea: run.input.direction || "" }, chapter);
   if (draftTask.status !== "success") throw new Error(draftTask.error || "chapter.draft failed");
   const draftResult = draftTask.result;
+  const governedOutline = (project as NovelProject & { outlineVersion?: { versionId?: string; fingerprint?: string } }).outlineVersion;
+  if (governedProject(project)) {
+    if (!governedOutline?.versionId) throw new Error("GOVERNED_OUTLINE_POINTER_REQUIRED");
+    if (!governedOutline.fingerprint) throw new Error("GOVERNED_OUTLINE_FINGERPRINT_REQUIRED");
+    const proof = await readExecutionReadyProof(root);
+    const context = await readContextManifest(root);
+    const sourceFingerprint = [governedOutline.versionId, governedOutline.fingerprint, proof?.fingerprint || "", context?.sourceFingerprint || "", chapter.id].join(":");
+    const candidate = await createProseCandidate({
+      root,
+      projectSlug: project.slug,
+      chapterId: chapter.id,
+      content: draftResult?.content?.trim() || draftResult?.summary?.trim() || "",
+      outlineVersionId: governedOutline.versionId,
+      executionProofFingerprint: proof?.fingerprint || "",
+      sourceFingerprint
+    });
+    const validation = await validateProseCandidate(root, candidate);
+    if (validation.status !== "passed") throw new Error(`PROSE_CANDIDATE_${validation.reasons.join("_")}`);
+    const candidateRun = updateRuntimeRun(currentRun.id, {
+      status: "review_required",
+      result: { chapterId: chapter.id, reason: "prose_candidate_ready", candidateId: candidate.candidateId, candidateFingerprint: candidate.fingerprint },
+      finishedAt: runtimeNow()
+    });
+    appendRuntimeEvent({
+      projectSlug: project.slug,
+      runId: currentRun.id,
+      type: "review",
+      stage: "chapter_draft",
+      message: "Prose candidate persisted outside canon; author adoption is required",
+      payload: { candidateId: candidate.candidateId, candidateFingerprint: candidate.fingerprint, chapterId: chapter.id }
+    });
+    return candidateRun || currentRun;
+  }
   const patchWrites = await Promise.all(matchingRuntimePatches(project, chapter, draftResult?.patches || []).map((patch) => patchToWrite(root, patch)));
   const draftContent = draftResult?.content?.trim() || "";
   const writes = patchWrites.length
@@ -1303,7 +1346,34 @@ async function processDerivative(command: RuntimeCommand): Promise<void> {
 }
 
 export async function processRuntimeCommand(command: RuntimeCommand): Promise<void> {
+  let executionWorkItem: { root: string; itemId: string; claimed: boolean } | undefined;
+  let executionHeartbeat: NodeJS.Timeout | undefined;
   try {
+    if (command.type === "start") {
+      const project = await readProject(command.projectSlug);
+      const chapterId = typeof command.payload.chapterId === "string"
+        ? command.payload.chapterId
+        : (command.runId ? getRuntimeRun(command.runId)?.chapterId : undefined);
+      const outlinePointer = (project as NovelProject & { outlineVersion?: { versionId?: string } }).outlineVersion;
+      if (governedProject(project) && !(outlinePointer as { fingerprint?: string } | undefined)?.fingerprint) {
+        throw new Error("GOVERNED_OUTLINE_FINGERPRINT_REQUIRED");
+      }
+      if (chapterId && (governedProject(project) || command.payload.requireExecutionReady === true)) {
+        const idempotencyKey = typeof command.payload.idempotencyKey === "string"
+          ? command.payload.idempotencyKey
+          : `runtime-${chapterId}`;
+        const root = projectRoot(project.slug);
+        const itemId = executionWorkItemId(chapterId, idempotencyKey);
+        const item = await claimExecutionWorkItem(root, itemId, command.runId || command.id);
+        if (item.status !== "running" || (item.runId && item.runId !== (command.runId || command.id))) {
+          throw new Error(`EXECUTION_WORK_ITEM_${item.blockedReason || item.status.toUpperCase()}`);
+        }
+        executionWorkItem = { root, itemId, claimed: true };
+        executionHeartbeat = setInterval(() => {
+          heartbeatExecutionWorkItem(root, itemId, command.runId || command.id).catch(() => undefined);
+        }, 5_000);
+      }
+    }
     if (command.type === "start") {
       await processStart(command);
     } else if (command.type === "derivative") {
@@ -1311,9 +1381,17 @@ export async function processRuntimeCommand(command: RuntimeCommand): Promise<vo
     } else {
       await processControl(command);
     }
+    if (executionWorkItem?.claimed) {
+      if (executionHeartbeat) clearInterval(executionHeartbeat);
+      await finishExecutionWorkItem(executionWorkItem.root, executionWorkItem.itemId, { status: "completed", runId: command.runId || command.id });
+    }
     finishRuntimeCommand(command.id, "succeeded");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    if (executionWorkItem?.claimed) {
+      if (executionHeartbeat) clearInterval(executionHeartbeat);
+      await finishExecutionWorkItem(executionWorkItem.root, executionWorkItem.itemId, { status: "failed", error: message, runId: command.runId || command.id }).catch(() => undefined);
+    }
     if (error instanceof RuntimeControlStop) {
       appendRuntimeEvent({
         projectSlug: command.projectSlug,

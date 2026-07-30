@@ -1,0 +1,506 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited-dependencies-specified-not-implemented",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP7-revision",
+  "profileKind": "user-release",
+  "isUserRelease": true,
+  "journey": "Use longitudinal author feedback and multi-scale evidence to revise locally, learn reversible preferences, detect drift, and release or roll back quality strategies without metric gaming.",
+  "protocol": {
+    "blueQuestion": "Does this requirement consume longitudinal, multi-candidate, or author-feedback evidence to revise locally, detect drift, learn a reversible preference, or govern a strategy release?",
+    "redQuestion": "Should this control have existed at the first prose gate or first feedback event, or does it mistake a proxy score or self-judgment for trustworthy quality evidence?",
+    "rule": "RP5 captures first-prose review and feedback evidence; RP7 may aggregate that evidence into bounded hypotheses and reversible strategy decisions, but cannot override hard failures or generalize private feedback without proof."
+  },
+  "currentPlatformEvidence": {
+    "present": [
+      "quality.review and quality.rewrite task types",
+      "ChapterQualityReport with seven metrics and an overall score",
+      "Series quality trends and background quality rebuild paths",
+      "Invocation adoption decisions with accepted or rejected states and accepted patch targets"
+    ],
+    "contradictoryOrInsufficient": [
+      "The same fixed seven metrics are applied broadly instead of adapting to chapter function and declared intent",
+      "qualityMeetsTarget relies on overall and per-metric scores without a separate evidence-backed hard-failure gate",
+      "The review UI proposes full-chapter rewrite from metric deficits rather than bounded evidence-anchored edits",
+      "No blind pairwise review, reviewer calibration, PreferenceHypothesis, LearningPolicy, EvaluationRun, ReleaseDecision, holdout, shadow, or canary evidence was found",
+      "Accepted or rejected patch targets do not capture fragment-level reason, scope, confounding factors, or undo semantics"
+    ]
+  },
+  "counts": {
+    "originalRequirements": 36,
+    "originalMustRequirements": 35,
+    "originalShouldRequirements": 1,
+    "retainedRequirements": 21,
+    "retainedMustRequirements": 20,
+    "retainedShouldRequirements": 1,
+    "movedRequirements": 15,
+    "remainingMustBudgetHeadroom": 4
+  },
+  "retained": [
+    {
+      "requirementId": "FR-LONGMEM-013",
+      "title": "修订失效传播",
+      "normativeStrength": "MUST",
+      "category": "revision-invalidation-invariant",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-376"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-018",
+      "title": "协作强度自适应",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-350"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-020",
+      "title": "精力与价值联合评估",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-352"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-007",
+      "title": "盲配对优先",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-123"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-008",
+      "title": "作者偏好校准",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-124"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-013",
+      "title": "重复采样与波动控制",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-129"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-014",
+      "title": "多尺度质量回归",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-130",
+        "AT-132"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-015",
+      "title": "长期文风与模板漂移",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-131"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-017",
+      "title": "提示词与模型发布门禁",
+      "normativeStrength": "MUST",
+      "category": "strategy-release-guard",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-133"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-018",
+      "title": "影子与金丝雀验证",
+      "normativeStrength": "SHOULD",
+      "category": "strategy-release-guard",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-134",
+        "AT-135"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-020",
+      "title": "评审器漂移监控",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-137"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-021",
+      "title": "反馈转回归用例",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-138"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-022",
+      "title": "质量、成本与时延联合判定",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-139"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-009",
+      "title": "目标变更影响分析",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-223"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-011",
+      "title": "目标漂移监控",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-225"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-007",
+      "title": "偏好假设生命周期",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-233"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-008",
+      "title": "正负反馈不对称",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-234"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-009",
+      "title": "因果归因与冻结变量",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-235"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-010",
+      "title": "防迎合与探索配额",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-236"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-011",
+      "title": "隐私、隔离与可遗忘",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-237"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-012",
+      "title": "可解释、可暂停与可回滚学习",
+      "normativeStrength": "MUST",
+      "category": "longitudinal-learning-journey",
+      "firstSliceScope": "Only the behavior required to evaluate longitudinal revision evidence, detect cross-chapter drift, form reversible preference hypotheses, and gate or roll back strategy changes; first-prose review and feedback capture belong to RP5, and final completion remains RP8.",
+      "acceptanceRefs": [
+        "AT-238"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V8-completion"
+      ]
+    }
+  ],
+  "moved": [
+    {
+      "requirementId": "FR-AI-011",
+      "title": "内容寻址缓存",
+      "targetSlice": "V5-drafting",
+      "reason": "Content-addressed reuse, retry, and stale-result protection are first consumed by repeated drafting calls, not by later learning.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-004",
+      "title": "创作任务不使用逐字金标准",
+      "targetSlice": "V5-drafting",
+      "reason": "The first prose candidate must be judged by constraints and function rather than exact-gold text.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-005",
+      "title": "章节功能自适应量表",
+      "targetSlice": "V5-drafting",
+      "reason": "The first chapter review requires a function-adaptive rubric; a fixed climax rubric cannot safely gate drafting.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-006",
+      "title": "硬守卫与审美判断分离",
+      "targetSlice": "V5-drafting",
+      "reason": "Hard canon, POV, lock, secrecy, and obligation failures must block the first prose adoption independently of aesthetic scores.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-009",
+      "title": "独立评审与聚合",
+      "targetSlice": "V5-drafting",
+      "reason": "A high-impact drafting candidate cannot be accepted solely by its generating model's self-review.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-010",
+      "title": "评审校准集",
+      "targetSlice": "V5-drafting",
+      "reason": "Any reviewer used in the first prose gate must first pass a chapter-function and anti-pattern calibration set.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-011",
+      "title": "证据锚定评价",
+      "targetSlice": "V5-drafting",
+      "reason": "The first blocking quality claim must point to recoverable prose and contract evidence.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EVAL-012",
+      "title": "不确定、平局与分歧",
+      "targetSlice": "V5-drafting",
+      "reason": "The first review must preserve tie, uncertainty, not-applicable, and disagreement instead of manufacturing a winner.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-008",
+      "title": "目标可验证但不指标投机",
+      "targetSlice": "V5-drafting",
+      "reason": "Anti-metric-gaming is required when the first prose objective is evaluated, even before longitudinal drift evidence exists.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-001",
+      "title": "一等作者反馈事件",
+      "targetSlice": "V5-drafting",
+      "reason": "The first author accept, reject, edit, lock, or criticism must be captured as an immutable feedback event.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-002",
+      "title": "低负担反馈",
+      "targetSlice": "V5-drafting",
+      "reason": "Low-burden feedback controls are part of the first candidate-review journey.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-003",
+      "title": "部分采纳与片段归因",
+      "targetSlice": "V5-drafting",
+      "reason": "Partial prose adoption must retain fragment-level attribution from the first review.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-004",
+      "title": "手工编辑差异不是自动偏好",
+      "targetSlice": "V5-drafting",
+      "reason": "A manual edit must remain an attribution hypothesis from the first observed edit, not become an automatic preference.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-005",
+      "title": "删除、撤销与恢复的语义",
+      "targetSlice": "V5-drafting",
+      "reason": "Deletion, undo, and restore semantics must be captured when the first candidate is revised or reverted.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FEEDBACK-006",
+      "title": "反馈作用域与对象",
+      "targetSlice": "V5-drafting",
+      "reason": "Every first feedback event needs an explicit target and narrow scope so later learning has trustworthy evidence.",
+      "extensionSlices": [
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    }
+  ],
+  "conclusion": "RP7 retains 20 MUST plus one SHOULD longitudinal revision and learning requirement, while moving 15 first-prose review and feedback foundations to RP5; Q-003 is closed at specification level, but no implementation evidence proves the learning loop."
+}

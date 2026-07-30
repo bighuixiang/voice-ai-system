@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "author-selected-specification-not-implementation-verified",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "decisionId": "Q-003",
+  "question": "第一阶段正文创作默认优先速度、单章质量，还是按风险与章节功能分层？",
+  "evidenceBaselineRef": "docs/spec-governance/audits/current-q003-operational-baseline.json",
+  "recommendationState": "C-selected-by-author-as-default-policy-not-a-proven-optimum-or-implemented-runtime",
+  "selection": {
+    "selectedOption": "C",
+    "selectedPolicyId": "tiered-quality",
+    "selectedLabel": "分层质量",
+    "decisionStatus": "confirmed",
+    "source": "direct-author-answer",
+    "selectedOn": "2026-07-25",
+    "runtimeActivationStatus": "not-implemented-not-verified"
+  },
+  "evidenceBoundary": [
+    "The operational baseline uses local read-only metadata only and excludes prose, prompts, summaries, and SQLite JSON payloads.",
+    "Only one observed project meets the audit's substantial-project threshold, so cross-author and cross-genre generalization is unknown.",
+    "Sparse quality and adoption records cannot prove causal quality uplift; author selection remains required."
+  ],
+  "invariantRules": [
+    "Canon, POV, author-lock, rights, secrecy, narrative-obligation, stale-input, and atomic-adoption gates never weaken by policy.",
+    "Every generated prose artifact remains a candidate until governed adoption and chapter settlement complete.",
+    "Aesthetic scores never override hard failures, and model self-review never proves acceptance.",
+    "The author may switch policy at a stable chapter boundary; in-flight candidates retain the policy version that created them."
+  ],
+  "options": [
+    {
+      "option": "A",
+      "policyId": "speed-priority",
+      "label": "速度优先",
+      "status": "unselected-alternative",
+      "recommended": false,
+      "defaultCandidateCount": {
+        "ordinary": 1,
+        "key": 2
+      },
+      "independentReview": {
+        "ordinary": "risk-triggered-or-20-percent-sample",
+        "key": "required"
+      },
+      "blindPairwise": {
+        "ordinary": "only-on-uncertainty",
+        "key": "required-when-two-candidates"
+      },
+      "repairBudget": {
+        "ordinary": 1,
+        "key": 2
+      },
+      "milestoneAudit": "every-10-settled-chapters-and-volume-boundary",
+      "authorInterruption": "L2 decisions, unresolved hard failures, repeated stagnation, or explicit request only",
+      "tradeoff": "Fastest throughput and lowest review cost, with more defects deferred to milestone review but no safety-gate relaxation."
+    },
+    {
+      "option": "B",
+      "policyId": "chapter-quality-priority",
+      "label": "单章质量优先",
+      "status": "unselected-key-chapter-alternative",
+      "recommended": false,
+      "defaultCandidateCount": {
+        "ordinary": 2,
+        "key": 3
+      },
+      "independentReview": {
+        "ordinary": "required",
+        "key": "required-with-second-opinion-on-disagreement"
+      },
+      "blindPairwise": {
+        "ordinary": "required",
+        "key": "required"
+      },
+      "repairBudget": {
+        "ordinary": 2,
+        "key": 3
+      },
+      "milestoneAudit": "every-5-settled-chapters-and-volume-boundary",
+      "authorInterruption": "L2 decisions, unresolved hard failures, irreducible reviewer disagreement, repeated stagnation, or explicit request",
+      "tradeoff": "Strongest chapter-level evidence and highest cost/latency; deep system review does not force the author to approve every low-risk chapter."
+    },
+    {
+      "option": "C",
+      "policyId": "tiered-quality",
+      "label": "分层质量",
+      "status": "selected-default-specification",
+      "recommended": true,
+      "defaultCandidateCount": {
+        "ordinary": 1,
+        "elevated": 2,
+        "key": 3
+      },
+      "independentReview": {
+        "ordinary": "risk-triggered",
+        "elevated": "required",
+        "key": "required-with-disagreement-resolution"
+      },
+      "blindPairwise": {
+        "ordinary": "only-on-uncertainty",
+        "elevated": "required-when-two-candidates",
+        "key": "required"
+      },
+      "repairBudget": {
+        "ordinary": 1,
+        "elevated": 2,
+        "key": 3
+      },
+      "milestoneAudit": "risk-adaptive-plus-every-10-settled-chapters-and-volume-boundary",
+      "authorInterruption": "L2 decisions, unresolved hard failures, key-chapter tradeoffs, repeated stagnation, or explicit request",
+      "tradeoff": "Balances low author burden and cost with deep evidence on openings, turns, reveals, climaxes, payoffs, and endings."
+    }
+  ]
+}

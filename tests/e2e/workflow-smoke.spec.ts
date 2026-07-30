@@ -63,11 +63,15 @@ async function openReviewMode(page: Page) {
 async function expandPanelContaining(page: Page, childSelector: string) {
   const panel = page.locator(childSelector);
   if (await panel.isVisible()) return;
-  await page
-    .locator(".collapsible-panel")
-    .filter({ has: page.locator(childSelector) })
-    .locator(".collapse-toggle")
-    .click();
+  const collapsible = panel.locator(
+    "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' collapsible-panel ')][1]"
+  );
+  await expect(collapsible).toHaveCount(1);
+  const toggle = collapsible.locator(".panel-toggle");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") {
+    await toggle.click();
+  }
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
   await expect(panel).toBeVisible();
 }
 
@@ -133,6 +137,7 @@ test("author save workflow runs recap, runtime, background rebuilds, and audit p
     expect(chapter?.id).toBeTruthy();
 
     await page.addInitScript((projectSlug) => {
+      Object.defineProperty(navigator, "maxTouchPoints", { configurable: true, value: 1 });
       window.localStorage.setItem("voice-ai-theme", "dark");
       window.localStorage.removeItem(`novel-workspace:${projectSlug}:review:collapsed-panels`);
       window.localStorage.removeItem(`novel-workspace:${projectSlug}:focus:collapsed-panels`);
@@ -144,17 +149,22 @@ test("author save workflow runs recap, runtime, background rebuilds, and audit p
 
     const editor = page.locator(".chapter-editor .editor-textarea");
     await expect(editor).toBeVisible();
-    await editor.fill(`# ${chapter?.id} Workflow Smoke
+    const chapterContent = `# ${chapter?.id} Workflow Smoke
 
 The saved chapter adds a verifiable fact for the recap, quality, knowledge, and runtime pipeline.
 
-The protagonist records a clean decision so the mock recap can be accepted later by a real author.`);
+The protagonist records a clean decision so the mock recap can be accepted later by a real author.`;
+    await editor.fill(chapterContent);
     await page.locator(".chapter-editor .save-button").click();
 
     await expect(page.locator(".save-pipeline-panel .step-item.done")).toHaveCount(3, { timeout: 45_000 });
     await expect(page.locator(".save-pipeline-panel .step-item.queued")).toHaveCount(3, { timeout: 45_000 });
-    await expect(page.locator(".creation-loop-panel .loop-radar")).toBeVisible();
-    await expect(page.locator(".creation-loop-panel .loop-radar")).toContainText(/进行中|后台队列|处理中|质量|索引|图谱/);
+    const creationLoopPanel = page.locator(".autopilot-loop-panel");
+    await creationLoopPanel.locator(".panel-toggle").click();
+    const creationLoop = page.getByRole("region", { name: "章节创作闭环" });
+    await expect(creationLoop).toBeVisible();
+    await expect(creationLoop.locator(".risk-radar, .loop-steps").first()).toBeVisible();
+    await expect(creationLoop).toContainText(/进行中|后台队列|处理中|质量|索引|图谱|已沉淀/);
     await waitForWorkflowArtifacts(request, project, chapter!.id);
 
     await openReviewMode(page);
@@ -165,7 +175,7 @@ The protagonist records a clean decision so the mock recap can be accepted later
     await page.locator(".task-history-panel .report-actions button").first().click();
     await expect(page.locator(".audit-report-panel")).toBeVisible();
     await expect(page.locator(".audit-report-panel .metric-strip")).toBeVisible();
-    await expect(page.locator(".audit-report-panel")).toContainText("Task Health");
+    await expect(page.locator(".audit-report-panel")).toContainText(/Task Health|任务健康/);
   } finally {
     await deleteSmokeProject(request, project);
   }

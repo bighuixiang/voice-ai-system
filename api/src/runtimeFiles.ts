@@ -66,6 +66,20 @@ function runtimeManagedPaths(project: NovelProject, chapterId?: string): string[
   ];
 }
 
+function governedCanonPath(project: NovelProject, relativePath: string): boolean {
+  const safePath = assertSafeNovelPath(relativePath);
+  if (safePath === "project.json") return true;
+  if (project.chapters.some((chapter) => chapter.contentPath === safePath || chapter.outlinePath === safePath)) return true;
+  return safePath === "memory/chapter-index.json" || ["story-control/", "ledger/", "dashboard/", "scenes/", "memory/chapter-summaries/", "quality/", "knowledge/", "story-graph/"]
+    .some((prefix) => safePath.startsWith(prefix));
+}
+
+function governedProject(project: NovelProject): boolean {
+  const outlineVersion = (project as NovelProject & { outlineVersion?: { versionId?: string } }).outlineVersion;
+  const migration = (project as NovelProject & { migration?: { state?: string } }).migration;
+  return Boolean(outlineVersion?.versionId || migration?.state === "activated");
+}
+
 export async function createRuntimeCheckpoint(input: {
   root: string;
   project: NovelProject;
@@ -190,6 +204,10 @@ export async function dispatchRuntimeWrites(input: {
   checkpoint?: RuntimeCheckpoint;
   allowProjectJson?: boolean;
 }): Promise<void> {
+  const governed = governedProject(input.project);
+  if (governed && input.writes.some((write) => governedCanonPath(input.project, write.relativePath))) {
+    throw new Error("GOVERNED_RUNTIME_CANON_WRITE_REQUIRES_ADOPTION");
+  }
   const queueKey = input.project.slug;
   const previous = projectQueues.get(queueKey) || Promise.resolve();
   const next = previous.then(async () => {

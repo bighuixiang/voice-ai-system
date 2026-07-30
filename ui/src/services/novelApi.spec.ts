@@ -54,6 +54,155 @@ describe("novelApi", () => {
     );
   });
 
+  it("reads the server-authoritative creative journey projection", async () => {
+    mockJson({
+      journey: {
+        schemaVersion: "creative-journey-projection.v1",
+        projectSlug: "demo",
+        stage: "understanding",
+        primaryAsset: "understanding-preview",
+        primaryAction: { id: "review-understanding", label: "确认当前理解", kind: "review", status: "available" },
+        activeQuestion: { id: "question-primary-desire", text: "What must the protagonist want most?", status: "candidate", impact: "high", source: "deterministic-gap" },
+        sourceMessageIds: ["message-1"],
+        sessionFingerprint: "a".repeat(64)
+      }
+    });
+
+    const journey = await novelApi.readCreativeJourney("demo");
+
+    expect(journey.stage).toBe("understanding");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/session/journey", {});
+  });
+
+  it("starts and advances a governed book run through explicit API contracts", async () => {
+    mockJson({ run: { bookRunId: "book-run-1", status: "ready" } });
+    await expect(novelApi.startBookRun("demo", { chapterIds: ["chapter-001"], autonomyLevel: "L1", limits: { maxWorkItems: 1 } })).resolves.toMatchObject({ bookRunId: "book-run-1" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/book-runs", expect.objectContaining({ method: "POST", body: JSON.stringify({ chapterIds: ["chapter-001"], autonomyLevel: "L1", limits: { maxWorkItems: 1 } }) }));
+
+    mockJson({ run: { bookRunId: "book-run-1", status: "running" }, graph: { workItems: [] }, scheduled: [], dispatched: [] });
+    await expect(novelApi.advanceBookRun("demo", "book-run-1")).resolves.toMatchObject({ run: { status: "running" } });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/book-runs/book-run-1/advance", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("passes the active book run when settling a chapter", async () => {
+    mockJson({ settlement: { settlementId: "settle-1", chapterId: "chapter-001", status: "settled" } });
+    await novelApi.settleChapter("demo", "chapter-001", "adopt-1", "book-run-1");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/chapters/chapter-001/settle", expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({ adoptionTransactionId: "adopt-1", bookRunId: "book-run-1" })
+    }));
+  });
+
+  it("keeps feedback attribution scoped and derives a hypothesis through explicit endpoints", async () => {
+    mockJson({ attribution: { attributionId: "attr-1", lifecycle: "candidate", allowPreferenceLearning: false } });
+    await novelApi.createFeedbackAttribution("demo", "event-1", { category: "structure", pattern: "prefer-compact-dialogue", scope: { chapterId: "chapter-1" }, evidenceRefs: ["candidate://one"], confounders: [], confidence: { lower: 0.3, upper: 0.6 } });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/prose-feedback/event-1/attribution", expect.objectContaining({ method: "POST" }));
+    mockJson({ hypothesis: { hypothesisId: "hyp-1", lifecycle: "candidate" } });
+    await novelApi.derivePreferenceHypothesis("demo", "attr-1");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/prose-feedback-attributions/attr-1/hypothesis", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("reads, revokes, and records opposition without changing the evidence endpoint", async () => {
+    mockJson({ hypothesis: { hypothesisId: "hyp-1", lifecycle: "validated", supportEventIds: ["event-1"] } });
+    await novelApi.readPreferenceHypothesis("demo", "hyp-1");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/preference-hypotheses/hyp-1", {});
+    mockJson({ hypothesis: { hypothesisId: "hyp-1", lifecycle: "retired", supportEventIds: ["event-1"], revokeReason: "temporary" } });
+    await novelApi.revokePreferenceHypothesis("demo", "hyp-1", { actor: "author", reason: "temporary" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/preference-hypotheses/hyp-1/revoke", expect.objectContaining({ method: "POST" }));
+    mockJson({ hypothesis: { hypothesisId: "hyp-1", lifecycle: "weakened", oppositionEventIds: ["event-opposition"] } });
+    await novelApi.recordPreferenceOpposition("demo", "hyp-1", { oppositionEventId: "event-opposition", reason: "counterexample" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/preference-hypotheses/hyp-1/oppositions", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("uses bounded learning-policy and exploration-budget endpoints", async () => {
+    mockJson({ policy: { policyId: "policy-demo", rollbackVersion: "v1" } });
+    await novelApi.createLearningPolicy("demo", "v1");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/learning-policy", expect.objectContaining({ method: "POST" }));
+    mockJson({ budget: { budgetId: "budget-1", status: "active" } });
+    await novelApi.createExplorationBudget("demo", { scope: "chapter-1", maxProbes: 2, maxCost: 10, maxImpact: "chapter-1", stopConditions: [] });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/exploration-budgets", expect.objectContaining({ method: "POST" }));
+    mockJson({ budget: { budgetId: "budget-1", status: "active", usedProbes: 1 } });
+    await novelApi.consumeExplorationBudget("demo", "budget-1", { operationId: "probe-1", probes: 1, cost: 2, impact: "chapter-1" });
+    mockJson({ budget: { budgetId: "budget-1", status: "paused" } });
+    await novelApi.pauseExplorationBudget("demo", "budget-1", "review");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/exploration-budgets/budget-1/pause", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("reads learning governance state for the author workspace", async () => {
+    mockJson({ policy: { policyId: "policy-demo" } });
+    await novelApi.readLearningPolicy("demo");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/learning-policy", {});
+    mockJson({ budget: { budgetId: "budget-1", status: "active" } });
+    await novelApi.readExplorationBudget("demo", "budget-1");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/exploration-budgets/budget-1", {});
+  });
+
+  it("keeps source material rights operations explicit", async () => {
+    mockJson({ source: { sourceId: "source-1", rightsStatus: "unknown" } });
+    const source = await novelApi.createSourceMaterial("demo", { title: "Reference", type: "sample", provenance: "upload", rightsStatus: "unknown", licensor: "", allowedUses: ["analysis"], projectScope: "demo", retainExcerpt: false, importedBy: "author" });
+    expect(source.sourceId).toBe("source-1");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/source-material", expect.objectContaining({ method: "POST" }));
+    mockJson({ envelope: { envelopeId: "rights-1", status: "restricted", analysisOnly: true } });
+    await novelApi.createRightsEnvelope("demo", "source-1", "author");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/source-material/source-1/rights-envelope", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("keeps craft pattern creation and approval behind explicit endpoints", async () => {
+    mockJson({ pattern: { patternId: "pattern-1", lifecycle: "candidate" } });
+    await novelApi.createCraftPattern("demo", { name: "Scoped rhythm", mechanism: "shorten turns", narrativeFunction: "speed", applicability: ["chase"], counterexamples: [], sourceEnvelopeIds: ["rights-1"], evidenceRefs: ["source://one"] });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/craft-patterns", expect.objectContaining({ method: "POST" }));
+    mockJson({ pattern: { patternId: "pattern-1", lifecycle: "approved" } });
+    await novelApi.approveCraftPattern("demo", "pattern-1", { actor: "author", reason: "Scoped" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/craft-patterns/pattern-1/approve", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("requires an explicit similarity guard before creating a transfer plan", async () => {
+    mockJson({ guard: { guardId: "guard-1", status: "passed", risk: "low" } });
+    const guard = await novelApi.evaluateSimilarityGuard("demo", { sourceText: "source", targetText: "transformed", maxTokenOverlap: 0.35, sourceVersion: "s1", targetVersion: "t1" });
+    expect(guard.status).toBe("passed");
+    mockJson({ plan: { planId: "plan-1", status: "candidate", canonWriteAllowed: false } });
+    await novelApi.createPatternTransferPlan("demo", { patternId: "pattern-1", sourceEnvelopeId: "rights-1", guard, targetChapterId: "chapter-1", intendedEffect: "preserve pressure" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/pattern-transfer-plans", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("keeps craft experiments and independent judgments explicit", async () => {
+    mockJson({ experiment: { experimentId: "experiment-1", status: "planned" } });
+    await novelApi.createCraftExperiment("demo", { transferPlanId: "plan-1", baselineCandidateId: "base", treatmentCandidateId: "treatment", holdoutSceneIds: ["scene-1"], targetMetrics: ["pressure"], budgetId: "budget-1" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/craft-experiments", expect.objectContaining({ method: "POST" }));
+    mockJson({ experiment: { experimentId: "experiment-1", status: "running" } });
+    await novelApi.startCraftExperiment("demo", "experiment-1", "runner");
+    mockJson({ experiment: { experimentId: "experiment-1", status: "judged" } });
+    await novelApi.judgeCraftExperiment("demo", "experiment-1", { evaluatorId: "reviewer", evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "holdout improved" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/craft-experiments/experiment-1/judge", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("keeps pattern promotion behind the judged experiment result", async () => {
+    mockJson({ pattern: { patternId: "pattern-1", lifecycle: "probation" } });
+    await novelApi.promoteCraftPatternFromExperiment("demo", "pattern-1", { experiment: { experimentId: "experiment-1", status: "judged", judgment: { winner: "treatment", hardGuardsPassed: true } } as never, actor: "author", reason: "holdout" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/craft-patterns/pattern-1/promote-from-experiment", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("requires a second experiment before validating a craft pattern", async () => {
+    mockJson({ pattern: { patternId: "pattern-1", lifecycle: "validated" } });
+    await novelApi.validateCraftPatternFromExperiment("demo", "pattern-1", { experiment: { experimentId: "experiment-2", status: "judged", judgment: { winner: "treatment", hardGuardsPassed: true } } as never, actor: "author", reason: "second holdout" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/craft-patterns/pattern-1/validate-from-experiment", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("runs a completion audit with an explicit closure source fingerprint", async () => {
+    mockJson({ audit: { status: "audited_complete", bookRunId: "book-run-1" } });
+    await expect(novelApi.runBookCompletionAudit("demo", "book-run-1", "closure-source-1")).resolves.toMatchObject({ status: "audited_complete" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/book-runs/book-run-1/completion-audits", expect.objectContaining({ method: "POST", body: JSON.stringify({ sourceFingerprint: "closure-source-1" }) }));
+  });
+
+  it("reads and explicitly activates release only through the release endpoints", async () => {
+    mockJson({ activation: null });
+    await expect(novelApi.readReleaseActivation()).resolves.toBeNull();
+    expect(fetch).toHaveBeenCalledWith("/api/novel/release-activation", {});
+    mockJson({ activation: { status: "active", fingerprint: "activation-1" } });
+    await expect(novelApi.activateRelease()).resolves.toMatchObject({ status: "active" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/release-activation", expect.objectContaining({ method: "POST" }));
+  });
+
   it("imports a local folder as a managed project", async () => {
     mockJson({
       project: {
@@ -265,6 +414,390 @@ describe("novelApi", () => {
         body: JSON.stringify({ content: "new draft" })
       })
     );
+  });
+
+  it("reads the global migration cutover readiness report", async () => {
+    mockJson({ report: { schemaVersion: "project-migration-cutover.v1", status: "blocked", projectCount: 1, projects: [], blockers: ["demo:legacy-governance"], evaluatedAt: "now", fingerprint: "f".repeat(64) } });
+
+    const report = await novelApi.readMigrationCutoverReadiness();
+
+    expect(report.status).toBe("blocked");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/migrations/cutover-readiness", {});
+  });
+
+  it("runs global migration validation without activation", async () => {
+    mockJson({ report: { schemaVersion: "project-migration-batch-validation.v1", status: "blocked", projectCount: 1, projects: [], blockers: ["demo:outline-version-missing"], generatedAt: "now", fingerprint: "f".repeat(64) } });
+    const report = await novelApi.validateAllProjectMigrations();
+    expect(report.status).toBe("blocked");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/migrations/validate-all", expect.objectContaining({ method: "POST", body: "{}" }));
+  });
+
+  it("drives migration validation, conflict resolution and activation", async () => {
+    mockJson({ validation: { status: "validated", conflicts: ["outline-authority-active-and-archived"], resolvedConflicts: [] } });
+    const validation = await novelApi.validateProjectMigration("demo", "migration-1");
+    expect(validation.status).toBe("validated");
+    mockJson({ resolution: { status: "resolved", selectedOutlineAuthority: "active", resolvedConflicts: ["outline-authority-active-and-archived"] } });
+    const resolution = await novelApi.resolveProjectMigrationConflicts("demo", "migration-1", "active");
+    expect(resolution.selectedOutlineAuthority).toBe("active");
+    mockJson({ activation: { status: "activated", writeAuthority: "prose-adoption" } });
+    const activationInput = { idempotencyKey: "activate-1", expectedValidationFingerprint: "a".repeat(64) };
+    const activation = await novelApi.activateProjectMigration("demo", "migration-1", activationInput);
+    expect(activation.status).toBe("activated");
+    mockJson({ rollback: { status: "rolled_back", migrationId: "migration-1" } });
+    const rollback = await novelApi.rollbackProjectMigration("demo", "migration-1");
+    expect(rollback.status).toBe("rolled_back");
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/migrations/migration-1/validate", expect.objectContaining({ method: "POST", body: "{}" }));
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/novel/projects/demo/migrations/migration-1/resolve-conflicts", expect.objectContaining({ method: "POST", body: JSON.stringify({ selectedOutlineAuthority: "active" }) }));
+    expect(fetch).toHaveBeenNthCalledWith(3, "/api/novel/projects/demo/migrations/migration-1/activate", expect.objectContaining({ method: "POST", body: JSON.stringify(activationInput) }));
+    expect(fetch).toHaveBeenNthCalledWith(4, "/api/novel/projects/demo/migrations/migration-1/rollback", expect.objectContaining({ method: "POST", body: "{}" }));
+  });
+
+  it("reads the local backup catalog without implying disaster recovery", async () => {
+    mockJson({ backups: [{ backupId: "backup-1", projectSlug: "demo", status: "verified", faultDomain: "same-workspace", objectCount: 2 }] });
+    const backups = await novelApi.listProjectBackups("demo");
+    expect(backups[0]).toMatchObject({ backupId: "backup-1", faultDomain: "same-workspace" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/backups", {});
+  });
+
+  it("uses append-only obligation commands instead of a direct status update", async () => {
+    mockJson({ obligations: [{ obligationId: "obligation-1", status: "proposed", version: 0 }] });
+    const obligations = await novelApi.listNarrativeObligations("demo");
+    expect(obligations[0].obligationId).toBe("obligation-1");
+    mockJson({ obligation: { obligationId: "obligation-2", status: "proposed", version: 0 } });
+    await novelApi.createNarrativeObligation("demo", { type: "mystery", title: "Gate", questionOrPromise: "Who sealed it?" });
+    mockJson({ obligation: { obligationId: "obligation-2", status: "confirmed", version: 1 }, event: { toStatus: "confirmed" } });
+    const result = await novelApi.appendNarrativeObligationEvent("demo", "obligation-2", { toStatus: "confirmed", reason: "author confirmed", actor: "author", expectedVersion: 0 });
+    expect(result.obligation.status).toBe("confirmed");
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/obligations", {});
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/novel/projects/demo/obligations", expect.objectContaining({ method: "POST" }));
+    expect(fetch).toHaveBeenNthCalledWith(3, "/api/novel/projects/demo/obligations/obligation-2/events", expect.objectContaining({ method: "POST", body: JSON.stringify({ toStatus: "confirmed", reason: "author confirmed", actor: "author", expectedVersion: 0 }) }));
+  });
+
+  it("reads honest obligation source coverage", async () => {
+    mockJson({ report: { sourceCoverageStatus: "empty-assets-coverage-unknown", canClaimNoOpenObligations: false, plannedIds: ["FS-demo-001"] } });
+    const report = await novelApi.readNarrativeObligationCoverage("demo");
+    expect(report.sourceCoverageStatus).toBe("empty-assets-coverage-unknown");
+    expect(report.canClaimNoOpenObligations).toBe(false);
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/obligation-coverage", {});
+  });
+
+  it("previews obligation candidates without an adoption command", async () => {
+    mockJson({ candidates: [{ candidateId: "candidate-1", markerId: "FS-demo-001", status: "candidate", chapterIds: ["chapter-001"], sourceRefs: ["scene://chapter-001#scene-1"], existingObligationId: null }] });
+    const candidates = await novelApi.previewNarrativeObligationCandidates("demo");
+    expect(candidates[0].status).toBe("candidate");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/obligation-candidates/preview", {});
+  });
+
+  it("requests a coverage certificate with an explicit frozen source fingerprint", async () => {
+    mockJson({ certificate: { schemaVersion: "obligation-coverage-certificate.v1", status: "issued", sourceFingerprint: "publication-1" } });
+    const certificate = await novelApi.issueObligationCoverageCertificate("demo", "publication-1");
+    expect(certificate.status).toBe("issued");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/obligation-coverage/certificate", expect.objectContaining({ method: "POST", body: JSON.stringify({ sourceFingerprint: "publication-1" }) }));
+  });
+
+  it("validates and invalidates coverage certificates by source fingerprint", async () => {
+    mockJson({ valid: true, certificate: { status: "issued" } });
+    await expect(novelApi.validateObligationCoverageCertificate("demo", "publication-1")).resolves.toMatchObject({ valid: true });
+    mockJson({ invalidation: { status: "stale", currentSourceFingerprint: "publication-2" } });
+    await expect(novelApi.invalidateObligationCoverageCertificate("demo", "publication-2")).resolves.toMatchObject({ status: "stale" });
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/novel/projects/demo/obligation-coverage/certificate/invalidate", expect.objectContaining({ method: "POST", body: JSON.stringify({ sourceFingerprint: "publication-2" }) }));
+  });
+
+  it("creates and lists author revision intents", async () => {
+    mockJson({ intent: { intentId: "revision-1", status: "proposed", mode: "branch_candidate", maturity: "settled" } });
+    const intent = await novelApi.createRevisionIntent("demo", { authorText: "保留第三段", type: "style_edit", maturity: "settled", scope: { chapterIds: ["chapter-001"] }, requestedChanges: ["local repair"], protectedItems: ["chapter-001.paragraph-3"], mode: "branch_candidate", actor: "author" });
+    expect(intent.mode).toBe("branch_candidate");
+    mockJson({ intents: [intent] });
+    await expect(novelApi.listRevisionIntents("demo")).resolves.toHaveLength(1);
+    mockJson({ report: { intentId: "revision-1", status: "needs_review", directChapterIds: ["chapter-001"], transitiveChapterIds: ["chapter-001"], unknownDependencies: ["dependency-graph-missing"] } });
+    await expect(novelApi.readRevisionImpactReport("demo", "revision-1")).resolves.toMatchObject({ status: "needs_review", unknownDependencies: ["dependency-graph-missing"] });
+    mockJson({ changeSet: { status: "candidate", operations: [{ targetId: "chapter-001.paragraph-1" }] } });
+    await expect(novelApi.createRevisionChangeSet("demo", "revision-1", "fp-1", [{ kind: "update", targetKind: "text-span", targetId: "chapter-001.paragraph-1", chapterId: "chapter-001", rationale: "local repair" }])).resolves.toMatchObject({ status: "candidate" });
+    mockJson({ review: { status: "approved_for_adoption", canonWritten: false } });
+    await expect(novelApi.reviewRevisionChangeSet("demo", "changeset-1", "fp-1", { decision: "accepted", note: "Proceed", actor: "author" })).resolves.toMatchObject({ status: "approved_for_adoption", canonWritten: false });
+    mockJson({ proposal: { status: "ready_for_author_adoption", canonWritten: false, baseCanonFingerprint: "canon-1" } });
+    await expect(novelApi.createRevisionAdoptionProposal("demo", "changeset-1", "fp-1", "review-1", "canon-1")).resolves.toMatchObject({ status: "ready_for_author_adoption", canonWritten: false });
+    mockJson({ receipt: { status: "committed", canonWritten: true, proseAdoptionTransactionId: "adopt-1" } });
+    await expect(novelApi.recordRevisionAdoptionReceipt("demo", "proposal-1", "fp-1", "adopt-1")).resolves.toMatchObject({ status: "committed", canonWritten: true });
+    mockJson({ settlement: { status: "settled", chapterSettlementIds: ["settle-008"] } });
+    await expect(novelApi.settleRevision("demo", "receipt-1", "fp-1", ["settle-008"])).resolves.toMatchObject({ status: "settled", chapterSettlementIds: ["settle-008"] });
+    mockJson({ manifest: { status: "frozen", editionId: "edition-1", readerSafe: true } });
+    await expect(novelApi.createEditionManifest("demo", { canonCommitFingerprint: "canon-1", title: "Demo", author: "Author", language: "zh-CN", chapters: [{ chapterId: "chapter-001", title: "第一章", order: 1, contentPath: "chapters/chapter-001.md", settlementId: "settle-008" }] })).resolves.toMatchObject({ status: "frozen", editionId: "edition-1" });
+    mockJson({ manifest: { status: "frozen", editionId: "edition-1" } });
+    await expect(novelApi.readEditionManifest("demo", "edition-1")).resolves.toMatchObject({ editionId: "edition-1" });
+    mockJson({ tree: { schemaVersion: "publication-tree.v1", editionId: "edition-1", readerSafe: true } });
+    await expect(novelApi.compilePublicationTree("demo", "edition-1")).resolves.toMatchObject({ schemaVersion: "publication-tree.v1", readerSafe: true });
+    mockJson({ tree: { schemaVersion: "publication-tree.v1", editionId: "edition-1", readerSafe: true } });
+    await expect(novelApi.readPublicationTree("demo", "edition-1")).resolves.toMatchObject({ editionId: "edition-1" });
+    mockJson({ artifacts: { schemaVersion: "publication-artifact-set.v1", status: "validated", artifacts: [{ format: "markdown", sha256: "a" }] } });
+    await expect(novelApi.renderPublicationArtifacts("demo", "edition-1", ["markdown", "txt"])).resolves.toMatchObject({ status: "validated" });
+    mockJson({ artifacts: { schemaVersion: "publication-artifact-set.v1", status: "validated" } });
+    await expect(novelApi.readPublicationArtifacts("demo", "edition-1")).resolves.toMatchObject({ status: "validated" });
+    mockJson({ proof: { schemaVersion: "delivery-proof.v1", status: "issued", approvalId: "author-release-1" } });
+    await expect(novelApi.issueDeliveryProof("demo", "edition-1", "author-release-1", "artifact-fp")).resolves.toMatchObject({ status: "issued", approvalId: "author-release-1" });
+    mockJson({ verification: { valid: true, reasons: [], proof: { status: "issued" } } });
+    await expect(novelApi.verifyDeliveryProof("demo", "edition-1")).resolves.toMatchObject({ valid: true });
+    mockJson({ event: { status: "revoked", reason: "withdrawn" } });
+    await expect(novelApi.revokeDeliveryProof("demo", "edition-1", "withdrawn")).resolves.toMatchObject({ status: "revoked" });
+    mockJson({ event: { status: "superseded", replacementEditionId: "edition-2" } });
+    await expect(novelApi.supersedeDeliveryProof("demo", "edition-1", "new edition", "edition-2")).resolves.toMatchObject({ status: "superseded", replacementEditionId: "edition-2" });
+    mockJson({ grant: { schemaVersion: "delivery-access-grant.v1", status: "active", scope: "reader", recipientId: "reader-1" } });
+    await expect(novelApi.issueDeliveryAccessGrant("demo", "edition-1", "reader-1", "reader", "2099-01-01T00:00:00.000Z")).resolves.toMatchObject({ status: "active", scope: "reader" });
+    mockJson({ verification: { valid: true, reasons: [], grant: { status: "active" } } });
+    await expect(novelApi.verifyDeliveryAccessGrant("demo", "edition-1", "grant-1")).resolves.toMatchObject({ valid: true });
+    mockJson({ event: { status: "revoked", grantId: "grant-1" } });
+    await expect(novelApi.revokeDeliveryAccessGrant("demo", "edition-1", "grant-1", "reader request")).resolves.toMatchObject({ status: "revoked", grantId: "grant-1" });
+    mockJson({ report: { schemaVersion: "release-preflight.v1", status: "blocked", findings: [{ code: "delivery-proof-missing" }] } });
+    await expect(novelApi.preflightPublicationEdition("demo", "edition-1")).resolves.toMatchObject({ status: "blocked", findings: [{ code: "delivery-proof-missing" }] });
+  });
+
+  it("reads quality calibration evidence without exposing holdout labels", async () => {
+    mockJson({ evidence: { schemaVersion: "quality-calibration-evidence.v1", status: "blocked", canonGateEligible: false } });
+    const evidence = await novelApi.readQualityCalibrationEvidence("demo");
+    expect(evidence.status).toBe("blocked");
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/session/understanding/quality-calibration", {});
+    mockJson({ evidence: [{ schemaVersion: "quality-calibration-evidence.v1", status: "blocked" }] });
+    await expect(novelApi.readQualityCalibrationEvidenceHistory("demo")).resolves.toHaveLength(1);
+  });
+
+  it("submits only externally attested calibration evidence", async () => {
+    mockJson({ evidence: { schemaVersion: "quality-calibration-evidence.v1", status: "calibrated", sourceKind: "human", caseIds: [], canonGateEligible: false } });
+    const input = { evaluatorVersion: "human-v1", sourceKind: "human" as const, holdoutInputFingerprint: "sealed-human-v1", evaluatedCount: 10, correctCount: 9, accuracy: 0.9, minimumAccuracy: 0.8, attestation: { kind: "human-reviewed" as const, reference: "human://review/v1" }, evidenceRefs: ["audit://human/v1"] };
+    await expect(novelApi.submitQualityCalibrationEvidence("demo", input)).resolves.toMatchObject({ status: "calibrated", sourceKind: "human" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/session/understanding/quality-calibration", expect.objectContaining({ method: "POST", body: JSON.stringify(input) }));
+  });
+
+  it("reads the global release acceptance decision as a read-only gate", async () => {
+    mockJson({ decision: { schemaVersion: "release-acceptance.v1", status: "do-not-activate", checks: [] } });
+    await expect(novelApi.readReleaseAcceptance()).resolves.toMatchObject({ status: "do-not-activate" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/release-acceptance", {});
+  });
+
+  it("submits an externally attested understanding review with all gates", async () => {
+    mockJson({ review: { schemaVersion: "understanding-review.v1", status: "passed", canonWritten: false, reviewer: { kind: "human" } } });
+    const input = { reviewerKind: "human" as const, reviewerId: "reviewer-1", attestationReference: "human://review/1", snapshotFingerprint: "a".repeat(64), checks: ["source-fingerprint", "evidence-spans", "branch-separation", "question-gate", "canon-isolation"].map((checkId) => ({ checkId: checkId as any, detail: "passed" })), evidenceRefs: ["audit://review/1"] };
+    await expect(novelApi.submitExternalUnderstandingReview("demo", input)).resolves.toMatchObject({ status: "passed" });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/session/understanding/review/external", expect.objectContaining({ method: "POST", body: JSON.stringify(input) }));
+  });
+
+  it("compiles an outline candidate from a contract candidate", async () => {
+    mockJson({ outline: { outlineId: "outline-candidate-contract-1", canonWritten: false }, created: true });
+    const result = await novelApi.compileOutlineCandidate("demo", "contract-1", { strongFreezeCount: 3, totalChapterCount: 5 });
+    expect(result.created).toBe(true);
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/projects/demo/session/understanding/outline-candidates",
+      expect.objectContaining({ method: "POST", body: JSON.stringify({ sourceCandidateId: "contract-1", strongFreezeCount: 3, totalChapterCount: 5 }) })
+    );
+  });
+
+  it("validates an outline candidate through the safety gate", async () => {
+    mockJson({ report: { reportId: "outline-validation-1", status: "passed", executionReady: false } });
+    const report = await novelApi.validateOutlineCandidate("demo", "outline-1");
+    expect(report.executionReady).toBe(false);
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/projects/demo/session/understanding/outline-candidates/outline-1/validate",
+      expect.objectContaining({ method: "POST", body: "{}" })
+    );
+  });
+
+  it("creates an outline adoption proposal without writing canon", async () => {
+    mockJson({ proposal: { proposalId: "outline-adoption-1", status: "ready_for_authorization", canonWritten: false } });
+    const proposal = await novelApi.createOutlineAdoptionProposal("demo", { outlineId: "outline-1", expectedOutlineFingerprint: "fp-1", selectedChapterIds: ["chapter-001"] });
+    expect(proposal.canonWritten).toBe(false);
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/projects/demo/session/understanding/outline-adoption-proposals",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
+  it("commits only an authorized outline proposal and returns its proof", async () => {
+    mockJson({ status: "committed", canonWritten: true, proof: { executionReady: true } });
+    const result = await novelApi.commitOutlineAdoption("demo", "proposal-fingerprint");
+    expect(result.canonWritten).toBe(true);
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/projects/demo/session/understanding/outline-adoption",
+      expect.objectContaining({ method: "POST", body: JSON.stringify({ expectedProposalFingerprint: "proposal-fingerprint" }) })
+    );
+  });
+
+  it("checks execution readiness for a chapter before runtime start", async () => {
+    mockJson({ readiness: { allowed: false, reason: "CHAPTER_OUTSIDE_WINDOW", checks: [] } });
+    const readiness = await novelApi.checkExecutionReadiness("demo", "chapter-009");
+    expect(readiness.allowed).toBe(false);
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/runtime/execution-readiness/chapter-009", {});
+  });
+
+  it("compiles an attributed interpretation candidate without losing the branch id", async () => {
+    mockJson({ candidate: { candidateId: "candidate-branch-revenge" }, created: true });
+
+    await novelApi.compileContractCandidate("demo", "decision-1", "branch-revenge");
+
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/projects/demo/session/understanding/contract-candidates",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ decisionId: "decision-1", interpretationId: "branch-revenge" })
+      })
+    );
+  });
+
+  it("lists contract candidates for comparison", async () => {
+    mockJson({ candidates: [{ candidateId: "candidate-1" }] });
+
+    const candidates = await novelApi.listContractCandidates("demo");
+
+    expect(candidates).toEqual([{ candidateId: "candidate-1" }]);
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/projects/demo/session/understanding/contract-candidates",
+      {}
+    );
+  });
+
+  it("creates a scoped non-canon world rule contract", async () => {
+    mockJson({ contract: { ruleId: "world-rule-1", status: "candidate", canonWritten: false } });
+
+    await novelApi.createWorldRuleContract("demo", {
+      sourceCandidateId: "candidate-1",
+      sourceFingerprint: "a".repeat(64),
+      proposition: { condition: "anchor", mechanism: "fold", result: "cross", cost: "lifespan", limit: "once", failure: "pain" },
+      scope: { subjects: ["caster"], regions: ["nine-lotus-mountain"] },
+      disclosure: { objectiveStatus: "unknown", domains: [{ domainId: "church", kind: "institution_belief", claim: "divine" }] },
+      evidenceRefs: [{ kind: "dialogue-question", refId: "question-world-rule" }]
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/novel/projects/demo/session/understanding/world-rule-contracts",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
+  it("reads and captures a durable creative session", async () => {
+    const session = {
+      schemaVersion: "creative-session.v1",
+      sessionId: "session-demo",
+      projectSlug: "demo",
+      status: "capturing" as const,
+      messages: [],
+      createdAt: "2026-07-29T00:00:00.000Z",
+      updatedAt: "2026-07-29T00:00:00.000Z"
+    };
+    mockJson({ session });
+    mockJson({ session: { ...session, messages: [{ id: "message-1", clientMessageId: "client-1", role: "author", text: "A seed", source: { kind: "author" }, createdAt: "now" }] }, created: true });
+
+    await expect(novelApi.readCreativeSession("demo")).resolves.toEqual(session);
+    await expect(novelApi.captureAuthorMessage("demo", { clientMessageId: "client-1", text: "A seed" })).resolves.toMatchObject({ created: true });
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/session", {});
+    expect(fetch).toHaveBeenNthCalledWith(
+      2,
+      "/api/novel/projects/demo/session/messages",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientMessageId: "client-1", text: "A seed" })
+      })
+    );
+  });
+
+  it("reads the non-authoritative understanding preview", async () => {
+    mockJson({
+      preview: {
+        schemaVersion: "understanding-preview.v1",
+        projectSlug: "demo",
+        inputFingerprint: "a".repeat(64),
+        sourceMessageIds: ["message-1"],
+        coreExplicit: [],
+        inferred: [],
+        unknowns: [],
+        nextAction: "await-safe-understanding-dependencies",
+        modelCallIssued: false,
+        canonWritten: false
+      }
+    });
+
+    await expect(novelApi.readUnderstandingPreview("demo")).resolves.toMatchObject({
+      schemaVersion: "understanding-preview.v1",
+      modelCallIssued: false
+    });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/session/understanding-preview", {});
+  });
+
+  it("freezes the session input as a T0 context manifest", async () => {
+    mockJson({
+      manifest: {
+        schemaVersion: "context-manifest.v1",
+        manifestId: "context-1",
+        projectSlug: "demo",
+        purpose: "understanding",
+        sourceSessionId: "session-demo",
+        sourceFingerprint: "b".repeat(64),
+        sourceMessages: [],
+        frozenAt: "2026-07-29T00:00:00.000Z"
+      },
+      created: true
+    }, true, 201);
+
+    await expect(novelApi.freezeContextManifest("demo")).resolves.toMatchObject({ created: true });
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/session/context-manifest", { method: "POST" });
+  });
+
+  it("starts and controls a persisted understanding task", async () => {
+    const task = {
+      schemaVersion: "understanding-task.v1",
+      taskId: "understanding-task-1",
+      projectSlug: "demo",
+      status: "queued" as const,
+      sourceFingerprint: "a".repeat(64),
+      sourceMessageIds: ["message-1"],
+      modelCallIssued: false,
+      canonWritten: false as const,
+      startedAt: "now",
+      updatedAt: "now"
+    };
+    mockJson({ task }, true, 202);
+    mockJson({ task: { ...task, status: "cancelled" } });
+    mockJson({ task: { ...task, status: "queued" } }, true, 202);
+
+    await expect(novelApi.startUnderstanding("demo", "model")).resolves.toMatchObject({ task: { taskId: task.taskId, status: "queued" } });
+    await expect(novelApi.cancelUnderstandingTask("demo", task.taskId)).resolves.toMatchObject({ status: "cancelled" });
+    await expect(novelApi.resumeUnderstandingTask("demo", task.taskId)).resolves.toMatchObject({ status: "queued" });
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      "/api/novel/projects/demo/session/understanding",
+      expect.objectContaining({ method: "POST", body: JSON.stringify({ mode: "model" }) })
+    );
+  });
+
+  it("lists, creates, and answers a versioned dialogue question", async () => {
+    const question = {
+      schemaVersion: "dialogue-question.v1",
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      projectSlug: "demo",
+      status: "active" as const,
+      text: "What does the protagonist want?",
+      whyNow: "It changes the opening.",
+      impact: "high" as const,
+      ambiguity: 0.8,
+      errorCost: "high",
+      reversibility: "low",
+      delayCost: "medium",
+      options: [],
+      recommendation: "Ask once",
+      snapshotFingerprint: "a".repeat(64)
+    };
+    mockJson({ questions: [question] });
+    mockJson({ created: false, question });
+    mockJson({ question: { ...question, status: "answered", answerStatus: "confirmed" }, replayed: false }, true, 201);
+
+    await expect(novelApi.listDialogueQuestions("demo")).resolves.toEqual([question]);
+    await expect(novelApi.ensurePrimaryDialogueQuestion("demo")).resolves.toMatchObject({ created: false });
+    await expect(novelApi.answerDialogueQuestion("demo", question.questionId, {
+      questionVersion: 1,
+      expectedSnapshotFingerprint: question.snapshotFingerprint,
+      idempotencyKey: "answer-1",
+      answerText: "Truth",
+      answerStatus: "confirmed"
+    })).resolves.toMatchObject({ question: { status: "answered" } });
   });
 
   it("reads file versions, diffs, and editor suggestions", async () => {

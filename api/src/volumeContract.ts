@@ -1,0 +1,22 @@
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { resolveInside } from "./pathSafety.js";
+
+export interface VolumeContract { schemaVersion: "volume-contract.v1"; volumeId: string; projectSlug: string; title: string; openingState: string; stageGoals: string[]; primaryConflict: string; rolePositions: string[]; irreversibleDuties: string[]; climaxChoice: string; stagePayoffs: string[]; endPressure: string; capacityBudget: { chapters: number; words: number }; sourceRefs: string[]; status: "candidate" | "confirmed" | "retired"; createdAt: string; updatedAt: string; fingerprint: string; }
+function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
+function volumePath(root: string, id: string): string { return resolveInside(root, `sessions/volume-contracts/${id}.json`); }
+async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const temp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(temp, target); }
+async function readJson<T>(target: string): Promise<T | null> { try { return JSON.parse(await fs.readFile(target, "utf8")) as T; } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
+export async function readVolumeContract(root: string, volumeId: string): Promise<VolumeContract | null> { return readJson<VolumeContract>(volumePath(root, volumeId)); }
+export async function listVolumeContracts(root: string, projectSlug: string): Promise<VolumeContract[]> { const directory = resolveInside(root, "sessions/volume-contracts"); let names: string[]; try { names = await fs.readdir(directory); } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return []; throw error; } const records = await Promise.all(names.filter((name) => name.endsWith(".json")).map((name) => readJson<VolumeContract>(path.join(directory, name)))); return records.filter((record): record is VolumeContract => Boolean(record && record.projectSlug === projectSlug)).sort((a, b) => a.createdAt.localeCompare(b.createdAt)); }
+export async function createVolumeContract(input: { root: string; projectSlug: string; volumeId: string; title: string; openingState: string; stageGoals: readonly string[]; primaryConflict: string; rolePositions: readonly string[]; irreversibleDuties: readonly string[]; climaxChoice: string; stagePayoffs: readonly string[]; endPressure: string; capacityBudget: { chapters: number; words: number }; sourceRefs: readonly string[] }): Promise<VolumeContract> {
+  const required = [input.projectSlug, input.volumeId, input.title, input.openingState, input.primaryConflict, input.climaxChoice, input.endPressure];
+  if (required.some((value) => !value.trim())) throw new Error("VOLUME_CONTRACT_FIELDS_REQUIRED");
+  if (!input.stageGoals.length || !input.rolePositions.length || !input.irreversibleDuties.length || !input.stagePayoffs.length) throw new Error("VOLUME_CONTRACT_COMMITMENTS_REQUIRED");
+  if (!Number.isInteger(input.capacityBudget.chapters) || input.capacityBudget.chapters <= 0 || !Number.isInteger(input.capacityBudget.words) || input.capacityBudget.words <= 0) throw new Error("VOLUME_CONTRACT_CAPACITY_INVALID");
+  if (!input.sourceRefs.length) throw new Error("VOLUME_CONTRACT_SOURCE_REQUIRED");
+  const existing = await readVolumeContract(input.root, input.volumeId); if (existing) return existing;
+  const base = { schemaVersion: "volume-contract.v1" as const, volumeId: input.volumeId, projectSlug: input.projectSlug, title: input.title, openingState: input.openingState, stageGoals: [...input.stageGoals], primaryConflict: input.primaryConflict, rolePositions: [...input.rolePositions], irreversibleDuties: [...input.irreversibleDuties], climaxChoice: input.climaxChoice, stagePayoffs: [...input.stagePayoffs], endPressure: input.endPressure, capacityBudget: { ...input.capacityBudget }, sourceRefs: [...input.sourceRefs], status: "candidate" as const, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  const volume: VolumeContract = { ...base, fingerprint: hash(base) }; await writeJson(volumePath(input.root, input.volumeId), volume); return volume;
+}

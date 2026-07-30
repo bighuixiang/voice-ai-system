@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import crypto from "node:crypto";
 import { createRequire } from "node:module";
 import path from "node:path";
 import type { DatabaseSync as DatabaseSyncType } from "node:sqlite";
@@ -62,12 +63,44 @@ export function openDatabase(): DatabaseSyncType {
   database.exec("PRAGMA busy_timeout = 5000;");
   database.exec("PRAGMA journal_mode = WAL;");
   database.exec("PRAGMA foreign_keys = ON;");
-  migrateDatabase(database);
+  try {
+    migrateDatabase(database);
+  } catch (error) {
+    database.close();
+    throw error;
+  }
   return database;
 }
 
 export function migrateDatabase(database = openDatabase()): void {
   database.exec(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      checksum TEXT NOT NULL,
+      started_at TEXT NOT NULL,
+      completed_at TEXT,
+      error TEXT
+    );
+  `);
+  const migrations = database
+    .prepare("SELECT version, name, checksum, started_at, completed_at, error FROM schema_migrations ORDER BY version")
+    .all() as Array<{ version: number; name: string; checksum: string; started_at: string; completed_at: string | null; error: string | null }>;
+  const future = migrations.find((migration) => migration.version > CURRENT_SCHEMA_VERSION);
+  if (future) throw new Error(`DATABASE_SCHEMA_VERSION_UNSUPPORTED: ${future.version}`);
+  const incomplete = migrations.find((migration) => migration.version <= CURRENT_SCHEMA_VERSION && !migration.completed_at);
+  if (incomplete) throw new Error(`DATABASE_MIGRATION_INCOMPLETE: ${incomplete.version}`);
+  if (migrations.some((migration) => migration.version === CURRENT_SCHEMA_VERSION && migration.completed_at)) return;
+
+  database
+    .prepare(
+      `INSERT INTO schema_migrations (version, name, checksum, started_at, completed_at, error)
+       VALUES (?, ?, ?, ?, NULL, NULL)`
+    )
+    .run(CURRENT_SCHEMA_VERSION, BASELINE_MIGRATION_NAME, BASELINE_MIGRATION_CHECKSUM, new Date().toISOString());
+  try {
+    database.exec("BEGIN IMMEDIATE;");
+    database.exec(`
     CREATE TABLE IF NOT EXISTS metadata (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
@@ -251,7 +284,61 @@ export function migrateDatabase(database = openDatabase()): void {
     CREATE INDEX IF NOT EXISTS idx_runtime_snapshots_run ON runtime_snapshots(run_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_runtime_branches_project ON runtime_branches(project_slug, updated_at DESC);
     CREATE INDEX IF NOT EXISTS idx_runtime_knowledge_refs_run ON runtime_knowledge_refs(run_id, created_at DESC);
-  `);
+    `);
+    database.exec("COMMIT;");
+    database
+      .prepare("UPDATE schema_migrations SET completed_at = ?, error = NULL WHERE version = ?")
+      .run(new Date().toISOString(), CURRENT_SCHEMA_VERSION);
+  } catch (error) {
+    try {
+      database.exec("ROLLBACK;");
+    } catch {
+      // Preserve the original migration error.
+    }
+    database
+      .prepare("UPDATE schema_migrations SET error = ?, completed_at = NULL WHERE version = ?")
+      .run(error instanceof Error ? error.message : String(error), CURRENT_SCHEMA_VERSION);
+    throw error;
+  }
+}
+
+const CURRENT_SCHEMA_VERSION = 1;
+const BASELINE_MIGRATION_NAME = "creative-platform-baseline";
+const BASELINE_MIGRATION_CHECKSUM = crypto
+  .createHash("sha256")
+  .update(`${CURRENT_SCHEMA_VERSION}:${BASELINE_MIGRATION_NAME}`)
+  .digest("hex");
+
+export interface SchemaMigrationRecord {
+  version: number;
+  name: string;
+  checksum: string;
+  startedAt: string;
+  completedAt: string | null;
+  error: string | null;
+  status: "started" | "completed" | "failed";
+}
+
+export function readSchemaMigrations(): SchemaMigrationRecord[] {
+  if (!DatabaseSync) return [];
+  const database = openDatabase();
+  try {
+    return (
+      database
+        .prepare("SELECT version, name, checksum, started_at, completed_at, error FROM schema_migrations ORDER BY version")
+        .all() as Array<{ version: number; name: string; checksum: string; started_at: string; completed_at: string | null; error: string | null }>
+    ).map((migration) => ({
+      version: migration.version,
+      name: migration.name,
+      checksum: migration.checksum,
+      startedAt: migration.started_at,
+      completedAt: migration.completed_at,
+      error: migration.error,
+      status: migration.error ? "failed" : migration.completed_at ? "completed" : "started"
+    }));
+  } finally {
+    database.close();
+  }
 }
 
 export function databaseInfo(): { path: string; exists: boolean; engine: "node:sqlite" | "json-fallback" } {

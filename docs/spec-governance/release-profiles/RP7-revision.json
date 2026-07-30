@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "draft",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP7-revision",
+  "profileKind": "user-release",
+  "isUserRelease": true,
+  "firstSlice": "V7-revision",
+  "journey": "Use longitudinal author feedback and multi-scale evidence to revise locally, learn reversible preferences, detect drift, and release or roll back quality strategies without metric gaming.",
+  "dependencies": [
+    "RP5-drafting",
+    "RP6-obligations"
+  ],
+  "missingDependencyProfiles": [],
+  "openDecisionIds": [],
+  "policyCandidateRef": null,
+  "scopeBudget": {
+    "mustRequirementsMax": 24,
+    "actualMustRequirements": 20,
+    "withinBudget": true
+  },
+  "mustRequirementIds": [
+    "FR-LONGMEM-013",
+    "FR-EFFORT-018",
+    "FR-EFFORT-020",
+    "FR-EVAL-007",
+    "FR-EVAL-008",
+    "FR-EVAL-013",
+    "FR-EVAL-014",
+    "FR-EVAL-015",
+    "FR-EVAL-017",
+    "FR-EVAL-020",
+    "FR-EVAL-021",
+    "FR-EVAL-022",
+    "FR-OBJECTIVE-009",
+    "FR-OBJECTIVE-011",
+    "FR-FEEDBACK-007",
+    "FR-FEEDBACK-008",
+    "FR-FEEDBACK-009",
+    "FR-FEEDBACK-010",
+    "FR-FEEDBACK-011",
+    "FR-FEEDBACK-012"
+  ],
+  "shouldRequirementIds": [
+    "FR-EVAL-018"
+  ],
+  "experimentRequirementIds": [],
+  "evidenceBundleRefs": [
+    "AT-118..AT-141"
+  ],
+  "directAcceptanceStatus": "human-review-required",
+  "firstSliceAcceptance": {
+    "status": "spec-audited",
+    "reviewedRequirements": 21,
+    "totalRequirements": 21
+  },
+  "explicitExclusions": [
+    "No first-feedback event postponed until the learning phase",
+    "No single accept, reject, or edit generalized into an active preference",
+    "No overall score, same-model self-review, or average improvement overriding hard failures",
+    "No platform-wide use of private project feedback",
+    "No strategy promotion without holdout, slice, cost, rollback, and evidence gates"
+  ],
+  "activationGate": "Classification and first-slice acceptance mapping are spec-audited; implementation evidence is still required."
+}

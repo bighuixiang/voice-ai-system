@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "project-migration-preview.v1",
+  "migrationId": "migration-preview-ea16970d1336fb247bea4e4b",
+  "projectSlug": "novel-1780911338197",
+  "status": "preview_only",
+  "previewOnly": true,
+  "writeAuthority": "legacy_compatibility_only",
+  "assetCounts": {
+    "chapters": 198,
+    "outlines": 198,
+    "sceneCards": 0,
+    "summaries": 1,
+    "ledgers": 0,
+    "qualityReports": 1
+  },
+  "conflicts": [],
+  "sourceFingerprint": "ea16970d1336fb247bea4e4ba5cc196c657a9a9530a102bd4849e0ce957629fe",
+  "createdAt": "2026-07-29T17:29:23.948Z",
+  "fingerprint": "b7526577a23ee4b685395166ccf2c7aadfb8f63fe113177daa54c4500f84e0a0"
+}

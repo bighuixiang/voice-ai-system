@@ -1,0 +1,1718 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "A rough idea is compiled into evidence-backed story-contract choices and then into comparable, causally reachable, partially adoptable outline candidates; the contract remains the hard anchor, the next 3-5 chapters are strongly frozen, the far horizon may evolve, and drafting discoveries remain isolated candidates until governed adoption.",
+  "sourceFiles": [
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/outlineCandidate.ts",
+      "sha256": "d8655fb0a85e754a912631cea0342257c7449e4c971d562849fc764ce0ba8497"
+    },
+    {
+      "path": "api/src/outlineValidation.ts",
+      "sha256": "aa2d8e53cc2870a13b0ff15a20b38e8f7c94bcc91236ab7576c38f23141d7110"
+    },
+    {
+      "path": "api/src/outlineAdoption.ts",
+      "sha256": "89263e3c4b6c54c5fe3e1e096794a9259c0fb63914fa9d3b58ea78263203ee18"
+    },
+    {
+      "path": "api/src/outlineCommit.ts",
+      "sha256": "888215f5df10ee14cd5d73db87eaf9e59a534444086b7b994694936a6a3a05e7"
+    },
+    {
+      "path": "api/src/executionReadiness.ts",
+      "sha256": "e86f6c1bf92ee9933ca607cc93691ccc5c281711a40c31a7405ab233f22b446c"
+    },
+    {
+      "path": "api/src/executionQueue.ts",
+      "sha256": "313674ce39d6e25eff038633d96cadc42f7438d2313a5036fbba9fcd0fe56563"
+    },
+    {
+      "path": "api/src/proseCandidate.ts",
+      "sha256": "551b4e3e996b7b237fc1572ec11c49245ec0ea22fb3101996577f03090974ab2"
+    },
+    {
+      "path": "api/src/novelProject.ts",
+      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+    },
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "api/src/taskService.ts",
+      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/storyGraph.ts",
+      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    },
+    {
+      "path": "ui/src/components/novel/ProjectCreatePanel.vue",
+      "sha256": "39b2682cecf230b9af964a8c33d1237fe48482d8b8ecdb2bb702eb3f40c2b35a"
+    },
+    {
+      "path": "ui/src/components/novel/StructureQuickStartPanel.vue",
+      "sha256": "fabd7dc9f66b44b767bf2b7311374dcc8043c28f66f5a76ddd729dd79808e06f"
+    },
+    {
+      "path": "ui/src/components/novel/AIOperationPanel.vue",
+      "sha256": "6be3aa125c430174db7808aa06d325d2ad2adfc2d47d4b277926b7523f170b71"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "artifact-category hashes",
+      "status and field-completeness counts",
+      "file-size and heading distributions",
+      "content fingerprint cardinality",
+      "task type/status/adoption counts",
+      "cross-surface coverage counts"
+    ],
+    "snapshotExcludes": [
+      "project slug",
+      "title",
+      "rough idea",
+      "outline text",
+      "dashboard text",
+      "scene text",
+      "character or event names",
+      "prompt or model output",
+      "novel prose"
+    ]
+  },
+  "operationalSnapshot": {
+    "totals": {
+      "projects": 8,
+      "chapters": 219,
+      "chapterOutlineFiles": 213,
+      "nonPlaceholderOutlines": 164,
+      "dashboardFiles": 210,
+      "completeDashboards": 1,
+      "sceneFiles": 211,
+      "sceneCards": 8,
+      "chaptersWithSceneCards": 2,
+      "chaptersWithAllThree": 0,
+      "outlineGenerateTasks": 2,
+      "chapterPlanTasks": 16
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": [
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "storyControl": {
+          "exists": false,
+          "premisePresent": false,
+          "arcs": 0,
+          "arcStatuses": {},
+          "arcsWithCoreContract": 0,
+          "characters": 0,
+          "characterStatuses": {},
+          "events": 0,
+          "eventStatuses": {},
+          "eventsWithCausalSurface": 0
+        },
+        "chapterOutlines": {
+          "expected": 3,
+          "files": 0,
+          "placeholders": 0,
+          "nonPlaceholderAtLeast80Chars": 0,
+          "uniqueFileFingerprints": 0,
+          "bytes": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "headingCounts": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "volumeOutlines": {
+          "files": 0,
+          "bytes": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "headingCounts": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "dashboards": {
+          "files": 0,
+          "goalPresent": 0,
+          "povPresent": 0,
+          "conflictPresent": 0,
+          "endingHookPresent": 0,
+          "completeCore": 0,
+          "uniqueCoreFingerprints": 0,
+          "largestRepeatedCoreGroup": 0
+        },
+        "sceneCards": {
+          "files": 0,
+          "filesWithCards": 0,
+          "cards": 0,
+          "chaptersWithCards": 0,
+          "conflictAndTurnPresent": 0,
+          "fullFunctionSurface": 0,
+          "withCraftBeats": 0
+        },
+        "crossSurfaceCoverage": {
+          "chaptersWithNonPlaceholderOutline": 0,
+          "chaptersWithCompleteDashboard": 0,
+          "chaptersWithSceneCards": 0,
+          "chaptersWithAllThree": 0,
+          "executionReadyProofs": 0
+        },
+        "taskEvidence": {
+          "outlineGenerate": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          },
+          "chapterPlan": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          }
+        },
+        "interpretation": {
+          "hasExecutableOutlineProof": false,
+          "reason": "Existing files and statuses do not provide a versioned story contract, candidate/canon boundary, causal reachability, cross-layer referential integrity, rolling-horizon readiness, or replayable ExecutionReadyProof."
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": [
+          {
+            "category": "invocations",
+            "fileCount": 1,
+            "aggregateSha256": "d58e98c020c6419456d748d86dd36fd3dc2aa644a0ef130b6a21ac99366f2b30"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0"
+          },
+          {
+            "category": "task-history",
+            "fileCount": 1,
+            "aggregateSha256": "ea4dfc9d692ce486fb8b475b561c8accfcc88ec84998cc22d6d36554259d3b23"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "storyControl": {
+          "exists": false,
+          "premisePresent": false,
+          "arcs": 0,
+          "arcStatuses": {},
+          "arcsWithCoreContract": 0,
+          "characters": 0,
+          "characterStatuses": {},
+          "events": 0,
+          "eventStatuses": {},
+          "eventsWithCausalSurface": 0
+        },
+        "chapterOutlines": {
+          "expected": 3,
+          "files": 0,
+          "placeholders": 0,
+          "nonPlaceholderAtLeast80Chars": 0,
+          "uniqueFileFingerprints": 0,
+          "bytes": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "headingCounts": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "volumeOutlines": {
+          "files": 0,
+          "bytes": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "headingCounts": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "dashboards": {
+          "files": 0,
+          "goalPresent": 0,
+          "povPresent": 0,
+          "conflictPresent": 0,
+          "endingHookPresent": 0,
+          "completeCore": 0,
+          "uniqueCoreFingerprints": 0,
+          "largestRepeatedCoreGroup": 0
+        },
+        "sceneCards": {
+          "files": 0,
+          "filesWithCards": 0,
+          "cards": 0,
+          "chaptersWithCards": 0,
+          "conflictAndTurnPresent": 0,
+          "fullFunctionSurface": 0,
+          "withCraftBeats": 0
+        },
+        "crossSurfaceCoverage": {
+          "chaptersWithNonPlaceholderOutline": 0,
+          "chaptersWithCompleteDashboard": 0,
+          "chaptersWithSceneCards": 0,
+          "chaptersWithAllThree": 0,
+          "executionReadyProofs": 0
+        },
+        "taskEvidence": {
+          "outlineGenerate": {
+            "total": 1,
+            "byStatus": {
+              "cancelled": 1
+            },
+            "invocations": 1,
+            "adoptionDecisions": {
+              "not-required": 1
+            }
+          },
+          "chapterPlan": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          }
+        },
+        "interpretation": {
+          "hasExecutableOutlineProof": false,
+          "reason": "Existing files and statuses do not provide a versioned story contract, candidate/canon boundary, causal reachability, cross-layer referential integrity, rolling-horizon readiness, or replayable ExecutionReadyProof."
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": [
+          {
+            "category": "chapter-outline",
+            "fileCount": 3,
+            "aggregateSha256": "7534e3487deee59e8cfaa1287df5f426297343e9052402a523f7fe85261a5521"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864"
+          },
+          {
+            "category": "scene",
+            "fileCount": 1,
+            "aggregateSha256": "846c3d38dbb59276b698bdd56cd024df2ab4da00c5046f0399db6725730c58a8"
+          },
+          {
+            "category": "task-history",
+            "fileCount": 1,
+            "aggregateSha256": "f72c1dd26e2ce261eb6b859340e8ba5c94ef6d6ed227002f226a3fd6a7032ac9"
+          },
+          {
+            "category": "volume-outline",
+            "fileCount": 1,
+            "aggregateSha256": "22f3d0ea7bc2015e52f77aa25a4a95b7cc8f190751191d6834b430cf37d0dc37"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "storyControl": {
+          "exists": false,
+          "premisePresent": false,
+          "arcs": 0,
+          "arcStatuses": {},
+          "arcsWithCoreContract": 0,
+          "characters": 0,
+          "characterStatuses": {},
+          "events": 0,
+          "eventStatuses": {},
+          "eventsWithCausalSurface": 0
+        },
+        "chapterOutlines": {
+          "expected": 3,
+          "files": 3,
+          "placeholders": 0,
+          "nonPlaceholderAtLeast80Chars": 0,
+          "uniqueFileFingerprints": 3,
+          "bytes": {
+            "sampleCount": 3,
+            "min": 35,
+            "p50": 35,
+            "p95": 62,
+            "max": 62,
+            "average": 44
+          },
+          "headingCounts": {
+            "sampleCount": 3,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "volumeOutlines": {
+          "files": 1,
+          "bytes": {
+            "sampleCount": 1,
+            "min": 35,
+            "p50": 35,
+            "p95": 35,
+            "max": 35,
+            "average": 35
+          },
+          "headingCounts": {
+            "sampleCount": 1,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "dashboards": {
+          "files": 0,
+          "goalPresent": 0,
+          "povPresent": 0,
+          "conflictPresent": 0,
+          "endingHookPresent": 0,
+          "completeCore": 0,
+          "uniqueCoreFingerprints": 0,
+          "largestRepeatedCoreGroup": 0
+        },
+        "sceneCards": {
+          "files": 1,
+          "filesWithCards": 1,
+          "cards": 1,
+          "chaptersWithCards": 1,
+          "conflictAndTurnPresent": 0,
+          "fullFunctionSurface": 0,
+          "withCraftBeats": 0
+        },
+        "crossSurfaceCoverage": {
+          "chaptersWithNonPlaceholderOutline": 0,
+          "chaptersWithCompleteDashboard": 0,
+          "chaptersWithSceneCards": 1,
+          "chaptersWithAllThree": 0,
+          "executionReadyProofs": 0
+        },
+        "taskEvidence": {
+          "outlineGenerate": {
+            "total": 1,
+            "byStatus": {
+              "success": 1
+            },
+            "invocations": 0,
+            "adoptionDecisions": {}
+          },
+          "chapterPlan": {
+            "total": 1,
+            "byStatus": {
+              "success": 1
+            },
+            "invocations": 0,
+            "adoptionDecisions": {}
+          }
+        },
+        "interpretation": {
+          "hasExecutableOutlineProof": false,
+          "reason": "Existing files and statuses do not provide a versioned story contract, candidate/canon boundary, causal reachability, cross-layer referential integrity, rolling-horizon readiness, or replayable ExecutionReadyProof."
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": [
+          {
+            "category": "chapter-outline",
+            "fileCount": 198,
+            "aggregateSha256": "ed4f1f0d2a79baf35ffe2cdeb7ad6f154a2e13fbb3936bca351f510572197d60"
+          },
+          {
+            "category": "dashboard",
+            "fileCount": 198,
+            "aggregateSha256": "a6c2bc34befa1f35ab71b46103945308c5554dc1b50425562724f703999dd56a"
+          },
+          {
+            "category": "invocations",
+            "fileCount": 1,
+            "aggregateSha256": "fbeeab5ff672ed7dbedcb087d873e70a51f0e72f0b201396c11fa044a9ee5e87"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d"
+          },
+          {
+            "category": "scene",
+            "fileCount": 198,
+            "aggregateSha256": "a0021c63dbae396a965719ad574908e3a95eda7d39e72cbb6ca44354d300c394"
+          },
+          {
+            "category": "story-control",
+            "fileCount": 1,
+            "aggregateSha256": "3cfbb3687ff74d283c2aeb93e63130669152438cd39ce0e27be7c008914126be"
+          },
+          {
+            "category": "task-history",
+            "fileCount": 1,
+            "aggregateSha256": "48c63c511fc0cd3f48a7c0e6a42a77e71c5fc9131dfac010ce1c57f3f6a49d03"
+          },
+          {
+            "category": "volume-outline",
+            "fileCount": 1,
+            "aggregateSha256": "aceddcc9e31dfae3adca1fc778a2eb1d2d7ec8722fa694ce780a557a39156711"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "chapters": {
+          "total": 198,
+          "statuses": {
+            "drafted": 70,
+            "planned": 128
+          }
+        },
+        "storyControl": {
+          "exists": true,
+          "premisePresent": true,
+          "arcs": 24,
+          "arcStatuses": {
+            "active": 1,
+            "planned": 23
+          },
+          "arcsWithCoreContract": 0,
+          "characters": 22,
+          "characterStatuses": {
+            "planned": 22
+          },
+          "events": 2,
+          "eventStatuses": {
+            "planned": 2
+          },
+          "eventsWithCausalSurface": 0
+        },
+        "chapterOutlines": {
+          "expected": 198,
+          "files": 198,
+          "placeholders": 0,
+          "nonPlaceholderAtLeast80Chars": 164,
+          "uniqueFileFingerprints": 198,
+          "bytes": {
+            "sampleCount": 198,
+            "min": 135,
+            "p50": 544,
+            "p95": 781,
+            "max": 1525,
+            "average": 461
+          },
+          "headingCounts": {
+            "sampleCount": 198,
+            "min": 1,
+            "p50": 2,
+            "p95": 3,
+            "max": 3,
+            "average": 2
+          }
+        },
+        "volumeOutlines": {
+          "files": 1,
+          "bytes": {
+            "sampleCount": 1,
+            "min": 386988,
+            "p50": 386988,
+            "p95": 386988,
+            "max": 386988,
+            "average": 386988
+          },
+          "headingCounts": {
+            "sampleCount": 1,
+            "min": 766,
+            "p50": 766,
+            "p95": 766,
+            "max": 766,
+            "average": 766
+          }
+        },
+        "dashboards": {
+          "files": 198,
+          "goalPresent": 1,
+          "povPresent": 1,
+          "conflictPresent": 1,
+          "endingHookPresent": 1,
+          "completeCore": 1,
+          "uniqueCoreFingerprints": 2,
+          "largestRepeatedCoreGroup": 197
+        },
+        "sceneCards": {
+          "files": 198,
+          "filesWithCards": 1,
+          "cards": 7,
+          "chaptersWithCards": 1,
+          "conflictAndTurnPresent": 7,
+          "fullFunctionSurface": 0,
+          "withCraftBeats": 0
+        },
+        "crossSurfaceCoverage": {
+          "chaptersWithNonPlaceholderOutline": 164,
+          "chaptersWithCompleteDashboard": 1,
+          "chaptersWithSceneCards": 1,
+          "chaptersWithAllThree": 0,
+          "executionReadyProofs": 0
+        },
+        "taskEvidence": {
+          "outlineGenerate": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          },
+          "chapterPlan": {
+            "total": 15,
+            "byStatus": {
+              "success": 15
+            },
+            "invocations": 15,
+            "adoptionDecisions": {
+              "not-required": 1,
+              "pending": 14
+            }
+          }
+        },
+        "interpretation": {
+          "hasExecutableOutlineProof": false,
+          "reason": "Existing files and statuses do not provide a versioned story contract, candidate/canon boundary, causal reachability, cross-layer referential integrity, rolling-horizon readiness, or replayable ExecutionReadyProof."
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": [
+          {
+            "category": "chapter-outline",
+            "fileCount": 3,
+            "aggregateSha256": "6a4b6931def8095632c8438d53c340cc29763ed16fa2243d199581b577bd38be"
+          },
+          {
+            "category": "dashboard",
+            "fileCount": 3,
+            "aggregateSha256": "c8902d51ea6bb24046ca507a8b8c1801432f44789cdd8f9fe3fd72e0abca94e0"
+          },
+          {
+            "category": "invocations",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "story-control",
+            "fileCount": 1,
+            "aggregateSha256": "a0e07b0b4e566e9e00db4882ccca46a7f845cf44fce1a5ff11e5f99305750c80"
+          },
+          {
+            "category": "task-history",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "volume-outline",
+            "fileCount": 1,
+            "aggregateSha256": "140ae0ff330804605bf58da3a231a69076e2ef5008f4337d27bf837342e8e147"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "storyControl": {
+          "exists": true,
+          "premisePresent": false,
+          "arcs": 1,
+          "arcStatuses": {
+            "seed": 1
+          },
+          "arcsWithCoreContract": 1,
+          "characters": 1,
+          "characterStatuses": {
+            "seed": 1
+          },
+          "events": 1,
+          "eventStatuses": {
+            "seed": 1
+          },
+          "eventsWithCausalSurface": 1
+        },
+        "chapterOutlines": {
+          "expected": 3,
+          "files": 3,
+          "placeholders": 0,
+          "nonPlaceholderAtLeast80Chars": 0,
+          "uniqueFileFingerprints": 3,
+          "bytes": {
+            "sampleCount": 3,
+            "min": 32,
+            "p50": 32,
+            "p95": 32,
+            "max": 32,
+            "average": 32
+          },
+          "headingCounts": {
+            "sampleCount": 3,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "volumeOutlines": {
+          "files": 1,
+          "bytes": {
+            "sampleCount": 1,
+            "min": 32,
+            "p50": 32,
+            "p95": 32,
+            "max": 32,
+            "average": 32
+          },
+          "headingCounts": {
+            "sampleCount": 1,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "dashboards": {
+          "files": 3,
+          "goalPresent": 0,
+          "povPresent": 0,
+          "conflictPresent": 0,
+          "endingHookPresent": 0,
+          "completeCore": 0,
+          "uniqueCoreFingerprints": 1,
+          "largestRepeatedCoreGroup": 3
+        },
+        "sceneCards": {
+          "files": 3,
+          "filesWithCards": 0,
+          "cards": 0,
+          "chaptersWithCards": 0,
+          "conflictAndTurnPresent": 0,
+          "fullFunctionSurface": 0,
+          "withCraftBeats": 0
+        },
+        "crossSurfaceCoverage": {
+          "chaptersWithNonPlaceholderOutline": 0,
+          "chaptersWithCompleteDashboard": 0,
+          "chaptersWithSceneCards": 0,
+          "chaptersWithAllThree": 0,
+          "executionReadyProofs": 0
+        },
+        "taskEvidence": {
+          "outlineGenerate": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          },
+          "chapterPlan": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          }
+        },
+        "interpretation": {
+          "hasExecutableOutlineProof": false,
+          "reason": "Existing files and statuses do not provide a versioned story contract, candidate/canon boundary, causal reachability, cross-layer referential integrity, rolling-horizon readiness, or replayable ExecutionReadyProof."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": [
+          {
+            "category": "chapter-outline",
+            "fileCount": 3,
+            "aggregateSha256": "6a4b6931def8095632c8438d53c340cc29763ed16fa2243d199581b577bd38be"
+          },
+          {
+            "category": "dashboard",
+            "fileCount": 3,
+            "aggregateSha256": "84cc00491429acde7104afc00b5896e38e6102244596bcf3a935b5f21cc7c45c"
+          },
+          {
+            "category": "invocations",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "story-control",
+            "fileCount": 1,
+            "aggregateSha256": "6539a447b37cf582c5d689847919f023aad388536e36488d709f45199f04d641"
+          },
+          {
+            "category": "task-history",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "volume-outline",
+            "fileCount": 1,
+            "aggregateSha256": "140ae0ff330804605bf58da3a231a69076e2ef5008f4337d27bf837342e8e147"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "storyControl": {
+          "exists": true,
+          "premisePresent": false,
+          "arcs": 1,
+          "arcStatuses": {
+            "seed": 1
+          },
+          "arcsWithCoreContract": 1,
+          "characters": 1,
+          "characterStatuses": {
+            "seed": 1
+          },
+          "events": 1,
+          "eventStatuses": {
+            "seed": 1
+          },
+          "eventsWithCausalSurface": 1
+        },
+        "chapterOutlines": {
+          "expected": 3,
+          "files": 3,
+          "placeholders": 0,
+          "nonPlaceholderAtLeast80Chars": 0,
+          "uniqueFileFingerprints": 3,
+          "bytes": {
+            "sampleCount": 3,
+            "min": 32,
+            "p50": 32,
+            "p95": 32,
+            "max": 32,
+            "average": 32
+          },
+          "headingCounts": {
+            "sampleCount": 3,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "volumeOutlines": {
+          "files": 1,
+          "bytes": {
+            "sampleCount": 1,
+            "min": 32,
+            "p50": 32,
+            "p95": 32,
+            "max": 32,
+            "average": 32
+          },
+          "headingCounts": {
+            "sampleCount": 1,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "dashboards": {
+          "files": 3,
+          "goalPresent": 0,
+          "povPresent": 0,
+          "conflictPresent": 0,
+          "endingHookPresent": 0,
+          "completeCore": 0,
+          "uniqueCoreFingerprints": 1,
+          "largestRepeatedCoreGroup": 3
+        },
+        "sceneCards": {
+          "files": 3,
+          "filesWithCards": 0,
+          "cards": 0,
+          "chaptersWithCards": 0,
+          "conflictAndTurnPresent": 0,
+          "fullFunctionSurface": 0,
+          "withCraftBeats": 0
+        },
+        "crossSurfaceCoverage": {
+          "chaptersWithNonPlaceholderOutline": 0,
+          "chaptersWithCompleteDashboard": 0,
+          "chaptersWithSceneCards": 0,
+          "chaptersWithAllThree": 0,
+          "executionReadyProofs": 0
+        },
+        "taskEvidence": {
+          "outlineGenerate": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          },
+          "chapterPlan": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          }
+        },
+        "interpretation": {
+          "hasExecutableOutlineProof": false,
+          "reason": "Existing files and statuses do not provide a versioned story contract, candidate/canon boundary, causal reachability, cross-layer referential integrity, rolling-horizon readiness, or replayable ExecutionReadyProof."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": [
+          {
+            "category": "chapter-outline",
+            "fileCount": 3,
+            "aggregateSha256": "6a4b6931def8095632c8438d53c340cc29763ed16fa2243d199581b577bd38be"
+          },
+          {
+            "category": "dashboard",
+            "fileCount": 3,
+            "aggregateSha256": "a7e1af5e12e050bdcde2a2ba19cef9c4ba34e8a88c463fa5af9ac92986f745a7"
+          },
+          {
+            "category": "invocations",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "story-control",
+            "fileCount": 1,
+            "aggregateSha256": "4094014288b55e7f4bd6a0ed1ede677414db57b32ee63d4e5da5d627e25fc04a"
+          },
+          {
+            "category": "task-history",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "volume-outline",
+            "fileCount": 1,
+            "aggregateSha256": "140ae0ff330804605bf58da3a231a69076e2ef5008f4337d27bf837342e8e147"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "storyControl": {
+          "exists": true,
+          "premisePresent": false,
+          "arcs": 1,
+          "arcStatuses": {
+            "seed": 1
+          },
+          "arcsWithCoreContract": 1,
+          "characters": 1,
+          "characterStatuses": {
+            "seed": 1
+          },
+          "events": 1,
+          "eventStatuses": {
+            "seed": 1
+          },
+          "eventsWithCausalSurface": 1
+        },
+        "chapterOutlines": {
+          "expected": 3,
+          "files": 3,
+          "placeholders": 0,
+          "nonPlaceholderAtLeast80Chars": 0,
+          "uniqueFileFingerprints": 3,
+          "bytes": {
+            "sampleCount": 3,
+            "min": 32,
+            "p50": 32,
+            "p95": 32,
+            "max": 32,
+            "average": 32
+          },
+          "headingCounts": {
+            "sampleCount": 3,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "volumeOutlines": {
+          "files": 1,
+          "bytes": {
+            "sampleCount": 1,
+            "min": 32,
+            "p50": 32,
+            "p95": 32,
+            "max": 32,
+            "average": 32
+          },
+          "headingCounts": {
+            "sampleCount": 1,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "dashboards": {
+          "files": 3,
+          "goalPresent": 0,
+          "povPresent": 0,
+          "conflictPresent": 0,
+          "endingHookPresent": 0,
+          "completeCore": 0,
+          "uniqueCoreFingerprints": 1,
+          "largestRepeatedCoreGroup": 3
+        },
+        "sceneCards": {
+          "files": 3,
+          "filesWithCards": 0,
+          "cards": 0,
+          "chaptersWithCards": 0,
+          "conflictAndTurnPresent": 0,
+          "fullFunctionSurface": 0,
+          "withCraftBeats": 0
+        },
+        "crossSurfaceCoverage": {
+          "chaptersWithNonPlaceholderOutline": 0,
+          "chaptersWithCompleteDashboard": 0,
+          "chaptersWithSceneCards": 0,
+          "chaptersWithAllThree": 0,
+          "executionReadyProofs": 0
+        },
+        "taskEvidence": {
+          "outlineGenerate": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          },
+          "chapterPlan": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          }
+        },
+        "interpretation": {
+          "hasExecutableOutlineProof": false,
+          "reason": "Existing files and statuses do not provide a versioned story contract, candidate/canon boundary, causal reachability, cross-layer referential integrity, rolling-horizon readiness, or replayable ExecutionReadyProof."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": [
+          {
+            "category": "chapter-outline",
+            "fileCount": 3,
+            "aggregateSha256": "6a4b6931def8095632c8438d53c340cc29763ed16fa2243d199581b577bd38be"
+          },
+          {
+            "category": "dashboard",
+            "fileCount": 3,
+            "aggregateSha256": "cfc0983c2922ec184470ba88197301a46380fe8ee3b9934e5bb6b8d4f4ccc4ca"
+          },
+          {
+            "category": "invocations",
+            "fileCount": 1,
+            "aggregateSha256": "988f04eb910c93d773aa804596a77201681092a43160a0de961d67f6b7f446b8"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "story-control",
+            "fileCount": 1,
+            "aggregateSha256": "10489c8ea61d15dec75cacbe3175c6c43eac2069da829bf511de5f23c76266f9"
+          },
+          {
+            "category": "task-history",
+            "fileCount": 1,
+            "aggregateSha256": "d3fb87fd7556f445db97be68c1229835b7cc8c3717821e6e80612a5ea72f0ede"
+          },
+          {
+            "category": "volume-outline",
+            "fileCount": 1,
+            "aggregateSha256": "140ae0ff330804605bf58da3a231a69076e2ef5008f4337d27bf837342e8e147"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "storyControl": {
+          "exists": true,
+          "premisePresent": false,
+          "arcs": 1,
+          "arcStatuses": {
+            "seed": 1
+          },
+          "arcsWithCoreContract": 1,
+          "characters": 1,
+          "characterStatuses": {
+            "seed": 1
+          },
+          "events": 1,
+          "eventStatuses": {
+            "seed": 1
+          },
+          "eventsWithCausalSurface": 1
+        },
+        "chapterOutlines": {
+          "expected": 3,
+          "files": 3,
+          "placeholders": 0,
+          "nonPlaceholderAtLeast80Chars": 0,
+          "uniqueFileFingerprints": 3,
+          "bytes": {
+            "sampleCount": 3,
+            "min": 32,
+            "p50": 32,
+            "p95": 32,
+            "max": 32,
+            "average": 32
+          },
+          "headingCounts": {
+            "sampleCount": 3,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "volumeOutlines": {
+          "files": 1,
+          "bytes": {
+            "sampleCount": 1,
+            "min": 32,
+            "p50": 32,
+            "p95": 32,
+            "max": 32,
+            "average": 32
+          },
+          "headingCounts": {
+            "sampleCount": 1,
+            "min": 1,
+            "p50": 1,
+            "p95": 1,
+            "max": 1,
+            "average": 1
+          }
+        },
+        "dashboards": {
+          "files": 3,
+          "goalPresent": 0,
+          "povPresent": 0,
+          "conflictPresent": 0,
+          "endingHookPresent": 0,
+          "completeCore": 0,
+          "uniqueCoreFingerprints": 1,
+          "largestRepeatedCoreGroup": 3
+        },
+        "sceneCards": {
+          "files": 3,
+          "filesWithCards": 0,
+          "cards": 0,
+          "chaptersWithCards": 0,
+          "conflictAndTurnPresent": 0,
+          "fullFunctionSurface": 0,
+          "withCraftBeats": 0
+        },
+        "crossSurfaceCoverage": {
+          "chaptersWithNonPlaceholderOutline": 0,
+          "chaptersWithCompleteDashboard": 0,
+          "chaptersWithSceneCards": 0,
+          "chaptersWithAllThree": 0,
+          "executionReadyProofs": 0
+        },
+        "taskEvidence": {
+          "outlineGenerate": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          },
+          "chapterPlan": {
+            "total": 0,
+            "byStatus": {},
+            "invocations": 0,
+            "adoptionDecisions": {}
+          }
+        },
+        "interpretation": {
+          "hasExecutableOutlineProof": false,
+          "reason": "Existing files and statuses do not provide a versioned story contract, candidate/canon boundary, causal reachability, cross-layer referential integrity, rolling-horizon readiness, or replayable ExecutionReadyProof."
+        }
+      }
+    ],
+    "interpretation": "File existence and non-empty fields are inventory evidence only. They do not prove author adoption, semantic correctness, causal reachability, cross-surface consistency, or drafting readiness."
+  },
+  "summary": {
+    "auditedStages": 12,
+    "projectsScanned": 8,
+    "chaptersInventoried": 219,
+    "chapterOutlineFiles": 213,
+    "completeDashboards": 1,
+    "sceneCards": 8,
+    "chaptersWithAllThreeLegacySurfaces": 0,
+    "outlineGenerateTasks": 2,
+    "chapterPlanTasks": 16,
+    "runtimeConsumesChapterPlanResult": false,
+    "governedOutlineCandidateExists": true,
+    "outlineCandidateCompilerSliceExists": true,
+    "outlineValidationReportSliceExists": true,
+    "outlineAdoptionProposalSliceExists": true,
+    "outlineVersionCommitSliceExists": true,
+    "executionReadyProofSliceExists": true,
+    "executionWorkItemLifecycleSliceExists": true,
+    "runtimeWorkerBindsExecutionWorkItem": true,
+    "causalReachabilityGateExists": false,
+    "executionReadyProofExists": false,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform treats outline Markdown, StoryControl, ChapterDashboard, SceneCard, task results, project chapter status, and StoryGraph as neighboring editable assets rather than projections and candidates around one versioned causal outline authority.",
+    "consequence": "A project can contain hundreds of outline files yet have almost no executable scene coverage; a plan task can succeed without affecting the following draft; and direct edits cannot reliably invalidate, compare, partially adopt, or minimally replan dependent nodes."
+  },
+  "stages": [
+    {
+      "stageId": "OUTLINE-TRACE-001",
+      "label": "粗略想法捕获",
+      "currentStatus": "project-field-not-immutable-seed",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/ProjectCreatePanel.vue",
+          "line": 27,
+          "evidence": "roughIdea"
+        }
+      ],
+      "strength": "The author can begin with a short rough idea and safe title/genre defaults.",
+      "gap": "No immutable utterance, evidence spans, competing interpretation, correction lineage, or seed compilation state precedes project creation."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-002",
+      "label": "项目创建",
+      "currentStatus": "generic-filesystem-skeleton",
+      "evidence": [
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 162,
+          "evidence": "createDefaultChapters()"
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 285,
+          "evidence": "\"# 第一卷大纲\\n\\n待生成。\\n\""
+        }
+      ],
+      "strength": "A fast isolated project container creates paths needed by later planning.",
+      "gap": "The create route runs no project.create compiler and success proves only bootstrap, not understanding or outline readiness."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-003",
+      "label": "用想法起结构",
+      "currentStatus": "client-local-generic-first-chapter-template",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 2921,
+          "evidence": "function generateStructureFromIdea"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 2931,
+          "evidence": "mainConflict: \"主角必须在目标、阻力和代价之间做选择。\""
+        }
+      ],
+      "strength": "The current chapter gets an immediate reversible dashboard and scene scaffold without a model call.",
+      "gap": "Only one chapter is affected; generic conflict/hook text is not evidence that the idea was understood or compiled into a causal book outline."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-004",
+      "label": "outline.generate 任务",
+      "currentStatus": "manual-monolithic-markdown-task",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 13,
+          "evidence": "\"outline.generate\": \"Generate or rewrite the volume outline"
+        }
+      ],
+      "strength": "A dedicated task can use broad project context to propose volume, chapter, causality, and foreshadowing material.",
+      "gap": "No typed contract, candidate alternatives, node-level provenance, partial adoption, causal validator, or execution-readiness result is required."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-005",
+      "label": "手工章规划结果",
+      "currentStatus": "generic-rewrite-candidate-not-structured-plan",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3780,
+          "evidence": "rewriteCandidate.value = task.result"
+        }
+      ],
+      "strength": "chapter.plan opens the outline document and keeps AI output reviewable before patch application.",
+      "gap": "The task contract asks for dashboard/scenes JSON inside content, but the generic task path does not parse or atomically adopt those structures; only structure.reverse has a dedicated parser."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-006",
+      "label": "StoryControl",
+      "currentStatus": "mutable-v1-free-text-control",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 599,
+          "evidence": "export interface StoryControl"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 1715,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/story-control\""
+        }
+      ],
+      "strength": "Arcs, characters, events, costs, rewards, ranges, and orchestration notes provide useful planning primitives.",
+      "gap": "Free chapter ranges and statuses lack contract versions, causal edges, stable cross-layer references, candidate/canon authority, and baseline-guarded commands."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-007",
+      "label": "章节仪表盘",
+      "currentStatus": "independent-whole-object-put",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 304,
+          "evidence": "export interface ChapterDashboard"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2420,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/dashboard/:chapterId\""
+        }
+      ],
+      "strength": "Goal, POV, conflict, hook, word count, and risk IDs make a compact chapter contract-like view.",
+      "gap": "It has no chapter function, state delta, predecessor/successor evidence, arc milestone, story-question movement, capacity budget, confidence, or source version."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-008",
+      "label": "场景卡",
+      "currentStatus": "rich-but-independent-scene-list",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 519,
+          "evidence": "export interface SceneCard"
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 943,
+          "evidence": "export async function saveSceneCards"
+        }
+      ],
+      "strength": "Scene cards already represent POV, characters, conflict, turn, information, progression, reader payoff, craft beats, and draft anchors.",
+      "gap": "No typed causal input/output state, required predecessor, alternative branch, capacity, obligation reservation, canon evidence distinction, or cross-file transaction exists."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-009",
+      "label": "自动运行时章规划",
+      "currentStatus": "task-success-result-discarded",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 749,
+          "evidence": "const planTask = await runRuntimeTask"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 754,
+          "evidence": "await assembleContext(\"chapter.draft\""
+        }
+      ],
+      "strength": "The runtime explicitly schedules chapter planning before drafting and stops on a failed plan task.",
+      "gap": "On success it consumes neither planTask.result nor patches, then assembles existing files; planning success can therefore be logged without the draft using the new plan."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-010",
+      "label": "正文上下文",
+      "currentStatus": "parallel-files-without-manifest-authority",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 729,
+          "evidence": "{ title: \"卷纲\""
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 754,
+          "evidence": "{ title: \"目标章纲\""
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 738,
+          "evidence": "{ title: \"场景卡\""
+        }
+      ],
+      "strength": "Drafting can receive volume outline, target chapter outline, dashboard, scenes, story control, ledgers, memory, and project data.",
+      "gap": "The assembler does not prove these inputs share one accepted baseline, resolve conflicts, satisfy reachability, or remain fresh after upstream changes."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-011",
+      "label": "跨层一致性与重规划",
+      "currentStatus": "multiple-direct-writers-no-impact-subgraph",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2437,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/scenes/:chapterId\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 1715,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/story-control\""
+        }
+      ],
+      "strength": "Each surface is independently editable and path-safe.",
+      "gap": "StoryControl, Markdown, dashboard, scenes, project chapter status, graph, and runtime can diverge; no impact graph, stale propagation, node-level merge, or minimal replan transaction exists."
+    },
+    {
+      "stageId": "OUTLINE-TRACE-012",
+      "label": "执行就绪证明",
+      "currentStatus": "absent",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 88,
+          "evidence": "selectTargetChapter"
+        }
+      ],
+      "strength": "Runtime can select a target chapter and build snapshots/checkpoints before work.",
+      "gap": "Chapter existence and task success do not prove accepted contract, causal reachability, no orphan nodes, required state transitions, capacity, obligation landing, context completeness, or replayable ExecutionReadyProof."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-wire-current-tasks-to-markdown",
+      "verdict": "insufficient-alone",
+      "blueCase": "Fastest visible improvement: connect project.create and chapter.plan results to existing outline files.",
+      "redCase": "Monolithic Markdown still lacks competing interpretations, node identity, partial adoption, causal validation, cross-surface authority, and reliable replan scope."
+    },
+    {
+      "option": "B-reconcile-existing-structure-assets",
+      "verdict": "useful-migration-layer-not-authority",
+      "blueCase": "A reconciliation service can unify StoryControl, dashboard, scenes, and Markdown with less UI disruption.",
+      "redCase": "If existing mutable files remain co-equal writers, reconciliation becomes recurring conflict repair rather than a provable source of truth."
+    },
+    {
+      "option": "C-candidateized-causal-story-compiler",
+      "verdict": "partial-candidate-compiler-implemented-not-adoption-ready",
+      "blueCase": "Compiles accepted story-contract fields into typed alternative graphs, supports node-level red/blue comparison and adoption, validates reachability, and publishes a rolling execution-ready window with provenance.",
+      "redCase": "Requires shared schemas, migration, a versioned outline authority, validators, impact analysis, and projection rebuilds before it can replace current direct writes."
+    }
+  ],
+  "targetPipeline": {
+    "stages": [
+      "utterance_captured",
+      "seed_interpretations_ready",
+      "contract_candidate_ready",
+      "contract_fields_adopted",
+      "outline_candidates_ready",
+      "outline_nodes_adopted",
+      "outline_version_validating",
+      "rolling_window_ready",
+      "execution_ready",
+      "stale_or_replanning"
+    ],
+    "entities": [
+      "StorySeedFrame",
+      "SeedInterpretationSet",
+      "StoryContract",
+      "StoryContractReadinessProof",
+      "StoryEngineContract",
+      "NarrativeQuestion",
+      "OutlineNode",
+      "CausalMilestoneGraph",
+      "OutlineCandidate",
+      "OutlineAdoptionDecision",
+      "OutlineVersion",
+      "OutlineValidationReport",
+      "RollingPlanningWindow",
+      "ImpactSubgraph",
+      "ExecutionReadyProof",
+      "ExecutionWorkItem"
+    ],
+    "invariant": "No skeleton, Markdown file, task success, field completeness, chapter status, graph projection, or model self-report may independently establish accepted outline or execution_ready."
+  },
+  "selectedOutlineEvolutionAuthority": {
+    "policyId": "contract-anchored-rolling-emergence",
+    "hardContract": "StoryContract, central narrative question, protagonist and character bottom lines, explicit author locks, major promises, ending direction, and hard ending constraints may change only through an explicit author L2 decision.",
+    "adoptedStructure": "Major arcs, causal milestones, committed obligations, volume functions, and major foreshadowing require an impact-backed candidate; material tradeoffs are L2.",
+    "nearHorizon": "The next 3-5 chapters are strongly frozen. Automatic L0 changes must remain local and reversible and preserve committed state transitions, causal inputs, knowledge boundaries, obligations, and locks.",
+    "farHorizon": "Tentative milestones, chapter allocation, and exploratory supporting paths may be automatically re-planned as L1 only inside a current AutonomyGrant and after validation, regression checks, rollback identity, and a visible receipt.",
+    "draftingEmergence": "A stronger motive, conflict, reveal, relationship turn, payoff path, or ending possibility is evidence captured as a non-canon EmergenceCandidate; prose quality never grants structural authority by itself.",
+    "hardPause": "Any change to a core promise, protagonist, central conflict, character fate, core relationship outcome, major foreshadowing/payoff meaning, ending, volume boundary, or intentionally open obligation is L2 and asks the author one bounded Socratic question."
+  },
+  "rollingPlanningPolicy": {
+    "fullBook": "Keep committed ending constraints, central questions, major arcs, obligation landing zones, and volume functions without pretending every distant scene is fixed.",
+    "nearHorizon": "Strongly freeze the next 3-5 chapters with chapter function, input/output state, causal predecessors, scene contracts, capacity, obligations, knowledge boundaries, and current context fingerprints; relevant change invalidates readiness before re-planning.",
+    "farHorizon": "Keep distant detail tentative or exploratory and allow validated L1 re-planning inside the contract and current grant without pretending those details are already committed.",
+    "replan": "Author changes or adopted draft discoveries invalidate only the affected subgraph; stable semantic IDs survive chapter-number moves, unchanged adopted nodes remain locked unless evidence requires reopening, eligible L0/L1 changes may adopt with receipts, and every L2 change pauses for the author."
+  },
+  "releaseGate": {
+    "requirementIds": [
+      "FR-SEED-001",
+      "FR-SEED-002",
+      "FR-SEED-004",
+      "FR-SEED-005",
+      "FR-SEED-007",
+      "FR-SEED-012",
+      "FR-SEED-013",
+      "FR-SEED-014",
+      "FR-SEED-015",
+      "FR-SEED-016",
+      "FR-SEED-017",
+      "FR-SEED-019",
+      "FR-SEED-020",
+      "FR-ARCH-001",
+      "FR-ARCH-002",
+      "FR-ARCH-003",
+      "FR-ARCH-004",
+      "FR-ARCH-005",
+      "FR-ARCH-006",
+      "FR-ARCH-007",
+      "FR-ARCH-008",
+      "FR-ARCH-009",
+      "FR-ARCH-010",
+      "FR-ARCH-011",
+      "FR-ARCH-012",
+      "FR-ARCH-013",
+      "FR-ARCH-014",
+      "FR-ARCH-015",
+      "FR-ARCH-016",
+      "FR-ARCH-017",
+      "FR-ARCH-018",
+      "FR-ARCH-019",
+      "FR-ARCH-020",
+      "FR-ARCH-021",
+      "FR-ARCH-022",
+      "FR-ARCH-024"
+    ],
+    "acceptanceRefs": [
+      "AT-058",
+      "AT-081",
+      "AT-160",
+      "AT-223",
+      "AT-224",
+      "AT-269",
+      "AT-270",
+      "AT-271",
+      "AT-272",
+      "AT-273",
+      "AT-274",
+      "AT-275",
+      "AT-276",
+      "AT-277",
+      "AT-278",
+      "AT-279",
+      "AT-280",
+      "AT-281",
+      "AT-282",
+      "AT-283",
+      "AT-284",
+      "AT-285",
+      "AT-286",
+      "AT-288",
+      "AT-356",
+      "AT-357",
+      "AT-365",
+      "AT-389",
+      "AT-405",
+      "AT-415",
+      "AT-453",
+      "AT-454"
+    ],
+    "rule": "Do not claim a rough idea has become an executable outline until the accepted contract and outline baseline are versioned, alternative candidates are genuinely distinguishable, adopted nodes are causally reachable and cross-layer consistent, the strongly frozen next 3-5 chapter window has complete task inputs, evolution authority and change class are proven, and ExecutionReadyProof can be replayed and is invalidated by relevant upstream change."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level. Q-008 selects contract-anchored rolling emergence without weakening story-contract evidence, causal validation, candidate isolation, the strongly frozen 3-5 chapter window, minimal re-planning, or author authority over L2 story changes. No outline-evolution runtime is implementation-verified."
+}

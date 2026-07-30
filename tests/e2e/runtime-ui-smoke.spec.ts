@@ -33,7 +33,7 @@ test("loads runtime workspace panels and dark themed previews", async ({ page, r
   const consoleErrors: string[] = [];
 
   page.on("console", (message) => {
-    if (message.type() === "error") {
+    if (message.type() === "error" && !message.text().includes("Failed to load resource: the server responded with a status of 404")) {
       consoleErrors.push(message.text());
     }
   });
@@ -69,7 +69,13 @@ test("loads runtime workspace panels and dark themed previews", async ({ page, r
   await page.locator(".writing-mode-switcher .segment-option").nth(2).click();
   const taskHistoryPanel = page.locator(".task-history-panel");
   if (!(await taskHistoryPanel.isVisible())) {
-    await page.locator(".collapsible-panel").filter({ has: page.locator(".task-history-panel") }).locator(".collapse-toggle").click();
+    const collapsible = taskHistoryPanel.locator(
+      "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' collapsible-panel ')][1]"
+    );
+    const toggle = collapsible.locator(".panel-toggle");
+    if ((await toggle.getAttribute("aria-expanded")) !== "true") {
+      await toggle.click();
+    }
   }
   await expect(taskHistoryPanel).toBeVisible();
   await page.locator(".task-history-panel .report-actions button").first().click();

@@ -1,0 +1,812 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "Every generated, imported, edited, revised, restored, and exported chapter preserves the author's exact intended text and structure, isolates machine/import wrappers, diagnoses real encoding/typography problems without flattening style, and can prove mechanical cleanup did not corrupt prose or narrative evidence.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/novelProject.ts",
+      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+    },
+    {
+      "path": "api/src/runtimeFiles.ts",
+      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
+    },
+    {
+      "path": "api/src/chapterQualityReview.ts",
+      "sha256": "71f72a3497c4924f64ac673fadeaea2a659603614e36328b0f117b1ea5e5a0bf"
+    },
+    {
+      "path": "api/src/resultParser.ts",
+      "sha256": "25e7427683edf9a02b3ca953da2be5c3408cbd2ab1d552edb4034cbf77df68a6"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "ui/src/components/novel/ChapterEditor.vue",
+      "sha256": "7bd418e17405579d94b777bb4fe453244307169723cc4256bf8ab2ca689d185c"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "source/project/content aggregate hashes",
+      "file/byte/character counts",
+      "encoding/line-ending/whitespace/Markdown/punctuation signal counts",
+      "source evidence paths and code tokens"
+    ],
+    "snapshotExcludes": [
+      "project slug or ID",
+      "title",
+      "genre",
+      "rough idea",
+      "chapter ID/title/path",
+      "prose or outline",
+      "matched line or punctuation context",
+      "author exception text",
+      "task/model output",
+      "absolute path"
+    ]
+  },
+  "operationalSnapshot": {
+    "totals": {
+      "projects": 8,
+      "declaredFiles": 219,
+      "existingFiles": 213,
+      "nonemptyFiles": 213,
+      "validUtf8Files": 213,
+      "bytes": 387715,
+      "characters": 152392,
+      "crlfFiles": 199,
+      "lfFiles": 14,
+      "mixedLineEndingFiles": 0,
+      "trailingWhitespaceFiles": 26,
+      "trailingWhitespaceLines": 104,
+      "multipleHeadingFiles": 68,
+      "markdownListFiles": 7,
+      "markdownTableFiles": 1,
+      "horizontalRuleFiles": 65
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "contentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
+        },
+        "files": {
+          "declared": 3,
+          "existing": 0,
+          "nonempty": 0,
+          "validUtf8": 0,
+          "bytes": 0,
+          "characters": 0
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {},
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "contentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
+        },
+        "files": {
+          "declared": 3,
+          "existing": 0,
+          "nonempty": 0,
+          "validUtf8": 0,
+          "bytes": 0,
+          "characters": 0
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {},
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "contentAggregate": "f1e73610707d9cb6fa66de05e55ff3b2f42b74b9cd06b851be84b9e5307bd960"
+        },
+        "files": {
+          "declared": 3,
+          "existing": 3,
+          "nonempty": 3,
+          "validUtf8": 3,
+          "bytes": 8900,
+          "characters": 3316
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {
+            "crlf": 3
+          },
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 1,
+          "markdownListLines": 7,
+          "withMarkdownTable": 1,
+          "markdownTableLines": 11,
+          "withMultipleHeadings": 1,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 1,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 1,
+          "withChineseEllipsis": 1,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "contentAggregate": "d6da96d4da614df888d4ccf8944f0bd94301729112331a25d68893f30279cf38"
+        },
+        "files": {
+          "declared": 198,
+          "existing": 198,
+          "nonempty": 198,
+          "validUtf8": 198,
+          "bytes": 378445,
+          "characters": 148750
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {
+            "crlf": 196,
+            "lf": 2
+          },
+          "withTabs": 0,
+          "withTrailingWhitespace": 26,
+          "trailingWhitespaceLines": 104,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 6,
+          "markdownListLines": 23,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 67,
+          "withHorizontalRule": 65,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 70,
+          "withChineseEllipsis": 26,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "contentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "files": {
+          "declared": 3,
+          "existing": 3,
+          "nonempty": 3,
+          "validUtf8": 3,
+          "bytes": 39,
+          "characters": 27
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {
+            "lf": 3
+          },
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "contentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "files": {
+          "declared": 3,
+          "existing": 3,
+          "nonempty": 3,
+          "validUtf8": 3,
+          "bytes": 39,
+          "characters": 27
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {
+            "lf": 3
+          },
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "contentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "files": {
+          "declared": 3,
+          "existing": 3,
+          "nonempty": 3,
+          "validUtf8": 3,
+          "bytes": 39,
+          "characters": 27
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {
+            "lf": 3
+          },
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "contentAggregate": "2d36728f3a770439d66fd3730878e502a4bf53f4c0dbe03aad5931804ad9d63d"
+        },
+        "files": {
+          "declared": 3,
+          "existing": 3,
+          "nonempty": 3,
+          "validUtf8": 3,
+          "bytes": 253,
+          "characters": 245
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {
+            "lf": 3
+          },
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 1,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      }
+    ],
+    "interpretation": "Zero fatal UTF-8 or control-character findings in the current snapshot is good inventory evidence, not proof of a governed text pipeline. CRLF, headings, lists, tables, horizontal rules, punctuation variants, and whitespace are not automatically defects; only a TextProfile plus structural context can distinguish intent, safe mechanics, contamination, and publication blockers."
+  },
+  "summary": {
+    "auditedStages": 11,
+    "projectsScanned": 8,
+    "declaredContentFiles": 219,
+    "existingContentFiles": 213,
+    "validUtf8Files": 213,
+    "mixedLineEndingFiles": 0,
+    "trailingWhitespaceFiles": 26,
+    "multipleHeadingFiles": 68,
+    "markdownListFiles": 7,
+    "markdownTableFiles": 1,
+    "textProfiles": 0,
+    "structureSnapshots": 0,
+    "diagnostics": 0,
+    "normalizationReceipts": 0,
+    "textSettlements": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform treats chapter prose as a UTF-8 Markdown string. Manual save, browser import, and runtime write preserve caller text directly; literary quality heuristics split strings into paragraphs/sentences, but no shared profile, loss-aware parser, wrapper quarantine, diagnostic applicability, bounded normalization, source map, round-trip proof, or settlement authority exists.",
+    "consequence": "A readable file can still contain model/task wrappers, duplicated metadata, malformed structure, typography drift, or import noise; a seemingly harmless global cleanup can also alter dialogue, rhythm, special blocks, content hashes, locks, foreshadowing, factual claims, and publication output without an auditable semantic change."
+  },
+  "currentEvidence": [
+    {
+      "claim": "Manual file save snapshots and then writes the submitted nextContent UTF-8 string directly.",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2695,
+          "evidence": "const nextContent = String(req.body.content || \"\")"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2697,
+          "evidence": "fs.writeFile(resolveInside(projectRoot(project.slug), relativePath), nextContent, \"utf8\")"
+        }
+      ]
+    },
+    {
+      "claim": "Imported drafted chapters are copied from uploaded source.file.content into canon chapter files without a text profile or structural settlement.",
+      "evidence": [
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 945,
+          "evidence": "for (const source of importedChapters)"
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 952,
+          "evidence": "source.file.content, \"utf8\""
+        }
+      ]
+    },
+    {
+      "claim": "Runtime atomic write protects filesystem replacement but writes the supplied content string unchanged.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 164,
+          "evidence": "async function atomicWrite"
+        },
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 172,
+          "evidence": "fs.writeFile(tmp, content, \"utf8\")"
+        }
+      ]
+    },
+    {
+      "claim": "Rules-based quality analysis derives paragraphs and sentences from regex splitting, not a loss-aware prose structure tree.",
+      "evidence": [
+        {
+          "path": "api/src/chapterQualityReview.ts",
+          "line": 116,
+          "evidence": "function splitParagraphs"
+        },
+        {
+          "path": "api/src/chapterQualityReview.ts",
+          "line": 123,
+          "evidence": "function splitSentences"
+        }
+      ]
+    },
+    {
+      "claim": "ChapterEditor is a generic Markdown Monaco surface that emits editor.getValue without project text diagnostics or normalization receipts.",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/ChapterEditor.vue",
+          "line": 207,
+          "evidence": "language: \"markdown\""
+        },
+        {
+          "path": "ui/src/components/novel/ChapterEditor.vue",
+          "line": 239,
+          "evidence": "emit(\"update:content\", editor.getValue())"
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "TXT-TRACE-001",
+      "label": "decode-and-preserve-raw",
+      "current": "Node paths read/write UTF-8 strings and imports accept caller-provided text.",
+      "gap": "Invalid bytes, BOM, replacement characters, Unicode normalization, and decoder provenance have no first-class report or raw-byte identity.",
+      "target": "Freeze raw bytes/hash, decode under a declared TextProfile, quarantine loss, and preserve a reversible origin."
+    },
+    {
+      "id": "TXT-TRACE-002",
+      "label": "resolve-project-text-profile",
+      "current": "Monaco uses Markdown and a Chinese-friendly font, while project files carry no typography/structure policy.",
+      "gap": "The system cannot tell intended Chinese dialogue, foreign quotations, letters, poetry, lists, tables, scene rules, or author exceptions from inconsistency.",
+      "target": "Version language/locale, encoding, whitespace, punctuation, structure, special-block, and exception rules per scope."
+    },
+    {
+      "id": "TXT-TRACE-003",
+      "label": "parse-structure-with-source-map",
+      "current": "Quality review splits paragraphs on blank lines and sentences on a punctuation regex.",
+      "gap": "No stable nodes distinguish titles, narration, dialogue, quotes, letters, scene breaks, notes, lists/tables, resources, special blocks, or unknown spans.",
+      "target": "Build a loss-aware TextStructureSnapshot and TextSourceMap over every consumed byte/span."
+    },
+    {
+      "id": "TXT-TRACE-004",
+      "label": "quarantine-generation-and-import-contamination",
+      "current": "Result parsers can unwrap task JSON, but save/import/runtime ultimately accept plain content strings.",
+      "gap": "JSON/fences, analysis labels, prompt echoes, task metadata, duplicate titles, import reports, candidate labels, or truncation can become readable Markdown canon.",
+      "target": "Separate provable prose nodes from wrappers, preserve unconsumed bytes, and block ambiguous extraction before adoption."
+    },
+    {
+      "id": "TXT-TRACE-005",
+      "label": "diagnose-by-applicability-and-severity",
+      "current": "Rule quality checks flag long paragraphs and literary patterns but not encoding, structure, typography, or entrypoint parity.",
+      "gap": "Mechanical corruption, publication blockers, optional house style, literary choice, and not-applicable cases would be mixed into one noisy lint score.",
+      "target": "Emit evidence-anchored TextDiagnostics with profile applicability, counterexamples, hard/style severity, and stale conditions."
+    },
+    {
+      "id": "TXT-TRACE-006",
+      "label": "compile-bounded-fix-candidate",
+      "current": "Current save writes the submitted string; quality rewrite may replace whole chapters.",
+      "gap": "There is no middle path for minimal reversible whitespace/structure fixes, and global quote/dash replacement can alter meaning, rhythm, commands, or foreign text.",
+      "target": "Auto-apply only proved semantic-equivalent authorized edits; preview every other fix as a minimal baseline-bound patch."
+    },
+    {
+      "id": "TXT-TRACE-007",
+      "label": "preserve-author-exceptions",
+      "current": "Passage locks protect prose spans but do not explain project-scoped typography exceptions.",
+      "gap": "Repeated warnings can fight deliberate dialect, punctuation, poetry, code, letters, or period voice, while one suppression could accidentally hide future real damage.",
+      "target": "Record exact, reasoned, expiring TextExceptions with inheritance and revocation boundaries."
+    },
+    {
+      "id": "TXT-TRACE-008",
+      "label": "reanchor-dependent-evidence",
+      "current": "Foreshadowing and other evidence may depend on text spans or contextual anchors.",
+      "gap": "Line-ending/Unicode/whitespace changes can move offsets and silently point locks, obligations, claims, quality evidence, or comments at the wrong text.",
+      "target": "Transform spans through a TextSourceMap, reanchor uniquely, and mark ambiguous dependents stale."
+    },
+    {
+      "id": "TXT-TRACE-009",
+      "label": "enforce-entrypoint-parity",
+      "current": "Manual save, browser import, runtime write, restore, merge, and future export have separate code paths.",
+      "gap": "A clean editor save can be bypassed by import/runtime or reinterpreted by publication, yielding divergent text for the same canon version.",
+      "target": "Route all entrypoints through the same profile/parser/diagnostic/receipt contract without silently changing bytes."
+    },
+    {
+      "id": "TXT-TRACE-010",
+      "label": "prove-round-trip-and-idempotency",
+      "current": "No parse-render-parse identity or canonicalization idempotency evidence is stored.",
+      "gap": "Repeated saves or exports can churn punctuation/whitespace, drop unknown blocks, or produce enormous non-literary diffs.",
+      "target": "Prove stable structure hashes, byte policy, unconsumed coverage, and empty second normalization under pinned versions."
+    },
+    {
+      "id": "TXT-TRACE-011",
+      "label": "settle-text-integrity",
+      "current": "File saved, task success, readable Markdown, and quality score are operational endpoints.",
+      "gap": "None proves hard corruption/contamination is absent, exceptions are authorized, anchors remain valid, and publication sees the same semantic tree.",
+      "target": "Issue TextSettlement only after hard diagnostics, exceptions, source-map coverage, round-trip, entrypoint, and export regressions pass."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-normalize-on-every-save",
+      "verdict": "reject-silent-global-rewrite",
+      "blueCase": "Simple implementation, consistently tidy files, predictable renderer input, and no large cleanup at publication time.",
+      "redCase": "Unicode/newline/quote/dash/ellipsis replacement can create full-file diffs, alter dialect, foreign text, commands and rhythm, break byte hashes and anchors, and hide which changes came from the author."
+    },
+    {
+      "option": "B-lint-only-never-normalize",
+      "verdict": "default-for-ambiguous-style-not-complete-alone",
+      "blueCase": "Maximum fidelity to author bytes and low risk of a wrong rule rewriting literature; all choices remain visible.",
+      "redCase": "Mechanical import/AI/runtime noise accumulates across hundreds of chapters, users repeatedly fix safe trivia, severe corruption competes with style warnings, and publication becomes the first place cross-entry divergence appears."
+    },
+    {
+      "option": "C-governed-profile-parse-diagnose-fix-roundtrip",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "Freeze raw bytes, parse typed nodes, isolate wrappers, diagnose by profile/applicability, auto-fix only proven reversible mechanics, preview other patches/exceptions, transform anchors, and prove idempotent round-trip across every entrypoint.",
+      "redCase": "Requires language/locale profiles, loss-aware parser/source maps, Unicode and Markdown expertise, special-block modeling, diagnostic calibration, patch/exception UX, anchor transformation, entrypoint adapters, renderer parity, and large multilingual/adversarial fixtures."
+    }
+  ],
+  "targetAuthority": {
+    "entities": [
+      "TextProfile",
+      "TextStructureSnapshot",
+      "TextNode",
+      "TextSourceMap",
+      "TextDiagnostic",
+      "TextFixCandidate",
+      "TextException",
+      "TextNormalizationReceipt",
+      "TextSettlement"
+    ],
+    "hardCategories": [
+      "decode_loss",
+      "control_character",
+      "wrapper_contamination",
+      "ambiguous_truncation",
+      "structure_unconsumed",
+      "secret_or_internal_leak",
+      "anchor_corruption",
+      "roundtrip_loss"
+    ],
+    "invariant": "No readable file, UTF-8 write, Markdown mode, regex split, non-empty body, clean task exit, model declaration, global replacement, prettier/formatter success, quality score, unchanged character count, or successful export may independently establish intended text structure, semantic-equivalent normalization, contamination freedom, anchor validity, round-trip fidelity, or TextSettlement."
+  },
+  "textProtocol": {
+    "order": [
+      "freeze raw bytes/hash, source entrypoint, author/canon version, expected profile, producer and baseline before decoding or cleanup",
+      "decode under TextProfile with fatal-loss detection; preserve raw input and classify BOM, Unicode, line-ending, whitespace and unsupported-character signals",
+      "parse all bytes/spans into typed TextNodes plus unknown/unconsumed ranges and build raw/editor/canonical/publication TextSourceMap",
+      "isolate JSON/fences, analysis/prompt/task metadata, duplicate headings, import notes, candidate labels, truncation and secret/internal material before prose adoption",
+      "evaluate structure, typography and hygiene rules by locale, node type, author exception and narrative context; emit span evidence, severity, counterexample and stale condition",
+      "auto-apply only explicitly authorized, reversible, semantics-proved mechanics; compile every other change as a minimal baseline-bound TextFixCandidate",
+      "preview literary impact and moved anchors; allow partial adoption, reject, lock, scoped TextException and rollback without learning pure formatting as voice",
+      "transform dependent spans through TextSourceMap, reanchor unique context, and invalidate ambiguous locks, obligations, claims, comments, quality evidence and editions",
+      "route manual save, import, task parsing, runtime, restore, merge, revision and publication through the same versioned contract",
+      "prove parse-render-parse structural equivalence, unconsumed-byte coverage, byte-policy compliance and empty second normalization under pinned versions",
+      "issue TextSettlement only after hard findings/unknowns, exceptions, anchors, entrypoint parity and publication regression are current"
+    ],
+    "nonGoal": "The text pipeline does not choose one universal Chinese typography or rewrite prose for literary taste. It protects declared project conventions and exposes ambiguity; Q-003 controls review depth, not byte safety or contamination gates."
+  },
+  "verificationMatrix": [
+    "UTF-8 BOM, LF, CRLF, mixed line endings, missing final newline, tabs, trailing spaces, NBSP/fullwidth spaces, combining characters, replacement characters, invalid bytes and C0 controls",
+    "Chinese dialogue and nested quotes mixed with English quotation, code/command text, dialect pauses, three-dot/six-dot ellipses, em/en/double hyphens and horizontal scene rules",
+    "headings, letters, poems, diaries, lists, tables, footnotes, links, images, HTML, code blocks, intentional blank space and unknown custom blocks",
+    "JSON envelope, Markdown fence, analysis/final/system/user labels, prompt echo, task IDs/scores, import notes, duplicate titles, candidate markers and truncated wrappers around real prose",
+    "same chapter enters through Monaco, API, browser import, runtime, restore, branch merge, revision, Markdown/TXT and later EPUB/DOCX/PDF adapters",
+    "safe whitespace patch moves a foreshadowing anchor, research claim, passage lock, quality evidence and inline comment; unique anchors rebind and ambiguous anchors stale",
+    "concurrent author edit after diagnostic/fix generation, stale profile/parser version, retry, crash mid-normalization and rollback",
+    "author intentionally violates punctuation/paragraph convention for voice, unreliable narration, poetry, chat log, transcript, foreign language or accessibility",
+    "very large chapter and full book process incrementally without truncation, quadratic diff, source-map loss or changed final semantic hash",
+    "same frozen input/profile/parser/renderer repeats to identical diagnostics, fixes, source maps, structure hashes, artifacts and settlement"
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-TEXT-001",
+      "FR-TEXT-002",
+      "FR-TEXT-003",
+      "FR-TEXT-004"
+    ],
+    "acceptanceRefs": [
+      "AT-512",
+      "AT-513",
+      "AT-514",
+      "AT-515"
+    ],
+    "rule": "Do not claim clean, normalized, correctly formatted, uncontaminated, round-trip-safe, anchor-safe, editor/import/runtime-consistent, or publication-ready prose until raw input and TextProfile are frozen, every byte is decoded and structurally consumed or quarantined, diagnostics preserve applicability and author exceptions, fixes are bounded/reversible/baseline-bound, source maps reanchor or invalidate dependents, all entrypoints share the contract, and TextSettlement proves idempotent round-trip and export parity."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none weakens decode-loss, control-character, contamination, secret/internal leakage, source-map, stale-baseline, round-trip, entrypoint-parity or settlement gates."
+}

@@ -1,0 +1,2016 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP2-understanding",
+  "journey": "Separate evidence, inference, unknowns, and competing interpretations, then ask one high-value question.",
+  "protocol": {
+    "blueQuestion": "What breaks evidence-bounded understanding or the single high-value question if this requirement is absent?",
+    "redQuestion": "Can the requirement move to contract, outline, drafting, or revision without corrupting RP2 truth boundaries?",
+    "rule": "Retain production safety for the first AI interpretation call, but defer downstream candidate, prose, and longitudinal optimization semantics."
+  },
+  "counts": {
+    "originalRequirements": 112,
+    "originalMustRequirements": 111,
+    "originalExperimentRequirements": 1,
+    "retainedRequirements": 97,
+    "retainedMustRequirements": 96,
+    "retainedExperimentRequirements": 1,
+    "movedRequirements": 15,
+    "remainingMustBudgetHeadroom": 16
+  },
+  "retained": [
+    {
+      "requirementId": "FR-INTENT-001",
+      "title": "粗略想法结构化",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-190",
+        "AT-192",
+        "AT-443",
+        "AT-444"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-001",
+      "title": "问题价值门控",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-195",
+        "AT-451",
+        "AT-452"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-002",
+      "title": "单问题交互",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-022",
+        "AT-078",
+        "AT-195"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-003",
+      "title": "问题预算",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-334"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-004",
+      "title": "三级自治门控",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-193",
+        "AT-194",
+        "AT-337"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-005",
+      "title": "单活跃阻塞问题",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-022",
+        "AT-078"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-006",
+      "title": "问题去重与记忆",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-023",
+        "AT-201",
+        "AT-345"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-007",
+      "title": "模糊回答处理",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-198"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-008",
+      "title": "为什么现在问",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-335"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-QUESTION-009",
+      "title": "作者可以纠正提问策略",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-200",
+        "AT-346"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-COLLAB-001",
+      "title": "单轮消息理解",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-041",
+        "AT-191"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-COLLAB-005",
+      "title": "误解与漂移纠正",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-059",
+        "AT-200",
+        "AT-212",
+        "AT-346"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-001",
+      "title": "重大决策辩证卡",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-002",
+        "AT-340"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-002",
+      "title": "不伪造分歧",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-028"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-003",
+      "title": "决策账本",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-002",
+        "AT-029"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-004",
+      "title": "触发条件",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-194",
+        "AT-335"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-005",
+      "title": "独立立论",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-027"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-006",
+      "title": "项目证据优先",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-027"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-007",
+      "title": "非对称结论",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-028"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-008",
+      "title": "精简呈现与展开证据",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-079"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBATE-009",
+      "title": "决策变更与影响分析",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-029"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-STATE-002",
+      "title": "资产版本与指纹",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-460",
+        "AT-496"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-API-002",
+      "title": "异步长任务",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-074",
+        "AT-497"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-004",
+      "title": "单活跃问题卡",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-078"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-005",
+      "title": "精简红蓝决策卡",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-079"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-019",
+      "title": "可分享定位链接",
+      "normativeStrength": "MUST",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-093"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-002",
+      "title": "作者精力预算",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-334"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-003",
+      "title": "决策升级证据",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-335"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-004",
+      "title": "低风险自动决定回执",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-336"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-005",
+      "title": "L2 稀缺门禁",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-194",
+        "AT-337"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-006",
+      "title": "答案复用与不确定性合并",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-199",
+        "AT-338"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-008",
+      "title": "推荐先行",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-340"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-010",
+      "title": "“你决定”的范围化授权",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-197",
+        "AT-342"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-012",
+      "title": "沉默不是同意",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-209",
+        "AT-344"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-013",
+      "title": "不重复确认已知事实",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-201",
+        "AT-345"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-EFFORT-014",
+      "title": "一次纠正全链止损",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-200",
+        "AT-346"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-001",
+      "title": "任务风险画像",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-095",
+        "AT-096"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-002",
+      "title": "模型能力注册表",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-095",
+        "AT-096",
+        "AT-117"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-003",
+      "title": "策略化模型路由",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-095",
+        "AT-096"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-004",
+      "title": "证据驱动的能力升级",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-097"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-005",
+      "title": "高影响独立复核",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-027",
+        "AT-114"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-006",
+      "title": "不可变用量与成本账本",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-100"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-007",
+      "title": "分层预算与硬停止",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-098",
+        "AT-099"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-008",
+      "title": "价值优先的降本顺序",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-099"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-009",
+      "title": "窄重试协议",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-101",
+        "AT-102"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-010",
+      "title": "有边界的执行器故障转移",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-103"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-012",
+      "title": "结构化输出与隔离区",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-113"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-013",
+      "title": "可重放调用指纹",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-116"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-014",
+      "title": "禁止模型自证正确",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-114"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-015",
+      "title": "熔断、限流与并发",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-115"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-AI-016",
+      "title": "作者可理解的执行策略",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-095",
+        "AT-099",
+        "AT-117"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-001",
+      "title": "全局 token 计划",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-105"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-002",
+      "title": "T0 不可静默截断",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-106",
+        "AT-498"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-003",
+      "title": "目的化检索",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-499"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-004",
+      "title": "去重与冲突并存",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-112"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-005",
+      "title": "上下文清单",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-116",
+        "AT-500"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-006",
+      "title": "不可信内容边界",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-109"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-007",
+      "title": "隐私、秘密与素材权利门禁",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-103",
+        "AT-110"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-008",
+      "title": "数据损坏不静默",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-111"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-009",
+      "title": "调用前完整性门禁",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-107",
+        "AT-108"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CONTEXT-010",
+      "title": "调用后证据覆盖",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-501"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-003",
+      "title": "认识状态分层",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-192"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-004",
+      "title": "置信度必须有证据",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-192",
+        "AT-444"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-005",
+      "title": "可检查的理解快照",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-190",
+        "AT-443",
+        "AT-446"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-006",
+      "title": "歧义与影响分开计算",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-193",
+        "AT-194"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-007",
+      "title": "问题期望价值排序",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-195",
+        "AT-451"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-008",
+      "title": "非诱导式问题",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-196"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-009",
+      "title": "暂定假设有边界",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-193",
+        "AT-198",
+        "AT-450"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-010",
+      "title": "委托决定是显式授权",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-197",
+        "AT-342"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-011",
+      "title": "不确定答案不伪造确定性",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-198"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-012",
+      "title": "一条回答可解决多个待办",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-199",
+        "AT-338"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-013",
+      "title": "纠正优先且保留谱系",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-200"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-014",
+      "title": "问题生命周期",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-199",
+        "AT-203"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-015",
+      "title": "重问必须解释新证据",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-201"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-016",
+      "title": "回答提交幂等与并发安全",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-202"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-017",
+      "title": "样章探针不污染 canon",
+      "normativeStrength": "EXPERIMENT",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-204"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-018",
+      "title": "成对选择优于评分问卷",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-204"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-019",
+      "title": "对话记忆分层压缩",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-206"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-020",
+      "title": "记忆纠正、遗忘与作用域",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-207"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-021",
+      "title": "插话与运行中理解",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-025",
+        "AT-026",
+        "AT-208"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-022",
+      "title": "超时不等于同意",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-209"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DIALOGUE-024",
+      "title": "误解闭环与反复问题学习",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-212"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-002",
+      "title": "创意语义分面",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-443"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-003",
+      "title": "字段级证据跨度",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-444"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-004",
+      "title": "缺席信息保持未知",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-445"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-005",
+      "title": "多解释并存",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-446"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-006",
+      "title": "安全解释与近期产物",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-447"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-007",
+      "title": "契约最低充分度",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-448"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-008",
+      "title": "完整度不能替代可信度",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-449"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-009",
+      "title": "可逆工艺默认",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-450"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-010",
+      "title": "分支淘汰型提问",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-451"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-011",
+      "title": "反事实问题价值验证",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-452"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-SEED-018",
+      "title": "旧项目影子编译",
+      "normativeStrength": "MUST",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-459"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-001",
+      "title": "作品级创作目标档案",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-215"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-002",
+      "title": "硬约束、软偏好与愿景分层",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-215",
+        "AT-216"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-004",
+      "title": "目标冲突显式化",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-218"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DELIVERY-018",
+      "title": "K4 AI 治理与工艺安全内核",
+      "normativeStrength": "MUST",
+      "category": "enabling-invariant",
+      "firstSliceScope": "Only the behavior required to form an evidence-bounded understanding and ask one high-value question; downstream semantics remain extension obligations.",
+      "acceptanceRefs": [
+        "AT-358",
+        "AT-502"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V3-contract",
+        "V4-outline",
+        "V5-drafting",
+        "V6-obligations",
+        "V7-revision",
+        "V8-completion"
+      ]
+    }
+  ],
+  "moved": [
+    {
+      "requirementId": "FR-EFFORT-007",
+      "title": "低风险变更批量结算",
+      "targetSlice": "V3-contract",
+      "reason": "Batch settlement first changes adoptable contract fields; RP2 only records provisional assumptions."
+    },
+    {
+      "requirementId": "FR-EFFORT-009",
+      "title": "选择成本预览",
+      "targetSlice": "V3-contract",
+      "reason": "Story-effect and rework previews require concrete contract candidates."
+    },
+    {
+      "requirementId": "FR-EFFORT-015",
+      "title": "审阅压缩",
+      "targetSlice": "V3-contract",
+      "reason": "Candidate review compression starts when the first adoptable contract candidate exists."
+    },
+    {
+      "requirementId": "FR-EFFORT-018",
+      "title": "协作强度自适应",
+      "targetSlice": "V7-revision",
+      "reason": "Adaptive collaboration intensity requires longitudinal behavior and rollback evidence."
+    },
+    {
+      "requirementId": "FR-EFFORT-020",
+      "title": "精力与价值联合评估",
+      "targetSlice": "V7-revision",
+      "reason": "Effort-to-value optimization is a longitudinal product metric, not an understanding prerequisite."
+    },
+    {
+      "requirementId": "FR-AI-011",
+      "title": "内容寻址缓存",
+      "targetSlice": "V5-drafting",
+      "reason": "Content-addressed cache optimization is valuable but not required to prove the first governed interpretation call; it is first consumed by repeated drafting calls."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-003",
+      "title": "多层目标与继承",
+      "targetSlice": "V4-outline",
+      "reason": "Cross-level objective inheritance starts when volume, arc, chapter, and scene scopes exist."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-005",
+      "title": "优先级不是永久权重",
+      "targetSlice": "V5-drafting",
+      "reason": "Stage-dependent objective weighting is first applied to prose generation and review."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-006",
+      "title": "近期与远期双层成功条件",
+      "targetSlice": "V4-outline",
+      "reason": "Near-term versus long-term contribution requires planned arcs and work items."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-007",
+      "title": "反目标守卫",
+      "targetSlice": "V5-drafting",
+      "reason": "Anti-goal extraction is understood in V2, but the independent generation guard is first consumed by drafting."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-008",
+      "title": "目标可验证但不指标投机",
+      "targetSlice": "V5-drafting",
+      "reason": "Anti-metric-gaming is not needed for the first interpretation call, but it is required as soon as the first prose objective is evaluated."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-009",
+      "title": "目标变更影响分析",
+      "targetSlice": "V7-revision",
+      "reason": "Cross-asset objective-change impact begins after authored assets and evaluation history exist."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-010",
+      "title": "候选比较按缺口而非总分",
+      "targetSlice": "V3-contract",
+      "reason": "Gap-based candidate comparison begins with multiple contract candidates."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-011",
+      "title": "目标漂移监控",
+      "targetSlice": "V7-revision",
+      "reason": "Objective drift requires chapter settlements and historical target versions."
+    },
+    {
+      "requirementId": "FR-OBJECTIVE-012",
+      "title": "Q-003 参数槽",
+      "targetSlice": "V5-drafting",
+      "reason": "Q-003 changes drafting quality, review depth, and budget parameters rather than understanding semantics."
+    }
+  ],
+  "conclusion": "RP2 retains truth-bounded interpretation, Socratic questioning, red-blue evidence, effort gates, and first-call AI/context safety; downstream optimization no longer counts in its denominator."
+}

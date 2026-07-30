@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "author-delegated-policy-selected-not-implemented-not-verified",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "decisionId": "Q-009",
+  "question": "平台应把总字数、总章数和卷数视为固定目标，还是允许根据叙事义务、节奏和读者体验动态调整？",
+  "currentDecisionState": {
+    "status": "confirmed-author-delegated",
+    "authorSelection": "obligation-led-elastic-length",
+    "recommendationId": "obligation-led-elastic-length",
+    "evidenceBaselineRef": "docs/spec-governance/audits/current-length-planning.json",
+    "implementationStatus": "authorized-not-implemented-not-verified"
+  },
+  "alternatives": [
+    {
+      "policyId": "fixed-count-contract",
+      "status": "candidate-not-selected",
+      "blueCase": "Makes schedule, serialization slots, editing cost, platform format, and commercial delivery highly predictable.",
+      "redCase": "Encourages filler when the story finishes early and destructive compression when obligations, emotional aftermath, or earned payoffs need more room; uncertain early counts become false truth.",
+      "bestFit": "Explicitly commissioned or platform-constrained work where the author deliberately locks one or more count dimensions."
+    },
+    {
+      "policyId": "fully-emergent-unbounded-length",
+      "status": "candidate-not-selected",
+      "blueCase": "Maximizes discovery writing and never sacrifices a promising arc merely to protect an estimate.",
+      "redCase": "Allows endless expansion, delayed endings, forgotten obligations, pacing debt, cost drift, and no reliable forecast for the author.",
+      "bestFit": "Temporary exploration branches, not the default authority for a continuously completed book."
+    },
+    {
+      "policyId": "obligation-led-elastic-length",
+      "status": "selected-by-author-delegation",
+      "blueCase": "Treats counts as evidence-backed forecast bands unless explicitly locked, so the system can absorb useful discoveries while obligations, pacing, reader experience, ending reachability, and author constraints control completion.",
+      "redCase": "Requires durable length intent, forecast confidence, obligation/capacity accounting, variance events, protected locks, anti-filler/anti-compression guards, and honest pause thresholds.",
+      "bestFit": "Low-input collaborative long-form creation where the author wants the platform to finish the book without micromanaging every chapter allocation."
+    }
+  ],
+  "recommendedContract": {
+    "authorityOrder": [
+      "explicit author hard locks and external delivery/platform constraints",
+      "StoryContract, ending constraints, required narrative obligations, character/relationship arcs, major payoff and aftermath requirements",
+      "reader pacing, cognitive load, chapter/volume function, and protected quality strengths",
+      "accepted forecast band and current autonomy grant",
+      "raw word, chapter, and volume counts"
+    ],
+    "dimensions": [
+      {
+        "dimension": "totalWords",
+        "defaultMode": "soft-range",
+        "hardLockAvailable": true
+      },
+      {
+        "dimension": "chapterCount",
+        "defaultMode": "soft-range",
+        "hardLockAvailable": true
+      },
+      {
+        "dimension": "volumeCount",
+        "defaultMode": "soft-range",
+        "hardLockAvailable": true
+      },
+      {
+        "dimension": "chapterWordTarget",
+        "defaultMode": "working-range-not-completion-gate",
+        "hardLockAvailable": true
+      }
+    ],
+    "forecastRule": "Maintain actual, accepted range, remaining obligation-backed estimate, confidence, assumptions, and best/worst credible completion paths. A point estimate never masquerades as a promise.",
+    "automaticAuthority": "Inside a valid grant, the system may reallocate tentative far-horizon chapters and scene capacity while the projection remains inside every explicit hard lock and accepted forecast band, preserves the Q-008 near 3-5 chapter freeze, closes all required obligations, and emits a variance receipt.",
+    "defaultPauseThreshold": "Pause when a projection exits an author-approved band; absent a custom band, when whole-book words or chapters move beyond 15% of the last accepted forecast, a volume must be added/removed, the ending or major payoff moves across a promised window, a hard commercial/platform constraint is threatened, or the only way to fit is filler or skipped closure.",
+    "noProgressByCount": "Word percentage may show productivity but cannot select narrative stage, close a chapter, settle an obligation, or prove book completion. Stage follows causal/functional evidence; counts are one capacity signal."
+  },
+  "invariants": [
+    "Never add scenes, repetition, side conflicts, exposition, or hooks solely to hit a word/chapter/volume target.",
+    "Never compress away causal setup, character choice, consequence, reader fairness, payoff, aftermath, or required closure solely to stay under a count.",
+    "Candidate prose and discarded branches do not count toward canon actuals or completion forecasts.",
+    "Bootstrap chapters, inferred import volumes, display groups, filenames, and current array length are inventory projections, not author intent.",
+    "Q-008 authority remains intact: near 3-5 chapters are strongly frozen, far allocation is flexible, and material story changes remain L2 even when they improve count fit.",
+    "A length variance cannot silently change a hard author lock, release contract, intentional-open obligation, ending constraint, or published edition."
+  ],
+  "minimalTargetModel": {
+    "entities": [
+      "LengthContract: per-dimension hard/soft/unknown mode, range or exact lock, source, rationale, effective scope, author/external authority, revision lineage",
+      "LengthForecast: canon actuals, remaining obligation-backed range, confidence, assumptions, pacing/capacity evidence, ending reachability, frozen baseline",
+      "LengthVarianceDecision: detected deviation, cause, affected outline/obligations, alternatives, authority, adoption receipt, invalidation and rollback identity"
+    ],
+    "yagni": "Reuse OutlineVersion, RollingPlanningWindow, VolumeContract, ChapterFunctionContract, CapacityBudget, NarrativeObligation, AutonomyGrant, ImpactSubgraph and CanonCommit; do not create a parallel length outline or treat analytics counters as canon."
+  },
+  "candidateAcceptanceScenarios": [
+    "A 120k-word soft forecast reaches all required payoffs cleanly at 108k: the system may recommend finishing, never pads 12k, and updates the forecast with evidence.",
+    "A 120k hard delivery lock projects to 145k because one arc expanded: the system pauses with preserve/cut/split alternatives, exact obligation and quality damage, and a recommendation; it does not silently add a volume.",
+    "A chapter reaches 100% of its working word target before its irreversible choice and payoff: productivity shows complete but narrative stage remains blocked from settlement.",
+    "A chapter finishes its function below the working range with causal, obligation, reader-effect, and quality evidence: it may close without filler.",
+    "An imported 198-chapter partial manuscript has inferred volume groups but no author length intent: the system reports scope unknown instead of treating 198 as the planned total.",
+    "A far-horizon reallocation stays inside the accepted band and all locks: it minimally replans with a receipt; the same change crossing the near 3-5 chapter freeze invalidates execution readiness first."
+  ],
+  "existingRequirementRefs": [
+    "FR-OBJECTIVE-001",
+    "FR-OBJECTIVE-002",
+    "FR-ARCH-003",
+    "FR-ARCH-010",
+    "FR-ARCH-011",
+    "FR-ARCH-014",
+    "FR-ARCH-015",
+    "FR-ARCH-016",
+    "FR-ARCH-017",
+    "FR-ARCH-021",
+    "FR-ARCH-022",
+    "FR-RUN-005",
+    "FR-COMPLETE-001",
+    "FR-COMPLETE-002",
+    "FR-COMPLETE-003",
+    "FR-COMPLETE-004",
+    "FR-COMPLETE-005",
+    "FR-PROSE-011",
+    "FR-UX-014"
+  ],
+  "existingAcceptanceRefs": [
+    "AT-058",
+    "AT-160",
+    "AT-215",
+    "AT-216",
+    "AT-223",
+    "AT-278",
+    "AT-279",
+    "AT-280",
+    "AT-281",
+    "AT-285",
+    "AT-286",
+    "AT-288",
+    "AT-289",
+    "AT-313",
+    "AT-314",
+    "AT-315",
+    "AT-319",
+    "AT-323",
+    "AT-324",
+    "AT-331",
+    "AT-332"
+  ],
+  "decisionBoundary": "The author delegated selection of the documented recommendation. selectedPolicyId is obligation-led-elastic-length; the default 15% pause threshold and hard/soft authority order are approved for implementation. Runtime activation still requires the target model, tests and release evidence."
+}

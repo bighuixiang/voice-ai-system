@@ -1,0 +1,691 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "After the platform helps finish the book, the author receives a stable, reader-safe manuscript edition whose exact chapters, order, formats, bytes, checks, and later replacements can be independently verified.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/editionManifest.ts",
+      "sha256": "603898e0ceb1d513d8214b9a464c2222a67a2ad5b7439dffebfc3d0f471f25e7"
+    },
+    {
+      "path": "api/src/publicationTree.ts",
+      "sha256": "5670360025ad853525f8e437f03310101bc2cb0516859b639f5d130f4b2c3541"
+    },
+    {
+      "path": "api/src/publicationArtifacts.ts",
+      "sha256": "8f842d060b71181f5af819c447ba244fec95bafc5baa9d081e1c71de7b592b32"
+    },
+    {
+      "path": "api/src/deliveryProof.ts",
+      "sha256": "a9d3cb656be94b60c5ad76156001cf3e385ae51c52dc07779be8e2d826170eb5"
+    },
+    {
+      "path": "api/src/deliveryAccessGrant.ts",
+      "sha256": "5004e3c1bc4b29877cd461e2dc007f5a30d451e79fe67f0df484edc19e690926"
+    },
+    {
+      "path": "api/src/releasePreflight.ts",
+      "sha256": "47a371106a61dc06e6e5be3c39059e8ca5e4cb6e239887bea3a32fdfa3956034"
+    },
+    {
+      "path": "api/src/closureCertificate.ts",
+      "sha256": "c69444822955e26bd7bf36e65122ec0ae9208028a43ec47a472e7a325c5085e6"
+    },
+    {
+      "path": "api/src/auditReport.ts",
+      "sha256": "fe3f1f5a511ab0ef67fe57e97d939b373c6f80985ae6cffc805e6c5857b2144e"
+    },
+    {
+      "path": "api/src/novelProject.ts",
+      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    },
+    {
+      "path": "ui/src/components/novel/AuditReportPanel.vue",
+      "sha256": "1561e0e35d543a3b631d324d659dc5daed094d0a5dac6caeded19319d0958393"
+    },
+    {
+      "path": "ui/src/services/novelApi.ts",
+      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+    },
+    {
+      "path": "ui/src/types/novel.ts",
+      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "source/project/content aggregate hashes",
+      "chapter/status/order/content byte and character counts",
+      "fixed candidate release-directory file counts",
+      "source evidence paths and code tokens"
+    ],
+    "snapshotExcludes": [
+      "project slug or ID",
+      "title",
+      "genre",
+      "rough idea",
+      "chapter ID/title/path value",
+      "volume title",
+      "outline or prose",
+      "author direction",
+      "prompt/model output",
+      "task or invocation payload",
+      "recipient identity",
+      "absolute project path"
+    ]
+  },
+  "operationalSnapshot": {
+    "totals": {
+      "projects": 8,
+      "chapters": 219,
+      "checkedChapters": 0,
+      "declaredContentPaths": 219,
+      "existingContentFiles": 213,
+      "nonemptyContentFiles": 213,
+      "substantialContentFiles": 71,
+      "utf8Bytes": 387715,
+      "characters": 152392,
+      "chaptersWithExplicitOrder": 198,
+      "chaptersWithVolumeOrder": 198,
+      "releaseArtifactFiles": 0
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "byStatus": {
+            "empty": 3
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 3,
+          "pathsOutsideProject": 0,
+          "existingFiles": 0,
+          "nonemptyFiles": 0,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 0,
+          "utf8Bytes": 0,
+          "characters": 0
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "byStatus": {
+            "empty": 3
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 3,
+          "pathsOutsideProject": 0,
+          "existingFiles": 0,
+          "nonemptyFiles": 0,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 0,
+          "utf8Bytes": 0,
+          "characters": 0
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "chapterContentAggregate": "f1e73610707d9cb6fa66de05e55ff3b2f42b74b9cd06b851be84b9e5307bd960"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "byStatus": {
+            "empty": 3
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 3,
+          "pathsOutsideProject": 0,
+          "existingFiles": 3,
+          "nonemptyFiles": 3,
+          "substantialFilesAtLeast800Characters": 1,
+          "filesStartingWithMarkdownHeading": 3,
+          "utf8Bytes": 8900,
+          "characters": 3316
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "chapterContentAggregate": "d6da96d4da614df888d4ccf8944f0bd94301729112331a25d68893f30279cf38"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 198,
+          "byStatus": {
+            "drafted": 70,
+            "planned": 128
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 198,
+          "pathsOutsideProject": 0,
+          "existingFiles": 198,
+          "nonemptyFiles": 198,
+          "substantialFilesAtLeast800Characters": 70,
+          "filesStartingWithMarkdownHeading": 198,
+          "utf8Bytes": 378445,
+          "characters": 148750
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 198,
+          "chaptersWithVolumeIdentity": 198,
+          "chaptersWithVolumeOrder": 198,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "byStatus": {
+            "empty": 3
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 3,
+          "pathsOutsideProject": 0,
+          "existingFiles": 3,
+          "nonemptyFiles": 3,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 3,
+          "utf8Bytes": 39,
+          "characters": 27
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "byStatus": {
+            "empty": 3
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 3,
+          "pathsOutsideProject": 0,
+          "existingFiles": 3,
+          "nonemptyFiles": 3,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 3,
+          "utf8Bytes": 39,
+          "characters": 27
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "byStatus": {
+            "empty": 3
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 3,
+          "pathsOutsideProject": 0,
+          "existingFiles": 3,
+          "nonemptyFiles": 3,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 3,
+          "utf8Bytes": 39,
+          "characters": 27
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "chapterContentAggregate": "2d36728f3a770439d66fd3730878e502a4bf53f4c0dbe03aad5931804ad9d63d"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "byStatus": {
+            "empty": 3
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 3,
+          "pathsOutsideProject": 0,
+          "existingFiles": 3,
+          "nonemptyFiles": 3,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 3,
+          "utf8Bytes": 253,
+          "characters": 245
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      }
+    ],
+    "interpretation": "Working chapter files are source inventory, not a release. Nonempty or substantial prose, array order, a completed runtime, a JSON audit download, or a browser click cannot prove a frozen reader edition, format validity, privacy, atomic publication, or delivery identity."
+  },
+  "summary": {
+    "auditedStages": 10,
+    "projectsScanned": 8,
+    "chaptersInventoried": 219,
+    "existingContentFiles": 213,
+    "substantialContentFiles": 71,
+    "checkedChapters": 0,
+    "releaseArtifactFiles": 0,
+    "manuscriptReleases": 0,
+    "editionManifests": 0,
+    "exportArtifacts": 0,
+    "deliveryProofs": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform treats creation state and operational audit data as mutable project views. It has no publication aggregate that freezes an exact canon version, compiles a reader-safe normalized book, validates deterministic format artifacts, atomically publishes an immutable set, and proves which bytes were delivered.",
+    "consequence": "Even after prose and completion logic mature, the author could receive reordered, stale, partial, privacy-leaking, non-reproducible, or silently overwritten files and have no reliable answer to which edition a reader actually received."
+  },
+  "currentEvidence": [
+    {
+      "claim": "The server exposes a dynamic project audit-report JSON route, not a manuscript release route.",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2751,
+          "evidence": "app.get(\"/api/novel/projects/:projectId/audit-report\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2753,
+          "evidence": "buildProjectAuditReport(projectRoot(project.slug), project)"
+        }
+      ]
+    },
+    {
+      "claim": "The browser export serializes the mutable audit object to an application/json Blob named audit-report.json.",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3948,
+          "evidence": "new Blob([JSON.stringify(report, null, 2)]"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3952,
+          "evidence": "-audit-report.json"
+        }
+      ]
+    },
+    {
+      "claim": "ProjectAuditReport identifies current project and generated time but has no source commit, edition manifest, artifact hashes, renderer identity, validation, or delivery proof.",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 1097,
+          "evidence": "export interface ProjectAuditReport"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 1100,
+          "evidence": "generatedAt: string;"
+        }
+      ]
+    },
+    {
+      "claim": "Audit report assembly reads current quality, tasks, invocations, jobs, knowledge, and runtime snapshots on demand.",
+      "evidence": [
+        {
+          "path": "api/src/auditReport.ts",
+          "line": 64,
+          "evidence": "export async function buildProjectAuditReport"
+        },
+        {
+          "path": "api/src/auditReport.ts",
+          "line": 65,
+          "evidence": "await Promise.all(["
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "PUB-TRACE-001",
+      "label": "freeze-release-source",
+      "current": "Project JSON and chapter files are mutable live state; audit report reads them at request time.",
+      "gap": "No immutable release source, author authorization, active-writer fence, or publication-scope identity.",
+      "target": "Freeze one settled CanonCommit into a ManuscriptRelease without changing historical editions."
+    },
+    {
+      "id": "PUB-TRACE-002",
+      "label": "compile-edition-manifest",
+      "current": "Chapter array position and optional volume/order fields describe the working project.",
+      "gap": "No stable frozen order, inclusion reason, per-chapter content hash, public metadata, front/back matter, open-suspense notice, or certificate dependency manifest.",
+      "target": "Compile and validate one EditionManifest over stable narrative identities."
+    },
+    {
+      "id": "PUB-TRACE-003",
+      "label": "preflight-content-and-rights",
+      "current": "Audit and quality views summarize current project objects.",
+      "gap": "No release gate for missing/duplicate/unsettled chapters, broken resources, invalid encoding, rights, fonts, stale completion evidence, secrets, or reader-view leakage.",
+      "target": "Fail closed with actionable release preflight findings before freeze."
+    },
+    {
+      "id": "PUB-TRACE-004",
+      "label": "normalize-publication-tree",
+      "current": "Chapter Markdown remains separate authoring files.",
+      "gap": "No format-neutral semantic tree for volume/chapter hierarchy, paragraphs, scene breaks, notes, images, links, and metadata.",
+      "target": "Compile one canonical PublicationTree consumed by every format adapter."
+    },
+    {
+      "id": "PUB-TRACE-005",
+      "label": "render-reader-safe-formats",
+      "current": "The only browser download serializes ProjectAuditReport JSON.",
+      "gap": "No manuscript Markdown/TXT/EPUB/DOCX/PDF artifact and no separate reader versus author-archive policy.",
+      "target": "Render deterministic reader-safe artifacts from versioned profiles; keep author archive separately authorized."
+    },
+    {
+      "id": "PUB-TRACE-006",
+      "label": "validate-artifacts",
+      "current": "Blob download trusts browser serialization.",
+      "gap": "No schema/package/font/link/resource/metadata validation, byte hash, size, MIME, or cross-format structural parity report.",
+      "target": "Validate every staged artifact and bind findings to exact bytes and renderer versions."
+    },
+    {
+      "id": "PUB-TRACE-007",
+      "label": "publish-atomic-artifact-set",
+      "current": "Each audit download is independent and ephemeral.",
+      "gap": "Partial formats, crashes, retries, and concurrent revisions have no atomic visibility or idempotent publication boundary.",
+      "target": "Stage, validate, and atomically reveal exactly one immutable artifact set or none."
+    },
+    {
+      "id": "PUB-TRACE-008",
+      "label": "issue-and-verify-delivery-proof",
+      "current": "A filename and download click are the only client-side receipt.",
+      "gap": "No offline-verifiable manifest/artifact hashes, signature, known limits, revocation, replacement, or delivery identity.",
+      "target": "Issue replayable DeliveryProof and verify tampering or supersession without trusting mutable server state."
+    },
+    {
+      "id": "PUB-TRACE-009",
+      "label": "control-access-and-retention",
+      "current": "Audit JSON contains internal operational information and project identifiers.",
+      "gap": "No reader/archive grants, expiry, revocation, retention, deletion, or leak audit for released artifacts.",
+      "target": "Separate artifact identity from recipient access and prove privacy lifecycle coverage."
+    },
+    {
+      "id": "PUB-TRACE-010",
+      "label": "supersede-without-overwrite",
+      "current": "A fresh audit request simply reflects newer live project state.",
+      "gap": "No edition chain preserves what was delivered before later revisions.",
+      "target": "Create a new edition from a new CanonCommit, link supersedes/parent, and retain verifiable historical proofs."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-package-current-project-folder",
+      "verdict": "retain-as-author-backup-not-reader-release",
+      "blueCase": "Fast, lossless, and compatible with current file storage; authors can keep every source and internal artifact.",
+      "redCase": "The folder can mutate during packaging, has no settled scope or stable order, and may expose prompts, tasks, private sources, secrets, internal mystery answers, and operational data."
+    },
+    {
+      "option": "B-render-on-every-download",
+      "verdict": "use-for-preview-not-edition-authority",
+      "blueCase": "Low storage overhead, flexible format choice, and a simple download interaction.",
+      "redCase": "Repeated downloads can change with live files, sort behavior, renderer dependencies, templates, or partial failures; historical bytes, disputes, rollback, and supersession are unprovable."
+    },
+    {
+      "option": "C-immutable-edition-transaction",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "Freeze a settled CanonCommit into an EditionManifest, compile one reader-safe PublicationTree, render/version/validate staged formats, atomically publish content-addressed artifacts, and sign DeliveryProof; later work creates a new edition.",
+      "redCase": "Requires release state, artifact storage, deterministic renderers, font/resource licensing, privacy profiles, format validators, transaction/idempotency design, access lifecycle, and crash/concurrency/large-book tests."
+    }
+  ],
+  "targetAuthority": {
+    "entities": [
+      "ManuscriptRelease",
+      "EditionManifest",
+      "EditionChapterEntry",
+      "PublicationTree",
+      "ExportProfile",
+      "ExportArtifact",
+      "RenderReceipt",
+      "ArtifactValidationReport",
+      "DeliveryProof",
+      "DeliveryAccessGrant"
+    ],
+    "lifecycle": [
+      "draft_release",
+      "preflight",
+      "frozen",
+      "rendering",
+      "validating",
+      "ready",
+      "delivered",
+      "blocked",
+      "failed",
+      "stale",
+      "revoked",
+      "superseded"
+    ],
+    "invariant": "No project folder, chapter count, nonempty file, runtime completion, audit report, render success, artifact presence, download click, or mutable URL may independently establish a frozen edition, reader safety, format validity, atomic readiness, successful delivery, literary quality, or author satisfaction."
+  },
+  "releaseProtocol": {
+    "order": [
+      "capture author release intent, edition metadata, reader/archive audience, formats, public open-suspense notice, rights and access policy",
+      "verify completion and revision settlements, freeze CanonCommit/canon cursor, acquire active-writer fence, and snapshot certificate dependencies",
+      "preflight stable chapter identity/order, inclusion, missing/duplicate/unsettled content, encoding, links/assets, rights/fonts, secrets, privacy and stale proofs",
+      "compile immutable EditionManifest and a format-neutral reader-safe PublicationTree with exact input and policy hashes",
+      "render each requested ExportProfile into private staged artifacts using pinned renderer, template, font and locale versions",
+      "validate package/schema/structure/metadata/resources/privacy and cross-format parity; content-address every byte with size and MIME",
+      "atomically publish the complete validated artifact set and manifest; partial failure leaves no ready edition and idempotent retry creates no duplicate",
+      "issue DeliveryProof, optionally issue recipient-specific DeliveryAccessGrant/receipt, and support offline hash/signature verification",
+      "on later CanonCommit, revoke stale draft releases and create a new edition linked by parent/supersedes without overwriting historical artifacts or proofs"
+    ],
+    "minimumFormats": "RP8 first release must prove deterministic UTF-8 Markdown and plain text; EPUB/DOCX/PDF adapters may follow, but every adapter consumes the same PublicationTree and obeys the same atomic set, privacy, validation, and proof rules."
+  },
+  "verificationMatrix": [
+    "three-volume book with insertions, renumbering, front/back matter, scene separators, notes, images, and authorized open sequel hooks",
+    "missing content, empty/unsettled chapter, duplicate stable ID, duplicate order, order gap, invalid encoding/control characters, broken link or resource",
+    "concurrent chapter edit or revision settlement while preflight, render, validate, or publish is running",
+    "crash after staging one format, after all renders before validation, and after atomic publish before proof notification",
+    "one adapter fails while others succeed; no partial ready claim and idempotent retry publishes one set",
+    "same manifest and renderer twice yields byte-identical Markdown/TXT; changed renderer/input yields a new identity",
+    "canary secrets, prompts, task history, private craft sources, internal mystery answers, editor markers, filesystem paths, and hidden metadata never reach reader artifacts",
+    "font/source/image license expires or is revoked between draft and freeze",
+    "completion, closure, continuity, quality, or revision proof becomes stale before ready",
+    "very large book streams within memory limits and resumes safely without changing final hashes",
+    "tamper with artifact, manifest, proof, MIME, size, signature, or supersedes link and fail verification",
+    "export/import and historical retention preserve edition identities while privacy erasure follows declared legal policy"
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-PUBLISH-001",
+      "FR-PUBLISH-002",
+      "FR-PUBLISH-003"
+    ],
+    "acceptanceRefs": [
+      "AT-505",
+      "AT-506",
+      "AT-507"
+    ],
+    "rule": "Do not claim the finished book has been released or delivered until one settled CanonCommit is frozen into an immutable EditionManifest, all requested reader-safe artifacts derive deterministically from the same PublicationTree, preflight and format/privacy validation bind to exact bytes, the complete set is published atomically and idempotently, and DeliveryProof can detect tampering, staleness, revocation, or supersession."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none weakens immutable source freeze, reader safety, deterministic identities, validation, atomic publication, historical retention, integrity proof or honest failure."
+}

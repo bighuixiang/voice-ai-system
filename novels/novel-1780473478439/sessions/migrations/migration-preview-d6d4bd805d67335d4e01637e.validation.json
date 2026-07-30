@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "project-migration-validation.v1",
+  "migrationId": "migration-preview-d6d4bd805d67335d4e01637e",
+  "projectSlug": "novel-1780473478439",
+  "status": "validated",
+  "sourceFingerprint": "d6d4bd805d67335d4e01637e4883ec21dfcc169f9dfb0c3b64957a21d0a50daa",
+  "conflicts": [],
+  "resolvedConflicts": [],
+  "dependencies": {
+    "outlineVersion": "missing"
+  },
+  "validatedAt": "2026-07-29T17:29:23.961Z",
+  "fingerprint": "57efce714f8ac466ab182b16fe514766eeba3a28e8e3c949f40348d14ad46aed"
+}

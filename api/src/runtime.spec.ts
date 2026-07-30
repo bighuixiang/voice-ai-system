@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -29,6 +30,7 @@ import {
   updateRuntimeRun
 } from "./runtimeStore.js";
 import { acceptWritingRecapPatches, appendWritingRecap, readChapterQualityReport } from "./writingCockpit.js";
+import { enqueueExecutionWorkItem, readExecutionWorkItem } from "./executionQueue.js";
 
 let tempRoot = "";
 
@@ -44,6 +46,42 @@ describe("runtime autopilot infrastructure", () => {
     delete process.env.NOVEL_DB_PATH;
     delete process.env.RUNTIME_WORKER_MOCK;
     await fs.rm(tempRoot, { recursive: true, force: true });
+  });
+
+  it("rejects direct governed canon writes at the runtime write fence", async () => {
+    const project = createProjectSkeleton({ title: "Runtime Write Fence", roughIdea: "Governed canon writes need adoption." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const governedProject = { ...project, outlineVersion: { versionId: "outline-governed", fingerprint: "outline-fingerprint" } };
+    await fs.writeFile(resolveInside(root, "project.json"), `${JSON.stringify(governedProject, null, 2)}\n`, "utf8");
+    const chapter = project.chapters[0];
+    const run = createRuntimeRun({ projectSlug: project.slug, chapterId: chapter.id });
+    const before = await fs.readFile(resolveInside(root, chapter.contentPath), "utf8");
+
+    await expect(dispatchRuntimeWrites({
+      root,
+      project: governedProject,
+      run,
+      reason: "test-governed-write",
+      writes: [{ relativePath: chapter.contentPath, content: "must not land\n" }]
+    })).rejects.toThrow("GOVERNED_RUNTIME_CANON_WRITE_REQUIRES_ADOPTION");
+    await expect(fs.readFile(resolveInside(root, chapter.contentPath), "utf8")).resolves.toBe(before);
+  });
+
+  it("rejects governed chapter-index projection writes at the runtime write fence", async () => {
+    const project = createProjectSkeleton({ title: "Runtime Index Fence", roughIdea: "Derived indexes cannot bypass adoption." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const governedProject = { ...project, outlineVersion: { versionId: "outline-governed", fingerprint: "outline-fingerprint" } };
+    const run = createRuntimeRun({ projectSlug: project.slug, chapterId: project.chapters[0].id });
+
+    await expect(dispatchRuntimeWrites({
+      root,
+      project: governedProject,
+      run,
+      reason: "test-governed-index-write",
+      writes: [{ relativePath: "memory/chapter-index.json", content: "{}\n" }]
+    })).rejects.toThrow("GOVERNED_RUNTIME_CANON_WRITE_REQUIRES_ADOPTION");
   });
 
   it("persists runtime commands, events, quality scores, and branches", () => {
@@ -279,6 +317,57 @@ describe("runtime autopilot infrastructure", () => {
     );
     const recapLines = (await fs.readFile(resolveInside(root, "tasks/recaps.jsonl"), "utf8")).trim().split(/\r?\n/);
     expect(JSON.parse(recapLines[0])).toEqual(expect.objectContaining({ chapterId: chapter.id }));
+  });
+
+  it("keeps governed runtime prose outside canon until adoption", async () => {
+    process.env.RUNTIME_WORKER_MOCK = "1";
+    const project = createProjectSkeleton({ title: "Governed Candidate", roughIdea: "Candidate isolation." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const chapter = project.chapters[0];
+    const versionBase = { schemaVersion: "outline-version.v1", versionId: "outline-version-governed", projectSlug: project.slug, version: 1, outlineId: "outline-governed", outlineFingerprint: "outline-fp", selectedChapterIds: [chapter.id], strongFreezeCount: 3, status: "active", canonWritten: true, createdAt: new Date().toISOString() };
+    const version = { ...versionBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(versionBase)).digest("hex") };
+    const proofBase = { schemaVersion: "execution-ready-proof.v1", proofId: "proof-governed", projectSlug: project.slug, versionId: version.versionId, versionFingerprint: version.fingerprint, status: "ready", executionReady: true, checks: [], createdAt: new Date().toISOString() };
+    const proof = { ...proofBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(proofBase)).digest("hex") };
+    const governedProject = { ...project, outlineVersion: { versionId: version.versionId, fingerprint: version.fingerprint } };
+    await fs.writeFile(resolveInside(root, "project.json"), `${JSON.stringify(governedProject, null, 2)}\n`, "utf8");
+    await fs.mkdir(path.join(root, "sessions", "outline-versions"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "outline-versions", "governed.json"), JSON.stringify(version), "utf8");
+    await fs.writeFile(path.join(root, "sessions", "execution-ready-proof.json"), JSON.stringify(proof), "utf8");
+    await fs.writeFile(path.join(root, "sessions", "context-manifest.json"), JSON.stringify({ manifestId: "context-governed", sourceFingerprint: "context-fp" }), "utf8");
+    const canonBefore = await fs.readFile(resolveInside(root, chapter.contentPath), "utf8");
+    const workItem = await enqueueExecutionWorkItem(root, project.slug, chapter.id, "governed-runtime");
+    const run = createRuntimeRun({ projectSlug: project.slug, chapterId: chapter.id, payload: { chapterId: chapter.id, requireExecutionReady: true, idempotencyKey: "governed-runtime" } });
+    const command = enqueueRuntimeCommand({ projectSlug: project.slug, runId: run.id, type: "start", payload: { chapterId: chapter.id, requireExecutionReady: true, idempotencyKey: "governed-runtime" } });
+    await processRuntimeCommand(command);
+    const candidateFiles = await fs.readdir(path.join(root, "sessions", "prose-candidates"));
+    expect(candidateFiles.length).toBe(1);
+    await expect(fs.readFile(resolveInside(root, chapter.contentPath), "utf8")).resolves.toBe(canonBefore);
+    expect(await readExecutionWorkItem(root, workItem.workItemId)).toEqual(expect.objectContaining({ status: "completed", runId: run.id }));
+    expect(getRuntimeRun(run.id)).toEqual(expect.objectContaining({ status: "review_required", result: expect.objectContaining({ reason: "prose_candidate_ready" }) }));
+  });
+
+  it("fails closed when a governed outline pointer has no integrity fingerprint", async () => {
+    process.env.RUNTIME_WORKER_MOCK = "1";
+    const project = createProjectSkeleton({ title: "Incomplete Governed Pointer", roughIdea: "Missing outline integrity must not reopen canon writes." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const chapter = project.chapters[0];
+    const governedProject = { ...project, outlineVersion: { versionId: "outline-without-fingerprint" } };
+    await fs.writeFile(resolveInside(root, "project.json"), `${JSON.stringify(governedProject, null, 2)}\n`, "utf8");
+    const proofBase = { schemaVersion: "execution-ready-proof.v1", proofId: "proof-missing-outline-fingerprint", projectSlug: project.slug, versionId: "outline-without-fingerprint", versionFingerprint: "placeholder-outline-fingerprint", status: "ready", executionReady: true, checks: [], createdAt: new Date().toISOString() };
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "execution-ready-proof.json"), JSON.stringify({ ...proofBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(proofBase)).digest("hex") }), "utf8");
+    await fs.writeFile(path.join(root, "sessions", "context-manifest.json"), JSON.stringify({ manifestId: "context-missing-outline-fingerprint", sourceFingerprint: "context-fp" }), "utf8");
+    const canonBefore = await fs.readFile(resolveInside(root, chapter.contentPath), "utf8");
+    const workItem = await enqueueExecutionWorkItem(root, project.slug, chapter.id, "missing-outline-fingerprint");
+    const run = createRuntimeRun({ projectSlug: project.slug, chapterId: chapter.id, payload: { chapterId: chapter.id, requireExecutionReady: true, idempotencyKey: "missing-outline-fingerprint" } });
+    const command = enqueueRuntimeCommand({ projectSlug: project.slug, runId: run.id, type: "start", payload: { chapterId: chapter.id, requireExecutionReady: true, idempotencyKey: "missing-outline-fingerprint" } });
+
+    await processRuntimeCommand(command);
+    await expect(fs.readFile(resolveInside(root, chapter.contentPath), "utf8")).resolves.toBe(canonBefore);
+    expect(getRuntimeRun(run.id)).toEqual(expect.objectContaining({ status: "failed", error: "GOVERNED_OUTLINE_FINGERPRINT_REQUIRED" }));
+    await expect(readExecutionWorkItem(root, workItem.workItemId)).resolves.toEqual(expect.objectContaining({ status: "blocked", blockedReason: "VERSION_POINTER_STALE" }));
   });
 
   it("self-repairs autopilot drafts until the runtime quality target is met before review", async () => {

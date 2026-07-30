@@ -253,7 +253,8 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "assets/videos",
     "scripts",
     "relations",
-    "prompts"
+    "prompts",
+    "sessions"
   ]) {
     await fs.mkdir(path.join(root, dir), { recursive: true });
   }
@@ -299,6 +300,15 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
     "relations/asset-links.json": `${JSON.stringify({ projectSlug: project.slug, links: [] }, null, 2)}\n`,
     "relations/story-asset-map.md": "# Story Asset Map\n\nTrack how characters, props, scenes, and generated media relate to chapters and plot beats.\n",
     "prompts/project-prompts.md": "# Project Prompts\n\nProject-specific prompt notes, expert role overrides, and reusable generation instructions.\n",
+    "sessions/creative-session.json": `${JSON.stringify({
+      schemaVersion: "creative-session.v1",
+      sessionId: `session-${project.slug}`,
+      projectSlug: project.slug,
+      status: "capturing",
+      messages: [],
+      createdAt: nowIso(),
+      updatedAt: nowIso()
+    }, null, 2)}\n`,
     "tasks/history.jsonl": "",
     "tasks/invocations.jsonl": "",
     "tasks/recaps.jsonl": "",

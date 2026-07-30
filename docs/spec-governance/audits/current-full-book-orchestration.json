@@ -1,0 +1,703 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "After the author provides only a rough direction and answers the few truly high-impact questions, the platform can durably plan, write, review, settle, repair, pause, resume, and finish the whole novel while proving every required chapter and narrative obligation has a current terminal disposition.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/executionDispatcher.ts",
+      "sha256": "a29abfa64191a58d4fe19738f33d46943e8b4382c1af006bfb53c8ec47aa55bd"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/runtimeSnapshot.ts",
+      "sha256": "0a2cda33d0d1fe4859b7583314a25c64b406d3a2603090232a4f2c3b6654c8b6"
+    },
+    {
+      "path": "api/src/runtimeStore.ts",
+      "sha256": "575cc0dfa899d35ade781b8c8498e6db8d81d50914433731f49beb2cac6492a5"
+    },
+    {
+      "path": "api/src/runtimeWorker.ts",
+      "sha256": "f475c301b1bcd34add67000049015651b41ee75c89fb06fe99a410dbdeb89174"
+    },
+    {
+      "path": "api/src/bookRun.ts",
+      "sha256": "d3075bb1d598f7b1cec68b28e7690ed54abf94155241072df86c08984dcc755c"
+    },
+    {
+      "path": "api/src/quiescenceProof.ts",
+      "sha256": "afdcbb424a3151e331bfa25612c274f5299cbb7620c2278c3f6e773b3cc5bdcc"
+    },
+    {
+      "path": "api/src/completionAudit.ts",
+      "sha256": "a7962c88ebe1ecc3f97c6cf414a950c6edf33abd3c6a1d481ac4ca86ba0f3f42"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
+      "sha256": "01d4ff436dbee1f27f12aef0b253e2e53f723ae417ca6b983d879328e076b31e"
+    },
+    {
+      "path": "ui/src/services/novelApi.ts",
+      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    },
+    {
+      "path": "ui/src/types/novel.ts",
+      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "source and artifact hashes",
+      "chapter/status/count denominators",
+      "quality/summary/ledger coverage counts",
+      "governed orchestration artifact-name counts"
+    ],
+    "snapshotExcludes": [
+      "project slug",
+      "title",
+      "genre",
+      "rough idea",
+      "chapter title",
+      "outline or prose",
+      "summary or ledger text",
+      "author direction",
+      "prompt or model output",
+      "character or entity names"
+    ]
+  },
+  "operationalSnapshot": {
+    "substantialInventoryThresholdChars": 800,
+    "runtimeOperationalBaselineRef": "docs/spec-governance/audits/current-q003-operational-baseline.json",
+    "totals": {
+      "projects": 8,
+      "chapters": 219,
+      "chapterStatuses": {
+        "drafted": 70,
+        "empty": 21,
+        "planned": 128
+      },
+      "substantialChapters": 71,
+      "qualityReports": 2,
+      "chapterSummariesWithSignal": 1,
+      "ledgerEntries": 0,
+      "bookRuns": 0,
+      "workGraphs": 0,
+      "workItems": 0,
+      "chapterSettlements": 0,
+      "completionProofs": 0,
+      "completionAudits": 0,
+      "quiescenceProofs": 0
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "chapterContentAggregate": "f1e73610707d9cb6fa66de05e55ff3b2f42b74b9cd06b851be84b9e5307bd960"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "substantialAtLeast800Chars": 1
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "chapterContentAggregate": "d6da96d4da614df888d4ccf8944f0bd94301729112331a25d68893f30279cf38"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 198,
+          "statuses": {
+            "drafted": 70,
+            "planned": 128
+          },
+          "substantialAtLeast800Chars": 70
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 2,
+          "chapterSummariesWithSignal": 1,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "chapterContentAggregate": "2d36728f3a770439d66fd3730878e502a4bf53f4c0dbe03aad5931804ad9d63d"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      }
+    ],
+    "interpretation": "Chapter files, statuses, quality reports, summaries, ledgers, runtime runs, commands, and events are inventory or execution evidence only. None independently proves governed work completion, canonical settlement, scope coverage, narrative closure, audit freshness, or terminal quiescence."
+  },
+  "summary": {
+    "auditedStages": 15,
+    "projectsScanned": 8,
+    "chaptersInventoried": 219,
+    "chaptersMarkedChecked": 0,
+    "substantialChapters": 71,
+    "bookRuns": 0,
+    "workGraphs": 0,
+    "chapterSettlements": 0,
+    "completionProofs": 0,
+    "auditedCompletionCertificates": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform has a durable command queue around one eager single-chapter mutation pipeline, but no durable full-book authority that freezes publication scope, materializes dependencies, distinguishes candidate/adoption/settlement, schedules from settled evidence, or proves closure and completion.",
+    "consequence": "Continuous-chapter UI cannot safely continue, resume can repeat side effects, one project can block all controls, local readiness can be falsely green, and completed can mean one accepted run rather than one auditable finished novel."
+  },
+  "currentEvidence": [
+    {
+      "claim": "UI and API forward autoContinue, but runtime engine never consumes it.",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 2417,
+          "evidence": "autoContinue"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1203,
+          "evidence": "async function processStart"
+        }
+      ]
+    },
+    {
+      "claim": "Start executes exactly one single-chapter pipeline.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1207,
+          "evidence": "await runSingleChapterPipeline(run)"
+        }
+      ]
+    },
+    {
+      "claim": "Accept marks the current run completed without adoption, settlement, or next-work scheduling.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1220,
+          "evidence": "command.type === \"accept\""
+        }
+      ]
+    },
+    {
+      "claim": "When every chapter is checked, target selection falls back to the first chapter instead of declaring no work or scope completion.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 94,
+          "evidence": "return next || orderedChapters(project)[0]"
+        }
+      ]
+    },
+    {
+      "claim": "One global FIFO command is awaited to completion before another command can be claimed.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeStore.ts",
+          "line": 420,
+          "evidence": "ORDER BY created_at ASC LIMIT 1"
+        },
+        {
+          "path": "api/src/runtimeWorker.ts",
+          "line": 55,
+          "evidence": "await processRuntimeCommand(command)"
+        }
+      ]
+    },
+    {
+      "claim": "Local next-readiness can be declared by recap presence and UI maps completed to 100 percent without a book denominator.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeSnapshot.ts",
+          "line": 257,
+          "evidence": "status: hasLedger || hasWritingRecap ? \"done\" : \"waiting\""
+        },
+        {
+          "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
+          "line": 269,
+          "evidence": "if (props.activeRun.status === \"completed\") return 100"
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "rough-idea-and-collaboration",
+      "current": "Project rough idea and independent tasks can start local work.",
+      "gap": "No accepted StoryContract and frozen publication scope establish what this book run must finish.",
+      "target": "Consume the current collaboration decision projection and create a versioned FrozenPublicationScope."
+    },
+    {
+      "id": "scope-and-outline-compile",
+      "current": "Project chapters and outline files provide a visible chapter list.",
+      "gap": "File/status presence does not prove causal coverage, required chapter set, volume milestones, terminal arc, or obligation ownership.",
+      "target": "Compile accepted story/outline nodes into a dependency graph with scope membership and evidence versions."
+    },
+    {
+      "id": "readiness-and-budget",
+      "current": "A runtime start can be queued immediately.",
+      "gap": "No full-run call, token, cost, time, failure, chapter, storage, or review-load forecast and ceiling is frozen before work begins.",
+      "target": "Issue RunReadinessProof and BudgetReservation or block with explicit missing evidence."
+    },
+    {
+      "id": "work-graph-materialization",
+      "current": "One RuntimeRun represents one chapter pipeline or derivative command.",
+      "gap": "No durable graph expresses chapter, obligation, continuity, revision, projection, milestone, and final-audit dependencies.",
+      "target": "Materialize typed BookWorkItems whose readiness derives only from settled predecessor evidence."
+    },
+    {
+      "id": "fair-scheduling-and-leases",
+      "current": "A transactional global FIFO claims one command at a time.",
+      "gap": "No project fairness, priority aging, resource class, write-set exclusion, lease expiry, fencing token, or per-project concurrency limit.",
+      "target": "Schedule ready work fairly with scoped leases, heartbeats, fencing, budgets, and explicit blocked reasons."
+    },
+    {
+      "id": "chapter-plan-and-context",
+      "current": "The pipeline runs chapter.plan, then assembles draft context.",
+      "gap": "The plan result is discarded and no ExecutionReadyProof binds plan, memory, obligations, decisions, locks, and context to the work item.",
+      "target": "Adopt a governed ChapterExecutionPlan and freeze its ExecutionReadyProof before prose generation."
+    },
+    {
+      "id": "candidate-generation-and-validation",
+      "current": "The pipeline writes prose before continuity/quality checks and may rewrite canon in place.",
+      "gap": "Work success, candidate generation, canonical adoption, and chapter settlement are conflated and are not safely retryable.",
+      "target": "Generate immutable candidates, validate them, then adopt through the canonical mutation gateway."
+    },
+    {
+      "id": "chapter-settlement",
+      "current": "Accept changes RuntimeRun to completed after prose was already written.",
+      "gap": "No atomic settlement binds adoption receipt, summary/assertion/obligation deltas, projections, feedback, cost, and next-work eligibility.",
+      "target": "Emit ChapterSettlementEvent only after every mandatory output commits or records a governed waiver."
+    },
+    {
+      "id": "next-work-scheduling",
+      "current": "autoContinue is forwarded but unused; start invokes one chapter; accept schedules nothing.",
+      "gap": "A recap candidate or any ledger signal can make the local snapshot label next as done without settlement.",
+      "target": "The scheduler consumes settlement and graph evidence, never UI switches, file counts, recap presence, or mutable chapter status alone."
+    },
+    {
+      "id": "live-direction-pause-and-stop",
+      "current": "Control commands share the same queue and pause/stop become visible at stage boundaries.",
+      "gap": "A long command blocks queued direction; no control-plane fence, safe-boundary acknowledgement, call cancellation, drain, or quiescence protocol exists.",
+      "target": "Separate control events from work leases and prove received, effective, superseded, drained, and quiescent states."
+    },
+    {
+      "id": "failure-recovery-and-idempotency",
+      "current": "Stale commands requeue and stale runs move to review; checkpoints preserve files.",
+      "gap": "Resume/rewrite reruns the entire chapter pipeline, so calls, candidates, reports, writes, and costs can duplicate or overwrite without stage receipts.",
+      "target": "Resume the first unsettled idempotent stage from immutable receipts, with retry budgets, stuck detection, compensations, and late-worker fencing."
+    },
+    {
+      "id": "milestone-and-obligation-repair",
+      "current": "Quality, graph, index, and ledgers can be inspected independently.",
+      "gap": "No volume/arc milestone gate opens typed repair work for continuity, memory, pacing, obligations, character/world state, or stale projections.",
+      "target": "Run evidence-based milestone audits and add repair work to the same dependency graph without silently shrinking scope."
+    },
+    {
+      "id": "scope-complete-versus-closure-ready",
+      "current": "Runtime completed means one accepted run and UI reports 100%.",
+      "gap": "No state distinguishes drafted, reviewed, settled, publication-scope complete, closure blocked, closure ready, or audit ready.",
+      "target": "Expose denominators and advance only through evidence-backed book-run states."
+    },
+    {
+      "id": "completion-audit-and-quiescence",
+      "current": "No full-book completion audit or certificate exists.",
+      "gap": "Last-chapter prose, all checked statuses, empty task queue, or model self-report could be mistaken for completion while obligations, projections, repairs, or writers remain open.",
+      "target": "Replay the frozen scope and issue audited_complete only after closure, freshness, coverage, deterministic audit, and no-active-writer proofs pass."
+    },
+    {
+      "id": "post-completion-change",
+      "current": "Files can still be edited or restored after any run status.",
+      "gap": "No rule invalidates a completion claim when a scoped decision, outline, prose, obligation, assertion, policy, model, or audit input changes.",
+      "target": "Any relevant mutation revokes the current proof, opens an impact subgraph, and requires re-settlement and re-audit."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-process-local-chapter-loop",
+      "verdict": "reject-as-target",
+      "blueCase": "A while-loop over unchecked chapters is the fastest way to make the existing continuous switch appear functional and reuses the current pipeline.",
+      "redCase": "It cannot durably express dependencies, exact resume, fairness, control-plane interruption, candidate settlement, obligations, revisions, scope changes, cost ceilings, or trustworthy completion; a crash or review gate loses loop intent."
+    },
+    {
+      "option": "B-persistent-chapter-queue-or-saga",
+      "verdict": "useful-migration-layer-not-complete-target",
+      "blueCase": "Persistent per-chapter jobs add restart safety, retries, visibility, and a natural next-chapter scheduler with moderate migration cost.",
+      "redCase": "A chapter-only queue treats obligation repair, continuity, memory rebuild, decision correction, milestone audit, stale proof, and final closure as side channels, recreating hidden dependencies and false terminal states."
+    },
+    {
+      "option": "C-evidence-driven-book-work-graph",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "A durable typed dependency graph can schedule chapters and cross-cutting repair from settlement evidence, isolate failure, support fair leases and live control, and derive completion from a frozen scope plus replayable proofs.",
+      "redCase": "It requires new domain schemas, graph materialization, schedulers, idempotent stage receipts, leases/fencing, migration, observability, cost policy, projection freshness, and substantial failure-injection testing."
+    }
+  ],
+  "targetAuthority": {
+    "entities": [
+      "BookRunSpec",
+      "FrozenPublicationScope",
+      "BookWorkGraph",
+      "BookWorkItem",
+      "WorkDependency",
+      "RunReadinessProof",
+      "BudgetReservation",
+      "WorkItemLease",
+      "StageReceipt",
+      "ChapterSettlementEvent",
+      "MilestoneAudit",
+      "ClosureReadyProof",
+      "CompletionAudit",
+      "CompletionProof",
+      "QuiescenceProof"
+    ],
+    "bookRunStates": [
+      "draft",
+      "planning",
+      "ready",
+      "running",
+      "pausing",
+      "paused",
+      "review_required",
+      "recovering",
+      "scope_complete",
+      "closure_blocked",
+      "closure_ready",
+      "auditing",
+      "audited_complete",
+      "failed",
+      "cancelled",
+      "superseded"
+    ],
+    "workItemStates": [
+      "blocked",
+      "ready",
+      "leased",
+      "running",
+      "waiting_external",
+      "review_required",
+      "succeeded",
+      "settled",
+      "failed",
+      "cancelled",
+      "superseded"
+    ],
+    "workItemTypes": [
+      "understanding",
+      "story_contract",
+      "outline_compile",
+      "chapter_plan",
+      "prose_candidate",
+      "validate",
+      "adopt",
+      "chapter_settle",
+      "memory_projection",
+      "obligation_repair",
+      "continuity_repair",
+      "revision",
+      "milestone_audit",
+      "completion_audit"
+    ],
+    "invariant": "A work item may succeed without settling; only current settlement/proof events unlock dependents. No file existence, chapter status, task success, model score, recap presence, queue emptiness, last-chapter draft, run completed flag, or UI percentage may independently establish chapter settlement, scope completion, closure readiness, or audited completion."
+  },
+  "schedulingProtocol": {
+    "readinessInputs": [
+      "current frozen scope version",
+      "all hard predecessor settlement IDs",
+      "decision/outline/canon/obligation/memory cursors",
+      "author locks and review policy",
+      "budget reservation",
+      "write-set and resource class"
+    ],
+    "lease": [
+      "project and work-item scope",
+      "attempt and idempotency key",
+      "lease expiry",
+      "heartbeat",
+      "fencing token",
+      "write-set",
+      "cost reservation"
+    ],
+    "fairness": "Use per-project concurrency limits, priority aging, resource classes, review-unblock priority, and write-set exclusion. One long model call or one project's repair storm must not starve pause/direction commands or unrelated projects.",
+    "continuation": "autoContinue is an author policy flag on BookRunSpec. It permits the scheduler to lease the next already-ready work item; it does not waive review gates, invent scope, accept candidates, resolve obligations, or convert succeeded work to settled."
+  },
+  "recoveryAndControlProtocol": {
+    "recovery": "Persist immutable stage inputs and receipts. On restart, verify their hashes and resume the first missing or stale stage; never replay a chargeable call or canon mutation solely because a process-local function restarted.",
+    "retry": "Classify transient, deterministic, contract, author-decision, budget, conflict, and unknown failures; apply bounded per-stage attempts, backoff, circuit breakers, stuck detection, and compensations without silently reducing quality or scope.",
+    "control": "Pause stops new leases, requests cancellable calls to stop, waits for safe boundaries, fences late workers, records uncommitted candidates, drains mutations, and emits QuiescenceProof. Stop additionally cancels remaining authorized work; direction is a durable steering event acknowledged at a named safe boundary."
+  },
+  "completionProtocol": {
+    "requiredProofs": [
+      "FrozenPublicationScope hash and source decision/contract/outline versions",
+      "every required chapter has a current ChapterSettlementEvent",
+      "every in-scope narrative obligation has paid_off, transformed, intentionally_open, or author_waived terminal evidence allowed by the chosen open-mystery contract",
+      "character, relationship, world, timeline, continuity, memory, pacing, quality, rights, safety, and revision gates are current",
+      "all required projections have caught up to the canonical event cursor",
+      "no required work item is blocked, ready, leased, running, waiting_external, review_required, failed, or stale",
+      "no active writer, mutation transaction, stale lease, late worker, uncommitted canon candidate, or unbounded retry remains",
+      "CompletionAudit deterministically replays with source coverage, waivers, disputes, policy/model/evaluator versions, costs, timestamps, and signatures"
+    ],
+    "invalidation": "Any change to an in-scope decision, contract, outline node, settled prose, obligation, assertion, author lock, evaluator, closure policy, or audit input revokes audited_complete, marks the affected proof subgraph stale, and requires re-settlement plus re-audit.",
+    "display": "Always show separate denominators for chapters drafted/reviewed/adopted/settled, obligations terminal/blocked/overdue, projections current/stale, repair work open, scope complete, closure ready, audit current, and worker quiescence."
+  },
+  "releaseGate": {
+    "requirementIds": [
+      "FR-RUN-001",
+      "FR-RUN-002",
+      "FR-RUN-003",
+      "FR-RUN-004",
+      "FR-RUN-005",
+      "FR-RUN-006",
+      "FR-RUN-007",
+      "FR-RUN-008",
+      "FR-RUN-009",
+      "FR-RUN-010",
+      "FR-RUN-011",
+      "FR-RUN-012",
+      "FR-RUN-013",
+      "FR-RUN-014",
+      "FR-RUN-015",
+      "FR-RUN-016",
+      "FR-RUN-017",
+      "FR-RUN-018",
+      "FR-RUN-019",
+      "FR-RUN-020",
+      "FR-RUN-021",
+      "FR-RUN-022",
+      "FR-RUN-023",
+      "FR-COMPLETE-001",
+      "FR-COMPLETE-002",
+      "FR-COMPLETE-003",
+      "FR-COMPLETE-004",
+      "FR-COMPLETE-005",
+      "FR-COMPLETE-006",
+      "FR-COMPLETE-007",
+      "FR-COMPLETE-008",
+      "FR-COMPLETE-009",
+      "FR-COMPLETE-010",
+      "FR-COMPLETE-011",
+      "FR-COMPLETE-012",
+      "FR-COMPLETE-013",
+      "FR-OBL-001",
+      "FR-CLOSURE-001"
+    ],
+    "rule": "Do not claim continuous whole-book creation or audited completion until an accepted frozen scope materializes a durable work graph, settlement alone unlocks dependencies, control and crash tests prove exact recovery and fencing, milestone repair and obligation closure share the graph, completion replay is current, and quiescence proves no writer or transaction can mutate the certified version."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed within one common orchestration contract; none weakens scope freezing, work identity, settlement, idempotency, control, obligation closure, audit freshness or completion/quiescence proof."
+}

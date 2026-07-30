@@ -1,0 +1,1163 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "Every identified canon narrative obligation is visibly marked, causally tracked, and closed by evidence-backed payoff, partial remainder, transformation, neutralization, or an author-approved open contract; completion also proves source coverage and remaining uncertainty.",
+  "sourceFiles": [
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/narrativeObligation.ts",
+      "sha256": "e4cb7d0e298387064803777331a28bfbede96aae59c252decf82ed226ab19b11"
+    },
+    {
+      "path": "api/src/obligationCoverage.ts",
+      "sha256": "412d8bbcefe5c3de1dbd295192cd35b3c295142e2fd79265c41882dbec6d8c31"
+    },
+    {
+      "path": "api/src/obligationCandidates.ts",
+      "sha256": "8e1776e3a0870b5196a0f8a7a6b19fe1fcd3f30ec61e1f16be79d13f76e21d8a"
+    },
+    {
+      "path": "api/src/obligationCertificate.ts",
+      "sha256": "f64d56a8491eb5aeb25ec74ba3677a21157bb576d9aaf299595bc43473ad7245"
+    },
+    {
+      "path": "api/src/closureCertificate.ts",
+      "sha256": "c69444822955e26bd7bf36e65122ec0ae9208028a43ec47a472e7a325c5085e6"
+    },
+    {
+      "path": "api/src/novelProject.ts",
+      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/runtimeSnapshot.ts",
+      "sha256": "0a2cda33d0d1fe4859b7583314a25c64b406d3a2603090232a4f2c3b6654c8b6"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/storyGraph.ts",
+      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+    },
+    {
+      "path": "api/src/worldRuleContract.ts",
+      "sha256": "0c64c916d8e2afcb39656d3ae76c53da33ea313ca6a18ce64a47da2e47c950f0"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    },
+    {
+      "path": "ui/src/components/novel/LedgerPanel.vue",
+      "sha256": "7598456d61bce8bc53a8139bfb1115c1d5116b117710f43b1f05ae3c7009213e"
+    },
+    {
+      "path": "ui/src/components/novel/WritingRecapPanel.vue",
+      "sha256": "35499ceff7bc2b75a1f8c4e1c130b7fbc9e57e780c5fff1e62ff45c791d42a2b"
+    },
+    {
+      "path": "ui/src/components/novel/ReviewQualityPanel.vue",
+      "sha256": "5869e3ba35e4a4f7b791fb564705e1c2703ff8d5215db4dafe89dac5a0424aba"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "artifact-category hashes",
+      "chapter status counts",
+      "reference and entry counts",
+      "anonymous ID-set hashes",
+      "cross-surface mismatch counts"
+    ],
+    "snapshotExcludes": [
+      "project slug",
+      "title",
+      "rough idea",
+      "foreshadowing ID text",
+      "ledger title or note",
+      "scene content",
+      "summary content",
+      "novel prose",
+      "prompt or model output"
+    ]
+  },
+  "operationalSnapshot": {
+    "totals": {
+      "projects": 8,
+      "chapters": 219,
+      "sceneCards": 8,
+      "sceneReferences": 21,
+      "uniqueSceneIds": 21,
+      "dashboardReferences": 0,
+      "ledgerEntries": 0,
+      "summaryUpdates": 0,
+      "recapUpdates": 0,
+      "sceneIdsMissingFromLedger": 21
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": [
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 0,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 0,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": [
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 0,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 0,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": [
+          {
+            "category": "ledger-markdown",
+            "fileCount": 1,
+            "aggregateSha256": "5022be0c6f449c2242ad81be3bd921c3380200210c1e084b8e0f785e2eaf9180"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864"
+          },
+          {
+            "category": "scene",
+            "fileCount": 1,
+            "aggregateSha256": "846c3d38dbb59276b698bdd56cd024df2ab4da00c5046f0399db6725730c58a8"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 1,
+            "cards": 1,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 0,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": [
+          {
+            "category": "dashboard",
+            "fileCount": 198,
+            "aggregateSha256": "a6c2bc34befa1f35ab71b46103945308c5554dc1b50425562724f703999dd56a"
+          },
+          {
+            "category": "ledger-json",
+            "fileCount": 1,
+            "aggregateSha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f"
+          },
+          {
+            "category": "ledger-markdown",
+            "fileCount": 1,
+            "aggregateSha256": "5022be0c6f449c2242ad81be3bd921c3380200210c1e084b8e0f785e2eaf9180"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d"
+          },
+          {
+            "category": "recap-jsonl",
+            "fileCount": 1,
+            "aggregateSha256": "2f07ec830566e03f17e3b22c794e2ca0ab6cc9ca77b9c0786a86d2d15302cb92"
+          },
+          {
+            "category": "scene",
+            "fileCount": 198,
+            "aggregateSha256": "a0021c63dbae396a965719ad574908e3a95eda7d39e72cbb6ca44354d300c394"
+          },
+          {
+            "category": "summary",
+            "fileCount": 1,
+            "aggregateSha256": "9e1176a58e42d20773b4e65cca5fda05a46e3fe8d6ad5c9a7bf2063d75f3f7c0"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 198,
+          "statuses": {
+            "drafted": 70,
+            "planned": 128
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 198,
+            "cards": 7,
+            "cardsWithForeshadowingRefs": 7,
+            "references": 21,
+            "uniqueIds": 21,
+            "idSetSha256": "fcfaa9580be7c5bae105283f9440eebaae4d4aa617c16539b5b9d1dee8982d82"
+          },
+          "dashboards": {
+            "files": 198,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 1,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 8,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 21,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": true,
+          "authorityStatus": "fragmented-references-with-empty-ledger",
+          "zeroLedgerMeansClosure": false,
+          "reason": "At least one planning or recap surface refers to foreshadowing while the ledger has no authoritative entry."
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": [
+          {
+            "category": "dashboard",
+            "fileCount": 3,
+            "aggregateSha256": "c8902d51ea6bb24046ca507a8b8c1801432f44789cdd8f9fe3fd72e0abca94e0"
+          },
+          {
+            "category": "ledger-json",
+            "fileCount": 1,
+            "aggregateSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "category": "ledger-markdown",
+            "fileCount": 1,
+            "aggregateSha256": "a4628d23d6db4ed2ad83fe5efc2c47153a85e440c26501889e4a07f632de23ba"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917"
+          },
+          {
+            "category": "recap-jsonl",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "summary",
+            "fileCount": 3,
+            "aggregateSha256": "29cc6eecd75aa665e518dfb36095cc9a0fdd6f424ce4a7f34fff5a14dc80e6e1"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 3,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 3,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 3,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": [
+          {
+            "category": "dashboard",
+            "fileCount": 3,
+            "aggregateSha256": "84cc00491429acde7104afc00b5896e38e6102244596bcf3a935b5f21cc7c45c"
+          },
+          {
+            "category": "ledger-json",
+            "fileCount": 1,
+            "aggregateSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "category": "ledger-markdown",
+            "fileCount": 1,
+            "aggregateSha256": "a4628d23d6db4ed2ad83fe5efc2c47153a85e440c26501889e4a07f632de23ba"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700"
+          },
+          {
+            "category": "recap-jsonl",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "summary",
+            "fileCount": 3,
+            "aggregateSha256": "2ece184717c36856e28e547b140b2080a1c2a66cabd4c63e390e5c126f748afd"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 3,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 3,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 3,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": [
+          {
+            "category": "dashboard",
+            "fileCount": 3,
+            "aggregateSha256": "a7e1af5e12e050bdcde2a2ba19cef9c4ba34e8a88c463fa5af9ac92986f745a7"
+          },
+          {
+            "category": "ledger-json",
+            "fileCount": 1,
+            "aggregateSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "category": "ledger-markdown",
+            "fileCount": 1,
+            "aggregateSha256": "a4628d23d6db4ed2ad83fe5efc2c47153a85e440c26501889e4a07f632de23ba"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7"
+          },
+          {
+            "category": "recap-jsonl",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "summary",
+            "fileCount": 3,
+            "aggregateSha256": "afda3c049dfe6a0de5d8b3d782d1343d72859a7139b18f78bb8e842654464c2f"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 3,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 3,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 3,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": [
+          {
+            "category": "dashboard",
+            "fileCount": 3,
+            "aggregateSha256": "cfc0983c2922ec184470ba88197301a46380fe8ee3b9934e5bb6b8d4f4ccc4ca"
+          },
+          {
+            "category": "ledger-json",
+            "fileCount": 1,
+            "aggregateSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "category": "ledger-markdown",
+            "fileCount": 1,
+            "aggregateSha256": "a4628d23d6db4ed2ad83fe5efc2c47153a85e440c26501889e4a07f632de23ba"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341"
+          },
+          {
+            "category": "recap-jsonl",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "summary",
+            "fileCount": 3,
+            "aggregateSha256": "381a74feca59820014eeb1775c041d703b8b234f9497c83ed3d8d165d2c49378"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 3,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 3,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 3,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      }
+    ],
+    "interpretation": "Scene/dashboard/summary/ledger counts are inventory evidence only. Zero rows never prove zero reader expectations, exhaustive discovery, semantic payoff, or book closure."
+  },
+  "summary": {
+    "auditedStages": 12,
+    "projectsScanned": 8,
+    "chaptersInventoried": 219,
+    "uniquePlannedSceneIds": 21,
+    "legacyLedgerEntries": 0,
+    "plannedIdsMissingFromLedger": 21,
+    "unifiedObligationAuthorityExists": false,
+    "evidenceBackedPayoffTransitionExists": false,
+    "openSuspenseContractExists": false,
+    "sourceCoverageCertificateExists": false,
+    "replayableClosureCertificateExists": false,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "Foreshadowing is represented as independent strings, arrays, mutable ledger rows, recap patches, counts, and graph projections without one authoritative narrative-obligation identity and append-only evidence lifecycle.",
+    "consequence": "A setup can exist only in a plan, a ledger can be empty while scene cards refer to clues, a user can mark resolved without payoff evidence, and completion can neither prove coverage nor distinguish paid, partially paid, transformed, neutralized, or lawfully open obligations."
+  },
+  "stages": [
+    {
+      "stageId": "CLOSURE-TRACE-001",
+      "label": "项目初始化",
+      "currentStatus": "parallel-empty-markdown-and-json",
+      "evidence": [
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 286,
+          "evidence": "\"ledger/foreshadowing.md\""
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 289,
+          "evidence": "\"ledger/foreshadowing.json\""
+        }
+      ],
+      "strength": "Every new project receives visible and structured foreshadowing ledger entry points.",
+      "gap": "Two empty representations exist without a coverage scan, authority declaration, or proof that zero means no obligations."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-002",
+      "label": "计划层伏笔标记",
+      "currentStatus": "scene-card-string-ids",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 531,
+          "evidence": "foreshadowingIds: string[];"
+        }
+      ],
+      "strength": "Scene cards can refer to stable-looking foreshadowing IDs before drafting.",
+      "gap": "The type has no referential constraint, lifecycle, source, payoff contract, reader expectation, or required/optional semantics."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-003",
+      "label": "章级未决投影",
+      "currentStatus": "independent-dashboard-id-array",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 312,
+          "evidence": "unresolvedForeshadowingIds: string[];"
+        }
+      ],
+      "strength": "The chapter dashboard can expose a compact unresolved count.",
+      "gap": "It is independently editable and not proven to be a projection of the scene, ledger, recap, or canon evidence chain."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-004",
+      "label": "正文后回顾候选",
+      "currentStatus": "optional-ledger-patches",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 80,
+          "evidence": "foreshadowingUpdates"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 637,
+          "evidence": "foreshadowingUpdates: []"
+        }
+      ],
+      "strength": "A recap can propose foreshadowing updates and the runtime parser preserves structured patches when present.",
+      "gap": "Fallback recap creates no foreshadowing evidence, and proposed rows do not prove setup visibility, semantic payoff, or author acceptance by themselves."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-005",
+      "label": "回顾采纳写入",
+      "currentStatus": "transactional-merge-by-id",
+      "evidence": [
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 1060,
+          "evidence": "await writeFilesTransaction(root, writes)"
+        }
+      ],
+      "strength": "Accepted recap data updates summary, ledgers, and recap history in one file transaction and deduplicates by ID.",
+      "gap": "The transaction merges mutable rows rather than appending typed setup/reminder/payoff/waiver events with canon evidence and baseline versions."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-006",
+      "label": "人工账本编辑",
+      "currentStatus": "whole-table-put",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2606,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/ledger/:kind\""
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 978,
+          "evidence": "export async function saveLedgerEntries"
+        }
+      ],
+      "strength": "Authors can inspect and correct ledger rows directly.",
+      "gap": "Whole-table replacement has no baseline, append-only history, evidence requirement, permission distinction, or cross-surface atomicity."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-007",
+      "label": "手工结算",
+      "currentStatus": "resolved-dropdown-without-proof",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/LedgerPanel.vue",
+          "line": 41,
+          "evidence": "<option value=\"resolved\">"
+        }
+      ],
+      "strength": "Status is visible and reversible before save.",
+      "gap": "A dropdown can mark resolved without payoff subclaims, canon anchors, fairness, consequences, author waiver, or independent assessment."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-008",
+      "label": "窗口与逾期",
+      "currentStatus": "chapter-number-regex",
+      "evidence": [
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 633,
+          "evidence": "expectedResolutionChapterId.match(/(\\d+)/)"
+        }
+      ],
+      "strength": "The dashboard can flag a row after its expected chapter number.",
+      "gap": "A free-form chapter ID digit is not a versioned soft/hard window, dependency plan, migrated chapter identity, delay event, or reachability proof."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-009",
+      "label": "写作上下文",
+      "currentStatus": "markdown-and-json-both-injected",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 730,
+          "evidence": "{ title: \"伏笔账本\""
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 739,
+          "evidence": "{ title: \"结构化伏笔账本\""
+        }
+      ],
+      "strength": "Drafting can see both legacy notes and structured rows.",
+      "gap": "No single authority, provenance, staleness check, conflict resolution, task-specific minimal set, or spoiler-aware visibility policy is enforced."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-010",
+      "label": "运行时风险",
+      "currentStatus": "count-and-high-risk-proxy",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 342,
+          "evidence": "entry.status === \"blocked\" || entry.severity === \"high\""
+        }
+      ],
+      "strength": "Runtime snapshots include ledger signals and can block on high or explicitly blocked rows.",
+      "gap": "Open medium obligations, missing ledger rows, partial payoffs, impossible closure paths, evidence loss, and coverage unknown do not become equivalent hard blockers."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-011",
+      "label": "图谱投影",
+      "currentStatus": "ledger-node-projection",
+      "evidence": [
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 583,
+          "evidence": "type: \"ledger\""
+        }
+      ],
+      "strength": "Ledger rows can appear as graph nodes linked to chapters and entities.",
+      "gap": "The graph projects current rows; it is not the authority for obligation lineage, hypotheses, clue independence, payoff assessments, or damage propagation."
+    },
+    {
+      "stageId": "CLOSURE-TRACE-012",
+      "label": "完结闭环证明",
+      "currentStatus": "absent",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/ReviewQualityPanel.vue",
+          "line": 406,
+          "evidence": "openForeshadowingCount"
+        }
+      ],
+      "strength": "The review UI reports current open-foreshadowing counts as a useful warning signal.",
+      "gap": "No source-coverage proof, frozen obligation set, lawful open contract, semantic payoff assessment, quiescence proof, replayable ClosureCertificate, or change invalidation exists."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-richer-mutable-ledger",
+      "verdict": "insufficient-alone",
+      "blueCase": "Smallest migration: add setup, payoff, due window, and evidence fields to the existing row and UI.",
+      "redCase": "A mutable row still allows history loss, last-write-wins resolution, cross-surface divergence, false zero, and unprovable completion."
+    },
+    {
+      "option": "B-story-graph-as-authority",
+      "verdict": "insufficient-alone",
+      "blueCase": "Graph edges naturally represent clue, character, hypothesis, dependency, and payoff relationships.",
+      "redCase": "A graph projection does not by itself define commands, evidence-backed transitions, version fencing, author authority, fairness, or certificate replay."
+    },
+    {
+      "option": "C-event-sourced-narrative-obligations",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "One stable obligation ID and typed immutable events can generate ledger, editor marks, dashboards, graph, schedules, prompts, audits, and completion certificates without multiple writers of truth.",
+      "redCase": "Requires migration, canon anchors, event/version semantics, projection rebuilds, impact propagation, and strict admission rules to avoid turning every detail into mandatory debt."
+    }
+  ],
+  "targetProtocol": {
+    "authority": "NarrativeObligation plus append-only ObligationEvent stream",
+    "states": [
+      "candidate",
+      "admitted",
+      "planned",
+      "seeded",
+      "developing",
+      "due",
+      "partially_paid",
+      "paid",
+      "transformed",
+      "neutralized",
+      "intentional_open",
+      "blocked",
+      "invalidated"
+    ],
+    "commands": [
+      "AdmitObligation",
+      "AttachSetupEvidence",
+      "AdvanceObligation",
+      "AssessPayoff",
+      "RecordPartialPayoff",
+      "TransformObligation",
+      "NeutralizeObligation",
+      "AuthorizeOpenContract",
+      "InvalidateEvidence",
+      "ReplanClosureWindow"
+    ],
+    "projections": [
+      "editor marks",
+      "author ledger",
+      "chapter dashboard",
+      "story graph",
+      "closure schedule",
+      "context manifest",
+      "completion audit"
+    ],
+    "invariant": "No plan label, keyword repetition, model self-report, empty ledger, mutable dropdown, or file count may independently establish seeded, paid, intentional_open, or audited_complete."
+  },
+  "openSuspenseContract": {
+    "selectedMode": "Q-002-B-open-contract",
+    "requiredEvidence": [
+      "author authorization",
+      "reader-facing partial answer",
+      "fairness evidence",
+      "explicit retained question",
+      "scope or sequel inheritance",
+      "reader-harm assessment",
+      "versioned rationale"
+    ],
+    "forbiddenUse": "Open status cannot hide an overdue required payoff, unresolved contradiction, missing source scan, or system-selected waiver."
+  },
+  "releaseGate": {
+    "requirementIds": [
+      "FR-FORESHADOW-001",
+      "FR-FORESHADOW-002",
+      "FR-FORESHADOW-003",
+      "FR-FORESHADOW-004",
+      "FR-FORESHADOW-005",
+      "FR-FORESHADOW-007",
+      "FR-FORESHADOW-008",
+      "FR-FORESHADOW-009",
+      "FR-FORESHADOW-010",
+      "FR-FORESHADOW-011",
+      "FR-OBL-001",
+      "FR-OBL-004",
+      "FR-OBL-009",
+      "FR-OBL-010",
+      "FR-OBL-011",
+      "FR-OBL-013",
+      "FR-OBL-017",
+      "FR-OBL-019",
+      "FR-OBL-021",
+      "FR-OBL-023",
+      "FR-OBL-024",
+      "FR-CLOSURE-009",
+      "FR-CLOSURE-010",
+      "FR-CLOSURE-015",
+      "FR-CLOSURE-016",
+      "FR-CLOSURE-018",
+      "FR-CLOSURE-019",
+      "FR-CLOSURE-020",
+      "FR-COMPLETE-001",
+      "FR-COMPLETE-003",
+      "FR-COMPLETE-004",
+      "FR-COMPLETE-005",
+      "FR-COMPLETE-007"
+    ],
+    "acceptanceRefs": [
+      "AT-004",
+      "AT-005",
+      "AT-006",
+      "AT-036",
+      "AT-039",
+      "AT-040",
+      "AT-166",
+      "AT-167",
+      "AT-172",
+      "AT-173",
+      "AT-176",
+      "AT-177",
+      "AT-178",
+      "AT-185",
+      "AT-189",
+      "AT-214",
+      "AT-278",
+      "AT-284",
+      "AT-313",
+      "AT-320",
+      "AT-321",
+      "AT-322",
+      "AT-326",
+      "AT-327",
+      "AT-328",
+      "AT-331",
+      "AT-332",
+      "AT-503",
+      "AT-504"
+    ],
+    "rule": "Do not claim all plot points are closed until a frozen publication scope has exhaustive-enough source coverage, every admitted required obligation has a replayable evidence-backed terminal event, every open item satisfies the Q-002 contract, every cross-surface projection matches the same event version, and any later edit invalidates affected closure evidence and certificates."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none can weaken obligation admission, evidence, payoff, open-contract, projection-consistency or completion-certificate gates. Q-009 does not alter closure semantics."
+}

@@ -1,0 +1,1290 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "AI prose remains isolated and attributable until evidence and author/autonomy policy adopt it atomically; only adopted prose can produce accepted facts, obligations, projections, chapter settlement, and the next safe writing action.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/chapterSettlement.ts",
+      "sha256": "481906f680153a4ab6cf2f10b563b8195fa2d85aa8e9623b235892b594925ecd"
+    },
+    {
+      "path": "api/src/proseValidation.ts",
+      "sha256": "5f07efdcf14be88c59bae8614fc4758555e1923482ffa06a367efee648fffc3e"
+    },
+    {
+      "path": "api/src/proseReview.ts",
+      "sha256": "64415f70d9a8128038ccb36c28f93db835cd190cad60f572f9c6efd021529ccc"
+    },
+    {
+      "path": "api/src/authorFeedback.ts",
+      "sha256": "c78d6c10b6f8713281fba2330efc0ebdb4c0cd882f6652eff8260012fbd24139"
+    },
+    {
+      "path": "api/src/derivedPublication.ts",
+      "sha256": "e331f9f320f7d11c8d523e747fc08c99864770a8e0e3065ff3c5c8dd9378e3af"
+    },
+    {
+      "path": "api/src/fileVersions.ts",
+      "sha256": "d746903790749003667e0944ea4b94fd9b9560399acc4f2c75813734d47ff797"
+    },
+    {
+      "path": "api/src/knowledgeIndex.ts",
+      "sha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74"
+    },
+    {
+      "path": "api/src/contextManifest.ts",
+      "sha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/proseCandidate.ts",
+      "sha256": "551b4e3e996b7b237fc1572ec11c49245ec0ea22fb3101996577f03090974ab2"
+    },
+    {
+      "path": "api/src/proseAdoption.ts",
+      "sha256": "4580625cc0112d5dbe14800cf1ed967932dff1c12c2176d58785ee23f3482349"
+    },
+    {
+      "path": "api/src/runtimeFiles.ts",
+      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
+    },
+    {
+      "path": "api/src/taskService.ts",
+      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+    },
+    {
+      "path": "ui/src/services/novelApi.ts",
+      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "artifact hashes",
+      "chapter status and content-size distributions",
+      "quality score distributions",
+      "task type/status/adoption enums",
+      "file-version source/reason counts",
+      "recap and accepted-summary counts"
+    ],
+    "snapshotExcludes": [
+      "project slug",
+      "title",
+      "rough idea",
+      "chapter title",
+      "novel prose",
+      "prompt",
+      "model output",
+      "recap text",
+      "quality notes",
+      "error text",
+      "character, place, event, or obligation names"
+    ]
+  },
+  "operationalSnapshot": {
+    "substantialInventoryThresholdChars": 800,
+    "totals": {
+      "projects": 8,
+      "chapters": 219,
+      "contentFiles": 213,
+      "nonEmptyContentFiles": 213,
+      "substantialContentFiles": 71,
+      "draftedMissingOrUnder800Chars": 0,
+      "plannedWithAtLeast800Chars": 0,
+      "emptyWithAtLeast800Chars": 1,
+      "checkedWithAtLeast800Chars": 0,
+      "qualityReports": 2,
+      "proseTasks": 53,
+      "proseInvocations": 51,
+      "acceptedPatchTargets": 2,
+      "versionSnapshots": 19,
+      "recapCandidates": 8,
+      "acceptedRecapIds": 8
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af",
+          "taskHistory": null,
+          "invocationHistory": null,
+          "recapHistory": null,
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "contentFiles": 0,
+          "nonEmptyContentFiles": 0,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 0,
+          "contentChars": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 0,
+          "proseTasks": 0,
+          "byType": {},
+          "byStatus": {},
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 0,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af",
+          "taskHistory": "ea4dfc9d692ce486fb8b475b561c8accfcc88ec84998cc22d6d36554259d3b23",
+          "invocationHistory": "d58e98c020c6419456d748d86dd36fd3dc2aa644a0ef130b6a21ac99366f2b30",
+          "recapHistory": null,
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "contentFiles": 0,
+          "nonEmptyContentFiles": 0,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 0,
+          "contentChars": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 1,
+          "proseTasks": 0,
+          "byType": {},
+          "byStatus": {},
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 0,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "chapterContentAggregate": "f1e73610707d9cb6fa66de05e55ff3b2f42b74b9cd06b851be84b9e5307bd960",
+          "taskHistory": "f72c1dd26e2ce261eb6b859340e8ba5c94ef6d6ed227002f226a3fd6a7032ac9",
+          "invocationHistory": null,
+          "recapHistory": null,
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "contentFiles": 3,
+          "nonEmptyContentFiles": 3,
+          "substantialAtLeast800Chars": 1,
+          "uniqueContentFingerprints": 3,
+          "contentChars": {
+            "sampleCount": 3,
+            "min": 7,
+            "p50": 7,
+            "p95": 3292,
+            "max": 3292,
+            "average": 1102
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 1,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 3,
+          "proseTasks": 1,
+          "byType": {
+            "selection.polish": 1
+          },
+          "byStatus": {
+            "success": 1
+          },
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 0,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "chapterContentAggregate": "d6da96d4da614df888d4ccf8944f0bd94301729112331a25d68893f30279cf38",
+          "taskHistory": "48c63c511fc0cd3f48a7c0e6a42a77e71c5fc9131dfac010ce1c57f3f6a49d03",
+          "invocationHistory": "fbeeab5ff672ed7dbedcb087d873e70a51f0e72f0b201396c11fa044a9ee5e87",
+          "recapHistory": "2f07ec830566e03f17e3b22c794e2ca0ab6cc9ca77b9c0786a86d2d15302cb92",
+          "versionManifest": "d50f440acf6ae5cb62762b16d00377bc86a31a6c6a8930232ab0fd846d637fed"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 198,
+          "statuses": {
+            "drafted": 70,
+            "planned": 128
+          },
+          "contentFiles": 198,
+          "nonEmptyContentFiles": 198,
+          "substantialAtLeast800Chars": 70,
+          "uniqueContentFingerprints": 198,
+          "contentChars": {
+            "sampleCount": 198,
+            "min": 14,
+            "p50": 20,
+            "p95": 2890,
+            "max": 6918,
+            "average": 748
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 2,
+          "parsedReports": 2,
+          "chapterCoverage": 2,
+          "overallScores": {
+            "sampleCount": 2,
+            "min": 96,
+            "p50": 96,
+            "p95": 96,
+            "max": 96,
+            "average": 96
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 81,
+          "proseTasks": 51,
+          "byType": {
+            "chapter.draft": 14,
+            "continuity.check": 13,
+            "quality.rewrite": 7,
+            "selection.polish": 1,
+            "writing.recap": 16
+          },
+          "byStatus": {
+            "error": 1,
+            "success": 50
+          },
+          "invocations": 50,
+          "invocationAdoptionDecisions": {
+            "accepted": 2,
+            "not-required": 25,
+            "pending": 23
+          },
+          "acceptedPatchTargets": 2
+        },
+        "versioning": {
+          "snapshots": 18,
+          "bySource": {
+            "missing": 4,
+            "runtime": 14
+          },
+          "byReason": {
+            "chapter_draft": 14,
+            "missing": 4
+          },
+          "filesCovered": 2
+        },
+        "recapAndMemory": {
+          "recapCandidates": 8,
+          "summaryFiles": 1,
+          "summariesWithAcceptedSignal": 1,
+          "acceptedRecapIds": 8
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recapHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "contentFiles": 3,
+          "nonEmptyContentFiles": 3,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 3,
+          "contentChars": {
+            "sampleCount": 3,
+            "min": 7,
+            "p50": 7,
+            "p95": 7,
+            "max": 7,
+            "average": 7
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 0,
+          "proseTasks": 0,
+          "byType": {},
+          "byStatus": {},
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 3,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recapHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "contentFiles": 3,
+          "nonEmptyContentFiles": 3,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 3,
+          "contentChars": {
+            "sampleCount": 3,
+            "min": 7,
+            "p50": 7,
+            "p95": 7,
+            "max": 7,
+            "average": 7
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 0,
+          "proseTasks": 0,
+          "byType": {},
+          "byStatus": {},
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 3,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recapHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "contentFiles": 3,
+          "nonEmptyContentFiles": 3,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 3,
+          "contentChars": {
+            "sampleCount": 3,
+            "min": 7,
+            "p50": 7,
+            "p95": 7,
+            "max": 7,
+            "average": 7
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 0,
+          "proseTasks": 0,
+          "byType": {},
+          "byStatus": {},
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 3,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "chapterContentAggregate": "2d36728f3a770439d66fd3730878e502a4bf53f4c0dbe03aad5931804ad9d63d",
+          "taskHistory": "d3fb87fd7556f445db97be68c1229835b7cc8c3717821e6e80612a5ea72f0ede",
+          "invocationHistory": "988f04eb910c93d773aa804596a77201681092a43160a0de961d67f6b7f446b8",
+          "recapHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "versionManifest": "d5d1ee18b78b17e34a09dc4d9178a60e08ee70b33d1f92856b0e4b67b15b0e8f"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "contentFiles": 3,
+          "nonEmptyContentFiles": 3,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 3,
+          "contentChars": {
+            "sampleCount": 3,
+            "min": 7,
+            "p50": 7,
+            "p95": 227,
+            "max": 227,
+            "average": 80
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 1,
+          "proseTasks": 1,
+          "byType": {
+            "writing.recap": 1
+          },
+          "byStatus": {
+            "success": 1
+          },
+          "invocations": 1,
+          "invocationAdoptionDecisions": {
+            "not-required": 1
+          },
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 1,
+          "bySource": {
+            "missing": 1
+          },
+          "byReason": {
+            "missing": 1
+          },
+          "filesCovered": 1
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 3,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      }
+    ],
+    "interpretation": "All counts describe local inventory and workflow traces. They do not establish prose quality, author approval, causal attribution, canonical correctness, or settled chapters."
+  },
+  "summary": {
+    "auditedStages": 13,
+    "projectsScanned": 8,
+    "chaptersInventoried": 219,
+    "substantialContentFiles": 71,
+    "checkedChaptersWithSubstantialContent": 0,
+    "qualityReports": 2,
+    "versionSnapshots": 19,
+    "recapCandidates": 8,
+    "acceptedRecapIds": 8,
+    "durableProseCandidates": 0,
+    "adoptionReceipts": 0,
+    "chapterSettlementProofs": 0,
+    "proseCandidateIsolationSliceExists": true,
+    "proseAdoptionTransactionSliceExists": true,
+    "implementationVerified": false
+  },
+  "temporalInversions": [
+    {
+      "inversionId": "PROSE-TIME-001",
+      "direction": "canon-before-review",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 803,
+          "evidence": "reason: \"chapter_draft\""
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 943,
+          "evidence": "reason: \"quality_self_repair\""
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 780,
+          "evidence": "status: \"review_required\""
+        }
+      ],
+      "harm": "Unapproved generated or repaired prose becomes the input to later validation, recap, status, and projection work; review can no longer be the act that authorizes canonical mutation."
+    },
+    {
+      "inversionId": "PROSE-TIME-002",
+      "direction": "derived-truth-before-source-save",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3881,
+          "evidence": "await requestWritingRecapForAcceptedDraft"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3068,
+          "evidence": "async function acceptWritingRecap"
+        }
+      ],
+      "harm": "An accepted recap can outlive, diverge from, or precede the unsaved client prose that allegedly supports it."
+    }
+  ],
+  "rootCause": {
+    "statement": "The platform uses mutable chapter files as both candidate workspace and canonical truth, while acceptance is split among client state, file saves, patch loops, recap acceptance, runtime status, and projections without one durable adoption and settlement boundary.",
+    "consequence": "The system cannot prove what the author accepted, which baseline and validations applied, whether facts and obligations match the adopted prose, whether a repair regressed strengths, or whether a chapter is safe to use as the foundation for the next chapter."
+  },
+  "stages": [
+    {
+      "stageId": "PROSE-TRACE-001",
+      "label": "作者直接编辑与保存",
+      "currentStatus": "direct-canon-file-put",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3690,
+          "evidence": "async function saveCurrentContent"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2674,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/files/*\""
+        }
+      ],
+      "strength": "Author text remains immediate, explicit, and snapshot-backed.",
+      "gap": "The request carries content only, so concurrent or offline saves have no parent version, edit-session identity, compare-and-swap, mutation event, or deterministic invalidation receipt."
+    },
+    {
+      "stageId": "PROSE-TRACE-002",
+      "label": "手工 AI 正文候选",
+      "currentStatus": "reviewable-task-result",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3780,
+          "evidence": "rewriteCandidate.value = task.result"
+        }
+      ],
+      "strength": "Manual draft and rewrite results remain visible before the author applies them.",
+      "gap": "The candidate has no durable prose identity, frozen generation manifest, parent baseline, expiry, lineage, validation bundle, or fragment-level decision receipt."
+    },
+    {
+      "stageId": "PROSE-TRACE-003",
+      "label": "局部润色接受",
+      "currentStatus": "client-splice-unsaved",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3846,
+          "evidence": "function acceptRewrite"
+        }
+      ],
+      "strength": "The author controls the exact visible selection replacement.",
+      "gap": "Acceptance only changes client memory; a later generic save loses candidate attribution, explicit feedback, source baseline, selection identity, and rejection/undo semantics."
+    },
+    {
+      "stageId": "PROSE-TRACE-004",
+      "label": "专注写作接受与回顾",
+      "currentStatus": "derived-recap-before-canonical-save",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3870,
+          "evidence": "async function acceptFocusDraft"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3881,
+          "evidence": "await requestWritingRecapForAcceptedDraft"
+        }
+      ],
+      "strength": "The workflow immediately asks what factual changes the accepted addition implies.",
+      "gap": "The addition is still unsaved client text when recap generation begins, and recap acceptance has no prose fingerprint; derived truth can therefore be accepted before its source prose exists in canon."
+    },
+    {
+      "stageId": "PROSE-TRACE-005",
+      "label": "AI 补丁采用",
+      "currentStatus": "sequential-file-writes-then-audit-update",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2984,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/patches\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 251,
+          "evidence": "for (const patch of patches)"
+        }
+      ],
+      "strength": "Paths are normalized, snapshots precede writes, and accepted patch targets can be recorded.",
+      "gap": "A middle failure can leave earlier files changed while the invocation remains unaccepted; no all-or-nothing prose, fact, obligation, lock, or projection transaction exists."
+    },
+    {
+      "stageId": "PROSE-TRACE-006",
+      "label": "runtime 正文生成",
+      "currentStatus": "candidate-written-to-canon-before-validation",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 803,
+          "evidence": "reason: \"chapter_draft\""
+        }
+      ],
+      "strength": "A pre-run checkpoint, per-project queue, baseline fingerprints, and conflict handling reduce accidental overwrite risk.",
+      "gap": "Generated prose enters the chapter canon before continuity checks, quality evidence, red/blue review, or author/autonomy adoption authorization."
+    },
+    {
+      "stageId": "PROSE-TRACE-007",
+      "label": "连续性与质量验证",
+      "currentStatus": "post-canon-fixed-score-review",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 838,
+          "evidence": "runRuntimeTask(project, \"continuity.check\""
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 72,
+          "evidence": "RUNTIME_QUALITY_TARGET = 86"
+        }
+      ],
+      "strength": "The pipeline exposes continuity and seven quality dimensions and records quality evidence.",
+      "gap": "Review occurs after mutation and a universal score threshold can confuse chapter function with quality; hard failures and aesthetic tradeoffs are not independently gated."
+    },
+    {
+      "stageId": "PROSE-TRACE-008",
+      "label": "自动质量修复",
+      "currentStatus": "full-chapter-canon-overwrite-inside-loop",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 943,
+          "evidence": "reason: \"quality_self_repair\""
+        }
+      ],
+      "strength": "Repairs are limited to one attempt and create another checkpoint.",
+      "gap": "The repaired chapter replaces canon before final review and has no child-candidate comparison, preserved-strength locks, localized evidence boundary, or regression proof."
+    },
+    {
+      "stageId": "PROSE-TRACE-009",
+      "label": "章后回顾与派生投影",
+      "currentStatus": "recap-candidate-after-premature-canon-write",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1020,
+          "evidence": "runRuntimeTask(project, \"writing.recap\""
+        },
+        {
+          "path": "api/src/knowledgeIndex.ts",
+          "line": 644,
+          "evidence": "export async function buildKnowledgeIndexProjection"
+        }
+      ],
+      "strength": "Recap patches remain candidates, and the knowledge index reads accepted summaries, ledgers, and story control rather than directly embedding whole chapter prose.",
+      "gap": "The recap is derived from prose already written without adoption; runtime then rebuilds projections and story metrics before a governed chapter settlement boundary exists."
+    },
+    {
+      "stageId": "PROSE-TRACE-010",
+      "label": "章节状态收尾",
+      "currentStatus": "score-derived-status-before-author-review",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1074,
+          "evidence": "status: qualityMeetsTarget(report, RUNTIME_QUALITY_TARGET) ? \"drafted\" : \"planned\""
+        }
+      ],
+      "strength": "The runtime distinguishes a low-scoring chapter from a drafted one.",
+      "gap": "Status is committed before author review and represents a score outcome, not adopted prose plus converged recap, obligations, scene evidence, locks, and stable downstream projections."
+    },
+    {
+      "stageId": "PROSE-TRACE-011",
+      "label": "runtime 审稿接受",
+      "currentStatus": "run-status-only",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1220,
+          "evidence": "command.type === \"accept\""
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1221,
+          "evidence": "status: \"completed\""
+        }
+      ],
+      "strength": "An explicit author action and immutable runtime command event are available.",
+      "gap": "Accept does not adopt prose, accept recap patches, emit an adoption receipt, settle the chapter, record preference evidence, or schedule the next safe work item."
+    },
+    {
+      "stageId": "PROSE-TRACE-012",
+      "label": "文件版本与恢复",
+      "currentStatus": "pre-write-snapshots-not-commit-log",
+      "evidence": [
+        {
+          "path": "api/src/fileVersions.ts",
+          "line": 55,
+          "evidence": "export async function createWritingFileSnapshot"
+        }
+      ],
+      "strength": "Changed writing files retain recoverable pre-write content plus optional runtime reason and run ID.",
+      "gap": "Snapshots are per-file rollback aids, not an atomic multi-asset commit log; many author saves lack source/reason, and snapshot existence cannot prove which candidate was accepted."
+    },
+    {
+      "stageId": "PROSE-TRACE-013",
+      "label": "章节结算与继续写书",
+      "currentStatus": "absent",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1207,
+          "evidence": "await runSingleChapterPipeline(run)"
+        }
+      ],
+      "strength": "The single-chapter pipeline is a reusable unit for a future work graph.",
+      "gap": "There is no replayable ChapterSettlement proof or settled event that atomically closes derived work and author feedback before the next chapter is selected."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-direct-files-plus-snapshots",
+      "verdict": "insufficient-target",
+      "blueCase": "Preserves the current editor and runtime with the least migration work; snapshots make most single-file mistakes recoverable.",
+      "redCase": "Rollback is not candidate isolation, multi-file atomicity, adoption evidence, feedback capture, stale prevention, or settlement; review remains temporally downstream of mutation."
+    },
+    {
+      "option": "B-candidate-directory-plus-manual-promote",
+      "verdict": "useful-transition-not-complete",
+      "blueCase": "Moving AI outputs outside chapter files immediately restores a visible candidate/canon boundary and supports side-by-side comparison.",
+      "redCase": "A manual file copy still cannot atomically validate baseline, locks, facts, obligations, feedback, projections, recap, and chapter status or safely resume after partial failure."
+    },
+    {
+      "option": "C-unified-adoption-and-settlement",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "A CanonMutationGateway plus ProseAdoptionTransaction gives every AI path one atomic, idempotent, attributable commit and makes ChapterSettlement the only continuation trigger.",
+      "redCase": "Requires durable candidate storage, shared schemas, event/outbox semantics, compatibility routing, projection cursors, failure injection, and a staged migration of every current write surface."
+    }
+  ],
+  "targetLifecycle": {
+    "states": [
+      "generation_manifest_frozen",
+      "candidate_streaming",
+      "candidate_ready",
+      "validating",
+      "repair_candidate_ready",
+      "decision_ready",
+      "adopting",
+      "adopted",
+      "settling",
+      "settled",
+      "stale",
+      "rejected",
+      "invalidated"
+    ],
+    "entities": [
+      "ProseGenerationManifest",
+      "ProseCandidate",
+      "CandidateChunk",
+      "ValidationBundle",
+      "RedBlueReview",
+      "EvidenceBoundedRepairPlan",
+      "AdoptionDecision",
+      "ProseAdoptionTransaction",
+      "AdoptionReceipt",
+      "CanonMutationEvent",
+      "ChapterSettlement"
+    ],
+    "invariant": "No task success, client splice, file write, snapshot, fixed score, recap candidate, runtime completion, or chapter status may independently establish adopted or settled prose."
+  },
+  "adoptionTransaction": {
+    "validates": [
+      "candidate lineage",
+      "current canon and outline baselines",
+      "author locks",
+      "POV and secret boundaries",
+      "rights and similarity guards",
+      "continuity hard failures",
+      "narrative obligation evidence",
+      "repair scope and preserved strengths",
+      "authorization tier",
+      "idempotency key"
+    ],
+    "atomicallyCommits": [
+      "prose version",
+      "candidate adoption decision",
+      "author feedback event",
+      "fact and character deltas",
+      "obligation evidence",
+      "mutation event",
+      "projection invalidations",
+      "adoption receipt"
+    ],
+    "defersUntilAfterCommit": [
+      "recap acceptance",
+      "knowledge index publication",
+      "story graph publication",
+      "series quality publication",
+      "chapter status settlement",
+      "next-chapter scheduling"
+    ]
+  },
+  "migrationOrder": [
+    "Make runtime and focus-save ordering honest without changing author prose.",
+    "Persist AI output as durable candidates with parent baselines and lineage; keep current files as canon during shadow mode.",
+    "Route fragment acceptance, task patches, runtime review accept, and derivative merge through one idempotent adoption command.",
+    "Publish derived assets from committed mutation events with source fingerprints and outbox recovery.",
+    "Introduce ChapterSettlement and allow continuous writing to consume settled events only.",
+    "Disable or forward legacy canon-capable paths only after parity, concurrency, offline, crash, restore, and stale-worker evidence passes."
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-WRITE-001",
+      "FR-WRITE-002",
+      "FR-WRITE-003",
+      "FR-WRITE-004",
+      "FR-WRITE-005",
+      "FR-WRITE-006",
+      "FR-WRITE-007",
+      "FR-WRITE-008",
+      "FR-WRITE-009",
+      "FR-WRITE-010",
+      "FR-WRITE-011",
+      "FR-WRITE-012",
+      "FR-WRITE-013",
+      "FR-WRITE-014",
+      "FR-WRITE-015",
+      "FR-WRITE-016",
+      "FR-PROSE-001",
+      "FR-PROSE-002",
+      "FR-PROSE-003",
+      "FR-PROSE-004",
+      "FR-PROSE-005",
+      "FR-PROSE-006",
+      "FR-PROSE-007",
+      "FR-PROSE-008",
+      "FR-PROSE-009",
+      "FR-PROSE-010",
+      "FR-PROSE-011",
+      "FR-PROSE-012",
+      "FR-PROSE-013",
+      "FR-PROSE-014",
+      "FR-PROSE-015",
+      "FR-PROSE-016",
+      "FR-PROSE-017",
+      "FR-PROSE-018",
+      "FR-PROSE-019",
+      "FR-PROSE-020",
+      "FR-PROSE-021",
+      "FR-PROSE-022",
+      "FR-PROSE-023",
+      "FR-PROSE-024",
+      "FR-QUALITY-001",
+      "FR-QUALITY-002",
+      "FR-QUALITY-003",
+      "FR-QUALITY-004",
+      "FR-QUALITY-005",
+      "FR-QUALITY-006",
+      "FR-QUALITY-007",
+      "FR-QUALITY-008",
+      "FR-QUALITY-009",
+      "FR-QUALITY-010",
+      "FR-MEMORY-001",
+      "FR-MEMORY-002",
+      "FR-MEMORY-003",
+      "FR-STATE-006",
+      "FR-STATE-007",
+      "FR-STATE-008"
+    ],
+    "acceptanceRefs": [
+      "AT-067",
+      "AT-068",
+      "AT-069",
+      "AT-094",
+      "AT-095",
+      "AT-096",
+      "AT-097",
+      "AT-098",
+      "AT-099",
+      "AT-100",
+      "AT-101",
+      "AT-102",
+      "AT-103",
+      "AT-104",
+      "AT-105",
+      "AT-106",
+      "AT-107",
+      "AT-108",
+      "AT-109",
+      "AT-110",
+      "AT-111",
+      "AT-112",
+      "AT-113",
+      "AT-114",
+      "AT-115",
+      "AT-116",
+      "AT-117",
+      "AT-118",
+      "AT-119",
+      "AT-120",
+      "AT-121",
+      "AT-122",
+      "AT-123",
+      "AT-124",
+      "AT-125",
+      "AT-126",
+      "AT-127",
+      "AT-128",
+      "AT-129",
+      "AT-130",
+      "AT-131",
+      "AT-132",
+      "AT-133",
+      "AT-134",
+      "AT-135",
+      "AT-136",
+      "AT-137",
+      "AT-138",
+      "AT-139",
+      "AT-140",
+      "AT-141",
+      "AT-142",
+      "AT-143",
+      "AT-144",
+      "AT-145",
+      "AT-146",
+      "AT-147",
+      "AT-148",
+      "AT-149",
+      "AT-290",
+      "AT-310",
+      "AT-311",
+      "AT-359",
+      "AT-361"
+    ],
+    "rule": "Do not claim AI prose is accepted or a chapter is settled until the exact candidate and parent baselines are durable, all hard guards and declared evidence reviews are current, the adoption transaction is atomic and idempotent, author feedback is attributable, derived publications consume the committed event, and crash/retry/restore/stale-worker tests reproduce the same receipt."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level. Candidate isolation, hard guards, atomic adoption, feedback capture, source-fingerprinted projections and ChapterSettlement remain invariant."
+}

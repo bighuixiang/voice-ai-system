@@ -1,0 +1,1416 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "Across a full novel, every accepted fact, character/world state, relationship, rule, secret, injury, resource, timeline event, and reader/POV knowledge boundary remains temporally traceable, contradiction-aware, revision-safe, and available to the right generation task without leaking hidden truth.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/auditReport.ts",
+      "sha256": "fe3f1f5a511ab0ef67fe57e97d939b373c6f80985ae6cffc805e6c5857b2144e"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/knowledgeIndex.ts",
+      "sha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/runtimeSnapshot.ts",
+      "sha256": "0a2cda33d0d1fe4859b7583314a25c64b406d3a2603090232a4f2c3b6654c8b6"
+    },
+    {
+      "path": "api/src/storyGraph.ts",
+      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "artifact-category hashes",
+      "chapter/status/coverage counts",
+      "summary field counts",
+      "knowledge source/predicate/vector-kind counts",
+      "schema field-presence counts",
+      "continuity task status and question counts"
+    ],
+    "snapshotExcludes": [
+      "project slug",
+      "title",
+      "genre",
+      "rough idea",
+      "chapter title",
+      "summary or fact text",
+      "character/entity/alias names",
+      "secret text",
+      "world rules",
+      "question or answer text",
+      "prompt/model output",
+      "novel prose"
+    ]
+  },
+  "operationalSnapshot": {
+    "substantialInventoryThresholdChars": 800,
+    "totals": {
+      "projects": 8,
+      "chapters": 219,
+      "substantialChapters": 71,
+      "draftedChapters": 70,
+      "substantialWithSummary": 1,
+      "draftedWithSummary": 1,
+      "plannedChapters": 128,
+      "plannedWithoutOwnKnowledgeAnchor": 128,
+      "summaryFiles": 13,
+      "signalSummaries": 1,
+      "acceptedRecapIds": 8,
+      "factPatches": 0,
+      "characterStatePatches": 0,
+      "knowledgeFacts": 28,
+      "knowledgeTriples": 24,
+      "indexedChapters": 201,
+      "indexedChaptersWithFacts": 1,
+      "vectorEntries": 253,
+      "storyCharacters": 26,
+      "ledgerEntries": 0,
+      "continuityTasks": 13,
+      "continuityQuestions": 43
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "chapterSummaries": null,
+          "knowledgeFacts": null,
+          "knowledgeTriples": null,
+          "chapterIndex": null,
+          "vectors": null,
+          "storyControl": null,
+          "ledgers": null,
+          "taskHistory": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 0,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 0,
+          "factsBySource": {},
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 0,
+          "triplesByPredicate": {},
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 0,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 0,
+          "vectorsByKind": {}
+        },
+        "storyControl": {
+          "exists": false,
+          "characters": 0,
+          "charactersWithCurrentState": 0,
+          "charactersWithKnownSecrets": 0,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "chapterSummaries": null,
+          "knowledgeFacts": null,
+          "knowledgeTriples": null,
+          "chapterIndex": null,
+          "vectors": null,
+          "storyControl": null,
+          "ledgers": null,
+          "taskHistory": "ea4dfc9d692ce486fb8b475b561c8accfcc88ec84998cc22d6d36554259d3b23"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 0,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 0,
+          "factsBySource": {},
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 0,
+          "triplesByPredicate": {},
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 0,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 0,
+          "vectorsByKind": {}
+        },
+        "storyControl": {
+          "exists": false,
+          "characters": 0,
+          "charactersWithCurrentState": 0,
+          "charactersWithKnownSecrets": 0,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "chapterSummaries": null,
+          "knowledgeFacts": null,
+          "knowledgeTriples": null,
+          "chapterIndex": null,
+          "vectors": null,
+          "storyControl": null,
+          "ledgers": null,
+          "taskHistory": "f72c1dd26e2ce261eb6b859340e8ba5c94ef6d6ed227002f226a3fd6a7032ac9"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "substantialAtLeast800Chars": 1,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 0,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 0,
+          "factsBySource": {},
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 0,
+          "triplesByPredicate": {},
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 0,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 0,
+          "vectorsByKind": {}
+        },
+        "storyControl": {
+          "exists": false,
+          "characters": 0,
+          "charactersWithCurrentState": 0,
+          "charactersWithKnownSecrets": 0,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "chapterSummaries": "354f68b49fd0cfc6312b09981cc7cd7d70055e293719c4657f3bd2934ea5e16c",
+          "knowledgeFacts": "c7a332d7138e29a07b5cacb18b3df869f8e024c604cdb3476e4d9fde8af56b06",
+          "knowledgeTriples": "a846f2dc7ba52a67f56c76e47154e74f305ac4ec1b8f3cb42af447d7b0f62980",
+          "chapterIndex": "f59ff90f1269adc1458fedcde78e5432d926ae70380eb8bf17de44e76c49eea0",
+          "vectors": "993e2ffb64578d93cb4158ee88f65f1807db75c972f230f166b1eb3f0dbff7d7",
+          "storyControl": "3cfbb3687ff74d283c2aeb93e63130669152438cd39ce0e27be7c008914126be",
+          "ledgers": "e3c134c423028ec7f51cb6a92086bd5b30b23c5fe3cd764c29415efc4486c140",
+          "taskHistory": "48c63c511fc0cd3f48a7c0e6a42a77e71c5fc9131dfac010ce1c57f3f6a49d03"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 198,
+          "substantialAtLeast800Chars": 70,
+          "drafted": 70,
+          "substantialWithSummarySignal": 1,
+          "draftedWithSummarySignal": 1,
+          "planned": 128,
+          "plannedWithoutOwnKnowledgeAnchor": 128
+        },
+        "summaries": {
+          "files": 1,
+          "signalSummaries": 1,
+          "acceptedRecapIds": 8,
+          "keyEvents": 1,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 26,
+          "factsBySource": {
+            "chapter-summary": 2,
+            "story-control": 24
+          },
+          "summaryFacts": 2,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 22,
+          "triplesByPredicate": {
+            "has_role": 22
+          },
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 198,
+          "indexedChaptersWithFacts": 1,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 246,
+          "vectorsByKind": {
+            "chapter": 198,
+            "fact": 26,
+            "triple": 22
+          }
+        },
+        "storyControl": {
+          "exists": true,
+          "characters": 22,
+          "charactersWithCurrentState": 22,
+          "charactersWithKnownSecrets": 0,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 13,
+          "byStatus": {
+            "success": 13
+          },
+          "emittedQuestions": 43,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "chapterSummaries": "1a8a14c6bcf969a28bb6890d7a3d23cde3c315fbe69e1cb4592de965e97cc6b1",
+          "knowledgeFacts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "knowledgeTriples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "chapterIndex": "fcb52223e3a75053eee80c175685895a0165344289a0ef32cbc47821d16cc017",
+          "vectors": null,
+          "storyControl": "a0e07b0b4e566e9e00db4882ccca46a7f845cf44fce1a5ff11e5f99305750c80",
+          "ledgers": "b3dc76ddf5eb746cf0d96e99cb3138e3053f1c57679a3f1a8f6fa3b54b7490fa",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 3,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 0,
+          "factsBySource": {},
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 0,
+          "triplesByPredicate": {},
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 0,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 0,
+          "vectorsByKind": {}
+        },
+        "storyControl": {
+          "exists": true,
+          "characters": 1,
+          "charactersWithCurrentState": 1,
+          "charactersWithKnownSecrets": 1,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "chapterSummaries": "23d3a9cd7d4768c5b935140eea6c75c3a7cb818b7a640b50083ab8eba54cfe0c",
+          "knowledgeFacts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "knowledgeTriples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "chapterIndex": "2c1f94783ae4f1422e7cc598aa5619a828630e49a1af6342b00df4f0f0a5e8ac",
+          "vectors": null,
+          "storyControl": "6539a447b37cf582c5d689847919f023aad388536e36488d709f45199f04d641",
+          "ledgers": "b3dc76ddf5eb746cf0d96e99cb3138e3053f1c57679a3f1a8f6fa3b54b7490fa",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 3,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 0,
+          "factsBySource": {},
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 0,
+          "triplesByPredicate": {},
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 0,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 0,
+          "vectorsByKind": {}
+        },
+        "storyControl": {
+          "exists": true,
+          "characters": 1,
+          "charactersWithCurrentState": 1,
+          "charactersWithKnownSecrets": 1,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "chapterSummaries": "312d8a193ef508fae8318ff704338ace36757328eacc948c846d3db42bc8ad26",
+          "knowledgeFacts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "knowledgeTriples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "chapterIndex": "61cf551ea0297e5958ca9ecc78b0f5863e7af35441fc55320d82a2cc1e444b65",
+          "vectors": null,
+          "storyControl": "4094014288b55e7f4bd6a0ed1ede677414db57b32ee63d4e5da5d627e25fc04a",
+          "ledgers": "b3dc76ddf5eb746cf0d96e99cb3138e3053f1c57679a3f1a8f6fa3b54b7490fa",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 3,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 0,
+          "factsBySource": {},
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 0,
+          "triplesByPredicate": {},
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 0,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 0,
+          "vectorsByKind": {}
+        },
+        "storyControl": {
+          "exists": true,
+          "characters": 1,
+          "charactersWithCurrentState": 1,
+          "charactersWithKnownSecrets": 1,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "chapterSummaries": "cc6c2aaad503941093ef4a8c1df804a78f38c9c8ca3e81a6787e4752f78e79b8",
+          "knowledgeFacts": "010f930dbf3a607e4414734bac24f8b00cf16d79b7bc7427bc4eb38ab8c68032",
+          "knowledgeTriples": "e3f8883601e628d6ee7c1ed12d165ef3edabf9391b14294f2d81abf2b0249919",
+          "chapterIndex": "adb1418ee9f267e38b112bfd0b00b03d057e53622f0243e9733d977c011bdb36",
+          "vectors": "1cde41406062633ab125df01e124b83dadc6bcaf144502fc06e563bcf046346d",
+          "storyControl": "10489c8ea61d15dec75cacbe3175c6c43eac2069da829bf511de5f23c76266f9",
+          "ledgers": "b3dc76ddf5eb746cf0d96e99cb3138e3053f1c57679a3f1a8f6fa3b54b7490fa",
+          "taskHistory": "d3fb87fd7556f445db97be68c1229835b7cc8c3717821e6e80612a5ea72f0ede"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 3,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 2,
+          "factsBySource": {
+            "story-control": 2
+          },
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 2,
+          "triplesByPredicate": {
+            "has_role": 1,
+            "participates_in": 1
+          },
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 3,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 7,
+          "vectorsByKind": {
+            "chapter": 3,
+            "fact": 2,
+            "triple": 2
+          }
+        },
+        "storyControl": {
+          "exists": true,
+          "characters": 1,
+          "charactersWithCurrentState": 1,
+          "charactersWithKnownSecrets": 1,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      }
+    ],
+    "interpretation": "File, summary, fact, triple, vector, task, and count presence is inventory evidence only. It does not prove current canonical truth, temporal correctness, entity identity, POV safety, contradiction resolution, retrieval sufficiency, or long-book continuity."
+  },
+  "summary": {
+    "auditedStages": 14,
+    "projectsScanned": 8,
+    "chaptersInventoried": 219,
+    "substantialChapters": 71,
+    "substantialChaptersWithSummary": 1,
+    "knowledgeFacts": 28,
+    "knowledgeTriples": 24,
+    "indexedChapters": 201,
+    "indexedChaptersWithFacts": 1,
+    "vectorEntries": 253,
+    "continuityTasks": 13,
+    "structuredContradictionCases": 0,
+    "memoryReadyProofs": 0,
+    "longContinuityCertificates": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform treats chapter summaries, ledgers, StoryControl, Markdown bibles, fact/triple/vector indexes, task results, and runtime snapshots as neighboring mutable memory surfaces instead of projections over one settled, temporal, epistemic, versioned canon assertion stream.",
+    "consequence": "Most drafted chapters have no accepted memory summary; future chapters can miss global retrieval; character and world states can diverge across surfaces; historical and current assertions coexist without supersession; hidden truth can reach the wrong POV; revisions cannot deterministically invalidate dependent memory or prove long-book continuity."
+  },
+  "stages": [
+    {
+      "stageId": "MEMORY-TRACE-001",
+      "label": "正文来源",
+      "currentStatus": "mutable-chapter-files",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 755,
+          "evidence": "{ title: \"目标正文\""
+        }
+      ],
+      "strength": "The current and nearby writing assets remain available for direct inspection and recovery.",
+      "gap": "Memory extraction does not require an adopted prose receipt, settled chapter, immutable source version, or stable evidence anchors before deriving facts."
+    },
+    {
+      "stageId": "MEMORY-TRACE-002",
+      "label": "章后抽取",
+      "currentStatus": "model-generated-recap-candidate",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 77,
+          "evidence": "Post-save Recap Contract"
+        }
+      ],
+      "strength": "Recaps can propose summaries, facts, character changes, emotion items, risks, and ledger patches for author review.",
+      "gap": "Claims lack semantic entity IDs, assertion type, story-time interval, epistemic status, confidence, visibility, contradiction links, and source-content version."
+    },
+    {
+      "stageId": "MEMORY-TRACE-003",
+      "label": "回顾采纳",
+      "currentStatus": "summary-and-ledger-file-merge",
+      "evidence": [
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 998,
+          "evidence": "export async function acceptWritingRecapPatches"
+        }
+      ],
+      "strength": "Accepted recap assets are written through a multi-file temporary-file transaction and duplicate acceptance IDs are guarded.",
+      "gap": "Acceptance mutates chapter summaries and ledgers but does not update a canonical fact event stream, StoryControl character state, entity registry, temporal world state, or contradiction queue."
+    },
+    {
+      "stageId": "MEMORY-TRACE-004",
+      "label": "事实权威",
+      "currentStatus": "accepted-patch-status-inside-summary",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 709,
+          "evidence": "export interface ChapterFactPatch"
+        }
+      ],
+      "strength": "Facts retain a patch ID, chapter ID, related entity labels, optional source anchor, and acceptance status.",
+      "gap": "The summary is a mutable projection; facts have no claim type, truth status, evidence version, valid interval, confidence, supersession, contest, author authority, or settlement event."
+    },
+    {
+      "stageId": "MEMORY-TRACE-005",
+      "label": "实体与别名",
+      "currentStatus": "free-string-related-entities",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 701,
+          "evidence": "relatedEntities: string[]"
+        }
+      ],
+      "strength": "Loose labels make early extraction tolerant of incomplete schema and can seed later entity work.",
+      "gap": "Names, aliases, titles, disguises, reincarnations, organizations, locations, items, and rules have no stable registry or merge/split history, so identical strings may differ and different strings may identify one entity."
+    },
+    {
+      "stageId": "MEMORY-TRACE-006",
+      "label": "人物状态",
+      "currentStatus": "parallel-current-state-and-history-triples",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 562,
+          "evidence": "currentState: string"
+        },
+        {
+          "path": "api/src/knowledgeIndex.ts",
+          "line": 317,
+          "evidence": "predicate: \"state_after\""
+        }
+      ],
+      "strength": "StoryControl offers an editable current profile while summaries can retain chapter-specific character changes.",
+      "gap": "Recap acceptance does not reconcile StoryControl; every state_after triple can coexist without dimension, effective time, supersession, relapse, branch, or current-state reduction semantics."
+    },
+    {
+      "stageId": "MEMORY-TRACE-007",
+      "label": "世界、规则与时间线",
+      "currentStatus": "markdown-plus-free-text-events",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 722,
+          "evidence": "{ title: \"世界观\""
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 581,
+          "evidence": "export interface StoryEventCard"
+        }
+      ],
+      "strength": "World, power-system, event trigger, location, reward, cost, and chapter range can all be represented in author-readable assets.",
+      "gap": "No typed rule condition/mechanism/result/cost, location-time state, travel duration, inventory conservation, injury/cooldown, organization action, calendar, branch, or bitemporal validity authority exists."
+    },
+    {
+      "stageId": "MEMORY-TRACE-008",
+      "label": "秘密与认识边界",
+      "currentStatus": "one-free-text-known-secrets-field",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 563,
+          "evidence": "knownSecrets: string"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 724,
+          "evidence": "{ title: \"故事总控台\""
+        }
+      ],
+      "strength": "The schema acknowledges that what a character knows matters for POV-safe writing.",
+      "gap": "The entire StoryControl is injected into drafting; knowledge is not keyed by subject, proposition, learned-at event, evidence, belief/lie/misbelief, branch, reader visibility, or permission view, so hidden truth can leak into POV prose."
+    },
+    {
+      "stageId": "MEMORY-TRACE-009",
+      "label": "知识投影",
+      "currentStatus": "rebuildable-facts-triples-vectors",
+      "evidence": [
+        {
+          "path": "api/src/knowledgeIndex.ts",
+          "line": 671,
+          "evidence": "export async function rebuildKnowledgeIndex"
+        }
+      ],
+      "strength": "Accepted summaries, ledgers, and StoryControl project into searchable facts, triples, chapter keywords, and provider-independent vector records with source references.",
+      "gap": "Projection records omit source version, truth/epistemic status, valid time, visibility, contradiction and supersession; vector presence can overstate memory coverage because empty chapter index entries are also embedded."
+    },
+    {
+      "stageId": "MEMORY-TRACE-010",
+      "label": "下一章检索",
+      "currentStatus": "target-anchor-gated",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 615,
+          "evidence": "if (!indexEntry || (!indexEntry.factIds.length && !indexEntry.tripleIds.length)) return []"
+        }
+      ],
+      "strength": "When a target chapter already has entity and keyword anchors, bounded direct plus related semantic retrieval avoids dumping the whole book into the prompt.",
+      "gap": "A future chapter normally has no own facts/triples, so the function returns before global retrieval; ChapterIntent, scene entities, obligations, POV knowledge, predecessor outputs, and unresolved contradictions do not seed the query."
+    },
+    {
+      "stageId": "MEMORY-TRACE-011",
+      "label": "runtime 叙事快照",
+      "currentStatus": "current-target-summary-only",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 334,
+          "evidence": "readChapterSummary(root, chapter.id)"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 370,
+          "evidence": "summarySignals: currentSummary.summary || currentSummary.keyEvents.length ? [currentSummary] : []"
+        }
+      ],
+      "strength": "Runtime records context budget, story-control counts, ledgers, index counts, quality/craft risks, previews, and knowledge references for diagnostics.",
+      "gap": "The summary signal is the target chapter itself rather than the prior settled chain; missing-chain is recorded but does not prevent draft, and counts do not prove relevant, current, authorized memory reached the model."
+    },
+    {
+      "stageId": "MEMORY-TRACE-012",
+      "label": "连续性验证",
+      "currentStatus": "generic-llm-task-with-string-questions",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 20,
+          "evidence": "\"continuity.check\": \"Inspect continuity risks"
+        }
+      ],
+      "strength": "A dedicated task type receives broad, cockpit, memory, target, and continuity-skill context and can identify nuanced literary inconsistencies.",
+      "gap": "It has no structured violation contract, deterministic rule pass, evidence anchors, severity/waiver state, contradiction classification, resolution receipt, regression scope, or hard gate before canon adoption."
+    },
+    {
+      "stageId": "MEMORY-TRACE-013",
+      "label": "修订与失效传播",
+      "currentStatus": "manual-rebuild-without-source-cursor",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2451,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/memory/chapter-summaries/:chapterId\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2499,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/knowledge/index/rebuild\""
+        }
+      ],
+      "strength": "Authors can edit summaries and rebuild derived indexes after changes.",
+      "gap": "Direct edits do not emit supersession or damage events; old candidates, summaries, facts, triples, vectors, POV states, continuity results, prompts, and completion proofs are not deterministically invalidated by an impact graph."
+    },
+    {
+      "stageId": "MEMORY-TRACE-014",
+      "label": "长期记忆健康与证明",
+      "currentStatus": "count-dashboard-only",
+      "evidence": [
+        {
+          "path": "api/src/auditReport.ts",
+          "line": 162,
+          "evidence": "knowledgeSummary"
+        }
+      ],
+      "strength": "The audit report exposes fact, triple, indexed-chapter, keyword, vector, job, task, and runtime counts.",
+      "gap": "Counts do not measure settled-source coverage, currentness, contradiction debt, entity resolution, temporal completeness, POV leakage, retrieval recall, compression loss, stale projections, or replayable long-continuity certification."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-larger-context-and-more-summaries",
+      "verdict": "insufficient-target",
+      "blueCase": "Fastest improvement: summarize every chapter and include more adjacent or semantically similar text in prompts.",
+      "redCase": "More compressed text amplifies stale facts, contradictions, identity ambiguity, secret leakage, and token cost; context size cannot establish truth, time, authority, or supersession."
+    },
+    {
+      "option": "B-knowledge-graph-as-authority",
+      "verdict": "useful-projection-not-final-authority",
+      "blueCase": "Typed nodes and edges improve entity retrieval, relationship analysis, timelines, path queries, and visible contradiction clusters.",
+      "redCase": "A graph alone does not define commands, evidence versions, author/settlement authority, bitemporal validity, POV permissions, branch semantics, rollback, or immutable history; mutable graph edges recreate last-write-wins."
+    },
+    {
+      "option": "C-event-sourced-temporal-canon-memory",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "Settled assertion events with stable entities, story/revision time, epistemic views, contradiction cases, and deterministic projections support safe retrieval, revision, POV filtering, audit replay, and full-book continuity.",
+      "redCase": "Requires entity resolution, event schemas, temporal reducers, access-controlled views, migration, projection cursors, contradiction UX, retrieval evaluation, and careful performance work for long novels."
+    }
+  ],
+  "targetAuthority": {
+    "entities": [
+      "CanonFactEvent",
+      "FactAssertion",
+      "EntityRegistry",
+      "EntityAlias",
+      "CharacterStateTimeline",
+      "RelationshipStateTimeline",
+      "WorldRule",
+      "WorldStateTimeline",
+      "StoryTimeInterval",
+      "KnowledgeBoundary",
+      "SecretVisibilityPolicy",
+      "ContradictionCase",
+      "ContinuityConstraint",
+      "MemoryProjection",
+      "MemoryHealthReport",
+      "MemoryReadyProof",
+      "LongContinuityCertificate"
+    ],
+    "assertionStatuses": [
+      "candidate",
+      "accepted",
+      "contested",
+      "superseded",
+      "invalidated",
+      "branch_only",
+      "author_waived"
+    ],
+    "assertionTypes": [
+      "objective_canon",
+      "character_belief",
+      "character_lie",
+      "character_misbelief",
+      "rumor",
+      "reader_visible",
+      "plan_only",
+      "counterfactual",
+      "unknown"
+    ],
+    "temporalAxes": [
+      "story_valid_from",
+      "story_valid_to",
+      "recorded_at",
+      "superseded_at",
+      "branch_id",
+      "canon_version"
+    ],
+    "invariant": "No summary, Markdown sentence, mutable profile field, ledger row, vector hit, model output, task success, current-state string, or last-written triple may independently establish canon truth or a subject's knowledge."
+  },
+  "retrievalProtocol": {
+    "mandatoryInputs": [
+      "settled ChapterIntent and ExecutionReadyProof",
+      "POV subject and permitted knowledge view",
+      "predecessor state outputs",
+      "scene entity and location IDs",
+      "active obligations and continuity constraints",
+      "story-time window",
+      "current canon/version cursor"
+    ],
+    "order": [
+      "filter by authority, branch, validity, visibility, source freshness, and hard constraints",
+      "include mandatory current state and predecessor outputs",
+      "retrieve causal/temporal/entity neighbors",
+      "rank optional semantic context",
+      "expose omissions, conflicts, and compression",
+      "freeze ContextManifest and MemoryReadyProof"
+    ],
+    "rule": "Applicability and permission are evaluated before semantic similarity. A highly similar stale, branch-only, future-secret, superseded, or untrusted assertion must not outrank a mandatory current fact."
+  },
+  "contradictionProtocol": {
+    "classes": [
+      "true continuity error",
+      "deliberate lie",
+      "character misbelief",
+      "unreliable narration",
+      "rumor disagreement",
+      "time-state change",
+      "branch difference",
+      "identity ambiguity",
+      "source extraction error",
+      "insufficient evidence"
+    ],
+    "behavior": "Never silently overwrite. Open a ContradictionCase with competing assertion IDs, evidence, affected entities/scenes/decisions, severity, reader/POV exposure, and recommended resolution; block adoption only when the contradiction can invalidate the target action or leak protected truth."
+  },
+  "povAndSecretProtocol": {
+    "knowledgeState": [
+      "subjectId",
+      "assertionId",
+      "epistemicType",
+      "learnedAtEventId",
+      "evidence",
+      "confidence",
+      "canDiscloseTo",
+      "expiresOrChangesAt",
+      "branchId"
+    ],
+    "views": [
+      "objective-author",
+      "pov-character",
+      "other-character",
+      "reader-at-chapter",
+      "reviewer-redacted",
+      "export-public"
+    ],
+    "rule": "Prompts receive a view-specific projection, not the full author truth plus an instruction to avoid leaking it. Reader knowledge and character knowledge remain separate even when both derive from the same event."
+  },
+  "revisionProtocol": {
+    "behavior": "Every adopted prose mutation emits assertion additions, supersessions, and evidence-anchor changes. An impact graph marks summaries, state timelines, contradictions, knowledge/vector projections, context manifests, candidates, continuity results, obligations, and completion certificates stale; deterministic reducers rebuild from the last valid cursor and late workers cannot publish across the new fence."
+  },
+  "releaseGate": {
+    "requirementIds": [
+      "FR-CHAR-003",
+      "FR-CHAR-004",
+      "FR-CHAR-005",
+      "FR-CHAR-006",
+      "FR-CHAR-008",
+      "FR-CHAR-009",
+      "FR-CHAR-010",
+      "FR-CHAR-011",
+      "FR-CHAR-016",
+      "FR-CHAR-017",
+      "FR-CHAR-018",
+      "FR-CHAR-019",
+      "FR-WORLD-001",
+      "FR-WORLD-002",
+      "FR-WORLD-003",
+      "FR-WORLD-004",
+      "FR-WORLD-005",
+      "FR-WORLD-006",
+      "FR-WORLD-007",
+      "FR-WORLD-008",
+      "FR-WORLD-009",
+      "FR-WORLD-010",
+      "FR-WORLD-011",
+      "FR-WORLD-012",
+      "FR-WORLD-013",
+      "FR-WORLD-014",
+      "FR-WORLD-015",
+      "FR-WORLD-016",
+      "FR-WORLD-017",
+      "FR-WORLD-018",
+      "FR-WORLD-019",
+      "FR-MEMORY-001",
+      "FR-MEMORY-002",
+      "FR-MEMORY-003",
+      "FR-LONGMEM-001",
+      "FR-LONGMEM-002",
+      "FR-LONGMEM-003",
+      "FR-LONGMEM-004",
+      "FR-LONGMEM-005",
+      "FR-LONGMEM-006",
+      "FR-LONGMEM-007",
+      "FR-LONGMEM-008",
+      "FR-LONGMEM-009",
+      "FR-LONGMEM-010",
+      "FR-LONGMEM-011",
+      "FR-LONGMEM-012",
+      "FR-LONGMEM-013",
+      "FR-LONGMEM-014",
+      "FR-LONGMEM-015",
+      "FR-LONGMEM-016",
+      "FR-LONGMEM-017",
+      "FR-LONGMEM-018",
+      "FR-LONGMEM-019",
+      "FR-LONGMEM-020",
+      "FR-LONGMEM-021",
+      "FR-LONGMEM-022",
+      "FR-LONGMEM-023",
+      "FR-LONGMEM-024",
+      "FR-PROSE-007",
+      "FR-PROSE-009",
+      "FR-PROSE-013",
+      "FR-PROSE-023"
+    ],
+    "acceptanceRefs": [
+      "AT-060",
+      "AT-061",
+      "AT-062",
+      "AT-063",
+      "AT-064",
+      "AT-065",
+      "AT-066",
+      "AT-083",
+      "AT-084",
+      "AT-085",
+      "AT-086",
+      "AT-087",
+      "AT-088",
+      "AT-089",
+      "AT-090",
+      "AT-091",
+      "AT-092",
+      "AT-093",
+      "AT-150",
+      "AT-151",
+      "AT-152",
+      "AT-153",
+      "AT-154",
+      "AT-155",
+      "AT-156",
+      "AT-157",
+      "AT-158",
+      "AT-159",
+      "AT-160",
+      "AT-161",
+      "AT-162",
+      "AT-163",
+      "AT-164",
+      "AT-165",
+      "AT-166",
+      "AT-167",
+      "AT-168",
+      "AT-169",
+      "AT-170",
+      "AT-171",
+      "AT-172",
+      "AT-173",
+      "AT-174",
+      "AT-175",
+      "AT-176",
+      "AT-177",
+      "AT-178",
+      "AT-179",
+      "AT-180",
+      "AT-181",
+      "AT-182",
+      "AT-183",
+      "AT-184",
+      "AT-185",
+      "AT-186",
+      "AT-187",
+      "AT-188",
+      "AT-189",
+      "AT-227",
+      "AT-228",
+      "AT-229",
+      "AT-230",
+      "AT-231",
+      "AT-232",
+      "AT-233",
+      "AT-234",
+      "AT-235",
+      "AT-236",
+      "AT-237",
+      "AT-238",
+      "AT-239",
+      "AT-240",
+      "AT-241",
+      "AT-242",
+      "AT-243",
+      "AT-244",
+      "AT-245",
+      "AT-246",
+      "AT-247",
+      "AT-248",
+      "AT-249",
+      "AT-250",
+      "AT-251",
+      "AT-252",
+      "AT-253",
+      "AT-254",
+      "AT-255",
+      "AT-256",
+      "AT-257",
+      "AT-258",
+      "AT-259",
+      "AT-260",
+      "AT-261",
+      "AT-262",
+      "AT-263",
+      "AT-264",
+      "AT-265",
+      "AT-266",
+      "AT-267",
+      "AT-268"
+    ],
+    "rule": "Do not claim long-novel memory or continuity until settled prose is the only canon assertion source, every assertion has stable entity/evidence/version/temporal/epistemic semantics, future-chapter retrieval works without target-owned anchors, prompts use POV-filtered views, contradictions and revisions are replayable, and shadow tests prove recall, leakage prevention, stale invalidation, deterministic rebuild, and continuity over a frozen long-book corpus."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none changes memory truth, temporal validity, entity identity, POV/reader visibility, contradiction handling, revision invalidation, retrieval completeness or continuity certification."
+}

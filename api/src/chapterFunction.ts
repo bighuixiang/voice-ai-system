@@ -1,0 +1,21 @@
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { resolveInside } from "./pathSafety.js";
+
+export interface ChapterFunctionContract { schemaVersion: "chapter-function-contract.v1"; chapterId: string; projectSlug: string; primaryFunction: string; secondaryFunctions: string[]; sceneState: string; localGoal: string; obstacle: string; choice: string; observableChange: string; readerPayoff: string; mustRemember: string[]; mustNotReveal: string[]; sourceRefs: string[]; status: "candidate" | "validated" | "blocked"; createdAt: string; updatedAt: string; fingerprint: string; }
+function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
+function chapterPath(root: string, id: string): string { return resolveInside(root, `sessions/chapter-functions/${id}.json`); }
+async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const temp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(temp, target); }
+async function readJson<T>(target: string): Promise<T | null> { try { return JSON.parse(await fs.readFile(target, "utf8")) as T; } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
+export async function readChapterFunctionContract(root: string, chapterId: string): Promise<ChapterFunctionContract | null> { return readJson<ChapterFunctionContract>(chapterPath(root, chapterId)); }
+export async function listChapterFunctionContracts(root: string, projectSlug: string): Promise<ChapterFunctionContract[]> { const directory = resolveInside(root, "sessions/chapter-functions"); let names: string[]; try { names = await fs.readdir(directory); } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return []; throw error; } const records = await Promise.all(names.filter((name) => name.endsWith(".json")).map((name) => readJson<ChapterFunctionContract>(path.join(directory, name)))); return records.filter((record): record is ChapterFunctionContract => Boolean(record && record.projectSlug === projectSlug)).sort((a, b) => a.chapterId.localeCompare(b.chapterId)); }
+export async function createChapterFunctionContract(input: { root: string; projectSlug: string; chapterId: string; primaryFunction: string; secondaryFunctions: readonly string[]; sceneState: string; localGoal: string; obstacle: string; choice: string; observableChange: string; readerPayoff: string; mustRemember: readonly string[]; mustNotReveal: readonly string[]; sourceRefs: readonly string[] }): Promise<ChapterFunctionContract> {
+  if (input.secondaryFunctions.length > 2) throw new Error("CHAPTER_FUNCTION_SECONDARY_LIMIT");
+  const required = [input.projectSlug, input.chapterId, input.primaryFunction, input.sceneState, input.localGoal, input.obstacle, input.choice, input.observableChange, input.readerPayoff];
+  if (required.some((value) => !value.trim())) throw new Error("CHAPTER_FUNCTION_CHANGE_REQUIRED");
+  if (!input.mustRemember.length || !input.mustNotReveal.length || !input.sourceRefs.length) throw new Error("CHAPTER_FUNCTION_EVIDENCE_REQUIRED");
+  const existing = await readChapterFunctionContract(input.root, input.chapterId); if (existing) return existing;
+  const base = { schemaVersion: "chapter-function-contract.v1" as const, chapterId: input.chapterId, projectSlug: input.projectSlug, primaryFunction: input.primaryFunction, secondaryFunctions: [...input.secondaryFunctions], sceneState: input.sceneState, localGoal: input.localGoal, obstacle: input.obstacle, choice: input.choice, observableChange: input.observableChange, readerPayoff: input.readerPayoff, mustRemember: [...input.mustRemember], mustNotReveal: [...input.mustNotReveal], sourceRefs: [...input.sourceRefs], status: "candidate" as const, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  const chapter: ChapterFunctionContract = { ...base, fingerprint: hash(base) }; await writeJson(chapterPath(input.root, input.chapterId), chapter); return chapter;
+}

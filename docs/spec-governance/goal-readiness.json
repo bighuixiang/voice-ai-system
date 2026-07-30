@@ -1,0 +1,860 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-goal-readiness-audit-not-product-completion",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "objective": "A low-input intelligent novel partner that uses Socratic questioning, red/blue evidence and iterative learning to create outline and prose, track foreshadowing and finish the whole book; first deliver an executable SDD.",
+  "privacy": {
+    "includes": [
+      "objective IDs and normalized promises",
+      "requirement/acceptance counts",
+      "audit artifact references",
+      "aggregate current-state facts",
+      "decision and evidence verdicts"
+    ],
+    "excludes": [
+      "project identity",
+      "rough idea",
+      "novel prose",
+      "outline content",
+      "character or foreshadowing names",
+      "prompt/model output",
+      "author private feedback"
+    ]
+  },
+  "summary": {
+    "explicitObjectives": 10,
+    "specificationCovered": 10,
+    "documentationDeliverablesVerified": 1,
+    "targetProductObjectivesImplementationVerified": 0,
+    "targetProductObjectivesImplementationPartiallyVerified": 9,
+    "productReleaseObjectivesVerified": 0,
+    "confirmedAuthorDecisions": 9,
+    "activeAuthorDecisions": 0,
+    "soleActiveDecision": null,
+    "sddSpecificationApproved": true,
+    "productGoalAchieved": false,
+    "conclusion": "All ten promises are mapped at specification level and all author decisions are confirmed; selected target slices have partial implementation evidence, but no target capability has complete end-to-end or release proof."
+  },
+  "qualityAssessment": {
+    "score": 97,
+    "maximum": 100,
+    "scope": "specification-quality-only-not-product-quality-not-implementation-readiness",
+    "dimensions": [
+      {
+        "dimension": "business-value-and-goals",
+        "score": 27,
+        "maximum": 30,
+        "evidence": [
+          "explicit problem and ten user objectives",
+          "measurable completion/closure/readiness semantics",
+          "objective coverage and outcome guards"
+        ],
+        "deduction": "No production ROI, adoption baseline, cost target or validated market outcome exists."
+      },
+      {
+        "dimension": "functional-requirements",
+        "score": 25,
+        "maximum": 25,
+        "evidence": [
+          "537 uniquely identified requirements",
+          "519 acceptance tests",
+          "happy path, edge, failure, concurrency, recovery and evidence boundaries"
+        ]
+      },
+      {
+        "dimension": "user-experience",
+        "score": 20,
+        "maximum": 20,
+        "evidence": [
+          "low-input primary author journey",
+          "one-question discipline",
+          "complexity firewall, accessibility and interruption budgets",
+          "Q-009 approved obligation-led elastic-length interaction"
+        ],
+        "deduction": "None."
+      },
+      {
+        "dimension": "technical-constraints",
+        "score": 15,
+        "maximum": 15,
+        "evidence": [
+          "security/privacy/source rights",
+          "performance/budget/context",
+          "atomicity/idempotency/recovery/integration and migration constraints"
+        ]
+      },
+      {
+        "dimension": "scope-and-priorities",
+        "score": 10,
+        "maximum": 10,
+        "evidence": [
+          "V0-V8 slices",
+          "RP0-RP8 budgets and dependencies",
+          "defer decisions and YAGNI mappings",
+          "all author decisions are confirmed"
+        ],
+        "deduction": "None."
+      }
+    ],
+    "interpretation": "A 97/100 requirements score means the approved specification is unusually detailed and testable. It does not prove the product works, users benefit, the model writes well, or a release is ready."
+  },
+  "evidenceLadder": [
+    {
+      "level": "L0-intent",
+      "meaning": "The user promise is recorded.",
+      "sufficientForCompletion": false
+    },
+    {
+      "level": "L1-specification",
+      "meaning": "Requirements, acceptance and authority are defined.",
+      "sufficientForCompletion": false
+    },
+    {
+      "level": "L2-current-state",
+      "meaning": "Existing primitives and gaps are evidenced by code/data audits.",
+      "sufficientForCompletion": false
+    },
+    {
+      "level": "L3-implementation",
+      "meaning": "Target behavior passes authoritative component and integration evidence.",
+      "sufficientForCompletion": false
+    },
+    {
+      "level": "L4-end-to-end",
+      "meaning": "The full user journey passes on representative projects, failures and recovery.",
+      "sufficientForCompletion": false
+    },
+    {
+      "level": "L5-release",
+      "meaning": "A frozen build, migration, operations and production acceptance prove delivery.",
+      "sufficientForCompletion": true
+    }
+  ],
+  "gates": [
+    {
+      "gateId": "SDD-STRUCTURE",
+      "status": "passed",
+      "evidence": [
+        "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+        "requirement-catalog.json",
+        "objective-coverage.json",
+        "convergence/v1.18.40.json"
+      ],
+      "boundary": "Proves deterministic document structure and traceability only."
+    },
+    {
+      "gateId": "SDD-QUALITY",
+      "status": "passed-with-explicit-deductions",
+      "evidence": [
+        "qualityAssessment"
+      ],
+      "boundary": "97/100 is specification quality, not runtime quality."
+    },
+    {
+      "gateId": "SDD-AUTHOR-DECISIONS",
+      "status": "passed",
+      "evidence": [
+        "Q-009",
+        "author-delegated-obligation-led-elastic-length"
+      ],
+      "boundary": "All author decisions are confirmed at specification level."
+    },
+    {
+      "gateId": "PRODUCT-IMPLEMENTATION",
+      "status": "partially-verified",
+      "evidence": [
+        "api/src/app.spec.ts#V1-V2-V3-vertical-slice",
+        "api/src/contextManifest.spec.ts",
+        "api/src/dialogueQuestions.spec.ts",
+        "api/src/app.spec.ts#V3-V4-vertical-slice",
+        "api/src/outlineValidation.spec.ts",
+        "api/src/outlineCommit.spec.ts",
+        "api/src/runtime.spec.ts#governed-prose-candidate",
+        "api/src/proseValidation.spec.ts",
+        "api/src/proseAdoption.spec.ts",
+        "api/src/chapterSettlement.spec.ts",
+        "api/src/qualityCalibration.spec.ts",
+        "api/src/craftProfile.spec.ts",
+        "api/src/authorFeedback.spec.ts",
+        "api/src/app.spec.ts#adaptive-question-sequence",
+        "api/src/dialogueQuestions.spec.ts",
+        "api/src/understandingReview.spec.ts",
+        "api/src/qualityCalibration.spec.ts",
+        "api/src/proseReview.spec.ts",
+        "api/src/bookRun.spec.ts",
+        "api/src/completionAudit.spec.ts",
+        "api/src/runtimeWorker.spec.ts",
+        "api/src/narrativeObligation.spec.ts",
+        "api/src/obligationCoverage.spec.ts",
+        "api/src/closureCertificate.spec.ts",
+        "api/src/qualityCalibration.spec.ts",
+        "api/src/revisionSettlement.spec.ts",
+        "api/src/revisionAdoptionReceipt.spec.ts"
+      ],
+      "boundary": "Partial component/integration evidence authorizes continued slice development; it does not prove complete target runtime behavior."
+    },
+    {
+      "gateId": "PRODUCT-END-TO-END",
+      "status": "not-verified",
+      "evidence": [],
+      "boundary": "No representative rough-idea-to-delivered-book journey has passed."
+    },
+    {
+      "gateId": "PRODUCT-RELEASE",
+      "status": "not-verified",
+      "evidence": [],
+      "boundary": "No release artifact, migration, production acceptance or DeliveryProof exists for the target platform."
+    }
+  ],
+  "objectives": [
+    {
+      "objectiveId": "OBJ-USER-001",
+      "shortPromise": "一句粗略想法即可开始，系统主动理解、保留未知并推进",
+      "decisionIds": [
+        "Q-001",
+        "Q-004"
+      ],
+      "auditRefs": [
+        "audits/current-low-input-journey.json",
+        "audits/current-collaboration-dialogue.json",
+        "audits/current-context-orchestration.json"
+      ],
+      "currentFacts": {
+        "endToEndLowInputJourneyVerified": false,
+        "interactiveSocraticDecisionExists": false,
+        "structuredAnswerPayloads": 0,
+        "decisionConsumptionReceipts": 0,
+        "contextManifests": 0
+      },
+      "currentEvidenceVerdict": "partial-entry-primitives-target-journey-unverified",
+      "proofRequired": "A browser/API/runtime replay from one short idea through evidence-bounded understanding, one answerable question, scoped decision consumption, contract readiness and resumable next action.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 47,
+        "acceptanceTestCount": 63,
+        "firstSlices": [
+          "V1-conversation",
+          "V2-understanding",
+          "V3-contract"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-001",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-004",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/app.spec.ts#V1-V2-V3-vertical-slice",
+          "api/src/contextManifest.spec.ts",
+          "api/src/dialogueQuestions.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-002",
+      "shortPromise": "自动组装可执行、可追踪、可演化且篇幅诚实的大纲",
+      "decisionIds": [
+        "Q-008",
+        "Q-009"
+      ],
+      "auditRefs": [
+        "audits/current-executable-outline.json",
+        "audits/current-length-planning.json",
+        "audits/current-character-causality.json",
+        "audits/current-world-causality.json"
+      ],
+      "currentFacts": {
+        "governedOutlineCandidateExists": true,
+        "runtimeConsumesChapterPlanResult": false,
+        "executionReadyProofExists": false,
+        "persistentLengthTargets": 0,
+        "characterArcCertificates": 0,
+        "worldIntegrityCertificates": 0
+      },
+      "currentEvidenceVerdict": "legacy-structure-assets-without-executable-outline-authority",
+      "proofRequired": "A rough idea must compile into alternative contract/outline candidates, author/scoped adoption, causal and character/world validation, a Q-009-compliant length forecast, and replayable next-chapter ExecutionReadyProof.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 64,
+        "acceptanceTestCount": 62,
+        "firstSlices": [
+          "V3-contract",
+          "V4-outline",
+          "V5-drafting",
+          "V8-completion"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-008",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-009",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/app.spec.ts#V3-V4-vertical-slice",
+          "api/src/outlineValidation.spec.ts",
+          "api/src/outlineCommit.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-003",
+      "shortPromise": "持续创作高质量正文并按作者目标调节速度与审校深度",
+      "decisionIds": [
+        "Q-003",
+        "Q-006",
+        "Q-007",
+        "Q-008",
+        "Q-009"
+      ],
+      "auditRefs": [
+        "audits/current-prose-production.json",
+        "audits/current-quality-evaluation.json",
+        "audits/current-text-integrity.json",
+        "audits/current-context-orchestration.json"
+      ],
+      "currentFacts": {
+        "substantialContentFiles": 71,
+        "durableProseCandidates": 0,
+        "adoptionReceipts": 0,
+        "chapterSettlementProofs": 0,
+        "qualityReports": 2,
+        "reportsWithEvidenceOrProvenance": 0,
+        "replayableQualityGateDecisions": 0,
+        "textSettlements": 0
+      },
+      "currentEvidenceVerdict": "prose-files-exist-without-governed-candidate-adoption-quality-settlement",
+      "proofRequired": "Frozen chapter intent and context must produce isolated prose candidates, tiered evidence-backed comparison, author/scoped adoption, text/canon settlement and no-regression continuation across chapters.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 78,
+        "acceptanceTestCount": 168,
+        "firstSlices": [
+          "V4-outline",
+          "V5-drafting"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-003",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-006",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-007",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-008",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-009",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/runtime.spec.ts#governed-prose-candidate",
+          "api/src/proseValidation.spec.ts",
+          "api/src/proseAdoption.spec.ts",
+          "api/src/chapterSettlement.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-004",
+      "shortPromise": "跨平台学习优质创作机制而不近似复刻或污染来源边界",
+      "decisionIds": [
+        "Q-005"
+      ],
+      "auditRefs": [
+        "audits/current-craft-learning-loop.json",
+        "audits/current-research-grounding.json"
+      ],
+      "currentFacts": {
+        "governedCraftExperimentExists": false,
+        "governedPreferenceHypothesisExists": false,
+        "craftReleaseAndRollbackExists": false,
+        "externalKnowledgeSourceRecords": 0,
+        "researchSettlements": 0
+      },
+      "currentEvidenceVerdict": "static-guidance-and-local-samples-without-governed-learning-loop",
+      "proofRequired": "Eligible sources must pass isolation and provenance, abstract mechanisms must win controlled project trials, author/independent evidence must bound applicability, and retirement/deletion must propagate without retaining source expression.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 48,
+        "acceptanceTestCount": 46,
+        "firstSlices": [
+          "V0-baseline",
+          "V5-drafting",
+          "V7-revision"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-005",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/qualityCalibration.spec.ts",
+          "api/src/craftProfile.spec.ts",
+          "api/src/authorFeedback.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-005",
+      "shortPromise": "一次一个高价值苏格拉底问题，与作者持续共同推进",
+      "decisionIds": [
+        "Q-004"
+      ],
+      "auditRefs": [
+        "audits/current-collaboration-dialogue.json",
+        "audits/current-low-input-journey.json"
+      ],
+      "currentFacts": {
+        "emittedQuestionStrings": 176,
+        "structuredAnswerPayloads": 0,
+        "activeQuestionQueues": 0,
+        "decisionRecords": 0,
+        "decisionConsumptionReceipts": 0
+      },
+      "currentEvidenceVerdict": "question-text-output-without-answerable-decision-loop",
+      "proofRequired": "One durable active QuestionCard must be answerable, bind the answer to one decision and scope, survive restart, produce a consumption receipt, avoid duplicate questioning and allow unrelated safe work to continue.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 60,
+        "acceptanceTestCount": 63,
+        "firstSlices": [
+          "V1-conversation",
+          "V2-understanding",
+          "V3-contract",
+          "V5-drafting",
+          "V7-revision"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-004",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/app.spec.ts#adaptive-question-sequence",
+          "api/src/dialogueQuestions.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-006",
+      "shortPromise": "红蓝辩证保留竞争解释并用证据裁决",
+      "decisionIds": [
+        "Q-006"
+      ],
+      "auditRefs": [
+        "audits/current-collaboration-dialogue.json",
+        "audits/current-quality-evaluation.json",
+        "audits/current-low-input-journey.json"
+      ],
+      "currentFacts": {
+        "redBlueCases": 0,
+        "governedRedBlueContractExists": false,
+        "reportsWithEvidenceOrProvenance": 0,
+        "calibratedEvaluatorSuites": 0
+      },
+      "currentEvidenceVerdict": "specification-method-present-runtime-debate-evidence-absent",
+      "proofRequired": "Competing interpretations and candidates must retain support, counterevidence, assumptions, protected strengths and falsifiers until a scoped authority adopts, merges or rejects them with replayable evidence.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 11,
+        "acceptanceTestCount": 7,
+        "firstSlices": [
+          "V2-understanding",
+          "V5-drafting"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-006",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/understandingReview.spec.ts",
+          "api/src/qualityCalibration.spec.ts",
+          "api/src/proseReview.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-007",
+      "shortPromise": "持续协作直至整书完成、审计、恢复并交付",
+      "decisionIds": [
+        "Q-002",
+        "Q-004",
+        "Q-007",
+        "Q-009"
+      ],
+      "auditRefs": [
+        "audits/current-full-book-orchestration.json",
+        "audits/current-long-memory-continuity.json",
+        "audits/current-revision-lineage.json",
+        "audits/current-manuscript-delivery.json",
+        "audits/current-project-durability.json"
+      ],
+      "currentFacts": {
+        "bookRuns": 0,
+        "workGraphs": 0,
+        "chapterSettlements": 0,
+        "completionProofs": 0,
+        "memoryReadyProofs": 0,
+        "revisionSettlements": 0,
+        "deliveryProofs": 0,
+        "verifiedBackupSets": 0,
+        "restoreDrills": 0
+      },
+      "currentEvidenceVerdict": "chapter-runtime-primitives-without-book-run-completion-delivery-proof",
+      "proofRequired": "A recoverable BookRun must execute an obligation-aware work graph through chapter settlements, continuity/revision/closure/quality audits, stable quiescence, immutable edition rendering and replayable DeliveryProof.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 106,
+        "acceptanceTestCount": 86,
+        "firstSlices": [
+          "V0-baseline",
+          "V4-outline",
+          "V5-drafting",
+          "V6-obligations",
+          "V7-revision",
+          "V8-completion"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-002",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-004",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-007",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-009",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/bookRun.spec.ts",
+          "api/src/completionAudit.spec.ts",
+          "api/src/runtimeWorker.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-008",
+      "shortPromise": "伏笔显式标记、证据化埋设并全部回收、转化或合法开放",
+      "decisionIds": [
+        "Q-002"
+      ],
+      "auditRefs": [
+        "audits/current-foreshadowing-closure.json",
+        "audits/current-full-book-orchestration.json",
+        "audits/current-long-memory-continuity.json"
+      ],
+      "currentFacts": {
+        "legacyLedgerEntries": 0,
+        "unifiedObligationAuthorityExists": false,
+        "evidenceBackedPayoffTransitionExists": false,
+        "sourceCoverageCertificateExists": false,
+        "replayableClosureCertificateExists": false
+      },
+      "currentEvidenceVerdict": "fragmented-or-empty-legacy-ledgers-without-evidence-backed-closure",
+      "proofRequired": "Every admitted canon obligation must have stable identity, setup evidence, reminder/payoff windows, terminal evidence or Q-002-valid open contract, exhaustive-enough source coverage and revision-invalidatable ClosureCertificate.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 57,
+        "acceptanceTestCount": 59,
+        "firstSlices": [
+          "V6-obligations",
+          "V8-completion"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-002",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/narrativeObligation.spec.ts",
+          "api/src/obligationCoverage.spec.ts",
+          "api/src/closureCertificate.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-009",
+      "shortPromise": "循环头脑风暴并依据作者反馈持续优化平台与创作",
+      "decisionIds": [
+        "Q-003",
+        "Q-005",
+        "Q-006",
+        "Q-007"
+      ],
+      "auditRefs": [
+        "audits/current-craft-learning-loop.json",
+        "audits/current-quality-evaluation.json",
+        "audits/current-revision-lineage.json"
+      ],
+      "currentFacts": {
+        "governedPreferenceHypothesisExists": false,
+        "structuredAuthorQualityRatings": 0,
+        "calibratedEvaluatorSuites": 0,
+        "semanticImpactGraphs": 0,
+        "revisionSettlements": 0
+      },
+      "currentEvidenceVerdict": "manual-iteration-without-measurable-governed-learning-and-regression-loop",
+      "proofRequired": "Author feedback and red/blue experiments must update scoped hypotheses, demonstrate downstream consumption, retain negative evidence, detect regression, support rollback and never globalize private preferences without authority.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 55,
+        "acceptanceTestCount": 30,
+        "firstSlices": [
+          "V0-baseline",
+          "V1-conversation",
+          "V2-understanding",
+          "V3-contract",
+          "V4-outline",
+          "V5-drafting",
+          "V7-revision"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-003",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-005",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-006",
+            "status": "confirmed"
+          },
+          {
+            "decisionId": "Q-007",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      },
+      "targetProductImplementationEvidence": {
+        "status": "partially-verified",
+        "evidence": [
+          "api/src/qualityCalibration.spec.ts",
+          "api/src/revisionSettlement.spec.ts",
+          "api/src/revisionAdoptionReceipt.spec.ts"
+        ],
+        "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
+      },
+      "releaseEvidence": {
+        "status": "not-verified",
+        "evidence": []
+      }
+    },
+    {
+      "objectiveId": "OBJ-USER-010",
+      "shortPromise": "先形成可持续收敛、可追踪、可机器检查的 SDD",
+      "decisionIds": [
+        "Q-009"
+      ],
+      "auditRefs": [
+        "requirement-catalog.json",
+        "objective-coverage.json",
+        "convergence/v1.18.40.json",
+        "release-profiles/RP0-baseline.json",
+        "defer-decisions.jsonl"
+      ],
+      "currentFacts": {
+        "sddExists": true,
+        "parsedVersion": "v1.18.40",
+        "requirements": 537,
+        "acceptanceTests": 519,
+        "designDecisions": 149,
+        "specificationCoveredObjectives": 10,
+        "generatedGovernanceEntrypointExists": true
+      },
+      "currentEvidenceVerdict": "documentation-deliverable-verified-decisions-confirmed",
+      "proofRequired": "The SDD and deterministic projections must parse, map all explicit objectives, preserve unique/contiguous identities, expose scope/decision/implementation boundaries and reproduce without drift; author decisions must close before specification approval.",
+      "specificationEvidence": {
+        "status": "covered",
+        "requirementCount": 6,
+        "acceptanceTestCount": 6,
+        "firstSlices": [
+          "V0-baseline"
+        ]
+      },
+      "decisionEvidence": {
+        "status": "confirmed",
+        "decisions": [
+          {
+            "decisionId": "Q-009",
+            "status": "confirmed"
+          }
+        ]
+      },
+      "deliverableEvidence": {
+        "status": "verified",
+        "evidence": [
+          "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+          "scripts/generate-spec-governance.mjs",
+          "docs/spec-governance/requirement-catalog.json"
+        ]
+      },
+      "targetProductImplementationEvidence": {
+        "status": "not-applicable",
+        "evidence": [],
+        "boundary": "This objective is the documentation deliverable, not a product runtime capability."
+      },
+      "releaseEvidence": {
+        "status": "not-applicable",
+        "evidence": []
+      }
+    }
+  ]
+}

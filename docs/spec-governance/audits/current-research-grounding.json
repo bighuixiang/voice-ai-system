@@ -1,0 +1,624 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "The author can provide only a rough premise; when credibility depends on real history, profession, science, medicine, law, geography, culture, or current facts, the platform researches autonomously within policy, preserves competing evidence, adapts it creatively, and can prove every consequential assertion is current or explicitly fictionalized.",
+  "sourceFiles": [
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/platformLibrary.ts",
+      "sha256": "57082e1bfda1dd74fd7c224813b08c4dba7766402254b31491f0bf16fc2799a5"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/knowledgeIndex.ts",
+      "sha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74"
+    },
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/database.ts",
+      "sha256": "68f4fbb574e77f8c9a2f1f43f0f0a369d3999c615b4d251214e26523b06cd87f"
+    },
+    {
+      "path": "api/src/projectBackup.ts",
+      "sha256": "807bec8d473603504aa1ee33c3d862f8a3c9ed56cbf9b32afff7feafbee93bcf"
+    },
+    {
+      "path": "ui/src/types/novel.ts",
+      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+    },
+    {
+      "path": "ui/src/components/novel/PlatformLibraryPanel.vue",
+      "sha256": "598c6fbf8927655b402baf96345cf98551b9e5d7e17d57480b0f360c78a62706"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "source/database/library/fact/triple aggregate hashes",
+      "asset/prompt/role/skill and internal fact/triple counts",
+      "schema field names",
+      "internal knowledge source-type categories",
+      "fixed candidate research-directory file counts",
+      "source evidence paths and code tokens"
+    ],
+    "snapshotExcludes": [
+      "project slug or ID",
+      "title",
+      "genre",
+      "rough idea",
+      "chapter ID/title/path",
+      "fact/triple text",
+      "asset name/path/tag/link target",
+      "prompt/role/skill text",
+      "source URL or document content",
+      "author direction",
+      "model output",
+      "database row identity",
+      "absolute project path"
+    ]
+  },
+  "operationalSnapshot": {
+    "totals": {
+      "projects": 8,
+      "knowledgeFacts": 28,
+      "knowledgeTriples": 24,
+      "externalKnowledgeSourceRecords": 0,
+      "candidateResearchFiles": 0
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "facts": null,
+          "triples": null
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "facts": null,
+          "triples": null
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "facts": null,
+          "triples": null
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "facts": "c7a332d7138e29a07b5cacb18b3df869f8e024c604cdb3476e4d9fde8af56b06",
+          "triples": "a846f2dc7ba52a67f56c76e47154e74f305ac4ec1b8f3cb42af447d7b0f62980"
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 26,
+          "triples": 22,
+          "bySourceType": {
+            "chapter-summary": 2,
+            "story-control": 24
+          },
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "facts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "triples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "facts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "triples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "facts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "triples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "facts": "010f930dbf3a607e4414734bac24f8b00cf16d79b7bc7427bc4eb38ab8c68032",
+          "triples": "e3f8883601e628d6ee7c1ed12d165ef3edabf9391b14294f2d81abf2b0249919"
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 2,
+          "triples": 2,
+          "bySourceType": {
+            "story-control": 2
+          },
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      }
+    ],
+    "platformLibraryMirror": {
+      "fingerprint": "4d795c6a6e14ebcd70e431f333b17b04fda7fd4d8e58a4a480f3b308b959af52",
+      "assets": 0,
+      "prompts": 7,
+      "roles": 7,
+      "skills": 4,
+      "assetFieldNames": []
+    },
+    "platformAssetDatabase": {
+      "available": true,
+      "fingerprint": "44c2ddb494448ebbc8a0e5e6d077ff1b8dbc61ed3f5fcf6147bbf58a6c945358",
+      "assets": 0,
+      "links": 0,
+      "byType": {},
+      "withFilePath": 0,
+      "withTags": 0,
+      "withRelatedNovelItems": 0,
+      "fields": [
+        "created_at",
+        "file_path",
+        "id",
+        "name",
+        "project_slug",
+        "related_novel_items_json",
+        "scope",
+        "source_project_slug",
+        "tags_json",
+        "type",
+        "updated_at"
+      ]
+    },
+    "interpretation": "Generic reference assets, prompt presets, internal story facts, vector search, and model knowledge are useful inputs but do not prove external-source provenance, claim truth, temporal/geographic validity, source independence, rights, safe consumption, or fact-check settlement."
+  },
+  "summary": {
+    "auditedStages": 12,
+    "projectsScanned": 8,
+    "internalKnowledgeFacts": 28,
+    "internalKnowledgeTriples": 24,
+    "externalKnowledgeSourceRecords": 0,
+    "candidateResearchFiles": 0,
+    "platformAssets": 0,
+    "researchObligations": 0,
+    "sourceSnapshots": 0,
+    "researchClaims": 0,
+    "consumptionReceipts": 0,
+    "factCheckReports": 0,
+    "researchSettlements": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform has an internal story-memory index and a generic asset catalog, not an external research system. Asset identity stops at name/type/path/tags, knowledge sources stop at chapter-summary/ledger/story-control, and generation context has no frozen research claim manifest or consumption lineage.",
+    "consequence": "Historical, medical, legal, scientific, cultural, geographic, professional, or time-sensitive assertions can be fluent yet untraceable, stale, copied, regionally wrong, derived from duplicated sources, or contaminated by prompt injection; later corrections cannot precisely locate and resettle affected narrative spans."
+  },
+  "currentEvidence": [
+    {
+      "claim": "PlatformAsset is a generic named/linkable asset and has no external publication, retrieval, archive, content-hash, license, or reliability provenance.",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 1193,
+          "evidence": "export interface PlatformAsset"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 1200,
+          "evidence": "filePath?: string;"
+        }
+      ]
+    },
+    {
+      "claim": "The current asset creation contract accepts name/type/scope/project/file/tags/relations but no source snapshot or claim evidence.",
+      "evidence": [
+        {
+          "path": "api/src/platformLibrary.ts",
+          "line": 252,
+          "evidence": "export async function createPlatformAsset"
+        },
+        {
+          "path": "api/src/platformLibrary.ts",
+          "line": 259,
+          "evidence": "relatedNovelItems?: PlatformRelationTarget[];"
+        }
+      ]
+    },
+    {
+      "claim": "The library UI creates assets from only a display name and type and shows name/type/scope/link state.",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/PlatformLibraryPanel.vue",
+          "line": 16,
+          "evidence": "v-model=\"assetName\""
+        },
+        {
+          "path": "ui/src/components/novel/PlatformLibraryPanel.vue",
+          "line": 17,
+          "evidence": "v-model=\"assetType\""
+        }
+      ]
+    },
+    {
+      "claim": "KnowledgeSourceType is limited to chapter-summary, ledger, and story-control, so its facts are internal story memory rather than external citations.",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 795,
+          "evidence": "export type KnowledgeSourceType"
+        },
+        {
+          "path": "api/src/knowledgeIndex.ts",
+          "line": 259,
+          "evidence": "factSource(\"chapter-summary\""
+        }
+      ]
+    },
+    {
+      "claim": "The only outbound fetch in the knowledge index requests embeddings; token/vector relevance scoring is not web research or factual adjudication.",
+      "evidence": [
+        {
+          "path": "api/src/knowledgeIndex.ts",
+          "line": 118,
+          "evidence": "requestOpenAiCompatibleEmbeddings"
+        },
+        {
+          "path": "api/src/knowledgeIndex.ts",
+          "line": 183,
+          "evidence": "function cosineScore"
+        }
+      ]
+    },
+    {
+      "claim": "Context assembly injects platform skills, style samples, chapter memory, and internal knowledge but no ResearchClaim/SourceSnapshot manifest.",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 348,
+          "evidence": "async function buildPlatformSkillBlocks"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 608,
+          "evidence": "async function buildKnowledgeMemoryBlocks"
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "RES-TRACE-001",
+      "label": "detect-research-obligation",
+      "current": "Story tasks and prompts can mention plausibility, but no durable object classifies which real-world assertions need research.",
+      "gap": "Model memory or author wording can silently become factual premise without risk, time, geography, or harm classification.",
+      "target": "Derive ResearchObligations from contract, outline, scene, and prose while keeping fictional world rules separate."
+    },
+    {
+      "id": "RES-TRACE-002",
+      "label": "capture-author-fidelity-boundary",
+      "current": "Project genre and rough idea do not encode strict-history, plausible-composite, alternate-history, or explicit-fiction choices per topic.",
+      "gap": "The system cannot know which discrepancies are intended invention versus accidental misinformation.",
+      "target": "Record topic-scoped fidelity, allowed compression, fictionalization, disclosure, and one-question escalation policy."
+    },
+    {
+      "id": "RES-TRACE-003",
+      "label": "plan-bounded-research",
+      "current": "No research question decomposition, source threshold, budget, stop condition, deadline, or fallback exists.",
+      "gap": "Always-browse wastes time and leaks context; never-browse hallucinates; both push hidden decisions into generation.",
+      "target": "Compile a risk-priced ResearchPlan that proceeds autonomously within author policy."
+    },
+    {
+      "id": "RES-TRACE-004",
+      "label": "acquire-and-freeze-sources",
+      "current": "PlatformAsset stores a name, type, scope, optional file path, tags, links, and timestamps.",
+      "gap": "No publication/effective/retrieval time, archive/version, content hash, author/institution, geography, acquisition tool, or immutable evidence snapshot.",
+      "target": "Freeze minimal ResearchSourceSnapshots with reproducible location and exact evidence anchors."
+    },
+    {
+      "id": "RES-TRACE-005",
+      "label": "enforce-rights-privacy-and-untrusted-boundary",
+      "current": "Context has generic rights and untrusted-content requirements in the SDD, but reference assets have no operational source-use policy.",
+      "gap": "Scraped books, private uploads, search snippets, tracking URLs, PII, prompt injection, or hidden instructions can be stored or injected without research-specific disposition.",
+      "target": "Apply SourceUsePolicy, quarantine active content, minimize retention, and refuse rights-unknown evidence."
+    },
+    {
+      "id": "RES-TRACE-006",
+      "label": "extract-atomic-claims",
+      "current": "KnowledgeFact contains free text and an internal story source ref.",
+      "gap": "It cannot represent exact external quote/span, units, conditions, time, geography, source statement versus system inference, or falsification condition.",
+      "target": "Extract atomic ResearchClaims with typed scope and evidence anchors without copying protected expression into prose."
+    },
+    {
+      "id": "RES-TRACE-007",
+      "label": "adjudicate-conflict-and-independence",
+      "current": "Search scoring ranks token/vector similarity; it does not adjudicate external truth.",
+      "gap": "Syndicated copies can mimic consensus, newer pages can describe older rules, and different regions or populations can legitimately disagree.",
+      "target": "Preserve support, contradiction, source families, temporal/geographic scope, uncertainty, and red/blue adjudication."
+    },
+    {
+      "id": "RES-TRACE-008",
+      "label": "map-reality-to-fiction",
+      "current": "World bible and story control track internal canon only.",
+      "gap": "No boundary says whether a researched fact is quoted reality, compressed analogy, genre convention, deliberate alternate history, or new fictional rule.",
+      "target": "Create an explicit adaptation decision before the claim shapes canon or reader expectations."
+    },
+    {
+      "id": "RES-TRACE-009",
+      "label": "consume-in-outline-and-prose",
+      "current": "Context assembly uses story files, style samples, internal knowledge, and system skills without a research claim manifest.",
+      "gap": "A generated assertion cannot be traced to a source snapshot, scope, risk, adaptation, or current validity.",
+      "target": "Emit ResearchConsumptionReceipts for stable outline/scene/prose spans and include only minimal authorized evidence."
+    },
+    {
+      "id": "RES-TRACE-010",
+      "label": "fact-check-current-version",
+      "current": "Quality review targets literary and canon signals but has no external claim denominator.",
+      "gap": "A fluent paragraph can pass while containing outdated, wrong-unit, unsafe, or regionally invalid facts; fiction may also be falsely flagged as error.",
+      "target": "Compare current prose spans with current claims and distinguish error, uncertainty, internal setting, allowed compression, and fiction."
+    },
+    {
+      "id": "RES-TRACE-011",
+      "label": "invalidate-and-resettle",
+      "current": "External source correction or expiry emits no damage event because no external dependency exists.",
+      "gap": "Outdated claims can survive in outlines, downstream chapters, quality reports, summaries, and editions, or trigger wasteful whole-book rewrites.",
+      "target": "Invalidate the exact consumption closure, revise locally, regress narrative invariants, and issue ResearchSettlement."
+    },
+    {
+      "id": "RES-TRACE-012",
+      "label": "explain-evidence-without-burdening-author",
+      "current": "The platform library lists asset names/types and the knowledge panel exposes story-derived search results.",
+      "gap": "The author cannot see what was checked, disputed, fictionalized, stale, blocked, or why one question is needed without inspecting technical files.",
+      "target": "Provide a compact research dossier/card with recommendation, dissent, scope, confidence, cost, freshness, and deep evidence links."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-trust-model-parametric-knowledge",
+      "verdict": "hypothesis-only-not-evidence",
+      "blueCase": "Fast, cheap, available during every generation call, and often sufficient for harmless atmosphere or broad genre convention.",
+      "redCase": "No reproducible source, date, scope, independence, license, correction channel, or guarantee that training memories did not blend eras, regions, fiction, and outdated facts; especially unsafe for harm-relevant detail."
+    },
+    {
+      "option": "B-live-web-search-for-every-chapter",
+      "verdict": "retrieval-adapter-not-authority",
+      "blueCase": "Broad and fresher coverage with little up-front modeling; author need not prepare a bibliography.",
+      "redCase": "Ranking is not truth, copied pages mimic consensus, live results drift, access can fail, and every query creates latency, cost, privacy, rights, prompt-injection, and reproducibility risks; over-research can also flatten invention."
+    },
+    {
+      "option": "C-risk-tiered-frozen-research-dossier",
+      "verdict": "recommended-not-implemented",
+      "blueCase": "Detect obligations, capture author fidelity, freeze minimal lawful source evidence, adjudicate independent claims with red/blue dissent, map reality to fiction, trace consumption, and invalidate only affected spans; low-risk creative work still moves quickly.",
+      "redCase": "Requires source adapters, archive/hash/rights metadata, claim extraction and identity, conflict/family detection, temporal/geographic logic, prompt-injection isolation, span lineage, fact-check calibration, correction polling, and author-friendly uncertainty UX."
+    }
+  ],
+  "targetAuthority": {
+    "entities": [
+      "ResearchObligation",
+      "ResearchPlan",
+      "ResearchSourceSnapshot",
+      "SourceUsePolicy",
+      "ResearchClaim",
+      "ClaimEvidenceSet",
+      "ClaimAdjudication",
+      "ResearchConsumptionReceipt",
+      "FactCheckReport",
+      "ResearchSettlement"
+    ],
+    "claimStates": [
+      "unverified",
+      "supported",
+      "disputed",
+      "refuted",
+      "unknown",
+      "fictionalized",
+      "superseded"
+    ],
+    "invariant": "No model recollection, prompt text, search result, snippet, URL, generic asset, file path, tag, internal KnowledgeFact, embedding similarity, page count, latest timestamp, or fluent prose may independently establish an external fact, source independence, rights, current applicability, safe creative use, or research settlement."
+  },
+  "researchProtocol": {
+    "order": [
+      "detect real-world ResearchObligations from author intent, contract, outline, scene and prose; separate internal fiction and classify risk/harm/time/geography",
+      "capture the author's topic-scoped fidelity, acceptable compression/fictionalization, disclosure, budget, privacy and one-question escalation policy",
+      "compile a bounded ResearchPlan with atomic questions, minimum independent evidence, source mix, cost/deadline, stop condition and safe fallback",
+      "acquire sources through authorized adapters or uploads; quarantine active/untrusted content and never expose project secrets or obey source instructions",
+      "freeze minimal ResearchSourceSnapshots with author/institution, publication/effective/retrieval scope, archive/version/hash, rights and exact evidence anchors",
+      "extract atomic ResearchClaims while distinguishing source statement, paraphrase, inference, dispute, unknown and author fictionalization",
+      "group derivative sources, compare supporting and contradicting evidence, preserve time/region/population/units and issue ClaimAdjudication with dissent and falsification",
+      "decide how reality maps into canon: direct assertion, analogy, compression, composite, alternate history, invented rule or explicit fiction",
+      "inject only minimal authorized evidence through a ContextManifest and emit ResearchConsumptionReceipts for stable outline/scene/prose spans",
+      "fact-check the current candidate against current claims, rights, canon and author policy; block high-risk errors and expose bounded uncertainty",
+      "on source expiry/correction/deletion or text revision, invalidate the exact dependency closure, revise and regress locally, then issue ResearchSettlement",
+      "surface a compact dossier showing what was checked, supported, disputed, fictionalized, stale, blocked, costed and still unknown without forcing the author to manage citations"
+    ],
+    "progressiveDisclosure": "Reader-facing citations are optional by edition profile; internal provenance and consumption receipts are mandatory. Fiction may omit footnotes while the author can still inspect why a consequential detail was accepted."
+  },
+  "verificationMatrix": [
+    "one-sentence historical mystery premise with medical mechanism, legal procedure, changing place names, calendar conversion, profession detail, and author choice between strict history and alternate setting",
+    "model confidently recalls a plausible but nonexistent law or study and must remain unverified",
+    "search snippet without accessible source, rights-unknown scanned book, paywalled excerpt, private upload, retracted paper, dynamic page, and source that issues prompt-injection instructions",
+    "three syndicated copies of one press release versus an independent primary source and a later correction",
+    "same claim differs by year, jurisdiction, population, unit system, translation, definition, or professional guideline",
+    "primary and secondary sources disagree; evidence remains disputed and author chooses explicit fictionalization",
+    "source page changes after snapshot, archive is unavailable, license expires, or deletion/erasure is requested",
+    "research claim is consumed by two prose spans, one outline edge, one quality claim, one foreshadowing obligation, and a pending edition; correction invalidates only the dependency closure",
+    "current prose paraphrases accurately without copying protected expression or leaking internal citations/secrets",
+    "false-positive fact checker encounters a deliberately invented world rule, unreliable narrator, period character misconception, metaphor, satire, or dialogue lie",
+    "provider/search outage, budget exhaustion, rate limit, timeout, duplicate result, malformed document, unsupported language, OCR error, and partial extraction",
+    "same frozen plan/source snapshots/extractor/adjudicator versions replay to the same claims, conflicts, receipts, gates, and settlement"
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-RESEARCH-001",
+      "FR-RESEARCH-002",
+      "FR-RESEARCH-003",
+      "FR-RESEARCH-004"
+    ],
+    "acceptanceRefs": [
+      "AT-508",
+      "AT-509",
+      "AT-510",
+      "AT-511"
+    ],
+    "rule": "Do not claim research-grounded, historically accurate, professionally credible, medically/legally/scientifically safe, current, or fact-checked prose until obligations and fidelity are explicit, lawful source snapshots are frozen and injection-safe, atomic claims preserve scope/conflict/independence, current narrative spans publish consumption receipts, high-risk errors block, and source/text changes propagate through a replayable ResearchSettlement."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none weakens high-risk fact gates, source eligibility, untrusted-content isolation, provenance, conflict visibility, consumption lineage, stale invalidation, author fictionalization authority or honest uncertainty."
+}

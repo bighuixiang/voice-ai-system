@@ -1,0 +1,620 @@
+{
+  "schemaVersion": "1.0.0",
+  "sddVersion": "v1.18.40",
+  "decisionId": "Q-003",
+  "status": "observational-baseline-not-causal-proof",
+  "generatedBy": "scripts/generate-q003-operational-baseline.mjs",
+  "dataBoundary": {
+    "mode": "local-read-only-metadata-whitelist",
+    "projectDiscovery": "Only direct children of novels/ containing project.json are projects; checkpoint copies are excluded.",
+    "substantialProjectCriterion": "chapterCount >= 20; this is an audit segmentation rule, not a product classification.",
+    "prohibitedFields": [
+      "title",
+      "roughIdea",
+      "chapter prose",
+      "inputSummary",
+      "outputSummary",
+      "promptSnapshot",
+      "contextSnapshot",
+      "result",
+      "rawOutput",
+      "recap summary",
+      "SQLite JSON payloads",
+      "SQLite messages and errors"
+    ],
+    "mutationPerformed": false,
+    "invalidJsonLineCount": 0
+  },
+  "observedFacts": {
+    "projects": {
+      "total": 4,
+      "substantialCount": 1
+    },
+    "chapters": {
+      "total": 207,
+      "byStatus": {
+        "drafted": 70,
+        "empty": 9,
+        "planned": 128
+      },
+      "draftedCount": 70,
+      "draftedShare": 0.3382,
+      "checkedCount": 0,
+      "checkedShare": 0
+    },
+    "fileQualityEvidence": {
+      "reportCount": 2,
+      "allChapterCoverage": 0.0097,
+      "substantialProjectChapterCoverage": 0.0101,
+      "warning": "A report count is evidence availability, not independent proof of literary quality or author satisfaction."
+    },
+    "tasks": {
+      "total": 95,
+      "byStatus": {
+        "error": 12,
+        "running": 11,
+        "success": 72
+      },
+      "terminalCount": 84,
+      "terminalErrorCount": 12,
+      "terminalErrorRate": 0.1429
+    },
+    "invocations": {
+      "total": 66,
+      "byAdoptionDecision": {
+        "accepted": 2,
+        "not-required": 27,
+        "pending": 37
+      },
+      "proposedPatchTargetCount": 44,
+      "acceptedPatchTargetCount": 2,
+      "acceptedPatchTargetShareOfProposed": 0.0455,
+      "warning": "This is not an author acceptance rate because the denominator mixes pending, not-required, direct-save, and manual-edit paths."
+    },
+    "runtime": {
+      "available": true,
+      "sourceFingerprints": {
+        "database": {
+          "bytes": 1187840,
+          "sha256": "d31b32a3db496ccd570cfae518ed82091a46928eb1c786df3af5daeb2422c8db"
+        },
+        "wal": null,
+        "shm": null
+      },
+      "runs": {
+        "total": 8,
+        "byStatus": {
+          "cancelled": 3,
+          "completed": 2,
+          "failed": 3
+        },
+        "byCommand": {
+          "start": 8
+        },
+        "durationMs": {
+          "sampleCount": 8,
+          "min": 270039,
+          "p50": 788287,
+          "p95": 578774079,
+          "max": 578774079,
+          "average": 113816763.13
+        },
+        "durationWarning": "Wall-clock run duration may include pauses, recovery, or abandoned intervals; it is not active model latency.",
+        "failureCountTotal": 4,
+        "rewriteCountTotal": 0,
+        "persistedQualityScore": {
+          "sampleCount": 7,
+          "min": 79,
+          "p50": 96,
+          "p95": 96,
+          "max": 96,
+          "average": 90.57
+        }
+      },
+      "events": {
+        "total": 296,
+        "byType": {
+          "checkpoint": 18,
+          "command": 50,
+          "error": 4,
+          "quality": 13,
+          "review": 7,
+          "run": 1,
+          "stage": 163,
+          "system": 26,
+          "write": 14
+        },
+        "byStage": {
+          "chapter_draft": 14,
+          "chapter_plan": 18,
+          "checkpoint_before_run": 36,
+          "content_validate": 13,
+          "context_assemble": 14,
+          "finalize_or_gate": 16,
+          "find_next_chapter": 18,
+          "knowledge_index_update": 16,
+          "missing": 68,
+          "prepare_narrative_snapshot": 36,
+          "quality_review": 26,
+          "recap_and_ledger": 13,
+          "story_graph_update": 8
+        }
+      },
+      "writeCommands": {
+        "total": 22,
+        "byStatus": {
+          "cancelled": 2,
+          "failed": 4,
+          "succeeded": 16
+        },
+        "byType": {
+          "accept": 1,
+          "direction": 1,
+          "pause": 3,
+          "resume": 1,
+          "rewrite": 5,
+          "start": 8,
+          "stop": 3
+        },
+        "durationMs": {
+          "sampleCount": 22,
+          "min": 32,
+          "p50": 611168,
+          "p95": 788336,
+          "max": 878089,
+          "average": 420580.91
+        },
+        "durationWarning": "Wall-clock command duration may include queueing and pause time; use it as operational exposure, not pure execution latency."
+      },
+      "checkpoints": {
+        "total": 18
+      },
+      "snapshots": {
+        "total": 18
+      },
+      "branches": {
+        "total": 0,
+        "byStatus": {}
+      },
+      "qualityScores": {
+        "total": 13,
+        "distinctProjectChapterCount": 2,
+        "score": {
+          "sampleCount": 13,
+          "min": 79,
+          "p50": 85,
+          "p95": 96,
+          "max": 96,
+          "average": 87.38
+        }
+      },
+      "knowledgeRefs": {
+        "total": 581,
+        "byKind": {
+          "chapter": 48,
+          "context_block": 360,
+          "fact": 80,
+          "summary": 13,
+          "triple": 80
+        }
+      },
+      "privacyNote": "Only selected metadata columns were queried; JSON payloads, messages, errors, labels, titles, and prose were not read into the audit."
+    }
+  },
+  "projects": [
+    {
+      "projectRef": "project-3cf432ab16",
+      "substantialProject": false,
+      "chapters": {
+        "total": 3,
+        "byStatus": {
+          "empty": 3
+        },
+        "checkedCount": 0
+      },
+      "taskHistory": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0,
+        "byStatus": {},
+        "byType": {},
+        "terminalCount": 0,
+        "terminalErrorCount": 0,
+        "terminalErrorRate": null,
+        "durationMs": {
+          "sampleCount": 0,
+          "min": null,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "average": null
+        }
+      },
+      "invocations": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0,
+        "byStatus": {},
+        "byAdoptionDecision": {},
+        "proposedPatchTargetCount": 0,
+        "acceptedPatchTargetCount": 0,
+        "acceptedPatchTargetShareOfProposed": null,
+        "denominatorWarning": "This share is not an author acceptance rate: pending, not-required, direct-save, and manual-edit semantics differ."
+      },
+      "backgroundJobs": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0,
+        "byStatus": {},
+        "byType": {}
+      },
+      "recaps": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0
+      },
+      "fileQualityReports": {
+        "reportCount": 0,
+        "chapterCoverage": 0,
+        "overallScore": {
+          "sampleCount": 0,
+          "min": null,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "average": null
+        }
+      },
+      "sourceFingerprints": {
+        "project": {
+          "bytes": 1549,
+          "sha256": "c0c03a3409c70c0cf45e2a84787c5d1dc51d1e280b1ca7deb6a0df8f5d2a083b"
+        },
+        "taskHistory": null,
+        "invocations": null,
+        "backgroundJobs": null,
+        "recaps": null,
+        "qualityReports": []
+      }
+    },
+    {
+      "projectRef": "project-2a97516c35",
+      "substantialProject": false,
+      "chapters": {
+        "total": 3,
+        "byStatus": {
+          "empty": 3
+        },
+        "checkedCount": 0
+      },
+      "taskHistory": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0,
+        "byStatus": {},
+        "byType": {},
+        "terminalCount": 0,
+        "terminalErrorCount": 0,
+        "terminalErrorRate": null,
+        "durationMs": {
+          "sampleCount": 0,
+          "min": null,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "average": null
+        }
+      },
+      "invocations": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0,
+        "byStatus": {},
+        "byAdoptionDecision": {},
+        "proposedPatchTargetCount": 0,
+        "acceptedPatchTargetCount": 0,
+        "acceptedPatchTargetShareOfProposed": null,
+        "denominatorWarning": "This share is not an author acceptance rate: pending, not-required, direct-save, and manual-edit semantics differ."
+      },
+      "backgroundJobs": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0,
+        "byStatus": {},
+        "byType": {}
+      },
+      "recaps": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0
+      },
+      "fileQualityReports": {
+        "reportCount": 0,
+        "chapterCoverage": 0,
+        "overallScore": {
+          "sampleCount": 0,
+          "min": null,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "average": null
+        }
+      },
+      "sourceFingerprints": {
+        "project": {
+          "bytes": 1423,
+          "sha256": "43dbca1b7c2e31abcedaacb4df12980aab945e74b4f395d91ef3e03b5efbf467"
+        },
+        "taskHistory": null,
+        "invocations": null,
+        "backgroundJobs": null,
+        "recaps": null,
+        "qualityReports": []
+      }
+    },
+    {
+      "projectRef": "project-3cc815b60c",
+      "substantialProject": false,
+      "chapters": {
+        "total": 3,
+        "byStatus": {
+          "empty": 3
+        },
+        "checkedCount": 0
+      },
+      "taskHistory": {
+        "total": 3,
+        "sourceLineCount": 3,
+        "invalidLineCount": 0,
+        "byStatus": {
+          "success": 3
+        },
+        "byType": {
+          "chapter.plan": 1,
+          "outline.generate": 1,
+          "selection.polish": 1
+        },
+        "terminalCount": 3,
+        "terminalErrorCount": 0,
+        "terminalErrorRate": 0,
+        "durationMs": {
+          "sampleCount": 3,
+          "min": 123735,
+          "p50": 166850,
+          "p95": 960473,
+          "max": 960473,
+          "average": 417019.33
+        }
+      },
+      "invocations": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0,
+        "byStatus": {},
+        "byAdoptionDecision": {},
+        "proposedPatchTargetCount": 0,
+        "acceptedPatchTargetCount": 0,
+        "acceptedPatchTargetShareOfProposed": null,
+        "denominatorWarning": "This share is not an author acceptance rate: pending, not-required, direct-save, and manual-edit semantics differ."
+      },
+      "backgroundJobs": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0,
+        "byStatus": {},
+        "byType": {}
+      },
+      "recaps": {
+        "total": 0,
+        "sourceLineCount": 0,
+        "invalidLineCount": 0
+      },
+      "fileQualityReports": {
+        "reportCount": 0,
+        "chapterCoverage": 0,
+        "overallScore": {
+          "sampleCount": 0,
+          "min": null,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "average": null
+        }
+      },
+      "sourceFingerprints": {
+        "project": {
+          "bytes": 1134,
+          "sha256": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864"
+        },
+        "taskHistory": {
+          "bytes": 122615,
+          "sha256": "f72c1dd26e2ce261eb6b859340e8ba5c94ef6d6ed227002f226a3fd6a7032ac9"
+        },
+        "invocations": null,
+        "backgroundJobs": null,
+        "recaps": null,
+        "qualityReports": []
+      }
+    },
+    {
+      "projectRef": "project-2643d288ac",
+      "substantialProject": true,
+      "chapters": {
+        "total": 198,
+        "byStatus": {
+          "drafted": 70,
+          "planned": 128
+        },
+        "checkedCount": 0
+      },
+      "taskHistory": {
+        "total": 92,
+        "sourceLineCount": 92,
+        "invalidLineCount": 0,
+        "byStatus": {
+          "error": 12,
+          "running": 11,
+          "success": 69
+        },
+        "byType": {
+          "chapter.draft": 14,
+          "chapter.plan": 15,
+          "continuity.check": 13,
+          "idea.suggest": 2,
+          "quality.rewrite": 14,
+          "selection.polish": 1,
+          "structure.reverse": 14,
+          "writing.recap": 19
+        },
+        "terminalCount": 81,
+        "terminalErrorCount": 12,
+        "terminalErrorRate": 0.1481,
+        "durationMs": {
+          "sampleCount": 81,
+          "min": 12560,
+          "p50": 179013,
+          "p95": 683731,
+          "max": 702190,
+          "average": 206258.47
+        }
+      },
+      "invocations": {
+        "total": 66,
+        "sourceLineCount": 66,
+        "invalidLineCount": 0,
+        "byStatus": {
+          "error": 1,
+          "success": 65
+        },
+        "byAdoptionDecision": {
+          "accepted": 2,
+          "not-required": 27,
+          "pending": 37
+        },
+        "proposedPatchTargetCount": 44,
+        "acceptedPatchTargetCount": 2,
+        "acceptedPatchTargetShareOfProposed": 0.0455,
+        "denominatorWarning": "This share is not an author acceptance rate: pending, not-required, direct-save, and manual-edit semantics differ."
+      },
+      "backgroundJobs": {
+        "total": 66,
+        "sourceLineCount": 66,
+        "invalidLineCount": 0,
+        "byStatus": {
+          "pending": 22,
+          "running": 22,
+          "success": 22
+        },
+        "byType": {
+          "knowledge.index.rebuild": 6,
+          "quality.series.rebuild": 57,
+          "story.graph.rebuild": 3
+        }
+      },
+      "recaps": {
+        "total": 8,
+        "sourceLineCount": 8,
+        "invalidLineCount": 0
+      },
+      "fileQualityReports": {
+        "reportCount": 2,
+        "chapterCoverage": 0.0101,
+        "overallScore": {
+          "sampleCount": 2,
+          "min": 96,
+          "p50": 96,
+          "p95": 96,
+          "max": 96,
+          "average": 96
+        }
+      },
+      "sourceFingerprints": {
+        "project": {
+          "bytes": 70020,
+          "sha256": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d"
+        },
+        "taskHistory": {
+          "bytes": 4820538,
+          "sha256": "48c63c511fc0cd3f48a7c0e6a42a77e71c5fc9131dfac010ce1c57f3f6a49d03"
+        },
+        "invocations": {
+          "bytes": 339961,
+          "sha256": "fbeeab5ff672ed7dbedcb087d873e70a51f0e72f0b201396c11fa044a9ee5e87"
+        },
+        "backgroundJobs": {
+          "bytes": 20310,
+          "sha256": "04114d9e2d53739bf1a32164f79573ef1d17154659650f50415a2a1f4c4a619f"
+        },
+        "recaps": {
+          "bytes": 8116,
+          "sha256": "2f07ec830566e03f17e3b22c794e2ca0ab6cc9ca77b9c0786a86d2d15302cb92"
+        },
+        "qualityReports": [
+          {
+            "fileKind": "chapter-quality-report",
+            "bytes": 2208,
+            "sha256": "6a12e097d189a7031a25992031199bdbb0dc670a225ea48c049f1fc4dcd4be5a"
+          },
+          {
+            "fileKind": "chapter-quality-report",
+            "bytes": 2044,
+            "sha256": "139a7081189b695a3b944a0ef6f22291e7890710f7f4f059db97e675abef17a8"
+          }
+        ]
+      }
+    }
+  ],
+  "redBlueAssessment": {
+    "blueCase": [
+      "The repository contains enough real task and runtime metadata to reject a purely theoretical policy choice.",
+      "A tiered policy can preserve hard gates while allocating deeper review to openings, turns, reveals, climaxes, payoffs, and endings.",
+      "Recorded latency, terminal errors, and sparse quality/adoption evidence make an adaptive rollout safer than globally maximizing either speed or review depth."
+    ],
+    "redCase": [
+      "The sample contains only one substantial project, so genre, author, and project diversity are not established.",
+      "Quality reports and accepted patch targets are too sparse and semantically incomplete to prove causal quality improvement.",
+      "Persisted running or pending states cannot be interpreted as live work, abandonment, failure, or rejection without lifecycle reconciliation.",
+      "Model-generated quality scores are not independent human judgments and cannot establish reader or author satisfaction."
+    ]
+  },
+  "candidateAssessment": [
+    {
+      "option": "A",
+      "verdict": "retain-as-comparison-arm-not-proven-default",
+      "rationale": "Useful as a throughput baseline, but current evidence does not show that deferred deep review protects long-range obligations or literary quality."
+    },
+    {
+      "option": "B",
+      "verdict": "retain-as-key-chapter-arm-not-proven-default",
+      "rationale": "Useful for high-risk chapters, but current latency and failure evidence plus missing causal uplift data do not justify universal maximum-depth review."
+    },
+    {
+      "option": "C",
+      "verdict": "selected-by-author-as-default-policy-not-causally-proven-optimum",
+      "rationale": "The author selected C as the product default. This settles intent, while shadow experiments must still calibrate thresholds and cannot reinterpret the selection as causal proof of optimality or implementation evidence."
+    }
+  ],
+  "unknowns": [
+    "Author satisfaction and edit effort per candidate",
+    "Reader outcome or independent literary-quality judgment",
+    "Token, model, and monetary cost normalized per settled chapter",
+    "True author acceptance rate across governed adoption, direct saves, and manual edits",
+    "Causal quality uplift from additional candidates, reviews, and repair loops",
+    "Risk-tier calibration by chapter function and genre",
+    "Whether recorded running and pending states are still operationally live"
+  ],
+  "requiredNextEvidence": [
+    "Introduce policyVersion, riskTier, candidateCount, reviewCount, repairCount, elapsedMs, normalizedCost, and terminalOutcome telemetry without storing prose.",
+    "Record explicit governed adoption outcomes and post-adoption manual edit distance at stable chapter boundaries.",
+    "Run A/B/C in shadow or author-approved experiments with hard gates held constant; compare settled-chapter latency, failure, rework, and independent review outcomes.",
+    "Do not learn or auto-promote a policy from model self-scores alone."
+  ],
+  "conclusion": {
+    "recommendedCandidate": "C",
+    "selectedCandidate": "C",
+    "selectionSource": "direct-author-answer",
+    "specificationActivationAllowed": true,
+    "runtimeActivationAllowed": false,
+    "statement": "C is the author-confirmed default drafting policy. It is not a causally proven optimum and remains unimplemented and runtime-inactive until the common hard gates, policy telemetry, shadow calibration, and release evidence pass."
+  }
+}

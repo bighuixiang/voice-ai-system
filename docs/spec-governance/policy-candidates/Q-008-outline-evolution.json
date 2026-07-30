@@ -1,0 +1,227 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "author-selected-specification-not-implementation-verified",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "decisionId": "Q-008",
+  "question": "正文创作发现比原大纲更好的剧情方向时，故事契约、大纲和现场涌现之间应如何决定谁可以改变谁？",
+  "selection": {
+    "selectedPolicyId": "contract-anchored-rolling-emergence",
+    "selectedLabel": "故事契约硬锚、近端强冻结、远端可演化、正文涌现候选化",
+    "decisionStatus": "confirmed",
+    "source": "author-accepted-recommendation",
+    "selectedOn": "2026-07-25",
+    "runtimeActivationStatus": "not-implemented-not-verified"
+  },
+  "alternatives": [
+    {
+      "policyId": "fixed-full-book-outline",
+      "status": "rejected-alternative",
+      "blueCase": "Makes execution predictable and minimizes downstream re-planning once a full outline has been accepted.",
+      "redCase": "Treats uncertain distant detail as truth, suppresses valuable discoveries from actual prose, and encourages filler or forced causality to protect an obsolete plan."
+    },
+    {
+      "policyId": "prose-always-overrides-outline",
+      "status": "rejected-alternative",
+      "blueCase": "Preserves creative energy and lets convincing scenes continuously reshape the story without approval latency.",
+      "redCase": "Lets local eloquence silently rewrite character fate, promises, foreshadowing, and endings; retrospective outline edits can rationalize drift instead of governing it."
+    },
+    {
+      "policyId": "contract-anchored-rolling-emergence",
+      "status": "selected-default-specification",
+      "blueCase": "Protects author promises while allowing low-risk discoveries to improve the flexible future through explicit candidates and minimal re-planning.",
+      "redCase": "Requires authoritative contract locks, horizon states, semantic impact classification, emergence candidates, stale-proof propagation, and reliable pause/adoption behavior."
+    }
+  ],
+  "authorityLayers": [
+    {
+      "rank": 1,
+      "authority": "StoryContract and author locks",
+      "scope": [
+        "core narrative promise",
+        "central narrative question",
+        "protagonist and character bottom lines",
+        "ending direction and hard ending constraints",
+        "explicit anti-goals and authored locks"
+      ],
+      "rule": "These are hard anchors. Only an explicit author decision may revise them; no outline score, draft fluency, evaluator preference, or model discovery can override them."
+    },
+    {
+      "rank": 2,
+      "authority": "Adopted causal structure",
+      "scope": [
+        "major arc and causal milestones",
+        "volume functions",
+        "committed obligations",
+        "major foreshadowing and payoff windows"
+      ],
+      "rule": "Changes require a versioned candidate and exact impact report; any material tradeoff or change-class L2 pauses for the author before adoption."
+    },
+    {
+      "rank": 3,
+      "authority": "Near rolling horizon",
+      "scope": [
+        "next 3-5 chapters",
+        "adopted chapter functions",
+        "scene causal inputs",
+        "current obligation and context commitments"
+      ],
+      "rule": "Strongly frozen for execution. Automatic changes are limited to local, reversible L0 refinements that preserve committed state transitions, obligations, knowledge boundaries, and author locks."
+    },
+    {
+      "rank": 4,
+      "authority": "Far outline horizon",
+      "scope": [
+        "tentative milestones",
+        "chapter allocation",
+        "scene placement",
+        "exploratory supporting paths"
+      ],
+      "rule": "May be automatically re-planned inside a valid AutonomyGrant when the result remains inside the StoryContract, passes structural guards, preserves protected commitments, and emits a visible low-risk receipt."
+    },
+    {
+      "rank": 5,
+      "authority": "Drafting discovery",
+      "scope": [
+        "new motive",
+        "stronger conflict",
+        "relationship turn",
+        "different reveal or payoff path",
+        "new ending possibility"
+      ],
+      "rule": "A discovery is evidence, not canon. It first becomes an isolated EmergenceCandidate with provenance, counterfactual value, impact closure, affected horizon, and adoption authority."
+    }
+  ],
+  "changeClasses": [
+    {
+      "classId": "L0-local-reversible",
+      "authority": "automatic-inside-valid-grant",
+      "examples": [
+        "scene expression",
+        "beat ordering",
+        "local obstacle",
+        "non-contractual texture",
+        "reversible scene split or merge"
+      ],
+      "guards": "Must not change a committed state transition, reader knowledge, obligation, author lock, causal predecessor, or downstream accepted fact."
+    },
+    {
+      "classId": "L1-structural-low-risk",
+      "authority": "automatic-after-validation-with-receipt",
+      "examples": [
+        "far-horizon milestone placement",
+        "tentative chapter allocation",
+        "supporting-path replacement",
+        "low-impact payoff-window adjustment"
+      ],
+      "guards": "Requires candidate isolation, exact affected subgraph, contract validation, regression checks, rollback identity, and a visible adoption receipt; uncertainty escalates to L2."
+    },
+    {
+      "classId": "L2-material-story-decision",
+      "authority": "hard-pause-for-author",
+      "examples": [
+        "core promise or central conflict",
+        "protagonist or character fate",
+        "core relationship outcome",
+        "major foreshadowing or payoff meaning",
+        "ending direction or hard ending constraint",
+        "volume boundary or intentionally open obligation"
+      ],
+      "guards": "Present one bounded Socratic question with red/blue evidence, impact, protected strengths, alternatives, and a recommendation; author silence never means approval."
+    }
+  ],
+  "evolutionProtocol": [
+    "Capture the prose observation against a frozen story, outline, chapter, scene, obligation, context, and author-lock baseline; separate what was actually written from the system's interpretation.",
+    "Create an isolated EmergenceCandidate with discovery type, supporting spans, narrative value, alternative explanation, affected semantic nodes, horizon classification, and proposed change class.",
+    "Compute the direct, transitive, uncertain, protected, and unaffected impact closure across contract, arcs, characters, world state, reader knowledge, obligations, foreshadowing, prose, completion, and publication.",
+    "Compare preserve-outline, adopt-discovery, and bounded-hybrid alternatives under the same author objectives; attractive prose alone is not evidence that the structural alternative wins.",
+    "Apply the authority matrix: reject invalid candidates; automatically adopt eligible L0/L1 candidates only inside a current grant; hard-pause every L2 or ambiguous case with one scoped author question.",
+    "Adopt through a new OutlineVersion/CanonCommit, preserve stable semantic IDs where meaning is unchanged, invalidate exact dependent proofs and workers, and minimally re-plan only the affected subgraph.",
+    "Rebuild projections, prove the next 3-5 chapter window and next chapter execution-ready again, and retain the rejected or superseded candidate without letting it contaminate future context."
+  ],
+  "invariants": [
+    "No draft discovery retroactively edits the StoryContract, current outline, fact ledger, obligation ledger, or execution queue before governed adoption.",
+    "The next 3-5 chapters are strongly frozen, but not immutable: a required change uses the same impact and authority protocol and invalidates stale execution proofs.",
+    "Far-horizon flexibility never means permission to change the ending, central question, major promise, character bottom line, or intentional open-contract boundary.",
+    "Repeated local discoveries that imply one material structural drift are aggregated and escalated; they may not be split into L0/L1 changes to bypass L2 authority.",
+    "Rejecting an emergence candidate removes it from generation context and future assertions while preserving audit history and the original prose candidate lineage."
+  ],
+  "implementationBoundary": "This decision locks outline-evolution authority only. No authoritative contract-lock evaluator, rolling 3-5 chapter freeze, EmergenceCandidate, semantic change classifier, exact impact closure, L0/L1 automatic-adoption fence, L2 pause protocol, minimal re-planning transaction, stale-proof propagation, projection rebuild, or end-to-end behavior is implementation-verified by this documentation-only work.",
+  "invariantRequirementIds": [
+    "FR-ARCH-001",
+    "FR-ARCH-002",
+    "FR-ARCH-003",
+    "FR-ARCH-004",
+    "FR-ARCH-005",
+    "FR-ARCH-006",
+    "FR-ARCH-007",
+    "FR-ARCH-008",
+    "FR-ARCH-009",
+    "FR-ARCH-010",
+    "FR-ARCH-011",
+    "FR-ARCH-012",
+    "FR-ARCH-013",
+    "FR-ARCH-014",
+    "FR-ARCH-015",
+    "FR-ARCH-016",
+    "FR-ARCH-017",
+    "FR-ARCH-018",
+    "FR-ARCH-019",
+    "FR-ARCH-020",
+    "FR-ARCH-021",
+    "FR-ARCH-022",
+    "FR-ARCH-023",
+    "FR-ARCH-024",
+    "FR-OBJECTIVE-002",
+    "FR-OBJECTIVE-006",
+    "FR-RUN-005",
+    "FR-RUN-010",
+    "FR-PROSE-002",
+    "FR-PROSE-003",
+    "FR-PROSE-024"
+  ],
+  "acceptanceRefs": [
+    "AT-014",
+    "AT-058",
+    "AT-067",
+    "AT-081",
+    "AT-137",
+    "AT-160",
+    "AT-223",
+    "AT-224",
+    "AT-269",
+    "AT-270",
+    "AT-271",
+    "AT-272",
+    "AT-273",
+    "AT-274",
+    "AT-275",
+    "AT-276",
+    "AT-277",
+    "AT-278",
+    "AT-279",
+    "AT-280",
+    "AT-281",
+    "AT-282",
+    "AT-283",
+    "AT-284",
+    "AT-285",
+    "AT-286",
+    "AT-287",
+    "AT-288",
+    "AT-289",
+    "AT-290",
+    "AT-356",
+    "AT-357",
+    "AT-389",
+    "AT-405",
+    "AT-415",
+    "AT-424",
+    "AT-453",
+    "AT-454",
+    "AT-476",
+    "AT-496",
+    "AT-511",
+    "AT-519"
+  ]
+}

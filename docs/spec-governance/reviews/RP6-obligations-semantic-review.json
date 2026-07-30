@@ -1,0 +1,918 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "spec-audited-dependencies-specified-not-implemented",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "releaseProfile": "RP6-obligations",
+  "profileKind": "user-release",
+  "isUserRelease": true,
+  "journey": "Turn identified reader promises into visible, evidence-anchored obligations that can be reminded, paid, transformed, neutralized, or intentionally opened without false closure claims.",
+  "protocol": {
+    "blueQuestion": "Does this requirement directly let the author and system identify, mark, schedule, evidence, settle, transform, or intentionally open a reader-facing narrative obligation?",
+    "redQuestion": "Does it claim full-book source coverage or completion, rely only on a mutable status field, or expose an answer that the current reader/POV must not know?",
+    "rule": "RP6 proves lifecycle actions for identified obligations and honest scoped closure; RP8 alone may certify completion-wide coverage and final portfolio closure."
+  },
+  "currentPlatformEvidence": {
+    "present": [
+      "LedgerEntry supports foreshadowing, status, severity, chapterIds, and expected resolution text",
+      "SceneCard and chapter dashboard carry foreshadowing identifiers",
+      "Runtime snapshots expose open and overdue narrative-debt counts",
+      "Real project templates contain Markdown and JSON foreshadowing ledgers"
+    ],
+    "contradictoryOrInsufficient": [
+      "LedgerPanel can directly PUT a mutable resolved status without payoff evidence",
+      "Overdue detection parses chapter numbers from free text instead of semantic milestones",
+      "No NarrativeObligation authority, append-only lifecycle, EvidenceAnchor, PayoffContract, or ClosureCertificate was found",
+      "A real sampled foreshadowing ledger is empty, so zero entries cannot prove source coverage or closure health"
+    ]
+  },
+  "counts": {
+    "originalRequirements": 58,
+    "originalMustRequirements": 57,
+    "originalShouldRequirements": 1,
+    "retainedRequirements": 56,
+    "retainedMustRequirements": 55,
+    "retainedShouldRequirements": 1,
+    "movedMustRequirements": 2,
+    "remainingMustBudgetHeadroom": 9
+  },
+  "retained": [
+    {
+      "requirementId": "FR-FORESHADOW-001",
+      "title": "一等伏笔实体",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-004",
+        "AT-166"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-002",
+      "title": "生命周期",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-004",
+        "AT-005",
+        "AT-006"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-003",
+      "title": "正文证据锚点",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-004",
+        "AT-030"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-004",
+      "title": "回收窗口与逾期",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-007",
+        "AT-040",
+        "AT-172"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-005",
+      "title": "双向追踪",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-166",
+        "AT-184"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-006",
+      "title": "受约束的事件迁移",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-030",
+        "AT-036"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-007",
+      "title": "语义兑现判定",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-031",
+        "AT-173",
+        "AT-185"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-008",
+      "title": "编辑器伏笔标记",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-034",
+        "AT-187"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-009",
+      "title": "可恢复证据锚点",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-032",
+        "AT-033"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-010",
+      "title": "计划事实与正文事实分离",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-035",
+        "AT-168"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-011",
+      "title": "全书雷达与变更影响",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-033",
+        "AT-038",
+        "AT-184"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-FORESHADOW-012",
+      "title": "重复线索与谱系",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-037",
+        "AT-176"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-DEBT-001",
+      "title": "统一叙事债务",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-166",
+        "AT-167",
+        "AT-179"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-UX-013",
+      "title": "全书地图",
+      "normativeStrength": "SHOULD",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-503"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-001",
+      "title": "统一叙事义务身份",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-166"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-002",
+      "title": "类型化义务契约",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-167"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-003",
+      "title": "来源、所有者与重要度",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-180"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-004",
+      "title": "埋设事件与正文证据",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-168"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-005",
+      "title": "读者显著性证明",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-169"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-006",
+      "title": "知识与披露边界",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-170"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-007",
+      "title": "提醒节奏与间隔",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-172"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-008",
+      "title": "升级与变化",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-171"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-009",
+      "title": "回收契约",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-173"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-010",
+      "title": "语义兑现而非关键词命中",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-185"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-011",
+      "title": "部分兑现与剩余义务",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-173"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-012",
+      "title": "假线索与反转公平性",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-174"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-013",
+      "title": "转化与谱系",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-175"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-014",
+      "title": "重复、合并与覆盖",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-176",
+        "AT-177"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-015",
+      "title": "冲突与不可能组合",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-178"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-016",
+      "title": "漏项与负空间发现",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-179"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-017",
+      "title": "弹性窗口与逾期证据",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-181"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-018",
+      "title": "最小修复路线",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-182"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-019",
+      "title": "作者豁免与有意开放",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-040",
+        "AT-175"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-020",
+      "title": "防剧透可见性",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-186"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-021",
+      "title": "编辑器标记与交互",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-187"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-022",
+      "title": "发布版本冻结",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-188"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-OBL-024",
+      "title": "旧资产迁移与单一权威",
+      "normativeStrength": "MUST",
+      "category": "compatibility-guard",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-166",
+        "AT-180",
+        "AT-183"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-001",
+      "title": "义务准入而非万物皆伏笔",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-313"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-002",
+      "title": "读者期待强度校准",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-314"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-003",
+      "title": "问题—假设图",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-315"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-004",
+      "title": "线索主张与方向",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-316"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-005",
+      "title": "线索独立性与交叉验证",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-317"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-006",
+      "title": "答案版本与稳定边界",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-318"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-007",
+      "title": "首次读者盲审",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-319"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-008",
+      "title": "公平性证据包",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-320"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-009",
+      "title": "闭环关键路径调度",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-321"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-010",
+      "title": "回收容量预留",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-322"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-011",
+      "title": "自适应提醒策略",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-323"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-012",
+      "title": "过度曝光与答案泄漏",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-324"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-013",
+      "title": "义务碰撞与证据串线",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-325"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-014",
+      "title": "回收形态多样性",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-326"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-015",
+      "title": "回收场景契约",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-327"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-016",
+      "title": "回收后果传播",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-328"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-017",
+      "title": "回报节奏与叙事利息",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-329"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-018",
+      "title": "改稿破坏传播与反事实检查",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-330"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    },
+    {
+      "requirementId": "FR-CLOSURE-020",
+      "title": "可证明保证边界",
+      "normativeStrength": "MUST",
+      "category": "direct-journey",
+      "firstSliceScope": "Only the behavior required to admit, mark, schedule, evidence, settle, transform, or intentionally open identified narrative obligations without leaking secrets or claiming full-book completion; completion-wide coverage certificates remain downstream obligations.",
+      "acceptanceRefs": [
+        "AT-332"
+      ],
+      "extensionMode": "invariant-revalidation",
+      "extensionSlices": [
+        "V7-revision",
+        "V8-completion"
+      ]
+    }
+  ],
+  "moved": [
+    {
+      "requirementId": "FR-OBL-023",
+      "title": "组合级完成门禁",
+      "targetSlice": "V8-completion",
+      "reason": "The portfolio-level completion gate consumes a frozen full-book scope; RP6 provides obligation health and settlement semantics but cannot certify the unfinished book."
+    },
+    {
+      "requirementId": "FR-CLOSURE-019",
+      "title": "来源覆盖证明",
+      "targetSlice": "V8-completion",
+      "reason": "ObligationCoverageCertificate requires a completion-wide source inventory, frozen scan scope, and unresolved-parser accounting."
+    }
+  ],
+  "conclusion": "RP6 retains 55 MUST plus one SHOULD obligation-lifecycle requirement and moves two completion-wide certificates to RP8; Q-003 no longer blocks specification dependency resolution, but RP5/RP6 implementation and release evidence remain absent."
+}

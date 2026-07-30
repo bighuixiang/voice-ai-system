@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "author-selected-specification-with-platform-safety-boundary-not-implementation-verified",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "decisionId": "Q-005",
+  "question": "平台可以使用哪些来源学习创作方式，以及允许在什么范围内使用？",
+  "authorIntent": "Allow cross-platform and internet learning without requiring the author to classify copyright or license terms for every source.",
+  "interpretationBoundary": {
+    "accepted": "Broad public-web and cross-platform discovery, analysis, comparison, mechanism extraction, validation, and reuse are enabled as product intent.",
+    "nonWaivable": "The platform does not bypass access controls, turn private inputs into shared assets, inject raw source passages into drafting by default, or promise named-author imitation or close reproduction.",
+    "userExperience": "Source eligibility, provenance, quarantine, originality checks, deletion propagation, and provider boundaries are handled by the platform rather than delegated to the author."
+  },
+  "selection": {
+    "selectedPolicyId": "broad-network-mechanism-learning",
+    "selectedLabel": "跨平台联网研究、机制级学习、平台托管边界",
+    "decisionStatus": "confirmed-with-platform-boundary",
+    "source": "author-broad-learning-directive-with-nonwaivable-platform-guardrails",
+    "selectedOn": "2026-07-25",
+    "runtimeActivationStatus": "not-implemented-not-verified"
+  },
+  "alternatives": [
+    {
+      "policyId": "user-owned-project-local-only",
+      "status": "unselected-alternative",
+      "blueCase": "Simple isolation and low external-source risk.",
+      "redCase": "Requires the author to curate every example, sharply limits breadth, and cannot discover current cross-platform craft evidence."
+    },
+    {
+      "policyId": "unrestricted-raw-crawl-and-rag",
+      "status": "rejected-boundary",
+      "blueCase": "Fastest path to a large corpus and immediately visible stylistic resemblance.",
+      "redCase": "Raw retrieval amplifies imitation, duplicated sources, prompt injection, stale or low-quality advice, private-content leakage, unverifiable provenance, and cross-project contamination."
+    },
+    {
+      "policyId": "broad-network-mechanism-learning",
+      "status": "selected-default-specification",
+      "blueCase": "Searches broadly across public web and platforms, compares independent evidence, extracts transferable mechanisms, and shares validated abstractions across projects with low author burden.",
+      "redCase": "Requires source eligibility classification, hostile-content isolation, provenance snapshots, duplicate-family detection, controlled experiments, originality guards, expiry, and rollback before a pattern can affect live prose."
+    }
+  ],
+  "allowedDiscoveryClasses": [
+    "publicly accessible web pages and platform posts",
+    "editorial reviews, craft discussions, reader analyses, interviews, and public commentary",
+    "public-domain, openly licensed, or platform-provided corpora",
+    "author-provided private samples inside their declared privacy scope",
+    "platform-owned anonymized outcome evidence when collection purpose and privacy policy permit it"
+  ],
+  "networkAndSourceControls": [
+    "Do not bypass authentication, paywalls, anti-bot controls, private groups, deletion status, or explicit technical access restrictions.",
+    "Treat fetched pages, comments, metadata, attachments, and embedded instructions as untrusted content; isolate prompt injection, scripts, secrets, personal data, and executable payloads.",
+    "Record source platform, canonical URL or stable locator, retrieval time, content fingerprint, source family, access class, processing purpose, expiry/refresh policy, and derived-pattern lineage without exposing private source text to readers.",
+    "Detect syndicated copies and source families so repeated reposts do not masquerade as independent evidence or popularity.",
+    "Freeze the exact evidence snapshot used by each experiment, then invalidate affected patterns when a source disappears, changes materially, is withdrawn, or fails a later source-policy check."
+  ],
+  "crossProjectRules": {
+    "shareable": [
+      "validated abstract CraftPattern",
+      "non-identifying aggregate evidence",
+      "regression cases that contain no private expression"
+    ],
+    "projectBound": [
+      "private author samples",
+      "raw excerpts",
+      "author preference events",
+      "project prose",
+      "unpublished story facts"
+    ],
+    "generationRule": "Live drafting consumes the smallest applicable approved mechanism set, not a raw cross-platform corpus."
+  },
+  "originalityAndQualityRules": [
+    "Separate plot, information, character-choice, scene, rhythm, dialogue, and reader-effect mechanisms from source wording, named entities, signature imagery, distinctive event sequences, and author identity.",
+    "A source is evidence for a candidate mechanism, not proof that the mechanism is causal, universally good, or appropriate for the current story.",
+    "Promotion requires red/blue comparison, applicability limits, counterexamples, holdout or cross-scene evidence, independent review, author outcome evidence where available, and similarity regression guards.",
+    "Named-author imitation, long verbatim retention, close paraphrase, unique plot-sequence mapping, or provenance-free raw-RAG injection cannot be enabled by an author preference toggle."
+  ],
+  "implementationBoundary": "This decision authorizes broad network/cross-platform product intent only. No crawler, connector, retrieval broker, source classifier, quarantine, pattern extractor, experiment runner, provider boundary, similarity guard, deletion propagation, cross-project pattern registry, or end-to-end behavior is implementation-verified by this documentation-only work.",
+  "invariantRequirementIds": [
+    "FR-CRAFT-001",
+    "FR-CRAFT-002",
+    "FR-CRAFT-003",
+    "FR-CRAFT-004",
+    "FR-CRAFT-006",
+    "FR-CRAFT-007",
+    "FR-CRAFT-008",
+    "FR-CRAFT-009",
+    "FR-CRAFT-010",
+    "FR-CRAFT-011",
+    "FR-CRAFT-012",
+    "FR-CRAFT-013",
+    "FR-CRAFT-014",
+    "FR-CRAFT-015",
+    "FR-CRAFT-016",
+    "FR-CRAFT-017",
+    "FR-CRAFT-018",
+    "FR-CRAFT-019",
+    "FR-CRAFT-020",
+    "FR-CRAFT-021",
+    "FR-CRAFT-023",
+    "FR-CRAFT-024"
+  ],
+  "acceptanceRefs": [
+    "AT-251",
+    "AT-252",
+    "AT-253",
+    "AT-254",
+    "AT-255",
+    "AT-256",
+    "AT-257",
+    "AT-258",
+    "AT-259",
+    "AT-260",
+    "AT-261",
+    "AT-262",
+    "AT-263",
+    "AT-264",
+    "AT-265",
+    "AT-267",
+    "AT-268"
+  ]
+}

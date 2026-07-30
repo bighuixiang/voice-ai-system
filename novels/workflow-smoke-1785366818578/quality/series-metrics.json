@@ -1,0 +1,72 @@
+{
+  "projectSlug": "workflow-smoke-1785366818578",
+  "chapterCount": 3,
+  "reportCount": 0,
+  "averageOverallScore": 0,
+  "metricAverages": [],
+  "weakestChapters": [],
+  "rhythmSignals": [
+    {
+      "chapterId": "chapter-001",
+      "chapterTitle": "第 1 章",
+      "wordCount": 189,
+      "sceneCount": 0,
+      "beatCount": 0,
+      "note": "暂无节奏摘要。",
+      "updatedAt": "2026-07-29T23:13:38.624Z"
+    }
+  ],
+  "characterArcSignals": [],
+  "qualityTrends": [],
+  "tensionCurve": [],
+  "styleDriftSignals": [],
+  "narrativeDebtSignals": [],
+  "craftCoverageSignals": [
+    {
+      "chapterId": "chapter-001",
+      "chapterTitle": "第 1 章",
+      "craftBeatCount": 0,
+      "requiredBeatCount": 0,
+      "missingRequiredBeatCount": 0,
+      "payoffCount": 0,
+      "foreshadowingCount": 0,
+      "progressionCount": 0,
+      "sliceOfLifeCount": 0,
+      "redemptionCount": 0,
+      "note": "No craft beats tracked for this chapter yet.",
+      "severity": "watch",
+      "updatedAt": "2026-07-29T23:13:38.624Z"
+    },
+    {
+      "chapterId": "chapter-002",
+      "chapterTitle": "第 2 章",
+      "craftBeatCount": 0,
+      "requiredBeatCount": 0,
+      "missingRequiredBeatCount": 0,
+      "payoffCount": 0,
+      "foreshadowingCount": 0,
+      "progressionCount": 0,
+      "sliceOfLifeCount": 0,
+      "redemptionCount": 0,
+      "note": "No craft beats tracked for this chapter yet.",
+      "severity": "watch",
+      "updatedAt": "2026-07-29T23:13:38.626Z"
+    },
+    {
+      "chapterId": "chapter-003",
+      "chapterTitle": "第 3 章",
+      "craftBeatCount": 0,
+      "requiredBeatCount": 0,
+      "missingRequiredBeatCount": 0,
+      "payoffCount": 0,
+      "foreshadowingCount": 0,
+      "progressionCount": 0,
+      "sliceOfLifeCount": 0,
+      "redemptionCount": 0,
+      "note": "No craft beats tracked for this chapter yet.",
+      "severity": "watch",
+      "updatedAt": "2026-07-29T23:13:38.629Z"
+    }
+  ],
+  "updatedAt": "2026-07-29T23:13:40.352Z"
+}

@@ -1,0 +1,22 @@
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { resolveInside } from "./pathSafety.js";
+
+export interface SceneCardContract { schemaVersion: "scene-card-contract.v1"; sceneId: string; projectSlug: string; chapterId: string; trigger: string; povCharacterId: string; roleGoal: string; conflictStrategy: string; turningPoint: string; informationChange: string; emotionChange: string; relationshipChange: string; resourceChange: string; entryState: string; exitState: string; nextSceneHook: string; sourceRefs: string[]; status: "candidate" | "validated" | "blocked"; createdAt: string; updatedAt: string; fingerprint: string; }
+function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
+function scenePath(root: string, id: string): string { return resolveInside(root, `sessions/scene-cards/${id}.json`); }
+async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const temp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(temp, target); }
+async function readJson<T>(target: string): Promise<T | null> { try { return JSON.parse(await fs.readFile(target, "utf8")) as T; } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
+export async function readSceneCardContract(root: string, sceneId: string): Promise<SceneCardContract | null> { return readJson<SceneCardContract>(scenePath(root, sceneId)); }
+export async function listSceneCardContracts(root: string, projectSlug: string): Promise<SceneCardContract[]> { const directory = resolveInside(root, "sessions/scene-cards"); let names: string[]; try { names = await fs.readdir(directory); } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return []; throw error; } const records = await Promise.all(names.filter((name) => name.endsWith(".json")).map((name) => readJson<SceneCardContract>(path.join(directory, name)))); return records.filter((record): record is SceneCardContract => Boolean(record && record.projectSlug === projectSlug)).sort((a, b) => a.sceneId.localeCompare(b.sceneId)); }
+export async function createSceneCardContract(input: { root: string; projectSlug: string; sceneId: string; chapterId: string; trigger: string; povCharacterId: string; roleGoal: string; conflictStrategy: string; turningPoint: string; informationChange: string; emotionChange: string; relationshipChange: string; resourceChange: string; entryState: string; exitState: string; nextSceneHook: string; sourceRefs: readonly string[] }): Promise<SceneCardContract> {
+  const required = [input.projectSlug, input.sceneId, input.chapterId, input.trigger, input.povCharacterId, input.roleGoal, input.conflictStrategy, input.turningPoint, input.informationChange, input.emotionChange, input.entryState, input.exitState];
+  if (required.some((value) => !value.trim())) throw new Error("SCENE_CARD_FIELDS_REQUIRED");
+  if (!input.relationshipChange.trim() || !input.resourceChange.trim()) throw new Error("SCENE_CARD_CHANGE_REQUIRED");
+  if (!input.nextSceneHook.trim()) throw new Error("SCENE_CARD_HOOK_REQUIRED");
+  if (!input.sourceRefs.length) throw new Error("SCENE_CARD_SOURCE_REQUIRED");
+  const existing = await readSceneCardContract(input.root, input.sceneId); if (existing) return existing;
+  const base = { schemaVersion: "scene-card-contract.v1" as const, sceneId: input.sceneId, projectSlug: input.projectSlug, chapterId: input.chapterId, trigger: input.trigger, povCharacterId: input.povCharacterId, roleGoal: input.roleGoal, conflictStrategy: input.conflictStrategy, turningPoint: input.turningPoint, informationChange: input.informationChange, emotionChange: input.emotionChange, relationshipChange: input.relationshipChange, resourceChange: input.resourceChange, entryState: input.entryState, exitState: input.exitState, nextSceneHook: input.nextSceneHook, sourceRefs: [...input.sourceRefs], status: "candidate" as const, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  const scene: SceneCardContract = { ...base, fingerprint: hash(base) }; await writeJson(scenePath(input.root, input.sceneId), scene); return scene;
+}

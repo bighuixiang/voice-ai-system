@@ -1,0 +1,1407 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "The fictional world constrains the story fairly across an entire novel: rules remain versioned and scoped, travel consumes time, abilities require prerequisites and costs, resources and injuries persist, institutions act off page, new rules cannot conveniently solve climaxes, revisions propagate, and completion states exactly what was and was not proven.",
+  "sourceFiles": [
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/novelProject.ts",
+      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+    },
+    {
+      "path": "api/src/storyGraph.ts",
+      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+    },
+    {
+      "path": "ui/src/components/novel/StoryControlPanel.vue",
+      "sha256": "d09ce9722f830892114276a9d5f05cac18e8df0bbdf318180d0c8edc9f1d7821"
+    },
+    {
+      "path": "ui/src/components/novel/SceneCardPanel.vue",
+      "sha256": "efcb3122146e3f4807914ff1e6166083f6a11c84ea3151c7b2cf73d7ad62b7e5"
+    },
+    {
+      "path": "ui/src/components/novel/WritingRecapPanel.vue",
+      "sha256": "35499ceff7bc2b75a1f8c4e1c130b7fbc9e57e780c5fff1e62ff45c791d42a2b"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "aggregate source/Bible fingerprints, bytes, lines and heading counts",
+      "StoryControl event field coverage",
+      "scene time/location/progression coverage",
+      "summary and ledger aggregate counts",
+      "story-graph type counts",
+      "source evidence paths and code tokens"
+    ],
+    "snapshotExcludes": [
+      "project slug or ID",
+      "title",
+      "genre",
+      "rough idea",
+      "rule, ability, location, organization, resource or character identity",
+      "chapter/scene/event/entity identity",
+      "Bible, ledger, summary, outline or prose text",
+      "file path inside a project",
+      "raw task/model output",
+      "absolute path or secret"
+    ]
+  },
+  "operationalSnapshot": {
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprint": "9816b83cf626d618bef33c52cd07743df473ba9df55f2bb55a35c6eea2893a11",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": false,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 0,
+          "summaryFiles": 0
+        },
+        "bibles": {
+          "world": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          },
+          "power": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          },
+          "locations": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          }
+        },
+        "storyEvents": {
+          "events": 0,
+          "withTrigger": 0,
+          "withLocation": 0,
+          "withReward": 0,
+          "withCost": 0,
+          "withChapterRange": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 0,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 0,
+          "byType": {},
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprint": "9461e5b9de02ac0f92d3aa214d762feff869d0dc28b39d6aabca6e530ac16086",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": false,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 0,
+          "summaryFiles": 0
+        },
+        "bibles": {
+          "world": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          },
+          "power": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          },
+          "locations": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          }
+        },
+        "storyEvents": {
+          "events": 0,
+          "withTrigger": 0,
+          "withLocation": 0,
+          "withReward": 0,
+          "withCost": 0,
+          "withChapterRange": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 0,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 0,
+          "byType": {},
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprint": "674ccfaa492171ad733a72816054ca09b3f283ebaccff87ffc6424cbb3ef9c7f",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": false,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 1,
+          "summaryFiles": 0
+        },
+        "bibles": {
+          "world": {
+            "exists": true,
+            "bytes": 29,
+            "characters": 15,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "46706632301d2e79ea6f19a095851db7053baba93b5d8decfa594d556be876c3"
+          },
+          "power": {
+            "exists": true,
+            "bytes": 68,
+            "characters": 32,
+            "lines": 5,
+            "headings": 1,
+            "sha256": "ef8aeaa778220a6de559b0bef3949223762283783d4d748a6f62a799141571e2"
+          },
+          "locations": {
+            "exists": true,
+            "bytes": 32,
+            "characters": 16,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "b17b9de865488b62e0224cb4f78ccbb6c716088c23d954520392a5c375223fc3"
+          }
+        },
+        "storyEvents": {
+          "events": 0,
+          "withTrigger": 0,
+          "withLocation": 0,
+          "withReward": 0,
+          "withCost": 0,
+          "withChapterRange": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 1,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 0,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 0,
+          "byType": {},
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprint": "f41fa596c83c7e3a9ab5af9d5e27ecdb1af0c39ee887f72914d7385964056616",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 198,
+          "summaryFiles": 1
+        },
+        "bibles": {
+          "world": {
+            "exists": true,
+            "bytes": 450561,
+            "characters": 234663,
+            "lines": 14199,
+            "headings": 798,
+            "sha256": "b638dbb0ec9862513263f658ca788a4c8b7612c0fee505e4b997d59b8bcebd67"
+          },
+          "power": {
+            "exists": true,
+            "bytes": 9192,
+            "characters": 3910,
+            "lines": 250,
+            "headings": 35,
+            "sha256": "eb56a7aec5c311e35e283bd876253600e7c0bb8d0ab91d347871d4297f2c65ea"
+          },
+          "locations": {
+            "exists": true,
+            "bytes": 32,
+            "characters": 16,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "b17b9de865488b62e0224cb4f78ccbb6c716088c23d954520392a5c375223fc3"
+          }
+        },
+        "storyEvents": {
+          "events": 2,
+          "withTrigger": 2,
+          "withLocation": 0,
+          "withReward": 0,
+          "withCost": 0,
+          "withChapterRange": 2,
+          "byStatus": {
+            "planned": 2
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 7,
+          "withTime": 7,
+          "withLocation": 7,
+          "withPowerProgression": 7,
+          "withBothTimeAndLocation": 7
+        },
+        "settledEvidence": {
+          "summaries": 1,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 279,
+          "byType": {
+            "arc": 24,
+            "chapter": 198,
+            "character": 22,
+            "event": 2,
+            "knowledge": 33
+          },
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprint": "4cb10c88dd6fa40440296bdd2d385e3c4b929c2bb629d14d7dfb5b0fc1b66811",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3
+        },
+        "bibles": {
+          "world": {
+            "exists": true,
+            "bytes": 26,
+            "characters": 12,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "abb2ee23eb14a6ff6a483adb558b344be570af8daa57cc717cf617690d2412f7"
+          },
+          "power": {
+            "exists": true,
+            "bytes": 64,
+            "characters": 28,
+            "lines": 5,
+            "headings": 1,
+            "sha256": "10f70c5447576c0740034160a29d6b1105c1a52b5206d797c02aa013d73638ad"
+          },
+          "locations": {
+            "exists": true,
+            "bytes": 29,
+            "characters": 13,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "6f9bdefb5dd1fe77517ad5d88c3a65c9ec792f4058ca865297524f0d193c9a8b"
+          }
+        },
+        "storyEvents": {
+          "events": 1,
+          "withTrigger": 1,
+          "withLocation": 1,
+          "withReward": 1,
+          "withCost": 1,
+          "withChapterRange": 1,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 3,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 6,
+          "byType": {
+            "arc": 1,
+            "chapter": 3,
+            "character": 1,
+            "event": 1
+          },
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprint": "f8a9f610e3939e1a82819f7efe2ed8dd83ce9fbe57de4a2c036627d0521a7a52",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3
+        },
+        "bibles": {
+          "world": {
+            "exists": true,
+            "bytes": 26,
+            "characters": 12,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "abb2ee23eb14a6ff6a483adb558b344be570af8daa57cc717cf617690d2412f7"
+          },
+          "power": {
+            "exists": true,
+            "bytes": 64,
+            "characters": 28,
+            "lines": 5,
+            "headings": 1,
+            "sha256": "10f70c5447576c0740034160a29d6b1105c1a52b5206d797c02aa013d73638ad"
+          },
+          "locations": {
+            "exists": true,
+            "bytes": 29,
+            "characters": 13,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "6f9bdefb5dd1fe77517ad5d88c3a65c9ec792f4058ca865297524f0d193c9a8b"
+          }
+        },
+        "storyEvents": {
+          "events": 1,
+          "withTrigger": 1,
+          "withLocation": 1,
+          "withReward": 1,
+          "withCost": 1,
+          "withChapterRange": 1,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 3,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 6,
+          "byType": {
+            "arc": 1,
+            "chapter": 3,
+            "character": 1,
+            "event": 1
+          },
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprint": "33d73559c80298b1a07414c1ac4d07dace9d6c37640b482623f6d6f2df6f4b99",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3
+        },
+        "bibles": {
+          "world": {
+            "exists": true,
+            "bytes": 26,
+            "characters": 12,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "abb2ee23eb14a6ff6a483adb558b344be570af8daa57cc717cf617690d2412f7"
+          },
+          "power": {
+            "exists": true,
+            "bytes": 64,
+            "characters": 28,
+            "lines": 5,
+            "headings": 1,
+            "sha256": "10f70c5447576c0740034160a29d6b1105c1a52b5206d797c02aa013d73638ad"
+          },
+          "locations": {
+            "exists": true,
+            "bytes": 29,
+            "characters": 13,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "6f9bdefb5dd1fe77517ad5d88c3a65c9ec792f4058ca865297524f0d193c9a8b"
+          }
+        },
+        "storyEvents": {
+          "events": 1,
+          "withTrigger": 1,
+          "withLocation": 1,
+          "withReward": 1,
+          "withCost": 1,
+          "withChapterRange": 1,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 3,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 6,
+          "byType": {
+            "arc": 1,
+            "chapter": 3,
+            "character": 1,
+            "event": 1
+          },
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprint": "5f1a1f1fe79f7dd43231f6920cfbec70bbef4a31e6c03a49261aa0247b20b2eb",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3
+        },
+        "bibles": {
+          "world": {
+            "exists": true,
+            "bytes": 26,
+            "characters": 12,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "abb2ee23eb14a6ff6a483adb558b344be570af8daa57cc717cf617690d2412f7"
+          },
+          "power": {
+            "exists": true,
+            "bytes": 64,
+            "characters": 28,
+            "lines": 5,
+            "headings": 1,
+            "sha256": "10f70c5447576c0740034160a29d6b1105c1a52b5206d797c02aa013d73638ad"
+          },
+          "locations": {
+            "exists": true,
+            "bytes": 29,
+            "characters": 13,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "6f9bdefb5dd1fe77517ad5d88c3a65c9ec792f4058ca865297524f0d193c9a8b"
+          }
+        },
+        "storyEvents": {
+          "events": 1,
+          "withTrigger": 1,
+          "withLocation": 1,
+          "withReward": 1,
+          "withCost": 1,
+          "withChapterRange": 1,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 3,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 6,
+          "byType": {
+            "arc": 1,
+            "chapter": 3,
+            "character": 1,
+            "event": 1
+          },
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      }
+    ],
+    "totals": {
+      "projects": 8,
+      "worldBibleFiles": 6,
+      "worldBibleBytes": 450694,
+      "worldBibleHeadings": 803,
+      "powerBibleFiles": 6,
+      "powerBibleBytes": 9516,
+      "powerBibleHeadings": 40,
+      "locationBibleFiles": 6,
+      "locationBibleBytes": 180,
+      "locationBibleHeadings": 6,
+      "events": 6,
+      "eventsWithTrigger": 6,
+      "eventsWithLocation": 4,
+      "eventsWithReward": 4,
+      "eventsWithCost": 4,
+      "eventsWithChapterRange": 6,
+      "scenes": 8,
+      "scenesWithTime": 7,
+      "scenesWithLocation": 7,
+      "scenesWithPowerProgression": 7,
+      "summaries": 13,
+      "powerPatches": 0,
+      "acceptedPowerPatches": 0,
+      "powerLedgerEntries": 0,
+      "continuityLedgerEntries": 0,
+      "graphNodes": 303,
+      "governedWorldNodes": 0
+    },
+    "eventStatusTotals": {
+      "planned": 2,
+      "seed": 4
+    },
+    "graphNodeTypeTotals": {
+      "arc": 28,
+      "chapter": 210,
+      "character": 26,
+      "event": 6,
+      "knowledge": 33
+    },
+    "interpretation": "The platform preserves substantial world and power prose plus editable time/location/progression/event fields, but those surfaces remain trimmed text or generic strings and ledgers. They are useful authoring evidence, not executable proof of applicable rules, travel, capability, conservation, persistent injury, institutional agency, fair exceptions or world closure."
+  },
+  "summary": {
+    "auditedStages": 14,
+    "projectsScanned": 8,
+    "worldBibleBytes": 450694,
+    "powerBibleBytes": 9516,
+    "events": 6,
+    "scenes": 8,
+    "powerPatches": 0,
+    "powerLedgerEntries": 0,
+    "continuityLedgerEntries": 0,
+    "worldIntegrityCertificates": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "World truth is split among long Markdown Bibles, free-text event/scene/profile fields, generic ledgers, summaries, knowledge triples and lossy graph/context projections. No authority binds stable rule identity, temporal/regional validity, condition-mechanism-result-cost, location reachability, ability lifecycle, resource/constraint conservation, institutional clocks, exceptions and adopted prose evidence into one causal world graph.",
+    "consequence": "The model can write a locally exciting chapter while teleporting a character, forgetting a cooldown, spending an item twice, healing an injury, promoting borrowed power, freezing an antagonist organization or inventing a climax rule—then summaries and empty ledgers make the violation difficult to detect and selectively repair."
+  },
+  "currentEvidence": [
+    {
+      "claim": "SceneCard and StoryEventCard expose useful time/location/progression/trigger/reward/cost strings but not executable temporal, capability or conservation contracts.",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 519,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "export interface SceneCard"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 532,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "powerProgression: string"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 581,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "export interface StoryEventCard"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 590,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "cost: string"
+        }
+      ]
+    },
+    {
+      "claim": "The story graph type system contains arcs, characters, events, chapters, ledgers and knowledge, with no first-class world rule, location, ability, resource or organization node.",
+      "evidence": [
+        {
+          "path": "api/src/types.ts",
+          "line": 610,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "export type StoryGraphNodeType = \"arc\" | \"character\" | \"event\" | \"chapter\" | \"ledger\" | \"knowledge\""
+        }
+      ]
+    },
+    {
+      "claim": "World and power Bibles are always assembled as context blocks, while oversized blocks retain their beginning and end around a middle-compression marker.",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 73,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "function trimContext"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 75,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "[...中间内容已压缩...]"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 722,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "{ title: \"世界观\""
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 723,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "{ title: \"力量体系\""
+        }
+      ]
+    },
+    {
+      "claim": "New projects create prose world/power/location files plus generic Markdown/JSON power and continuity ledgers.",
+      "evidence": [
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 282,
+          "sourceSha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064",
+          "token": "\"bible/world.md\""
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 283,
+          "sourceSha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064",
+          "token": "\"bible/power-system.md\""
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 284,
+          "sourceSha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064",
+          "token": "\"bible/locations.md\""
+        },
+        {
+          "path": "api/src/novelProject.ts",
+          "line": 291,
+          "sourceSha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064",
+          "token": "\"ledger/power-progression.json\""
+        }
+      ]
+    },
+    {
+      "claim": "Power and continuity are generic LedgerEntry kinds; recap acceptance merges them without quantities, units, rule versions, ability prerequisites or world-state transactions.",
+      "evidence": [
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 33,
+          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "token": "continuity: \"ledger/continuity.json\""
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 34,
+          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "token": "power: \"ledger/power-progression.json\""
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 1011,
+          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "token": "const powerProgressionUpdates = ledgerPatches.filter((entry) => entry.kind === \"power\")"
+        }
+      ]
+    },
+    {
+      "claim": "The StoryControl editor exposes power-level and event trigger/location/reward/cost fields, while the SceneCard editor exposes a free-text power-progression field.",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/StoryControlPanel.vue",
+          "line": 224,
+          "sourceSha256": "d09ce9722f830892114276a9d5f05cac18e8df0bbdf318180d0c8edc9f1d7821",
+          "token": "selectedCharacter.powerLevel"
+        },
+        {
+          "path": "ui/src/components/novel/StoryControlPanel.vue",
+          "line": 384,
+          "sourceSha256": "d09ce9722f830892114276a9d5f05cac18e8df0bbdf318180d0c8edc9f1d7821",
+          "token": "selectedEvent.trigger"
+        },
+        {
+          "path": "ui/src/components/novel/StoryControlPanel.vue",
+          "line": 411,
+          "sourceSha256": "d09ce9722f830892114276a9d5f05cac18e8df0bbdf318180d0c8edc9f1d7821",
+          "token": "selectedEvent.cost"
+        },
+        {
+          "path": "ui/src/components/novel/SceneCardPanel.vue",
+          "line": 147,
+          "sourceSha256": "efcb3122146e3f4807914ff1e6166083f6a11c84ea3151c7b2cf73d7ad62b7e5",
+          "token": "key: \"title\" | \"location\" | \"pov\" | \"conflict\" | \"turn\" | \"powerProgression\""
+        }
+      ]
+    },
+    {
+      "claim": "The recap UI presents counts for generic continuity and progression patches, not a review of resource, injury, rule-interaction or institutional transactions.",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/WritingRecapPanel.vue",
+          "line": 75,
+          "sourceSha256": "35499ceff7bc2b75a1f8c4e1c130b7fbc9e57e780c5fff1e62ff45c791d42a2b",
+          "token": "candidate.continuityRisks.length"
+        },
+        {
+          "path": "ui/src/components/novel/WritingRecapPanel.vue",
+          "line": 76,
+          "sourceSha256": "35499ceff7bc2b75a1f8c4e1c130b7fbc9e57e780c5fff1e62ff45c791d42a2b",
+          "token": "candidate.powerProgressionUpdates.length"
+        }
+      ]
+    },
+    {
+      "claim": "Event graph projection uses location or chapter range as a subtitle, which provides navigation but not story-time or reachability semantics.",
+      "evidence": [
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 541,
+          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "token": "subtitle: event.location || event.chapterRange || event.type"
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "WORLD-TRACE-001",
+      "label": "resolve-rule-entity-authority",
+      "current": "World, power and location Bibles coexist with StoryControl, scenes, ledgers, summaries and knowledge projections.",
+      "gap": "No stable rule/ability/location/organization/resource registry resolves aliases, versions, source priority, conflicts or unknowns.",
+      "target": "Resolve stable identities and provenance before any world inference or constraint check."
+    },
+    {
+      "id": "WORLD-TRACE-002",
+      "label": "compile-rule-contract",
+      "current": "Bible prose and prompts can describe rules and visible costs.",
+      "gap": "No adopted contract binds condition, mechanism, result, cost, limit, failure, time/region validity and disclosure boundary.",
+      "target": "Compile versioned WorldRuleContract records only for story-relevant rules."
+    },
+    {
+      "id": "WORLD-TRACE-003",
+      "label": "separate-rule-from-belief",
+      "current": "Knowledge facts and prose may contain claims from characters, institutions or narration.",
+      "gap": "A doctrine, rumor, proposal or model inference can be flattened into objective world truth.",
+      "target": "Keep effective rule, actor belief, proposal, competing explanation and honest unknown distinct."
+    },
+    {
+      "id": "WORLD-TRACE-004",
+      "label": "freeze-world-state-snapshot",
+      "current": "Scene time/location and mutable Bible/ledger blocks are assembled independently.",
+      "gap": "No single canon/event cursor proves applicable rules, region, weather, closure, inventory and constraints at scene entry.",
+      "target": "Freeze WorldStateSnapshot with source versions, story time, region and relevant constraint states."
+    },
+    {
+      "id": "WORLD-TRACE-005",
+      "label": "validate-chronology-and-travel",
+      "current": "Scenes store free-text time/location and events store chapter ranges.",
+      "gap": "Chapter order cannot prove elapsed time, parallel POV, route reachability, travel duration or blockade effects.",
+      "target": "Validate departure, route, transport, obstacles, duration and arrival against a temporal location graph."
+    },
+    {
+      "id": "WORLD-TRACE-006",
+      "label": "compile-ability-and-progression",
+      "current": "Profiles/scenes/ledgers carry power-level and progression strings.",
+      "gap": "No contract proves prerequisites, acquisition, retention, borrowing, loss, cost, cooldown or recovery; planned progression can masquerade as earned growth.",
+      "target": "Use AbilityContract plus adopted ProgressionEvent evidence and contextual capability comparison."
+    },
+    {
+      "id": "WORLD-TRACE-007",
+      "label": "enforce-resource-conservation",
+      "current": "Events have generic reward/cost strings and LedgerEntry has no quantity, unit, balance or transaction semantics.",
+      "gap": "Items, currency, lifespan, force, status or debt can appear, disappear or be consumed twice.",
+      "target": "Settle exact ResourceTransaction values where countable and bounded evidence intervals where not."
+    },
+    {
+      "id": "WORLD-TRACE-008",
+      "label": "persist-injury-and-cooldown",
+      "current": "Costs and continuity risks may mention injury or cooldown in prose.",
+      "gap": "No time-valid constraint state prevents chapter-boundary healing, repeated use or recovery without treatment/time evidence.",
+      "target": "Maintain injury, disease, poison, curse, cooldown and recovery ConstraintState records."
+    },
+    {
+      "id": "WORLD-TRACE-009",
+      "label": "simulate-institution-agency",
+      "current": "Story events list participants but do not model organization knowledge, response clocks, communication, routes or resource use.",
+      "gap": "Institutions may become instantly omniscient, teleport forces or freeze whenever the protagonist leaves.",
+      "target": "Generate evidence-bound InstitutionActionEvents and settle social/institutional consequences."
+    },
+    {
+      "id": "WORLD-TRACE-010",
+      "label": "resolve-rule-interaction-and-exception",
+      "current": "Continuity review can flag prose risks but has no deterministic interaction or exception lineage.",
+      "gap": "The system can choose the convenient outcome, silently weaken a rule or lose the explanation debt.",
+      "target": "Preserve candidate interactions; adopted outcomes and exceptions create replayable events and RuleExceptionDebt."
+    },
+    {
+      "id": "WORLD-TRACE-011",
+      "label": "guard-new-rule-fairness",
+      "current": "Draft prompts ask for setup/cost/aftershock and foreshadowing, but a new rule remains free text.",
+      "gap": "A climax-only rule can solve the plot without prior salience, limits, irreversible cost or author decision.",
+      "target": "Apply rising admission, setup, disclosure and author-approval thresholds as rules approach decisive payoff."
+    },
+    {
+      "id": "WORLD-TRACE-012",
+      "label": "validate-plan-and-prose",
+      "current": "Context includes trimmed Bibles, StoryControl, scenes and generic ledgers.",
+      "gap": "A locally fluent plan or chapter can violate a rule omitted from context, while forcing full lore exposition would harm prose.",
+      "target": "Validate full relevant contracts privately and expose only reader-appropriate observable rule evidence in prose."
+    },
+    {
+      "id": "WORLD-TRACE-013",
+      "label": "settle-world-events-after-adoption",
+      "current": "Recap merges generic power and continuity ledger patches after author acceptance.",
+      "gap": "Free-text ledger acceptance cannot atomically update rule use, time/location, ability, resource, injury, organization and disclosure state against one prose version.",
+      "target": "After prose adoption settle typed world events atomically with source anchors and reversible projections."
+    },
+    {
+      "id": "WORLD-TRACE-014",
+      "label": "propagate-revision-and-certify",
+      "current": "Story graphs project generic events/ledgers; no world integrity certificate exists.",
+      "gap": "A changed rule, route, resource source or organization knowledge may leave stale prose/outline/closure claims, while an empty ledger can look healthy.",
+      "target": "Propagate exact invalidation and issue scope-bound WorldIntegrityCertificate with consistent/open/conflict/unknown/failed/stale results."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-enrich-bibles-maps-tables-and-prompts",
+      "verdict": "retain-as-authoring-sources-and-adapters-not-world-truth",
+      "blueCase": "Authors can express nuanced lore naturally, reuse current files and UI, migrate cheaply and improve local generation detail quickly.",
+      "redCase": "Longer prose remains truncated, conflicting and non-executable; prompts cannot prove time, travel, capability, conservation, recovery, organization response or fair exception handling."
+    },
+    {
+      "option": "B-build-a-complete-economic-geographic-political-physics-simulator",
+      "verdict": "defer-to-optional-project-specific-simulators",
+      "blueCase": "A full simulation can produce strong consistency and emergent possibilities for hard-worldbuilding or sandbox stories.",
+      "redCase": "It is expensive, falsely precise for social resources, burdens authors with parameters, constrains discovery writing and solves far more world state than the narrative can observe or use."
+    },
+    {
+      "option": "C-typed-narrative-relevant-world-graph-with-transactions-and-independent-fairness-review",
+      "verdict": "recommended-already-specified-not-implemented",
+      "blueCase": "Promote only rules that affect choice, causality, reader fairness or closure; combine scoped contracts, temporal states, reachability, abilities, transactions, constraints, institutional events, exceptions and evidence certificates while keeping atmospheric lore in prose.",
+      "redCase": "Requires schema/migration, identity and temporal resolution, units and intervals, interaction logic, author-approved extraction, impact propagation, genre calibration and careful UX that does not turn fiction into a spreadsheet."
+    }
+  ],
+  "yAGNI": {
+    "newRequirementsAdded": 0,
+    "newAcceptanceTestsAdded": 0,
+    "newDecisionsAdded": 0,
+    "rationale": "FR-WORLD-001..020 already specify the complete causal world contract. The missing work is implementation, migration and evidence; parallel LORE2, POWER2, TIMELINE2 or RESOURCE domains would split authority and invite partial delivery.",
+    "existingContract": {
+      "requirementIds": [
+        "FR-WORLD-001",
+        "FR-WORLD-002",
+        "FR-WORLD-003",
+        "FR-WORLD-004",
+        "FR-WORLD-005",
+        "FR-WORLD-006",
+        "FR-WORLD-007",
+        "FR-WORLD-008",
+        "FR-WORLD-009",
+        "FR-WORLD-010",
+        "FR-WORLD-011",
+        "FR-WORLD-012",
+        "FR-WORLD-013",
+        "FR-WORLD-014",
+        "FR-WORLD-015",
+        "FR-WORLD-016",
+        "FR-WORLD-017",
+        "FR-WORLD-018",
+        "FR-WORLD-019",
+        "FR-WORLD-020",
+        "FR-LONGMEM-004",
+        "FR-LONGMEM-007",
+        "FR-PROSE-023",
+        "FR-READER-012"
+      ],
+      "acceptanceRefs": [
+        "AT-284",
+        "AT-367",
+        "AT-380",
+        "AT-462",
+        "AT-463",
+        "AT-464",
+        "AT-465",
+        "AT-466",
+        "AT-467",
+        "AT-468",
+        "AT-469",
+        "AT-470",
+        "AT-471",
+        "AT-472",
+        "AT-473",
+        "AT-474",
+        "AT-475",
+        "AT-476",
+        "AT-477",
+        "AT-478",
+        "AT-479",
+        "AT-480",
+        "AT-481",
+        "AT-510"
+      ],
+      "decisionRefs": [
+        "D-137",
+        "D-138",
+        "D-139",
+        "D-140",
+        "D-141",
+        "D-142"
+      ]
+    }
+  },
+  "targetAuthority": {
+    "entities": [
+      "WorldRuleContract",
+      "WorldStateSnapshot",
+      "LocationGraph",
+      "TravelEvent",
+      "AbilityContract",
+      "ProgressionEvent",
+      "CapabilityComparison",
+      "ResourceAccount",
+      "ResourceTransaction",
+      "ConstraintState",
+      "InstitutionActionEvent",
+      "RuleInteractionEvent",
+      "RuleExceptionDebt",
+      "WorldImpactReport",
+      "WorldIntegrityCertificate"
+    ],
+    "invariant": "No Bible size or heading, prompt instruction, scene time/location/progression string, event trigger/reward/cost, chapter range, generic ledger entry, recap acceptance, knowledge triple, quality score, model assertion or empty ledger may independently establish rule validity, reachability, ability availability, earned progression, conservation, recovery, institutional causality, fair exception or world integrity."
+  },
+  "worldProtocol": {
+    "order": [
+      "resolve stable rule, ability, location, organization and resource identities plus aliases, versions, provenance, conflicts and honest unknowns",
+      "adopt story-relevant WorldRuleContracts with condition, mechanism, result, cost, limit, failure, temporal/regional validity and disclosure boundary",
+      "separate objective effective rules from character/institution belief, author proposal and competing explanations",
+      "freeze one WorldStateSnapshot at the canon/event cursor and validate chronology, location graph, route, transport, obstacles and duration",
+      "compile AbilityContracts and evidence-bearing ProgressionEvents; compare capability contextually and preserve borrowing, loss, cost, cooldown and recovery",
+      "settle exact or bounded ResourceTransactions plus injury/disease/poison/curse/cooldown ConstraintStates without silent reset",
+      "simulate InstitutionActionEvents from knowledge, goals, response clocks, communication, routes and resource expenditure, including social consequences",
+      "preserve candidate rule interactions; admit new rules and exceptions through rising setup, salience, cost, fairness and author-approval gates",
+      "validate plan and prose against full relevant contracts while revealing only reader-appropriate observable consequences",
+      "after prose adoption atomically settle world events, propagate exact revision invalidation and issue a scope-bound WorldIntegrityCertificate"
+    ],
+    "nonGoal": "The target does not simulate every citizen, coin, weather cell or unwritten continent; force all resources into exact numbers; reveal private lore to readers; forbid intentional mystery; or prevent discovery writing. It promotes only constraints that change choice, causality, fairness or closure and leaves the rest as narrative source material until needed."
+  },
+  "verificationMatrix": [
+    "same-named rules, superseded versions, regional variants, unreliable doctrine, author proposal, conflicting sources and honest unknown",
+    "parallel POV night, time jump, flashback, time stop, teleport, blocked road, detour, transport speed and exact boundary duration",
+    "missing prerequisite/artifact/anchor, borrowed power, temporary buff, retained/lost skill, cooldown, recovery and contextual underdog victory",
+    "single-use item spent twice, negative currency, lifespan cost restored, debt transfer, fuzzy prestige/force interval and concurrent transactions",
+    "injury, disease, poison, curse and ability cooldown across chapter boundaries with treatment, rest and failed recovery",
+    "institution receives partial intelligence, verifies, communicates, mobilizes, travels and spends resources while protagonist is absent",
+    "climax-only solution rule, prior subtle setup, irreversible cost, silent exception, multiple-rule interaction and replay after adoption",
+    "cheap healing/communication/power changes professions, prices, warfare, hierarchy or lifespan unless a sourced exception explains why not",
+    "validator sees full contract while prose preserves mystery and avoids lore dump; character belief remains wrong without corrupting truth",
+    "revision changes rule, location, departure time, acquisition, resource or institution knowledge; only exact dependents become stale",
+    "unknown continent and intentionally soft economics remain unknown while empty ledger, failed scan or key conflict blocks certification",
+    "author rejects an extracted world event; projections rebuild without resurrecting the rejected balance, capability or rule interpretation"
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-WORLD-001",
+      "FR-WORLD-002",
+      "FR-WORLD-003",
+      "FR-WORLD-004",
+      "FR-WORLD-005",
+      "FR-WORLD-006",
+      "FR-WORLD-007",
+      "FR-WORLD-008",
+      "FR-WORLD-009",
+      "FR-WORLD-010",
+      "FR-WORLD-011",
+      "FR-WORLD-012",
+      "FR-WORLD-013",
+      "FR-WORLD-014",
+      "FR-WORLD-015",
+      "FR-WORLD-016",
+      "FR-WORLD-017",
+      "FR-WORLD-018",
+      "FR-WORLD-019",
+      "FR-WORLD-020"
+    ],
+    "acceptanceRefs": [
+      "AT-462",
+      "AT-463",
+      "AT-464",
+      "AT-465",
+      "AT-466",
+      "AT-467",
+      "AT-468",
+      "AT-469",
+      "AT-470",
+      "AT-471",
+      "AT-472",
+      "AT-473",
+      "AT-474",
+      "AT-475",
+      "AT-476",
+      "AT-477",
+      "AT-478",
+      "AT-479",
+      "AT-480",
+      "AT-481"
+    ],
+    "rule": "Do not claim coherent world rules, reachable travel, valid abilities, earned progression, conserved resources, persistent constraints, causal institutions, fair new rules or world completion until stable identities/versions and belief boundaries resolve; one time/region snapshot determines applicability; travel, ability, resource, injury and organization events settle from adopted prose; interactions/exceptions retain explanation debt and reader-fairness evidence; revisions propagate; and WorldIntegrityCertificate honestly limits its scope and lists conflicts, unknowns, failures and stale evidence."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none weakens rule identity/version, time/region validity, travel reachability, ability prerequisites, resource/constraint conservation, new-rule fairness, author-approved settlement, revision invalidation or honest scope-bound certification."
+}

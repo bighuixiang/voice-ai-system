@@ -1,0 +1,1408 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "authoritativeTarget": {
+    "gateway": "CanonMutationGateway",
+    "commands": [
+      "SubmitAuthorEdit",
+      "AdoptProseCandidate",
+      "RestoreCanonVersion"
+    ],
+    "invariant": "Every canon mutation emits one immutable event, validates a versioned baseline and locks, commits atomically, and invalidates all affected projections, candidates, caches, obligations, and audits."
+  },
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/proseCandidate.ts",
+      "sha256": "551b4e3e996b7b237fc1572ec11c49245ec0ea22fb3101996577f03090974ab2"
+    },
+    {
+      "path": "api/src/proseAdoption.ts",
+      "sha256": "4580625cc0112d5dbe14800cf1ed967932dff1c12c2176d58785ee23f3482349"
+    },
+    {
+      "path": "api/src/proseValidation.ts",
+      "sha256": "5f07efdcf14be88c59bae8614fc4758555e1923482ffa06a367efee648fffc3e"
+    },
+    {
+      "path": "api/src/proseReview.ts",
+      "sha256": "64415f70d9a8128038ccb36c28f93db835cd190cad60f572f9c6efd021529ccc"
+    },
+    {
+      "path": "api/src/authorFeedback.ts",
+      "sha256": "c78d6c10b6f8713281fba2330efc0ebdb4c0cd882f6652eff8260012fbd24139"
+    },
+    {
+      "path": "api/src/derivedPublication.ts",
+      "sha256": "e331f9f320f7d11c8d523e747fc08c99864770a8e0e3065ff3c5c8dd9378e3af"
+    },
+    {
+      "path": "api/src/chapterSettlement.ts",
+      "sha256": "481906f680153a4ab6cf2f10b563b8195fa2d85aa8e9623b235892b594925ecd"
+    },
+    {
+      "path": "api/src/bookWorkGraph.ts",
+      "sha256": "080e74a325fc6a8195e98b4213cfb0e112ecbe1dcbc5a0ebbcf2fb95ba8223ea"
+    },
+    {
+      "path": "api/src/bookWorkScheduler.ts",
+      "sha256": "09f721bc89417c623f1def07c6032bb585eb9103ddf69513c4a09127621306fe"
+    },
+    {
+      "path": "api/src/bookRun.ts",
+      "sha256": "d3075bb1d598f7b1cec68b28e7690ed54abf94155241072df86c08984dcc755c"
+    },
+    {
+      "path": "api/src/quiescenceProof.ts",
+      "sha256": "afdcbb424a3151e331bfa25612c274f5299cbb7620c2278c3f6e773b3cc5bdcc"
+    },
+    {
+      "path": "api/src/completionAudit.ts",
+      "sha256": "a7962c88ebe1ecc3f97c6cf414a950c6edf33abd3c6a1d481ac4ca86ba0f3f42"
+    },
+    {
+      "path": "api/src/outlineCandidate.ts",
+      "sha256": "d8655fb0a85e754a912631cea0342257c7449e4c971d562849fc764ce0ba8497"
+    },
+    {
+      "path": "api/src/outlineValidation.ts",
+      "sha256": "aa2d8e53cc2870a13b0ff15a20b38e8f7c94bcc91236ab7576c38f23141d7110"
+    },
+    {
+      "path": "api/src/outlineAdoption.ts",
+      "sha256": "89263e3c4b6c54c5fe3e1e096794a9259c0fb63914fa9d3b58ea78263203ee18"
+    },
+    {
+      "path": "api/src/outlineCommit.ts",
+      "sha256": "888215f5df10ee14cd5d73db87eaf9e59a534444086b7b994694936a6a3a05e7"
+    },
+    {
+      "path": "api/src/executionReadiness.ts",
+      "sha256": "e86f6c1bf92ee9933ca607cc93691ccc5c281711a40c31a7405ab233f22b446c"
+    },
+    {
+      "path": "api/src/executionQueue.ts",
+      "sha256": "313674ce39d6e25eff038633d96cadc42f7438d2313a5036fbba9fcd0fe56563"
+    },
+    {
+      "path": "api/src/runtimeFiles.ts",
+      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
+    },
+    {
+      "path": "api/src/taskService.ts",
+      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+    },
+    {
+      "path": "api/src/creativeSession.ts",
+      "sha256": "db382d3da1c3569bb84852cf7738869a2dd2d67fd274fc006178064323600cf4"
+    },
+    {
+      "path": "api/src/creativeJourney.ts",
+      "sha256": "83726cbde2f77204c805acbbf58f23742cd65666bda54e34758b366d9b2a656b"
+    },
+    {
+      "path": "api/src/understandingTask.ts",
+      "sha256": "4d9508d4d09175a45420fd3836f614599fdb09475419fa0bd2175e398e06f2e0"
+    },
+    {
+      "path": "api/src/contextManifest.ts",
+      "sha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc"
+    },
+    {
+      "path": "api/src/understandingPreflight.ts",
+      "sha256": "977c0adb83a54551b43e6c918cb49d753ad06b6bb1ed5954198fd366c7c0c22b"
+    },
+    {
+      "path": "api/src/understandingRiskProfile.ts",
+      "sha256": "f0b522fad7bafb200257e7c7a517037fba90f98b6f653e9d71d176656b0c4ecc"
+    },
+    {
+      "path": "api/src/understandingBudget.ts",
+      "sha256": "c96ae3686f7b84ab195e498616974afe16f8f26b8c0768d7cb508028a678426e"
+    },
+    {
+      "path": "api/src/understandingAuthorization.ts",
+      "sha256": "53ae77b14c67ee33f41dab10383e1a8a777aa9351fb576d75320a8622744a11e"
+    },
+    {
+      "path": "api/src/understandingExecutor.ts",
+      "sha256": "d79b0e5463a08032776bf08fb0af80733e2fefad46a710fdd74ead16144fb6e7"
+    },
+    {
+      "path": "api/src/understandingWorker.ts",
+      "sha256": "abf52765f351fd8d9004c373df09ff9f75fc0940c1671f96c9246e7ff0f25e83"
+    },
+    {
+      "path": "api/src/dialogueQuestions.ts",
+      "sha256": "ad8813eb29fc06c10686ee7aa3d3eeadbcb63d45048f9b66afc2cea40e0c6ce7"
+    },
+    {
+      "path": "api/src/contractCandidate.ts",
+      "sha256": "087dd1e84882d211e2e40a82d0dca1e50d9209258f54b63f9b9ef52b6d965b4e"
+    },
+    {
+      "path": "api/src/understandingReview.ts",
+      "sha256": "71495bacd26136b082c34f13b5699747676d0216ea118afd15ea2b402bf91038"
+    },
+    {
+      "path": "api/src/contractAdoption.ts",
+      "sha256": "2f341cd39f96ec79cce2fafd2c342a23ffdf8d37f82cd1a712972675dca8bb60"
+    },
+    {
+      "path": "api/src/contractCanonAdoption.ts",
+      "sha256": "a1a5e46e20dd34b576fd036fb31d4450979dad50154bb94886d4c8fbfef85da0"
+    },
+    {
+      "path": "api/src/contractProjectionRebuild.ts",
+      "sha256": "65b4dc762720badcdeb8fd1d5e6b056606a5a92bcac99738b2da194967d2d1d2"
+    },
+    {
+      "path": "api/src/contractReadiness.ts",
+      "sha256": "95680ab7ea23f54720b0f103fa4c4f84587290d2bf993e518528cce18d4920dc"
+    },
+    {
+      "path": "api/src/worldRuleContract.ts",
+      "sha256": "0c64c916d8e2afcb39656d3ae76c53da33ea313ca6a18ce64a47da2e47c950f0"
+    },
+    {
+      "path": "api/src/backgroundJobs.ts",
+      "sha256": "73c13641c2ff469ab4b96c3b411b3902aafcf440f0f87f0bf9124d336d585eb6"
+    },
+    {
+      "path": "ui/src/services/novelApi.ts",
+      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    }
+  ],
+  "summary": {
+    "auditedSurfaceFamilies": 17,
+    "classifiedMutatingProjectRoutes": 104,
+    "unclassifiedMutatingProjectRoutes": 0,
+    "byRisk": {
+      "controlled": 4,
+      "critical": 4,
+      "high": 8,
+      "medium": 1
+    },
+    "currentlyUnifiedCanonAuthority": false,
+    "implementationVerified": false
+  },
+  "mutatingProjectRoutes": [
+    {
+      "route": "DELETE /api/novel/projects/:projectId",
+      "disposition": "project-lifecycle-control",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/import",
+      "disposition": "bootstrap-only",
+      "surfaceIds": [
+        "WRITE-SURFACE-013"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects",
+      "disposition": "bootstrap-only",
+      "surfaceIds": [
+        "WRITE-SURFACE-013"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/backups",
+      "disposition": "local-backup-create",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/backups/:backupId/verify",
+      "disposition": "local-backup-verify",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs",
+      "disposition": "book-run-start",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/advance",
+      "disposition": "book-run-advance",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/completion-audits",
+      "disposition": "book-run-completion-audit",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/pause",
+      "disposition": "book-run-pause",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/resume",
+      "disposition": "book-run-resume",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/retry",
+      "disposition": "book-run-retry",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/stop",
+      "disposition": "book-run-stop",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/continuity/check",
+      "disposition": "review-only",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/editor/suggestion",
+      "disposition": "candidate-only",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/jobs",
+      "disposition": "derived-job-control",
+      "surfaceIds": [
+        "WRITE-SURFACE-012"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/jobs/:jobId/cancel",
+      "disposition": "job-control",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/jobs/:jobId/retry",
+      "disposition": "derived-job-control",
+      "surfaceIds": [
+        "WRITE-SURFACE-012"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/knowledge/index/rebuild",
+      "disposition": "derived-projection",
+      "surfaceIds": [
+        "WRITE-SURFACE-012"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/knowledge/search",
+      "disposition": "query-only",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/migrations",
+      "disposition": "migration-preview",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/migrations/:migrationId/activate",
+      "disposition": "migration-activation",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/migrations/:migrationId/resolve-conflicts",
+      "disposition": "migration-conflict-resolution",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/migrations/:migrationId/rollback",
+      "disposition": "migration-rollback",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/migrations/:migrationId/validate",
+      "disposition": "migration-validation",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/obligation-coverage/certificate",
+      "disposition": "obligation-coverage-certificate",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/obligation-coverage/certificate/invalidate",
+      "disposition": "obligation-coverage-certificate-invalidate",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/obligation-coverage/certificate/validate",
+      "disposition": "obligation-coverage-certificate-validate",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/obligations",
+      "disposition": "obligation-create",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/obligations/:obligationId/events",
+      "disposition": "obligation-event",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/patches",
+      "disposition": "canon-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-002"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions",
+      "disposition": "edition-manifest-freeze",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/access-grants",
+      "disposition": "delivery-access-grant",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/access-grants/:grantId/revoke",
+      "disposition": "delivery-access-grant-revoke",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/artifacts",
+      "disposition": "publication-artifact-validation",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/closure-certificate",
+      "disposition": "closure-certificate-issue",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/delivery-proof",
+      "disposition": "delivery-proof-issue",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/delivery-proof/revoke",
+      "disposition": "delivery-proof-revoke",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/delivery-proof/supersede",
+      "disposition": "delivery-proof-supersede",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/preflight",
+      "disposition": "release-preflight",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/publication-editions/:editionId/tree",
+      "disposition": "publication-tree-compile",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/recaps/accept",
+      "disposition": "derived-canon-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-008"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/release-e2e-acceptance",
+      "disposition": "evidence-ingestion",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/revision-adoption-proposals/:proposalId/receipts",
+      "disposition": "revision-adoption-receipt",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/revision-adoption-receipts/:receiptId/settlements",
+      "disposition": "revision-settlement",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/revision-change-sets/:changeSetId/adoption-proposals",
+      "disposition": "revision-adoption-proposal",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/revision-change-sets/:changeSetId/reviews",
+      "disposition": "revision-change-set-review",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/revision-intents",
+      "disposition": "revision-intent-create",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/revision-intents/:intentId/change-sets",
+      "disposition": "revision-change-set-candidate",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapters/:chapterId/settle",
+      "disposition": "canon-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-005"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapters/:chapterId/settlements/:settlementId/derived",
+      "disposition": "derived-projection",
+      "surfaceIds": [
+        "WRITE-SURFACE-005"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/checkpoints/:checkpointId/restore",
+      "disposition": "canon-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-011"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/derivatives",
+      "disposition": "candidate-only",
+      "surfaceIds": [
+        "WRITE-SURFACE-007"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/derivatives/:branchId/merge",
+      "disposition": "canon-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-007"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/direction",
+      "disposition": "runtime-control-event",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/pause",
+      "disposition": "runtime-control",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/adopt",
+      "disposition": "canon-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-005"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/feedback",
+      "disposition": "feedback-event",
+      "surfaceIds": [
+        "WRITE-SURFACE-005"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/review",
+      "disposition": "review-only",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/validate",
+      "disposition": "review-only",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/resume",
+      "disposition": "runtime-control",
+      "surfaceIds": [
+        "WRITE-SURFACE-003"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review/accept",
+      "disposition": "canon-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-005"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review/rewrite",
+      "disposition": "candidate-orchestration",
+      "surfaceIds": [
+        "WRITE-SURFACE-004"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/start",
+      "disposition": "candidate-orchestration",
+      "surfaceIds": [
+        "WRITE-SURFACE-003"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/stop",
+      "disposition": "runtime-control",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/work-graph",
+      "disposition": "candidate-orchestration",
+      "surfaceIds": [
+        "WRITE-SURFACE-003"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/work-graph/refresh",
+      "disposition": "derived-projection",
+      "surfaceIds": [
+        "WRITE-SURFACE-003"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/selection/polish",
+      "disposition": "candidate-only",
+      "surfaceIds": [
+        "WRITE-SURFACE-006"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/context-manifest",
+      "disposition": "t0-freeze",
+      "surfaceIds": [
+        "WRITE-SURFACE-016"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/messages",
+      "disposition": "session-capture",
+      "surfaceIds": [
+        "WRITE-SURFACE-014"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/budget",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/capability-authorization",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/contract-adoption",
+      "disposition": "canon-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-017"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/contract-adoption-proposals",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/contract-candidates",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/contract-readiness",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-017"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/outline-adoption",
+      "disposition": "canon-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-017"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/outline-adoption-proposals",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/outline-adoption-proposals/authorize",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/outline-candidates",
+      "disposition": "candidate-only",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/outline-candidates/:outlineId/validate",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/preflight",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/projection-freshness/monitor",
+      "disposition": "derived-projection",
+      "surfaceIds": [
+        "WRITE-SURFACE-017"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/projection-rebuild",
+      "disposition": "derived-projection",
+      "surfaceIds": [
+        "WRITE-SURFACE-017"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/quality-calibration",
+      "disposition": "evidence-ingestion",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/questions",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/questions/:questionId/answers",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/recover",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/review",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/review/external",
+      "disposition": "evidence-ingestion",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/tasks/:taskId/cancel",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/tasks/:taskId/resume",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/world-rule-contracts",
+      "disposition": "safety-gate",
+      "surfaceIds": [
+        "WRITE-SURFACE-015"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/tasks",
+      "disposition": "candidate-only",
+      "surfaceIds": [
+        "WRITE-SURFACE-002"
+      ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/tasks/:taskId/cancel",
+      "disposition": "task-control",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/tasks/async",
+      "disposition": "candidate-only",
+      "surfaceIds": [
+        "WRITE-SURFACE-002"
+      ]
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/ai",
+      "disposition": "project-configuration",
+      "surfaceIds": []
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/dashboard/:chapterId",
+      "disposition": "projection-mutable",
+      "surfaceIds": [
+        "WRITE-SURFACE-010"
+      ]
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/files/*",
+      "disposition": "canon-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-001"
+      ]
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/ledger/:kind",
+      "disposition": "canon-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-009"
+      ]
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/memory/chapter-summaries/:chapterId",
+      "disposition": "projection-mutable",
+      "surfaceIds": [
+        "WRITE-SURFACE-010"
+      ]
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/quality/:chapterId",
+      "disposition": "projection-mutable",
+      "surfaceIds": [
+        "WRITE-SURFACE-010"
+      ]
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/scenes/:chapterId",
+      "disposition": "canon-plan-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-010"
+      ]
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/story-control",
+      "disposition": "canon-capable",
+      "surfaceIds": [
+        "WRITE-SURFACE-010"
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "surfaceId": "WRITE-SURFACE-001",
+      "label": "作者正文与支持文件直接保存",
+      "actor": "author-ui",
+      "currentOperation": "PUT arbitrary safe project file content, snapshot it, then write the file and project metadata directly",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2674,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/files/*\""
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3690,
+          "evidence": "async function saveCurrentContent"
+        }
+      ],
+      "currentStrengths": [
+        "safe-path validation",
+        "protected project.json guard",
+        "file-version snapshot"
+      ],
+      "gaps": [
+        "no client baseline or ETag precondition",
+        "no shared canon mutation event",
+        "no deterministic downstream invalidation before derived rebuild"
+      ],
+      "risk": "high",
+      "requiredDisposition": "Route author edits through CanonMutationGateway while preserving immediate author ownership and offline-recovery UX."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-002",
+      "label": "AI 任务补丁采纳",
+      "actor": "author-ui-plus-task-api",
+      "currentOperation": "Apply normalized task patches one by one and mark invocation targets accepted afterward",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2984,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/patches\""
+        },
+        {
+          "path": "api/src/taskService.ts",
+          "line": 328,
+          "evidence": "export async function applyPatch"
+        }
+      ],
+      "currentStrengths": [
+        "path safety",
+        "project.json protection",
+        "pre-apply file snapshots",
+        "selection range validation"
+      ],
+      "gaps": [
+        "patch list is not atomically committed",
+        "no candidate input fingerprint or hard-guard bundle",
+        "accepted audit update occurs after file writes"
+      ],
+      "risk": "critical",
+      "requiredDisposition": "Replace canon-capable task patch application with ProseAdoptionTransaction; keep task output candidate-only."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-003",
+      "label": "自动驾驶正文生成",
+      "actor": "runtime-worker",
+      "currentOperation": "Dispatch chapter_draft writes before continuity and quality review",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 803,
+          "evidence": "reason: \"chapter_draft\""
+        }
+      ],
+      "currentStrengths": [
+        "pre-run checkpoint",
+        "checkpoint baseline conflict detection",
+        "per-project write queue"
+      ],
+      "gaps": [
+        "generated prose reaches canon before validation",
+        "checkpoint rollback is not candidate isolation",
+        "derived stages read unapproved prose"
+      ],
+      "risk": "critical",
+      "requiredDisposition": "Persist ProseCandidate outside canon and submit it only after complete validation and adoption authorization."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-004",
+      "label": "自动质量整章修复",
+      "actor": "runtime-worker",
+      "currentOperation": "Dispatch quality_self_repair full-chapter writes inside the score loop",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 943,
+          "evidence": "reason: \"quality_self_repair\""
+        }
+      ],
+      "currentStrengths": [
+        "repair checkpoint",
+        "one-attempt limit",
+        "write-conflict handling"
+      ],
+      "gaps": [
+        "rewrite mutates canon before author review",
+        "fixed-score optimization can erase accepted strengths",
+        "no atomic proof that repair improved without regressions"
+      ],
+      "risk": "critical",
+      "requiredDisposition": "Keep repair output as a child candidate and require evidence-bounded regression comparison before adoption."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-005",
+      "label": "自动驾驶审稿接受",
+      "actor": "author-ui-plus-runtime-api",
+      "currentOperation": "Mark the run completed and enqueue accept without a prose commit transaction",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2118,
+          "evidence": "type === \"accept\""
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1220,
+          "evidence": "command.type === \"accept\""
+        }
+      ],
+      "currentStrengths": [
+        "explicit author action",
+        "runtime command event"
+      ],
+      "gaps": [
+        "accept is status-only because prose was already written",
+        "no adoption receipt",
+        "no chapter settlement or feedback event"
+      ],
+      "risk": "critical",
+      "requiredDisposition": "Make accept the sole trigger for ProseAdoptionTransaction and emit settlement or structured blocking evidence."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-006",
+      "label": "局部润色与专注写作候选接受",
+      "actor": "author-ui",
+      "currentOperation": "Splice or append candidate text in client state, then rely on a later generic file save",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3846,
+          "evidence": "function acceptRewrite"
+        },
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 3870,
+          "evidence": "async function acceptFocusDraft"
+        }
+      ],
+      "currentStrengths": [
+        "author-visible candidate",
+        "selection anchoring for some patch paths",
+        "manual save remains explicit"
+      ],
+      "gaps": [
+        "accept/reject feedback can disappear client-side",
+        "server does not validate candidate lineage at acceptance",
+        "later generic save loses candidate attribution"
+      ],
+      "risk": "high",
+      "requiredDisposition": "Submit fragment-level adoption with candidate, baseline, selection identity, feedback, and lock checks in one server command."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-007",
+      "label": "衍生分支合并",
+      "actor": "author-ui-plus-runtime-api",
+      "currentOperation": "Write branch draft, optional new outline, and project.json through runtime dispatch after user merge action",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2326,
+          "evidence": "reason: \"derivative_merge\""
+        }
+      ],
+      "currentStrengths": [
+        "branch isolation before merge",
+        "user merge action",
+        "checkpoint",
+        "path collision guard"
+      ],
+      "gaps": [
+        "no prose validation bundle",
+        "multi-file runtime dispatch is sequential without compensating atomic rollback",
+        "new or replacement chapter is immediately marked drafted"
+      ],
+      "risk": "high",
+      "requiredDisposition": "Compile branch merge into a ProseAdoptionTransaction plus project-structure MutationPlan and settle only after both commit."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-008",
+      "label": "章后回顾采纳",
+      "actor": "author-ui-plus-cockpit-service",
+      "currentOperation": "Atomically rewrite summary, ledgers, and recap log from a submitted recap candidate",
+      "evidence": [
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 998,
+          "evidence": "export async function acceptWritingRecapPatches"
+        }
+      ],
+      "currentStrengths": [
+        "multi-file rollback attempt",
+        "accepted recap idempotency",
+        "candidate review step"
+      ],
+      "gaps": [
+        "no authoritative prose fingerprint check",
+        "no proof recap belongs to an adopted candidate",
+        "ledger changes are not appended lifecycle events"
+      ],
+      "risk": "high",
+      "requiredDisposition": "Consume only a committed prose adoption receipt and append derived claim/obligation events in the same settlement workflow."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-009",
+      "label": "账本整表保存",
+      "actor": "author-ui-plus-cockpit-api",
+      "currentOperation": "Normalize and replace the selected ledger JSON file",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2606,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/ledger/:kind\""
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 978,
+          "evidence": "export async function saveLedgerEntries"
+        }
+      ],
+      "currentStrengths": [
+        "ledger-kind validation",
+        "normalized timestamps"
+      ],
+      "gaps": [
+        "whole-table last-write-wins",
+        "resolved status can bypass payoff evidence",
+        "no append-only obligation event or concurrency precondition"
+      ],
+      "risk": "high",
+      "requiredDisposition": "Retire canon-capable whole-table PUT in favor of typed obligation commands with evidence and version preconditions."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-010",
+      "label": "故事总控、场景、摘要与质量直接 PUT",
+      "actor": "author-ui-plus-cockpit-api",
+      "currentOperation": "Replace individual JSON projections through independent endpoints",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 1715,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/story-control\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2437,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/scenes/:chapterId\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2451,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/memory/chapter-summaries/:chapterId\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 2474,
+          "evidence": "app.put(\"/api/novel/projects/:projectId/quality/:chapterId\""
+        }
+      ],
+      "currentStrengths": [
+        "typed endpoint shapes",
+        "path-safe service functions",
+        "separate projections"
+      ],
+      "gaps": [
+        "no shared baseline/version precondition",
+        "no authority distinction between canon source and projection",
+        "cross-asset invariants cannot commit atomically"
+      ],
+      "risk": "high",
+      "requiredDisposition": "Classify each field as canon command or rebuildable projection; route canon commands through MutationPlan and projections through event consumers."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-011",
+      "label": "运行检查点恢复",
+      "actor": "author-ui-plus-runtime-api",
+      "currentOperation": "Copy or remove every checkpointed file directly, then update project metadata",
+      "evidence": [
+        {
+          "path": "api/src/runtimeFiles.ts",
+          "line": 144,
+          "evidence": "export async function restoreRuntimeCheckpoint"
+        }
+      ],
+      "currentStrengths": [
+        "explicit checkpoint",
+        "broad managed-file manifest",
+        "manual restore endpoint"
+      ],
+      "gaps": [
+        "no global writer fencing before restore",
+        "restore does not emit per-asset invalidation lineage",
+        "active candidates and projections can survive with newer assumptions"
+      ],
+      "risk": "high",
+      "requiredDisposition": "Execute restore as a fenced CanonRestoreTransaction that invalidates later candidates, audits, caches, and derived projections."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-012",
+      "label": "知识、质量与故事图后台重建",
+      "actor": "background-worker",
+      "currentOperation": "Rebuild and overwrite derived projections from the project snapshot captured when the job was created",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 415,
+          "evidence": "function createBackgroundJobHandler"
+        }
+      ],
+      "currentStrengths": [
+        "job status",
+        "rebuildable outputs",
+        "separate project jobs"
+      ],
+      "gaps": [
+        "no source fingerprint freshness check before publish",
+        "job may consume unapproved or later superseded prose",
+        "successful write can be displayed as current truth"
+      ],
+      "risk": "medium",
+      "requiredDisposition": "Make jobs read committed events only and compare source fingerprints immediately before publishing projections."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-013",
+      "label": "项目创建与旧项目导入",
+      "actor": "author-ui-plus-import-service",
+      "currentOperation": "Create initial project files or import external chapters and support assets into a new project root",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 651,
+          "evidence": "app.post(\"/api/novel/projects\""
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 661,
+          "evidence": "app.post(\"/api/novel/import\""
+        }
+      ],
+      "currentStrengths": [
+        "new project boundary",
+        "import source selection",
+        "isolated root"
+      ],
+      "gaps": [
+        "imported content lacks authority classification and provenance proof",
+        "AI backfill can be mistaken for canon if not candidate-only",
+        "activation evidence is separate from successful file copy"
+      ],
+      "risk": "controlled",
+      "requiredDisposition": "Keep bootstrap writes isolated; classify imported files and require preview/adoption before semantic backfill becomes authoritative."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-014",
+      "label": "Author session capture",
+      "actor": "author-client",
+      "currentOperation": "Append the author's original utterance to the project-local creative session with client idempotency",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 987,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/session/messages\""
+        },
+        {
+          "path": "api/src/creativeSession.ts",
+          "line": 86,
+          "evidence": "export async function appendAuthorMessage"
+        }
+      ],
+      "currentStrengths": [
+        "separate session authority",
+        "durable source attribution",
+        "per-project idempotency lock"
+      ],
+      "gaps": [
+        "no browser journey evidence",
+        "no downstream asset lineage",
+        "session projection is not yet shared with a UI"
+      ],
+      "risk": "controlled",
+      "requiredDisposition": "Keep capture isolated from canon and downstream interpretation; expose only after cross-navigation recovery and shared schema evidence."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-015",
+      "label": "V2 understanding safety gate",
+      "actor": "author-client",
+      "currentOperation": "Reject interpretation before risk, T0, budget, and model-capability dependencies are proven",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 998,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/session/understanding\""
+        },
+        {
+          "path": "api/src/understandingTask.ts",
+          "line": 1,
+          "evidence": "export const V2_UNDERSTANDING_DEPENDENCIES"
+        },
+        {
+          "path": "api/src/understandingPreflight.ts",
+          "line": 24,
+          "evidence": "export function evaluateUnderstandingPreflight"
+        },
+        {
+          "path": "api/src/understandingRiskProfile.ts",
+          "line": 15,
+          "evidence": "export function buildUnderstandingRiskProfile"
+        },
+        {
+          "path": "api/src/understandingBudget.ts",
+          "line": 59,
+          "evidence": "export async function reserveUnderstandingBudget"
+        },
+        {
+          "path": "api/src/understandingAuthorization.ts",
+          "line": 46,
+          "evidence": "export async function authorizeUnderstandingCapability"
+        },
+        {
+          "path": "api/src/understandingExecutor.ts",
+          "line": 80,
+          "evidence": "export async function executeShadowUnderstanding"
+        },
+        {
+          "path": "api/src/understandingWorker.ts",
+          "line": 324,
+          "evidence": "export async function executeModelUnderstanding"
+        },
+        {
+          "path": "api/src/understandingWorker.ts",
+          "line": 180,
+          "evidence": "export async function startModelUnderstandingTask"
+        },
+        {
+          "path": "api/src/understandingWorker.ts",
+          "line": 216,
+          "evidence": "export async function resumeUnderstandingTask"
+        },
+        {
+          "path": "api/src/understandingWorker.ts",
+          "line": 253,
+          "evidence": "export async function recoverUnderstandingTasks"
+        },
+        {
+          "path": "api/src/dialogueQuestions.ts",
+          "line": 164,
+          "evidence": "export async function answerDialogueQuestion"
+        },
+        {
+          "path": "api/src/backgroundJobs.ts",
+          "line": 72,
+          "evidence": "export async function enqueueProjectBackgroundJob"
+        }
+      ],
+      "currentStrengths": [
+        "zero model call while blocked",
+        "explicit shadow/model snapshots are non-canon",
+        "model worker has persisted task state, cancellation, resume, startup recovery, active-process cancellation, source-fingerprint fencing, candidate interpretation branches, append-only answers, contract candidates, independent review, and adoption proposals"
+      ],
+      "gaps": [
+        "holdout calibration and independent provider/human review remain incomplete",
+        "multi-process mutation fencing and broad world-rule contract coverage remain incomplete"
+      ],
+      "risk": "controlled",
+      "requiredDisposition": "Keep V2 interpretation blocked until all safety dependencies and frozen-input evidence are implemented."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-016",
+      "label": "T0 context manifest freeze",
+      "actor": "author-client",
+      "currentOperation": "Freeze the exact creative-session input into a versioned non-canon context manifest",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 981,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/session/context-manifest\""
+        },
+        {
+          "path": "api/src/contextManifest.ts",
+          "line": 74,
+          "evidence": "export async function freezeContextManifest"
+        }
+      ],
+      "currentStrengths": [
+        "source fingerprint",
+        "source message spans",
+        "supersedes previous manifest",
+        "atomic separate write"
+      ],
+      "gaps": [
+        "manifest is not yet consumed by a worker",
+        "risk, budget, and capability dependencies remain absent"
+      ],
+      "risk": "controlled",
+      "requiredDisposition": "Use only as frozen T0 evidence; never treat the manifest itself as an understanding result or canon authority."
+    },
+    {
+      "surfaceId": "WRITE-SURFACE-017",
+      "label": "Explicit story-contract canon adoption",
+      "actor": "author-client",
+      "currentOperation": "Commit an author-authorized, independently reviewed contract proposal into the project contract pointer, StoryControl, Bible evidence, and immutable canon event",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 1422,
+          "evidence": "app.post(\"/api/novel/projects/:projectId/session/understanding/contract-adoption\""
+        },
+        {
+          "path": "api/src/contractCanonAdoption.ts",
+          "line": 247,
+          "evidence": "export async function commitContractAdoption"
+        }
+      ],
+      "currentStrengths": [
+        "explicit authorization",
+        "candidate/proposal fingerprint fences",
+        "project lease and fencing token",
+        "staging and rollback journal",
+        "idempotent mutation plan",
+        "canon event receipt",
+        "world-rule field support",
+        "projection invalidation and rebuild receipt"
+      ],
+      "gaps": [
+        "cross-process lease durability beyond the local lease file",
+        "full StoryContract schema and projection freshness monitoring remain partial"
+      ],
+      "risk": "high",
+      "requiredDisposition": "Keep the gateway narrow; require author authorization, current proposal fingerprint, atomic rollback evidence, and never infer authorization from silence or task completion."
+    }
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-STATE-006",
+      "FR-STATE-007",
+      "FR-STATE-008",
+      "FR-PROSE-002",
+      "FR-PROSE-022",
+      "FR-PROSE-023",
+      "FR-DELIVERY-031"
+    ],
+    "acceptanceRefs": [
+      "AT-067",
+      "AT-068",
+      "AT-069",
+      "AT-290",
+      "AT-310",
+      "AT-311",
+      "AT-359",
+      "AT-361"
+    ],
+    "rule": "RP5 cannot activate until every listed surface is routed, explicitly read-only, or proven projection-only under server-side capability enforcement and failure injection."
+  }
+}

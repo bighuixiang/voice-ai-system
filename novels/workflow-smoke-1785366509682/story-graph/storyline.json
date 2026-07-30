@@ -1,0 +1,133 @@
+{
+  "projectSlug": "workflow-smoke-1785366509682",
+  "nodes": [
+    {
+      "id": "chapter:chapter-001",
+      "type": "chapter",
+      "label": "第 1 章",
+      "subtitle": "chapter-001",
+      "status": "empty",
+      "chapterIds": [
+        "chapter-001"
+      ]
+    },
+    {
+      "id": "chapter:chapter-002",
+      "type": "chapter",
+      "label": "第 2 章",
+      "subtitle": "chapter-002",
+      "status": "empty",
+      "chapterIds": [
+        "chapter-002"
+      ]
+    },
+    {
+      "id": "chapter:chapter-003",
+      "type": "chapter",
+      "label": "第 3 章",
+      "subtitle": "chapter-003",
+      "status": "empty",
+      "chapterIds": [
+        "chapter-003"
+      ]
+    },
+    {
+      "id": "character:char-protagonist",
+      "type": "character",
+      "label": "主角",
+      "subtitle": "主角",
+      "status": "seed",
+      "chapterIds": []
+    },
+    {
+      "id": "arc:arc-main-01",
+      "type": "arc",
+      "label": "主线起步",
+      "subtitle": "第 1-10 章",
+      "status": "seed",
+      "chapterIds": [
+        "chapter-001",
+        "chapter-002",
+        "chapter-003"
+      ]
+    },
+    {
+      "id": "event:event-first-dungeon",
+      "type": "event",
+      "label": "第一处特殊事件",
+      "subtitle": "待定地点",
+      "status": "seed",
+      "chapterIds": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "arc:arc-main-01->chapter:chapter-001",
+      "source": "arc:arc-main-01",
+      "target": "chapter:chapter-001",
+      "type": "contains",
+      "label": "contains"
+    },
+    {
+      "id": "arc:arc-main-01->chapter:chapter-002",
+      "source": "arc:arc-main-01",
+      "target": "chapter:chapter-002",
+      "type": "contains",
+      "label": "contains"
+    },
+    {
+      "id": "arc:arc-main-01->chapter:chapter-003",
+      "source": "arc:arc-main-01",
+      "target": "chapter:chapter-003",
+      "type": "contains",
+      "label": "contains"
+    },
+    {
+      "id": "event:event-first-dungeon->character:char-protagonist",
+      "source": "event:event-first-dungeon",
+      "target": "character:char-protagonist",
+      "type": "involves",
+      "label": "involves"
+    }
+  ],
+  "characterRelations": {
+    "characters": [
+      {
+        "id": "character:char-protagonist",
+        "type": "character",
+        "label": "主角",
+        "subtitle": "主角",
+        "status": "seed",
+        "chapterIds": []
+      }
+    ],
+    "relationships": [],
+    "coverage": [
+      {
+        "characterId": "character:char-protagonist",
+        "name": "主角",
+        "relationshipCount": 0,
+        "eventCount": 0,
+        "knowledgeTripleCount": 0,
+        "hasProfileNote": true,
+        "isolated": true
+      }
+    ],
+    "appearanceSignals": [
+      {
+        "characterId": "character:char-protagonist",
+        "name": "主角",
+        "status": "balanced",
+        "priority": 0,
+        "appearanceCount": 1,
+        "mentionedInUpcoming": false,
+        "relationshipCount": 0,
+        "reasons": [
+          "主线角色优先",
+          "关系图缺少证据"
+        ]
+      }
+    ]
+  },
+  "updatedAt": "2026-07-29T23:08:30.624Z"
+}

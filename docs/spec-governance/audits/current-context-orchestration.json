@@ -1,0 +1,821 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "From a rough idea, the creative partner can assemble only the right, authorized and current evidence for each decision; it can explain what the model saw and did not see, never silently lose critical story truth, and block rather than fabricate when essential context cannot fit or be trusted.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/contextAssembler.ts",
+      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+    },
+    {
+      "path": "api/src/taskService.ts",
+      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+    },
+    {
+      "path": "api/src/knowledgeIndex.ts",
+      "sha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74"
+    },
+    {
+      "path": "api/src/contextManifest.ts",
+      "sha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "ui/src/components/novel/ContextPanel.vue",
+      "sha256": "0d26e4e5edc4af1fa545f5271021359282ec43570d8e4c8f5fac394ea6514f57"
+    },
+    {
+      "path": "ui/src/types/novel.ts",
+      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project ordinal",
+      "invocation-file fingerprints/bytes/counts",
+      "aggregate prompt/context character and tier/truncation counts",
+      "review status/warning/outcome aggregates",
+      "source evidence paths and code tokens"
+    ],
+    "snapshotExcludes": [
+      "project slug or ID",
+      "title",
+      "genre",
+      "rough idea",
+      "chapter/task/invocation identity or type",
+      "block title",
+      "prompt preview or content",
+      "context/prose/source text",
+      "file/entity path or database values",
+      "raw payload/result/error",
+      "absolute path or secret"
+    ]
+  },
+  "operationalSnapshot": {
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprint": null,
+        "invocationFile": {
+          "exists": false,
+          "bytes": 0,
+          "records": 0,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 0,
+          "blocks": 0,
+          "contextChars": 0,
+          "tierBlocks": {},
+          "truncatedBlocks": 0,
+          "t0Blocks": 0,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 0
+        },
+        "callGateEvidence": {
+          "reviews": 0,
+          "reviewStatuses": {},
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {},
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 0,
+          "maxChars": 0,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprint": "d58e98c020c6419456d748d86dd36fd3dc2aa644a0ef130b6a21ac99366f2b30",
+        "invocationFile": {
+          "exists": true,
+          "bytes": 2795,
+          "records": 1,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 1,
+          "blocks": 15,
+          "contextChars": 12309,
+          "tierBlocks": {
+            "missing": 1,
+            "T0": 5,
+            "T1": 6,
+            "T2": 3
+          },
+          "truncatedBlocks": 0,
+          "t0Blocks": 5,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 12309
+        },
+        "callGateEvidence": {
+          "reviews": 1,
+          "reviewStatuses": {
+            "pass": 1
+          },
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {
+            "pass->cancelled": 1
+          },
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 13256,
+          "maxChars": 13256,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprint": null,
+        "invocationFile": {
+          "exists": false,
+          "bytes": 0,
+          "records": 0,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 0,
+          "blocks": 0,
+          "contextChars": 0,
+          "tierBlocks": {},
+          "truncatedBlocks": 0,
+          "t0Blocks": 0,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 0
+        },
+        "callGateEvidence": {
+          "reviews": 0,
+          "reviewStatuses": {},
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {},
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 0,
+          "maxChars": 0,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprint": "fbeeab5ff672ed7dbedcb087d873e70a51f0e72f0b201396c11fa044a9ee5e87",
+        "invocationFile": {
+          "exists": true,
+          "bytes": 339961,
+          "records": 66,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 66,
+          "blocks": 1350,
+          "contextChars": 3071492,
+          "tierBlocks": {
+            "missing": 76,
+            "T0": 244,
+            "T1": 479,
+            "T2": 494,
+            "T3": 57
+          },
+          "truncatedBlocks": 440,
+          "t0Blocks": 244,
+          "t0TruncatedBlocks": 64,
+          "maxContextChars": 57954
+        },
+        "callGateEvidence": {
+          "reviews": 64,
+          "reviewStatuses": {
+            "warn": 64
+          },
+          "warnings": {
+            "multiple-context-blocks-truncated": 64
+          },
+          "reviewStatusToInvocationOutcome": {
+            "missing->success": 2,
+            "warn->error": 1,
+            "warn->success": 63
+          },
+          "invocationsWithoutReview": 2
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 3293930,
+          "maxChars": 68978,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "invocationFile": {
+          "exists": true,
+          "bytes": 0,
+          "records": 0,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 0,
+          "blocks": 0,
+          "contextChars": 0,
+          "tierBlocks": {},
+          "truncatedBlocks": 0,
+          "t0Blocks": 0,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 0
+        },
+        "callGateEvidence": {
+          "reviews": 0,
+          "reviewStatuses": {},
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {},
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 0,
+          "maxChars": 0,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "invocationFile": {
+          "exists": true,
+          "bytes": 0,
+          "records": 0,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 0,
+          "blocks": 0,
+          "contextChars": 0,
+          "tierBlocks": {},
+          "truncatedBlocks": 0,
+          "t0Blocks": 0,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 0
+        },
+        "callGateEvidence": {
+          "reviews": 0,
+          "reviewStatuses": {},
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {},
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 0,
+          "maxChars": 0,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "invocationFile": {
+          "exists": true,
+          "bytes": 0,
+          "records": 0,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 0,
+          "blocks": 0,
+          "contextChars": 0,
+          "tierBlocks": {},
+          "truncatedBlocks": 0,
+          "t0Blocks": 0,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 0
+        },
+        "callGateEvidence": {
+          "reviews": 0,
+          "reviewStatuses": {},
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {},
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 0,
+          "maxChars": 0,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprint": "988f04eb910c93d773aa804596a77201681092a43160a0de961d67f6b7f446b8",
+        "invocationFile": {
+          "exists": true,
+          "bytes": 2755,
+          "records": 1,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 1,
+          "blocks": 13,
+          "contextChars": 15817,
+          "tierBlocks": {
+            "missing": 1,
+            "T0": 5,
+            "T1": 7
+          },
+          "truncatedBlocks": 0,
+          "t0Blocks": 5,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 15817
+        },
+        "callGateEvidence": {
+          "reviews": 1,
+          "reviewStatuses": {
+            "pass": 1
+          },
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {
+            "pass->success": 1
+          },
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 22407,
+          "maxChars": 22407,
+          "promptsOver120kChars": 0
+        }
+      }
+    ],
+    "totals": {
+      "projects": 8,
+      "invocationFiles": 6,
+      "invocationFileBytes": 345511,
+      "invocations": 68,
+      "invalidInvocationLines": 0,
+      "invocationsWithContextSnapshot": 68,
+      "blocks": 1378,
+      "contextChars": 3099618,
+      "truncatedBlocks": 440,
+      "t0Blocks": 254,
+      "t0TruncatedBlocks": 64,
+      "preCallReviews": 66,
+      "preCallPass": 2,
+      "preCallWarn": 64,
+      "preCallBlock": 0,
+      "invocationsWithoutReview": 2,
+      "warnedSuccessfulInvocations": 63,
+      "contextManifests": 0,
+      "postCallEvidenceCoverageReports": 0,
+      "promptChars": 3329593,
+      "maxPromptChars": 68978,
+      "maxContextChars": 57954
+    },
+    "tierTotals": {
+      "missing": 78,
+      "T0": 254,
+      "T1": 492,
+      "T2": 497,
+      "T3": 57
+    },
+    "warningTotals": {
+      "multiple-context-blocks-truncated": 64
+    },
+    "reviewOutcomeTotals": {
+      "missing->success": 2,
+      "pass->cancelled": 1,
+      "pass->success": 1,
+      "warn->error": 1,
+      "warn->success": 63
+    },
+    "interpretation": "The platform records abundant context, but record volume is not evidence fitness. Fixed per-block character slicing truncated critical T0 blocks, every recorded governed pre-call review warned, successful calls still proceeded, and the new session-level manifest is not yet bound to the model executor or post-call evidence coverage."
+  },
+  "summary": {
+    "auditedStages": 12,
+    "projectsScanned": 8,
+    "invocations": 68,
+    "contextBlocks": 1378,
+    "truncatedBlocks": 440,
+    "t0TruncatedBlocks": 64,
+    "preCallReviews": 66,
+    "preCallWarn": 64,
+    "preCallBlock": 0,
+    "warnedSuccessfulInvocations": 63,
+    "contextManifests": 0,
+    "postCallEvidenceCoverageReports": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "Context assembly is a display-title-driven packing pipeline with fixed per-block character caps. It records volume and truncation after assembly; a session-level frozen manifest now exists, but the executor still lacks model-aware global token planning, eligibility-first authority filters, corruption/conflict receipts, manifest binding, a server-side block state and post-call evidence coverage.",
+    "consequence": "A long prompt can appear comprehensive while silently omitting a decisive middle fact, using stale or unauthorized material, flattening conflicts, starving output or letting a warning-only call generate fluent but narratively invalid prose that later contaminates memory and foreshadowing closure."
+  },
+  "currentEvidence": [
+    {
+      "claim": "Optional file, JSON and JSONL failures are converted to empty/undefined/dropped rows during context assembly.",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 39,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "async function readOptional"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 57,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "async function readOptionalJsonl"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 59,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "return [];"
+        }
+      ]
+    },
+    {
+      "claim": "Context is tiered by display title and independently first/last character-trimmed to fixed limits.",
+      "evidence": [
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 73,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "function trimContext"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 78,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "function contextTierForTitle"
+        },
+        {
+          "path": "api/src/contextAssembler.ts",
+          "line": 105,
+          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "token": "function contextLimitForTier"
+        }
+      ]
+    },
+    {
+      "claim": "Invocation context snapshots retain title, character length, tier and truncation, not provenance, eligibility, conflicts, token accounting or exclusions.",
+      "evidence": [
+        {
+          "path": "api/src/taskService.ts",
+          "line": 236,
+          "sourceSha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47",
+          "token": "function contextSnapshot"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 1039,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "export interface AiInvocationContextBlockSnapshot"
+        }
+      ]
+    },
+    {
+      "claim": "Pre-call review has pass/warn only and runner execution follows regardless of warnings.",
+      "evidence": [
+        {
+          "path": "api/src/taskService.ts",
+          "line": 281,
+          "sourceSha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47",
+          "token": "function preCallReview"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 1071,
+          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "token": "status: \"pass\" | \"warn\""
+        },
+        {
+          "path": "api/src/taskService.ts",
+          "line": 408,
+          "sourceSha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47",
+          "token": "const output = await runner.run"
+        }
+      ]
+    },
+    {
+      "claim": "Knowledge retrieval ranks score/vector matches and top limits without an eligibility-first canon/time/POV/reader/rights/freshness contract.",
+      "evidence": [
+        {
+          "path": "api/src/knowledgeIndex.ts",
+          "line": 698,
+          "sourceSha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74",
+          "token": "export async function searchKnowledgeIndex"
+        },
+        {
+          "path": "api/src/knowledgeIndex.ts",
+          "line": 737,
+          "sourceSha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74",
+          "token": ".sort((left, right) => right.score - left.score"
+        }
+      ]
+    },
+    {
+      "claim": "The author-facing context panel states that memory/rules/skills are injected but does not expose included/excluded evidence, truncation, conflicts, freshness or gate status.",
+      "evidence": [
+        {
+          "path": "ui/src/components/novel/ContextPanel.vue",
+          "line": 39,
+          "sourceSha256": "0d26e4e5edc4af1fa545f5271021359282ec43570d8e4c8f5fac394ea6514f57",
+          "token": "context-note"
+        },
+        {
+          "path": "ui/src/components/novel/ContextPanel.vue",
+          "line": 29,
+          "sourceSha256": "0d26e4e5edc4af1fa545f5271021359282ec43570d8e4c8f5fac394ea6514f57",
+          "token": "activeSkills"
+        }
+      ]
+    },
+    {
+      "claim": "A session-level T0 manifest freezes author message IDs, source spans and a source fingerprint, and supersedes the prior manifest when the session changes; it is not yet consumed by the executor.",
+      "evidence": [
+        {
+          "path": "api/src/contextManifest.ts",
+          "line": 74,
+          "sourceSha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc",
+          "token": "export async function freezeContextManifest"
+        },
+        {
+          "path": "api/src/contextManifest.ts",
+          "line": 20,
+          "sourceSha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc",
+          "token": "sourceFingerprint"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 981,
+          "sourceSha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55",
+          "token": "app.post(\"/api/novel/projects/:projectId/session/context-manifest\""
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "CTX-TRACE-001",
+      "label": "resolve-task-risk-and-model-capability",
+      "current": "Task type determines a broad fixed block recipe before the selected model is resolved.",
+      "gap": "No tokenizer, context-window capability, output reserve, task risk or retry budget participates in assembly.",
+      "target": "Resolve purpose, risk, model capabilities, output/retry reserve and hard evidence classes before retrieval."
+    },
+    {
+      "id": "CTX-TRACE-002",
+      "label": "resolve-authoritative-and-eligible-sources",
+      "current": "Project files, summaries, ledgers, platform assets and knowledge projections are read as available inputs.",
+      "gap": "Availability and lexical relevance do not prove canon version, time, POV, reader visibility, rights, freshness or source authority.",
+      "target": "Apply authority and eligibility predicates first; retain exclusion reasons and unknown states."
+    },
+    {
+      "id": "CTX-TRACE-003",
+      "label": "surface-corruption-and-conflicts",
+      "current": "Optional read/JSON/JSONL failures become empty, undefined or dropped lines; conflicting hits can be ranked independently.",
+      "gap": "Missing evidence, corruption and disagreement can masquerade as a clean absence or one coherent answer.",
+      "target": "Emit corruption receipts and explicit conflict sets; block when required evidence cannot be adjudicated."
+    },
+    {
+      "id": "CTX-TRACE-004",
+      "label": "retrieve-for-current-purpose",
+      "current": "Broad-context task lists and top-score knowledge search determine candidates.",
+      "gap": "High-scoring material may be irrelevant to the decision while low-lexical but causally necessary evidence is omitted.",
+      "target": "Compile purpose-specific evidence obligations and retrieve until required coverage, not arbitrary fullness, is met."
+    },
+    {
+      "id": "CTX-TRACE-005",
+      "label": "compile-provenance-bearing-blocks",
+      "current": "Blocks carry display title, content and inferred tier.",
+      "gap": "Source identity/version/hash, authority, eligibility, rights, conflict membership and transformation lineage are absent.",
+      "target": "Every block carries stable provenance and semantic role independent of a localized display title."
+    },
+    {
+      "id": "CTX-TRACE-006",
+      "label": "plan-global-token-and-output-budget",
+      "current": "Each tier has an independent character limit and the final prompt has only a 120k-character warning.",
+      "gap": "Per-block character success can exceed a model window, starve output, waste capacity or misestimate multilingual/token-heavy content.",
+      "target": "Allocate one model-token budget across instructions, evidence, deliberation, output, tools and retries with deterministic degradation order."
+    },
+    {
+      "id": "CTX-TRACE-007",
+      "label": "compress-or-block-t0",
+      "current": "Oversized T0 blocks are first/last character sliced like optional context.",
+      "gap": "Middle facts, constraints, user words, conflict evidence and open obligations may disappear without semantic coverage proof.",
+      "target": "Use evidence-linked semantic compression with coverage verification; if T0 still cannot fit, block before the model call."
+    },
+    {
+      "id": "CTX-TRACE-008",
+      "label": "enforce-rights-privacy-and-untrusted-boundary",
+      "current": "Mixed project/platform/imported text is assembled into the same prompt-oriented block stream.",
+      "gap": "Prompt injection, secrets, private notes and rights-bound samples can cross purpose/provider/cache boundaries.",
+      "target": "Gate rights/privacy/provider scope first and isolate untrusted content as quoted evidence, never instructions."
+    },
+    {
+      "id": "CTX-TRACE-009",
+      "label": "freeze-context-manifest",
+      "current": "Invocation snapshots retain block titles, character lengths, tiers and truncation flags.",
+      "gap": "The exact eligible sources, exclusions, hashes, transformations, conflicts, token plan and cache/retry fingerprint cannot be replayed or explained.",
+      "target": "Freeze an immutable ContextManifest before execution and bind prompt, model, policy and retry/cache keys to its fingerprint."
+    },
+    {
+      "id": "CTX-TRACE-010",
+      "label": "enforce-pre-call-gate",
+      "current": "PreCallReview emits pass or warn; warnings do not stop runner execution.",
+      "gap": "Missing T0, widespread truncation, corruption, unresolved rights or evidence gaps cannot produce a machine-enforced block state.",
+      "target": "Return pass/warn/block with typed reasons; block all hard-gate failures server-side before provider resolution/call."
+    },
+    {
+      "id": "CTX-TRACE-011",
+      "label": "execute-retry-and-cache-against-manifest",
+      "current": "The runner receives a rendered prompt and profile; retries/adoption cannot prove identical evidence semantics.",
+      "gap": "A retry or cache hit can silently use stale, differently eligible or differently compressed context.",
+      "target": "Pin attempts to the manifest or create an explicit successor with invalidation and visible differences."
+    },
+    {
+      "id": "CTX-TRACE-012",
+      "label": "verify-post-call-evidence-coverage",
+      "current": "Structured result parsing and invocation outcome do not prove which claims used, ignored or exceeded supplied evidence.",
+      "gap": "Fluent prose can contradict T0, invent facts, leak restricted material or miss required obligations while the process succeeds.",
+      "target": "Check claim/evidence coverage, instruction boundary, conflicts and stale dependencies before candidate adoption or canon mutation."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-keep-fixed-per-block-character-tiers",
+      "verdict": "retain-only-as-a-temporary-adapter",
+      "blueCase": "Simple, deterministic and cheap; prevents one block from consuming the entire prompt and already exposes coarse truncation telemetry.",
+      "redCase": "Characters are not model tokens, independent caps ignore output reserve, title-based tiers are brittle, and first/last slicing can remove the exact causal fact or open obligation required for the chapter."
+    },
+    {
+      "option": "B-pack-the-largest-possible-context",
+      "verdict": "reject-as-authority-strategy",
+      "blueCase": "Reduces obvious omissions, uses larger model windows and requires less up-front relevance engineering.",
+      "redCase": "Raises cost/latency and lost-in-the-middle distraction while amplifying stale facts, contradictions, privacy/rights leakage, prompt injection and output starvation; more text is not more truth."
+    },
+    {
+      "option": "C-eligibility-first-evidence-graph-with-global-token-plan-and-hard-gates",
+      "verdict": "recommended-already-specified-not-implemented",
+      "blueCase": "Select authority before relevance, retrieve for the current decision, preserve conflicts/provenance, allocate a model-aware global budget, verify T0 compression, freeze a manifest, hard-block unsafe calls and verify output evidence coverage.",
+      "redCase": "Requires tokenizer/capability registries, provenance and rights metadata, deterministic compaction, conflict UX, manifest storage, retry/cache invalidation and claim-level post-call checks; false hard blocks need fixtures and author-visible recovery paths."
+    }
+  ],
+  "yAGNI": {
+    "newRequirementsAdded": 0,
+    "newAcceptanceTestsAdded": 0,
+    "newDecisionsAdded": 0,
+    "rationale": "The SDD already specifies the target end to end. The current gap is missing implementation and release evidence, not missing requirement prose; adding another synonym domain would create duplicate authority.",
+    "existingContract": {
+      "requirementIds": [
+        "FR-CONTEXT-001",
+        "FR-CONTEXT-002",
+        "FR-CONTEXT-003",
+        "FR-CONTEXT-004",
+        "FR-CONTEXT-005",
+        "FR-CONTEXT-006",
+        "FR-CONTEXT-007",
+        "FR-CONTEXT-008",
+        "FR-CONTEXT-009",
+        "FR-CONTEXT-010",
+        "FR-AI-012",
+        "FR-AI-013",
+        "FR-LONGMEM-016",
+        "FR-LONGMEM-017",
+        "FR-LONGMEM-019",
+        "FR-LONGMEM-020"
+      ],
+      "acceptanceRefs": [
+        "AT-105",
+        "AT-106",
+        "AT-107",
+        "AT-108",
+        "AT-109",
+        "AT-110",
+        "AT-111",
+        "AT-112",
+        "AT-498",
+        "AT-499",
+        "AT-500",
+        "AT-501",
+        "AT-502"
+      ],
+      "decisionRefs": [
+        "D-032",
+        "D-108",
+        "D-109",
+        "D-110"
+      ]
+    }
+  },
+  "targetAuthority": {
+    "entities": [
+      "ContextIntent",
+      "EligibilityDecision",
+      "ContextConflictSet",
+      "ContextBlock",
+      "TokenPlan",
+      "CompressionReceipt",
+      "ContextManifest",
+      "PreCallReview",
+      "EvidenceCoverageReport"
+    ],
+    "invariant": "No file readability, parse fallback, retrieval score, vector similarity, block count, character count, tier label, truncation warning, large model window, prompt construction, provider acceptance, process success, structured parse, fluent prose or user-visible preview may independently establish source eligibility, T0 completeness, rights/privacy safety, fit within the selected model, reproducibility, factual/canon compliance or adoption readiness."
+  },
+  "orchestrationProtocol": {
+    "order": [
+      "resolve task purpose, risk class, selected model capabilities, output/tool/retry reserve and required evidence obligations",
+      "enumerate authoritative sources and apply canon-version, time, POV, reader-visibility, rights, privacy, provider, freshness and corruption eligibility before ranking",
+      "retain explicit absence, corruption and conflict sets; never turn a failed required read or disputed fact into a clean empty value",
+      "retrieve purpose-driven evidence and provenance-diverse support until required coverage is met or a typed gap remains",
+      "compile source-versioned blocks with authority, eligibility, conflicts, transformations, rights and untrusted-content boundaries",
+      "allocate one tokenizer/model-aware global budget with deterministic degradation of optional evidence and explicit output reserve",
+      "semantically compress T0 against evidence obligations and verify coverage; hard-block when required evidence remains missing or cannot fit",
+      "freeze and persist ContextManifest, bind prompt/model/policy/cache/retry fingerprints, and expose included/excluded/degraded reasons to the author",
+      "execute only after PreCallReview pass/warn/block gates; warnings are bounded degradations, blocks never reach provider resolution or runner",
+      "after generation compare claims, decisions and proposed patches to supplied evidence, conflicts and constraints before adoption/canon mutation"
+    ],
+    "nonGoal": "The target does not maximize prompt size, require every project artifact in every call, expose private content in telemetry, or pretend perfect retrieval. It makes evidence selection, compression, omission and uncertainty governed and inspectable."
+  },
+  "verificationMatrix": [
+    "same semantic evidence in Chinese/English, emoji/code-heavy and adversarial tokenization under small/large model windows",
+    "one enormous T0 source, many small T0 sources, exact-limit boundaries, required middle fact and output reserve exhaustion",
+    "missing file, permission error, malformed JSON, one malformed JSONL row, partial write and newer unknown schema",
+    "canon versus proposal, superseded version, time-invalid fact, wrong POV/reader visibility, secret and rights-expired source",
+    "two equally relevant contradictory claims, conflict resolved during call, stale summary and projection rebuilt after manifest freeze",
+    "prompt injection inside imported prose, research source, style sample and platform skill with outbound/provider restrictions",
+    "retry, cancellation, provider fallback, model change, cache hit and concurrent canon commit against one manifest fingerprint",
+    "model output cites absent evidence, ignores a conflict, invents a fact, leaks excluded material or violates an open obligation",
+    "author inspects include/exclude/truncation/conflict/block reasons without seeing raw private source content in telemetry",
+    "deterministic replay from identical source versions/policy/model capability produces equivalent manifest and coverage decisions"
+  ],
+  "releaseGate": {
+    "requirementIds": [
+      "FR-CONTEXT-001",
+      "FR-CONTEXT-002",
+      "FR-CONTEXT-003",
+      "FR-CONTEXT-004",
+      "FR-CONTEXT-005",
+      "FR-CONTEXT-006",
+      "FR-CONTEXT-007",
+      "FR-CONTEXT-008",
+      "FR-CONTEXT-009",
+      "FR-CONTEXT-010"
+    ],
+    "acceptanceRefs": [
+      "AT-105",
+      "AT-106",
+      "AT-107",
+      "AT-108",
+      "AT-109",
+      "AT-110",
+      "AT-111",
+      "AT-112",
+      "AT-498",
+      "AT-499",
+      "AT-500",
+      "AT-501",
+      "AT-502"
+    ],
+    "rule": "Do not claim long-context safety, full-story awareness, reliable memory, explainable prompt assembly or evidence-grounded generation until eligibility precedes ranking, corruption/conflicts remain visible, one selected-model token plan reserves output, every T0 item is present or coverage-verified after semantic compression, untrusted/private/rights-bound material is gated, ContextManifest is frozen and inspectable, hard failures block server-side before the runner, retries/caches stay manifest-bound, and post-call evidence coverage gates adoption."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; none weakens T0 completeness, eligibility-before-relevance, corruption/conflict visibility, source/privacy boundaries, selected-model fit, server-side block gates, manifest reproducibility or post-call evidence coverage."
+}

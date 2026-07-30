@@ -1,0 +1,165 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "author-selected-specification-not-implementation-verified",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "decisionId": "Q-007",
+  "question": "发现后续矛盾或更优方案时，系统可以自动修改已经接受、结算或发布的正文到什么范围？",
+  "selection": {
+    "selectedPolicyId": "maturity-tiered-revision-authority",
+    "selectedLabel": "未采纳稿授权内自动修、接受/结算稿只提候选、发布稿新版本",
+    "decisionStatus": "confirmed",
+    "source": "author-accepted-recommendation",
+    "selectedOn": "2026-07-25",
+    "runtimeActivationStatus": "not-implemented-not-verified"
+  },
+  "alternatives": [
+    {
+      "policyId": "full-autonomous-live-rewrite",
+      "status": "rejected-alternative",
+      "blueCase": "Continuously repairs contradictions and improves the whole book with the least author interaction.",
+      "redCase": "Silently destroys accepted prose, invalidates downstream evidence, races active writers, changes delivered text, and makes authorship, rollback, and completion unverifiable."
+    },
+    {
+      "policyId": "all-revisions-require-author-click",
+      "status": "unselected-alternative",
+      "blueCase": "Maximizes author control and makes every textual change visible before it reaches canon.",
+      "redCase": "Turns routine repair of unaccepted drafts and deterministic candidate iteration into exhausting approval work, preventing low-input continuous creation."
+    },
+    {
+      "policyId": "maturity-tiered-revision-authority",
+      "status": "selected-default-specification",
+      "blueCase": "Automates reversible work before acceptance, protects accepted truth from silent overwrite, and keeps published editions immutable while preserving impact evidence and rollback.",
+      "redCase": "Requires authoritative maturity states, content-addressed ancestry, revision intent, semantic impact graphs, stale-worker fencing, candidate branches, explicit adoption, new-edition release, and replayable settlement."
+    }
+  ],
+  "authorityByMaturity": [
+    {
+      "maturity": [
+        "planned",
+        "candidate_generated",
+        "validated"
+      ],
+      "automaticAuthority": "May generate, replace, or locally repair non-canon candidates inside a valid scoped AutonomyGrant and frozen baseline; every candidate remains isolated, versioned, regression-checked, and discardable.",
+      "prohibited": "May not promote candidate text or derived facts into canon without the applicable quality/adoption gate."
+    },
+    {
+      "maturity": [
+        "author_accepted",
+        "settled",
+        "publication_ready"
+      ],
+      "automaticAuthority": "May diagnose, compute damage, create a branch and revision candidate, run selective recomputation, and present an impact report.",
+      "prohibited": "May not silently overwrite accepted canon, change author locks, invalidate history, or mark the revision settled; adoption requires the authority defined by risk and impact, with explicit author approval for material changes."
+    },
+    {
+      "maturity": [
+        "released",
+        "delivered"
+      ],
+      "automaticAuthority": "May mark the current edition affected/stale for future publication decisions and create a new canon branch, candidate edition, migration plan, and validation evidence.",
+      "prohibited": "May never mutate, replace, delete, or relabel the immutable released artifact and DeliveryProof in place; a superseding edition requires explicit author release approval."
+    }
+  ],
+  "revisionProtocol": [
+    "Capture immutable RevisionIntent with cause, requested outcome, maturity, authority, scope, protected text, locks, anti-goals, urgency, and whether the change is correction, quality repair, retcon, reorder, restore, branch, or new edition.",
+    "Freeze content-addressed base commit, canon cursor, branch/edition head, policy/evaluator versions, and writer fences before analysis or generation.",
+    "Compile semantic and textual ChangeSet candidates, then walk exact direct/transitive/uncertain dependencies across facts, characters, world state, obligations, memory, quality, downstream prose, completion, and publication.",
+    "Keep the current accepted canon readable while the candidate is analyzed; mark dependent proofs stale where warranted, but do not replace current text merely because a better candidate exists.",
+    "Validate hard guards, author objectives, protected strengths, reader knowledge, obligations, downstream compatibility, cost, rollback, and edition impact before offering adoption.",
+    "Adopt through an atomic forward CanonCommit; emit damage/invalidation events, fence stale workers, selectively recompute, revalidate boundaries, and issue RevisionSettlement before dependents become current.",
+    "Undo/restore is also a forward commit derived from a reviewed plan; it preserves descendants, conflicts, prior editions, audit evidence, and the ability to revert the revert."
+  ],
+  "automaticRepairBoundary": {
+    "allowed": [
+      "unaccepted candidate regeneration",
+      "candidate-local prose repair",
+      "candidate discard/retry",
+      "diagnosis and impact analysis for accepted text",
+      "stale marking and future-work fencing",
+      "new branch and candidate edition creation"
+    ],
+    "authorDecisionRequired": [
+      "material change to author_accepted or settled prose",
+      "retcon or protected-span change",
+      "different character/plot/reader-effect tradeoff",
+      "reopening completed scope",
+      "publishing or superseding an edition"
+    ],
+    "alwaysForbidden": [
+      "silent accepted-canon overwrite",
+      "in-place released-artifact mutation",
+      "last-write-wins branch merge",
+      "destructive rewind that erases descendants",
+      "late-worker write against stale ancestry",
+      "claiming settlement from save/rebuild success"
+    ]
+  },
+  "failureAndEmergencyRules": [
+    "A newly discovered contradiction, research correction, or safety defect may immediately block further dependent writing/publication and mark evidence stale, but it still does not authorize silent accepted-text replacement.",
+    "If the author is unavailable, preserve the current accepted text, isolate candidate repairs, continue only unaffected work inside the autonomy grant, and surface one bounded decision at the required milestone.",
+    "Mechanical encoding or formatting changes to accepted text still require lossless round-trip proof and the same candidate/adoption lineage; released bytes always require a new edition.",
+    "Failed adoption, recomputation, or settlement keeps the prior canon/edition authoritative and the candidate recoverable; no partial revision is exposed as current."
+  ],
+  "implementationBoundary": "This decision locks revision authority only. No authoritative maturity transition, RevisionIntent, content-addressed ProjectVersion, semantic impact graph, candidate revision branch, atomic forward CanonCommit, damage/invalidation reducer, stale-worker fence, selective recomputation, RevisionSettlement, immutable edition supersession, or end-to-end behavior is implementation-verified by this documentation-only work.",
+  "invariantRequirementIds": [
+    "FR-PROSE-002",
+    "FR-PROSE-003",
+    "FR-PROSE-017",
+    "FR-PROSE-020",
+    "FR-PROSE-021",
+    "FR-PROSE-022",
+    "FR-PROSE-023",
+    "FR-PROSE-024",
+    "FR-STATE-002",
+    "FR-STATE-003",
+    "FR-STATE-006",
+    "FR-STATE-007",
+    "FR-STATE-008",
+    "FR-STATE-009",
+    "FR-LONGMEM-013",
+    "FR-FORESHADOW-005",
+    "FR-FORESHADOW-007",
+    "FR-EVAL-012",
+    "FR-RUN-010",
+    "FR-RUN-014",
+    "FR-RUN-021",
+    "FR-COMPLETE-006",
+    "FR-PUBLISH-001",
+    "FR-PUBLISH-002",
+    "FR-PUBLISH-003"
+  ],
+  "acceptanceRefs": [
+    "AT-014",
+    "AT-053",
+    "AT-067",
+    "AT-068",
+    "AT-086",
+    "AT-093",
+    "AT-127",
+    "AT-137",
+    "AT-150",
+    "AT-230",
+    "AT-286",
+    "AT-287",
+    "AT-289",
+    "AT-290",
+    "AT-291",
+    "AT-308",
+    "AT-309",
+    "AT-310",
+    "AT-311",
+    "AT-312",
+    "AT-416",
+    "AT-417",
+    "AT-418",
+    "AT-424",
+    "AT-476",
+    "AT-496",
+    "AT-505",
+    "AT-507",
+    "AT-511",
+    "AT-515",
+    "AT-519"
+  ]
+}

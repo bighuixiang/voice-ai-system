@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "author-selected-specification-not-implementation-verified",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "decisionId": "Q-006",
+  "question": "平台应依据哪些证据判断一章正文达到高质量并允许自动采纳？",
+  "selection": {
+    "selectedPolicyId": "author-goal-led-multi-evidence",
+    "selectedLabel": "硬门不可抵消、作者目标主导、盲读独立举证、分层采纳",
+    "decisionStatus": "confirmed",
+    "source": "author-accepted-recommendation",
+    "selectedOn": "2026-07-25",
+    "runtimeActivationStatus": "not-implemented-not-verified"
+  },
+  "alternatives": [
+    {
+      "policyId": "single-model-or-score-authority",
+      "status": "rejected-alternative",
+      "blueCase": "Fast, cheap, consistent to display, and easy to automate with one threshold.",
+      "redCase": "The generator and evaluator can share blind spots; scalar optimization hides fatal defects, applicability, uncertainty, author disagreement, and protected-strength regression."
+    },
+    {
+      "policyId": "reader-majority-authority",
+      "status": "unselected-alternative",
+      "blueCase": "Directly optimizes audience preference and can expose author/model blind spots through blind cold reads.",
+      "redCase": "Small or mismatched samples reward familiarity, flatten intentional difficulty, leak future truth, and can override the specific book the author intends to write."
+    },
+    {
+      "policyId": "author-goal-led-multi-evidence",
+      "status": "selected-default-specification",
+      "blueCase": "Non-compensable narrative truth stays safe, the author's accepted objective remains aesthetic authority, and independent blind readers/reviewers supply falsifiable evidence instead of replacing authorship.",
+      "redCase": "Requires explicit objective versions, calibrated evaluators, sealed reader views, disagreement typing, tier-aware stopping, evidence freshness, and reversible adoption rather than a convenient universal score."
+    }
+  ],
+  "authorityOrder": [
+    {
+      "rank": 1,
+      "authority": "non-compensable hard guards",
+      "rule": "Canon, POV, secrecy, author locks, obligation/foreshadowing evidence, world/resource constraints, text integrity, originality/source boundaries, stale inputs, and atomic adoption failures block regardless of aesthetic preference or reader vote."
+    },
+    {
+      "rank": 2,
+      "authority": "current explicit author objectives and anti-goals",
+      "rule": "After hard guards pass, the author owns aesthetic direction, intended difficulty, tone, ambiguity, voice, target reader, and protected strengths; the latest scoped explicit decision outranks inferred preference."
+    },
+    {
+      "rank": 3,
+      "authority": "calibrated independent blind evidence",
+      "rule": "Independent literary reviewers and voluntary blind/cold readers test whether the text actually produces the intended effect, preserve dissent, and cannot see future truth, model identity, or preferred answer."
+    },
+    {
+      "rank": 4,
+      "authority": "simulated-reader and deterministic diagnostic evidence",
+      "rule": "Calibrated models and rules locate risks and counterexamples as bounded hypotheses; they do not veto author aesthetics or certify reader response alone."
+    },
+    {
+      "rank": 5,
+      "authority": "scalar summaries and operational signals",
+      "rule": "Scores, cost, latency, acceptance rate, and reading telemetry support navigation and Pareto analysis only; no threshold independently proves literary quality."
+    }
+  ],
+  "adoptionByRiskTier": {
+    "ordinary": "May auto-adopt only inside a valid scoped AutonomyGrant when hard guards pass, author-objective fit is supported, no protected strength regresses, evidence is current, and no material calibrated dissent remains; adoption stays versioned and undoable.",
+    "elevated": "Requires independent review and blind pairwise comparison when alternatives exist; unresolved material disagreement becomes review_required rather than being averaged away.",
+    "key": "Requires independent blind comparison plus disagreement adjudication; any real tradeoff among author objectives, reader effects, protected strengths, or irreversible canon consequences hard-pauses for one scoped author decision."
+  },
+  "disagreementRules": [
+    "A hard-guard failure blocks even when the author or readers prefer the prose; waiver is allowed only where the underlying requirement explicitly defines author waiver authority and records scope/risk.",
+    "When readers dislike an intentional effect that matches an explicit author goal, report target-reader mismatch and tradeoff rather than silently normalizing the text.",
+    "When the author likes a candidate but independent evidence locates an unsupported intended effect, preserve the candidate and evidence, ask only at the risk-tier threshold, and never relabel disagreement as quality proof.",
+    "Ties, uncertainty, evaluator drift, insufficient reader samples, and mixed wins remain explicit states; filtering them out cannot create a passing result.",
+    "Silence, task success, a generated score increase, or lack of detected defects is not author approval or settlement evidence."
+  ],
+  "gateDecision": {
+    "states": [
+      "unassessed",
+      "blocked",
+      "conditional",
+      "disputed",
+      "passed",
+      "waived",
+      "stale"
+    ],
+    "requiredEvidence": [
+      "frozen content and objective versions",
+      "applicable hard-guard results",
+      "protected-strength comparison",
+      "independent judgment when tier requires it",
+      "reader-evidence scope and calibration",
+      "dissent and uncertainty",
+      "author authority or AutonomyGrant",
+      "freshness and rollback identity"
+    ],
+    "settlementRule": "Only a current passed/explicitly scoped waived QualityGateDecision may participate in ChapterSettlement; conditional/disputed/blocked/stale never masquerades as settled."
+  },
+  "implementationBoundary": "This decision locks quality authority only. No authoritative EvaluationCase, sealed reader view, calibrated independent evaluator, durable author-quality feedback, disagreement adjudicator, tier-aware QualityGateDecision, automatic-adoption fence, or end-to-end settlement behavior is implementation-verified by this documentation-only work.",
+  "invariantRequirementIds": [
+    "FR-QUALITY-001",
+    "FR-QUALITY-002",
+    "FR-QUALITY-003",
+    "FR-QUALITY-004",
+    "FR-QUALITY-005",
+    "FR-QUALITY-006",
+    "FR-QUALITY-007",
+    "FR-QUALITY-008",
+    "FR-QUALITY-010",
+    "FR-EVAL-003",
+    "FR-EVAL-004",
+    "FR-EVAL-005",
+    "FR-EVAL-006",
+    "FR-EVAL-007",
+    "FR-EVAL-008",
+    "FR-EVAL-009",
+    "FR-EVAL-010",
+    "FR-EVAL-011",
+    "FR-EVAL-012",
+    "FR-EVAL-014",
+    "FR-EVAL-016",
+    "FR-EVAL-020",
+    "FR-EVAL-024",
+    "FR-READER-002",
+    "FR-READER-003",
+    "FR-READER-014",
+    "FR-READER-015",
+    "FR-READER-016",
+    "FR-READER-020"
+  ],
+  "acceptanceRefs": [
+    "AT-011",
+    "AT-012",
+    "AT-014",
+    "AT-015",
+    "AT-118",
+    "AT-119",
+    "AT-121",
+    "AT-123",
+    "AT-124",
+    "AT-125",
+    "AT-126",
+    "AT-127",
+    "AT-128",
+    "AT-130",
+    "AT-132",
+    "AT-133",
+    "AT-137",
+    "AT-141",
+    "AT-262",
+    "AT-307",
+    "AT-309",
+    "AT-390",
+    "AT-391",
+    "AT-399",
+    "AT-400",
+    "AT-403",
+    "AT-404",
+    "AT-407"
+  ]
+}

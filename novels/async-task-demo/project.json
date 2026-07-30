@@ -4,11 +4,11 @@
   "title": "Async Task Demo",
   "genre": "未定",
   "roughIdea": "Run AI without blocking the UI.",
-  "createdAt": "2026-06-19T09:10:27.996Z",
-  "updatedAt": "2026-06-19T09:10:28.166Z",
+  "createdAt": "2026-07-30T13:01:04.561Z",
+  "updatedAt": "2026-07-30T13:01:04.702Z",
   "lastOpenedChapterId": "chapter-001",
   "codex": {
-    "command": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\novel-api-routes-1L8hRv\\mock-codex.cmd"
+    "command": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\novel-api-routes-FPHocJ\\mock-codex.cmd"
   },
   "ai": {
     "profileId": "codex-cli"

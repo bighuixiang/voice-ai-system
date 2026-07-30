@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "project-migration-preview.v1",
+  "migrationId": "migration-preview-e908d5cbb782c2f0ee99dd8f",
+  "projectSlug": "demo",
+  "status": "preview_only",
+  "previewOnly": true,
+  "writeAuthority": "legacy_compatibility_only",
+  "assetCounts": {
+    "chapters": 0,
+    "outlines": 0,
+    "sceneCards": 0,
+    "summaries": 0,
+    "ledgers": 0,
+    "qualityReports": 0
+  },
+  "conflicts": [],
+  "sourceFingerprint": "e908d5cbb782c2f0ee99dd8feb4f398a1bfc0485b23df4e25bfe886b01544553",
+  "createdAt": "2026-07-29T17:29:23.886Z",
+  "fingerprint": "550fe81ce4f949498354216a11da45eac3a4fa5681f2e72a6f3418681ade506a"
+}

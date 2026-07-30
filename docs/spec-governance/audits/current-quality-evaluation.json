@@ -1,0 +1,1253 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "current-state-cross-surface-audit-not-implementation",
+  "generatedOn": "2026-07-25",
+  "sourceSddVersion": "v1.18.40",
+  "userPromise": "The platform produces prose that is not merely high-scoring to its own evaluator: non-compensable story guards must pass, explicit author objectives govern aesthetic direction, calibrated independent blind evidence tests the intended effect, and tier-aware adoption preserves disagreement, strengths, reversibility, and book-wide coherence.",
+  "sourceFiles": [
+    {
+      "path": "api/src/app.ts",
+      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+    },
+    {
+      "path": "api/src/chapterQualityReview.ts",
+      "sha256": "71f72a3497c4924f64ac673fadeaea2a659603614e36328b0f117b1ea5e5a0bf"
+    },
+    {
+      "path": "api/src/runtimeEngine.ts",
+      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+    },
+    {
+      "path": "api/src/taskTemplates.ts",
+      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+    },
+    {
+      "path": "api/src/types.ts",
+      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+    },
+    {
+      "path": "ui/src/components/novel/ReviewQualityPanel.vue",
+      "sha256": "5869e3ba35e4a4f7b791fb564705e1c2703ff8d5215db4dafe89dac5a0424aba"
+    },
+    {
+      "path": "ui/src/stores/novel.ts",
+      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+    },
+    {
+      "path": "ui/src/stores/novel/quality.ts",
+      "sha256": "1cc3906aa96aa9c6a602c1e357bda26d2941cc0830d4becab6da4a6dbb11d91b"
+    },
+    {
+      "path": "ui/src/types/novel.ts",
+      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+    }
+  ],
+  "privacy": {
+    "snapshotIncludes": [
+      "anonymous project/report ordinal",
+      "source and asset hashes",
+      "chapter/report/task/invocation/job counts",
+      "metric keys and numeric scores",
+      "schema field names",
+      "text lengths and aggregate recurrence counts",
+      "cache freshness comparisons"
+    ],
+    "snapshotExcludes": [
+      "project slug",
+      "title",
+      "genre",
+      "rough idea",
+      "chapter title or ID value",
+      "outline or prose",
+      "report summary, notes, strengths or fixes text",
+      "repeated line text",
+      "author feedback",
+      "prompt or model output",
+      "character/entity names"
+    ]
+  },
+  "operationalSnapshot": {
+    "substantialInventoryThresholdChars": 800,
+    "totals": {
+      "projects": 8,
+      "chapters": 219,
+      "substantialChapters": 71,
+      "reports": 2,
+      "zeroFixReports": 2,
+      "allMetricScoresEqualReports": 2,
+      "reportsWithEvidenceFields": 0,
+      "qualityTasks": 7,
+      "qualityReviewTasks": 0,
+      "qualityRewriteTasks": 7,
+      "qualityInvocations": 7,
+      "acceptedQualityInvocations": 2,
+      "qualitySeriesRebuildJobs": 20,
+      "staleOrInconsistentSeriesCaches": 1,
+      "repeatedLineFingerprints": 1,
+      "chaptersSharingLines": 7,
+      "fakeSuspenseEndingPatternChapters": 2
+    },
+    "projects": [
+      {
+        "projectOrdinal": 1,
+        "inputFingerprints": {
+          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "qualityReportsAggregate": null,
+          "seriesMetrics": null,
+          "taskHistory": null,
+          "invocationHistory": null,
+          "backgroundJobs": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 3,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": 0,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": false
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 2,
+        "inputFingerprints": {
+          "project": "241f6a3ab7c0269833deb41727595a7d0a0278dfc1783a23746ac895938137e0",
+          "qualityReportsAggregate": null,
+          "seriesMetrics": null,
+          "taskHistory": "ea4dfc9d692ce486fb8b475b561c8accfcc88ec84998cc22d6d36554259d3b23",
+          "invocationHistory": "d58e98c020c6419456d748d86dd36fd3dc2aa644a0ef130b6a21ac99366f2b30",
+          "backgroundJobs": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 3,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": 0,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": false
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 3,
+        "inputFingerprints": {
+          "project": "895fc358822fc117683ac0831aef44050c8a8d64b1c631c96b20bef4e648d864",
+          "qualityReportsAggregate": null,
+          "seriesMetrics": null,
+          "taskHistory": "f72c1dd26e2ce261eb6b859340e8ba5c94ef6d6ed227002f226a3fd6a7032ac9",
+          "invocationHistory": null,
+          "backgroundJobs": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 3,
+          "substantialChapters": 1,
+          "qualityReports": 0,
+          "chapterCoverage": 0,
+          "substantialCoverage": 0
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": false
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 1,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 1
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 1,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 1
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 4,
+        "inputFingerprints": {
+          "project": "50d55c89ce8ea79afc240e9d2709f15c5dfe5275f2b61bbb3fde729cc1b5cb0d",
+          "qualityReportsAggregate": "216dba5b17824ca608aded36019e3d8cb6508cf5ffbd69ea95a0f45655057207",
+          "seriesMetrics": "7c20bf9b382355c1e0cfb7882cfce8ec1b1303f63be7ffff6f50af3946f82a06",
+          "taskHistory": "48c63c511fc0cd3f48a7c0e6a42a77e71c5fc9131dfac010ce1c57f3f6a49d03",
+          "invocationHistory": "fbeeab5ff672ed7dbedcb087d873e70a51f0e72f0b201396c11fa044a9ee5e87",
+          "backgroundJobs": "04114d9e2d53739bf1a32164f79573ef1d17154659650f50415a2a1f4c4a619f"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 2,
+          "parsedReports": 2,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 198,
+          "substantialChapters": 70,
+          "qualityReports": 2,
+          "chapterCoverage": 0.0101,
+          "substantialCoverage": 0.0286
+        },
+        "reports": {
+          "items": [
+            {
+              "reportOrdinal": 1,
+              "fields": [
+                "chapterId",
+                "fixes",
+                "metrics",
+                "overallScore",
+                "strengths",
+                "summary",
+                "updatedAt"
+              ],
+              "overallScore": 96,
+              "metricCount": 9,
+              "metricKeys": [
+                "tension",
+                "prose",
+                "rhythm",
+                "character_arc",
+                "payoff",
+                "foreshadowing_health",
+                "progression",
+                "slice_of_life",
+                "redemption"
+              ],
+              "metricScoreVectorFingerprint": "a3b371059c904f5a789f8a330b36f347277510245d0a00d861b5f7733b8e87b4",
+              "metricNoteVectorFingerprint": "4dc38ae0ee62a1a7eefbd81e30cb1d219d8c5003b5fda3d75c78d8e13eb7247f",
+              "allMetricScoresEqual": true,
+              "strengthCount": 1,
+              "fixCount": 0,
+              "evidenceFields": [],
+              "updatedAtValid": true
+            },
+            {
+              "reportOrdinal": 2,
+              "fields": [
+                "chapterId",
+                "fixes",
+                "metrics",
+                "overallScore",
+                "strengths",
+                "summary",
+                "updatedAt"
+              ],
+              "overallScore": 96,
+              "metricCount": 9,
+              "metricKeys": [
+                "tension",
+                "prose",
+                "rhythm",
+                "character_arc",
+                "payoff",
+                "foreshadowing_health",
+                "progression",
+                "slice_of_life",
+                "redemption"
+              ],
+              "metricScoreVectorFingerprint": "a3b371059c904f5a789f8a330b36f347277510245d0a00d861b5f7733b8e87b4",
+              "metricNoteVectorFingerprint": "4dc38ae0ee62a1a7eefbd81e30cb1d219d8c5003b5fda3d75c78d8e13eb7247f",
+              "allMetricScoresEqual": true,
+              "strengthCount": 1,
+              "fixCount": 0,
+              "evidenceFields": [],
+              "updatedAtValid": true
+            }
+          ],
+          "overallScore": {
+            "sampleCount": 2,
+            "min": 96,
+            "median": 96,
+            "max": 96,
+            "average": 96
+          },
+          "zeroFixReports": 2,
+          "allMetricScoresEqualReports": 2,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 1,
+            "duplicateFingerprintGroups": 1,
+            "largestGroup": 2
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 1,
+            "duplicateFingerprintGroups": 1,
+            "largestGroup": 2
+          }
+        },
+        "seriesCache": {
+          "exists": true,
+          "reportCount": 2,
+          "chapterCount": 198,
+          "cachedAverageOverallScore": 91,
+          "recomputedCurrentReportAverage": 96,
+          "averageMatchesCurrentReports": false,
+          "olderThanLatestReportByDeclaredTimestamp": true,
+          "metricAverageKeys": [
+            "character_arc",
+            "conflict",
+            "emotion",
+            "foreshadowing_health",
+            "hook",
+            "information",
+            "payoff",
+            "progression",
+            "prose",
+            "redemption",
+            "rhythm",
+            "slice_of_life",
+            "tension"
+          ]
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 70,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 1
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 70,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 1
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 1,
+          "chaptersSharingAtLeastOneNormalizedLine": 7,
+          "maximumChaptersSharingOneNormalizedLine": 7,
+          "fakeSuspenseEndingPatternChapters": 2
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 7,
+          "latestQualityTasksByType": {
+            "quality.rewrite": 7
+          },
+          "latestQualityTasksByStatus": {
+            "error": 1,
+            "success": 6
+          },
+          "qualityInvocations": 7,
+          "invocationDecisions": {
+            "accepted": 2,
+            "not-required": 1,
+            "pending": 4
+          },
+          "acceptedQualityInvocations": 2,
+          "qualitySeriesRebuildJobs": 19,
+          "qualitySeriesRebuildStatuses": {
+            "success": 19
+          },
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 5,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "qualityReportsAggregate": null,
+          "seriesMetrics": "aa19902040a35ae32454c65132a814c60dbd55f43a5706545760fa5e8c263842",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "backgroundJobs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 3,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": 0,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": true,
+          "reportCount": 0,
+          "chapterCount": 3,
+          "cachedAverageOverallScore": 0,
+          "recomputedCurrentReportAverage": null,
+          "averageMatchesCurrentReports": null,
+          "olderThanLatestReportByDeclaredTimestamp": false,
+          "metricAverageKeys": []
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
+          "qualityReportsAggregate": null,
+          "seriesMetrics": "f15d4e23f7ac2b019e64a14dd1c50e868d0de2a1e15eb4ba66b7336a83b8db67",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "backgroundJobs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 3,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": 0,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": true,
+          "reportCount": 0,
+          "chapterCount": 3,
+          "cachedAverageOverallScore": 0,
+          "recomputedCurrentReportAverage": null,
+          "averageMatchesCurrentReports": null,
+          "olderThanLatestReportByDeclaredTimestamp": false,
+          "metricAverageKeys": []
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
+          "qualityReportsAggregate": null,
+          "seriesMetrics": "d1cf7f85ed1118cb814e746fd68f7b67e8383cadb7a6d85f04ba27c93efe063d",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "backgroundJobs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 3,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": 0,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": true,
+          "reportCount": 0,
+          "chapterCount": 3,
+          "cachedAverageOverallScore": 0,
+          "recomputedCurrentReportAverage": null,
+          "averageMatchesCurrentReports": null,
+          "olderThanLatestReportByDeclaredTimestamp": false,
+          "metricAverageKeys": []
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
+          "qualityReportsAggregate": null,
+          "seriesMetrics": "3653993f03f73f8d9c90aa5effbbd59004230feccef19f018fa2ef5e515d70e7",
+          "taskHistory": "d3fb87fd7556f445db97be68c1229835b7cc8c3717821e6e80612a5ea72f0ede",
+          "invocationHistory": "988f04eb910c93d773aa804596a77201681092a43160a0de961d67f6b7f446b8",
+          "backgroundJobs": "f25608c5683254b9357a8ba1f9dc75b75c6ee89776d28a86c9336abc2e2db526"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 3,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": 0,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": true,
+          "reportCount": 0,
+          "chapterCount": 3,
+          "cachedAverageOverallScore": 0,
+          "recomputedCurrentReportAverage": null,
+          "averageMatchesCurrentReports": null,
+          "olderThanLatestReportByDeclaredTimestamp": false,
+          "metricAverageKeys": []
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 1,
+          "qualitySeriesRebuildStatuses": {
+            "success": 1
+          },
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      }
+    ],
+    "interpretation": "Numeric scores, exact repetition, phrase heuristics, task success, patch acceptance, and cache timestamps are diagnostic inventory only. They do not independently prove literary quality, evaluator validity, author satisfaction, template harm, plagiarism, causal improvement, or reader response."
+  },
+  "summary": {
+    "auditedStages": 16,
+    "projectsScanned": 8,
+    "chaptersInventoried": 219,
+    "substantialChapters": 71,
+    "qualityReports": 2,
+    "qualityReportCoverageOfAllChapters": 0.0091,
+    "qualityReportCoverageOfSubstantialChapters": 0.0282,
+    "reportsWithEvidenceOrProvenance": 0,
+    "zeroFixReports": 2,
+    "allMetricScoresEqualReports": 2,
+    "latestQualityReviewTasks": 0,
+    "latestQualityRewriteTasks": 7,
+    "acceptedQualityInvocations": 2,
+    "staleOrInconsistentSeriesCaches": 1,
+    "structuredAuthorQualityRatings": 0,
+    "calibratedEvaluatorSuites": 0,
+    "replayableQualityGateDecisions": 0,
+    "implementationVerified": false
+  },
+  "rootCause": {
+    "statement": "The platform stores a mutable score report as if it were quality truth, while client heuristics, one AI-dominant hybrid evaluator, imported reports, series aggregates, rewrite targets, and author patch adoption have no shared provenance, frozen evidence, calibration, uncertainty, disagreement, or causal comparison protocol.",
+    "consequence": "High or improving scores can reflect evaluator preference, keyword gaming, stale cache, self-review, schema drift, or homogenizing rewrites rather than better prose; the system cannot prove why a chapter passed, whether the author preferred it, which strengths regressed, or whether the whole book became more templated."
+  },
+  "currentEvidence": [
+    {
+      "claim": "Manual diagnosis saves a client-side keyword formula directly, without running the AI quality-review task.",
+      "evidence": [
+        {
+          "path": "ui/src/stores/novel.ts",
+          "line": 5,
+          "evidence": "analyzeChapterQualityHelper"
+        },
+        {
+          "path": "ui/src/stores/novel/quality.ts",
+          "line": 47,
+          "evidence": "export function analyzeChapterQuality"
+        }
+      ]
+    },
+    {
+      "claim": "Runtime hybrid review gives the AI 90 percent of each metric and 80 percent of overall score.",
+      "evidence": [
+        {
+          "path": "api/src/chapterQualityReview.ts",
+          "line": 373,
+          "evidence": "metric.score * 0.1 + aiMetric.score * 0.9"
+        },
+        {
+          "path": "api/src/chapterQualityReview.ts",
+          "line": 379,
+          "evidence": "aiReport.overallScore * 0.8"
+        }
+      ]
+    },
+    {
+      "claim": "Quality report writes accept a client-shaped object and the report schema lacks source/evidence/freshness semantics.",
+      "evidence": [
+        {
+          "path": "api/src/app.ts",
+          "line": 2479,
+          "evidence": "...reportInput"
+        },
+        {
+          "path": "api/src/types.ts",
+          "line": 324,
+          "evidence": "export interface ChapterQualityReport"
+        }
+      ]
+    },
+    {
+      "claim": "Score-targeted quality repair requests a complete replace-file rewrite.",
+      "evidence": [
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 265,
+          "evidence": "payload.targetScore"
+        },
+        {
+          "path": "api/src/taskTemplates.ts",
+          "line": 366,
+          "evidence": "mode: \"replace-file\""
+        }
+      ]
+    },
+    {
+      "claim": "Series style drift measures prose-score deviation, not textual voice or template recurrence.",
+      "evidence": [
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 598,
+          "evidence": "prose.score - baselineScore"
+        }
+      ]
+    },
+    {
+      "claim": "Series cache freshness is inferred from field presence rather than source fingerprints.",
+      "evidence": [
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 927,
+          "evidence": "cached?.rhythmSignals"
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "quality-objective-and-chapter-function",
+      "current": "Seven common metrics and a fixed target of 86 drive runtime and UI repair.",
+      "gap": "No frozen chapter-function, genre, author-objective, anti-goal, reader-contract, or must-preserve profile selects what quality means for this chapter.",
+      "target": "Compile a function-adaptive rubric and protected-strength contract from accepted objectives before assessment."
+    },
+    {
+      "id": "evaluation-input-freeze",
+      "current": "Evaluators read current content, dashboard, scenes, and sometimes a previous report.",
+      "gap": "Reports do not bind content hash, canon/outline/decision cursors, context manifest, rubric, evaluator, or prompt/model version.",
+      "target": "Freeze EvaluationCase inputs and reject or stale results whose evidence version no longer matches."
+    },
+    {
+      "id": "hard-guard-layer",
+      "current": "Continuity, craft risks, quality scores, and narrative debt are neighboring signals.",
+      "gap": "Aesthetic averages are not separated from canon, POV, secrecy, rights, similarity, lock, obligation, and stale-input failures.",
+      "target": "Evaluate non-compensable hard guards first; no high style score may override a fatal violation."
+    },
+    {
+      "id": "deterministic-signal-layer",
+      "current": "Keyword, paragraph, sentence-start, abstract-density, pressure, reaction, information, and fake-hook heuristics provide fast signals.",
+      "gap": "Genre-specific pressure vocabulary and fixed opening/ending assumptions can reward keyword stuffing and penalize quiet, comic, reflective, romance, mystery, or aftermath chapters.",
+      "target": "Treat rules as versioned evidence extractors with applicability, precision/recall calibration, counterexamples, and no direct literary verdict authority."
+    },
+    {
+      "id": "model-judgment-layer",
+      "current": "One AI report supplies 90 percent of each metric and 80 percent of overall score when parseable.",
+      "gap": "The same generator/reviewer family can share blind spots; no independence, blinding, repeat sampling, calibration, uncertainty, disagreement, or judge drift is recorded.",
+      "target": "Run calibrated independent evaluators only where needed, preserve dissent, and publish confidence rather than manufactured precision."
+    },
+    {
+      "id": "manual-diagnosis-path",
+      "current": "The UI computes a separate keyword formula locally and saves it as the same report type.",
+      "gap": "Consumers cannot distinguish heuristic-only, AI-hybrid, legacy-imported, author-entered, or regression-evaluated claims.",
+      "target": "Every EvaluatorRun declares method, version, authority, scope, inputs, limitations, and calibration status."
+    },
+    {
+      "id": "evidence-anchoring",
+      "current": "Notes, strengths, fixes, verdicts, and anti-pattern labels are free text.",
+      "gap": "No stable prose/scene/contract anchor proves a claim, supports author inspection, or survives/invalidates under edits.",
+      "target": "Every blocking or repair-driving claim cites recoverable spans, scene IDs, contract clauses, or cross-chapter comparisons and states what would falsify it."
+    },
+    {
+      "id": "aggregation-and-gating",
+      "current": "Overall and metric averages plus a uniform pass line decide repair and runtime review.",
+      "gap": "Averages hide fatal defects, non-applicable metrics, ties, disagreement, evidence gaps, and deliberate low-tension functions; score precision invites Goodhart optimization.",
+      "target": "Use typed hard gates, function-specific sufficiency, Pareto comparisons, uncertainty bands, and explicit disputed/evidence-incomplete states."
+    },
+    {
+      "id": "paired-candidate-comparison",
+      "current": "Baseline and rewritten chapter are rescored separately after applying the replacement.",
+      "gap": "There is no blind pairwise judgment, frozen variables, per-defect delta, strength-retention proof, confidence, or no-preference outcome before canon adoption.",
+      "target": "Compare candidates blind against the same EvaluationCase and preserve ties, mixed wins, and regression blockers."
+    },
+    {
+      "id": "repair-planning",
+      "current": "Metrics under 86 become explicit rewrite targets and a full-chapter replace-file candidate is requested.",
+      "gap": "The model is taught to optimize evaluator labels; it can add pressure words, hooks, sensory detail, or uniform beats while erasing voice, subtlety, strengths, and intentional variation.",
+      "target": "Derive a bounded defect repair plan with evidence, protected spans, invariants, negative constraints, scope, expected effect, and regression cases; scores are observations, not prompt objectives."
+    },
+    {
+      "id": "author-preference-and-feedback",
+      "current": "Patch adoption is pending/accepted/not-required and local UI shows score delta.",
+      "gap": "No durable author rating, pairwise choice, reason, partial adoption, edit retention, preference scope, confidence, or causal attribution links taste to quality claims.",
+      "target": "Capture low-burden structured feedback and edits as scoped hypotheses, not universal truth or automatic agreement with the evaluator."
+    },
+    {
+      "id": "series-template-and-voice-review",
+      "current": "Style drift is deviation of each prose score from the mean; rhythm/tension/craft views mostly aggregate report or sparse structured data.",
+      "gap": "Equal prose scores cannot detect repeated openings/endings, scene skeletons, cadence, metaphors, dialogue voices, emotional arcs, payoff patterns, or evaluator-induced homogenization.",
+      "target": "Use multi-scale stylometry, semantic structure, dialogue-speaker separability, motif/payoff diversity, intentional-parallelism labels, and evidence-linked recurrence cases."
+    },
+    {
+      "id": "reader-experience-validation",
+      "current": "The evaluator infers hooks, tension, information, emotion, and aftermath from the author/reviewer view.",
+      "gap": "No sealed reader-knowledge view, prediction state, confusion/curiosity distinction, cold read, reader diversity, or human calibration proves actual experience.",
+      "target": "Treat simulated reader claims as bounded hypotheses and calibrate them against voluntary blinded human feedback without leaking author-only truth."
+    },
+    {
+      "id": "benchmark-calibration-and-drift",
+      "current": "Tests cover parser behavior and two synthetic weak/strong passages.",
+      "gap": "No frozen representative corpus, pairwise human labels, hard negative counterexamples, holdout, evaluator agreement, score calibration, prompt/model comparison, contamination guard, or release threshold exists.",
+      "target": "Version benchmark slices by genre/function/language/length and ship evaluator changes only after holdout, disagreement, drift, cost, and false-pass gates pass."
+    },
+    {
+      "id": "report-freshness-and-projection",
+      "current": "Chapter reports overwrite files and series cache is considered valid when expected fields exist.",
+      "gap": "Current files can disagree with cached averages and neither report nor projection declares an input cursor or stale state.",
+      "target": "Append immutable claims, reduce current views from source fingerprints, and invalidate chapter/series/completion projections on every relevant mutation."
+    },
+    {
+      "id": "quality-release-decision",
+      "current": "Passing all metric thresholds triggers positive UI language and runtime review readiness.",
+      "gap": "No QualityGateDecision proves source coverage, fatal guards, calibration, author authority, disagreement disposition, regressions, freshness, or chapter settlement linkage.",
+      "target": "Issue a replayable gate decision with explicit pass, conditional, disputed, blocked, or waived outcomes; only current decisions may participate in settlement/completion."
+    }
+  ],
+  "alternatives": [
+    {
+      "option": "A-one-better-hybrid-score",
+      "verdict": "reject-as-target",
+      "blueCase": "Improve prompts and deterministic features, tune weights, add more metrics, and keep one familiar score and repair threshold; simplest UX and cheapest operation.",
+      "redCase": "A more sophisticated scalar still hides non-applicable dimensions, fatal errors, uncertainty, evaluator bias, author disagreement, evidence gaps, and cross-chapter homogenization; exposing the number as a target intensifies gaming."
+    },
+    {
+      "option": "B-multi-model-review-jury",
+      "verdict": "useful-evidence-producer-not-final-authority",
+      "blueCase": "Independent reviewers, red/blue roles, majority or weighted aggregation, and repeat sampling reduce some single-model blind spots and expose disagreement.",
+      "redCase": "Models may share training bias, prompts, leaked intent, rubric failure, and preference for polished conventional prose; voting without human calibration, anchors, hard guards, and no-preference states manufactures confidence at higher cost."
+    },
+    {
+      "option": "C-layered-evidence-calibrated-quality-system",
+      "verdict": "author-selected-specification-not-implemented",
+      "blueCase": "Frozen function-specific cases, non-compensable guards, deterministic signals, calibrated independent judgments, blind pairwise comparison, author feedback, series recurrence analysis, uncertainty, and replayable gates can prove bounded quality claims without reducing literature to one score.",
+      "redCase": "Requires benchmark curation, annotation/adjudication, evidence anchors, evaluator registry, calibration infrastructure, privacy-safe reader feedback, stylometry, richer UX, ongoing drift monitoring, and more selective model spend."
+    }
+  ],
+  "targetAuthority": {
+    "entities": [
+      "EvaluationCase",
+      "LiteraryQualityClaim",
+      "QualityEvidenceBundle",
+      "EvidenceAnchor",
+      "EvaluatorRun",
+      "EvaluatorCalibration",
+      "BlindPairwiseJudgment",
+      "QualityDisagreementCase",
+      "AuthorQualityFeedback",
+      "PreferenceHypothesis",
+      "TemplateRecurrenceSignal",
+      "QualityRegressionReport",
+      "QualityGateDecision"
+    ],
+    "claimStates": [
+      "candidate",
+      "evidence_incomplete",
+      "supported",
+      "contested",
+      "superseded",
+      "invalidated",
+      "author_disagreed",
+      "waived"
+    ],
+    "gateStates": [
+      "unassessed",
+      "blocked",
+      "conditional",
+      "disputed",
+      "passed",
+      "waived",
+      "stale"
+    ],
+    "invariant": "No scalar score, model self-report, keyword hit, metric average, task success, rewrite score delta, patch adoption, cache presence, synthetic reader opinion, or absence of detected repetition may independently establish literary quality, author preference, originality, reader effect, regression safety, chapter settlement, or book completion."
+  },
+  "selectedQualityAuthority": {
+    "policyId": "author-goal-led-multi-evidence",
+    "order": [
+      "non-compensable hard guards",
+      "current explicit author objectives and anti-goals",
+      "calibrated independent blind reviewer/reader evidence",
+      "simulated reader and deterministic diagnostic hypotheses",
+      "scalar and operational summaries"
+    ],
+    "ordinaryAdoption": "Allowed only inside a current scoped AutonomyGrant when hard guards pass, author-goal fit and protected-strength retention are supported, evidence is fresh, and no material calibrated dissent remains; adoption is versioned and undoable.",
+    "elevatedAdoption": "Requires independent review and blind pairwise comparison where alternatives exist; unresolved material disagreement becomes review_required.",
+    "keyAdoption": "Requires independent blind comparison and disagreement adjudication; real author-objective, reader-effect, protected-strength, or irreversible-canon tradeoffs pause for one scoped author decision.",
+    "silenceRule": "Silence, task completion, score increase, or lack of detected defects is never author approval or settlement evidence."
+  },
+  "layeredEvaluationProtocol": {
+    "order": [
+      "freeze content, contract, chapter function, author objectives, reader view, canon and policy versions",
+      "run deterministic hard guards for canon, POV, secrecy, rights, similarity, locks, obligations, stale inputs, and schema",
+      "collect applicable low-cost textual/structural signals with evidence and known error bounds",
+      "run selective calibrated independent literary evaluators with blinded intent where possible",
+      "compare candidate versus baseline pairwise under the same frozen case and preserve tie/mixed/disagreement",
+      "measure author choice, partial adoption, edits, retention, and scoped reasons without treating silence as approval",
+      "run cross-chapter voice, recurrence, arc, payoff, pacing, memory, and obligation regressions",
+      "emit QualityGateDecision with sources, uncertainty, dissent, waivers, freshness, and settlement scope"
+    ],
+    "applicability": "Rubrics are selected by chapter/scene function, genre contract, narrative phase, POV, intended reader effect, and author anti-goals. Quiet aftermath, comedy, romance, investigation, setup, misdirection, battle, and climax must not share a mandatory pressure/hook shape.",
+    "aggregation": "Fatal hard guards do not average away. Aesthetic evidence uses bounded claims, uncertainty intervals, Pareto and pairwise comparison, and explicit no-preference/disagreement; an overall score may be a secondary navigation aid only."
+  },
+  "evidenceAndRepairProtocol": {
+    "evidence": "Every repair-driving claim links exact current-version prose/scene/contract/cross-chapter anchors, evaluator and rubric versions, applicability, counterevidence, uncertainty, and a falsification condition. Editing an anchor invalidates the claim and dependent gate.",
+    "repair": "Compile defect-specific MutationPlans with protected strengths/spans, canon and voice locks, negative constraints, maximum scope, expected reader/function effect, and regression checks. Do not tell the generator to reach a numeric score or repair every low metric through a full-file rewrite.",
+    "comparison": "Before adoption, compare baseline and candidate blind on the target defect, author objective, hard guards, preserved strengths, new regressions, template recurrence, and cost. A higher scalar with any fatal or protected-strength regression loses."
+  },
+  "calibrationAndReleaseProtocol": {
+    "benchmarkSlices": [
+      "genre",
+      "chapter/scene function",
+      "story phase",
+      "language",
+      "length",
+      "POV form",
+      "dialogue density",
+      "action versus quiet",
+      "intentional parallelism",
+      "high ambiguity",
+      "adversarial metric gaming"
+    ],
+    "labels": "Prefer blinded pairwise human judgments with annotator confidence, rationale anchors, ties, disagreements, and adjudication over exact absolute gold prose or forced scores.",
+    "gates": [
+      "fatal false-pass rate",
+      "evidence-anchor precision",
+      "pairwise human agreement",
+      "calibration error",
+      "inter/repeat evaluator stability",
+      "author preference and edit-retention lift",
+      "protected-strength regression",
+      "template recurrence",
+      "secret/canon leakage",
+      "holdout contamination",
+      "cost and latency"
+    ],
+    "drift": "Evaluator prompt, model, rule, rubric, retrieval, tokenizer, benchmark, or aggregation changes create a new version, run shadow/holdout/canary comparison, preserve old results, and cannot silently reinterpret existing chapter or completion gates."
+  },
+  "releaseGate": {
+    "requirementIds": [
+      "FR-QUALITY-001",
+      "FR-QUALITY-002",
+      "FR-QUALITY-003",
+      "FR-QUALITY-004",
+      "FR-QUALITY-005",
+      "FR-QUALITY-006",
+      "FR-QUALITY-007",
+      "FR-QUALITY-008",
+      "FR-QUALITY-009",
+      "FR-QUALITY-010",
+      "FR-EVAL-001",
+      "FR-EVAL-003",
+      "FR-EVAL-005",
+      "FR-EVAL-006",
+      "FR-EVAL-007",
+      "FR-EVAL-008",
+      "FR-EVAL-009",
+      "FR-EVAL-010",
+      "FR-EVAL-011",
+      "FR-EVAL-012",
+      "FR-EVAL-013",
+      "FR-EVAL-014",
+      "FR-EVAL-015",
+      "FR-EVAL-017",
+      "FR-EVAL-018",
+      "FR-EVAL-019",
+      "FR-EVAL-020",
+      "FR-EVAL-021",
+      "FR-EVAL-024",
+      "FR-FEEDBACK-001",
+      "FR-FEEDBACK-003",
+      "FR-FEEDBACK-004",
+      "FR-FEEDBACK-006",
+      "FR-FEEDBACK-007",
+      "FR-OBJECTIVE-008",
+      "FR-OBJECTIVE-010",
+      "FR-READER-002",
+      "FR-READER-003",
+      "FR-READER-014",
+      "FR-READER-015",
+      "FR-READER-016",
+      "FR-READER-018"
+    ],
+    "rule": "Do not claim high-quality, author-aligned, non-template, reader-effective, improved, or auto-adoptable prose until current-version evidence anchors, function-adaptive rubrics, non-compensable guards, explicit author-objective authority, calibrated independent evaluation, sealed-reader blind comparison, tier-aware disagreement handling, regression/recurrence analysis, cache freshness, reversible adoption, and replayable QualityGateDecision are proven on representative holdout and real workflow evidence."
+  },
+  "unresolvedDecisionBoundary": "Q-003 through Q-009 are confirmed at specification level; Q-006 selects author-goal-led multi-evidence quality authority without weakening hard guards, calibration, independent blind evidence, regression protection, stale invalidation, or honest disagreement. No quality-authority runtime is implementation-verified."
+}
