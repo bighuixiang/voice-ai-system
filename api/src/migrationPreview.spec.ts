@@ -74,4 +74,17 @@ describe("project migration preview", () => {
 
     await expect(readMigrationPreview(root, first.migrationId)).rejects.toThrow("MIGRATION_PREVIEW_SEMANTIC_MISMATCH");
   });
+
+  it("rejects a validly hashed preview with invalid structural fields", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "novel-migration-preview-fields-"));
+    await fs.writeFile(path.join(root, "project.json"), JSON.stringify({ slug: "legacy", chapters: [] }));
+    const first = await previewProjectMigration(root, "legacy");
+    const { fingerprint: _fingerprint, ...previewBase } = first;
+    const malformedBase = { ...previewBase, projectSlug: "", conflicts: "not-an-array" };
+    const malformed = { ...malformedBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(malformedBase)).digest("hex") };
+    const previewPath = path.join(root, "sessions", "migrations", `${first.migrationId}.json`);
+    await fs.writeFile(previewPath, JSON.stringify(malformed));
+
+    await expect(readMigrationPreview(root, first.migrationId)).rejects.toThrow("MIGRATION_PREVIEW_SEMANTIC_MISMATCH");
+  });
 });

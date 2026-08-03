@@ -1,8 +1,9 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { buildLengthForecast, createLengthContract, decideLengthVariance, readLengthContract } from "./lengthPlanning.js";
+import { assertLengthContractIntegrity, buildLengthForecast, createLengthContract, decideLengthVariance, readLengthContract, readLengthForecast, readLengthVarianceDecision } from "./lengthPlanning.js";
 import { createNarrativeObligation } from "./narrativeObligation.js";
 import type { NovelProject } from "./types.js";
 
@@ -71,4 +72,40 @@ describe("length planning", () => {
     expect(forecast.assumptions.some((assumption) => assumption.includes("open obligation"))).toBe(true);
     expect(forecast.blockingReasons).toContain("open-obligations-outside-range");
   });
+
+  it("persists a forecast and fails closed when its contract or forecast is tampered", async () => {
+    const root = await makeRoot();
+    const contract = await createLengthContract(root, project.slug, {
+      dimensions: { totalWords: { mode: "soft", min: 100, max: 200 }, totalChapters: { mode: "soft", min: 1, max: 3 }, totalVolumes: { mode: "unknown" }, chapterWords: { mode: "soft", min: 50, max: 150 } }
+    });
+    const forecast = await buildLengthForecast(root, project, contract);
+    const replay = await buildLengthForecast(root, project, contract);
+    expect(replay.fingerprint).toBe(forecast.fingerprint);
+    expect(await readLengthForecast(root)).toEqual(replay);
+    const forecastPath = path.join(root, "planning", "length-forecast.json");
+    const tamperedForecast = JSON.parse(await fs.readFile(forecastPath, "utf8")) as Record<string, unknown>;
+    tamperedForecast.status = "within-range";
+    await fs.writeFile(forecastPath, JSON.stringify(tamperedForecast), "utf8");
+    await expect(readLengthForecast(root)).rejects.toThrow("LENGTH_FORECAST_INTEGRITY_FAILED");
+
+    const contractPath = path.join(root, "planning", "length-contract.json");
+    const tamperedContract = JSON.parse(await fs.readFile(contractPath, "utf8")) as Record<string, unknown>;
+    tamperedContract.projectSlug = "other-project";
+    await fs.writeFile(contractPath, JSON.stringify(tamperedContract), "utf8");
+    await expect(readLengthContract(root)).rejects.toThrow("LENGTH_CONTRACT_INTEGRITY_FAILED");
+  });
+
+  it("persists variance decisions idempotently and rejects a mismatched forecast", async () => {
+    const root = await makeRoot();
+    const contract = await createLengthContract(root, project.slug, {
+      dimensions: { totalWords: { mode: "soft", min: 100, max: 105 }, totalChapters: { mode: "soft", min: 2, max: 3 }, totalVolumes: { mode: "unknown" }, chapterWords: { mode: "soft", min: 50, max: 80 } }
+    });
+    const forecast = await buildLengthForecast(root, project, contract);
+    const first = await decideLengthVariance(root, contract, forecast, { authority: "author", choice: "pause-and-review" });
+    expect(await readLengthVarianceDecision(root, first.decisionId)).toEqual(first);
+    const second = await decideLengthVariance(root, contract, forecast, { authority: "author", choice: "pause-and-review" });
+    expect(second).toEqual(first);
+    await expect(decideLengthVariance(root, contract, { ...forecast, fingerprint: "f".repeat(64) }, { authority: "author", choice: "pause-and-review" })).rejects.toThrow("LENGTH_FORECAST_INTEGRITY_MISMATCH");
+  });
+  it("rejects a re-signed contract with invalid dimensions or hard locks", async () => { const root = await makeRoot(); const contract = await createLengthContract(root, project.slug, { dimensions: { totalWords: { mode: "soft", min: 100, max: 200 }, totalChapters: { mode: "unknown" }, totalVolumes: { mode: "unknown" }, chapterWords: { mode: "soft", min: 50, max: 100 } }, hardLocks: [] }); const { fingerprint: _fingerprint, ...base } = contract; const invalidBase = { ...base, hardLocks: ["totalWords"], dimensions: { ...base.dimensions, totalWords: { mode: "soft", min: 100, max: 200 } } }; const invalid = { ...invalidBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(invalidBase)).digest("hex") }; expect(() => assertLengthContractIntegrity(invalid as typeof contract)).toThrow("LENGTH_CONTRACT_INTEGRITY_FAILED"); });
 });

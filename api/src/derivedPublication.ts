@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
 import { readChapterSettlement } from "./chapterSettlement.js";
+import { recordChapterSettlementProjectionClosure } from "./chapterSettlementProjectionClosure.js";
 
 export interface DerivedPublicationTransaction {
   schemaVersion: "derived-publication-transaction.v1";
@@ -11,10 +12,11 @@ export interface DerivedPublicationTransaction {
   chapterId: string;
   settlementId: string;
   writes: Array<{ relativePath: string; contentSha256: string }>;
-  status: "prepared" | "committed" | "rolled_back";
+  status: "prepared" | "committed" | "rolled_back" | "stale";
   createdAt: string;
   committedAt?: string;
   error?: string;
+  staleReason?: string;
   fingerprint: string;
 }
 
@@ -22,7 +24,10 @@ function hash(value: unknown): string { return crypto.createHash("sha256").updat
 function hashText(value: string): string { return crypto.createHash("sha256").update(value, "utf8").digest("hex"); }
 function verifyTransactionIntegrity(transaction: DerivedPublicationTransaction): boolean {
   const { fingerprint, ...base } = transaction;
-  return hash(base) === fingerprint;
+  const writesValid = Array.isArray(transaction.writes) && transaction.writes.length > 0 && transaction.writes.every((write) => typeof write?.relativePath === "string" && write.relativePath.trim() && typeof write.contentSha256 === "string" && /^[a-f0-9]{64}$/i.test(write.contentSha256));
+  const statusValid = ["prepared", "committed", "rolled_back", "stale"].includes(transaction.status);
+  const datesValid = typeof transaction.createdAt === "string" && Number.isFinite(Date.parse(transaction.createdAt)) && (transaction.committedAt === undefined || Number.isFinite(Date.parse(transaction.committedAt)));
+  return transaction.schemaVersion === "derived-publication-transaction.v1" && typeof transaction.transactionId === "string" && transaction.transactionId.trim().length > 0 && typeof transaction.projectSlug === "string" && transaction.projectSlug.trim().length > 0 && typeof transaction.chapterId === "string" && transaction.chapterId.trim().length > 0 && typeof transaction.settlementId === "string" && transaction.settlementId.trim().length > 0 && writesValid && statusValid && datesValid && (transaction.status !== "committed" || typeof transaction.committedAt === "string") && hash(base) === fingerprint;
 }
 function transactionPath(root: string, id: string): string { return resolveInside(root, `sessions/derived-publications/${id}.json`); }
 function lockPath(root: string): string { return resolveInside(root, "sessions/derived-publications/.lock"); }
@@ -62,7 +67,11 @@ async function withLock<T>(root: string, operation: () => Promise<T>): Promise<T
 }
 
 export async function readDerivedPublicationTransaction(root: string, id: string): Promise<DerivedPublicationTransaction | null> {
-  try { return JSON.parse(await fs.readFile(transactionPath(root, id), "utf8")) as DerivedPublicationTransaction; }
+  try {
+    const transaction = JSON.parse(await fs.readFile(transactionPath(root, id), "utf8")) as DerivedPublicationTransaction;
+    if (transaction.schemaVersion !== "derived-publication-transaction.v1" || transaction.transactionId !== id || !/^[a-f0-9]{64}$/i.test(transaction.fingerprint) || !verifyTransactionIntegrity(transaction)) throw new Error("DERIVED_PUBLICATION_INTEGRITY_FAILED");
+    return transaction;
+  }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 
@@ -79,6 +88,17 @@ export async function publishDerivedAssets(input: {
     const existing = await readDerivedPublicationTransaction(input.root, transactionId);
     if (existing) {
       if (!verifyTransactionIntegrity(existing)) throw new Error("DERIVED_PUBLICATION_INTEGRITY_FAILED");
+      if (existing.projectSlug !== input.projectSlug || existing.chapterId !== input.chapterId || existing.settlementId !== input.settlementId) throw new Error("DERIVED_PUBLICATION_CONFLICT");
+      if (existing.status === "stale") throw new Error("DERIVED_PUBLICATION_REVALIDATION_REQUIRED");
+      if (existing.status === "committed") {
+        for (const write of existing.writes) {
+          let content: string;
+          try { content = await fs.readFile(resolveInside(input.root, write.relativePath), "utf8"); }
+          catch { throw new Error("DERIVED_PUBLICATION_OUTPUT_STALE"); }
+          if (hashText(content) !== write.contentSha256) throw new Error("DERIVED_PUBLICATION_OUTPUT_STALE");
+        }
+        await recordChapterSettlementProjectionClosure({ root: input.root, projectSlug: input.projectSlug, chapterId: input.chapterId, settlementId: input.settlementId, derivedTransactionId: existing.transactionId, derivedFingerprint: existing.fingerprint });
+      }
       return existing;
     }
     const settlement = await readChapterSettlement(input.root, input.settlementId);
@@ -114,16 +134,45 @@ export async function publishDerivedAssets(input: {
       const committedBase = { ...preparedWithoutFingerprint, status: "committed" as const, committedAt: new Date().toISOString() };
       const committed: DerivedPublicationTransaction = { ...committedBase, fingerprint: hash(committedBase) };
       await writeJson(transactionPath(input.root, transactionId), committed);
+      await recordChapterSettlementProjectionClosure({ root: input.root, projectSlug: input.projectSlug, chapterId: input.chapterId, settlementId: input.settlementId, derivedTransactionId: committed.transactionId, derivedFingerprint: committed.fingerprint });
       return committed;
     } catch (error) {
       for (const [relativePath, original] of originals) {
         if (original.exists) await writeText(resolveInside(input.root, relativePath), original.content);
         else await fs.rm(resolveInside(input.root, relativePath), { force: true });
       }
-      const rolledBackBase = { ...prepared, status: "rolled_back" as const, error: error instanceof Error ? error.message : String(error) };
+      const { fingerprint: _preparedRollbackFingerprint, ...preparedRollbackBase } = prepared;
+      const rolledBackBase = { ...preparedRollbackBase, status: "rolled_back" as const, error: error instanceof Error ? error.message : String(error) };
       const rolledBack: DerivedPublicationTransaction = { ...rolledBackBase, fingerprint: hash(rolledBackBase) };
       await writeJson(transactionPath(input.root, transactionId), rolledBack);
       throw error;
     }
   });
+}
+
+export async function invalidateDerivedPublications(root: string, claimId: string, reason: string): Promise<string[]> {
+  if (!claimId.trim() || !reason.trim()) throw new Error("DERIVED_PUBLICATION_INVALIDATION_FIELDS_REQUIRED");
+  return withLock(root, async () => {
+    const directory = resolveInside(root, "sessions/derived-publications");
+    let names: string[];
+    try { names = await fs.readdir(directory); } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return []; throw error; }
+    const invalidated: string[] = [];
+    for (const name of names.filter((item) => item.endsWith(".json"))) {
+      const id = name.slice(0, -5);
+      const transaction = await readDerivedPublicationTransaction(root, id);
+      if (!transaction || transaction.status !== "committed") continue;
+      const { fingerprint: _fingerprint, ...base } = transaction;
+      const staleBase = { ...base, status: "stale" as const, staleReason: `${claimId}:${reason}` };
+      await writeJson(transactionPath(root, id), { ...staleBase, fingerprint: hash(staleBase) });
+      invalidated.push(id);
+    }
+    return invalidated.sort();
+  });
+}
+
+export async function revalidateDerivedPublication(root: string, transactionId: string, writes: Array<{ relativePath: string; content: string }>): Promise<DerivedPublicationTransaction> {
+  const stale = await readDerivedPublicationTransaction(root, transactionId);
+  if (!stale) throw new Error("DERIVED_PUBLICATION_TRANSACTION_NOT_FOUND");
+  if (stale.status !== "stale") throw new Error("DERIVED_PUBLICATION_REVALIDATION_NOT_REQUIRED");
+  return publishDerivedAssets({ root, projectSlug: stale.projectSlug, chapterId: stale.chapterId, settlementId: stale.settlementId, writes });
 }

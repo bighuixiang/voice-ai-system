@@ -14,6 +14,9 @@ export interface CodexRunOutput {
   durationMs: number;
   timedOut?: boolean;
   cancelled?: boolean;
+  usage?: { inputTokens: number; outputTokens: number; cachedTokens: number; measurement: "actual" | "estimated"; source?: string };
+  cost?: { amount: number; currency: string; measurement: "actual" | "estimated"; pricingRef?: string; estimateMethod?: string };
+  modelVersion?: string;
 }
 
 export interface ProcessRunOptions {

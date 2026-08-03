@@ -16,4 +16,9 @@ describe("context privacy gate", () => {
     expect(result).toMatchObject({ status: "block", includedSourceIds: [], blockedSourceIds: ["secret", "cross", "deleted"] });
     expect(result.reasons).toEqual(expect.arrayContaining(["SECRET_DETECTED", "PROJECT_SCOPE_VIOLATION", "SOURCE_DELETED"]));
   });
+
+  it("blocks blank or untyped source metadata", () => {
+    const result = evaluateContextPrivacy({ projectSlug: "p1", purpose: "understanding", sources: [{ sourceId: "", projectSlug: "p1", content: "data", dataClass: "author-text", rights: "project-authorized", providerAuthorized: true, deleted: false }] });
+    expect(result).toMatchObject({ status: "block", reasons: ["SOURCE_METADATA_INVALID"] });
+  });
 });

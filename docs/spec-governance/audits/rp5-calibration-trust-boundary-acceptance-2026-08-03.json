@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-calibration-trust-boundary",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-EVAL-006", "FR-EVAL-007", "FR-RUN-020"],
+  "implementationRefs": [
+    "api/src/qualityCalibration.ts",
+    "api/src/qualityCalibration.spec.ts"
+  ],
+  "tests": ["api/src/qualityCalibration.spec.ts"],
+  "result": "passed",
+  "evidence": [
+    "RED: isQualityEvaluatorEligible accepted an in-memory object claiming calibrated status without a valid evidence fingerprint",
+    "GREEN: eligibility now requires full calibration integrity and semantic verification in addition to calibrated status",
+    "quality calibration regression passes 13/13",
+    "This guard does not create or imply real provider/human calibration evidence; it only prevents forged evidence from being treated as eligible"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "External provider/human holdout evidence is still an external input and remains absent from this workspace."
+  }
+}

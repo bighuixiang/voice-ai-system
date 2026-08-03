@@ -114,4 +114,20 @@ describe("background job persistence", () => {
     });
     expect(finished).toMatchObject({ id: retried?.id, status: "success", outputSummary: "retried story.graph.rebuild" });
   });
+
+  it("fails closed when persisted job history is tampered", async () => {
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "background-jobs-integrity-"));
+    const started = await enqueueProjectBackgroundJob({ slug: "demo" }, tempRoot, "story.graph.rebuild", "{}", async () => ({
+      outputSummary: "done",
+      resultRef: "/api/novel/projects/demo/story-graph"
+    }));
+    await waitForFinishedJob(tempRoot, "demo", started.id);
+    clearBackgroundJobsForTests();
+    const historyPath = path.join(tempRoot, "tasks", "background-jobs.jsonl");
+    const lines = (await fs.readFile(historyPath, "utf8")).trim().split(/\r?\n/);
+    const last = JSON.parse(lines.at(-1)!) as Record<string, unknown>;
+    lines[lines.length - 1] = JSON.stringify({ ...last, status: "running" });
+    await fs.writeFile(historyPath, `${lines.join("\n")}\n`, "utf8");
+    await expect(readBackgroundJob(tempRoot, "demo", started.id)).rejects.toThrow("BACKGROUND_JOB_INTEGRITY_FAILED");
+  });
 });

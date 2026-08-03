@@ -23,7 +23,7 @@ type ProjectAuditReport = {
   runtimeSummary: { chapterCount: number };
 };
 
-const apiBase = process.env.API_BASE_URL || "http://127.0.0.1:8787";
+const apiBase = "";
 
 async function createSmokeProject(request: APIRequestContext) {
   const response = await request.post(`${apiBase}/api/novel/projects`, {

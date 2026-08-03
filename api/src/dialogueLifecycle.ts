@@ -9,12 +9,12 @@ const hash = (value: unknown) => crypto.createHash("sha256").update(JSON.stringi
 
 export function classifyDialogueAnswer(input: { questionId: string; text: string }): DialogueAnswerClassification {
   if (!input.questionId.trim() || !input.text.trim()) throw new Error("DIALOGUE_ANSWER_REQUIRED");
-  const tentative = /可能|也许|不确定|先这样|maybe|perhaps|not sure/i.test(input.text);
+  const tentative = /可能|也许|或许|不确定|说不准|maybe|perhaps|not sure/i.test(input.text);
   const base = { schemaVersion: "dialogue-answer-classification.v1" as const, questionId: input.questionId, status: tentative ? "tentative" as const : "confirmed" as const, nextStep: tentative ? "reversible-default-or-probe" as const : "apply-answer" as const };
   return { ...base, fingerprint: hash(base) };
 }
 
-export function applyDialogueAnswerSegments(input: { openQuestions: readonly Array<{ questionId: string; semanticKey: string }>; segments: readonly Array<{ text: string; answers: readonly string[] }> }): DialogueAnswerApplication {
+export function applyDialogueAnswerSegments(input: { openQuestions: ReadonlyArray<{ questionId: string; semanticKey: string }>; segments: ReadonlyArray<{ text: string; answers: readonly string[] }> }): DialogueAnswerApplication {
   const evidence: DialogueAnswerApplication["evidence"] = []; const closed = new Set<string>();
   for (const segment of input.segments) for (const question of input.openQuestions) if (segment.answers.includes(question.semanticKey)) { closed.add(question.questionId); evidence.push({ questionId: question.questionId, segment: segment.text }); }
   const base = { schemaVersion: "dialogue-answer-application.v1" as const, closedQuestionIds: input.openQuestions.map((question) => question.questionId).filter((id) => closed.has(id)), remainingQuestionIds: input.openQuestions.map((question) => question.questionId).filter((id) => !closed.has(id)), evidence };

@@ -44,4 +44,13 @@ describe("creative session RP1 state and provenance", () => {
     await updateCreativeSessionState({ root, projectSlug: "p1", expectedFingerprint: initial.fingerprint, phase: "understanding", collaborationMode: "guided", activeQuestionId: "q-1", latestDirection: "first", unconfirmedAssumptions: [], decisionRefs: [], pendingPatchRefs: [] });
     await expect(updateCreativeSessionState({ root, projectSlug: "p1", expectedFingerprint: initial.fingerprint, phase: "capture", collaborationMode: "guided", activeQuestionId: undefined, latestDirection: "stale", unconfirmedAssumptions: [], decisionRefs: [], pendingPatchRefs: [] })).rejects.toThrow("CREATIVE_SESSION_VERSION_CONFLICT");
   });
+
+  it("fails closed when a persisted session fingerprint no longer matches", async () => {
+    const root = await makeRoot();
+    await appendAuthorMessage({ root, projectSlug: "p1", clientMessageId: "m-1", text: "A bell rings" });
+    const sessionPath = path.join(root, "sessions", "creative-session.json");
+    const persisted = JSON.parse(await fs.readFile(sessionPath, "utf8")) as Record<string, unknown>;
+    await fs.writeFile(sessionPath, JSON.stringify({ ...persisted, latestDirection: "tampered" }), "utf8");
+    await expect(readCreativeSession(root, "p1")).rejects.toThrow("CREATIVE_SESSION_INTEGRITY_FAILED");
+  });
 });

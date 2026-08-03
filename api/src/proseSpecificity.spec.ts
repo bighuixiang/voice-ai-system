@@ -6,4 +6,9 @@ describe("prose specificity", () => {
   it("passes concrete scene-bound evidence", () => { const report = evaluateProseSpecificity(valid); expect(report.status).toBe("passed"); expect(report.issues).toEqual([]); });
   it("flags exposition blocks, setting dumps, grandiose abstraction and sensory lists", () => { const report = evaluateProseSpecificity({ ...valid, blocks: [{ blockId: "b1", text: "这是一个宏大而永恒的伟大世界，规则如下：火、水、风、土、光、影。", mode: "exposition", linkedFunction: null, hasSensoryEvidence: true, changesAction: false }, { blockId: "b2", text: "冷、热、红、蓝、香、臭、响、静。", mode: "description", linkedFunction: null, hasSensoryEvidence: true, changesAction: false }] }); expect(report.status).toBe("blocked"); expect(report.issues).toEqual(expect.arrayContaining(["CONTINUOUS_EXPOSITION", "SETTING_DUMP", "GRANDIOSE_ABSTRACTION", "SENSORY_LIST_STACK"])); });
   it("requires functional links and evidence", () => { expect(evaluateProseSpecificity({ ...valid, sourceRefs: [] }).issues).toContain("SPECIFICITY_EVIDENCE_REQUIRED"); expect(evaluateProseSpecificity({ ...valid, blocks: [{ ...valid.blocks[1], linkedFunction: null, changesAction: false }] }).status).toBe("blocked"); });
+  it("rejects blank context, duplicate blocks, and blank source anchors", () => {
+    const report = evaluateProseSpecificity({ ...valid, sceneId: "", sourceRefs: [""], blocks: [{ ...valid.blocks[0], blockId: "" }, { ...valid.blocks[1], blockId: "" }] });
+    expect(report.status).toBe("blocked");
+    expect(report.issues).toEqual(expect.arrayContaining(["SPECIFICITY_CONTEXT_REQUIRED", "SPECIFICITY_BLOCK_DUPLICATE", "SPECIFICITY_EVIDENCE_REQUIRED"]));
+  });
 });

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-independent-review-input-fail-closed",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Independent review gate input validation must fail closed with an auditable blocked result.",
+    "Malformed strings and evidenceRefs must not cause runtime type errors or produce a passed gate."
+  ],
+  "implementationRefs": [
+    "api/src/independentReviewGate.ts:evaluateIndependentReviewGate",
+    "api/src/independentReviewGate.spec.ts:malformed evaluator input"
+  ],
+  "tests": {
+    "red": "Undefined taskId/evidenceRefs caused runtime TypeError during gate evaluation.",
+    "green": "independentReviewGate.spec.ts passed 5/5 after defensive input normalization and blocking reasons were added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Independent human/provider review evidence remains unavailable.",
+    "Full V2 release acceptance remains incomplete.",
+    "Complete migration cutover across all legacy-capable surfaces remains unproven."
+  ]
+}

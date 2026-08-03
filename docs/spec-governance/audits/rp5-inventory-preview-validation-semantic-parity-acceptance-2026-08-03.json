@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-inventory-preview-validation-semantic-parity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Inventory preview and validation recognition must apply required structural and semantic fields before advancing governance state.",
+    "Missing fingerprints, invalid timestamps, malformed conflict arrays, invalid dependencies, or negative asset counts must fail closed."
+  ],
+  "implementationRefs": [
+    "api/src/projectInventory.ts:governanceState preview/validation scans",
+    "api/src/projectInventory.spec.ts:missing fingerprint and invalid asset count regressions"
+  ],
+  "tests": {
+    "red": "Inventory classified validly hashed preview/validation artifacts with missing or malformed semantic fields as active migration states.",
+    "green": "projectInventory.spec.ts passed 17/17 after preview and validation semantic parity checks were added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

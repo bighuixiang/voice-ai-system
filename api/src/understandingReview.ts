@@ -51,6 +51,19 @@ function hasValidFingerprint(value: Record<string, unknown>): boolean {
   return crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") === value.fingerprint;
 }
 
+function hasValidReviewSemantics(value: Record<string, unknown>): boolean {
+  if (value.schemaVersion !== "understanding-review.v1" || typeof value.reviewId !== "string" || !value.reviewId.trim() || typeof value.projectSlug !== "string" || !value.projectSlug.trim() || typeof value.snapshotId !== "string" || !value.snapshotId.trim() || typeof value.snapshotFingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(value.snapshotFingerprint) || value.calibrationVersion !== "understanding-calibration.v1" || (value.status !== "passed" && value.status !== "blocked") || value.canonWritten !== false || typeof value.createdAt !== "string" || !Number.isFinite(Date.parse(value.createdAt))) return false;
+  const reviewer = value.reviewer as { kind?: unknown; id?: unknown; attestationReference?: unknown } | undefined;
+  if (!reviewer || typeof reviewer.id !== "string" || !reviewer.id.trim()) return false;
+  if (reviewer.kind === "independent-deterministic") {
+    if (reviewer.attestationReference !== undefined) return false;
+  } else if ((reviewer.kind !== "human" && reviewer.kind !== "provider") || !isTraceableEvidenceReference(String(reviewer.attestationReference ?? ""))) return false;
+  const requiredChecks = ["source-fingerprint", "evidence-spans", "branch-separation", "question-gate", "canon-isolation"];
+  if (!Array.isArray(value.checks) || value.checks.length !== requiredChecks.length) return false;
+  const checks = value.checks as Array<{ checkId?: unknown; status?: unknown; detail?: unknown }>;
+  return requiredChecks.every((checkId) => checks.some((check) => check.checkId === checkId && (check.status === "passed" || check.status === "failed") && typeof check.detail === "string" && check.detail.trim().length > 0)) && new Set(checks.map((check) => check.checkId)).size === requiredChecks.length;
+}
+
 async function writeReview(root: string, review: UnderstandingReview): Promise<void> {
   const target = reviewPath(root);
   await fs.mkdir(path.dirname(target), { recursive: true });
@@ -63,6 +76,7 @@ export async function readUnderstandingReview(root: string): Promise<Understandi
   try {
     const value = JSON.parse(await fs.readFile(reviewPath(root), "utf8")) as UnderstandingReview & Record<string, unknown>;
     if (!hasValidFingerprint(value)) throw new Error("UNDERSTANDING_REVIEW_INTEGRITY_FAILED");
+    if (!hasValidReviewSemantics(value)) throw new Error("UNDERSTANDING_REVIEW_SEMANTIC_INVALID");
     return value;
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null;
@@ -70,11 +84,29 @@ export async function readUnderstandingReview(root: string): Promise<Understandi
   }
 }
 
-function validEvidence(snapshot: UnderstandingSnapshot, messageIds: Set<string>): boolean {
-  return snapshot.coreExplicit.every((claim) => claim.evidence.every((evidence) => {
-    if (!messageIds.has(evidence.messageId)) return false;
-    return Number.isInteger(evidence.start) && Number.isInteger(evidence.end) && evidence.start >= 0 && evidence.end >= evidence.start;
-  }));
+function validEvidence(snapshot: UnderstandingSnapshot, messages: Map<string, string>): boolean {
+  const claims = [
+    ...snapshot.coreExplicit,
+    ...snapshot.inferred,
+    ...snapshot.unknowns,
+    ...(snapshot.interpretationSet?.commonClaims || []),
+    ...(snapshot.interpretationSet?.interpretations.flatMap((branch) => [
+      ...branch.supportEvidence,
+      ...branch.counterEvidence
+    ]) || [])
+  ];
+  return claims.every((claim) => {
+    if (claim.status !== "unknown" && claim.evidence.length === 0) return false;
+    return claim.evidence.every((evidence) => {
+    const source = messages.get(evidence.messageId);
+    if (source === undefined) return false;
+    return Number.isInteger(evidence.start)
+      && Number.isInteger(evidence.end)
+      && evidence.start >= 0
+      && evidence.end >= evidence.start
+      && evidence.end <= source.length;
+    });
+  });
 }
 
 export async function reviewUnderstandingSnapshot(root: string, reviewerId = "independent-deterministic-v1"): Promise<UnderstandingReview | null> {
@@ -90,8 +122,8 @@ export async function reviewUnderstandingSnapshot(root: string, reviewerId = "in
     },
     {
       checkId: "evidence-spans",
-      status: validEvidence(snapshot, new Set(session.messages.map((message) => message.id))) ? "passed" : "failed",
-      detail: "Explicit claims must reference existing message IDs and non-negative spans."
+      status: validEvidence(snapshot, new Map(session.messages.map((message) => [message.id, message.text]))) ? "passed" : "failed",
+      detail: "Every claim evidence span must reference an existing message and remain within its source bounds."
     },
     {
       checkId: "branch-separation",

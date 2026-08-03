@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-migration-preview-semantic-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Migration preview artifacts must fail closed when hashed fields have invalid semantics.",
+    "Preview identity, asset counts, conflict arrays, source fingerprint, and timestamp must be structurally valid before reuse."
+  ],
+  "implementationRefs": [
+    "api/src/migrationPreview.ts:readMigrationPreview",
+    "api/src/migrationPreview.spec.ts:validly hashed preview with invalid structural fields"
+  ],
+  "tests": {
+    "red": "A validly hashed preview with an empty project identity and conflicts as a string was accepted by direct read.",
+    "green": "migrationPreview.spec.ts passed 6/6 after semantic validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

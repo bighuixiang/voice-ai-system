@@ -29,4 +29,14 @@ describe("volume contract", () => {
     await expect(createVolumeContract({ ...input(root), stageGoals: [] })).rejects.toThrow("VOLUME_CONTRACT_COMMITMENTS_REQUIRED");
     await expect(createVolumeContract({ ...input(root), capacityBudget: { chapters: 0, words: 10 } })).rejects.toThrow("VOLUME_CONTRACT_CAPACITY_INVALID");
   });
+
+  it("fails closed when a volume contract is tampered", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "volume-contract-"));
+    const volume = await createVolumeContract(input(root));
+    const target = path.join(root, "sessions", "volume-contracts", `${volume.volumeId}.json`);
+    const persisted = JSON.parse(await fs.readFile(target, "utf8"));
+    await fs.writeFile(target, JSON.stringify({ ...persisted, title: "tampered" }), "utf8");
+    await expect(readVolumeContract(root, volume.volumeId)).rejects.toThrow("VOLUME_CONTRACT_INTEGRITY_FAILED");
+    await expect(listVolumeContracts(root, "demo")).rejects.toThrow("VOLUME_CONTRACT_INTEGRITY_FAILED");
+  });
 });

@@ -27,7 +27,7 @@ async function setup(root: string, reviewStatus: "passed" | "blocked" = "passed"
     fingerprint: "c".repeat(64)
   };
   await fs.writeFile(path.join(root, "sessions", "contract-candidates", `${candidate.candidateId}.json`), JSON.stringify(candidate), "utf8");
-  const reviewBase = { schemaVersion: "understanding-review.v1", reviewId: "review-1", projectSlug: "demo", snapshotId: "snapshot-1", snapshotFingerprint: "a".repeat(64), calibrationVersion: "understanding-calibration.v1", reviewer: { kind: "independent-deterministic", id: "reviewer" }, status: reviewStatus, checks: [], canonWritten: false, createdAt: new Date().toISOString() };
+  const reviewBase = { schemaVersion: "understanding-review.v1", reviewId: "review-1", projectSlug: "demo", snapshotId: "snapshot-1", snapshotFingerprint: "a".repeat(64), calibrationVersion: "understanding-calibration.v1", reviewer: { kind: "independent-deterministic", id: "reviewer" }, status: reviewStatus, checks: ["source-fingerprint", "evidence-spans", "branch-separation", "question-gate", "canon-isolation"].map((checkId) => ({ checkId, status: reviewStatus === "passed" ? "passed" : "failed", detail: "fixture" })), canonWritten: false, createdAt: new Date().toISOString() };
   await fs.writeFile(path.join(root, "sessions", "understanding-review.json"), JSON.stringify({ ...reviewBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(reviewBase)).digest("hex") }), "utf8");
   return candidate;
 }

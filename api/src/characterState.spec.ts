@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createCharacterDramaticContract } from "./characterContract.js";
 import { listCharacterStateSnapshots, readCharacterStateSnapshot, recordCharacterStateSnapshot } from "./characterState.js";
+import crypto from "node:crypto";
 
 async function fixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "character-state-"));
@@ -41,5 +42,24 @@ describe("character state snapshot", () => {
     const snapshot = await recordCharacterStateSnapshot({ root, projectSlug: "demo", characterId: contract.characterId, contractId: contract.contractId, asOf: "chapter-2:end", currentGoal: "negotiate", priority: "high", belief: "ally is useful", knowledge: [], emotion: "calm", injury: "none", resources: [], abilitiesAndIdentity: [], relationshipStances: [{ targetCharacterId: "ally", trust: 0.8, intimacy: 0.4, power: 0.2, dependency: 0.3, fear: 0.1, responsibility: 0.9, publicStance: "ally", privateStance: "doubtful", boundary: "no debt", unpaidDebt: "none" }, { targetCharacterId: "rival", trust: 0.1, intimacy: 0.0, power: 0.7, dependency: 0.2, fear: 0.8, responsibility: 0.1, publicStance: "civil", privateStance: "hostile", boundary: "no access", unpaidDebt: "insult" }], obligations: [], availableChoices: ["negotiate"], sourceRefs: ["chapter://2"] });
     expect(snapshot.relationshipStances[0]).toMatchObject({ targetCharacterId: "ally", intimacy: 0.4, responsibility: 0.9 });
     expect(snapshot.relationshipStances[1]).toMatchObject({ targetCharacterId: "rival", trust: 0.1, fear: 0.8 });
+  });
+
+  it("rejects malformed directed relationship dimensions", async () => {
+    const { root, contract } = await fixture();
+    const input = { root, projectSlug: "demo", characterId: contract.characterId, contractId: contract.contractId, asOf: "chapter-3:end", currentGoal: "negotiate", priority: "high", belief: "unsafe", knowledge: [], emotion: "calm", injury: "none", resources: [], abilitiesAndIdentity: [], relationshipStances: [{ targetCharacterId: "ally", trust: 1.2, power: 0.4, dependency: 0.2, fear: 0.1, publicStance: "ally", privateStance: "doubtful", boundary: "none", unpaidDebt: "none" }], obligations: [], availableChoices: ["wait"], sourceRefs: ["chapter://3"] };
+    await expect(recordCharacterStateSnapshot(input)).rejects.toThrow("RELATIONSHIP_DIMENSION_INVALID");
+    await expect(recordCharacterStateSnapshot({ ...input, relationshipStances: [{ ...input.relationshipStances[0], trust: 0.2 }, { ...input.relationshipStances[0], trust: 0.3 }] })).rejects.toThrow("RELATIONSHIP_TARGET_DUPLICATE");
+  });
+
+  it("fails closed when a re-signed snapshot duplicates a relationship target", async () => {
+    const { root, contract } = await fixture();
+    const snapshot = await recordCharacterStateSnapshot({ root, projectSlug: "demo", characterId: contract.characterId, contractId: contract.contractId, asOf: "chapter-4:end", currentGoal: "negotiate", priority: "high", belief: "unsafe", knowledge: [], emotion: "calm", injury: "none", resources: [], abilitiesAndIdentity: [], relationshipStances: [{ targetCharacterId: "ally", trust: 0.2, power: 0.4, dependency: 0.2, fear: 0.1, publicStance: "ally", privateStance: "doubtful", boundary: "none", unpaidDebt: "none" }], obligations: [], availableChoices: ["wait"], sourceRefs: ["chapter://4"] });
+    const target = path.join(root, "sessions", "character-state-snapshots", `${snapshot.snapshotId}.json`);
+    const { fingerprint: _old, ...base } = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const stances = base.relationshipStances as Array<Record<string, unknown>>;
+    const resigned = { ...base, relationshipStances: [...stances, { ...stances[0] }] };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readCharacterStateSnapshot(root, snapshot.snapshotId)).rejects.toThrow("CHARACTER_STATE_SNAPSHOT_INTEGRITY_FAILED");
   });
 });

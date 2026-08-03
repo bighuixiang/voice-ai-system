@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-decision-consumption-input-validation",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Decision-consumption receipts must reject unsupported consumer scopes at creation time.",
+    "Runtime-created receipts must satisfy the same consumer enum as persisted receipts."
+  ],
+  "implementationRefs": [
+    "api/src/decisionConsumption.ts:createDecisionConsumptionReceipt",
+    "api/src/decisionConsumption.spec.ts:invalid consumer regression"
+  ],
+  "tests": {
+    "red": "Receipt creation returned a self-hashed object for an unsupported consumer value.",
+    "green": "decisionConsumption.spec.ts passed 3/3 after input enum validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

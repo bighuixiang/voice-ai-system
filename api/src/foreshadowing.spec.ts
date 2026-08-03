@@ -28,4 +28,7 @@ describe("foreshadowing lifecycle", () => {
     const result = createFalseClueFairness({ foreshadowingId: "FS-demo-004", maker: "antagonist", whyBelievable: "forged ledger", counterEvidenceRefs: ["manuscript://v1#30-40"], correctionMode: "reveal-forgery", readerReinterpretation: "ledger was planted" });
     expect(result.fair).toBe(true);
   });
+  it("rejects untraceable counterevidence that cannot support a fair reversal", () => {
+    expect(() => createFalseClueFairness({ foreshadowingId: "FS-demo-005", maker: "antagonist", whyBelievable: "forged ledger", counterEvidenceRefs: ["not-an-anchor"], correctionMode: "reveal-forgery", readerReinterpretation: "ledger was planted" })).toThrow("FALSE_CLUE_FAIRNESS_REQUIRED");
+  });
 });

@@ -1,9 +1,10 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { cancelUnderstandingTask, executeModelUnderstanding, recoverUnderstandingTasksAtStartup, startModelUnderstandingTask } from "./understandingWorker.js";
-import { fingerprintCreativeSession } from "./contextManifest.js";
+import { fingerprintContextManifest, fingerprintCreativeSession } from "./contextManifest.js";
 
 const roots: string[] = [];
 
@@ -17,6 +18,21 @@ function input(root: string, overrides: Record<string, unknown> = {}) {
     agent: { command: "mock", label: "Mock", provider: "codex" as const },
     ...overrides
   };
+}
+
+function signTask(task: Record<string, unknown>): Record<string, unknown> {
+  return { ...task, fingerprint: crypto.createHash("sha256").update(JSON.stringify(task)).digest("hex") };
+}
+
+async function waitForPersistedTask(root: string, taskId: string, status: string, timeoutMs = 1000): Promise<Record<string, unknown>> {
+  const deadline = Date.now() + timeoutMs;
+  let last: Record<string, unknown> = {};
+  while (Date.now() < deadline) {
+    last = JSON.parse(await fs.readFile(path.join(root, "sessions", "understanding-tasks", `${taskId}.json`), "utf8")) as Record<string, unknown>;
+    if (last.status === status) return last;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  return last;
 }
 
 afterEach(async () => {
@@ -73,6 +89,38 @@ describe("understanding worker", () => {
     });
     await expect(fs.stat(path.join(root, "sessions", "understanding-snapshot.json"))).resolves.toBeTruthy();
     await expect(fs.stat(path.join(root, "project.json"))).rejects.toThrow();
+  });
+
+  it("fails closed when a model task declares a manifest that is not persisted", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-worker-manifest-"));
+    roots.push(root);
+    await expect(executeModelUnderstanding(
+      input(root, { contextManifestFingerprint: "a".repeat(64) }),
+      { run: async () => ({ stdout: "", stderr: "", exitCode: 1, finalMessage: "", durationMs: 1 }) }
+    )).rejects.toThrow("UNDERSTANDING_CONTEXT_MANIFEST_REQUIRED");
+  });
+
+  it("consumes the persisted manifest before issuing a model call", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-worker-manifest-valid-"));
+    roots.push(root);
+    const baseManifest = {
+      schemaVersion: "context-manifest.v1" as const,
+      manifestId: "manifest-1",
+      projectSlug: "worker-demo",
+      purpose: "understanding" as const,
+      sourceSessionId: "session-1",
+      sourceFingerprint: "a".repeat(64),
+      sourceMessages: [{ id: "message-001", role: "author" as const, sourceKind: "author" as const, text: "A message", sourceSpan: { start: 0, end: 9 } }],
+      blocks: [],
+      frozenAt: new Date().toISOString()
+    };
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "context-manifest.json"), JSON.stringify({ ...baseManifest, fingerprint: fingerprintContextManifest(baseManifest) }), "utf8");
+    const result = await executeModelUnderstanding(
+      input(root, { contextManifestFingerprint: fingerprintContextManifest(baseManifest) }),
+      { run: async () => ({ stdout: "", stderr: "", exitCode: 1, finalMessage: "", durationMs: 1 }) }
+    );
+    expect(result.task.error).toBe("UNDERSTANDING_PROCESS_EXIT:1");
   });
 
   it("does not persist a snapshot when the process is cancelled", async () => {
@@ -137,7 +185,7 @@ describe("understanding worker", () => {
     await fs.mkdir(taskDir, { recursive: true });
     await fs.writeFile(
       path.join(taskDir, `${taskId}.json`),
-      JSON.stringify({
+      JSON.stringify(signTask({
         schemaVersion: "understanding-task.v1",
         taskId,
         projectSlug: "worker-demo",
@@ -151,7 +199,7 @@ describe("understanding worker", () => {
         canonWritten: false,
         startedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      }),
+      })),
       "utf8"
     );
 
@@ -170,8 +218,7 @@ describe("understanding worker", () => {
       }
     );
     expect(resumed).toMatchObject({ taskId, status: "queued" });
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    const recovered = JSON.parse(await fs.readFile(path.join(taskDir, `${taskId}.json`), "utf8")) as { status: string; snapshotId?: string };
+    const recovered = await waitForPersistedTask(root, taskId, "completed") as { status: string; snapshotId?: string };
     expect(recovered).toMatchObject({ status: "completed", snapshotId: expect.stringContaining("understanding-model-") });
   });
 
@@ -193,7 +240,7 @@ describe("understanding worker", () => {
     await fs.writeFile(path.join(projectRoot, "sessions", "creative-session.json"), JSON.stringify(session), "utf8");
     const sourceFingerprint = fingerprintCreativeSession(session);
     const taskId = "understanding-task-startup-001";
-    await fs.writeFile(path.join(tasksRoot, `${taskId}.json`), JSON.stringify({
+    await fs.writeFile(path.join(tasksRoot, `${taskId}.json`), JSON.stringify(signTask({
       schemaVersion: "understanding-task.v1",
       taskId,
       projectSlug: "startup-demo",
@@ -207,7 +254,7 @@ describe("understanding worker", () => {
       canonWritten: false,
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }), "utf8");
+    })), "utf8");
 
     const results = await recoverUnderstandingTasksAtStartup(novelsRoot, {
       run: async () => ({
@@ -219,8 +266,7 @@ describe("understanding worker", () => {
       })
     });
     expect(results).toEqual([{ projectSlug: "startup-demo", recoveredTaskIds: [taskId] }]);
-    await new Promise((resolve) => setTimeout(resolve, 30));
-    expect(JSON.parse(await fs.readFile(path.join(tasksRoot, `${taskId}.json`), "utf8"))).toMatchObject({ status: "completed" });
+    expect(await waitForPersistedTask(projectRoot, taskId, "completed")).toMatchObject({ status: "completed" });
     expect(await fs.readFile(path.join(projectRoot, "sessions", "understanding-recovery-events.jsonl"), "utf8")).toContain(taskId);
   });
 
@@ -241,5 +287,29 @@ describe("understanding worker", () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(await (await import("./understandingWorker.js")).readUnderstandingTask(root, task.taskId)).toMatchObject({ status: "cancelled", modelCallIssued: true, canonWritten: false });
     await expect(fs.stat(path.join(root, "sessions", "understanding-snapshot.json"))).rejects.toThrow();
+  });
+
+  it("fails closed when a persisted task is tampered after signing", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-task-integrity-"));
+    roots.push(root);
+    const task = await startModelUnderstandingTask(input(root), {
+      run: async () => ({
+        stdout: "",
+        stderr: "",
+        exitCode: 0,
+        finalMessage: JSON.stringify({
+          coreExplicit: [],
+          inferred: [],
+          unknowns: [],
+          question: { id: "question-primary-desire", text: "What matters?", status: "candidate", impact: "high", source: "model-gap" }
+        }),
+        durationMs: 1
+      })
+    });
+    await waitForPersistedTask(root, task.taskId, "completed");
+    const taskPath = path.join(root, "sessions", "understanding-tasks", `${task.taskId}.json`);
+    const persisted = JSON.parse(await fs.readFile(taskPath, "utf8")) as Record<string, unknown>;
+    await fs.writeFile(taskPath, JSON.stringify({ ...persisted, status: "running" }), "utf8");
+    await expect((await import("./understandingWorker.js")).readUnderstandingTask(root, task.taskId)).rejects.toThrow("UNDERSTANDING_TASK_INTEGRITY_FAILED");
   });
 });

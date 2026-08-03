@@ -59,8 +59,34 @@ export interface LengthVarianceDecision {
 }
 
 const contractPath = (root: string) => resolveInside(root, "planning/length-contract.json");
+const forecastPath = (root: string) => resolveInside(root, "planning/length-forecast.json");
 const variancePath = (root: string, id: string) => resolveInside(root, `planning/length-variance/${id}.json`);
 const hash = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
+
+function verifyFingerprint(value: { fingerprint?: unknown }): boolean {
+  if (typeof value.fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(value.fingerprint)) return false;
+  const { fingerprint: _fingerprint, ...base } = value as Record<string, unknown>;
+  return hash(base) === value.fingerprint;
+}
+
+function verifyForecastFingerprint(value: LengthForecast): boolean {
+  if (typeof value.fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(value.fingerprint)) return false;
+  const { fingerprint: _fingerprint, createdAt: _createdAt, ...stable } = value;
+  return hash(stable) === value.fingerprint;
+}
+
+export function assertLengthContractIntegrity(contract: LengthContract): LengthContract {
+  const validDimension = (dimension: LengthDimension) => {
+    if (!dimension || !["hard", "soft", "unknown"].includes(dimension.mode)) return false;
+    if (dimension.mode === "unknown") return dimension.min === undefined && dimension.max === undefined && dimension.exact === undefined;
+    const values = [dimension.min, dimension.max, dimension.exact].filter((value) => value !== undefined);
+    return values.every((value) => Number.isFinite(value) && (value as number) >= 0) && (dimension.min === undefined || dimension.max === undefined || dimension.max >= dimension.min) && (dimension.exact === undefined || (dimension.min === undefined || dimension.exact >= dimension.min) && (dimension.max === undefined || dimension.exact <= dimension.max));
+  };
+  const { fingerprint: _fingerprint, ...base } = contract;
+  const valid = contract.schemaVersion === "length-contract.v1" && contract.projectSlug.trim() && Object.values(contract.dimensions).every(validDimension) && contract.pauseThresholdRatio >= 0 && contract.pauseThresholdRatio <= 1 && Array.isArray(contract.hardLocks) && contract.hardLocks.every((key) => ["totalWords", "totalChapters", "totalVolumes", "chapterWords"].includes(key)) && contract.hardLocks.every((key) => contract.dimensions[key as keyof typeof contract.dimensions].mode === "hard") && contract.source === "author" && contract.effectiveScope === "project" && Array.isArray(contract.revisionLineage) && contract.revisionLineage.every((value) => value.trim()) && !Number.isNaN(Date.parse(contract.createdAt)) && /^[a-f0-9]{64}$/i.test(contract.fingerprint) && hash(base) === contract.fingerprint;
+  if (!valid) throw new Error("LENGTH_CONTRACT_INTEGRITY_FAILED");
+  return contract;
+}
 
 async function writeJson(target: string, value: unknown) {
   await fs.mkdir(path.dirname(target), { recursive: true });
@@ -97,7 +123,19 @@ export async function createLengthContract(root: string, projectSlug: string, in
 }
 
 export async function readLengthContract(root: string): Promise<LengthContract | null> {
-  try { return JSON.parse(await fs.readFile(contractPath(root), "utf8")) as LengthContract; }
+  try {
+    const contract = JSON.parse(await fs.readFile(contractPath(root), "utf8")) as LengthContract;
+    return assertLengthContractIntegrity(contract);
+  }
+  catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
+}
+
+export async function readLengthForecast(root: string): Promise<LengthForecast | null> {
+  try {
+    const forecast = JSON.parse(await fs.readFile(forecastPath(root), "utf8")) as LengthForecast;
+    if (!verifyForecastFingerprint(forecast) || forecast.schemaVersion !== "length-forecast.v1") throw new Error("LENGTH_FORECAST_INTEGRITY_FAILED");
+    return forecast;
+  }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 
@@ -145,12 +183,31 @@ export async function buildLengthForecast(root: string, project: NovelProject, c
   if (totalWordsTarget > 0 && Math.abs(totalWords - totalWordsTarget) / totalWordsTarget > contract.pauseThresholdRatio) blockingReasons.push("forecast-deviation-over-15pct");
   if (openObligations.length && obligationWordFloor > baseWordRange.max) blockingReasons.push("open-obligations-outside-range");
   const base = { schemaVersion: "length-forecast.v1" as const, projectSlug: project.slug, contractFingerprint: contract.fingerprint, actuals, obligationSummary, completionRange, confidence: openObligations.length > 0 ? "low" as const : "medium" as const, assumptions: ["Forecast counts non-whitespace characters as draft words.", "Each open obligation reserves at least one chapter-word minimum and at most one chapter-word maximum; obligations remain authoritative over count.", "No filler, silent compression, or automatic chapter creation is permitted."], bestPath: "Complete remaining obligations within the accepted soft range.", worstPath: "Pause before filler, forced compression, or a hard-lock breach.", endingReachability: blockingReasons.some((reason) => reason.startsWith("hard-lock")) ? "blocked" as const : blockingReasons.length ? "at-risk" as const : "reachable" as const, frozenBaseline: contract.fingerprint, status: blockingReasons.length ? "pause-required" as const : "within-range" as const, blockingReasons, createdAt: new Date().toISOString() };
-  return { ...base, fingerprint: hash(base) };
+  const { createdAt: _createdAt, ...stableBase } = base;
+  const forecast = { ...base, fingerprint: hash(stableBase) };
+  await writeJson(forecastPath(root), forecast);
+  return forecast;
+}
+
+export async function readLengthVarianceDecision(root: string, decisionId: string): Promise<LengthVarianceDecision | null> {
+  try {
+    const decision = JSON.parse(await fs.readFile(variancePath(root, decisionId), "utf8")) as LengthVarianceDecision;
+    if (!verifyFingerprint(decision) || decision.schemaVersion !== "length-variance-decision.v1" || decision.decisionId !== decisionId) throw new Error("LENGTH_VARIANCE_INTEGRITY_FAILED");
+    return decision;
+  }
+  catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 
 export async function decideLengthVariance(root: string, contract: LengthContract, forecast: LengthForecast, input: { authority: "author" | "external"; choice: LengthVarianceDecision["choice"] }): Promise<LengthVarianceDecision> {
+  if (!verifyFingerprint(contract)) throw new Error("LENGTH_CONTRACT_INTEGRITY_FAILED");
+  if (!verifyForecastFingerprint(forecast) || forecast.schemaVersion !== "length-forecast.v1" || forecast.projectSlug !== contract.projectSlug || forecast.contractFingerprint !== contract.fingerprint) throw new Error("LENGTH_FORECAST_INTEGRITY_MISMATCH");
   const base = { schemaVersion: "length-variance-decision.v1" as const, decisionId: `length-variance-${forecast.fingerprint.slice(0, 12)}`, projectSlug: contract.projectSlug, contractFingerprint: contract.fingerprint, forecastFingerprint: forecast.fingerprint, detectedDeviation: forecast.blockingReasons, cause: forecast.blockingReasons.some((reason) => reason.startsWith("hard-lock")) ? "hard-lock-conflict" as const : forecast.blockingReasons.length ? "forecast-drift" as const : "none" as const, affectedOutlineIds: [], affectedObligationIds: [], alternatives: [{ optionId: "keep-plan", label: "保留当前计划并继续观察", autoAdoptable: false as const }, { optionId: "replan", label: "只重规划受影响远期窗口", autoAdoptable: false as const }, { optionId: "pause", label: "暂停并请求作者决策", autoAdoptable: false as const }], authority: input.authority, choice: input.choice, status: input.choice === "pause-and-review" || forecast.status === "pause-required" ? "paused" as const : "recorded" as const, createdAt: new Date().toISOString() };
   const decision = { ...base, fingerprint: hash(base) };
+  const existing = await readLengthVarianceDecision(root, decision.decisionId);
+  if (existing) {
+    if (existing.contractFingerprint !== contract.fingerprint || existing.forecastFingerprint !== forecast.fingerprint) throw new Error("LENGTH_VARIANCE_DECISION_CONFLICT");
+    return existing;
+  }
   await writeJson(variancePath(root, decision.decisionId), decision);
   return decision;
 }

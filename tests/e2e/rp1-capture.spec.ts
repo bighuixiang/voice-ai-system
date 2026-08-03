@@ -2,7 +2,7 @@ import { expect, type APIRequestContext, type Page, test } from "@playwright/tes
 
 type NovelProject = { slug: string; chapters?: Array<{ id: string }> };
 
-const apiBase = process.env.API_BASE_URL || "http://127.0.0.1:8787";
+const apiBase = "";
 
 async function createProject(request: APIRequestContext): Promise<NovelProject> {
   const response = await request.post(`${apiBase}/api/novel/projects`, {

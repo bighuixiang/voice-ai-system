@@ -1,3 +1,5 @@
+import type { TaskContextPlan } from "./taskContextPlan.js";
+
 export type CodexTaskType =
   | "project.create"
   | "outline.generate"
@@ -135,11 +137,19 @@ export interface NarrativeSnapshot {
     factCount: number;
     tripleCount: number;
     indexedChapterCount: number;
+    legacyFactCount?: number;
+    eligibleMemoryClaimCount?: number;
+    projectionAuthority?: "legacy-only" | "mixed" | "memory-claim-backed";
     vectorSummary?: KnowledgeVectorSummary;
   };
   qualityRisks: string[];
   craftRisks?: string[];
   blockingReasons?: string[];
+  memoryProjection?: {
+    status: "current" | "replacement-pending" | "stale" | "unknown";
+    blockingReasons: string[];
+    affectedClaimIds: string[];
+  };
   createdAt: string;
 }
 
@@ -255,6 +265,13 @@ export interface AiAgentProfile {
   enabled: boolean;
   versionArgs: string[];
   models: AiAgentModelOption[];
+  failoverCapability?: {
+    verifiedTaskTypes: string[];
+    structuredOutput: boolean;
+    contextLimit: number;
+    privacyClasses: string[];
+    dataResidencies: string[];
+  };
 }
 
 export interface ProjectAiConfig {
@@ -321,6 +338,14 @@ export interface ChapterQualityMetric {
   note: string;
 }
 
+export interface QualityReportEvidence {
+  contentSha256: string;
+  sourceFingerprint: string;
+  evaluatorVersion: string;
+  mode: "rules" | "hybrid" | "author" | "legacy";
+  generatedAt: string;
+}
+
 export interface ChapterQualityReport {
   chapterId: string;
   overallScore: number;
@@ -329,6 +354,7 @@ export interface ChapterQualityReport {
   strengths: string[];
   fixes: string[];
   updatedAt: string;
+  evidence?: QualityReportEvidence;
 }
 
 export interface SeriesQualityMetricAverage {
@@ -609,6 +635,7 @@ export interface StoryControl {
 
 export type StoryGraphNodeType = "arc" | "character" | "event" | "chapter" | "ledger" | "knowledge";
 export type StoryGraphEdgeType = "contains" | "involves" | "tracks" | "references" | "asserts" | "relationship";
+export type StoryGraphSourceAuthority = "governed" | "legacy-projection" | "unknown";
 
 export interface StoryGraphNode {
   id: string;
@@ -617,6 +644,7 @@ export interface StoryGraphNode {
   subtitle?: string;
   status?: string;
   chapterIds?: string[];
+  sourceAuthority?: StoryGraphSourceAuthority;
 }
 
 export interface StoryGraphEdge {
@@ -625,6 +653,7 @@ export interface StoryGraphEdge {
   target: string;
   type: StoryGraphEdgeType;
   label?: string;
+  sourceAuthority?: StoryGraphSourceAuthority;
 }
 
 export type CharacterRelationshipSourceType = "knowledge" | "event" | "profile";
@@ -688,6 +717,11 @@ export interface StoryGraphProjection {
   nodes: StoryGraphNode[];
   edges: StoryGraphEdge[];
   characterRelations?: CharacterRelationGraph;
+  memoryProjection?: {
+    status: "current" | "replacement-pending" | "stale" | "unknown";
+    blockingReasons: string[];
+    affectedClaimIds: string[];
+  };
   updatedAt: string;
 }
 
@@ -792,12 +826,14 @@ export interface WritingRecapCandidate {
   craftBeatPatches?: CraftBeat[];
 }
 
-export type KnowledgeSourceType = "chapter-summary" | "ledger" | "story-control";
+export type KnowledgeSourceType = "chapter-summary" | "ledger" | "story-control" | "memory-claim";
 
 export interface KnowledgeSourceRef {
   type: KnowledgeSourceType;
   id: string;
   label?: string;
+  visibility?: "author-only" | "reader-visible" | "character-visible" | "public";
+  secret?: boolean;
 }
 
 export interface KnowledgeFact {
@@ -849,8 +885,18 @@ export interface KnowledgeIndexProjection {
 
 export interface KnowledgeSearchQuery {
   query: string;
+  task?: string;
   chapterId?: string;
   limit?: number;
+  targetEvent?: string;
+  eventOrder?: Record<string, number>;
+  audience?: "author" | "reader" | "character" | "model-task";
+  readerScope?: string;
+  publicationVersion?: string;
+  readerProgressCursor?: string;
+  characterId?: string;
+  visibility?: "author-only" | "reader-visible" | "character-visible" | "public";
+  authorized?: boolean;
 }
 
 export interface KnowledgeVectorEntry {
@@ -885,13 +931,58 @@ export interface KnowledgeVectorSummary {
   updatedAt: string;
 }
 
+export interface KnowledgeRetrievalAudit {
+  schemaVersion: "knowledge-retrieval-audit.v1";
+  boundary: {
+    query: string;
+    task?: string;
+    chapterId?: string;
+    targetEvent?: string;
+    audience?: KnowledgeSearchQuery["audience"];
+    visibility?: KnowledgeSearchQuery["visibility"];
+    authorized?: boolean;
+    readerScope?: string;
+    publicationVersion?: string;
+    readerProgressCursor?: string;
+    characterId?: string;
+  };
+  eligibleFactIds: string[];
+  excluded: Array<{ id: string; reason: string }>;
+  selectedIds: string[];
+  evidenceSourceIds: string[];
+  evidenceSourceCount: number;
+  evidenceProfile?: {
+    sources: Array<{
+      id: string;
+      family: string;
+      independent: boolean;
+      quality: "canon" | "derived" | "plan" | "unknown";
+      derivedFromIds: string[];
+    }>;
+    independentSourceCount: number;
+    familyCount: number;
+    duplicateDerivedGroupCount: number;
+    gaps: string[];
+    saysNoContradiction: boolean;
+  };
+  vectorSummary?: KnowledgeVectorSummary;
+  resultFingerprint: string;
+}
+
 export interface KnowledgeSearchResult {
   query: string;
   tokens: string[];
   vectorSummary?: KnowledgeVectorSummary;
+  retrievalAudit?: KnowledgeRetrievalAudit;
+  queryEmbeddingFallback?: {
+    from: "openai-compatible";
+    to: "local";
+    reason: string;
+  };
   facts: Array<KnowledgeFact & { score: number; vectorScore?: number }>;
   triples: Array<KnowledgeTriple & { score: number; vectorScore?: number }>;
   chapters: Array<ChapterIndexEntry & { score: number; vectorScore?: number }>;
+  excluded?: Array<{ id: string; reason: string }>;
 }
 
 export type CreationLoopStepStatus = "done" | "active" | "waiting" | "blocked";
@@ -923,6 +1014,9 @@ export interface CreationRuntimeSnapshot {
     pendingRecapPatchCount?: number;
     craftBeatCount?: number;
     craftGateRisks?: string[];
+    legacyFactCount?: number;
+    eligibleMemoryClaimCount?: number;
+    projectionAuthority?: "legacy-only" | "mixed" | "memory-claim-backed";
     narrativeDebt?: Pick<NarrativeDebtSignal, "debtCount" | "openForeshadowingCount" | "riskCount" | "openLoopCount" | "overdueCount" | "severity">;
   };
   updatedAt: string;
@@ -1006,6 +1100,8 @@ export interface CodexTaskResult {
   questions: string[];
   patches: NovelFilePatch[];
   rawOutput?: string;
+  originalRawOutput?: string;
+  repairAttempted?: boolean;
   parseError?: string;
 }
 
@@ -1024,6 +1120,19 @@ export interface NovelTask {
   durationMs?: number;
   timeoutMs?: number;
   cancelRequestedAt?: string;
+  contextPlan?: TaskContextPlan;
+  contextManifestRef?: string;
+  contextBudget?: {
+    schemaVersion: "model-context-budget.v1";
+    status: "pass" | "block";
+    modelContextTokens: number;
+    inputTokens: number;
+    outputReserveTokens: number;
+    toolReserveTokens: number;
+    availableInputTokens: number;
+    reason?: "CONTEXT_TOKEN_BUDGET_EXCEEDED";
+    fingerprint: string;
+  };
 }
 
 export type AiInvocationAdoptionDecision = "pending" | "accepted" | "rejected" | "not-required";
@@ -1061,6 +1170,9 @@ export interface AiInvocationSession {
   agentProfileId?: string;
   agentProvider?: AiAgentProvider;
   modelId?: string;
+  bookRunId?: string;
+  budgetReservationId?: string;
+  authorityBinding?: import("./modelInvocationAuthority.js").ModelInvocationAuthorityBinding;
   promptVersion?: string;
   variablePlan?: {
     payloadKeys: string[];
@@ -1068,10 +1180,23 @@ export interface AiInvocationSession {
     contextTierCounts?: Partial<Record<AiInvocationContextTier, number>>;
   };
   preCallReview?: {
-    status: "pass" | "warn";
+    status: "pass" | "warn" | "block";
     warnings: string[];
     reviewedAt: string;
   };
+  contextBudget?: {
+    schemaVersion: "model-context-budget.v1";
+    status: "pass" | "block";
+    modelContextTokens: number;
+    inputTokens: number;
+    outputReserveTokens: number;
+    toolReserveTokens: number;
+    availableInputTokens: number;
+    reason?: "CONTEXT_TOKEN_BUDGET_EXCEEDED";
+    fingerprint: string;
+  };
+  contextPlan?: TaskContextPlan;
+  contextManifestRef?: string;
   promptSnapshot: AiInvocationPromptSnapshot;
   contextSnapshot: AiInvocationContextSnapshot;
   attempt: {
@@ -1152,6 +1277,7 @@ export type BackgroundJobType = "knowledge.index.rebuild" | "quality.series.rebu
 export type BackgroundJobStatus = "pending" | "running" | "success" | "error" | "cancelled";
 
 export interface BackgroundJob {
+  schemaVersion: "background-job.v1";
   id: string;
   projectId: string;
   type: BackgroundJobType;
@@ -1166,6 +1292,7 @@ export interface BackgroundJob {
   finishedAt?: string;
   durationMs?: number;
   updatedAt: string;
+  fingerprint: string;
 }
 
 export interface SelectionPayload {

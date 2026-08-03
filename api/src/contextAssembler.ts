@@ -7,6 +7,7 @@ import type {
   CraftProfile,
   KnowledgeFact,
   KnowledgeTriple,
+  KnowledgeSearchQuery,
   LedgerEntry,
   NovelChapter,
   NovelProject,
@@ -27,6 +28,7 @@ import {
   longNovelWriterSkill
 } from "./novelSystemSkills.js";
 import { readPlatformLibrarySnapshot } from "./platformLibrary.js";
+import { listPreferenceHypotheses } from "./feedbackLearning.js";
 
 type ContextTier = "T0" | "T1" | "T2" | "T3";
 
@@ -70,6 +72,22 @@ async function readOptionalJsonl<T>(root: string, relativePath: string): Promise
     });
 }
 
+async function readRequiredJsonl<T>(root: string, relativePath: string): Promise<T[]> {
+  let content: string;
+  try {
+    content = await fs.readFile(resolveInside(root, relativePath), "utf8");
+  } catch (error) {
+    if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return [];
+    throw error;
+  }
+  if (!content.trim()) return [];
+  try {
+    return content.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line) => JSON.parse(line) as T);
+  } catch {
+    throw new Error(`CONTEXT_KNOWLEDGE_SOURCE_CORRUPT:${relativePath}`);
+  }
+}
+
 function trimContext(content: string, limit = 6000): string {
   if (content.length <= limit) return content;
   return `${content.slice(0, Math.floor(limit / 2))}\n\n[...中间内容已压缩...]\n\n${content.slice(-Math.floor(limit / 2))}`;
@@ -77,6 +95,7 @@ function trimContext(content: string, limit = 6000): string {
 
 function contextTierForTitle(title: string): ContextTier {
   if (title === "Craft Profile" || title === "Voice Contract") return "T0";
+  if (title === "Active Craft Preferences") return "T1";
   if (title === "Style Samples") return "T1";
   if (["项目配置", "叙事承诺锁"].includes(title) || title.endsWith("题材 Profile")) return "T0";
   if (["文风规则", "角色档案", "世界观", "力量体系", "故事总控台", "章节仪表盘", "场景卡", "相邻章节摘要"].includes(title)) {
@@ -100,6 +119,26 @@ function contextTierForTitle(title: string): ContextTier {
     return "T2";
   }
   return "T3";
+}
+
+async function buildActiveCraftPreferencesBlock(root: string, projectSlug: string): Promise<ContextBlock | undefined> {
+  const preferences = await listPreferenceHypotheses(root, projectSlug, "active");
+  if (!preferences.length) return undefined;
+  return {
+    title: "Active Craft Preferences",
+    content: JSON.stringify({
+      authority: "author-approved-scoped",
+      projectionType: "active-preference-hypothesis",
+      items: preferences.map((preference) => ({
+        hypothesisId: preference.hypothesisId,
+        pattern: preference.pattern,
+        category: preference.category,
+        scope: preference.scope,
+        confidence: preference.confidence,
+        evidenceRefs: preference.supportEventIds.map((eventId) => `feedback://${eventId}`)
+      }))
+    }, null, 2)
+  };
 }
 
 function contextLimitForTier(tier: ContextTier): number {
@@ -436,6 +475,7 @@ function finalizeContextBlocks(blocks: ContextBlock[]): Array<{ title: string; c
     const tier = block.tier || contextTierForTitle(block.title);
     const limit = contextLimitForTier(tier);
     const originalLength = block.content.length;
+    if (tier === "T0" && originalLength > limit) throw new Error("CONTEXT_T0_OVERFLOW_REQUIRES_STRUCTURED_COMPRESSION");
     const content = trimContext(block.content, limit);
     return {
       title: block.title,
@@ -570,8 +610,10 @@ async function readLedgerEntries(root: string): Promise<LedgerEntry[]> {
 async function buildChapterMemoryBlocks(
   root: string,
   project: NovelProject,
-  chapterId: string
+  chapterId: string,
+  audience: "author" | "model-task" = "author"
 ): Promise<Array<{ title: string; content: string }>> {
+  if (audience === "model-task") return [];
   const chapters = orderedChapters(project);
   const targetIndex = chapters.findIndex((item) => item.id === chapterId);
   if (targetIndex === -1) return [];
@@ -602,26 +644,35 @@ async function buildChapterMemoryBlocks(
   if (relatedSummaries.length) {
     blocks.push({ title: "相关远章摘要", content: JSON.stringify(relatedSummaries.map(compactSummary), null, 2) });
   }
-  return blocks;
+  return blocks.map((block) => {
+    try {
+      const parsed = JSON.parse(block.content);
+      if (Array.isArray(parsed)) return { ...block, content: JSON.stringify({ authority: "projection-only", projectionType: "chapter-summary", requiresMemoryClaimVerification: true, items: parsed }, null, 2) };
+    } catch { /* preserve non-JSON context blocks */ }
+    return block;
+  });
 }
 
 async function buildKnowledgeMemoryBlocks(
   root: string,
   project: NovelProject,
-  chapterId: string
+  chapterId: string,
+  audience: "author" | "model-task" = "author",
+  eligibility: Partial<KnowledgeSearchQuery> = {}
 ): Promise<Array<{ title: string; content: string }>> {
   const chapterIndex = await readOptionalJson<ChapterMemoryIndex>(root, "memory/chapter-index.json");
   const indexEntry = chapterIndex?.chapters.find((entry) => entry.chapterId === chapterId);
   if (!indexEntry || (!indexEntry.factIds.length && !indexEntry.tripleIds.length)) return [];
 
   const [facts, triples] = await Promise.all([
-    readOptionalJsonl<KnowledgeFact>(root, "knowledge/facts.jsonl"),
-    readOptionalJsonl<KnowledgeTriple>(root, "knowledge/triples.jsonl")
+    readRequiredJsonl<KnowledgeFact>(root, "knowledge/facts.jsonl"),
+    readRequiredJsonl<KnowledgeTriple>(root, "knowledge/triples.jsonl")
   ]);
   const factIds = new Set(indexEntry.factIds);
   const tripleIds = new Set(indexEntry.tripleIds);
   const selectedFacts = facts
     .filter((fact) => factIds.has(fact.id))
+    .filter((fact) => audience === "author")
     .slice(0, 24)
     .map((fact) => ({
       id: fact.id,
@@ -633,6 +684,7 @@ async function buildKnowledgeMemoryBlocks(
     }));
   const selectedTriples = triples
     .filter((triple) => tripleIds.has(triple.id))
+    .filter(() => audience === "author")
     .slice(0, 16)
     .map((triple) => ({
       id: triple.id,
@@ -642,8 +694,9 @@ async function buildKnowledgeMemoryBlocks(
       chapterIds: triple.chapterIds
     }));
   const relatedQuery = [...indexEntry.entityNames, ...indexEntry.keywords].join(" ");
+  const retrievalAudience = eligibility.audience || (audience === "model-task" ? "model-task" : "author");
   const related = relatedQuery.trim()
-    ? await searchKnowledgeIndex(root, project, { query: relatedQuery, chapterId, limit: 24 })
+    ? await searchKnowledgeIndex(root, project, { query: relatedQuery, chapterId, limit: 24, ...eligibility, audience: retrievalAudience })
     : { facts: [], triples: [] };
   const relatedFacts = related.facts
     .filter((fact) => !factIds.has(fact.id))
@@ -669,19 +722,23 @@ async function buildKnowledgeMemoryBlocks(
       score: triple.score
     }));
 
-  if (!selectedFacts.length && !selectedTriples.length && !relatedFacts.length && !relatedTriples.length) return [];
+  if (!selectedFacts.length && !selectedTriples.length && !relatedFacts.length && !relatedTriples.length && !("excluded" in related && related.excluded?.length)) return [];
   return [
     {
       title: "Knowledge Memory Index",
       content: JSON.stringify(
         {
+          authority: "projection-only",
+          projectionType: "knowledge-index",
+          requiresMemoryClaimVerification: true,
           chapterId,
           keywords: indexEntry.keywords.slice(0, 24),
           entityNames: indexEntry.entityNames.slice(0, 24),
           facts: selectedFacts,
           triples: selectedTriples,
           relatedFacts,
-          relatedTriples
+          relatedTriples,
+          excluded: "excluded" in related ? related.excluded || [] : []
         },
         null,
         2
@@ -701,11 +758,13 @@ export async function assembleContext(
   }
 
   const chapterId = String(payload.chapterId || project.lastOpenedChapterId || "chapter-001");
+  const audience = payload.visibilityAudience === "model-task" ? "model-task" as const : "author" as const;
   const chapter = project.chapters.find((item) => item.id === chapterId);
   const narrativePromiseBlock = buildNarrativePromiseBlock(project, chapter);
   const genreProfileBlock = await buildGenreProfileBlock(root, project);
   const craftProfile = await readCraftProfile(root);
   const craftProfileBlock = await buildCraftProfileBlock(root, project);
+  const activeCraftPreferencesBlock = await buildActiveCraftPreferencesBlock(root, project.slug);
   const voiceContractBlock = buildVoiceContractBlock(craftProfile);
   const styleSamplesBlock = await buildStyleSamplesBlock(root, type);
   const platformSkillBlocks = await buildPlatformSkillBlocks(type);
@@ -715,6 +774,7 @@ export async function assembleContext(
     ...(genreProfileBlock ? [genreProfileBlock] : []),
     craftProfileBlock,
     voiceContractBlock,
+    ...(activeCraftPreferencesBlock ? [activeCraftPreferencesBlock] : []),
     ...(styleSamplesBlock ? [styleSamplesBlock] : []),
     ...platformSkillBlocks,
     { title: "文风规则", content: await readOptional(root, "style/style-guide.md") },
@@ -745,8 +805,21 @@ export async function assembleContext(
   }
 
   if (chapter && memoryContextTypes.includes(type)) {
-    blocks.push(...(await buildChapterMemoryBlocks(root, project, chapter.id)));
-    blocks.push(...(await buildKnowledgeMemoryBlocks(root, project, chapter.id)));
+    blocks.push(...(await buildChapterMemoryBlocks(root, project, chapter.id, audience)));
+    const retrievalAudience = payload.retrievalAudience === "reader" || payload.retrievalAudience === "character" || payload.retrievalAudience === "author" || payload.retrievalAudience === "model-task"
+      ? payload.retrievalAudience
+      : undefined;
+    blocks.push(...(await buildKnowledgeMemoryBlocks(root, project, chapter.id, audience, {
+      audience: retrievalAudience,
+      targetEvent: typeof payload.targetEvent === "string" ? payload.targetEvent : undefined,
+      eventOrder: payload.eventOrder && typeof payload.eventOrder === "object" ? payload.eventOrder as Record<string, number> : undefined,
+      characterId: typeof payload.characterId === "string" ? payload.characterId : undefined,
+      readerScope: typeof payload.readerScope === "string" ? payload.readerScope : undefined,
+      publicationVersion: typeof payload.publicationVersion === "string" ? payload.publicationVersion : undefined,
+      readerProgressCursor: typeof payload.readerProgressCursor === "string" ? payload.readerProgressCursor : undefined,
+      visibility: payload.visibility === "author-only" || payload.visibility === "reader-visible" || payload.visibility === "character-visible" || payload.visibility === "public" ? payload.visibility : undefined,
+      authorized: payload.authorized !== false
+    })));
   }
 
   if (chapter && targetChapterTypes.includes(type)) {

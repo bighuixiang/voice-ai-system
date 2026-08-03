@@ -16,7 +16,12 @@ export async function promoteCraftPatternFromExperiment(input: { root: string; p
   if (!pattern) throw new Error("CRAFT_PATTERN_NOT_FOUND");
   if (pattern.lifecycle !== "approved") throw new Error("CRAFT_PATTERN_APPROVAL_REQUIRED");
   if (input.experiment.status !== "judged" || input.experiment.judgment?.winner !== "treatment" || !input.experiment.judgment.hardGuardsPassed) throw new Error("CRAFT_PATTERN_PROMOTION_BLOCKED");
-  const base = { ...pattern, lifecycle: "probation" as const, promotion: { experimentId: input.experiment.experimentId, actor: input.actor, reason: input.reason, promotedAt: new Date().toISOString() }, updatedAt: new Date().toISOString() };
+  if (input.experiment.holdoutValidation && input.experiment.holdoutValidation.status !== "cross-scene-validated") throw new Error("CRAFT_PATTERN_PROMOTION_HOLDOUT_REQUIRED");
+  if (input.experiment.providerEvaluation?.decision === "blocked") throw new Error("CRAFT_PATTERN_PROMOTION_PROVIDER_BLOCKED");
+  if (input.experiment.readerCalibration?.status === "experimental") throw new Error("CRAFT_PATTERN_PROMOTION_READER_CALIBRATION_REQUIRED");
+  if (input.experiment.decision?.decision !== "adopt") throw new Error("CRAFT_PATTERN_AUTHOR_ADOPTION_REQUIRED");
+  const { fingerprint: _fingerprint, ...patternBase } = pattern;
+  const base = { ...patternBase, lifecycle: "probation" as const, promotion: { experimentId: input.experiment.experimentId, actor: input.actor, reason: input.reason, promotedAt: new Date().toISOString() }, updatedAt: new Date().toISOString() };
   const promoted: CraftPattern = { ...base, fingerprint: hash(base) };
   await writeJson(patternPath(input.root, promoted.patternId), promoted);
   return promoted;

@@ -74,7 +74,8 @@ describe("contract projection rebuild", () => {
     await fs.writeFile(path.join(root, "sessions", "projection-invalidation-events.jsonl"), JSON.stringify({ schemaVersion: "projection-invalidation-event.v1", mutationId: "pending-1", candidateId: "candidate-1", reviewId: "review-1", affectedProjections: ["story-graph"], createdAt: new Date().toISOString() }) + "\n", "utf8");
     const alerts: unknown[] = [];
     const stop = startProjectionFreshnessMonitor(root, "demo", { intervalMs: 10, onStale: (event) => alerts.push(event) });
-    await new Promise((resolve) => setTimeout(resolve, 35));
+    const deadline = Date.now() + 1000;
+    while (alerts.length === 0 && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 10));
     stop();
     expect(alerts.length).toBeGreaterThan(0);
     expect((alerts[0] as { freshness: { status: string } }).freshness.status).toBe("stale");

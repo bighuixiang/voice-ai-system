@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { compileAbstractTransfer } from "./abstractionCompiler.js";
+import { assertAbstractionTransferIntegrity, compileAbstractTransfer } from "./abstractionCompiler.js";
 
 const valid = { patternId: "p1", sourceProject: { character: "old-hero", world: "old-kingdom", conflict: "old-war", imagery: ["red moon"], revealOrder: ["setup", "reveal"], surfaceLanguage: ["signature phrase"] }, targetStory: { character: "new-detective", world: "city archive", conflict: "missing ledger", imagery: ["flickering neon"], revealOrder: ["clue", "consequence"], surfaceLanguage: ["plain dialogue"] }, mechanism: "withhold a verifiable clue before an irreversible choice", sourceRefs: ["pattern://p1"] };
 describe("abstraction transfer compiler", () => {
   it("compiles abstract mechanism into an original target implementation", () => { const result = compileAbstractTransfer(valid); expect(result.status).toBe("compiled"); expect(result.transformations).toHaveLength(6); expect(result.implementation.character).toBe("new-detective"); });
   it("blocks copied source entities, imagery or surface language", () => { const result = compileAbstractTransfer({ ...valid, targetStory: { ...valid.targetStory, imagery: ["red moon"] } }); expect(result.status).toBe("blocked"); expect(result.issues).toContain("SOURCE_FEATURE_COPIED"); });
   it("requires all three compilation stages and provenance", () => { expect(() => compileAbstractTransfer({ ...valid, mechanism: "" })).toThrow("ABSTRACTION_MECHANISM_REQUIRED"); expect(() => compileAbstractTransfer({ ...valid, sourceRefs: [] })).toThrow("ABSTRACTION_SOURCE_REQUIRED"); });
+  it("requires complete source and target feature sets and detects tampering", () => { expect(() => compileAbstractTransfer({ ...valid, sourceProject: { ...valid.sourceProject, imagery: [" "] } })).toThrow("ABSTRACTION_STORY_FEATURES_REQUIRED"); expect(() => compileAbstractTransfer({ ...valid, patternId: " " })).toThrow("ABSTRACTION_PATTERN_REQUIRED"); const result = compileAbstractTransfer(valid); expect(() => assertAbstractionTransferIntegrity({ ...result, abstractMechanism: "tampered" })).toThrow("ABSTRACTION_TRANSFER_INTEGRITY_FAILED"); });
 });

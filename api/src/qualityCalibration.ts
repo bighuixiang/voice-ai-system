@@ -76,14 +76,20 @@ function verifyEvidenceIntegrity(evidence: QualityCalibrationEvidence): boolean 
 }
 
 function verifyEvidenceSemantics(evidence: QualityCalibrationEvidence): boolean {
-  if (evidence.schemaVersion !== "quality-calibration-evidence.v1" || (evidence.sourceKind !== "provider" && evidence.sourceKind !== "human") || evidence.split !== "holdout" || evidence.labelAccess !== "sealed-separate-from-evaluator-input" || evidence.canonGateEligible !== false) return false;
+  if (evidence.schemaVersion !== "quality-calibration-evidence.v1" || typeof evidence.calibrationId !== "string" || !evidence.calibrationId.trim() || typeof evidence.evaluatorVersion !== "string" || !evidence.evaluatorVersion.trim() || typeof evidence.inputFingerprint !== "string" || !evidence.inputFingerprint.trim() || typeof evidence.createdAt !== "string" || !evidence.createdAt.trim() || !Number.isFinite(Date.parse(evidence.createdAt)) || !Array.isArray(evidence.caseIds) || evidence.caseIds.some((caseId) => typeof caseId !== "string" || !caseId.trim()) || new Set(evidence.caseIds).size !== evidence.caseIds.length || (evidence.sourceKind !== "provider" && evidence.sourceKind !== "human") || evidence.split !== "holdout" || evidence.labelAccess !== "sealed-separate-from-evaluator-input" || evidence.canonGateEligible !== false) return false;
   if (!Number.isInteger(evidence.evaluatedCount) || evidence.evaluatedCount <= 0 || !Number.isInteger(evidence.correctCount) || evidence.correctCount < 0 || evidence.correctCount > evidence.evaluatedCount) return false;
   if (typeof evidence.accuracy !== "number" || Math.abs(evidence.accuracy - evidence.correctCount / evidence.evaluatedCount) > 1e-9 || typeof evidence.minimumAccuracy !== "number" || evidence.minimumAccuracy < 0 || evidence.minimumAccuracy > 1) return false;
   if (evidence.status !== (evidence.accuracy >= evidence.minimumAccuracy ? "calibrated" : "blocked")) return false;
+  if (!evidence.attestation || typeof evidence.attestation !== "object" || typeof evidence.attestation.kind !== "string" || typeof evidence.attestation.reference !== "string") return false;
   const expectedAttestation = evidence.attestation.kind === "synthetic-fixture" ? "synthetic-fixture" : evidence.sourceKind === "provider" ? "provider-signed" : "human-reviewed";
   const refsValid = Array.isArray(evidence.evidenceRefs) && (evidence.attestation.kind === "synthetic-fixture" ? evidence.evidenceRefs.every(isTraceableEvidenceReference) : evidence.evidenceRefs.length > 0 && evidence.evidenceRefs.every(isTraceableEvidenceReference));
   const attestationReferenceValid = evidence.attestation.kind === "synthetic-fixture" ? evidence.attestation.reference === "local-test-fixture" : isTraceableEvidenceReference(evidence.attestation.reference);
   return evidence.attestation.kind === expectedAttestation && attestationReferenceValid && refsValid;
+}
+
+export function isQualityCalibrationEvidenceTrusted(evidence: QualityCalibrationEvidence | null | undefined): boolean {
+  try { return Boolean(evidence && verifyEvidenceIntegrity(evidence) && verifyEvidenceSemantics(evidence)); }
+  catch { return false; }
 }
 
 async function writeJson(target: string, value: unknown): Promise<void> {
@@ -113,10 +119,11 @@ export async function readQualityCalibrationEvidenceHistory(root: string): Promi
       const evidence = JSON.parse(await fs.readFile(path.join(historyDirectory(root), entry.name), "utf8")) as QualityCalibrationEvidence;
       if (!verifyEvidenceIntegrity(evidence)) throw new Error("CALIBRATION_EVIDENCE_INTEGRITY_FAILED");
       if (!verifyEvidenceSemantics(evidence)) throw new Error("CALIBRATION_EVIDENCE_SEMANTIC_INVALID");
+      if (entry.name.slice(0, -".json".length) !== evidence.calibrationId) throw new Error("CALIBRATION_EVIDENCE_SEMANTIC_INVALID");
       results.push(evidence);
     } catch (error) {
-      if (error instanceof Error && error.message === "CALIBRATION_EVIDENCE_INTEGRITY_FAILED") throw error;
-      /* ignore malformed history entries */
+      if (error instanceof Error && (error.message === "CALIBRATION_EVIDENCE_INTEGRITY_FAILED" || error.message === "CALIBRATION_EVIDENCE_SEMANTIC_INVALID")) throw error;
+      throw new Error("CALIBRATION_EVIDENCE_HISTORY_INVALID");
     }
   }
   return results.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -170,12 +177,12 @@ export async function ingestExternalCalibrationSubmission(root: string, submissi
   if (!isTraceableEvidenceReference(submission.attestation.reference)) throw new Error("CALIBRATION_ATTESTATION_REFERENCE_INVALID");
   const expectedAttestationKind = submission.sourceKind === "provider" ? "provider-signed" : "human-reviewed";
   if (submission.attestation.kind !== expectedAttestationKind) throw new Error("CALIBRATION_ATTESTATION_KIND_MISMATCH");
-  if (submission.evaluatedCount <= 0 || submission.correctCount < 0 || submission.correctCount > submission.evaluatedCount) throw new Error("CALIBRATION_COUNTS_INVALID");
+  if (!Number.isInteger(submission.evaluatedCount) || !Number.isFinite(submission.evaluatedCount) || !Number.isInteger(submission.correctCount) || !Number.isFinite(submission.correctCount) || submission.evaluatedCount <= 0 || submission.correctCount < 0 || submission.correctCount > submission.evaluatedCount) throw new Error("CALIBRATION_COUNTS_INVALID");
   const computedAccuracy = submission.correctCount / submission.evaluatedCount;
-  if (Math.abs(computedAccuracy - submission.accuracy) > 1e-9) throw new Error("CALIBRATION_ACCURACY_MISMATCH");
+  if (typeof submission.accuracy !== "number" || !Number.isFinite(submission.accuracy) || Math.abs(computedAccuracy - submission.accuracy) > 1e-9) throw new Error("CALIBRATION_ACCURACY_MISMATCH");
   if (!Array.isArray(submission.evidenceRefs) || submission.evidenceRefs.length === 0 || submission.evidenceRefs.some((reference) => typeof reference !== "string" || !reference.trim())) throw new Error("CALIBRATION_EVIDENCE_REFERENCE_REQUIRED");
   if (submission.evidenceRefs.some((reference) => !isTraceableEvidenceReference(reference))) throw new Error("CALIBRATION_EVIDENCE_REFERENCE_INVALID");
-  if (submission.minimumAccuracy < 0 || submission.minimumAccuracy > 1) throw new Error("CALIBRATION_THRESHOLD_INVALID");
+  if (typeof submission.minimumAccuracy !== "number" || !Number.isFinite(submission.minimumAccuracy) || submission.minimumAccuracy < 0 || submission.minimumAccuracy > 1) throw new Error("CALIBRATION_THRESHOLD_INVALID");
   const submissionIdentity = { evaluatorVersion: submission.evaluatorVersion, sourceKind: submission.sourceKind, holdoutInputFingerprint: submission.holdoutInputFingerprint, evaluatedCount: submission.evaluatedCount, correctCount: submission.correctCount, accuracy: submission.accuracy, minimumAccuracy: submission.minimumAccuracy, attestation: submission.attestation, evidenceRefs: [...submission.evidenceRefs].sort() };
   const calibrationId = `quality-calibration-external-${crypto.createHash("sha256").update(JSON.stringify(submissionIdentity)).digest("hex").slice(0, 32)}`;
   const existing = (await readQualityCalibrationEvidenceHistory(root)).find((candidate) => candidate.calibrationId === calibrationId);
@@ -208,5 +215,5 @@ export async function ingestExternalCalibrationSubmission(root: string, submissi
 }
 
 export function isQualityEvaluatorEligible(evidence: QualityCalibrationEvidence | null): boolean {
-  return evidence?.status === "calibrated" && evidence.canonGateEligible === false;
+  return Boolean(evidence && evidence.status === "calibrated" && evidence.canonGateEligible === false && isQualityCalibrationEvidenceTrusted(evidence));
 }

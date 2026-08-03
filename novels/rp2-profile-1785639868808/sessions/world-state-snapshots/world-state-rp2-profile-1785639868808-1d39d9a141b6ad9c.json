@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "world-state-snapshot.v1",
+  "snapshotId": "world-state-rp2-profile-1785639868808-1d39d9a141b6ad9c",
+  "projectSlug": "rp2-profile-1785639868808",
+  "asOf": "chapter-001",
+  "region": "north-shore",
+  "publicationVersion": "rp3-profile-canon-1",
+  "politicalControl": [
+    "shore council"
+  ],
+  "activeConflicts": [
+    "city denial"
+  ],
+  "institutions": [
+    "lighthouse guild"
+  ],
+  "infrastructure": [
+    "drowned beacon"
+  ],
+  "markets": [],
+  "environment": [
+    "low tide"
+  ],
+  "resources": [
+    "charged lens"
+  ],
+  "effectiveRuleIds": [
+    "world-rule-rp2-profile-1785639868808-46926c57cf594cafc6b8835d"
+  ],
+  "unknowns": [
+    "whether the city can answer"
+  ],
+  "sourceRefs": [
+    "decision://decision-question-ending-direction-1-rp3-profile-question-ending-direction-1785639873957"
+  ],
+  "createdAt": "2026-08-02T03:04:34.141Z",
+  "fingerprint": "0c9999dfd3a111a2f1be9538f0d0a2284787df1f7fec60a435eaf4c74ba464d7"
+}

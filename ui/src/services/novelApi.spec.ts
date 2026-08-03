@@ -44,14 +44,9 @@ describe("novelApi", () => {
     const project = await novelApi.createProject({ title: "Demo", roughIdea: "A sealed mountain gate." });
 
     expect(project.slug).toBe("demo");
-    expect(fetch).toHaveBeenCalledWith(
-      "/api/novel/projects",
-      expect.objectContaining({
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: "Demo", roughIdea: "A sealed mountain gate." })
-      })
-    );
+    const [, request] = (fetch as unknown as { mock: { calls: Array<[string, RequestInit]> } }).mock.calls.at(-1)!;
+    expect(request).toMatchObject({ method: "POST", headers: { "Content-Type": "application/json" } });
+    expect(JSON.parse(String(request.body))).toMatchObject({ title: "Demo", roughIdea: "A sealed mountain gate.", idempotencyKey: expect.stringMatching(/^project-create-/) });
   });
 
   it("reads the server-authoritative creative journey projection", async () => {
@@ -1354,6 +1349,49 @@ describe("novelApi", () => {
         body: JSON.stringify({ note: "Accepted after review.", mode: "new_chapter" })
       })
     );
+  });
+
+  it("creates and reads memory retrieval previews", async () => {
+    const preview = { schemaVersion: "memory-retrieval-preview.v1", retrievalId: "retrieval-abcdef0123456789abcdef01", projectSlug: "demo", query: "gate", boundary: { query: "gate", audience: "author", authorized: true }, eligibleFactIds: [], excluded: [], selectedIds: [], truncatedIds: [], evidenceSourceIds: [], evidenceSourceCount: 0, budget: { maxResults: 5 }, sourceResultFingerprint: "a".repeat(64), resultFingerprint: "b".repeat(64) };
+    mockJson({ preview });
+    mockJson({ preview });
+
+    await expect(novelApi.createMemoryRetrievalPreview("demo", { query: "gate", maxResults: 5 })).resolves.toEqual(preview);
+    await expect(novelApi.readMemoryRetrievalPreview("demo", preview.retrievalId)).resolves.toEqual(preview);
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/memory/retrieval-previews", expect.objectContaining({ method: "POST", body: JSON.stringify({ query: "gate", maxResults: 5 }) }));
+    expect(fetch).toHaveBeenNthCalledWith(2, `/api/novel/projects/demo/memory/retrievals/${preview.retrievalId}`, {});
+  });
+
+  it("creates memory governance evidence through the authoritative endpoints", async () => {
+    const health = { schemaVersion: "memory-health-report.v1", reportId: "memory-health-aaaaaaaaaaaaaaaaaaaaaaaa", status: "degraded" };
+    const proof = { schemaVersion: "memory-ready-proof.v1", proofId: "memory-ready-bbbbbbbbbbbbbbbbbbbbbbbb", status: "blocked", blockers: ["MEMORY_HEALTH_DEGRADED"] };
+    const audit = { schemaVersion: "long-continuity-audit.v1", auditId: "continuity-audit-cccccccccccccccccccccccc", status: "blocked", issues: ["SETTLED_CHAPTER_COVERAGE_INCOMPLETE"] };
+    mockJson({ report: health });
+    mockJson({ proof });
+    mockJson({ audit });
+
+    await expect(novelApi.createMemoryHealthReport("demo")).resolves.toEqual(health);
+    await expect(novelApi.createMemoryReadyProof("demo", { healthReportId: health.reportId, retrievalId: "retrieval-dddddddddddddddddddddddd", targetChapterId: "chapter-1" })).resolves.toEqual(proof);
+    await expect(novelApi.createMemoryContinuityAudit("demo", { healthReportId: health.reportId })).resolves.toEqual(audit);
+    expect(fetch).toHaveBeenNthCalledWith(1, "/api/novel/projects/demo/memory/health-reports", expect.objectContaining({ method: "POST" }));
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/novel/projects/demo/memory/ready-proofs", expect.objectContaining({ method: "POST", body: JSON.stringify({ healthReportId: health.reportId, retrievalId: "retrieval-dddddddddddddddddddddddd", targetChapterId: "chapter-1" }) }));
+    expect(fetch).toHaveBeenNthCalledWith(3, "/api/novel/projects/demo/memory/continuity-audits", expect.objectContaining({ method: "POST", body: JSON.stringify({ healthReportId: health.reportId }) }));
+  });
+
+  it("reads persisted memory governance evidence by project-scoped IDs", async () => {
+    const health = { reportId: "memory-health-aaaaaaaaaaaaaaaaaaaaaaaa", status: "healthy" };
+    const proof = { proofId: "memory-ready-bbbbbbbbbbbbbbbbbbbbbbbb", status: "ready" };
+    const audit = { auditId: "continuity-audit-cccccccccccccccccccccccc", status: "audited-consistent" };
+    mockJson({ report: health });
+    mockJson({ proof });
+    mockJson({ audit });
+
+    await expect(novelApi.readMemoryHealthReport("demo", health.reportId)).resolves.toEqual(health);
+    await expect(novelApi.readMemoryReadyProof("demo", proof.proofId)).resolves.toEqual(proof);
+    await expect(novelApi.readMemoryContinuityAudit("demo", audit.auditId)).resolves.toEqual(audit);
+    expect(fetch).toHaveBeenNthCalledWith(1, `/api/novel/projects/demo/memory/health-reports/${health.reportId}`, {});
+    expect(fetch).toHaveBeenNthCalledWith(2, `/api/novel/projects/demo/memory/ready-proofs/${proof.proofId}`, {});
+    expect(fetch).toHaveBeenNthCalledWith(3, `/api/novel/projects/demo/memory/continuity-audits/${audit.auditId}`, {});
   });
 
   it("throws the API error message when a request fails", async () => {

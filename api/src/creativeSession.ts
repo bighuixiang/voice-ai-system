@@ -38,11 +38,11 @@ function sessionPath(root: string): string {
 
 function emptySession(projectSlug: string): CreativeSession {
   const now = new Date().toISOString();
-  const base = {
+  const base: Omit<CreativeSession, "fingerprint"> = {
     schemaVersion: "creative-session.v1" as const,
     sessionId: `session-${projectSlug}`,
     projectSlug,
-    status: "capturing",
+    status: "capturing" as const,
     phase: "capture" as const,
     collaborationMode: "guided" as const,
     latestDirection: "",
@@ -75,7 +75,8 @@ function sessionFingerprint(session: Omit<CreativeSession, "fingerprint">): stri
 
 function normalizeSession(parsed: Record<string, unknown>, projectSlug: string): CreativeSession {
   if (parsed.projectSlug !== projectSlug || !Array.isArray(parsed.messages)) throw new Error("Invalid creative session manifest");
-  const base = {
+  if (parsed.schemaVersion !== undefined && parsed.schemaVersion !== "creative-session.v1") throw new Error("CREATIVE_SESSION_INTEGRITY_FAILED");
+  const base: Omit<CreativeSession, "fingerprint"> = {
     schemaVersion: "creative-session.v1" as const,
     sessionId: String(parsed.sessionId || `session-${projectSlug}`),
     projectSlug,
@@ -96,7 +97,9 @@ function normalizeSession(parsed: Record<string, unknown>, projectSlug: string):
     createdAt: String(parsed.createdAt || new Date().toISOString()),
     updatedAt: String(parsed.updatedAt || new Date().toISOString())
   };
-  return { ...base, fingerprint: sessionFingerprint(base) };
+  const fingerprint = sessionFingerprint(base);
+  if (parsed.fingerprint !== undefined && parsed.fingerprint !== fingerprint) throw new Error("CREATIVE_SESSION_INTEGRITY_FAILED");
+  return { ...base, fingerprint };
 }
 
 async function readSession(root: string, projectSlug: string): Promise<CreativeSession> {

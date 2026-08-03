@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-seed-adoption-semantic-id",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-STATE-006", "FR-STATE-008"],
+  "implementationRefs": [
+    "api/src/seedAdoption.ts",
+    "api/src/seedAdoption.spec.ts"
+  ],
+  "tests": ["api/src/seedAdoption.spec.ts"],
+  "result": "passed",
+  "evidence": [
+    "RED: a validly hashed adoption could carry an arbitrary semanticId",
+    "GREEN: supplied semanticId values must equal the stable field-derived identifier",
+    "seed adoption regression passes 8/8"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "This protects seed lineage identity but does not prove unified canon authority or complete migration cutover."
+  }
+}

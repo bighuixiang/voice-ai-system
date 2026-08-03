@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-inventory-artifact-filename-binding",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Migration inventory must bind activation and rollback artifacts to the migration id encoded by their filename.",
+    "A validly hashed artifact transplanted under another filename must not prove cutover or rollback state."
+  ],
+  "implementationRefs": [
+    "api/src/projectInventory.ts:governanceState",
+    "api/src/projectInventory.spec.ts:activation artifact stored under the wrong migration filename"
+  ],
+  "tests": {
+    "red": "A valid activation under other.activation.json incorrectly produced migration-activated when project state granted prose-adoption.",
+    "green": "projectInventory.spec.ts passed 11/11 after filename-to-migration binding was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

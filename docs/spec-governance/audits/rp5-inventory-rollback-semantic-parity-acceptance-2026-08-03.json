@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-inventory-rollback-semantic-parity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Inventory rollback recognition must apply the same required binding semantics as direct rollback reads.",
+    "A hashed rollback missing activationFingerprint or rolledBackAt must not suppress a valid activation."
+  ],
+  "implementationRefs": [
+    "api/src/projectInventory.ts:governanceState rollback scan",
+    "api/src/projectInventory.spec.ts:hashed rollback missing required activation binding"
+  ],
+  "tests": {
+    "red": "Inventory treated a hashed rollback without activationFingerprint as terminal and hid a valid activation.",
+    "green": "projectInventory.spec.ts passed 15/15 after rollback semantic parity checks were added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

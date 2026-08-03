@@ -14,7 +14,7 @@ export function createDialogueUtterance(input: Omit<DialogueUtterance, "schemaVe
   return { ...base, fingerprint: hash(base) };
 }
 
-export function atomizeIntent(input: { utteranceId: string; text: string; atoms: readonly Array<Omit<IntentAtom, "schemaVersion" | "sourceUtteranceId" | "fingerprint">> }): IntentAtom[] {
+export function atomizeIntent(input: { utteranceId: string; text: string; atoms: ReadonlyArray<Omit<IntentAtom, "schemaVersion" | "sourceUtteranceId" | "fingerprint">> }): IntentAtom[] {
   if (!input.utteranceId.trim() || !input.text.trim() || !input.atoms.length) throw new Error("INTENT_ATOMS_REQUIRED");
   return input.atoms.map((atom) => {
     if (!atom.atomId.trim() || !atom.text.trim() || atom.start < 0 || atom.end <= atom.start || atom.end > input.text.length || !atom.targetAsset.trim() || !atom.scope.trim()) throw new Error("INTENT_ATOM_INVALID");

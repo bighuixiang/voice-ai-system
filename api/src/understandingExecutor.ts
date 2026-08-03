@@ -50,6 +50,7 @@ export interface UnderstandingSnapshot {
   modelCallIssued: boolean;
   canonWritten: false;
   createdAt: string;
+  fingerprint: string;
 }
 
 export interface UnderstandingRun {
@@ -67,6 +68,34 @@ export interface UnderstandingRun {
   canonWritten: false;
   createdAt: string;
   completedAt: string;
+}
+
+function hash(value: unknown): string {
+  return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+function validClaim(value: unknown): value is UnderstandingClaim {
+  const claim = value as UnderstandingClaim;
+  return Boolean(claim && typeof claim.id === "string" && claim.id.trim() && typeof claim.text === "string" && claim.text.trim() && ["explicit", "inferred", "provisional", "unknown", "conflicted"].includes(claim.status)) && Array.isArray(claim.evidence) && claim.evidence.every((span) => Boolean(span && typeof span.messageId === "string" && span.messageId.trim() && Number.isInteger(span.start) && span.start >= 0 && Number.isInteger(span.end) && span.end >= span.start));
+}
+
+function validInterpretationSet(value: unknown): boolean {
+  const set = value as UnderstandingInterpretationSet;
+  if (!set || set.schemaVersion !== "seed-interpretation-set.v1" || set.activeQuestionId !== "question-primary-desire" || !Array.isArray(set.commonClaims) || !set.commonClaims.every(validClaim) || !Array.isArray(set.interpretations) || set.interpretations.length < 2) return false;
+  const ids = new Set<string>();
+  return set.interpretations.every((branch) => {
+    if (!branch || typeof branch.id !== "string" || !branch.id.trim() || ids.has(branch.id) || typeof branch.label !== "string" || !branch.label.trim() || typeof branch.summary !== "string" || !branch.summary.trim() || branch.status !== "candidate" || !Array.isArray(branch.differences) || !branch.differences.every((item) => typeof item === "string" && item.trim()) || !Array.isArray(branch.supportEvidence) || !branch.supportEvidence.every(validClaim) || !Array.isArray(branch.counterEvidence) || !branch.counterEvidence.every(validClaim) || !Array.isArray(branch.downstreamImpacts) || !branch.downstreamImpacts.every((item) => typeof item === "string" && item.trim())) return false;
+    ids.add(branch.id);
+    return true;
+  });
+}
+
+export function assertUnderstandingSnapshotIntegrity(snapshot: UnderstandingSnapshot): UnderstandingSnapshot {
+  const { fingerprint: _fingerprint, ...base } = snapshot;
+  const question = snapshot.question;
+  const valid = snapshot.schemaVersion === "understanding-snapshot.v1" && ["shadow", "model"].includes(snapshot.mode) && Boolean(snapshot.snapshotId?.trim() && snapshot.projectSlug?.trim() && snapshot.sourceFingerprint?.trim()) && Array.isArray(snapshot.sourceMessageIds) && snapshot.sourceMessageIds.every((id) => typeof id === "string" && id.trim()) && Array.isArray(snapshot.coreExplicit) && snapshot.coreExplicit.every(validClaim) && Array.isArray(snapshot.inferred) && snapshot.inferred.every(validClaim) && Array.isArray(snapshot.unknowns) && snapshot.unknowns.every(validClaim) && (snapshot.interpretationSet === undefined || validInterpretationSet(snapshot.interpretationSet)) && question?.id === "question-primary-desire" && typeof question.text === "string" && question.text.trim().length > 0 && question.status === "candidate" && question.impact === "high" && ["deterministic-gap", "model-gap"].includes(question.source) && snapshot.modelCallIssued === (snapshot.mode === "model") && snapshot.canonWritten === false && typeof snapshot.createdAt === "string" && snapshot.createdAt.trim().length > 0 && /^[a-f0-9]{64}$/i.test(snapshot.fingerprint) && hash(base) === snapshot.fingerprint;
+  if (!valid) throw new Error("UNDERSTANDING_SNAPSHOT_INTEGRITY_FAILED");
+  return snapshot;
 }
 
 async function writeJson(root: string, relativePath: string, value: unknown): Promise<void> {
@@ -94,11 +123,11 @@ export async function executeShadowUnderstanding(input: {
   const preview = buildUnderstandingPreview(input.session);
   const now = new Date().toISOString();
   const snapshotId = `understanding-shadow-${input.manifest.sourceFingerprint.slice(0, 16)}`;
-  const snapshot: UnderstandingSnapshot = {
-    schemaVersion: "understanding-snapshot.v1",
+  const snapshotBase: Omit<UnderstandingSnapshot, "fingerprint"> = {
+    schemaVersion: "understanding-snapshot.v1" as const,
     snapshotId,
     projectSlug: input.projectSlug,
-    mode: "shadow",
+    mode: "shadow" as const,
     sourceFingerprint: input.manifest.sourceFingerprint,
     sourceMessageIds: preview.sourceMessageIds,
     coreExplicit: preview.coreExplicit,
@@ -115,6 +144,7 @@ export async function executeShadowUnderstanding(input: {
     canonWritten: false,
     createdAt: now
   };
+  const snapshot: UnderstandingSnapshot = { ...snapshotBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(snapshotBase)).digest("hex") };
   await writeJson(input.root, "sessions/understanding-snapshot.json", snapshot);
   const runId = `understanding-run-${input.manifest.sourceFingerprint.slice(0, 16)}`;
   const run: UnderstandingRun = {
@@ -139,7 +169,7 @@ export async function executeShadowUnderstanding(input: {
 
 export async function readUnderstandingSnapshot(root: string): Promise<UnderstandingSnapshot | null> {
   try {
-    return JSON.parse(await fs.readFile(resolveInside(root, "sessions/understanding-snapshot.json"), "utf8")) as UnderstandingSnapshot;
+    return assertUnderstandingSnapshotIntegrity(JSON.parse(await fs.readFile(resolveInside(root, "sessions/understanding-snapshot.json"), "utf8")) as UnderstandingSnapshot);
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null;
     throw error;

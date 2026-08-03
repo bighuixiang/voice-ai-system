@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createCraftPattern, approveCraftPattern } from "./craftPattern.js";
 import { createRightsEnvelope, createSourceMaterial } from "./sourceRights.js";
-import { createPatternTransferPlan, evaluateSimilarityGuard, readPatternTransferPlan } from "./patternTransfer.js";
+import { assertPatternTransferPlanIntegrity, assertSimilarityGuardIntegrity, createPatternTransferPlan, evaluateSimilarityGuard, readPatternTransferPlan } from "./patternTransfer.js";
 
 async function fixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "pattern-transfer-"));
@@ -19,9 +19,12 @@ describe("pattern transfer and similarity guard", () => {
   it("passes materially transformed text and blocks near-copy text", () => {
     const pass = evaluateSimilarityGuard({ sourceText: "The guard opened the gate and the bells rang twice.", targetText: "At dusk, the watchman unlatched the iron door; two distant chimes answered.", maxTokenOverlap: 0.35, sourceVersion: "source-v1", targetVersion: "draft-v1" });
     expect(pass.status).toBe("passed");
+    expect(pass.semanticRisk).toBe("low");
+    expect(pass.structuralRisk).toBe("low");
     const blocked = evaluateSimilarityGuard({ sourceText: "The guard opened the gate and the bells rang twice.", targetText: "The guard opened the gate and the bells rang twice.", maxTokenOverlap: 0.35, sourceVersion: "source-v1", targetVersion: "draft-v2" });
     expect(blocked.status).toBe("blocked");
     expect(blocked.risk).toBe("high");
+    expect(blocked.structuralRisk).toBe("high");
   });
 
   it("requires approved pattern, valid rights, and passed guard", async () => {
@@ -39,4 +42,6 @@ describe("pattern transfer and similarity guard", () => {
     await expect(createPatternTransferPlan({ root, projectSlug: "demo", pattern: approved, sourceEnvelopeId: envelope.envelopeId, guard: blocked, targetChapterId: "chapter-1", intendedEffect: "copy" })).rejects.toThrow("PATTERN_TRANSFER_SIMILARITY_BLOCKED");
     await expect(createPatternTransferPlan({ root, projectSlug: "demo", pattern: { ...approved, lifecycle: "candidate" }, sourceEnvelopeId: envelope.envelopeId, guard: evaluateSimilarityGuard({ sourceText: "a", targetText: "b", maxTokenOverlap: 0.35, sourceVersion: "s", targetVersion: "t" }), targetChapterId: "chapter-1", intendedEffect: "test" })).rejects.toThrow("PATTERN_TRANSFER_APPROVAL_REQUIRED");
   });
+  it("requires real pre/post text and detects guard tampering", () => { expect(() => evaluateSimilarityGuard({ sourceText: " ", targetText: "draft", maxTokenOverlap: 0.35, sourceVersion: "source-v1", targetVersion: "draft-v1" })).toThrow("SIMILARITY_GUARD_INPUT_INVALID"); const guard = evaluateSimilarityGuard({ sourceText: "source text", targetText: "new draft", maxTokenOverlap: 0.35, sourceVersion: "source-v1", targetVersion: "draft-v1" }); expect(() => assertSimilarityGuardIntegrity({ ...guard, status: "blocked" })).toThrow("SIMILARITY_GUARD_INTEGRITY_FAILED"); });
+  it("fails closed when a transfer plan or nested guard is tampered", async () => { const { root, approved, envelope } = await fixture(); const guard = evaluateSimilarityGuard({ sourceText: "source text", targetText: "new draft", maxTokenOverlap: 0.35, sourceVersion: "source-v1", targetVersion: "draft-v1" }); const plan = await createPatternTransferPlan({ root, projectSlug: "demo", pattern: approved, sourceEnvelopeId: envelope.envelopeId, guard, targetChapterId: "chapter-tamper", intendedEffect: "preserve pressure" }); expect(() => assertPatternTransferPlanIntegrity({ ...plan, canonWriteAllowed: true as false })).toThrow("PATTERN_TRANSFER_PLAN_INTEGRITY_FAILED"); const target = path.join(root, "sessions", "pattern-transfer-plans", `${plan.planId}.json`); const persisted = JSON.parse(await fs.readFile(target, "utf8")); persisted.guard.status = "blocked"; await fs.writeFile(target, JSON.stringify(persisted)); await expect(readPatternTransferPlan(root, plan.planId)).rejects.toThrow("PATTERN_TRANSFER_PLAN_INTEGRITY_FAILED"); });
 });

@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
 
 export interface RankedDialogueQuestions { schemaVersion: "dialogue-question-ranking.v1"; activeQuestionId: string | null; ranking: Array<{ questionId: string; score: number; skipped: boolean; reason: string }>; fingerprint: string; }
-export interface NonLeadingQuestion { schemaVersion: "non-leading-question.v1"; questionId: string; knownEvidence: string[]; whyNow: string; options: Array<{ label: string; impact: string }>; recommendation: string; freeAnswerAllowed: true; fingerprint: string; }
+export interface NonLeadingQuestion { schemaVersion: "non-leading-question.v1"; questionId: string; knownEvidence: string[]; whyNow: string; options: Array<{ label: string; impact: string }>; recommendation: string; recommendationEvidenceRefs: string[]; uncertainOption: "我不确定，请推荐"; freeAnswerAllowed: true; fingerprint: string; }
 export interface ProvisionalAssumption { schemaVersion: "provisional-assumption.v1"; assumptionId: string; basis: string; assets: string[]; allowedActions: string[]; expiry: string; risk: string; revocationRoute: string; status: "provisional"; fingerprint: string; }
 export interface DelegationGrant { schemaVersion: "delegation-grant.v1"; grantId: string; scope: string[]; expiresAt: string; rationale: string; revocable: true; fingerprint: string; }
 const hash = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
-export function rankDialogueQuestions(input: readonly Array<{ questionId: string; ambiguity: number; errorCost: number; impact: number; reversibility: number; delayCost: number; evidenceCoverage: number; authorBurden: number }>): RankedDialogueQuestions {
+export function rankDialogueQuestions(input: ReadonlyArray<{ questionId: string; ambiguity: number; errorCost: number; impact: number; reversibility: number; delayCost: number; evidenceCoverage: number; authorBurden: number }>): RankedDialogueQuestions {
   if (!input.length) throw new Error("DIALOGUE_QUESTIONS_REQUIRED");
   const ranking = input.map((question) => ({ questionId: question.questionId, score: Number(((question.ambiguity * 0.2 + question.errorCost * 0.25 + question.impact * 0.3 + (1 - question.reversibility) * 0.1 + question.delayCost * 0.15) * (1 - question.evidenceCoverage) / Math.max(0.1, question.authorBurden)).toFixed(4)), skipped: false, reason: "highest expected value" })).sort((left, right) => right.score - left.score);
   const activeQuestionId = ranking[0]?.questionId ?? null;
@@ -14,9 +14,11 @@ export function rankDialogueQuestions(input: readonly Array<{ questionId: string
   return { ...base, fingerprint: hash(base) };
 }
 
-export function renderNonLeadingQuestion(input: { questionId: string; knownEvidence: readonly string[]; whyNow: string; options: readonly Array<{ label: string; impact: string }>; recommendation: string }): NonLeadingQuestion {
+export function renderNonLeadingQuestion(input: { questionId: string; knownEvidence: readonly string[]; whyNow: string; options: ReadonlyArray<{ label: string; impact: string }>; recommendation: string; recommendationEvidenceRefs?: readonly string[] }): NonLeadingQuestion {
   if (!input.questionId.trim() || !input.knownEvidence.length || !input.whyNow.trim() || input.options.length < 2 || input.options.length > 3 || !input.recommendation.trim()) throw new Error("DIALOGUE_QUESTION_RENDER_INVALID");
-  const base = { schemaVersion: "non-leading-question.v1" as const, questionId: input.questionId, knownEvidence: [...input.knownEvidence], whyNow: input.whyNow, options: input.options.map((option) => ({ ...option })), recommendation: input.recommendation, freeAnswerAllowed: true as const };
+  if (input.options.some((option) => !option.label.trim() || !option.impact.trim() || /正确|错误|俗套|显然|应该/iu.test(`${option.label} ${option.impact}`))) throw new Error("DIALOGUE_QUESTION_LEADING_WORDING");
+  if (!input.recommendationEvidenceRefs?.length) throw new Error("DIALOGUE_RECOMMENDATION_EVIDENCE_REQUIRED");
+  const base = { schemaVersion: "non-leading-question.v1" as const, questionId: input.questionId, knownEvidence: [...input.knownEvidence], whyNow: input.whyNow, options: input.options.map((option) => ({ ...option })), recommendation: input.recommendation, recommendationEvidenceRefs: [...input.recommendationEvidenceRefs], uncertainOption: "我不确定，请推荐" as const, freeAnswerAllowed: true as const };
   return { ...base, fingerprint: hash(base) };
 }
 
@@ -30,7 +32,7 @@ export function createProvisionalAssumption(input: Omit<ProvisionalAssumption, "
 
 export function createDelegationGrant(input: Omit<DelegationGrant, "schemaVersion" | "revocable" | "fingerprint">): DelegationGrant {
   if (!input.grantId.trim() || !input.scope.length || !input.expiresAt.trim() || !input.rationale.trim()) throw new Error("DELEGATION_FIELDS_REQUIRED");
-  if (input.scope.some((scope) => ["copyright", "privacy", "budget", "l2-hard-gate"].includes(scope))) throw new Error("DELEGATION_SCOPE_FORBIDDEN");
+  if (input.scope.some((scope) => ["copyright", "privacy", "budget", "l2-hard-gate", "ending", "character-death", "major-relationship"].includes(scope))) throw new Error("DELEGATION_SCOPE_FORBIDDEN");
   const base = { schemaVersion: "delegation-grant.v1" as const, ...input, scope: [...input.scope], revocable: true as const };
   return { ...base, fingerprint: hash(base) };
 }

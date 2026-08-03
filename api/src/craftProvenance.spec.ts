@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCraftProvenanceBundle, projectCraftProvenance } from "./craftProvenance.js";
+import { assertCraftProvenanceIntegrity, createCraftProvenanceBundle, projectCraftProvenance } from "./craftProvenance.js";
 
 const input = {
   candidateId: "candidate-1", patternId: "pattern-1", sceneId: "scene-1", sourceRefs: ["audit://bundle-1"],
@@ -34,4 +34,5 @@ describe("craft provenance", () => {
     expect(audit.transformations[0]?.evidenceRefs).toContain("transform://1");
     expect(audit.fingerprint).toBe(bundle.fingerprint);
   });
+  it("rejects malformed lineage and fails closed on tampering", () => { expect(() => createCraftProvenanceBundle({ ...input, sources: [{ ...input.sources[0], accessClass: "invalid" as never }] })).toThrow("CRAFT_PROVENANCE_SOURCE_METADATA_REQUIRED"); expect(() => createCraftProvenanceBundle({ ...input, transformations: [{ ...input.transformations[0], evidenceRefs: [" "] }] })).toThrow("CRAFT_PROVENANCE_TRANSFORMATION_EVIDENCE_REQUIRED"); const bundle = createCraftProvenanceBundle(input); expect(() => assertCraftProvenanceIntegrity({ ...bundle, sceneId: "tampered" })).toThrow("CRAFT_PROVENANCE_INTEGRITY_FAILED"); });
 });

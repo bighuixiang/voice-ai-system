@@ -11,11 +11,11 @@ export function createDecisionEscalation(input: Omit<DecisionEscalation, "schema
   const base = { schemaVersion: "decision-escalation.v1" as const, ...input, currentEvidence: [...input.currentEvidence], safeDefaults: [...input.safeDefaults], level, status: level === "L2" ? "needs-author" as const : level === "L1" ? "recommended" as const : "auto" as const };
   return { ...base, fingerprint: hash(base) };
 }
-export function createAutonomyReceipt(input: Omit<AutonomyReceipt, "schemaVersion" | "status" | "fingerprint">): AutonomyReceipt {
+export function createAutonomyReceipt(input: Omit<AutonomyReceipt, "schemaVersion" | "status" | "fingerprint" | "level"> & { level: "L0" | "L1" | "L2" }): AutonomyReceipt {
   if (input.level === "L2") throw new Error("AUTONOMY_L2_FORBIDDEN");
   if (!input.receiptId.trim() || !input.projectSlug.trim() || !input.scope.length || !input.evidenceRefs.length || !input.expiresAt.trim()) throw new Error(input.expiresAt.trim() ? "AUTONOMY_RECEIPT_FIELDS_REQUIRED" : "AUTONOMY_EXPIRY_REQUIRED");
   if (new Date(input.expiresAt).getTime() <= Date.now()) throw new Error("AUTONOMY_EXPIRY_INVALID");
-  const base = { schemaVersion: "autonomy-receipt.v1" as const, ...input, scope: [...input.scope], evidenceRefs: [...input.evidenceRefs], status: "active" as const };
+  const base = { schemaVersion: "autonomy-receipt.v1" as const, ...input, level: input.level as "L0" | "L1", scope: [...input.scope], evidenceRefs: [...input.evidenceRefs], status: "active" as const };
   return { ...base, fingerprint: hash(base) };
 }
 export function revokeAutonomyReceipt(receipt: AutonomyReceipt, phrase: string): AutonomyReceipt {

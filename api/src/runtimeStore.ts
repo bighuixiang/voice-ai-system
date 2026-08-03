@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import type {
   NarrativeSnapshot,
   RuntimeCheckpoint,
@@ -133,6 +134,8 @@ function rowToRun(row: Record<string, unknown>): RuntimeRun {
 }
 
 function rowToCommand(row: Record<string, unknown>): RuntimeCommand {
+  const storedIdempotencyKey = typeof row.idempotency_key === "string" ? row.idempotency_key : undefined;
+  const projectScope = `${String(row.project_slug)}::`;
   return {
     id: String(row.id),
     projectSlug: String(row.project_slug),
@@ -140,13 +143,19 @@ function rowToCommand(row: Record<string, unknown>): RuntimeCommand {
     type: row.type as RuntimeCommandType,
     status: row.status as RuntimeCommandStatus,
     payload: parseJson<Record<string, unknown>>(row.payload_json, {}),
-    idempotencyKey: typeof row.idempotency_key === "string" ? row.idempotency_key : undefined,
+    // New rows carry a project scope in storage to remain compatible with the
+    // legacy global UNIQUE constraint; the API still exposes the client key.
+    idempotencyKey: storedIdempotencyKey?.startsWith(projectScope) ? storedIdempotencyKey.slice(projectScope.length) : storedIdempotencyKey,
     error: typeof row.error === "string" ? row.error : undefined,
     createdAt: String(row.created_at),
     claimedAt: typeof row.claimed_at === "string" ? row.claimed_at : undefined,
     finishedAt: typeof row.finished_at === "string" ? row.finished_at : undefined,
     updatedAt: String(row.updated_at)
   };
+}
+
+function scopedIdempotencyKey(projectSlug: string, idempotencyKey: string): string {
+  return `${projectSlug}::${idempotencyKey}`;
 }
 
 function rowToEvent(row: Record<string, unknown>): RuntimeEvent {
@@ -286,7 +295,7 @@ export function createRuntimeRun(input: {
 
 export function updateRuntimeRun(
   runId: string,
-  patch: Partial<Pick<RuntimeRun, "status" | "currentStage" | "chapterId" | "branchId" | "result" | "error" | "failureCount" | "rewriteCount" | "qualityScore" | "startedAt" | "finishedAt">>
+  patch: Partial<Pick<RuntimeRun, "status" | "currentStage" | "chapterId" | "branchId" | "input" | "result" | "error" | "failureCount" | "rewriteCount" | "qualityScore" | "startedAt" | "finishedAt">>
 ): RuntimeRun | null {
   const current = getRuntimeRun(runId);
   if (!current) return null;
@@ -301,7 +310,7 @@ export function updateRuntimeRun(
       .prepare(
         `
         UPDATE runtime_runs SET
-          chapter_id = ?, branch_id = ?, status = ?, current_stage = ?, result_json = ?, error = ?,
+          chapter_id = ?, branch_id = ?, status = ?, current_stage = ?, input_json = ?, result_json = ?, error = ?,
           failure_count = ?, rewrite_count = ?, quality_score = ?, started_at = ?, updated_at = ?, finished_at = ?
         WHERE id = ?
       `
@@ -311,6 +320,7 @@ export function updateRuntimeRun(
         updated.branchId || null,
         updated.status,
         updated.currentStage || null,
+        json(updated.input),
         updated.result ? json(updated.result) : null,
         updated.error || null,
         updated.failureCount,
@@ -376,8 +386,8 @@ export function enqueueRuntimeCommand(input: {
   try {
     if (input.idempotencyKey) {
       const existing = database
-        .prepare("SELECT * FROM runtime_write_commands WHERE idempotency_key = ?")
-        .get(input.idempotencyKey);
+        .prepare("SELECT * FROM runtime_write_commands WHERE project_slug = ? AND idempotency_key IN (?, ?)")
+        .get(input.projectSlug, scopedIdempotencyKey(input.projectSlug, input.idempotencyKey), input.idempotencyKey);
       if (existing) return rowToCommand(existing);
     }
     database
@@ -397,7 +407,7 @@ export function enqueueRuntimeCommand(input: {
         command.type,
         command.status,
         json(command.payload),
-        command.idempotencyKey || null,
+        command.idempotencyKey ? scopedIdempotencyKey(command.projectSlug, command.idempotencyKey) : null,
         null,
         command.createdAt,
         null,
@@ -417,7 +427,7 @@ export function claimNextRuntimeCommand(): RuntimeCommand | null {
     database.exec("BEGIN IMMEDIATE;");
     inTransaction = true;
     const row = database
-      .prepare("SELECT * FROM runtime_write_commands WHERE status = 'pending' ORDER BY created_at ASC LIMIT 1")
+      .prepare("SELECT * FROM runtime_write_commands WHERE status = 'pending' ORDER BY CASE WHEN type IN ('pause', 'stop', 'direction') THEN 0 ELSE 1 END ASC, created_at ASC, id ASC LIMIT 1")
       .get();
     if (!row) {
       database.exec("COMMIT;");
@@ -706,7 +716,7 @@ export function insertRuntimeKnowledgeRefs(
   const createdAt = nowIso();
   const records: RuntimeKnowledgeRef[] = refs.map((ref) => ({
     ...ref,
-    id: ref.id || id("knowref"),
+    id: ref.id || `knowref-${crypto.createHash("sha256").update([ref.projectSlug, ref.runId, ref.chapterId, ref.kind, ref.refId].join("\u0000")).digest("hex").slice(0, 24)}`,
     createdAt: ref.createdAt || createdAt
   }));
   const database = openDatabase();

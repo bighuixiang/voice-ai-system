@@ -566,8 +566,18 @@ export interface KnowledgeIndexProjection {
 
 export interface KnowledgeSearchQuery {
   query: string;
+  task?: string;
   chapterId?: string;
   limit?: number;
+  targetEvent?: string;
+  eventOrder?: Record<string, number>;
+  audience?: "author" | "reader" | "character" | "model-task";
+  visibility?: "author-only" | "reader-visible" | "character-visible" | "public";
+  authorized?: boolean;
+  readerScope?: string;
+  publicationVersion?: string;
+  readerProgressCursor?: string;
+  characterId?: string;
 }
 
 export interface KnowledgeVectorEntry {
@@ -602,13 +612,112 @@ export interface KnowledgeVectorSummary {
   updatedAt: string;
 }
 
+export interface KnowledgeRetrievalAudit {
+  schemaVersion: "knowledge-retrieval-audit.v1";
+  boundary: {
+    query: string;
+    task?: KnowledgeSearchQuery["task"];
+    chapterId?: string;
+    targetEvent?: string;
+    audience?: KnowledgeSearchQuery["audience"];
+    visibility?: KnowledgeSearchQuery["visibility"];
+    authorized?: boolean;
+    readerScope?: string;
+    publicationVersion?: string;
+    readerProgressCursor?: string;
+    characterId?: string;
+  };
+  eligibleFactIds: string[];
+  excluded: Array<{ id: string; reason: string }>;
+  selectedIds: string[];
+  evidenceSourceIds: string[];
+  evidenceSourceCount: number;
+  evidenceProfile?: {
+    sources: Array<{ id: string; family: string; independent: boolean; quality: "canon" | "derived" | "plan" | "unknown"; derivedFromIds: string[] }>;
+    independentSourceCount: number;
+    familyCount: number;
+    duplicateDerivedGroupCount: number;
+    gaps: string[];
+    saysNoContradiction: boolean;
+  };
+  vectorSummary?: KnowledgeVectorSummary;
+  resultFingerprint: string;
+}
+
 export interface KnowledgeSearchResult {
   query: string;
   tokens: string[];
   vectorSummary?: KnowledgeVectorSummary;
+  queryEmbeddingFallback?: { from: "openai-compatible"; to: "local"; reason: string };
+  retrievalAudit?: KnowledgeRetrievalAudit;
   facts: Array<KnowledgeFact & { score: number; vectorScore?: number }>;
   triples: Array<KnowledgeTriple & { score: number; vectorScore?: number }>;
   chapters: Array<ChapterIndexEntry & { score: number; vectorScore?: number }>;
+  excluded?: Array<{ id: string; reason: string }>;
+}
+
+export interface MemoryRetrievalPreview {
+  schemaVersion: "memory-retrieval-preview.v1";
+  retrievalId: string;
+  projectSlug: string;
+  query: string;
+  boundary: KnowledgeRetrievalAudit["boundary"];
+  eligibleFactIds: string[];
+  excluded: Array<{ id: string; reason: string }>;
+  selectedIds: string[];
+  truncatedIds: string[];
+  evidenceSourceIds: string[];
+  evidenceSourceCount: number;
+  evidenceProfile?: KnowledgeRetrievalAudit["evidenceProfile"];
+  budget: { maxResults: number };
+  vectorSummary?: KnowledgeVectorSummary;
+  sourceResultFingerprint: string;
+  resultFingerprint: string;
+}
+
+export interface MemoryHealthReport {
+  schemaVersion: "memory-health-report.v1";
+  reportId: string;
+  projectSlug: string;
+  status: "healthy" | "degraded" | "blocked";
+  coverage: { totalChapters: number; settledChapters: number; eligibleClaims: number; candidateClaims: number; contestedClaims?: number; obsoleteClaims?: number; entityCount: number; timeBoundClaims: number; characterKnowledgeEntries: number; readerKnowledgeEntries: number };
+  staleProjectionCount: number;
+  invalidSettlementIds: string[];
+  risks: string[];
+  sourceRefs: string[];
+  generatedAt: string;
+  fingerprint: string;
+}
+
+export interface MemoryReadyProof {
+  schemaVersion: "memory-ready-proof.v1";
+  proofId: string;
+  projectSlug: string;
+  targetChapterId: string;
+  healthReportId: string;
+  retrievalId: string;
+  continuityAuditId?: string;
+  continuityAuditFingerprint?: string;
+  status: "ready" | "blocked";
+  blockers: string[];
+  sourceRefs: string[];
+  generatedAt: string;
+  fingerprint: string;
+}
+
+export interface LongContinuityAudit {
+  schemaVersion: "long-continuity-audit.v1";
+  auditId: string;
+  projectSlug: string;
+  status: "audited-consistent" | "conditionally-consistent" | "blocked";
+  coverage: { totalChapters: number; settledChapters: number; eligibleClaims: number; candidateClaims: number; settledRatio: number };
+  contradictionSetIds: string[];
+  staleProjectionCount: number;
+  issues: string[];
+  sourceRefs: string[];
+  healthReportId: string;
+  generatedAt: string;
+  fingerprint: string;
 }
 
 export interface ChapterQualityMetric {
@@ -1172,6 +1281,18 @@ export interface DialogueQuestion {
   answerStatus?: "confirmed" | "tentative" | "delegated";
   answerText?: string;
   answeredAt?: string;
+  redBlueCase?: {
+    caseId: string;
+    status: "open" | "superseded";
+    options: Array<{ optionId: string; label: string; claim: string; bestCase: string; failureModes: string[]; opportunityCost: string; reversibility: string; uncertainty: string }>;
+    sharedFacts: string[];
+    irreducibleTradeoff: string;
+    recommendation: string;
+    recommendationReason: string;
+    dissent: string[];
+    whatWouldChangeRecommendation: string[];
+    fingerprint: string;
+  };
 }
 
 export interface DecisionRecord {
@@ -1389,6 +1510,8 @@ export interface ProseCandidate {
   candidateId: string;
   projectSlug: string;
   chapterId: string;
+  policyVersion?: "tiered-quality.v1";
+  riskTier?: "ordinary" | "elevated" | "key";
   status: "generated" | "validated" | "adopted" | "rejected";
   content: string;
   generation: ProseGenerationManifest;
@@ -1804,6 +1927,9 @@ export interface CraftExperiment {
   budgetId: string;
   status: "planned" | "running" | "judged" | "inconclusive" | "failed" | "invalidated";
   runnerId?: string;
+  holdoutValidation?: { status: "cross-scene-validated" | "local-candidate" | "blocked"; holdoutCaseIds: string[]; sceneFunctions: string[] };
+  providerEvaluation?: { providerRef: string; decision: "pass" | "blocked"; quality: { status: "calibrated" | "blocked" | "missing" }; totalCost: { measurement: "actual" | "estimated" | "mixed" } };
+  readerCalibration?: { reviewerId: string; status: "calibrated" | "experimental"; humanSamples: number; blind: boolean; agreementRate: number };
   judgment?: ExperimentJudgment;
   createdAt: string;
   updatedAt: string;

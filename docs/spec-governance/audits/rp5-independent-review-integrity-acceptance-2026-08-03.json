@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-independent-review-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-EVAL-008", "FR-EVAL-009", "FR-RUN-020"],
+  "implementationRefs": [
+    "api/src/independentReviewGate.ts",
+    "api/src/independentReviewGate.spec.ts"
+  ],
+  "tests": ["api/src/independentReviewGate.spec.ts"],
+  "result": "passed",
+  "evidence": [
+    "RED: a validly hashed result with status=passed and independent=false was accepted by the integrity assertion",
+    "GREEN: integrity now enforces status/independent consistency, reason consistency, required evidence for passed results, and field semantics",
+    "independent review gate regression passes 4/4"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "The gate implementation is verified, but no real provider/human independent review artifact has been supplied for release approval."
+  }
+}

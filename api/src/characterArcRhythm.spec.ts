@@ -22,4 +22,11 @@ describe("character arc rhythm", () => {
     expect(record.events[0]?.phase).toBe("relapse");
     expect(evaluateCharacterArcRhythm(record, { minimumNovelPressure: 1 }).status).toBe("healthy");
   });
+
+  it("uses minimumNovelPressure instead of silently ignoring it", () => {
+    const record = recordArcRhythmEvent({ arcId: "arc-1", characterId: "hero", events: [], sourceRefs: ["arc://1"] }, event("1", "accumulation"));
+    const result = evaluateCharacterArcRhythm(record, { minimumNovelPressure: 2 });
+    expect(result.status).toBe("blocked");
+    expect(result.issues).toContain("ARC_NOVEL_PRESSURE_INSUFFICIENT");
+  });
 });

@@ -7,67 +7,67 @@
   "sourceFiles": [
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/narrativeObligation.ts",
-      "sha256": "e4cb7d0e298387064803777331a28bfbede96aae59c252decf82ed226ab19b11"
+      "sha256": "b9283c512c9111454c9cf477451597e274c70082bd8d1f2c35c127af5f7cc7e4"
     },
     {
       "path": "api/src/obligationCoverage.ts",
-      "sha256": "412d8bbcefe5c3de1dbd295192cd35b3c295142e2fd79265c41882dbec6d8c31"
+      "sha256": "246cac48bd46b71b11ebef77a07a135e1b05982887caaa6720de821356ecbe27"
     },
     {
       "path": "api/src/obligationCandidates.ts",
-      "sha256": "8e1776e3a0870b5196a0f8a7a6b19fe1fcd3f30ec61e1f16be79d13f76e21d8a"
+      "sha256": "7b9bccac69013785ecf4531bbf4ec1c9146734a386e8abda04b62c10fb7f5c67"
     },
     {
       "path": "api/src/obligationCertificate.ts",
-      "sha256": "f64d56a8491eb5aeb25ec74ba3677a21157bb576d9aaf299595bc43473ad7245"
+      "sha256": "896b7365c64133782ba556685f19ce056dec17a08f2d3185f09c82279242b2a5"
     },
     {
       "path": "api/src/closureCertificate.ts",
-      "sha256": "c69444822955e26bd7bf36e65122ec0ae9208028a43ec47a472e7a325c5085e6"
+      "sha256": "b55a598a53460aa758b1731350018d2dd292c2f7dd69af495d864de8db5a2a29"
     },
     {
       "path": "api/src/novelProject.ts",
-      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+      "sha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720"
     },
     {
       "path": "api/src/writingCockpit.ts",
-      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+      "sha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6"
     },
     {
       "path": "api/src/contextAssembler.ts",
-      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+      "sha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963"
     },
     {
       "path": "api/src/runtimeSnapshot.ts",
-      "sha256": "0a2cda33d0d1fe4859b7583314a25c64b406d3a2603090232a4f2c3b6654c8b6"
+      "sha256": "e006e4dae47be7762cbe32d5e5882c7a6fcc392106dd825684a81eac071db4e2"
     },
     {
       "path": "api/src/runtimeEngine.ts",
-      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      "sha256": "232bd54d3d76d340af9787f1ea5c522966499e7dad92da82faa24dfaa66b6572"
     },
     {
       "path": "api/src/taskTemplates.ts",
-      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+      "sha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57"
     },
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/storyGraph.ts",
-      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+      "sha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371"
     },
     {
       "path": "api/src/worldRuleContract.ts",
-      "sha256": "0c64c916d8e2afcb39656d3ae76c53da33ea313ca6a18ce64a47da2e47c950f0"
+      "sha256": "ece88919e2d43ef64117f149d793b9381e317e41b965b29e61b6a7a1982a4355"
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     },
     {
       "path": "ui/src/components/novel/LedgerPanel.vue",
@@ -105,8 +105,8 @@
   },
   "operationalSnapshot": {
     "totals": {
-      "projects": 8,
-      "chapters": 219,
+      "projects": 11,
+      "chapters": 222,
       "sceneCards": 8,
       "sceneReferences": 21,
       "uniqueSceneIds": 21,
@@ -123,7 +123,7 @@
           {
             "category": "project",
             "fileCount": 1,
-            "aggregateSha256": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788"
+            "aggregateSha256": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676"
           }
         ],
         "parseHealth": {
@@ -428,6 +428,218 @@
           {
             "category": "dashboard",
             "fileCount": 3,
+            "aggregateSha256": "eb6b2c69ef288353585d6bfe4afe32170ee0d4e062b73a66bb4f98aca0258377"
+          },
+          {
+            "category": "ledger-json",
+            "fileCount": 1,
+            "aggregateSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+          },
+          {
+            "category": "ledger-markdown",
+            "fileCount": 1,
+            "aggregateSha256": "a4628d23d6db4ed2ad83fe5efc2c47153a85e440c26501889e4a07f632de23ba"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe"
+          },
+          {
+            "category": "recap-jsonl",
+            "fileCount": 1,
+            "aggregateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "category": "scene",
+            "fileCount": 3,
+            "aggregateSha256": "b2cfbf719da2e18cb8b7d5688ad6206e0972d05e843a0c0694ad9e07bf9058bc"
+          },
+          {
+            "category": "summary",
+            "fileCount": 3,
+            "aggregateSha256": "4d9571d372da4f79c1d4e8509ba894d2a5c7e4a2424618b6e36697bbfcac803f"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          }
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 3,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 3,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 3,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": [],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 0,
+          "statuses": {}
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 0,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 0,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": [],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 0,
+          "statuses": {}
+        },
+        "surfaces": {
+          "sceneCards": {
+            "files": 0,
+            "cards": 0,
+            "cardsWithForeshadowingRefs": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "dashboards": {
+            "files": 0,
+            "references": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "ledger": {
+            "entries": 0,
+            "statuses": {},
+            "withExpectedResolutionChapter": 0,
+            "withChapterRefs": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "acceptedSummaries": {
+            "files": 0,
+            "foreshadowingUpdates": 0,
+            "uniqueIds": 0,
+            "idSetSha256": null
+          },
+          "recapCandidates": {
+            "records": 0,
+            "proposedForeshadowingUpdates": 0
+          }
+        },
+        "crossSurface": {
+          "sceneIdsMissingFromLedger": 0,
+          "ledgerIdsMissingFromScenes": 0,
+          "dashboardIdsMissingFromLedger": 0,
+          "summaryIdsMissingFromLedger": 0
+        },
+        "interpretation": {
+          "hasAnyStructuredFragments": false,
+          "authorityStatus": "empty-assets-coverage-unknown",
+          "zeroLedgerMeansClosure": false,
+          "reason": "Empty structured surfaces do not prove the project was exhaustively scanned for reader expectations or implicit obligations."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": [
+          {
+            "category": "dashboard",
+            "fileCount": 3,
             "aggregateSha256": "c8902d51ea6bb24046ca507a8b8c1801432f44789cdd8f9fe3fd72e0abca94e0"
           },
           {
@@ -519,7 +731,7 @@
         }
       },
       {
-        "projectOrdinal": 6,
+        "projectOrdinal": 9,
         "inputFingerprints": [
           {
             "category": "dashboard",
@@ -615,7 +827,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": [
           {
             "category": "dashboard",
@@ -711,7 +923,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": [
           {
             "category": "dashboard",
@@ -811,8 +1023,8 @@
   },
   "summary": {
     "auditedStages": 12,
-    "projectsScanned": 8,
-    "chaptersInventoried": 219,
+    "projectsScanned": 11,
+    "chaptersInventoried": 222,
     "uniquePlannedSceneIds": 21,
     "legacyLedgerEntries": 0,
     "plannedIdsMissingFromLedger": 21,
@@ -835,12 +1047,12 @@
       "evidence": [
         {
           "path": "api/src/novelProject.ts",
-          "line": 286,
+          "line": 315,
           "evidence": "\"ledger/foreshadowing.md\""
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 289,
+          "line": 318,
           "evidence": "\"ledger/foreshadowing.json\""
         }
       ],
@@ -854,7 +1066,7 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 531,
+          "line": 557,
           "evidence": "foreshadowingIds: string[];"
         }
       ],
@@ -868,7 +1080,7 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 312,
+          "line": 329,
           "evidence": "unresolvedForeshadowingIds: string[];"
         }
       ],
@@ -887,7 +1099,7 @@
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 637,
+          "line": 719,
           "evidence": "foreshadowingUpdates: []"
         }
       ],
@@ -901,7 +1113,7 @@
       "evidence": [
         {
           "path": "api/src/writingCockpit.ts",
-          "line": 1060,
+          "line": 1070,
           "evidence": "await writeFilesTransaction(root, writes)"
         }
       ],
@@ -915,7 +1127,7 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2606,
+          "line": 8701,
           "evidence": "app.put(\"/api/novel/projects/:projectId/ledger/:kind\""
         },
         {
@@ -962,12 +1174,12 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 730,
+          "line": 790,
           "evidence": "{ title: \"伏笔账本\""
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 739,
+          "line": 799,
           "evidence": "{ title: \"结构化伏笔账本\""
         }
       ],
@@ -981,7 +1193,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 342,
+          "line": 406,
           "evidence": "entry.status === \"blocked\" || entry.severity === \"high\""
         }
       ],
@@ -995,7 +1207,7 @@
       "evidence": [
         {
           "path": "api/src/storyGraph.ts",
-          "line": 583,
+          "line": 601,
           "evidence": "type: \"ledger\""
         }
       ],

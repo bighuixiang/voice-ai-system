@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-calibration-history-api-contract",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-EVAL-010", "FR-UX-029"],
+  "implementationRefs": [
+    "api/src/app.ts",
+    "api/src/app.spec.ts"
+  ],
+  "tests": ["api/src/app.spec.ts"],
+  "result": "passed",
+  "evidence": [
+    "RED: malformed calibration history surfaced as HTTP 500",
+    "GREEN: integrity/semantic/history calibration errors now return structured HTTP 409",
+    "API app regression passes 257/257"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "This exposes a recoverable API contract for damaged calibration history but does not provide external calibration evidence."
+  }
+}

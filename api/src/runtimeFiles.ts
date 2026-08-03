@@ -4,7 +4,7 @@ import path from "node:path";
 import type { NovelProject, RuntimeCheckpoint, RuntimeRun } from "./types.js";
 import { assertSafeNovelPath, resolveInside } from "./pathSafety.js";
 import { createWritingFileSnapshot } from "./fileVersions.js";
-import { insertRuntimeCheckpoint, runtimeId, runtimeNow, appendRuntimeEvent } from "./runtimeStore.js";
+import { getRuntimeRun, insertRuntimeCheckpoint, runtimeId, runtimeNow, appendRuntimeEvent } from "./runtimeStore.js";
 
 interface RuntimeWrite {
   relativePath: string;
@@ -13,6 +13,15 @@ interface RuntimeWrite {
 }
 
 const projectQueues = new Map<string, Promise<unknown>>();
+
+async function isolateLateRuntimeWrites(input: { root: string; run: RuntimeRun; writes: RuntimeWrite[]; reason: string; status: string }): Promise<string> {
+  const directory = resolveInside(input.root, "sessions/runtime-late-results");
+  await fs.mkdir(directory, { recursive: true });
+  const id = `${input.run.id}-${Date.now()}-${crypto.randomUUID()}.json`;
+  const target = path.join(directory, id);
+  await fs.writeFile(target, `${JSON.stringify({ schemaVersion: "runtime-late-result.v1", runId: input.run.id, projectSlug: input.run.projectSlug, reason: input.reason, fencedStatus: input.status, writes: input.writes, createdAt: runtimeNow() }, null, 2)}\n`, "utf8");
+  return `sessions/runtime-late-results/${id}`;
+}
 
 export class RuntimeWriteConflictError extends Error {
   constructor(
@@ -211,8 +220,23 @@ export async function dispatchRuntimeWrites(input: {
   const queueKey = input.project.slug;
   const previous = projectQueues.get(queueKey) || Promise.resolve();
   const next = previous.then(async () => {
-    for (const write of input.writes) {
+    const originals = new Map<string, Buffer | null>();
+    const applied: Array<{ safePath: string; content: string }> = [];
+    try {
+      for (const write of input.writes) {
+      const currentRun = getRuntimeRun(input.run.id);
+      if (!currentRun || !["queued", "running"].includes(currentRun.status)) {
+        const isolatedPath = await isolateLateRuntimeWrites({ root: input.root, run: input.run, writes: input.writes, reason: input.reason, status: currentRun?.status || "missing" });
+        appendRuntimeEvent({ projectSlug: input.project.slug, runId: input.run.id, type: "system", message: "Late runtime result isolated after run fence", payload: { isolatedPath, reason: input.reason, status: currentRun?.status || "missing" } });
+        throw new Error("RUNTIME_WRITE_FENCED_LATE_RESULT");
+      }
       const safePath = assertSafeNovelPath(write.relativePath);
+      if (!originals.has(safePath)) {
+        originals.set(safePath, await fs.readFile(resolveInside(input.root, safePath)).catch((error: unknown) => {
+          if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null;
+          throw error;
+        }));
+      }
       await assertCheckpointBaseline(input.root, input.checkpoint, safePath);
       if (write.failIfExists) {
         const exists = await fs
@@ -229,6 +253,7 @@ export async function dispatchRuntimeWrites(input: {
         runId: input.run.id
       });
       await atomicWrite(input.root, safePath, write.content, { allowProjectJson: input.allowProjectJson });
+      applied.push({ safePath, content: write.content });
       appendRuntimeEvent({
         projectSlug: input.project.slug,
         runId: input.run.id,
@@ -236,6 +261,18 @@ export async function dispatchRuntimeWrites(input: {
         message: `Runtime wrote ${safePath}`,
         payload: { path: safePath, reason: input.reason, source: "runtime", size: Buffer.byteLength(write.content, "utf8") }
       });
+      }
+    } catch (error) {
+      for (const { safePath, content } of [...applied].reverse()) {
+        const target = resolveInside(input.root, safePath);
+        const current = await fs.readFile(target).catch(() => null);
+        if (current && current.toString("utf8") === content) {
+          const original = originals.get(safePath);
+          if (original === null || original === undefined) await fs.rm(target, { force: true });
+          else await fs.writeFile(target, original);
+        }
+      }
+      throw error;
     }
   });
   projectQueues.set(queueKey, next.catch(() => undefined));

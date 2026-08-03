@@ -13,6 +13,11 @@ describe("obligation governance", () => {
     expect(result.status).toBe("overdue");
   });
 
+  it("keeps a legacy chapter anchor weak until it is mapped to the semantic milestone", () => {
+    const result = evaluateObligationWindow({ obligationId: "obl-legacy", windowType: "chapter-range", currentMilestone: "before-final", targetMilestone: "before-final", semanticWindow: "学院卷决赛前", legacyChapterId: "chapter-050", hardness: "hard", paid: false });
+    expect(result).toMatchObject({ status: "weak_window", semanticWindow: "学院卷决赛前", mappingRequired: true });
+  });
+
   it("offers minimal repair routes with impact and cost", () => {
     const result = planObligationRepair({ obligationId: "obl-1", routes: [{ kind: "local-evidence", impact: "low", cost: 1 }, { kind: "new-chapter", impact: "high", cost: 8 }] });
     expect(result.recommended.kind).toBe("local-evidence");

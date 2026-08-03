@@ -1,0 +1,62 @@
+{
+  "projectSlug": "rp2-low-input-1785767924528",
+  "chapterCount": 3,
+  "reportCount": 0,
+  "averageOverallScore": 0,
+  "metricAverages": [],
+  "weakestChapters": [],
+  "rhythmSignals": [],
+  "characterArcSignals": [],
+  "qualityTrends": [],
+  "tensionCurve": [],
+  "styleDriftSignals": [],
+  "narrativeDebtSignals": [],
+  "craftCoverageSignals": [
+    {
+      "chapterId": "chapter-001",
+      "chapterTitle": "第 1 章",
+      "craftBeatCount": 0,
+      "requiredBeatCount": 0,
+      "missingRequiredBeatCount": 0,
+      "payoffCount": 0,
+      "foreshadowingCount": 0,
+      "progressionCount": 0,
+      "sliceOfLifeCount": 0,
+      "redemptionCount": 0,
+      "note": "No craft beats tracked for this chapter yet.",
+      "severity": "watch",
+      "updatedAt": "2026-08-03T14:38:44.594Z"
+    },
+    {
+      "chapterId": "chapter-002",
+      "chapterTitle": "第 2 章",
+      "craftBeatCount": 0,
+      "requiredBeatCount": 0,
+      "missingRequiredBeatCount": 0,
+      "payoffCount": 0,
+      "foreshadowingCount": 0,
+      "progressionCount": 0,
+      "sliceOfLifeCount": 0,
+      "redemptionCount": 0,
+      "note": "No craft beats tracked for this chapter yet.",
+      "severity": "watch",
+      "updatedAt": "2026-08-03T14:38:44.596Z"
+    },
+    {
+      "chapterId": "chapter-003",
+      "chapterTitle": "第 3 章",
+      "craftBeatCount": 0,
+      "requiredBeatCount": 0,
+      "missingRequiredBeatCount": 0,
+      "payoffCount": 0,
+      "foreshadowingCount": 0,
+      "progressionCount": 0,
+      "sliceOfLifeCount": 0,
+      "redemptionCount": 0,
+      "note": "No craft beats tracked for this chapter yet.",
+      "severity": "watch",
+      "updatedAt": "2026-08-03T14:38:44.599Z"
+    }
+  ],
+  "updatedAt": "2026-08-03T14:38:45.338Z"
+}

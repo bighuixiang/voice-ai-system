@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "slice-acceptance-audit.v1",
+  "auditId": "rp3-contract-slice-acceptance-2026-07-31",
+  "sourceSdd": "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+  "releaseProfile": "RP3-contract",
+  "status": "partial-implementation-verified",
+  "scope": {
+    "mustRequirements": 27,
+    "verifiedRequirements": [
+      "FR-ARCH-001",
+      "FR-CHAR-001",
+      "FR-CHAR-002",
+      "FR-CHAR-003",
+      "FR-WORLD-001",
+      "FR-WORLD-002",
+      "FR-WORLD-003",
+      "FR-STATE-005",
+      "FR-STATE-006",
+      "FR-STATE-007",
+      "FR-STATE-008",
+      "FR-MIGRATE-004",
+      "FR-API-004",
+      "FR-UX-007",
+      "FR-UX-008",
+      "FR-UX-009",
+      "FR-EFFORT-007",
+      "FR-EFFORT-009",
+      "FR-EFFORT-015",
+      "FR-SEED-012",
+      "FR-SEED-013",
+      "FR-SEED-014",
+      "FR-SEED-015",
+      "FR-SEED-019",
+      "FR-SEED-020",
+      "FR-OBJECTIVE-010",
+      "FR-DELIVERY-016"
+    ],
+    "unverifiedRequirements": "The 27 RP3 MUST have implementation-level evidence; release remains unverified pending full author acceptance and real paid-provider quality/cost/latency evidence."
+  },
+  "verifiedSlices": [
+    {
+      "sliceId": "RP3-contract-candidate-and-field-fingerprint",
+      "requirements": ["FR-CHAR-001", "FR-CHAR-005", "FR-CHAR-006", "FR-CHAR-007", "FR-WORLD-001", "FR-STATE-005", "FR-OBJECTIVE-010"],
+      "implementationRefs": ["api/src/contractCandidate.ts", "api/src/characterState.ts", "api/src/characterChoice.ts", "api/src/characterAgencyGuard.ts", "api/src/app.ts"],
+      "tests": ["api/src/contractCandidate.spec.ts", "api/src/characterState.spec.ts", "api/src/characterChoice.spec.ts", "api/src/characterAgencyGuard.spec.ts", "api/src/app.spec.ts", "tests/e2e/rp2-understanding-profile.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP3-contract-question-sequence-field-coverage",
+      "requirements": ["FR-CHAR-001", "FR-CHAR-002", "FR-CHAR-003", "FR-WORLD-001", "FR-STATE-005", "FR-OBJECTIVE-010"],
+      "implementationRefs": ["api/src/app.ts", "api/src/contractCandidate.ts"],
+      "tests": ["api/src/app.spec.ts", "tests/e2e/rp2-understanding-profile.spec.ts"],
+      "result": "passed: ordered high-impact questions now cover all ten candidate contract paths; exhaustion remains fail-closed after the tenth answer"
+    },
+    {
+      "sliceId": "RP3-world-rule-review-and-author-adoption",
+      "requirements": ["FR-WORLD-002", "FR-WORLD-003", "FR-WORLD-007", "FR-WORLD-008", "FR-EFFORT-007", "FR-EFFORT-009", "FR-EFFORT-015", "FR-DELIVERY-016"],
+      "implementationRefs": ["api/src/worldRuleContract.ts", "api/src/capabilityContract.ts", "api/src/understandingReview.ts", "api/src/contractAdoption.ts", "api/src/contractCanonAdoption.ts", "api/src/app.ts"],
+      "tests": ["api/src/worldRuleContract.spec.ts", "api/src/capabilityContract.spec.ts", "api/src/understandingReview.spec.ts", "api/src/contractAdoption.spec.ts", "api/src/contractCanonAdoption.spec.ts", "tests/e2e/rp2-understanding-profile.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP3-belief-and-relationship-evidence",
+      "requirements": ["FR-CHAR-008", "FR-CHAR-009", "FR-CHAR-010", "FR-CHAR-011"],
+      "implementationRefs": ["api/src/characterBeliefLifecycle.ts", "api/src/relationshipMisread.ts", "api/src/relationshipEvent.ts", "api/src/characterState.ts", "api/src/app.ts"],
+      "tests": ["api/src/characterBeliefLifecycle.spec.ts", "api/src/relationshipMisread.spec.ts", "api/src/relationshipEvent.spec.ts", "tests/e2e/rp2-understanding-profile.spec.ts"],
+      "result": "passed: belief challenge -> behavioral consequence -> acknowledgement, asymmetric misread clarification without automatic restoration, and relationship state change observation"
+    },
+    {
+      "sliceId": "RP3-world-location-travel-time-evidence",
+      "requirements": ["FR-WORLD-004", "FR-WORLD-005", "FR-WORLD-006"],
+      "implementationRefs": ["api/src/worldState.ts", "api/src/worldStateProjection.ts", "api/src/worldLocation.ts", "api/src/worldTravel.ts", "api/src/app.ts"],
+      "tests": ["api/src/worldState.spec.ts", "api/src/worldStateProjection.spec.ts", "api/src/worldLocation.spec.ts", "api/src/worldTravel.spec.ts", "tests/e2e/rp2-understanding-profile.spec.ts"],
+      "result": "passed: region-scoped state projection, route/access reachability, and evidence-backed travel duration"
+    },
+    {
+      "sliceId": "RP3-migration-rollback-fail-closed",
+      "requirements": ["FR-MIGRATE-004", "FR-STATE-006", "FR-STATE-007"],
+      "implementationRefs": ["api/src/migrationValidation.ts", "api/src/projectInventory.ts", "api/src/app.ts"],
+      "tests": ["api/src/migrationValidation.spec.ts", "api/src/projectInventory.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP3-outline-adoption-fault-recovery-and-migration-activation",
+      "requirements": ["FR-MIGRATE-001", "FR-MIGRATE-002", "FR-MIGRATE-003", "FR-MIGRATE-004", "FR-STATE-006", "FR-STATE-007"],
+      "implementationRefs": ["api/src/outlineCommit.ts", "api/src/migrationValidation.ts", "api/src/app.ts"],
+      "tests": ["api/src/outlineCommit.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: injected post-pointer failure restores project/version/proof state; subsequent adoption commits, migration activates with validated fingerprint and idempotency key, then rolls back"
+    },
+    {
+      "sliceId": "RP3-author-resume-brief-cross-context-read",
+      "requirements": ["FR-DELIVERY-016", "FR-EFFORT-015"],
+      "implementationRefs": ["api/src/authorResumeBrief.ts", "api/src/app.ts", "api/src/creativeSession.ts", "api/src/dialogueQuestions.ts"],
+      "tests": ["api/src/authorResumeBrief.spec.ts", "api/src/app.spec.ts", "tests/e2e/rp2-understanding-profile.spec.ts"],
+      "result": "passed: server-authoritative session fingerprint, confirmed boundaries, active question, risks, task lanes and next step are reconstructed through a dedicated resume endpoint and read from a second browser context; an interrupted message request is retried with the same clientMessageId and remains a single event"
+    },
+    {
+      "sliceId": "RP3-provider-quality-cost-latency-gate",
+      "requirements": ["FR-AI-006", "FR-EVAL-022"],
+      "implementationRefs": ["api/src/modelInvocationLedger.ts", "api/src/qualityCalibration.ts", "api/src/providerEvaluation.ts", "api/src/app.ts"],
+      "tests": ["api/src/providerEvaluation.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed for deterministic provider records and a real local configured-process probe: provider output is executed before an estimated ledger record is appended; calibration status, effective output rate, actual/estimated cost, token totals and p50/p95/max latency are joined into a fingerprinted pass/block report; missing quality and threshold violations fail closed"
+    },
+    {
+      "sliceId": "RP3-profile-requirement-coverage-map",
+      "requirements": ["FR-STATE-005", "FR-STATE-006", "FR-STATE-007", "FR-STATE-008", "FR-MIGRATE-004", "FR-API-004", "FR-UX-007", "FR-UX-008", "FR-UX-009", "FR-SEED-012", "FR-SEED-013", "FR-SEED-014", "FR-SEED-015", "FR-SEED-019", "FR-SEED-020"],
+      "implementationRefs": ["api/src/contractCanonAdoption.ts", "api/src/outlineCommit.ts", "api/src/migrationValidation.ts", "api/src/contractDecisionPresentation.ts", "api/src/candidateComparison.ts", "api/src/app.ts"],
+      "tests": ["api/src/contractCanonAdoption.spec.ts", "api/src/outlineCommit.spec.ts", "api/src/migrationValidation.spec.ts", "api/src/contractDecisionPresentation.spec.ts", "api/src/candidateComparison.spec.ts", "api/src/app.spec.ts", "tests/e2e/rp2-understanding-profile.spec.ts"],
+      "result": "passed at contract-boundary level: candidate/canon separation, field-level adoption results, review/comparison presentation, versioned mutation/rollback and seed compilation lineage are covered by API and browser journeys"
+    },
+    {
+      "sliceId": "RP3-final-acceptance-fail-closed",
+      "requirements": ["FR-ARCH-001", "FR-DELIVERY-016"],
+      "implementationRefs": ["api/src/rp3ContractAcceptance.ts", "api/src/app.ts"],
+      "tests": ["api/src/rp3ContractAcceptance.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: the read-only API reconstructs the 27-item profile/audit map and remains do-not-activate without explicit author acceptance and real-provider evidence; only the fully signed and provider-backed combination can return accepted"
+    }
+  ],
+  "verification": {
+    "profileE2E": "passed: deterministic RP2 capture/freeze followed by ordered answers for all ten RP3 contract fields, candidate replay, world-rule linkage, independent review, field adoption, confirmed character contract, region-scoped world-state projection, location reachability and evidence-backed travel duration, capability progression, before/after choice evidence, agency guard pass/block boundaries, belief lifecycle evidence, asymmetric relationship misread clarification, relationship state change observation, second-browser-context session recovery with server-authoritative AuthorResumeBrief, and real imported-project migration preview/validation; no paid provider call",
+    "apiFullSuite": "passed: 295 test files, 1129 tests; skipped: 1 real Codex integration test requiring external executor credentials",
+    "browserSmoke": "passed: 6 Playwright Chromium tests, including the latest ten-field/character-belief/relationship/world-travel/cross-context profile journey and interrupted-request idempotent retry; real-device and assistive-technology matrix remain unproven"
+  },
+  "notYetProven": [
+    "RP3 full 27-requirement release acceptance",
+    "real provider quality/cost/latency acceptance"
+  ],
+  "nextGate": "Add real provider quality/cost/latency evidence and the remaining RP3 author-acceptance cases; keep full RP3 release status unverified until all 27 MUST have implementation and E2E evidence."
+}

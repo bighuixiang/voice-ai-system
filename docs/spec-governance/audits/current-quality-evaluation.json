@@ -7,7 +7,7 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/chapterQualityReview.ts",
@@ -15,19 +15,19 @@
     },
     {
       "path": "api/src/runtimeEngine.ts",
-      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      "sha256": "232bd54d3d76d340af9787f1ea5c522966499e7dad92da82faa24dfaa66b6572"
     },
     {
       "path": "api/src/taskTemplates.ts",
-      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+      "sha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57"
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/writingCockpit.ts",
-      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+      "sha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6"
     },
     {
       "path": "ui/src/components/novel/ReviewQualityPanel.vue",
@@ -35,7 +35,7 @@
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     },
     {
       "path": "ui/src/stores/novel/quality.ts",
@@ -43,7 +43,7 @@
     },
     {
       "path": "ui/src/types/novel.ts",
-      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+      "sha256": "8b40b4f8361cfddaee5bbc1bc946530c5391fe3045d27c4e62dfe5b62629ff24"
     }
   ],
   "privacy": {
@@ -73,8 +73,8 @@
   "operationalSnapshot": {
     "substantialInventoryThresholdChars": 800,
     "totals": {
-      "projects": 8,
-      "chapters": 219,
+      "projects": 11,
+      "chapters": 222,
       "substantialChapters": 71,
       "reports": 2,
       "zeroFixReports": 2,
@@ -95,7 +95,7 @@
       {
         "projectOrdinal": 1,
         "inputFingerprints": {
-          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "project": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676",
           "qualityReportsAggregate": null,
           "seriesMetrics": null,
           "taskHistory": null,
@@ -520,6 +520,259 @@
       {
         "projectOrdinal": 5,
         "inputFingerprints": {
+          "project": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe",
+          "qualityReportsAggregate": null,
+          "seriesMetrics": "414e5ed980833e07d33eaf57b9cc0a82b2eb13efdd08b509afec61a83755bb7a",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "backgroundJobs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 3,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": 0,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": true,
+          "reportCount": 0,
+          "chapterCount": 3,
+          "cachedAverageOverallScore": 0,
+          "recomputedCurrentReportAverage": null,
+          "averageMatchesCurrentReports": null,
+          "olderThanLatestReportByDeclaredTimestamp": false,
+          "metricAverageKeys": []
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": null,
+          "qualityReportsAggregate": null,
+          "seriesMetrics": null,
+          "taskHistory": null,
+          "invocationHistory": null,
+          "backgroundJobs": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 0,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": null,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": false
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": null,
+          "qualityReportsAggregate": null,
+          "seriesMetrics": null,
+          "taskHistory": null,
+          "invocationHistory": null,
+          "backgroundJobs": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "seriesValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidBackgroundJobLines": 0
+        },
+        "coverage": {
+          "chapters": 0,
+          "substantialChapters": 0,
+          "qualityReports": 0,
+          "chapterCoverage": null,
+          "substantialCoverage": null
+        },
+        "reports": {
+          "items": [],
+          "overallScore": {
+            "sampleCount": 0,
+            "min": null,
+            "median": null,
+            "max": null,
+            "average": null
+          },
+          "zeroFixReports": 0,
+          "allMetricScoresEqualReports": 0,
+          "withEvidenceOrProvenanceFields": 0,
+          "scoreVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "noteVectorGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          }
+        },
+        "seriesCache": {
+          "exists": false
+        },
+        "templateInventorySignals": {
+          "interpretation": "Exact signatures and heuristic phrases are triage signals only; intentional parallelism, refrain, genre convention, quotation, headings, and shared canon can create legitimate repetition.",
+          "openingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "endingSignatureGroups": {
+            "uniqueFingerprints": 0,
+            "duplicateFingerprintGroups": 0,
+            "largestGroup": 0
+          },
+          "repeatedNormalizedLineFingerprintsAcrossChapters": 0,
+          "chaptersSharingAtLeastOneNormalizedLine": 0,
+          "maximumChaptersSharingOneNormalizedLine": 0,
+          "fakeSuspenseEndingPatternChapters": 0
+        },
+        "executionEvidence": {
+          "latestQualityTasks": 0,
+          "latestQualityTasksByType": {},
+          "latestQualityTasksByStatus": {},
+          "qualityInvocations": 0,
+          "invocationDecisions": {},
+          "acceptedQualityInvocations": 0,
+          "qualitySeriesRebuildJobs": 0,
+          "qualitySeriesRebuildStatuses": {},
+          "structuredAuthorQualityRatings": 0,
+          "persistedBeforeAfterQualityComparisons": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
           "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
           "qualityReportsAggregate": null,
           "seriesMetrics": "aa19902040a35ae32454c65132a814c60dbd55f43a5706545760fa5e8c263842",
@@ -607,7 +860,7 @@
         }
       },
       {
-        "projectOrdinal": 6,
+        "projectOrdinal": 9,
         "inputFingerprints": {
           "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
           "qualityReportsAggregate": null,
@@ -696,7 +949,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": {
           "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
           "qualityReportsAggregate": null,
@@ -785,7 +1038,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": {
           "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
           "qualityReportsAggregate": null,
@@ -880,11 +1133,11 @@
   },
   "summary": {
     "auditedStages": 16,
-    "projectsScanned": 8,
-    "chaptersInventoried": 219,
+    "projectsScanned": 11,
+    "chaptersInventoried": 222,
     "substantialChapters": 71,
     "qualityReports": 2,
-    "qualityReportCoverageOfAllChapters": 0.0091,
+    "qualityReportCoverageOfAllChapters": 0.009,
     "qualityReportCoverageOfSubstantialChapters": 0.0282,
     "reportsWithEvidenceOrProvenance": 0,
     "zeroFixReports": 2,
@@ -938,12 +1191,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2479,
+          "line": 8145,
           "evidence": "...reportInput"
         },
         {
           "path": "api/src/types.ts",
-          "line": 324,
+          "line": 349,
           "evidence": "export interface ChapterQualityReport"
         }
       ]
@@ -958,7 +1211,7 @@
         },
         {
           "path": "api/src/taskTemplates.ts",
-          "line": 366,
+          "line": 370,
           "evidence": "mode: \"replace-file\""
         }
       ]

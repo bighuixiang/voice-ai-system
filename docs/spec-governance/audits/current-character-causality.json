@@ -7,23 +7,23 @@
   "sourceFiles": [
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/writingCockpit.ts",
-      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+      "sha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6"
     },
     {
       "path": "api/src/storyGraph.ts",
-      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+      "sha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371"
     },
     {
       "path": "api/src/contextAssembler.ts",
-      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+      "sha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963"
     },
     {
       "path": "api/src/taskTemplates.ts",
-      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+      "sha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57"
     },
     {
       "path": "api/src/chapterQualityReview.ts",
@@ -31,7 +31,7 @@
     },
     {
       "path": "api/src/runtimeEngine.ts",
-      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      "sha256": "232bd54d3d76d340af9787f1ea5c522966499e7dad92da82faa24dfaa66b6572"
     },
     {
       "path": "ui/src/components/novel/StoryControlPanel.vue",
@@ -74,7 +74,7 @@
     "projects": [
       {
         "projectOrdinal": 1,
-        "inputFingerprint": "9816b83cf626d618bef33c52cd07743df473ba9df55f2bb55a35c6eea2893a11",
+        "inputFingerprint": "e29ff843e21a38a24f6932b2a3bfe375f44300baa3d2f865690198b0ca455ce5",
         "sourceValidity": {
           "project": {
             "exists": true,
@@ -374,7 +374,7 @@
       },
       {
         "projectOrdinal": 4,
-        "inputFingerprint": "3f06b7198ca6bfbcee215c4777bf09821cc45d163529c9e797c4c74c22fb58cf",
+        "inputFingerprint": "943ced233096a24449804b595a739aec18dcf35f4407bf88d979e8afd8a1d3cf",
         "sourceValidity": {
           "project": {
             "exists": true,
@@ -479,7 +479,7 @@
       },
       {
         "projectOrdinal": 5,
-        "inputFingerprint": "98ffc753dca55eddf13cb33e3515f36875e42bf24e6544277d2841300749b439",
+        "inputFingerprint": "13a25d70c8ab77ff7421f2d6357d101cca2bb33eaf323b43746ab9ca56f769d9",
         "sourceValidity": {
           "project": {
             "exists": true,
@@ -583,6 +583,312 @@
       },
       {
         "projectOrdinal": 6,
+        "inputFingerprint": "b39f3dbdf2477a5905a3fd531f50d1d08b6e1acedb6b8d0457bfeed88bcc09a6",
+        "sourceValidity": {
+          "project": {
+            "exists": false,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 0,
+          "summaryFiles": 0,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": false,
+          "bytes": 0,
+          "sha256": null
+        },
+        "profiles": {
+          "characters": 0,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 0,
+          "withAllDramaticStringFields": 0,
+          "withSignatureTraits": 0,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 0,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 1,
+          "appearanceSignals": 1,
+          "appearanceByStatus": {
+            "balanced": 1
+          },
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sourceValidity": {
+          "project": {
+            "exists": false,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": false,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 0,
+          "summaryFiles": 0,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": false,
+          "bytes": 0,
+          "sha256": null
+        },
+        "profiles": {
+          "characters": 0,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 0,
+          "withAllDramaticStringFields": 0,
+          "withSignatureTraits": 0,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 0,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 0,
+          "appearanceSignals": 0,
+          "appearanceByStatus": {},
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprint": "191e293118cab2de6515121e866ab38de547de8c81d77e5eb4e9d12e34cabd9f",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "characterLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "seriesMetrics": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3,
+          "qualityFiles": 0
+        },
+        "characterBible": {
+          "exists": true,
+          "bytes": 108,
+          "sha256": "8a1c8af355ac54bb3ab9dbd56e847af8b1da076f84cc2a0aba149731cd05d65d"
+        },
+        "profiles": {
+          "characters": 1,
+          "duplicateStableIds": 0,
+          "withAllCoreStringFields": 1,
+          "withAllDramaticStringFields": 1,
+          "withSignatureTraits": 1,
+          "withChapterPresenceBounds": 0,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withCharacters": 0,
+          "withCharacterFunction": 0,
+          "withEmotionalShift": 0,
+          "craftBeats": 0,
+          "relationshipTurnBeats": 0,
+          "redemptionBeats": 0,
+          "beatsWithCharacterName": 0,
+          "beatsWithCost": 0
+        },
+        "settledStateEvidence": {
+          "summaries": 3,
+          "statePatches": 0,
+          "acceptedStatePatches": 0,
+          "pendingStatePatches": 0,
+          "withStableCharacterId": 0,
+          "withBeforeState": 0,
+          "withAfterState": 0,
+          "withCause": 0,
+          "emotionItems": 0,
+          "emotionByBucket": {},
+          "emotionByStatus": {},
+          "emotionWithCharacterName": 0,
+          "emotionWithCause": 0,
+          "characterLedgerEntries": 0
+        },
+        "relationshipAndPresenceProjection": {
+          "relationships": 0,
+          "relationshipEvidenceBySource": {},
+          "relationshipLabels": {},
+          "isolatedCharacters": 1,
+          "appearanceSignals": 1,
+          "appearanceByStatus": {
+            "balanced": 1
+          },
+          "arcSignals": 0,
+          "arcSignalChangeCount": 0
+        },
+        "qualityEvidence": {
+          "reports": 0,
+          "metricRows": 0,
+          "emotionMetricRows": 0,
+          "characterArcMetricRows": 0,
+          "relationshipMetricRows": 0,
+          "voiceMetricRows": 0
+        },
+        "governedCharacterArtifacts": {
+          "dramaticContracts": 0,
+          "stateSnapshots": 0,
+          "choiceEvidence": 0,
+          "beliefStates": 0,
+          "relationshipStates": 0,
+          "relationshipEvents": 0,
+          "voiceProfiles": 0,
+          "presencePlans": 0,
+          "offPageEvents": 0,
+          "arcCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 9,
         "inputFingerprint": "fed3660dff58601a739fa6dbbf0d7e6b1e03bf0e27b6073a18dba63a6e35da73",
         "sourceValidity": {
           "project": {
@@ -686,7 +992,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprint": "898593b07c0bd7689defee6b8fb00e77f683a246b8a4f93d7710727000828f9e",
         "sourceValidity": {
           "project": {
@@ -790,7 +1096,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprint": "7ce2508699a4daba5bef8696f6d1c76dc9afc30aed1e54bcd4e5141d946db2e2",
         "sourceValidity": {
           "project": {
@@ -895,14 +1201,14 @@
       }
     ],
     "totals": {
-      "projects": 8,
-      "characterBibleFiles": 6,
-      "characterBibleBytes": 315057,
-      "characters": 26,
+      "projects": 11,
+      "characterBibleFiles": 7,
+      "characterBibleBytes": 315165,
+      "characters": 27,
       "duplicateStableIds": 0,
-      "profilesWithAllCoreFields": 4,
-      "profilesWithAllDramaticFields": 4,
-      "profilesWithSignatureTraits": 4,
+      "profilesWithAllCoreFields": 5,
+      "profilesWithAllDramaticFields": 5,
+      "profilesWithSignatureTraits": 5,
       "profilesWithPresenceBounds": 0,
       "scenes": 8,
       "scenesWithCharacters": 7,
@@ -921,8 +1227,8 @@
       "emotionItemsWithCause": 0,
       "characterLedgerEntries": 0,
       "relationships": 0,
-      "isolatedCharacters": 26,
-      "appearanceSignals": 26,
+      "isolatedCharacters": 28,
+      "appearanceSignals": 28,
       "arcSignals": 0,
       "qualityReports": 2,
       "emotionMetricRows": 0,
@@ -932,21 +1238,21 @@
     },
     "profileStatusTotals": {
       "planned": 22,
-      "seed": 4
+      "seed": 5
     },
     "emotionStatusTotals": {},
     "relationshipSourceTotals": {},
     "appearanceStatusTotals": {
       "absent": 10,
-      "balanced": 4,
+      "balanced": 6,
       "should-appear": 12
     },
     "interpretation": "The platform has valuable character scaffolding—editable profiles, scene participants, recap state patches, emotion ledgers, relationship and appearance projections—but most semantics remain free text, name matching, co-appearance, keyword inference or aggregate recent-state signals. These are authoring aids, not proof of agency, relationship causality, distinct voice or arc closure."
   },
   "summary": {
     "auditedStages": 13,
-    "projectsScanned": 8,
-    "characters": 26,
+    "projectsScanned": 11,
+    "characters": 27,
     "scenes": 8,
     "statePatches": 0,
     "acceptedStatePatches": 0,
@@ -966,20 +1272,20 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 557,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 583,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "export interface StoryCharacterProfile"
         },
         {
           "path": "api/src/types.ts",
-          "line": 562,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 588,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "currentState: string"
         },
         {
           "path": "api/src/types.ts",
-          "line": 564,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 590,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "relationshipNotes: string"
         }
       ]
@@ -990,19 +1296,19 @@
         {
           "path": "api/src/writingCockpit.ts",
           "line": 469,
-          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "sourceSha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6",
           "token": "function buildCharacterArcSignals"
         },
         {
           "path": "api/src/writingCockpit.ts",
           "line": 476,
-          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "sourceSha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6",
           "token": "grouped.set(name"
         },
         {
           "path": "api/src/writingCockpit.ts",
           "line": 497,
-          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "sourceSha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6",
           "token": ".slice(0, 8)"
         }
       ]
@@ -1012,26 +1318,26 @@
       "evidence": [
         {
           "path": "api/src/storyGraph.ts",
-          "line": 26,
-          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "line": 28,
+          "sourceSha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371",
           "token": "const relationshipPredicates"
         },
         {
           "path": "api/src/storyGraph.ts",
-          "line": 213,
-          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "line": 215,
+          "sourceSha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371",
           "token": "function addEventRelationships"
         },
         {
           "path": "api/src/storyGraph.ts",
-          "line": 237,
-          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "line": 239,
+          "sourceSha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371",
           "token": "\"co-appears\""
         },
         {
           "path": "api/src/storyGraph.ts",
-          "line": 251,
-          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "line": 253,
+          "sourceSha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371",
           "token": "function addProfileRelationships"
         }
       ]
@@ -1041,14 +1347,14 @@
       "evidence": [
         {
           "path": "api/src/storyGraph.ts",
-          "line": 320,
-          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "line": 322,
+          "sourceSha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371",
           "token": "function buildCharacterAppearanceSignals"
         },
         {
           "path": "api/src/storyGraph.ts",
-          "line": 393,
-          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "line": 395,
+          "sourceSha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371",
           "token": "appearanceCount >= 4"
         }
       ]
@@ -1059,19 +1365,19 @@
         {
           "path": "api/src/taskTemplates.ts",
           "line": 53,
-          "sourceSha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a",
+          "sourceSha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57",
           "token": "Make character texture observable"
         },
         {
           "path": "api/src/taskTemplates.ts",
           "line": 150,
-          "sourceSha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a",
+          "sourceSha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57",
           "token": "characterStatePatches"
         },
         {
           "path": "api/src/taskTemplates.ts",
           "line": 88,
-          "sourceSha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a",
+          "sourceSha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57",
           "token": "emotionLedgerPatch"
         }
       ]
@@ -1081,8 +1387,8 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 534,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 560,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "characterFunction?: string"
         },
         {
@@ -1111,7 +1417,7 @@
         {
           "path": "api/src/taskTemplates.ts",
           "line": 316,
-          "sourceSha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a",
+          "sourceSha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57",
           "token": "Score only these seven metrics"
         }
       ]

@@ -27,8 +27,32 @@ describe("prose adoption transaction", () => {
     expect(committed.status).toBe("committed");
     expect(committed.reviewVerdict).toBe("supports-adoption");
     expect(committed.reviewFingerprint).toMatch(/^[a-f0-9]{64}$/);
+    expect(committed.audit).toMatchObject({
+      maturity: "author_accepted",
+      authority: "author",
+      revisionMode: "direct",
+      lockCheckPassed: true,
+      validationFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
+      rollbackVersion: expect.stringMatching(/^[a-f0-9]{64}$/),
+      derivedCandidates: []
+    });
+    expect(committed.audit.changeSet).toEqual([expect.objectContaining({
+      segmentId: "c1",
+      startOffset: 0,
+      endOffset: "new candidate".length,
+      beforeFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
+      afterFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/)
+    })]);
     await expect(fs.readFile(path.join(root, "chapters", "c1.md"), "utf8")).resolves.toBe("new candidate");
     expect((await adoptProseCandidate(input)).transactionId).toBe(committed.transactionId);
+  });
+  it("does not hide target canon drift on a committed adoption replay", async () => {
+    const { root, candidate } = await fixture();
+    const expected = crypto.createHash("sha256").update("old canon\n").digest("hex");
+    const input = { root, candidateId: candidate.candidateId, targetPath: "chapters/c1.md", expectedCanonSha256: expected, authorizationId: "author-1" };
+    await adoptProseCandidate(input);
+    await fs.writeFile(path.join(root, "chapters", "c1.md"), "drifted canon\n", "utf8");
+    await expect(adoptProseCandidate(input)).rejects.toThrow("PROSE_ADOPTION_TARGET_STALE");
   });
 
   it("rolls the canon back when commit fails after the target write", async () => {
@@ -40,5 +64,18 @@ describe("prose adoption transaction", () => {
     const files = await fs.readdir(path.join(root, "sessions", "prose-adoptions"));
     const transaction = await readProseAdoptionTransaction(root, files[0].replace(/\.json$/, ""));
     expect(transaction?.status).toBe("rolled_back");
+  });
+
+  it("fails closed when a persisted adoption transaction is tampered before reuse", async () => {
+    const { root, candidate } = await fixture();
+    const expected = "old canon\n";
+    const input = { root, candidateId: candidate.candidateId, targetPath: "chapters/c1.md", expectedCanonSha256: crypto.createHash("sha256").update(expected).digest("hex"), authorizationId: "author-1" };
+    const committed = await adoptProseCandidate(input);
+    const target = path.join(root, "sessions", "prose-adoptions", `${committed.transactionId}.json`);
+    const tampered = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    tampered.authorizationId = "tampered-author";
+    await fs.writeFile(target, JSON.stringify(tampered), "utf8");
+    await expect(readProseAdoptionTransaction(root, committed.transactionId)).rejects.toThrow("PROSE_ADOPTION_INTEGRITY_FAILED");
+    await expect(adoptProseCandidate(input)).rejects.toThrow("PROSE_ADOPTION_INTEGRITY_FAILED");
   });
 });

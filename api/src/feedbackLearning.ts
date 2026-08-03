@@ -68,8 +68,18 @@ async function listJson<T>(directory: string): Promise<T[]> {
 }
 function sameScope(left: FeedbackAttribution, right: FeedbackAttribution): boolean { return JSON.stringify(left.scope) === JSON.stringify(right.scope); }
 
-export async function readFeedbackAttribution(root: string, attributionId: string): Promise<FeedbackAttribution | null> { return readJson<FeedbackAttribution>(attributionPath(root, attributionId)); }
-export async function readPreferenceHypothesis(root: string, hypothesisId: string): Promise<PreferenceHypothesis | null> { return readJson<PreferenceHypothesis>(hypothesisPath(root, hypothesisId)); }
+export function assertFeedbackAttributionIntegrity(record: FeedbackAttribution): FeedbackAttribution { const { fingerprint, ...content } = record; if (record.schemaVersion !== "feedback-attribution.v1" || !record.attributionId.trim() || !record.eventId.trim() || !record.pattern.trim() || !record.evidenceRefs.length || record.evidenceRefs.some((value) => !value.trim()) || !Number.isFinite(record.confidence.lower) || !Number.isFinite(record.confidence.upper) || hash(content) !== fingerprint) throw new Error("FEEDBACK_ATTRIBUTION_INTEGRITY_FAILED"); return record; }
+export function assertPreferenceHypothesisIntegrity(record: PreferenceHypothesis): PreferenceHypothesis { const { fingerprint, ...content } = record; if (record.schemaVersion !== "preference-hypothesis.v1" || !record.hypothesisId.trim() || !record.projectSlug.trim() || !record.pattern.trim() || !record.supportEventIds.length || !Number.isFinite(record.confidence.lower) || !Number.isFinite(record.confidence.upper) || hash(content) !== fingerprint) throw new Error("PREFERENCE_HYPOTHESIS_INTEGRITY_FAILED"); return record; }
+export async function readFeedbackAttribution(root: string, attributionId: string): Promise<FeedbackAttribution | null> { const record = await readJson<FeedbackAttribution>(attributionPath(root, attributionId)); return record ? assertFeedbackAttributionIntegrity(record) : null; }
+export async function readPreferenceHypothesis(root: string, hypothesisId: string): Promise<PreferenceHypothesis | null> { const record = await readJson<PreferenceHypothesis>(hypothesisPath(root, hypothesisId)); return record ? assertPreferenceHypothesisIntegrity(record) : null; }
+
+export async function listPreferenceHypotheses(root: string, projectSlug: string, lifecycle?: PreferenceLifecycle): Promise<PreferenceHypothesis[]> {
+  const records = await listJson<PreferenceHypothesis>(resolveInside(root, "sessions/preference-hypotheses"));
+  return records
+    .map((record) => assertPreferenceHypothesisIntegrity(record))
+    .filter((record) => record.projectSlug === projectSlug && (lifecycle === undefined || record.lifecycle === lifecycle))
+    .sort((left, right) => left.createdAt.localeCompare(right.createdAt));
+}
 
 export async function createFeedbackAttribution(input: {
   root: string;
@@ -81,8 +91,8 @@ export async function createFeedbackAttribution(input: {
   confounders: string[];
   confidence: { lower: number; upper: number };
 }): Promise<FeedbackAttribution> {
-  if (!input.evidenceRefs.length) throw new Error("FEEDBACK_ATTRIBUTION_EVIDENCE_REQUIRED");
-  if (input.confidence.lower < 0 || input.confidence.upper > 1 || input.confidence.lower > input.confidence.upper) throw new Error("FEEDBACK_ATTRIBUTION_CONFIDENCE_INVALID");
+  if (!input.evidenceRefs.length || input.evidenceRefs.some((value) => !value.trim())) throw new Error("FEEDBACK_ATTRIBUTION_EVIDENCE_REQUIRED");
+  if (!Number.isFinite(input.confidence.lower) || !Number.isFinite(input.confidence.upper) || input.confidence.lower < 0 || input.confidence.upper > 1 || input.confidence.lower > input.confidence.upper) throw new Error("FEEDBACK_ATTRIBUTION_CONFIDENCE_INVALID");
   const pattern = input.pattern || `${input.category}:${input.event.note.trim().toLowerCase() || input.event.decision}`;
   const base = {
     schemaVersion: "feedback-attribution.v1" as const,
@@ -109,7 +119,7 @@ export async function createFeedbackAttribution(input: {
 }
 
 export async function derivePreferenceHypothesis(input: { root: string; attribution: FeedbackAttribution }): Promise<PreferenceHypothesis> {
-  const all = (await listJson<FeedbackAttribution>(resolveInside(input.root, "sessions/feedback-attributions"))).filter((item) => item.projectSlug === input.attribution.projectSlug && item.pattern === input.attribution.pattern && item.category === input.attribution.category && sameScope(item, input.attribution) && item.allowPreferenceLearning === false);
+  const all = (await listJson<FeedbackAttribution>(resolveInside(input.root, "sessions/feedback-attributions"))).map((item) => assertFeedbackAttributionIntegrity(item)).filter((item) => item.projectSlug === input.attribution.projectSlug && item.pattern === input.attribution.pattern && item.category === input.attribution.category && sameScope(item, input.attribution) && item.allowPreferenceLearning === false);
   const distinctByAdoption = new Map<string, FeedbackAttribution>();
   for (const item of all) distinctByAdoption.set(item.adoptionTransactionId, item);
   const support = [...distinctByAdoption.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -126,12 +136,26 @@ export async function derivePreferenceHypothesis(input: { root: string; attribut
   return hypothesis;
 }
 
+export async function promotePreferenceHypothesis(input: { root: string; hypothesisId: string; actor: string; reason: string }): Promise<PreferenceHypothesis> {
+  if (!input.actor.trim() || !input.reason.trim()) throw new Error("PREFERENCE_PROMOTION_APPROVAL_REQUIRED");
+  const existing = await readPreferenceHypothesis(input.root, input.hypothesisId);
+  if (!existing) throw new Error("PREFERENCE_HYPOTHESIS_NOT_FOUND");
+  if (existing.lifecycle === "active") return existing;
+  if (existing.lifecycle !== "validated") throw new Error("PREFERENCE_PROMOTION_VALIDATION_REQUIRED");
+  const { fingerprint: _fingerprint, ...existingBase } = existing;
+  const base = { ...existingBase, lifecycle: "active" as const, updatedAt: new Date().toISOString() };
+  const promoted: PreferenceHypothesis = { ...base, fingerprint: hash(base) };
+  await writeJson(hypothesisPath(input.root, promoted.hypothesisId), promoted);
+  return promoted;
+}
+
 export async function revokePreferenceHypothesis(input: { root: string; hypothesisId: string; actor: string; reason: string }): Promise<PreferenceHypothesis> {
-  if (!input.reason.trim()) throw new Error("PREFERENCE_REVOCATION_REASON_REQUIRED");
+  if (!input.actor.trim() || !input.reason.trim()) throw new Error("PREFERENCE_REVOCATION_REASON_REQUIRED");
   const existing = await readPreferenceHypothesis(input.root, input.hypothesisId);
   if (!existing) throw new Error("PREFERENCE_HYPOTHESIS_NOT_FOUND");
   if (existing.lifecycle === "retired") return existing;
-  const base = { ...existing, lifecycle: "retired" as const, revokeReason: input.reason, revokedBy: input.actor, revokedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  const { fingerprint: _fingerprint, ...existingBase } = existing;
+  const base = { ...existingBase, lifecycle: "retired" as const, revokeReason: input.reason, revokedBy: input.actor, revokedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
   const result: PreferenceHypothesis = { ...base, fingerprint: hash(base) };
   await writeJson(hypothesisPath(input.root, result.hypothesisId), result);
   return result;
@@ -143,7 +167,8 @@ export async function recordPreferenceOpposition(input: { root: string; hypothes
   const existing = await readPreferenceHypothesis(input.root, input.hypothesisId);
   if (!existing) throw new Error("PREFERENCE_HYPOTHESIS_NOT_FOUND");
   if (existing.oppositionEventIds.includes(input.oppositionEventId)) return existing;
-  const base = { ...existing, lifecycle: existing.lifecycle === "retired" ? "retired" as const : "weakened" as const, oppositionEventIds: [...existing.oppositionEventIds, input.oppositionEventId], oppositionReasons: [...(existing.oppositionReasons || []), input.reason], updatedAt: new Date().toISOString() };
+  const { fingerprint: _fingerprint, ...existingBase } = existing;
+  const base = { ...existingBase, lifecycle: existing.lifecycle === "retired" ? "retired" as const : "weakened" as const, oppositionEventIds: [...existing.oppositionEventIds, input.oppositionEventId], oppositionReasons: [...(existing.oppositionReasons || []), input.reason], updatedAt: new Date().toISOString() };
   const result: PreferenceHypothesis = { ...base, fingerprint: hash(base) };
   await writeJson(hypothesisPath(input.root, result.hypothesisId), result);
   return result;

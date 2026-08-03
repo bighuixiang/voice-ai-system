@@ -18,7 +18,7 @@ export function transformObligation(input: (Omit<ObligationTransformation, "sche
   return { ...base, fingerprint: hash(base) };
 }
 export function proposeObligationMerge(input: Omit<ObligationMergeProposal, "schemaVersion" | "status" | "fingerprint">): ObligationMergeProposal {
-  if (input.obligationIds.length < 2 || !input.sharedEntityRefs.length || !input.sourceRefs.length || !input.payoffConditions.length) throw new Error("OBLIGATION_MERGE_FIELDS_REQUIRED");
+  if (input.obligationIds.length < 2 || !input.sharedEntityRefs.length || input.sourceRefs.length < input.obligationIds.length || input.payoffConditions.length < input.obligationIds.length || new Set(input.payoffConditions).size < input.obligationIds.length) throw new Error("OBLIGATION_MERGE_FIELDS_REQUIRED");
   const base = { schemaVersion: "obligation-merge-proposal.v1" as const, ...input, obligationIds: [...input.obligationIds], sharedEntityRefs: [...input.sharedEntityRefs], sourceRefs: [...input.sourceRefs], payoffConditions: [...input.payoffConditions], status: "proposal" as const };
   return { ...base, fingerprint: hash(base) };
 }

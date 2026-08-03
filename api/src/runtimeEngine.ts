@@ -3,6 +3,7 @@ import path from "node:path";
 import type {
   ChapterQualityReport,
   CodexTaskType,
+  KnowledgeIndexProjection,
   KnowledgeSearchResult,
   NarrativeSnapshot,
   NovelChapter,
@@ -22,11 +23,12 @@ import { readProject, projectRoot } from "./novelProject.js";
 import { resolveInside, assertSafeNovelPath } from "./pathSafety.js";
 import { runNovelTask } from "./taskService.js";
 import { rebuildKnowledgeIndex, readKnowledgeIndex, searchKnowledgeIndex } from "./knowledgeIndex.js";
-import { buildStoryGraphProjection } from "./storyGraph.js";
+import { buildStoryGraphProjection, readStoryGraphProjection, writeStoryGraphProjection } from "./storyGraph.js";
 import {
-  appendWritingRecap,
+  appendWritingRecapIfMissing,
   buildSeriesQualityMetrics,
   readChapterDashboard,
+  readChapterQualityReport,
   readChapterSummary,
   readLedgerEntries,
   readSceneCards,
@@ -40,7 +42,9 @@ import {
   enqueueRuntimeCommand,
   finishRuntimeCommand,
   getRuntimeBranch,
+  getRuntimeCheckpoint,
   getRuntimeRun,
+  getLatestRuntimeSnapshot,
   insertRuntimeKnowledgeRefs,
   insertRuntimeQualityScore,
   insertRuntimeSnapshot,
@@ -49,10 +53,22 @@ import {
   updateRuntimeRun
 } from "./runtimeStore.js";
 import { createRuntimeCheckpoint, dispatchRuntimeWrites, RuntimeWriteConflictError } from "./runtimeFiles.js";
-import { claimExecutionWorkItem, executionWorkItemId, finishExecutionWorkItem, heartbeatExecutionWorkItem } from "./executionQueue.js";
+import { advanceSteeringEvent, readSteeringEvent } from "./steeringEvent.js";
+import { recordRuntimeControlBoundary } from "./runtimeControlBoundary.js";
+import { recordRuntimeMutationDrain } from "./runtimeMutationDrain.js";
+import { cancelExecutionWorkItem, claimExecutionWorkItem, executionWorkItemId, finishExecutionWorkItem, heartbeatExecutionWorkItem } from "./executionQueue.js";
 import { createProseCandidate, validateProseCandidate } from "./proseCandidate.js";
 import { readContextManifest } from "./contextManifest.js";
 import { readExecutionReadyProof } from "./outlineCommit.js";
+import { assertMemoryProjectionCanGenerate, evaluateMemoryProjectionFreshness, type MemoryProjectionFreshness } from "./memoryProjectionGate.js";
+import { isRuntimeStageOutputAvailable, isRuntimeStageOutputReusable, listRuntimeStageReceipts, recordRuntimeStageReceipt, selectFirstUnsettledRuntimeStage, stageInputFingerprint } from "./runtimeStageReceipt.js";
+import { readRuntimeStageOutput, writeRuntimeStageOutput } from "./runtimeStageOutput.js";
+import { attachQualityReportEvidence } from "./qualityReportEvidence.js";
+import { recordRuntimeRetryReceipt } from "./runtimeRecovery.js";
+import { applyRuntimeCompensation, recordRuntimeCompensation } from "./runtimeCompensation.js";
+import { assertModelInvocationAuthorityBinding } from "./modelInvocationAuthority.js";
+import { createChapterExecutionPlan, verifyChapterExecutionPlan } from "./chapterExecutionPlan.js";
+import { createChapterExecutionProof, verifyChapterExecutionProof } from "./chapterExecutionProof.js";
 
 const pipelineStages: RuntimePipelineStage[] = [
   "find_next_chapter",
@@ -70,7 +86,15 @@ const pipelineStages: RuntimePipelineStage[] = [
 ];
 
 const RUNTIME_QUALITY_TARGET = 86;
+const activeRuntimeAbortControllers = new Map<string, { controller: AbortController; runId: string }>();
+const activeRuntimeAuthority = new Map<string, { bookRunId?: string; authorityBinding?: unknown }>();
+function runtimeTaskKey(projectSlug: string, chapterId: string): string { return `${projectSlug}:${chapterId}`; }
 const RUNTIME_MAX_SELF_REPAIR_ATTEMPTS = 1;
+
+function stableKnowledgeFingerprint(value: KnowledgeIndexProjection): string {
+  const stable = JSON.parse(JSON.stringify(value, (key, entry) => (key === "updatedAt" ? undefined : entry)));
+  return stageInputFingerprint(stable);
+}
 
 function governedProject(project: NovelProject): boolean {
   const outlineVersion = (project as NovelProject & { outlineVersion?: { versionId?: string } }).outlineVersion;
@@ -132,9 +156,40 @@ function assertRunnable(run: RuntimeRun): void {
   }
 }
 
-async function markStage(run: RuntimeRun, stage: RuntimePipelineStage): Promise<RuntimeRun> {
+async function markStage(
+  run: RuntimeRun,
+  stage: RuntimePipelineStage,
+  previousOutputFingerprint?: string,
+  previousOutputRef?: string,
+  inputFingerprintOverride?: string,
+  previousStageInputFingerprintOverride?: string
+): Promise<RuntimeRun> {
   const current = getRuntimeRun(run.id);
+  if (current?.status === "running" && current.result?.pauseRequested === true) {
+    const paused = updateRuntimeRun(run.id, {
+      status: "paused",
+      result: {
+        ...(current.result || {}),
+        pauseRequested: false,
+        pauseAcknowledgedAt: runtimeNow()
+      }
+    });
+    appendRuntimeEvent({
+      projectSlug: run.projectSlug,
+      runId: run.id,
+      type: "command",
+      message: "Runtime pause acknowledged at safe boundary",
+      payload: { stage: current.currentStage || stage }
+    });
+    throw new RuntimeControlStop("paused");
+  }
   assertRunnable(current || run);
+  const root = projectRoot(run.projectSlug);
+  const inputFingerprint = stageInputFingerprint({ input: run.input, chapterId: run.chapterId, stage });
+  if (current?.currentStage && current.currentStage !== stage) {
+    await recordRuntimeStageReceipt(root, { projectSlug: run.projectSlug, runId: run.id, chapterId: run.chapterId, stage: current.currentStage, status: "completed", inputFingerprint: previousStageInputFingerprintOverride || stageInputFingerprint({ input: run.input, chapterId: run.chapterId, stage: current.currentStage }), ...(previousOutputFingerprint ? { outputFingerprint: previousOutputFingerprint } : {}), ...(previousOutputRef ? { outputRef: previousOutputRef } : {}) });
+  }
+  await recordRuntimeStageReceipt(root, { projectSlug: run.projectSlug, runId: run.id, chapterId: run.chapterId, stage, status: "started", inputFingerprint: inputFingerprintOverride || inputFingerprint });
   const updated = updateRuntimeRun(run.id, { status: "running", currentStage: stage, startedAt: run.startedAt || runtimeNow() });
   const next = updated || run;
   appendRuntimeEvent({
@@ -316,19 +371,28 @@ function searchKnowledgeRefs(input: {
   return [...facts, ...triples, ...chapters];
 }
 
-function buildSnapshotBlockingReasons(snapshot: Pick<NarrativeSnapshot, "contextBudget" | "summarySignals" | "knowledgeSignals" | "qualityRisks" | "craftRisks">): string[] {
+export function buildSnapshotBlockingReasons(snapshot: Pick<NarrativeSnapshot, "contextBudget" | "summarySignals" | "knowledgeSignals" | "qualityRisks" | "craftRisks">): string[] {
   const reasons: string[] = [];
   if (!snapshot.summarySignals.length) reasons.push("missing_chapter_summary_chain");
   if (!snapshot.knowledgeSignals.factCount && !snapshot.knowledgeSignals.tripleCount) reasons.push("missing_knowledge_index");
+  if ((snapshot.knowledgeSignals.legacyFactCount || 0) > 0 && !(snapshot.knowledgeSignals.eligibleMemoryClaimCount || 0)) reasons.push("LEGACY_PROJECTION_ONLY");
   if (snapshot.qualityRisks.length) reasons.push("open_high_risk_ledger_items");
   if (snapshot.craftRisks?.length) reasons.push("open_craft_gate_risks");
   if (snapshot.contextBudget?.truncatedBlocks.length) reasons.push("context_budget_truncated_sources");
   return reasons;
 }
 
+export function applyMemoryProjectionGate(snapshot: NarrativeSnapshot, freshness: MemoryProjectionFreshness): NarrativeSnapshot {
+  return {
+    ...snapshot,
+    memoryProjection: freshness,
+    blockingReasons: [...new Set([...(snapshot.blockingReasons || []), ...freshness.blockingReasons])]
+  };
+}
+
 async function buildNarrativeSnapshot(root: string, project: NovelProject, chapter: NovelChapter): Promise<NarrativeSnapshot> {
   const [contextBlocks, storyControl, knowledge, currentSummary, currentScenes] = await Promise.all([
-    assembleContext("chapter.draft", root, project, { chapterId: chapter.id }),
+    assembleContext("chapter.draft", root, project, { chapterId: chapter.id, visibilityAudience: "model-task" }),
     readStoryControl(root),
     readKnowledgeIndex(root, project),
     readChapterSummary(root, chapter.id),
@@ -381,6 +445,11 @@ async function buildNarrativeSnapshot(root: string, project: NovelProject, chapt
       factCount: knowledge.facts.length,
       tripleCount: knowledge.triples.length,
       indexedChapterCount: knowledge.chapterIndex.chapters.length,
+      legacyFactCount: knowledge.facts.filter((fact) => fact.source.type !== "memory-claim").length,
+      eligibleMemoryClaimCount: knowledge.facts.filter((fact) => fact.source.type === "memory-claim").length,
+      projectionAuthority: knowledge.facts.some((fact) => fact.source.type === "memory-claim")
+        ? knowledge.facts.some((fact) => fact.source.type !== "memory-claim") ? "mixed" : "memory-claim-backed"
+        : "legacy-only",
       vectorSummary: knowledge.vectorSummary
     },
     qualityRisks,
@@ -388,7 +457,7 @@ async function buildNarrativeSnapshot(root: string, project: NovelProject, chapt
     createdAt: runtimeNow()
   };
   snapshot.blockingReasons = buildSnapshotBlockingReasons(snapshot);
-  return snapshot;
+  return applyMemoryProjectionGate(snapshot, await evaluateMemoryProjectionFreshness(root));
 }
 
 async function maybeMockTask(project: NovelProject, type: CodexTaskType, chapter: NovelChapter, payload: Record<string, unknown>) {
@@ -539,7 +608,20 @@ async function maybeMockTask(project: NovelProject, type: CodexTaskType, chapter
 }
 
 async function runRuntimeTask(project: NovelProject, type: CodexTaskType, payload: Record<string, unknown>, chapter: NovelChapter) {
-  return (await maybeMockTask(project, type, chapter, payload)) || runNovelTask(project.slug, type, payload);
+  const effectivePayload = { ...payload, ...(activeRuntimeAuthority.get(runtimeTaskKey(project.slug, chapter.id)) || {}) };
+  if (effectivePayload.bookRunId) {
+    if (typeof effectivePayload.bookRunId !== "string" || !effectivePayload.bookRunId.trim() || !effectivePayload.authorityBinding) throw new Error("RUNTIME_MODEL_AUTHORITY_BINDING_REQUIRED");
+    assertModelInvocationAuthorityBinding(effectivePayload.authorityBinding);
+  }
+  const mocked = await maybeMockTask(project, type, chapter, effectivePayload);
+  if (mocked) return mocked;
+  const active = activeRuntimeAbortControllers.get(runtimeTaskKey(project.slug, chapter.id));
+  const task = await runNovelTask(project.slug, type, { ...effectivePayload, runId: active?.runId || payload.runId }, undefined, active ? { signal: active.controller.signal } : undefined);
+  if (task.status === "cancelled") {
+    const current = active ? getRuntimeRun(active.runId) : payload.runId && typeof payload.runId === "string" ? getRuntimeRun(payload.runId) : null;
+    if (current && (current.status === "paused" || current.status === "cancelled")) throw new RuntimeControlStop(current.status);
+  }
+  return task;
 }
 
 async function readText(root: string, relativePath: string): Promise<string> {
@@ -714,25 +796,67 @@ async function ensureRunActive(runId: string): Promise<RuntimeRun> {
 async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
   let project = await readProject(run.projectSlug);
   const root = projectRoot(project.slug);
-  let currentRun = await markStage(run, "find_next_chapter");
-  const chapter = selectTargetChapter(project, typeof run.input.chapterId === "string" ? run.input.chapterId : currentRun.chapterId);
+  const chapter = selectTargetChapter(project, typeof run.input.chapterId === "string" ? run.input.chapterId : run.chapterId);
+  const existingReceipts = await listRuntimeStageReceipts(root, run.id);
+  const expectedInputFingerprints = Object.fromEntries(pipelineStages.map((stage) => [stage, stageInputFingerprint({ input: run.input, chapterId: chapter.id, stage })]));
+  const resumeDecision = selectFirstUnsettledRuntimeStage(existingReceipts, pipelineStages, expectedInputFingerprints);
+  appendRuntimeEvent({ projectSlug: project.slug, runId: run.id, type: "system", message: "Runtime stage recovery decision", payload: { resumeDecision, receiptCount: existingReceipts.length } });
+  const findNextCompleted = existingReceipts.some((receipt) => receipt.stage === "find_next_chapter" && receipt.status === "completed" && receipt.inputFingerprint === expectedInputFingerprints.find_next_chapter);
+  let currentRun = findNextCompleted
+    ? (updateRuntimeRun(run.id, { status: "running", currentStage: "find_next_chapter", startedAt: run.startedAt || runtimeNow() }) || run)
+    : await markStage(run, "find_next_chapter");
   currentRun = updateRuntimeRun(currentRun.id, { chapterId: chapter.id }) || currentRun;
 
   await ensureRunActive(currentRun.id);
   currentRun = await markStage(currentRun, "checkpoint_before_run");
-  const writeCheckpoint = await createRuntimeCheckpoint({ root, project, run: currentRun, chapterId: chapter.id, label: `Before runtime ${chapter.title}` });
+  const checkpointReceipt = existingReceipts.find((receipt) => receipt.stage === "checkpoint_before_run");
+  const persistedCheckpoint = checkpointReceipt?.outputRef ? getRuntimeCheckpoint(checkpointReceipt.outputRef) : null;
+  const persistedCheckpointFingerprint = persistedCheckpoint
+    ? stageInputFingerprint({ checkpointId: persistedCheckpoint.id, manifest: persistedCheckpoint.manifest })
+    : "";
+  const checkpointReusable = Boolean(
+    persistedCheckpoint &&
+      isRuntimeStageOutputReusable(checkpointReceipt, expectedInputFingerprints.checkpoint_before_run, persistedCheckpointFingerprint, persistedCheckpoint.id)
+  );
+  const writeCheckpoint = checkpointReusable
+    ? persistedCheckpoint!
+    : await createRuntimeCheckpoint({ root, project, run: currentRun, chapterId: chapter.id, label: `Before runtime ${chapter.title}` });
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "checkpoint_before_run",
+    message: checkpointReusable ? "Runtime checkpoint reused from receipt" : "Runtime checkpoint created",
+    payload: { checkpointId: writeCheckpoint.id, outputFingerprint: stageInputFingerprint({ checkpointId: writeCheckpoint.id, manifest: writeCheckpoint.manifest }), reused: checkpointReusable }
+  });
 
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "prepare_narrative_snapshot");
-  const snapshot = await buildNarrativeSnapshot(root, project, chapter);
-  insertRuntimeSnapshot({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, snapshot });
-  const snapshotRefs = insertRuntimeKnowledgeRefs(snapshotKnowledgeRefs({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, snapshot }));
+  const checkpointOutputFingerprint = stageInputFingerprint({ checkpointId: writeCheckpoint.id, manifest: writeCheckpoint.manifest });
+  currentRun = await markStage(currentRun, "prepare_narrative_snapshot", checkpointOutputFingerprint, writeCheckpoint.id);
+  const persistedSnapshot = getLatestRuntimeSnapshot(project.slug, currentRun.id);
+  const snapshotReceipt = existingReceipts.find((receipt) => receipt.stage === "prepare_narrative_snapshot");
+  const persistedSnapshotFingerprint = persistedSnapshot ? stageInputFingerprint(persistedSnapshot.snapshot) : "";
+  const snapshotReusable = Boolean(
+    persistedSnapshot &&
+      isRuntimeStageOutputReusable(snapshotReceipt, expectedInputFingerprints.prepare_narrative_snapshot, persistedSnapshotFingerprint, persistedSnapshot.id)
+  );
+  let snapshot: NarrativeSnapshot;
+  let persistedSnapshotRecord = persistedSnapshot;
+  if (snapshotReusable && persistedSnapshot) {
+    snapshot = persistedSnapshot.snapshot;
+  } else {
+    snapshot = await buildNarrativeSnapshot(root, project, chapter);
+    persistedSnapshotRecord = insertRuntimeSnapshot({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, snapshot });
+  }
+  const snapshotRefs = snapshotReusable
+    ? []
+    : insertRuntimeKnowledgeRefs(snapshotKnowledgeRefs({ projectSlug: project.slug, runId: currentRun.id, chapterId: chapter.id, snapshot }));
   appendRuntimeEvent({
     projectSlug: project.slug,
     runId: currentRun.id,
     type: "system",
     stage: "prepare_narrative_snapshot",
-    message: "Narrative snapshot prepared",
+    message: snapshotReusable ? "Narrative snapshot reused from receipt" : "Narrative snapshot prepared",
     payload: {
       contextBlocks: snapshot.contextBlocks.length,
       contextChars: snapshot.contextBudget?.totalFinalChars,
@@ -740,30 +864,148 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       ledgerSignals: snapshot.ledgerSignals.length,
       summarySignals: snapshot.summarySignals.length,
       blockingReasons: snapshot.blockingReasons || [],
-      persistedRefs: snapshotRefs.length
+      persistedRefs: snapshotRefs.length,
+      snapshotId: persistedSnapshotRecord?.id,
+      outputFingerprint: stageInputFingerprint(snapshot),
+      reused: snapshotReusable
     }
   });
 
+  assertMemoryProjectionCanGenerate(snapshot.memoryProjection || { status: "unknown", blockingReasons: ["MEMORY_PROJECTION_UNKNOWN"], affectedClaimIds: [] });
+
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "chapter_plan");
-  const planTask = await runRuntimeTask(project, "chapter.plan", { chapterId: chapter.id, roughIdea: run.input.direction || "" }, chapter);
+  currentRun = await markStage(currentRun, "chapter_plan", stageInputFingerprint(snapshot), persistedSnapshotRecord?.id);
+  const planReceipt = existingReceipts.find((receipt) => receipt.stage === "chapter_plan");
+  const persistedPlan = await readRuntimeStageOutput<Awaited<ReturnType<typeof runRuntimeTask>>["result"]>(root, currentRun.id, "chapter_plan");
+  const planReusable = Boolean(
+    persistedPlan &&
+      isRuntimeStageOutputReusable(planReceipt, expectedInputFingerprints.chapter_plan, persistedPlan.fingerprint, persistedPlan.outputId)
+  );
+  const planTask = planReusable
+    ? ({ status: "success", result: persistedPlan!.value } as Awaited<ReturnType<typeof runRuntimeTask>>)
+    : await runRuntimeTask(project, "chapter.plan", { chapterId: chapter.id, roughIdea: run.input.direction || "" }, chapter);
   if (planTask.status !== "success") throw new Error(planTask.error || "chapter.plan failed");
+  const planOutput = planReusable
+    ? persistedPlan!
+    : await writeRuntimeStageOutput(root, { runId: currentRun.id, stage: "chapter_plan", value: planTask.result });
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "chapter_plan",
+    message: planReusable ? "Chapter plan reused from receipt" : "Chapter plan persisted for recovery",
+    payload: { outputRef: planOutput.outputId, outputFingerprint: planOutput.fingerprint, reused: planReusable }
+  });
 
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "context_assemble");
-  await assembleContext("chapter.draft", root, project, { chapterId: chapter.id, direction: run.input.direction || "" });
+  currentRun = await markStage(currentRun, "context_assemble", planOutput.fingerprint, planOutput.outputId);
+  const contextReceipt = existingReceipts.find((receipt) => receipt.stage === "context_assemble");
+  const persistedContextOutput = await readRuntimeStageOutput<Array<{ title: string; content: string }>>(root, currentRun.id, "context_assemble");
+  const contextReusable = Boolean(
+    persistedContextOutput &&
+      isRuntimeStageOutputAvailable(contextReceipt, expectedInputFingerprints.context_assemble, persistedContextOutput.fingerprint, persistedContextOutput.outputId)
+  );
+  const contextBlocks = contextReusable
+    ? persistedContextOutput!.value
+    : await assembleContext("chapter.draft", root, project, { chapterId: chapter.id, direction: run.input.direction || "", visibilityAudience: "model-task" });
+  const contextOutput = contextReusable
+    ? { outputId: persistedContextOutput!.outputId, fingerprint: persistedContextOutput!.fingerprint }
+    : await writeRuntimeStageOutput(root, { runId: currentRun.id, stage: "context_assemble", value: contextBlocks });
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "context_assemble",
+    message: contextReusable ? "Context assembly reused from receipt" : "Context assembly persisted for recovery",
+    payload: { outputRef: contextOutput.outputId, outputFingerprint: contextOutput.fingerprint, blockCount: contextBlocks.length, reused: contextReusable }
+  });
+
+  const governedExecutionPlan = governedProject(project)
+    ? await (async () => {
+      const proof = await readExecutionReadyProof(root);
+      if (!proof?.fingerprint || proof.status !== "ready" || !proof.executionReady) throw new Error("EXECUTION_READY_PROOF_REQUIRED_FOR_PLAN_CONSUMPTION");
+      const plan = await createChapterExecutionPlan(root, {
+        projectSlug: project.slug,
+        chapterId: chapter.id,
+        executionProofFingerprint: proof.fingerprint,
+        contextFingerprint: contextOutput.fingerprint,
+        planOutputId: planOutput.outputId,
+        planFingerprint: planOutput.fingerprint,
+        plan: planTask.result
+      });
+      if (!verifyChapterExecutionPlan(plan, { projectSlug: project.slug, chapterId: chapter.id, executionProofFingerprint: proof.fingerprint, contextFingerprint: contextOutput.fingerprint, planFingerprint: planOutput.fingerprint })) throw new Error("CHAPTER_EXECUTION_PLAN_STALE");
+      return plan;
+    })()
+    : null;
+  const governedChapterExecutionProof = governedExecutionPlan
+    ? await (async () => {
+      const parentProof = await readExecutionReadyProof(root);
+      if (!parentProof?.fingerprint || parentProof.status !== "ready" || !parentProof.executionReady) throw new Error("EXECUTION_READY_PROOF_REQUIRED_FOR_CHAPTER_PROOF");
+      const proof = await createChapterExecutionProof(root, { projectSlug: project.slug, chapterId: chapter.id, planId: governedExecutionPlan.planId, planFingerprint: governedExecutionPlan.planFingerprint, parentExecutionReadyProofFingerprint: parentProof.fingerprint, contextFingerprint: governedExecutionPlan.contextFingerprint });
+      if (!verifyChapterExecutionProof(proof, { projectSlug: project.slug, chapterId: chapter.id, planId: governedExecutionPlan.planId, planFingerprint: governedExecutionPlan.planFingerprint, parentExecutionReadyProofFingerprint: parentProof.fingerprint, contextFingerprint: governedExecutionPlan.contextFingerprint })) throw new Error("CHAPTER_EXECUTION_PROOF_STALE");
+      return proof;
+    })()
+    : null;
+  if (governedExecutionPlan) appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "chapter_plan",
+    message: "Governed chapter execution plan bound to proof and context",
+    payload: { executionPlanId: governedExecutionPlan.planId, executionPlanFingerprint: governedExecutionPlan.fingerprint, chapterExecutionProofId: governedChapterExecutionProof?.proofId, chapterExecutionProofFingerprint: governedChapterExecutionProof?.fingerprint, executionProofFingerprint: governedExecutionPlan.executionProofFingerprint, contextFingerprint: governedExecutionPlan.contextFingerprint }
+  });
 
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "chapter_draft");
-  const draftTask = await runRuntimeTask(project, "chapter.draft", { chapterId: chapter.id, roughIdea: run.input.direction || "" }, chapter);
+  const draftInputFingerprint = stageInputFingerprint({ input: run.input, chapterId: chapter.id, stage: "chapter_draft", contextFingerprint: contextOutput.fingerprint });
+  expectedInputFingerprints.chapter_draft = draftInputFingerprint;
+  currentRun = await markStage(currentRun, "chapter_draft", contextOutput.fingerprint, contextOutput.outputId, draftInputFingerprint);
+  const draftPayload = {
+    chapterId: chapter.id,
+    roughIdea: run.input.direction || "",
+    chapterPlan: planTask.result,
+    chapterPlanFingerprint: planOutput.fingerprint,
+    ...(governedExecutionPlan ? { chapterExecutionPlan: governedExecutionPlan.plan, chapterExecutionPlanFingerprint: governedExecutionPlan.fingerprint } : {}),
+    ...(governedChapterExecutionProof ? { chapterExecutionProofFingerprint: governedChapterExecutionProof.fingerprint } : {}),
+    contextFingerprint: contextOutput.fingerprint,
+    contextOutputRef: contextOutput.outputId
+  };
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "chapter_draft",
+    message: "Chapter plan bound to draft input",
+    payload: { chapterPlanFingerprint: planOutput.fingerprint, chapterPlanOutputRef: planOutput.outputId }
+  });
+  const draftReceipt = existingReceipts.find((receipt) => receipt.stage === "chapter_draft");
+  const persistedDraft = await readRuntimeStageOutput<Awaited<ReturnType<typeof runRuntimeTask>>["result"]>(root, currentRun.id, "chapter_draft");
+  const draftReusable = Boolean(
+    persistedDraft &&
+      isRuntimeStageOutputAvailable(draftReceipt, expectedInputFingerprints.chapter_draft, persistedDraft.fingerprint, persistedDraft.outputId)
+  );
+  const draftTask = draftReusable
+    ? ({ status: "success", result: persistedDraft!.value } as Awaited<ReturnType<typeof runRuntimeTask>>)
+    : await runRuntimeTask(project, "chapter.draft", draftPayload, chapter);
   if (draftTask.status !== "success") throw new Error(draftTask.error || "chapter.draft failed");
   const draftResult = draftTask.result;
+  const draftOutput = draftReusable
+    ? persistedDraft!
+    : await writeRuntimeStageOutput(root, { runId: currentRun.id, stage: "chapter_draft", value: draftResult });
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "chapter_draft",
+    message: draftReusable ? "Draft output reused from receipt" : "Draft output persisted for recovery",
+    payload: { outputRef: draftOutput.outputId, outputFingerprint: draftOutput.fingerprint, reused: draftReusable }
+  });
   const governedOutline = (project as NovelProject & { outlineVersion?: { versionId?: string; fingerprint?: string } }).outlineVersion;
   if (governedProject(project)) {
+    if (typeof run.input.generationManifestId !== "string" || !run.input.generationManifestId.trim()) throw new Error("PROSE_GENERATION_MANIFEST_REQUIRED");
     if (!governedOutline?.versionId) throw new Error("GOVERNED_OUTLINE_POINTER_REQUIRED");
     if (!governedOutline.fingerprint) throw new Error("GOVERNED_OUTLINE_FINGERPRINT_REQUIRED");
     const proof = await readExecutionReadyProof(root);
-    const context = await readContextManifest(root);
+    const context = await readContextManifest(root, { allowLegacyExecutionMetadata: true });
     const sourceFingerprint = [governedOutline.versionId, governedOutline.fingerprint, proof?.fingerprint || "", context?.sourceFingerprint || "", chapter.id].join(":");
     const candidate = await createProseCandidate({
       root,
@@ -772,7 +1014,10 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       content: draftResult?.content?.trim() || draftResult?.summary?.trim() || "",
       outlineVersionId: governedOutline.versionId,
       executionProofFingerprint: proof?.fingerprint || "",
-      sourceFingerprint
+      sourceFingerprint,
+      ...(typeof run.input.generationManifestId === "string" ? { generationManifestId: run.input.generationManifestId } : {}),
+      policyVersion: "tiered-quality.v1",
+      riskTier: run.input.riskTier === "key" || run.input.riskTier === "elevated" ? run.input.riskTier : "ordinary"
     });
     const validation = await validateProseCandidate(root, candidate);
     if (validation.status !== "passed") throw new Error(`PROSE_CANDIDATE_${validation.reasons.join("_")}`);
@@ -791,19 +1036,20 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     });
     return candidateRun || currentRun;
   }
-  const patchWrites = await Promise.all(matchingRuntimePatches(project, chapter, draftResult?.patches || []).map((patch) => patchToWrite(root, patch)));
-  const draftContent = draftResult?.content?.trim() || "";
-  const writes = patchWrites.length
-    ? patchWrites
-    : draftContent
-      ? [{ relativePath: chapter.contentPath, content: draftContent.endsWith("\n") ? draftContent : `${draftContent}\n` }]
-      : [];
-  if (!writes.length) throw new Error("chapter.draft produced no runtime-applicable content");
-  try {
-    await dispatchRuntimeWrites({ root, project, run: currentRun, writes, reason: "chapter_draft", checkpoint: writeCheckpoint });
-  } catch (error) {
-    if (error instanceof RuntimeWriteConflictError) {
-      const reviewRun = updateRuntimeRun(currentRun.id, {
+  if (!draftReusable) {
+    const patchWrites = await Promise.all(matchingRuntimePatches(project, chapter, draftResult?.patches || []).map((patch) => patchToWrite(root, patch)));
+    const draftContent = draftResult?.content?.trim() || "";
+    const writes = patchWrites.length
+      ? patchWrites
+      : draftContent
+        ? [{ relativePath: chapter.contentPath, content: draftContent.endsWith("\n") ? draftContent : `${draftContent}\n` }]
+        : [];
+    if (!writes.length) throw new Error("chapter.draft produced no runtime-applicable content");
+    try {
+      await dispatchRuntimeWrites({ root, project, run: currentRun, writes, reason: "chapter_draft", checkpoint: writeCheckpoint });
+    } catch (error) {
+      if (error instanceof RuntimeWriteConflictError) {
+        const reviewRun = updateRuntimeRun(currentRun.id, {
         status: "review_required",
         result: {
           chapterId: chapter.id,
@@ -827,27 +1073,84 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
           action: "review_user_edit_before_overwrite"
         }
       });
-      return reviewRun || currentRun;
+        return reviewRun || currentRun;
+      }
+      throw error;
     }
-    throw error;
   }
   let savedContent = await readText(root, chapter.contentPath);
 
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "content_validate");
-  const checkTask = await runRuntimeTask(project, "continuity.check", { chapterId: chapter.id }, chapter);
+  currentRun = await markStage(currentRun, "content_validate", draftOutput.fingerprint, draftOutput.outputId, undefined, draftInputFingerprint);
+  const validationReceipt = existingReceipts.find((receipt) => receipt.stage === "content_validate");
+  const persistedValidationOutput = await readRuntimeStageOutput(root, currentRun.id, "content_validate");
+  const validationReusable = Boolean(
+    persistedValidationOutput &&
+      isRuntimeStageOutputAvailable(
+        validationReceipt,
+        expectedInputFingerprints.content_validate,
+        persistedValidationOutput.fingerprint,
+        persistedValidationOutput.outputId
+      )
+  );
+  const checkTask = validationReusable
+    ? persistedValidationOutput!.value
+    : await runRuntimeTask(project, "continuity.check", { chapterId: chapter.id }, chapter);
+  const validationOutput = validationReusable
+    ? { outputId: persistedValidationOutput!.outputId, fingerprint: persistedValidationOutput!.fingerprint }
+    : await writeRuntimeStageOutput(root, { runId: currentRun.id, stage: "content_validate", value: checkTask });
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "content_validate",
+    message: validationReusable ? "Content validation reused from receipt" : "Content validation persisted for recovery",
+    payload: { outputRef: validationOutput.outputId, outputFingerprint: validationOutput.fingerprint, reused: validationReusable }
+  });
 
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "quality_review");
+  currentRun = await markStage(currentRun, "quality_review", validationOutput.fingerprint, validationOutput.outputId);
   let repairAttempt = 0;
-  let qualityReview = await performQualityReview({
-    root,
-    project,
-    chapter,
-    content: savedContent,
-    targetScore: RUNTIME_QUALITY_TARGET
-  });
-  let report = await saveChapterQualityReport(root, qualityReview.outcome.report);
+  const qualityReceipt = existingReceipts.find((receipt) => receipt.stage === "quality_review");
+  const persistedQualityOutput = await readRuntimeStageOutput<ChapterQualityReport>(root, currentRun.id, "quality_review");
+  const persistedQualityReport = persistedQualityOutput?.value || await readChapterQualityReport(root, chapter.id);
+  const qualityReportFingerprint = persistedQualityOutput?.fingerprint || (persistedQualityReport ? stageInputFingerprint(persistedQualityReport) : "");
+  const currentContentFingerprint = stageInputFingerprint({ chapterId: chapter.id, content: savedContent });
+  const qualityReusable = Boolean(
+    persistedQualityOutput &&
+    persistedQualityReport &&
+      persistedQualityReport.evidence?.sourceFingerprint === currentContentFingerprint &&
+      qualityMeetsTarget(persistedQualityReport, RUNTIME_QUALITY_TARGET) &&
+      isRuntimeStageOutputAvailable(qualityReceipt, expectedInputFingerprints.quality_review, qualityReportFingerprint, persistedQualityOutput.outputId)
+  );
+  let qualityReview: RuntimeQualityReviewResult;
+  let report: ChapterQualityReport;
+  if (qualityReusable && persistedQualityReport) {
+    report = persistedQualityReport;
+    qualityReview = {
+      outcome: {
+        report,
+        topIssues: report.fixes,
+        antiPatternsHit: [],
+        openingVerdict: "Reused verified quality report",
+        endingVerdict: "Reused verified quality report",
+        rulesBasedSignals: []
+      },
+      taskStatus: "success"
+    };
+  } else {
+    qualityReview = await performQualityReview({
+      root,
+      project,
+      chapter,
+      content: savedContent,
+      targetScore: RUNTIME_QUALITY_TARGET
+    });
+    report = await saveChapterQualityReport(root, attachQualityReportEvidence(qualityReview.outcome.report, { content: savedContent, sourceFingerprint: currentContentFingerprint, evaluatorVersion: "quality-review.v1", mode: qualityReview.taskStatus === "success" ? "hybrid" : "rules" }));
+  }
+  let qualityOutput = qualityReusable
+    ? { outputId: persistedQualityOutput!.outputId, fingerprint: qualityReportFingerprint }
+    : { outputId: `stage-output-${currentRun.id}-quality_review`, fingerprint: "" };
   insertRuntimeQualityScore({
     projectSlug: project.slug,
     runId: currentRun.id,
@@ -878,7 +1181,8 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       openingVerdict: qualityReview.outcome.openingVerdict,
       endingVerdict: qualityReview.outcome.endingVerdict,
       reviewTaskStatus: qualityReview.taskStatus,
-      reviewTaskError: qualityReview.taskError
+      reviewTaskError: qualityReview.taskError,
+      reused: qualityReusable
     }
   });
   while (!qualityMeetsTarget(report, RUNTIME_QUALITY_TARGET) && repairAttempt < RUNTIME_MAX_SELF_REPAIR_ATTEMPTS) {
@@ -900,7 +1204,7 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       endingVerdict: qualityReview.outcome.endingVerdict,
       feedback: `Runtime self-repair: raise every metric to at least ${RUNTIME_QUALITY_TARGET} before author review.`
     };
-    await assembleContext("quality.rewrite", root, project, rewritePayload);
+    await assembleContext("quality.rewrite", root, project, { ...rewritePayload, visibilityAudience: "model-task" });
     appendRuntimeEvent({
       projectSlug: project.slug,
       runId: currentRun.id,
@@ -977,7 +1281,7 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       targetScore: RUNTIME_QUALITY_TARGET,
       currentQualityReport: report
     });
-    report = await saveChapterQualityReport(root, qualityReview.outcome.report);
+    report = await saveChapterQualityReport(root, attachQualityReportEvidence(qualityReview.outcome.report, { content: savedContent, sourceFingerprint: stageInputFingerprint({ chapterId: chapter.id, content: savedContent }), evaluatorVersion: "quality-review.v1", mode: qualityReview.taskStatus === "success" ? "hybrid" : "rules" }));
     insertRuntimeQualityScore({
       projectSlug: project.slug,
       runId: currentRun.id,
@@ -1015,30 +1319,73 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
     });
   }
 
+  if (!qualityReusable) {
+    const persistedQualityOutput = await writeRuntimeStageOutput(root, { runId: currentRun.id, stage: "quality_review", value: report });
+    qualityOutput = { outputId: persistedQualityOutput.outputId, fingerprint: persistedQualityOutput.fingerprint };
+  }
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "quality_review",
+    message: qualityReusable ? "Quality report reused from receipt" : "Quality report persisted for recovery",
+    payload: { outputRef: qualityOutput.outputId, outputFingerprint: qualityOutput.fingerprint, reused: qualityReusable }
+  });
+
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "recap_and_ledger");
-  const recapTask = await runRuntimeTask(project, "writing.recap", { chapterId: chapter.id }, chapter);
-  const recapSource =
-    (recapTask.result as { content?: unknown; rawOutput?: string } | undefined)?.content ||
-    (recapTask.result as { rawOutput?: string } | undefined)?.rawOutput;
-  const recap =
-    parseWritingRecapCandidate(chapter, recapSource) ||
-    recapFromTask(chapter, savedContent, recapTask.result?.summary || draftResult?.summary || "");
-  const pendingRecapPatchCount = reviewablePatchCount(recap);
-  await appendWritingRecap(root, recap);
+  currentRun = await markStage(currentRun, "recap_and_ledger", qualityOutput.fingerprint, qualityOutput.outputId);
+  const recapReceipt = existingReceipts.find((receipt) => receipt.stage === "recap_and_ledger");
+  const persistedRecapOutput = await readRuntimeStageOutput<WritingRecapCandidate>(root, currentRun.id, "recap_and_ledger");
+  const recapReusable = Boolean(
+    persistedRecapOutput &&
+      persistedRecapOutput.value &&
+      isRuntimeStageOutputAvailable(
+        recapReceipt,
+        expectedInputFingerprints.recap_and_ledger,
+        persistedRecapOutput.fingerprint,
+        persistedRecapOutput.outputId
+      )
+  );
+  const generatedRecap = (recapReusable ? persistedRecapOutput!.value : undefined) || await (async () => {
+    const recapTask = await runRuntimeTask(project, "writing.recap", { chapterId: chapter.id }, chapter);
+    const recapSource =
+      (recapTask.result as { content?: unknown; rawOutput?: string } | undefined)?.content ||
+      (recapTask.result as { rawOutput?: string } | undefined)?.rawOutput;
+    return (
+      parseWritingRecapCandidate(chapter, recapSource) ||
+      recapFromTask(chapter, savedContent, recapTask.result?.summary || draftResult?.summary || "")
+    );
+  })();
+  const recapOutput = recapReusable
+    ? { outputId: persistedRecapOutput!.outputId, fingerprint: persistedRecapOutput!.fingerprint }
+    : await writeRuntimeStageOutput(root, { runId: currentRun.id, stage: "recap_and_ledger", value: generatedRecap });
+  const pendingRecapPatchCount = reviewablePatchCount(generatedRecap);
+  const recapAppended = await appendWritingRecapIfMissing(root, generatedRecap);
   appendRuntimeEvent({
     projectSlug: project.slug,
     runId: currentRun.id,
     type: "review",
     stage: "recap_and_ledger",
-    message: "Writing recap candidate saved for author approval",
-    payload: { chapterId: chapter.id, pendingRecapPatchCount }
+    message: recapReusable ? "Writing recap candidate reused from receipt" : "Writing recap candidate saved for author approval",
+    payload: { chapterId: chapter.id, pendingRecapPatchCount, outputRef: recapOutput.outputId, outputFingerprint: recapOutput.fingerprint, reused: recapReusable, appended: recapAppended }
   });
 
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "knowledge_index_update");
-  const knowledge = await rebuildKnowledgeIndex(root, project);
-  const query = await searchKnowledgeIndex(root, project, { query: `${chapter.title} ${recap.summary}`, chapterId: chapter.id, limit: 10 }).catch(
+  currentRun = await markStage(currentRun, "knowledge_index_update", recapOutput.fingerprint, recapOutput.outputId);
+  const knowledgeReceipt = existingReceipts.find((receipt) => receipt.stage === "knowledge_index_update");
+  let persistedKnowledge: KnowledgeIndexProjection | null = null;
+  try {
+    persistedKnowledge = await readKnowledgeIndex(root, project);
+  } catch {
+    persistedKnowledge = null;
+  }
+  const persistedKnowledgeFingerprint = persistedKnowledge ? stableKnowledgeFingerprint(persistedKnowledge) : "";
+  const knowledgeReusable = Boolean(
+    persistedKnowledge &&
+      isRuntimeStageOutputReusable(knowledgeReceipt, expectedInputFingerprints.knowledge_index_update, persistedKnowledgeFingerprint, "knowledge-index")
+  );
+  const knowledge = knowledgeReusable && persistedKnowledge ? persistedKnowledge : await rebuildKnowledgeIndex(root, project);
+  const query = await searchKnowledgeIndex(root, project, { query: `${chapter.title} ${generatedRecap.summary}`, chapterId: chapter.id, limit: 10 }).catch(
     () => null as KnowledgeSearchResult | null
   );
   const retrievedRefs = insertRuntimeKnowledgeRefs(
@@ -1056,16 +1403,51 @@ async function runSingleChapterPipeline(run: RuntimeRun): Promise<RuntimeRun> {
       relatedFacts: query?.facts.length || 0,
       relatedTriples: query?.triples.length || 0,
       relatedChapters: query?.chapters.length || 0,
-      persistedRefs: retrievedRefs.length
+      persistedRefs: retrievedRefs.length,
+      outputFingerprint: stableKnowledgeFingerprint(knowledge),
+      reused: knowledgeReusable
     }
   });
 
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "story_graph_update");
-  const [graph, seriesMetrics] = await Promise.all([buildStoryGraphProjection(root, project), buildSeriesQualityMetrics(root, project)]);
+  currentRun = await markStage(currentRun, "story_graph_update", stableKnowledgeFingerprint(knowledge), "knowledge-index");
+  const storyGraphReceipt = existingReceipts.find((receipt) => receipt.stage === "story_graph_update");
+  const persistedStoryGraphOutput = await readRuntimeStageOutput(root, currentRun.id, "story_graph_update");
+  const persistedStoryGraph = await readStoryGraphProjection(root);
+  const storyGraphFingerprint = persistedStoryGraph ? stageInputFingerprint(persistedStoryGraph) : "";
+  const storyGraphReusable = Boolean(
+    persistedStoryGraph &&
+      persistedStoryGraphOutput &&
+      storyGraphFingerprint === persistedStoryGraphOutput.fingerprint &&
+      isRuntimeStageOutputAvailable(
+        storyGraphReceipt,
+        expectedInputFingerprints.story_graph_update,
+        persistedStoryGraphOutput.fingerprint,
+        persistedStoryGraphOutput.outputId
+      )
+  );
+  const graph = storyGraphReusable
+    ? persistedStoryGraph!
+    : await buildStoryGraphProjection(root, project, { persist: false });
+  const graphOutput = storyGraphReusable
+    ? { outputId: persistedStoryGraphOutput!.outputId, fingerprint: persistedStoryGraphOutput!.fingerprint }
+    : await (async () => {
+        await writeStoryGraphProjection(root, graph);
+        const output = await writeRuntimeStageOutput(root, { runId: currentRun.id, stage: "story_graph_update", value: graph });
+        return { outputId: output.outputId, fingerprint: output.fingerprint };
+      })();
+  appendRuntimeEvent({
+    projectSlug: project.slug,
+    runId: currentRun.id,
+    type: "system",
+    stage: "story_graph_update",
+    message: storyGraphReusable ? "Story graph projection reused from receipt" : "Story graph projection persisted for recovery",
+    payload: { outputRef: graphOutput.outputId, outputFingerprint: graphOutput.fingerprint, reused: storyGraphReusable, nodeCount: graph.nodes.length, edgeCount: graph.edges.length }
+  });
+  const [, seriesMetrics] = await Promise.all([Promise.resolve(graph), buildSeriesQualityMetrics(root, project)]);
 
   await ensureRunActive(currentRun.id);
-  currentRun = await markStage(currentRun, "finalize_or_gate");
+  currentRun = await markStage(currentRun, "finalize_or_gate", graphOutput.fingerprint, graphOutput.outputId);
   project = await readProject(project.slug);
   const chapterIndex = project.chapters.findIndex((item) => item.id === chapter.id);
   if (chapterIndex >= 0) {
@@ -1204,7 +1586,24 @@ async function processStart(command: RuntimeCommand): Promise<void> {
   const run = command.runId ? getRuntimeRun(command.runId) : null;
   if (!run) throw new Error(`Runtime start command has no run: ${command.id}`);
   appendRuntimeEvent({ projectSlug: command.projectSlug, runId: run.id, type: "command", message: "Runtime start command claimed", payload: { commandId: command.id } });
-  await runSingleChapterPipeline(run);
+  const project = await readProject(command.projectSlug);
+  const chapterId = run.chapterId || (typeof command.payload.chapterId === "string" ? command.payload.chapterId : "");
+  const key = runtimeTaskKey(project.slug, chapterId);
+  const controller = new AbortController();
+  activeRuntimeAbortControllers.set(key, { controller, runId: run.id });
+  const authorityInput = { ...run.input, ...command.payload };
+  activeRuntimeAuthority.set(key, { bookRunId: typeof authorityInput.bookRunId === "string" ? authorityInput.bookRunId : undefined, authorityBinding: authorityInput.authorityBinding });
+  const monitor = setInterval(() => {
+    const current = getRuntimeRun(run.id);
+    if (current && (current.status === "paused" || current.status === "cancelled")) controller.abort();
+  }, 50);
+  try {
+    await runSingleChapterPipeline(run);
+  } finally {
+    clearInterval(monitor);
+    activeRuntimeAbortControllers.delete(key);
+    activeRuntimeAuthority.delete(key);
+  }
 }
 
 async function processControl(command: RuntimeCommand): Promise<void> {
@@ -1212,7 +1611,18 @@ async function processControl(command: RuntimeCommand): Promise<void> {
   const run = runId ? getRuntimeRun(runId) : null;
   if (!run) throw new Error(`Runtime control command has no run: ${command.id}`);
   if (command.type === "pause") {
-    updateRuntimeRun(run.id, { status: "paused" });
+    if (run.status === "running") {
+      updateRuntimeRun(run.id, {
+        result: {
+          ...(run.result || {}),
+          pauseRequested: true,
+          pauseRequestedAt: runtimeNow(),
+          pauseMode: "safe_boundary"
+        }
+      });
+    } else {
+      updateRuntimeRun(run.id, { status: "paused" });
+    }
   } else if (command.type === "stop") {
     updateRuntimeRun(run.id, { status: "cancelled", finishedAt: runtimeNow() });
   } else if (command.type === "resume" || command.type === "rewrite") {
@@ -1220,7 +1630,32 @@ async function processControl(command: RuntimeCommand): Promise<void> {
   } else if (command.type === "accept") {
     updateRuntimeRun(run.id, { status: "completed", finishedAt: runtimeNow() });
   } else if (command.type === "direction") {
-    updateRuntimeRun(run.id, { result: { ...(run.result || {}), direction: command.payload.direction } });
+    const eventId = typeof command.payload.steeringEventId === "string" ? command.payload.steeringEventId : "";
+    if (eventId) {
+      const steering = await readSteeringEvent(projectRoot(command.projectSlug), eventId);
+      if (!steering) throw new Error("STEERING_EVENT_NOT_FOUND");
+      if (Date.parse(run.updatedAt) !== steering.parentRunVersion) {
+        await advanceSteeringEvent(projectRoot(command.projectSlug), eventId, "rejected_stale", "PARENT_RUN_UPDATED");
+        appendRuntimeEvent({ projectSlug: command.projectSlug, runId: run.id, type: "command", message: "Runtime direction rejected as stale", payload: { commandId: command.id, steeringEventId: eventId } });
+        return;
+      }
+      await advanceSteeringEvent(projectRoot(command.projectSlug), eventId, "classified");
+      const current = getRuntimeRun(run.id);
+      const nextStatus = current?.status === "queued" ? "effective" as const : "queued_for_boundary" as const;
+      await advanceSteeringEvent(projectRoot(command.projectSlug), eventId, nextStatus, nextStatus === "effective" ? "APPLIED_AT_SAFE_BOUNDARY" : "WAITING_FOR_SAFE_BOUNDARY");
+    }
+    const current = getRuntimeRun(run.id) || run;
+    const direction = typeof command.payload.direction === "string" ? command.payload.direction : "";
+    const targetObjectiveVersion = Number.isInteger(command.payload.targetObjectiveVersion) ? Number(command.payload.targetObjectiveVersion) : undefined;
+    const steering = eventId ? await readSteeringEvent(projectRoot(command.projectSlug), eventId) : null;
+    const effective = steering?.status === "effective";
+    updateRuntimeRun(run.id, {
+      ...(effective ? { input: { ...current.input, direction, ...(targetObjectiveVersion ? { targetObjectiveVersion } : {}) } } : {}),
+      result: {
+        ...(current.result || {}),
+        ...(effective ? { direction, ...(targetObjectiveVersion ? { targetObjectiveVersion } : {}) } : { pendingDirection: direction, ...(targetObjectiveVersion ? { pendingDirectionObjectiveVersion: targetObjectiveVersion } : {}) })
+      }
+    });
   }
   appendRuntimeEvent({
     projectSlug: command.projectSlug,
@@ -1267,6 +1702,7 @@ async function processDerivative(command: RuntimeCommand): Promise<void> {
   });
   const snapshot = await buildNarrativeSnapshot(root, project, sourceChapter);
   insertRuntimeSnapshot({ projectSlug: project.slug, runId: activeRun.id, chapterId: sourceChapter.id, snapshot });
+  assertMemoryProjectionCanGenerate(snapshot.memoryProjection || { status: "unknown", blockingReasons: ["MEMORY_PROJECTION_UNKNOWN"], affectedClaimIds: [] });
 
   updateRuntimeRun(activeRun.id, { currentStage: "chapter_draft" });
   const direction = String(command.payload.direction || command.payload.prompt || "");
@@ -1346,7 +1782,7 @@ async function processDerivative(command: RuntimeCommand): Promise<void> {
 }
 
 export async function processRuntimeCommand(command: RuntimeCommand): Promise<void> {
-  let executionWorkItem: { root: string; itemId: string; claimed: boolean } | undefined;
+  let executionWorkItem: { root: string; itemId: string; runId: string; fencingToken: number; claimed: boolean } | undefined;
   let executionHeartbeat: NodeJS.Timeout | undefined;
   try {
     if (command.type === "start") {
@@ -1368,9 +1804,10 @@ export async function processRuntimeCommand(command: RuntimeCommand): Promise<vo
         if (item.status !== "running" || (item.runId && item.runId !== (command.runId || command.id))) {
           throw new Error(`EXECUTION_WORK_ITEM_${item.blockedReason || item.status.toUpperCase()}`);
         }
-        executionWorkItem = { root, itemId, claimed: true };
+        if (!Number.isInteger(item.fencingToken)) throw new Error("EXECUTION_WORK_ITEM_LEASE_REQUIRED");
+        executionWorkItem = { root, itemId, runId: command.runId || command.id, fencingToken: item.fencingToken as number, claimed: true };
         executionHeartbeat = setInterval(() => {
-          heartbeatExecutionWorkItem(root, itemId, command.runId || command.id).catch(() => undefined);
+          heartbeatExecutionWorkItem(root, itemId, executionWorkItem!.runId, executionWorkItem!.fencingToken).catch(() => undefined);
         }, 5_000);
       }
     }
@@ -1383,16 +1820,25 @@ export async function processRuntimeCommand(command: RuntimeCommand): Promise<vo
     }
     if (executionWorkItem?.claimed) {
       if (executionHeartbeat) clearInterval(executionHeartbeat);
-      await finishExecutionWorkItem(executionWorkItem.root, executionWorkItem.itemId, { status: "completed", runId: command.runId || command.id });
+      await finishExecutionWorkItem(executionWorkItem.root, executionWorkItem.itemId, { status: "completed", runId: executionWorkItem.runId, fencingToken: executionWorkItem.fencingToken });
     }
     finishRuntimeCommand(command.id, "succeeded");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (executionWorkItem?.claimed) {
       if (executionHeartbeat) clearInterval(executionHeartbeat);
-      await finishExecutionWorkItem(executionWorkItem.root, executionWorkItem.itemId, { status: "failed", error: message, runId: command.runId || command.id }).catch(() => undefined);
+      if (error instanceof RuntimeControlStop) {
+        await cancelExecutionWorkItem(executionWorkItem.root, executionWorkItem.itemId, { runId: executionWorkItem.runId, fencingToken: executionWorkItem.fencingToken, error: message }).catch(() => undefined);
+      } else {
+        await finishExecutionWorkItem(executionWorkItem.root, executionWorkItem.itemId, { status: "failed", error: message, runId: executionWorkItem.runId, fencingToken: executionWorkItem.fencingToken }).catch(() => undefined);
+      }
     }
     if (error instanceof RuntimeControlStop) {
+      const stoppedRun = command.runId ? getRuntimeRun(command.runId) : null;
+      if (stoppedRun) {
+        const boundary = await recordRuntimeControlBoundary({ root: projectRoot(command.projectSlug), commandId: command.id, projectSlug: command.projectSlug, runId: stoppedRun.id, status: error.status, stage: stoppedRun.currentStage || command.type });
+        await recordRuntimeMutationDrain({ root: projectRoot(command.projectSlug), boundaryId: boundary.boundaryId, projectSlug: command.projectSlug, runId: stoppedRun.id });
+      }
       appendRuntimeEvent({
         projectSlug: command.projectSlug,
         runId: command.runId,
@@ -1407,12 +1853,41 @@ export async function processRuntimeCommand(command: RuntimeCommand): Promise<vo
       const run = getRuntimeRun(command.runId);
       if (run) {
         const failureCount = run.failureCount + 1;
+        const recoveryRoot = projectRoot(command.projectSlug);
+        const retryReceipt = await recordRuntimeRetryReceipt(recoveryRoot, {
+          runId: run.id,
+          commandId: command.id,
+          stage: run.currentStage || command.type,
+          attempt: failureCount,
+          errorCode: message,
+          workFingerprints: Array.from({ length: failureCount }, () => run.currentStage || command.type)
+        });
+        const compensation = await recordRuntimeCompensation(recoveryRoot, {
+          runId: run.id,
+          commandId: command.id,
+          stage: run.currentStage || command.type,
+          failureFingerprint: retryReceipt.fingerprint,
+          workLeaseClaimed: Boolean(executionWorkItem?.claimed)
+        });
+        const compensationApplication = await applyRuntimeCompensation(recoveryRoot, compensation);
+        const shouldRetry = retryReceipt.decision.retry && retryReceipt.stagnation.status !== "paused";
+        const retryCommand = shouldRetry
+          ? enqueueRuntimeCommand({
+              projectSlug: command.projectSlug,
+              runId: run.id,
+              type: "start",
+              payload: { ...command.payload, retryChainId: retryReceipt.decision.retryChainId, retryAttempt: failureCount + 1 },
+              idempotencyKey: `runtime-retry-${run.id}-${failureCount}`
+            })
+          : undefined;
         updateRuntimeRun(run.id, {
-          status: failureCount >= 3 ? "review_required" : "failed",
+          status: shouldRetry ? "queued" : failureCount >= 3 || retryReceipt.stagnation.status === "paused" ? "review_required" : "failed",
           error: message,
           failureCount,
-          finishedAt: runtimeNow()
+          result: { ...(run.result || {}), recovery: { receiptFingerprint: retryReceipt.fingerprint, compensationFingerprint: compensation.fingerprint, compensationApplicationFingerprint: compensationApplication.fingerprint, retry: shouldRetry, retryCommandId: retryCommand?.id, stuck: retryReceipt.stagnation.status === "paused" } },
+          finishedAt: shouldRetry ? undefined : runtimeNow()
         });
+        appendRuntimeEvent({ projectSlug: command.projectSlug, runId: run.id, type: "system", stage: run.currentStage, message: shouldRetry ? "Runtime failure scheduled for bounded retry" : retryReceipt.stagnation.status === "paused" ? "Runtime paused after stagnation detection" : "Runtime failure recorded", payload: { receiptFingerprint: retryReceipt.fingerprint, compensationFingerprint: compensation.fingerprint, compensationApplicationFingerprint: compensationApplication.fingerprint, retry: shouldRetry, retryCommandId: retryCommand?.id, stuck: retryReceipt.stagnation.status === "paused", attempt: failureCount } });
       }
     }
     appendRuntimeEvent({

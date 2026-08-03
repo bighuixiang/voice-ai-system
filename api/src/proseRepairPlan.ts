@@ -34,8 +34,21 @@ async function writeJson(target: string, value: unknown) {
   await fs.rename(temp, target);
 }
 
+export function assertProseRepairPlanIntegrity(plan: ProseRepairPlan, expectedId?: string): ProseRepairPlan {
+    const { fingerprint, ...base } = plan;
+    const strings = (values: unknown) => Array.isArray(values) && values.every((value) => typeof value === "string" && value.trim());
+    const findings = Array.isArray(plan.targetFindings) && plan.targetFindings.length > 0 && plan.targetFindings.length <= 3 && plan.targetFindings.every((finding) => finding.findingId.trim() && ["hard", "warning"].includes(finding.severity) && strings(finding.evidenceRefs) && finding.expectedImprovement.trim());
+    const scope = plan.scope?.kind === "local-span" && plan.scope.chapterId.trim() && Array.isArray(plan.scope.affectedParagraphIndexes) && plan.scope.affectedParagraphIndexes.every((index) => Number.isInteger(index) && index >= 0) && Number.isInteger(plan.scope.maxChangedParagraphs) && plan.scope.maxChangedParagraphs > 0;
+    const valid = plan.schemaVersion === "prose-repair-plan.v1" && (!expectedId || plan.planId === expectedId) && [plan.planId, plan.projectSlug, plan.candidateId, plan.reviewFingerprint, plan.createdAt].every((value) => typeof value === "string" && value.trim()) && ["ready", "blocked"].includes(plan.status) && findings && scope && strings(plan.protectedStrengths) && strings(plan.protectedItems) && strings(plan.prohibitedActions) && strings(plan.expectedEvidence) && strings(plan.regressionChecks) && plan.rollbackPoint?.canonUntouched === true && plan.rollbackPoint.candidateFingerprint.trim() && plan.authorDecisionRequired === true && !Number.isNaN(Date.parse(plan.createdAt)) && /^[a-f0-9]{64}$/i.test(plan.fingerprint) && hash(base) === fingerprint;
+    if (!valid) throw new Error("PROSE_REPAIR_PLAN_INTEGRITY_FAILED");
+    return plan;
+}
+
 export async function readProseRepairPlan(root: string, planId: string): Promise<ProseRepairPlan | null> {
-  try { return JSON.parse(await fs.readFile(planPath(root, planId), "utf8")) as ProseRepairPlan; }
+  try {
+    const plan = JSON.parse(await fs.readFile(planPath(root, planId), "utf8")) as ProseRepairPlan;
+    return assertProseRepairPlanIntegrity(plan, planId);
+  }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 

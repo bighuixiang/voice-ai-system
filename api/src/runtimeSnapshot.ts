@@ -12,6 +12,7 @@ import type {
 } from "./types.js";
 import { resolveInside } from "./pathSafety.js";
 import { readChapterDashboard, readChapterQualityReport, readChapterSummary, readLedgerEntries, readSceneCards } from "./writingCockpit.js";
+import { readKnowledgeIndex } from "./knowledgeIndex.js";
 
 const ledgerKinds: LedgerEntry["kind"][] = ["foreshadowing", "continuity", "power", "character", "risk"];
 
@@ -168,7 +169,7 @@ export async function buildCreationRuntimeSnapshot(
     throw new Error("Project has no chapters");
   }
 
-  const [content, dashboard, scenes, summary, qualityReport, history, recaps, ledgers] = await Promise.all([
+  const [content, dashboard, scenes, summary, qualityReport, history, recaps, ledgers, knowledge] = await Promise.all([
     fs.readFile(resolveInside(root, chapter.contentPath), "utf8").catch(() => ""),
     readChapterDashboard(root, chapter.id),
     readSceneCards(root, chapter.id),
@@ -176,7 +177,8 @@ export async function buildCreationRuntimeSnapshot(
     readChapterQualityReport(root, chapter.id),
     readTaskHistory(root),
     readWritingRecaps(root),
-    Promise.all(ledgerKinds.map((kind) => readLedgerEntries(root, kind))).then((items) => items.flat())
+    Promise.all(ledgerKinds.map((kind) => readLedgerEntries(root, kind))).then((items) => items.flat()),
+    readKnowledgeIndex(root, project)
   ]);
 
   const wordCount = countDraftWords(content);
@@ -260,7 +262,7 @@ export async function buildCreationRuntimeSnapshot(
     }
   ];
 
-  const snapshotBase = {
+  const snapshotBase: Omit<CreationRuntimeSnapshot, "fingerprint" | "updatedAt"> = {
     projectSlug: project.slug,
     chapterId: chapter.id,
     chapterTitle: chapter.title,
@@ -277,6 +279,11 @@ export async function buildCreationRuntimeSnapshot(
       pendingRecapPatchCount,
       craftBeatCount,
       craftGateRisks,
+      legacyFactCount: knowledge.facts.filter((fact) => fact.source.type !== "memory-claim").length,
+      eligibleMemoryClaimCount: knowledge.facts.filter((fact) => fact.source.type === "memory-claim").length,
+      projectionAuthority: knowledge.facts.some((fact) => fact.source.type === "memory-claim")
+        ? knowledge.facts.some((fact) => fact.source.type !== "memory-claim") ? "mixed" : "memory-claim-backed"
+        : "legacy-only",
       narrativeDebt
     }
   };

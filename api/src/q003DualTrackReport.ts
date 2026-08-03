@@ -1,0 +1,4 @@
+export function buildQ003DualTrackReport(input: { q003Confirmed: boolean; latencyMs: number; costCents: number; reworkCount: number; authorAcceptance: number; hardGuardFailures: readonly string[]; qualityEvidenceRefs: readonly string[] }): { mode: "dual-track" | "single-track"; winner: null; tracks: { delivery: Record<string, number>; quality: Record<string, number | string[]> } } {
+  if (![input.latencyMs, input.costCents, input.reworkCount, input.authorAcceptance].every(Number.isFinite)) throw new Error("Q003_REPORT_METRICS_REQUIRED");
+  return { mode: input.q003Confirmed ? "single-track" : "dual-track", winner: null, tracks: { delivery: { latencyMs: input.latencyMs, costCents: input.costCents }, quality: { reworkCount: input.reworkCount, authorAcceptance: input.authorAcceptance, hardGuardFailures: [...input.hardGuardFailures], qualityEvidenceRefs: [...input.qualityEvidenceRefs] } } };
+}

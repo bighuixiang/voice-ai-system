@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-learning-release-missing-pattern",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "A prose manifest craft-pattern reference must resolve to a persisted pattern before release or revocation checks can pass.",
+    "Missing craft evidence must fail closed instead of being silently ignored."
+  ],
+  "implementationRefs": [
+    "api/src/learningRelease.ts:assertCraftPatternReleaseRefs",
+    "api/src/learningRelease.spec.ts:missing craft pattern regression"
+  ],
+  "tests": {
+    "red": "A missing pattern reference resolved successfully because the checker silently continued.",
+    "green": "learningRelease.spec.ts passed 11/11 after missing-reference rejection was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

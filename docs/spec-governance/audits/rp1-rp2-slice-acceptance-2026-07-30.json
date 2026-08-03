@@ -17,8 +17,8 @@
     {
       "sliceId": "RP1-surface-and-primary-action",
       "requirements": ["FR-UX-022", "FR-UX-023", "FR-UX-026"],
-      "implementationRefs": ["api/src/surfaceCapability.ts", "api/src/primaryActionDecision.ts"],
-      "tests": ["api/src/surfaceCapability.spec.ts", "api/src/primaryActionDecision.spec.ts", "api/src/app.spec.ts"],
+      "implementationRefs": ["api/src/surfaceCapability.ts", "api/src/surfaceCapabilityStore.ts", "api/src/primaryActionDecision.ts"],
+      "tests": ["api/src/surfaceCapability.spec.ts", "api/src/surfaceCapabilityStore.spec.ts", "api/src/primaryActionDecision.spec.ts", "api/src/app.spec.ts"],
       "result": "passed"
     },
     {
@@ -146,11 +146,273 @@
       "implementationRefs": ["api/src/dialogueMemoryGovernance.ts", "api/src/app.ts"],
       "tests": ["api/src/dialogueMemoryGovernance.spec.ts", "api/src/app.spec.ts"],
       "result": "passed"
+    },
+    {
+      "sliceId": "RP2-creative-objective-governance",
+      "requirements": ["FR-OBJECTIVE-001", "FR-OBJECTIVE-002", "FR-OBJECTIVE-004"],
+      "implementationRefs": ["api/src/creativeObjective.ts", "api/src/app.ts"],
+      "tests": ["api/src/creativeObjective.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-author-utterance-persistence",
+      "requirements": ["FR-DIALOGUE-001", "FR-DIALOGUE-002", "FR-API-002"],
+      "implementationRefs": ["api/src/dialogueUtteranceStore.ts", "api/src/dialogueUnderstanding.ts", "api/src/app.ts"],
+      "tests": ["api/src/dialogueUtteranceStore.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-intent-atom-persistence",
+      "requirements": ["FR-INTENT-001", "FR-COLLAB-001", "FR-DIALOGUE-002"],
+      "implementationRefs": ["api/src/dialogueIntentStore.ts", "api/src/dialogueUnderstanding.ts", "api/src/app.ts"],
+      "tests": ["api/src/dialogueIntentStore.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-understanding-evidence-bundle",
+      "requirements": ["FR-DIALOGUE-004", "FR-DIALOGUE-005"],
+      "implementationRefs": ["api/src/understandingEvidenceBundle.ts", "api/src/app.ts"],
+      "tests": ["api/src/understandingEvidenceBundle.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-question-value-breakdown",
+      "requirements": ["FR-DIALOGUE-006", "FR-DIALOGUE-007"],
+      "implementationRefs": ["api/src/questionValueGate.ts", "api/src/app.ts"],
+      "tests": ["api/src/questionValueGate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-dialogue-policy-safeguards",
+      "requirements": ["FR-DIALOGUE-008", "FR-DIALOGUE-009", "FR-DIALOGUE-010"],
+      "implementationRefs": ["api/src/dialoguePolicy.ts", "api/src/app.ts"],
+      "tests": ["api/src/dialoguePolicy.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-dialogue-question-lifecycle",
+      "requirements": ["FR-DIALOGUE-011", "FR-DIALOGUE-012", "FR-DIALOGUE-013", "FR-DIALOGUE-014", "FR-DIALOGUE-015", "FR-DIALOGUE-016"],
+      "implementationRefs": ["api/src/dialogueQuestions.ts", "api/src/app.ts"],
+      "tests": ["api/src/dialogueQuestions.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-exploratory-draft-canon-isolation",
+      "requirements": ["FR-DIALOGUE-017"],
+      "implementationRefs": ["api/src/exploratoryDraft.ts", "api/src/app.ts"],
+      "tests": ["api/src/exploratoryDraft.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-context-manifest-replay-and-evidence-gate",
+      "requirements": ["FR-CONTEXT-005", "FR-CONTEXT-010"],
+      "implementationRefs": ["api/src/contextManifest.ts", "api/src/contextEvidenceGate.ts", "api/src/app.ts"],
+      "tests": ["api/src/contextEvidenceGate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-execution-retry-and-circuit-gates",
+      "requirements": ["FR-AI-009", "FR-AI-015"],
+      "implementationRefs": ["api/src/executionResilience.ts", "api/src/app.ts"],
+      "tests": ["api/src/executionResilience.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-model-call-replay-fingerprint",
+      "requirements": ["FR-AI-013"],
+      "implementationRefs": ["api/src/modelCallFingerprint.ts", "api/src/app.ts"],
+      "tests": ["api/src/modelCallFingerprint.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-structured-output-and-completion-evidence",
+      "requirements": ["FR-AI-012", "FR-AI-014"],
+      "implementationRefs": ["api/src/aiOutputGovernance.ts", "api/src/app.ts"],
+      "tests": ["api/src/aiOutputGovernance.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-execution-strategy-and-failover-gates",
+      "requirements": ["FR-AI-008", "FR-AI-010", "FR-AI-016"],
+      "implementationRefs": ["api/src/executionStrategy.ts", "api/src/app.ts"],
+      "tests": ["api/src/executionStrategy.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-recognition-state-and-intent-correction",
+      "requirements": ["FR-DIALOGUE-003", "FR-COLLAB-005"],
+      "implementationRefs": ["api/src/dialogueUnderstanding.ts", "api/src/intentCorrection.ts", "api/src/app.ts"],
+      "tests": ["api/src/dialogueUnderstanding.spec.ts", "api/src/intentCorrection.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-versioned-understanding-snapshot",
+      "requirements": ["FR-STATE-002", "FR-DELIVERY-018"],
+      "implementationRefs": ["api/src/understandingExecutor.ts", "api/src/understandingWorker.ts"],
+      "tests": ["api/src/understandingExecutor.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "RP2-question-governance-and-effort-boundaries",
+      "requirements": ["FR-QUESTION-001", "FR-QUESTION-002", "FR-QUESTION-003", "FR-QUESTION-004", "FR-QUESTION-005", "FR-QUESTION-006", "FR-QUESTION-007", "FR-QUESTION-008", "FR-QUESTION-009", "FR-EFFORT-012", "FR-EFFORT-013"],
+      "implementationRefs": ["api/src/questionGovernance.ts", "api/src/questionInteraction.ts", "api/src/app.ts"],
+      "tests": ["api/src/questionGovernance.spec.ts", "api/src/questionInteraction.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V3-contract-candidate-comparison",
+      "requirements": ["FR-OBJECTIVE-010"],
+      "implementationRefs": ["api/src/candidateComparison.ts", "api/src/app.ts"],
+      "tests": ["api/src/candidateComparison.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V3-contract-decision-settlement-presentation",
+      "requirements": ["FR-EFFORT-007", "FR-EFFORT-009", "FR-EFFORT-015"],
+      "implementationRefs": ["api/src/decisionBundle.ts", "api/src/contractDecisionPresentation.ts", "api/src/app.ts"],
+      "tests": ["api/src/decisionBundle.spec.ts", "api/src/contractDecisionPresentation.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V4-outline-objective-hierarchy-and-contribution",
+      "requirements": ["FR-OBJECTIVE-003", "FR-OBJECTIVE-006"],
+      "implementationRefs": ["api/src/objectiveHierarchy.ts", "api/src/app.ts"],
+      "tests": ["api/src/objectiveHierarchy.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V5-drafting-objective-and-q003-guards",
+      "requirements": ["FR-OBJECTIVE-005", "FR-OBJECTIVE-007", "FR-OBJECTIVE-012"],
+      "implementationRefs": ["api/src/draftingGovernance.ts", "api/src/app.ts"],
+      "tests": ["api/src/draftingGovernance.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V5-prose-candidate-anti-goal-consumption",
+      "requirements": ["FR-OBJECTIVE-007"],
+      "implementationRefs": ["api/src/proseValidation.ts", "api/src/draftingGovernance.ts", "api/src/app.ts"],
+      "tests": ["api/src/proseValidation.spec.ts", "api/src/draftingGovernance.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "UX-question-decision-and-stable-deep-links",
+      "requirements": ["FR-UX-004", "FR-UX-005", "FR-UX-019"],
+      "implementationRefs": ["api/src/questionInteraction.ts", "api/src/decisionBundle.ts", "api/src/stableDeepLink.ts", "api/src/app.ts"],
+      "tests": ["api/src/questionInteraction.spec.ts", "api/src/decisionBundle.spec.ts", "api/src/stableDeepLink.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-objective-change-and-drift-monitoring",
+      "requirements": ["FR-OBJECTIVE-009", "FR-OBJECTIVE-011"],
+      "implementationRefs": ["api/src/objectiveEvolution.ts", "api/src/app.ts"],
+      "tests": ["api/src/objectiveEvolution.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V5-content-addressed-cache",
+      "requirements": ["FR-AI-011"],
+      "implementationRefs": ["api/src/contentAddressedCache.ts", "api/src/modelInvocationLedger.ts"],
+      "tests": ["api/src/contentAddressedCache.spec.ts", "api/src/modelInvocationLedger.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-effort-adaptation-and-value-measurement",
+      "requirements": ["FR-EFFORT-018", "FR-EFFORT-020"],
+      "implementationRefs": ["api/src/collaborationAdaptation.ts", "api/src/authorEffortValue.ts"],
+      "tests": ["api/src/collaborationAdaptation.spec.ts", "api/src/authorEffortValue.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V5-objective-evidence-anti-gaming",
+      "requirements": ["FR-OBJECTIVE-008"],
+      "implementationRefs": ["api/src/objectiveEvidence.ts"],
+      "tests": ["api/src/objectiveEvidence.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-book-run-work-graph-baseline",
+      "requirements": ["FR-RUN-001", "FR-RUN-002", "FR-RUN-005", "FR-RUN-007"],
+      "implementationRefs": ["api/src/bookRun.ts", "api/src/bookWorkGraph.ts", "api/src/bookWorkScheduler.ts", "api/src/executionDispatcher.ts", "api/src/quiescenceProof.ts"],
+      "tests": ["api/src/bookRun.spec.ts", "api/src/bookWorkGraph.spec.ts", "api/src/bookWorkScheduler.spec.ts", "api/src/executionDispatcher.spec.ts", "api/src/quiescenceProof.spec.ts", "api/src/runtimeWorker.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-work-lease-fencing",
+      "requirements": ["FR-RUN-015"],
+      "implementationRefs": ["api/src/workLease.ts"],
+      "tests": ["api/src/workLease.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-stage-aware-checkpoint-recovery",
+      "requirements": ["FR-RUN-016"],
+      "implementationRefs": ["api/src/runCheckpoint.ts"],
+      "tests": ["api/src/runCheckpoint.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-run-direction-causal-effect",
+      "requirements": ["FR-RUN-012"],
+      "implementationRefs": ["api/src/runDirection.ts"],
+      "tests": ["api/src/runDirection.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-stagnation-detection",
+      "requirements": ["FR-RUN-018"],
+      "implementationRefs": ["api/src/stagnationDetection.ts"],
+      "tests": ["api/src/stagnationDetection.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-evidence-based-replanning",
+      "requirements": ["FR-RUN-019"],
+      "implementationRefs": ["api/src/replanDecision.ts"],
+      "tests": ["api/src/replanDecision.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-fair-scheduling-and-progress-projection",
+      "requirements": ["FR-RUN-017", "FR-RUN-022"],
+      "implementationRefs": ["api/src/fairScheduler.ts", "api/src/runProgressProjection.ts"],
+      "tests": ["api/src/fairScheduler.spec.ts", "api/src/runProgressProjection.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V7-version-freshness-and-failure-isolation",
+      "requirements": ["FR-RUN-020", "FR-RUN-021"],
+      "implementationRefs": ["api/src/runFreshness.ts", "api/src/failureIsolation.ts"],
+      "tests": ["api/src/runFreshness.spec.ts", "api/src/failureIsolation.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V8-completion-certificates-and-audit-gates",
+      "requirements": ["FR-COMPLETE-001", "FR-COMPLETE-002", "FR-COMPLETE-004", "FR-COMPLETE-005", "FR-COMPLETE-006", "FR-CLOSURE-019", "FR-CLOSURE-020", "FR-CHAR-020", "FR-WORLD-020"],
+      "implementationRefs": ["api/src/completionAudit.ts", "api/src/closureCertificate.ts", "api/src/obligationCertificate.ts", "api/src/characterArcCertificate.ts", "api/src/worldIntegrityCertificate.ts"],
+      "tests": ["api/src/completionAudit.spec.ts", "api/src/closureCertificate.spec.ts", "api/src/obligationCertificate.spec.ts", "api/src/obligationCoverage.spec.ts", "api/src/characterArcCertificate.spec.ts", "api/src/worldIntegrityCertificate.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "V8-release-preflight-and-delivery-gates",
+      "requirements": ["FR-PUBLISH-001", "FR-PUBLISH-002", "FR-PUBLISH-003", "FR-EVAL-017"],
+      "implementationRefs": ["api/src/releasePreflight.ts", "api/src/releaseAcceptance.ts", "api/src/releaseE2EAcceptance.ts", "api/src/releaseActivation.ts"],
+      "tests": ["api/src/releasePreflight.spec.ts", "api/src/releaseAcceptance.spec.ts", "api/src/releaseE2EAcceptance.spec.ts", "api/src/releaseActivation.spec.ts"],
+      "result": "passed"
+    },
+    {
+      "sliceId": "seed-semantic-facets-and-readiness",
+      "requirements": ["FR-SEED-002", "FR-SEED-003", "FR-SEED-004", "FR-SEED-005", "FR-SEED-006", "FR-SEED-007", "FR-SEED-008", "FR-SEED-009", "FR-SEED-010", "FR-SEED-011", "FR-SEED-018"],
+      "implementationRefs": ["api/src/storySeed.ts", "api/src/seedReadiness.ts", "api/src/app.ts"],
+      "tests": ["api/src/storySeed.spec.ts", "api/src/seedReadiness.spec.ts", "api/src/seedBranchQuestion.spec.ts", "api/src/seedDurability.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed"
     }
   ],
   "verification": {
-    "command": "vitest run api/src/seedCompilationRun.spec.ts api/src/seedCompilationState.spec.ts api/src/seedDurability.spec.ts api/src/dialogueTimeout.spec.ts api/src/dialogueLifecycle.spec.ts api/src/dialogueRuntime.spec.ts api/src/decisionGovernance.spec.ts api/src/decisionBundle.spec.ts api/src/authorEffortBudget.spec.ts api/src/authorEffortBudgetStore.spec.ts api/src/intentCorrection.spec.ts api/src/understandingBudget.spec.ts api/src/understandingAuthorization.spec.ts api/src/understandingExecutor.spec.ts api/src/misunderstandingIncident.spec.ts api/src/contextPlanGate.spec.ts api/src/contextSourceGate.spec.ts api/src/contextPrivacyGate.spec.ts api/src/contextIntegrityGate.spec.ts api/src/modelInvocationLedger.spec.ts api/src/modelRoutingPolicy.spec.ts api/src/independentReviewGate.spec.ts api/src/debateDecision.spec.ts api/src/dialogueMemoryGovernance.spec.ts api/src/creativeJourney.spec.ts api/src/app.spec.ts --pool=forks --maxWorkers=1 --minWorkers=1",
-    "result": "passed: 175 tests"
+    "command": "vitest run api/src/seedCompilationRun.spec.ts api/src/seedCompilationState.spec.ts api/src/seedDurability.spec.ts api/src/storySeed.spec.ts api/src/seedReadiness.spec.ts api/src/seedBranchQuestion.spec.ts api/src/dialogueTimeout.spec.ts api/src/dialogueLifecycle.spec.ts api/src/dialogueRuntime.spec.ts api/src/decisionGovernance.spec.ts api/src/decisionBundle.spec.ts api/src/contractDecisionPresentation.spec.ts api/src/authorEffortBudget.spec.ts api/src/authorEffortBudgetStore.spec.ts api/src/intentCorrection.spec.ts api/src/dialogueUnderstanding.spec.ts api/src/questionGovernance.spec.ts api/src/questionInteraction.spec.ts api/src/understandingBudget.spec.ts api/src/understandingAuthorization.spec.ts api/src/understandingExecutor.spec.ts api/src/misunderstandingIncident.spec.ts api/src/contextPlanGate.spec.ts api/src/contextSourceGate.spec.ts api/src/contextPrivacyGate.spec.ts api/src/contextIntegrityGate.spec.ts api/src/contextEvidenceGate.spec.ts api/src/executionResilience.spec.ts api/src/modelCallFingerprint.spec.ts api/src/aiOutputGovernance.spec.ts api/src/executionStrategy.spec.ts api/src/candidateComparison.spec.ts api/src/objectiveHierarchy.spec.ts api/src/draftingGovernance.spec.ts api/src/proseValidation.spec.ts api/src/stableDeepLink.spec.ts api/src/objectiveEvolution.spec.ts api/src/modelInvocationLedger.spec.ts api/src/contentAddressedCache.spec.ts api/src/collaborationAdaptation.spec.ts api/src/authorEffortValue.spec.ts api/src/objectiveEvidence.spec.ts api/src/bookRun.spec.ts api/src/bookWorkGraph.spec.ts api/src/bookWorkScheduler.spec.ts api/src/executionDispatcher.spec.ts api/src/quiescenceProof.spec.ts api/src/runtimeWorker.spec.ts api/src/workLease.spec.ts api/src/runCheckpoint.spec.ts api/src/runDirection.spec.ts api/src/stagnationDetection.spec.ts api/src/replanDecision.spec.ts api/src/fairScheduler.spec.ts api/src/runProgressProjection.spec.ts api/src/runFreshness.spec.ts api/src/failureIsolation.spec.ts api/src/completionAudit.spec.ts api/src/closureCertificate.spec.ts api/src/obligationCertificate.spec.ts api/src/obligationCoverage.spec.ts api/src/characterArcCertificate.spec.ts api/src/worldIntegrityCertificate.spec.ts api/src/releasePreflight.spec.ts api/src/releaseAcceptance.spec.ts api/src/releaseE2EAcceptance.spec.ts api/src/releaseActivation.spec.ts api/src/modelRoutingPolicy.spec.ts api/src/independentReviewGate.spec.ts api/src/debateDecision.spec.ts api/src/dialogueMemoryGovernance.spec.ts api/src/creativeObjective.spec.ts api/src/dialogueUtteranceStore.spec.ts api/src/dialogueIntentStore.spec.ts api/src/understandingEvidenceBundle.spec.ts api/src/questionValueGate.spec.ts api/src/dialoguePolicy.spec.ts api/src/dialogueQuestions.spec.ts api/src/exploratoryDraft.spec.ts api/src/creativeJourney.spec.ts api/src/surfaceCapabilityStore.spec.ts api/src/app.spec.ts --pool=forks --maxWorkers=1 --minWorkers=1",
+    "result": "passed: 370 tests",
+    "browserSmoke": "passed: 6 Playwright Chromium tests with --workers=1, including 2 mobile-viewport keyboard/ARIA checks; real-device matrix and assistive-technology coverage remain unproven",
+    "apiFullSuite": "passed: 292 test files, 1122 tests; skipped: 1 real Codex integration test requiring external executor credentials",
+    "profileE2E": "passed: RP2 local deterministic journey capture -> T0 freeze -> budget/capability authorization -> shadow understanding -> ordered ten-field contract question answers -> idempotent HTTP replay -> browser reload and second-browser-context recovery, plus legacy cockpit dashboard read/write, runtime start command replay, uploaded import-report verification with real migration preview/validation, and RP3 incremental candidate replay -> world-rule linkage -> independent review -> field adoption -> confirmed character contract -> world-state projection -> capability progression -> before/after choice evidence -> agency guard boundaries -> belief lifecycle -> relationship misread and state-change evidence; no paid provider call"
   },
   "notYetProven": [
     "RP1 full 51-requirement release acceptance",
@@ -159,5 +421,5 @@
     "real provider model quality and cost/latency acceptance",
     "full RP3 contract release acceptance"
   ],
-  "nextGate": "Continue RP2 understanding evidence and then run profile-level E2E acceptance; do not mark RP1/RP2 released from this partial bundle."
+  "nextGate": "Expand RP2 profile-level E2E across the remaining legacy panels and add real-device/assistive-technology evidence; runtime-worker claim/finish, uploaded import, and publication-artifact export are now covered by API/worker fixtures, while real provider quality/cost remains unproven; surface registry and direct session-file bypasses are server-blocked; do not mark RP1/RP2 released from this partial bundle."
 }

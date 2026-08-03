@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createBeliefLifecycle, recordBeliefEvent } from "./characterBeliefLifecycle.js";
 
-const base = { beliefId: "belief-1", characterId: "hero", belief: "trust is weakness", sourceRefs: ["contract://1"] };
+const base = { beliefId: "belief-1", characterId: "hero", belief: "trust is weakness", protectiveFunction: "prevents abandonment", sourceRefs: ["contract://1"] };
 describe("character false-belief lifecycle", () => {
   it("keeps counterevidence and resistance separate from acknowledgment", () => {
     const formed = createBeliefLifecycle(base);
@@ -25,5 +25,10 @@ describe("character false-belief lifecycle", () => {
     expect(() => recordBeliefEvent(acknowledged, { type: "relapsed", description: "returns to old belief", evidenceRefs: ["scene://3"] })).toThrow("BELIEF_RELAPSE_PRESSURE_REQUIRED");
     const relapsed = recordBeliefEvent(acknowledged, { type: "relapsed", description: "returns under threat", evidenceRefs: ["scene://3"], pressureRefs: ["pressure://3"], costRefs: ["cost://3"] });
     expect(relapsed.status).toBe("relapsed");
+  });
+
+  it("requires and preserves the belief's protective function", () => {
+    expect(() => createBeliefLifecycle({ ...base, protectiveFunction: "" })).toThrow("BELIEF_PROTECTIVE_FUNCTION_REQUIRED");
+    expect(createBeliefLifecycle(base).protectiveFunction).toBe("prevents abandonment");
   });
 });

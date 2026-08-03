@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { createCausalityEdge, listCausalityEdges, readCausalityEdge, validateCausalityGraph } from "./causalityGraph.js";
+import { assertCausalityEdgeIntegrity, createCausalityEdge, listCausalityEdges, readCausalityEdge, validateCausalityGraph } from "./causalityGraph.js";
 
 const input = (root: string, edgeId = "e1") => ({ root, projectSlug: "demo", edgeId, sourceNodeId: "setup-1", targetNodeId: "payoff-1", relation: "pays_off" as const, trigger: "secret planted", consequence: "secret revealed", delayedConsequence: "trust changes", evidenceRefs: ["chapter://1#setup"] });
 
@@ -31,5 +31,16 @@ describe("narrative causality graph", () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "causality-"));
     await expect(createCausalityEdge({ ...input(root), sourceNodeId: "same", targetNodeId: "same" })).rejects.toThrow("CAUSALITY_SELF_LOOP");
     await expect(createCausalityEdge({ ...input(root), evidenceRefs: [] })).rejects.toThrow("CAUSALITY_EVIDENCE_REQUIRED");
+  });
+
+  it("fails closed when a persisted causality edge is tampered", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "causality-tamper-"));
+    const edge = await createCausalityEdge(input(root));
+    const target = path.join(root, "sessions", "causality-edges", `${edge.edgeId}.json`);
+    const tampered = { ...edge, consequence: "changed", fingerprint: "f".repeat(64) };
+    await fs.writeFile(target, JSON.stringify(tampered), "utf8");
+    await expect(readCausalityEdge(root, edge.edgeId)).rejects.toThrow("CAUSALITY_EDGE_INTEGRITY_FAILED");
+    await expect(listCausalityEdges(root, "demo")).rejects.toThrow("CAUSALITY_EDGE_INTEGRITY_FAILED");
+    expect(() => assertCausalityEdgeIntegrity(tampered, edge.edgeId)).toThrow("CAUSALITY_EDGE_INTEGRITY_FAILED");
   });
 });

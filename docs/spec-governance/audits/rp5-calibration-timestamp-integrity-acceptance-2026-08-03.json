@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-calibration-timestamp-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Calibration evidence must contain a parseable creation timestamp before it is trusted.",
+    "A rehashed artifact with an invalid timestamp must fail closed as semantic invalid evidence."
+  ],
+  "implementationRefs": [
+    "api/src/qualityCalibration.ts:verifyEvidenceSemantics",
+    "api/src/qualityCalibration.spec.ts:invalid creation timestamp"
+  ],
+  "tests": {
+    "red": "A rehashed provider calibration artifact with createdAt=not-a-timestamp was accepted by read/trust checks.",
+    "green": "qualityCalibration.spec.ts passed 16/16 after timestamp parsing was enforced."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete.",
+    "Complete migration cutover across all legacy-capable surfaces remains unproven."
+  ]
+}

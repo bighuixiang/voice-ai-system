@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { renderPublicationArtifacts, readPublicationArtifactSet } from "./publicationArtifacts.js";
+import crypto from "node:crypto";
 
 const tree = {
   schemaVersion: "publication-tree.v1" as const,
@@ -49,5 +50,17 @@ describe("publication artifacts", () => {
     await expect(readPublicationArtifactSet(root, "edition-1")).rejects.toThrow("PUBLICATION_ARTIFACT_SET_INTEGRITY_FAILED");
     await expect(renderPublicationArtifacts(root, manifest, tree, ["markdown"])).rejects.toThrow("PUBLICATION_ARTIFACT_SET_INTEGRITY_FAILED");
     expect(result.status).toBe("validated");
+  });
+
+  it("rejects a re-signed artifact set with an invalid lifecycle status", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "publication-artifacts-semantic-"));
+    await renderPublicationArtifacts(root, manifest, tree, ["markdown"]);
+    const target = path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, status: "draft" };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readPublicationArtifactSet(root, "edition-1")).rejects.toThrow("PUBLICATION_ARTIFACT_SET_SEMANTIC_INVALID");
   });
 });

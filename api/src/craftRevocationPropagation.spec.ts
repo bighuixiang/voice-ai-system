@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { propagateCraftSourceRevocation } from "./craftRevocationPropagation.js";
+import { assertCraftRevocationPropagationIntegrity, propagateCraftSourceRevocation } from "./craftRevocationPropagation.js";
 
 const base = {
   sourceId: "source-1", eventId: "revoke-1", reason: "rights withdrawn", evidenceRefs: ["rights://1"], sourceFingerprint: "source-fp-1",
@@ -26,5 +26,11 @@ describe("craft source revocation propagation", () => {
     const result = propagateCraftSourceRevocation(base);
     expect(result.sourceFingerprint).toBe("source-fp-1");
     expect(result.eventId).toBe("revoke-1");
+  });
+  it("rejects blank provenance, duplicate artifacts, and exposes derivative disposition", () => {
+    expect(() => propagateCraftSourceRevocation({ ...base, evidenceRefs: [" "] })).toThrow("CRAFT_REVOCATION_EVIDENCE_REQUIRED");
+    expect(() => propagateCraftSourceRevocation({ ...base, artifacts: [base.artifacts[0], base.artifacts[0]] })).toThrow("CRAFT_REVOCATION_ARTIFACT_DUPLICATE");
+    expect(propagateCraftSourceRevocation(base).derivativeDisposition).toBe("invalidated");
+    expect(() => propagateCraftSourceRevocation({ ...base, artifacts: [{ ...base.artifacts[0], kind: "unknown" as never }] })).toThrow("CRAFT_REVOCATION_ARTIFACT_INVALID"); const result = propagateCraftSourceRevocation(base); expect(() => assertCraftRevocationPropagationIntegrity({ ...result, reason: "tampered" })).toThrow("CRAFT_REVOCATION_INTEGRITY_FAILED");
   });
 });

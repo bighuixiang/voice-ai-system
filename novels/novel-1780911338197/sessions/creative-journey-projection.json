@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "creative-journey-projection.v1",
+  "projectSlug": "novel-1780911338197",
+  "sourceMessageIds": [],
+  "sessionFingerprint": "229a6b20eeaf783b6b0544928dd4ae165a6d778e7750ae63a0f542de002886ae",
+  "sourceFingerprint": "229a6b20eeaf783b6b0544928dd4ae165a6d778e7750ae63a0f542de002886ae",
+  "projectionVersion": "c47e38a01e623762a8afc15f",
+  "freshness": "current",
+  "unsavedState": {
+    "hasDraft": false
+  },
+  "pendingRefs": [],
+  "stage": "capture",
+  "primaryAsset": "creative-session",
+  "primaryAction": {
+    "id": "capture-idea",
+    "label": "告诉我你的想法",
+    "kind": "capture",
+    "status": "available"
+  },
+  "fingerprint": "98f0ed54d9bdcc1cc3b9570938e1bc495f3ec4e30ce7c27e533803c2cc0b46b5"
+}

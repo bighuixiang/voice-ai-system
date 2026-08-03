@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-scene-execution-error-contract",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-WRITE-002", "FR-PROSE-004", "FR-UX-029"],
+  "implementationRefs": [
+    "api/src/sceneExecutionLedger.ts",
+    "api/src/app.ts",
+    "api/src/app.spec.ts"
+  ],
+  "tests": [
+    "api/src/app.spec.ts",
+    "api/src/sceneExecutionLedger.spec.ts"
+  ],
+  "result": "passed",
+  "evidence": [
+    "RED: incomplete scene evidence surfaced as HTTP 500 instead of a recoverable domain conflict",
+    "GREEN: SCENE_LEDGER_EVIDENCE_REQUIRED is mapped to structured HTTP 409",
+    "RED: evidence could still be appended after the persisted SceneCard fingerprint drifted",
+    "GREEN: scene execution evidence now fails closed with SCENE_LEDGER_SCENE_CARD_STALE and HTTP 409",
+    "the route journey creates a SceneCard and SceneExecutionLedger, rejects incomplete evidence, and full API app regression passes 257/257; scene ledger unit regression passes 5/5"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "This slice proves the scene execution error contract only; it does not prove RP5 external calibration, independent review, migration cutover, or delivery proof."
+  }
+}

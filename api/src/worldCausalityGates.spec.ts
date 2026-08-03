@@ -1,0 +1,24 @@
+import { describe, expect, it } from "vitest";
+import { applyRegionalRule, assessContextualVictory, checkTravelFeasibility, conserveResource, enforceAbilityPrerequisites, enforceBodyAndCooldown, enforceRuleBoundary, preserveInstitutionBelief, projectStoryClock, scanWorldDocument, scheduleInstitutionResponse, settleTemporaryBoost, assessRuleConsequences, gateDeusExRule, recordRuleException, preserveRuleInteractionCandidates, minimizeRuleExposition, scopeRuleChange, assessWorldHealth, issueWorldCertificate } from "./worldCausalityGates.js";
+describe("world causality gates", () => {
+  it("scans long world documents without truncation", () => { expect(scanWorldDocument({ characters: 235000, headings: 798, sourceVersion: "v1", unresolved: 2 })).toMatchObject({ scanned: true, headings: 798, truncated: false }); });
+  it("blocks teleport without anchor in blocked zone", () => { expect(enforceRuleBoundary({ actor: "a", anchor: "", distance: 1, energy: 10, cooldown: 0, blocked: true, failure: "burn", hasAnchor: false }).allowed).toBe(false); });
+  it("keeps institution beliefs separate from objective truth", () => { expect(preserveInstitutionBelief({ claims: [{ owner: "church", claim: "divine" }, { owner: "academy", claim: "particles" }] }).objective).toBeNull(); });
+  it("applies regional modifiers without retroactive rewrite", () => { expect(applyRegionalRule({ rule: "leyline", origin: "blue", target: "elan", modifier: 2, newCost: "fatigue" })).toMatchObject({ modifier: 0, retroactive: false }); });
+  it("blocks impossible travel without proof", () => { expect(checkTravelFeasibility({ requiredDays: 5, elapsedDays: 1, transportProof: false, departureProof: false, timeJump: false }).conflict).toBe(true); });
+  it("uses event time instead of chapter number", () => { expect(projectStoryClock({ eventTimes: [10, 3], chapter: 11 }).now).toBe(10); });
+  it("requires ability prerequisites or explicit fallback cost", () => { expect(enforceAbilityPrerequisites({ required: ["altar", "sword"], present: [], fallbackCost: undefined }).allowed).toBe(false); });
+  it("keeps temporary boost from becoming permanent", () => { expect(settleTemporaryBoost({ source: "corpse-king", temporary: true, expiresAt: 10, now: 5, progressionEvent: false })).toMatchObject({ status: "borrowed", permanent: false }); });
+  it("credits contextual victory beyond power score", () => { expect(assessContextualVictory({ powerDelta: 0, terrain: true, counterKnowledge: true, opponentError: false, preparation: true, cost: true }).proven).toBe(true); });
+  it("preserves scarce resource balance", () => { expect(conserveResource({ balance: 1, spend: 1, acquisition: 0 })).toMatchObject({ balance: 0, valid: true }); });
+  it("carries injury and cooldown across chapters", () => { expect(enforceBodyAndCooldown({ injuryUntil: 7, cooldownUntil: 7, now: 2, treatment: false })).toMatchObject({ injured: true, cooling: true }); });
+  it("delays institution response by verification and mobilization", () => { expect(scheduleInstitutionResponse({ intelDay: 1, verifyDays: 2, mobilizeDays: 3, encounterDay: 3 }).ready).toBe(false); });
+  it("requires institutional consequences for widespread rules", () => { expect(assessRuleConsequences({ rule: "cheap-heal", professions: 0, price: 1, war: 1, lifespan: 1, explanation: "" }).covered).toBe(false); });
+  it("blocks an unforeshadowed no-cost reversal", () => { expect(gateDeusExRule({ priorHints: 0, boundary: false, irreversibleCost: false }).blocked).toBe(true); });
+  it("records exception debt instead of rewriting base rule", () => { expect(recordRuleException({ rule: "curse", reason: "bloodline", knowledgeScope: "hero", recoveryWindow: "ch12" }).debt).toBe(true); });
+  it("keeps multiple rule interaction outcomes replayable", () => { expect(preserveRuleInteractionCandidates({ candidates: ["blocked", "burn", "seal"], version: "v1" }).candidates).toHaveLength(3); });
+  it("allows observable-cost exposition without encyclopedia dump", () => { expect(minimizeRuleExposition({ observableCost: "lifespan", fullRuleAvailable: true, encyclopediaParagraphs: 0 }).sufficient).toBe(true); });
+  it("propagates confirmed rule change to minimal subgraph", () => { expect(scopeRuleChange({ changed: ["source"], affected: ["tier"], unrelated: ["currency"], confirmed: true })).toMatchObject({ recompute: ["source", "tier"], protected: ["currency"] }); });
+  it("does not call empty ledgers healthy", () => { expect(assessWorldHealth({ ledgerCoverage: 0, sourceCandidates: 2, ruleConflicts: 0, continuityEvidence: 0 }).status).toBe("coverage_missing"); });
+  it("limits world certificate to audited scope", () => { expect(issueWorldCertificate({ scope: "volume-1", unknown: ["far-continent"], keyExceptions: 0, scanFailures: 0, resourceConflicts: 0 }).status).toBe("audited_consistent_for_scope"); });
+});

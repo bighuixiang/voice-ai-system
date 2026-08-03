@@ -7,15 +7,15 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/novelProject.ts",
-      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+      "sha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720"
     },
     {
       "path": "api/src/runtimeFiles.ts",
-      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
+      "sha256": "c041b4689b107f2798788aa7effa7edfa0fb32efda1cd8ec0a6b58c0ecae75d2"
     },
     {
       "path": "api/src/chapterQualityReview.ts",
@@ -27,7 +27,7 @@
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "ui/src/components/novel/ChapterEditor.vue",
@@ -35,7 +35,7 @@
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     }
   ],
   "privacy": {
@@ -61,15 +61,15 @@
   },
   "operationalSnapshot": {
     "totals": {
-      "projects": 8,
-      "declaredFiles": 219,
-      "existingFiles": 213,
-      "nonemptyFiles": 213,
-      "validUtf8Files": 213,
-      "bytes": 387715,
-      "characters": 152392,
+      "projects": 11,
+      "declaredFiles": 222,
+      "existingFiles": 216,
+      "nonemptyFiles": 216,
+      "validUtf8Files": 216,
+      "bytes": 387754,
+      "characters": 152419,
       "crlfFiles": 199,
-      "lfFiles": 14,
+      "lfFiles": 17,
       "mixedLineEndingFiles": 0,
       "trailingWhitespaceFiles": 26,
       "trailingWhitespaceLines": 104,
@@ -82,7 +82,7 @@
       {
         "projectOrdinal": 1,
         "inputFingerprints": {
-          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "project": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676",
           "contentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
         },
         "files": {
@@ -311,7 +311,7 @@
       {
         "projectOrdinal": 5,
         "inputFingerprints": {
-          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "project": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe",
           "contentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
         },
         "files": {
@@ -369,6 +369,176 @@
       {
         "projectOrdinal": 6,
         "inputFingerprints": {
+          "project": null,
+          "contentAggregate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "files": {
+          "declared": 0,
+          "existing": 0,
+          "nonempty": 0,
+          "validUtf8": 0,
+          "bytes": 0,
+          "characters": 0
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {},
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": null,
+          "contentAggregate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "files": {
+          "declared": 0,
+          "existing": 0,
+          "nonempty": 0,
+          "validUtf8": 0,
+          "bytes": 0,
+          "characters": 0
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {},
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "contentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "files": {
+          "declared": 3,
+          "existing": 3,
+          "nonempty": 3,
+          "validUtf8": 3,
+          "bytes": 39,
+          "characters": 27
+        },
+        "encodingAndWhitespaceSignals": {
+          "withBom": 0,
+          "withReplacementCharacter": 0,
+          "withMojibakeMarker": 0,
+          "withC0Control": 0,
+          "byLineEnding": {
+            "lf": 3
+          },
+          "withTabs": 0,
+          "withTrailingWhitespace": 0,
+          "trailingWhitespaceLines": 0,
+          "withNbsp": 0,
+          "withFullwidthSpace": 0,
+          "withoutFinalNewline": 0,
+          "withThreeOrMoreBlankLines": 0
+        },
+        "structureAndPunctuationSignals": {
+          "withCodeFence": 0,
+          "withHtmlTag": 0,
+          "withMarkdownList": 0,
+          "markdownListLines": 0,
+          "withMarkdownTable": 0,
+          "markdownTableLines": 0,
+          "withMultipleHeadings": 0,
+          "withHorizontalRule": 0,
+          "withEmbeddedDoubleHyphen": 0,
+          "withPlaceholderMarker": 0,
+          "withMetadataNoise": 0,
+          "withAsciiDoubleQuote": 0,
+          "withAsciiEllipsis": 0,
+          "withChineseDialogueQuote": 0,
+          "withChineseEllipsis": 0,
+          "interpretation": "These are syntax inventory signals, not automatic defects. Headings, lists, tables, horizontal rules, ASCII punctuation, and special blocks may be intentional and require a TextProfile plus structural context before judgment."
+        },
+        "governedTextArtifacts": {
+          "profiles": 0,
+          "structureSnapshots": 0,
+          "diagnostics": 0,
+          "fixCandidates": 0,
+          "sourceMaps": 0,
+          "normalizationReceipts": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 9,
+        "inputFingerprints": {
           "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
           "contentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
         },
@@ -425,7 +595,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": {
           "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
           "contentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
@@ -483,7 +653,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": {
           "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
           "contentAggregate": "2d36728f3a770439d66fd3730878e502a4bf53f4c0dbe03aad5931804ad9d63d"
@@ -545,10 +715,10 @@
   },
   "summary": {
     "auditedStages": 11,
-    "projectsScanned": 8,
-    "declaredContentFiles": 219,
-    "existingContentFiles": 213,
-    "validUtf8Files": 213,
+    "projectsScanned": 11,
+    "declaredContentFiles": 222,
+    "existingContentFiles": 216,
+    "validUtf8Files": 216,
     "mixedLineEndingFiles": 0,
     "trailingWhitespaceFiles": 26,
     "multipleHeadingFiles": 68,
@@ -571,12 +741,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2695,
+          "line": 8794,
           "evidence": "const nextContent = String(req.body.content || \"\")"
         },
         {
           "path": "api/src/app.ts",
-          "line": 2697,
+          "line": 8796,
           "evidence": "fs.writeFile(resolveInside(projectRoot(project.slug), relativePath), nextContent, \"utf8\")"
         }
       ]
@@ -586,12 +756,12 @@
       "evidence": [
         {
           "path": "api/src/novelProject.ts",
-          "line": 945,
+          "line": 974,
           "evidence": "for (const source of importedChapters)"
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 952,
+          "line": 981,
           "evidence": "source.file.content, \"utf8\""
         }
       ]
@@ -601,12 +771,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeFiles.ts",
-          "line": 164,
+          "line": 173,
           "evidence": "async function atomicWrite"
         },
         {
           "path": "api/src/runtimeFiles.ts",
-          "line": 172,
+          "line": 181,
           "evidence": "fs.writeFile(tmp, content, \"utf8\")"
         }
       ]

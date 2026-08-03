@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import crypto from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { assembleContext } from "./contextAssembler.js";
 import { createProjectFiles, createProjectSkeleton, projectRoot } from "./novelProject.js";
@@ -35,6 +36,47 @@ describe("contextAssembler", () => {
     expect(blocks.some((block) => block.content.includes('"slug": "context-demo"'))).toBe(true);
     expect(blocks.some((block) => block.content.includes("Hero knows only local facts."))).toBe(true);
     expect(blocks.some((block) => block.content.includes("Volume plan with causal steps."))).toBe(true);
+  });
+
+  it("marks summary and knowledge blocks as rebuildable projections rather than canon authority", async () => {
+    const project = createProjectSkeleton({ title: "Projection Boundary", roughIdea: "Projection boundary." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(path.join(root, "memory", "chapter-summaries", "chapter-001.json"), JSON.stringify({ chapterId: "chapter-001", summary: "A projected recap", keyEvents: ["A projected event"] }), "utf8");
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-002" });
+    const summary = blocks.find((block) => block.content.includes("A projected recap"));
+    const knowledge = blocks.find((block) => block.title === "Knowledge Memory Index");
+    expect(summary?.content).toContain('"authority": "projection-only"');
+    expect(knowledge).toBeUndefined();
+  });
+
+  it("injects only author-approved active craft preferences into runtime context", async () => {
+    const project = createProjectSkeleton({ title: "Active Preference Context", roughIdea: "Scoped preference context." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const base = { schemaVersion: "preference-hypothesis.v1", hypothesisId: "hypothesis-active", projectSlug: project.slug, pattern: "keep-pressure", category: "structure", scope: { chapterId: "chapter-001" }, lifecycle: "active", supportEventIds: ["feedback-1", "feedback-2"], oppositionEventIds: [], confidence: { lower: 0.7, upper: 0.9 }, minIndependentEvidence: 2, createdAt: "2026-08-01T00:00:00.000Z", updatedAt: "2026-08-01T00:00:00.000Z" };
+    await fs.mkdir(path.join(root, "sessions", "preference-hypotheses"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "preference-hypotheses", "hypothesis-active.json"), JSON.stringify({ ...base, fingerprint: crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") }), "utf8");
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001", visibilityAudience: "model-task" });
+    const active = blocks.find((block) => block.title === "Active Craft Preferences");
+    expect(active?.content).toContain("keep-pressure");
+    expect(active?.content).toContain("author-approved-scoped");
+    expect(active?.content).not.toContain("feedback note");
+  });
+
+  it("does not inject legacy summary or index facts into an explicitly model-task context", async () => {
+    const project = createProjectSkeleton({ title: "Model Context Boundary", roughIdea: "Model tasks need governed memory." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(path.join(root, "memory", "chapter-summaries", "chapter-001.json"), JSON.stringify({ chapterId: "chapter-001", summary: "Private projected recap", keyEvents: ["Private event"] }), "utf8");
+    await fs.mkdir(path.join(root, "knowledge"), { recursive: true });
+    await fs.mkdir(path.join(root, "memory"), { recursive: true });
+    await fs.writeFile(path.join(root, "knowledge", "facts.jsonl"), `${JSON.stringify({ id: "fact:private", text: "Private projected fact", chapterIds: ["chapter-001"], relatedEntities: [], keywords: ["private"], source: { type: "chapter-summary", id: "private" }, updatedAt: "2026-07-31T00:00:00.000Z" })}\n`, "utf8");
+    await fs.writeFile(path.join(root, "knowledge", "triples.jsonl"), "", "utf8");
+    await fs.writeFile(path.join(root, "memory", "chapter-index.json"), JSON.stringify({ projectSlug: project.slug, chapters: [{ chapterId: "chapter-001", title: "Chapter 1", keywords: ["private"], factIds: ["fact:private"], tripleIds: [], entityNames: [], updatedAt: "2026-07-31T00:00:00.000Z" }], keywords: { private: ["chapter-001"] }, updatedAt: "2026-07-31T00:00:00.000Z" }), "utf8");
+    const blocks = await assembleContext("chapter.draft", root, project, { chapterId: "chapter-001", visibilityAudience: "model-task" });
+    expect(blocks.some((block) => block.content.includes("Private projected recap"))).toBe(false);
+    expect(blocks.some((block) => block.content.includes("Private projected fact"))).toBe(false);
   });
 
   it("injects a narrative promise lock near the top of writing context", async () => {
@@ -93,6 +135,13 @@ describe("contextAssembler", () => {
     expect(budget.blockPlan?.find((block) => block.title === "世界观")).toMatchObject({ tier: "T1", truncated: true });
     expect(budget.truncatedBlocks).toContainEqual(expect.objectContaining({ title: "世界观", tier: "T1" }));
     expect(budget.totalOriginalChars).toBeGreaterThan(budget.totalFinalChars || 0);
+  });
+
+  it("does not silently truncate T0 blocks", async () => {
+    const project = createProjectSkeleton({ title: "T0 Overflow", roughIdea: "x".repeat(12000) });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await expect(assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" })).rejects.toThrow("CONTEXT_T0_OVERFLOW_REQUIRES_STRUCTURED_COMPRESSION");
   });
 
   it("uses a project-level genre profile override when present", async () => {
@@ -553,5 +602,20 @@ describe("contextAssembler", () => {
     expect(knowledge?.content).toContain("state_after");
     expect(knowledge?.content).toContain("Wounded but alert.");
     expect(knowledge?.content).not.toContain("A distant unrelated fact.");
+  });
+
+  it("fails closed when the knowledge projection contains corrupted JSONL", async () => {
+    const project = createProjectSkeleton({ title: "Corrupt Knowledge", roughIdea: "Corrupt projections must not disappear." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    await fs.writeFile(path.join(root, "knowledge", "facts.jsonl"), "{not-json}\n", "utf8");
+    await fs.writeFile(path.join(root, "memory", "chapter-index.json"), JSON.stringify({
+      projectSlug: project.slug,
+      chapters: [{ chapterId: "chapter-001", title: "Chapter 1", keywords: ["gate"], factIds: ["fact-1"], tripleIds: [], entityNames: [], updatedAt: "2026-06-11T00:00:00.000Z" }],
+      keywords: { gate: ["chapter-001"] },
+      updatedAt: "2026-06-11T00:00:00.000Z"
+    }), "utf8");
+
+    await expect(assembleContext("chapter.draft", root, project, { chapterId: "chapter-001" })).rejects.toThrow("CONTEXT_KNOWLEDGE_SOURCE_CORRUPT:knowledge/facts.jsonl");
   });
 });

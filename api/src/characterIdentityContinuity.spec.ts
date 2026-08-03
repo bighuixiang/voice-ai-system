@@ -18,4 +18,12 @@ describe("character death resurrection identity continuity", () => {
   it("does not permit resurrection while alive or without identity change evidence", () => {
     expect(() => recordCharacterContinuityEvent(createCharacterContinuity(base), { type: "resurrection", description: "returns", mechanism: "magic", cost: "none", evidenceRefs: ["chapter://1"], identityChange: "" })).toThrow("CHARACTER_RESURRECTION_STATE_INVALID");
   });
+
+  it("only permits identity repair after a documented rupture", () => {
+    const alive = createCharacterContinuity(base);
+    expect(() => recordCharacterContinuityEvent(alive, { type: "identity-repair", description: "reconciles the name", identityChange: "accepts the returned identity", evidenceRefs: ["chapter://2"] })).toThrow("CHARACTER_IDENTITY_REPAIR_STATE_INVALID");
+    const dead = recordCharacterContinuityEvent(alive, { type: "death", description: "falls", cause: "blood loss", evidenceRefs: ["chapter://10"] });
+    const broken = recordCharacterContinuityEvent(dead, { type: "resurrection", description: "returns", mechanism: "oath exchange", cost: "loses name", evidenceRefs: ["chapter://12"], identityChange: "does not recognize old contract" });
+    expect(() => recordCharacterContinuityEvent(broken, { type: "identity-repair", description: "reconciles the name", evidenceRefs: ["chapter://13"] })).toThrow("CHARACTER_IDENTITY_REPAIR_REQUIRED");
+  });
 });

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { createSceneCardContract, listSceneCardContracts, readSceneCardContract } from "./sceneCard.js";
+import { assertSceneCardIntegrity, createSceneCardContract, listSceneCardContracts, readSceneCardContract } from "./sceneCard.js";
 
 const input = (root: string, sceneId = "scene-001") => ({ root, projectSlug: "demo", sceneId, chapterId: "chapter-001", trigger: "patrol closes the gate", povCharacterId: "hero", roleGoal: "warn ally", conflictStrategy: "misdirection", turningPoint: "ally sees the route", informationChange: "route exposed", emotionChange: "fear to resolve", relationshipChange: "trust rises", resourceChange: "escape window lost", entryState: "hero hidden at gate", exitState: "hero commits to warning", nextSceneHook: "enemy tracks the route", sourceRefs: ["outline://scene-001"] });
 
@@ -27,5 +27,16 @@ describe("scene card contract", () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "scene-card-"));
     await expect(createSceneCardContract({ ...input(root), relationshipChange: "", resourceChange: "" })).rejects.toThrow("SCENE_CARD_CHANGE_REQUIRED");
     await expect(createSceneCardContract({ ...input(root), nextSceneHook: "" })).rejects.toThrow("SCENE_CARD_HOOK_REQUIRED");
+  });
+
+  it("fails closed when a persisted scene card is tampered", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "scene-card-tamper-"));
+    const scene = await createSceneCardContract(input(root));
+    const target = path.join(root, "sessions", "scene-cards", `${scene.sceneId}.json`);
+    const tampered = { ...scene, exitState: "changed", fingerprint: "f".repeat(64) };
+    await fs.writeFile(target, JSON.stringify(tampered), "utf8");
+    await expect(readSceneCardContract(root, scene.sceneId)).rejects.toThrow("SCENE_CARD_INTEGRITY_FAILED");
+    await expect(listSceneCardContracts(root, "demo")).rejects.toThrow("SCENE_CARD_INTEGRITY_FAILED");
+    expect(() => assertSceneCardIntegrity(tampered, scene.sceneId)).toThrow("SCENE_CARD_INTEGRITY_FAILED");
   });
 });

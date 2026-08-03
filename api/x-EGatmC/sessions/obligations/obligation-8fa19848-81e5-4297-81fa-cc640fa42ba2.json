@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "narrative-obligation.v1",
+  "obligationId": "obligation-8fa19848-81e5-4297-81fa-cc640fa42ba2",
+  "projectSlug": "d",
+  "type": "mystery",
+  "title": "t",
+  "questionOrPromise": "q",
+  "importance": "medium",
+  "status": "proposed",
+  "sourceRefs": [],
+  "entityRefs": [],
+  "version": 0,
+  "updatedAt": "2026-07-31T06:03:28.311Z",
+  "fingerprint": "51dc442518020528abb5dc2a700430176bb0fb814f5f2ccc99f301cbc2d8afcc"
+}

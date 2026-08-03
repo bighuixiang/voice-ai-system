@@ -6,4 +6,9 @@ describe("explainable craft mechanism unit", () => {
   it("stores executable mechanism fields", () => { const unit = createCraftMechanismUnit(valid); expect(unit.status).toBe("candidate"); expect(unit.actionChange).toContain("隐瞒"); });
   it("rejects surface-only pseudo rules", () => { expect(() => createCraftMechanismUnit({ ...valid, triggerCondition: "句子短", actionChange: "反转多", informationChange: "很有氛围" })).toThrow("CRAFT_MECHANISM_NOT_EXECUTABLE"); });
   it("requires failure mode, applicability and evidence", () => { expect(() => createCraftMechanismUnit({ ...valid, failureModes: [] })).toThrow("CRAFT_MECHANISM_FAILURE_REQUIRED"); expect(() => createCraftMechanismUnit({ ...valid, evidenceRefs: [] })).toThrow("CRAFT_MECHANISM_EVIDENCE_REQUIRED"); });
+  it("rejects blank applicability/failure/evidence anchors and non-finite input values", () => {
+    expect(() => createCraftMechanismUnit({ ...valid, applicableScenes: [" "] })).toThrow("CRAFT_MECHANISM_APPLICABILITY_REQUIRED");
+    expect(() => createCraftMechanismUnit({ ...valid, failureModes: [" "] })).toThrow("CRAFT_MECHANISM_FAILURE_REQUIRED");
+    expect(() => createCraftMechanismUnit({ ...valid, evidenceRefs: [" "] })).toThrow("CRAFT_MECHANISM_EVIDENCE_REQUIRED");
+  });
 });

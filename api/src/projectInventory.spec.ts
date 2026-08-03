@@ -9,9 +9,25 @@ const roots: string[] = [];
 function withFingerprint<T extends Record<string, unknown>>(value: T): T & { fingerprint: string } {
   return { ...value, fingerprint: crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex") };
 }
-afterEach(async () => { delete process.env.NOVELS_ROOT; await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true }))); });
+afterEach(async () => { delete process.env.NOVELS_ROOT; delete process.env.NOVEL_DATA_ROOT; delete process.env.PLATFORM_ROOT; await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true }))); });
 
 describe("project migration inventory", () => {
+  it("does not classify configured platform and data roots as unmanaged projects", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-reserved-roots-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    process.env.NOVEL_DATA_ROOT = path.join(root, "data");
+    process.env.PLATFORM_ROOT = path.join(root, "platform");
+    await fs.mkdir(process.env.NOVEL_DATA_ROOT, { recursive: true });
+    await fs.mkdir(process.env.PLATFORM_ROOT, { recursive: true });
+    await fs.mkdir(path.join(root, "real-project", "chapters"), { recursive: true });
+    await fs.writeFile(path.join(root, "real-project", "project.json"), JSON.stringify({ slug: "real-project", chapters: [] }));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects.map((project) => project.projectSlug)).toEqual(["real-project"]);
+  });
+
   it("reports governance state without writing or treating legacy projects as activated", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-"));
     roots.push(root);
@@ -23,7 +39,9 @@ describe("project migration inventory", () => {
     await fs.writeFile(path.join(legacy, "project.json"), JSON.stringify({ slug: "legacy", chapters: [] }));
     await fs.writeFile(path.join(governed, "project.json"), JSON.stringify({ slug: "governed", outlineVersion: { versionId: "outline-1" }, chapters: [] }));
     await fs.mkdir(path.join(legacy, "sessions", "migrations"), { recursive: true });
-    await fs.writeFile(path.join(legacy, "sessions", "migrations", "migration-preview-x.json"), JSON.stringify(withFingerprint({ projectSlug: "legacy", status: "preview_only" })));
+    await fs.writeFile(path.join(legacy, "sessions", "migrations", "migration-preview-x.json"), JSON.stringify(withFingerprint({
+      projectSlug: "legacy", migrationId: "migration-preview-x", status: "preview_only", previewOnly: true, writeAuthority: "legacy_compatibility_only", assetCounts: { chapters: 0, outlines: 0, sceneCards: 0, summaries: 0, ledgers: 0, qualityReports: 0 }, conflicts: [], sourceFingerprint: "f".repeat(64), createdAt: "2026-07-30T00:00:00.000Z"
+    })));
 
     const inventory = await buildProjectInventory();
     expect(inventory.projects).toEqual(expect.arrayContaining([
@@ -130,7 +148,7 @@ describe("project migration inventory", () => {
     process.env.NOVELS_ROOT = root;
     const projectRoot = path.join(root, "legacy");
     await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
-    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], migration: { state: "activated", migrationId: "migration" } }));
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], migration: { state: "activated", migrationId: "migration", writeAuthority: "prose-adoption" } }));
     await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "migration.activation.json"), JSON.stringify(withFingerprint({
       schemaVersion: "project-migration-activation.v1", migrationId: "migration", projectSlug: "legacy", status: "activated", writeAuthority: "legacy", sourceFingerprint: "source", activatedAt: "2026-07-30T00:00:00.000Z"
     })));
@@ -138,5 +156,136 @@ describe("project migration inventory", () => {
     const inventory = await buildProjectInventory();
 
     expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "migration-activation-incomplete" })]);
+  });
+
+  it("does not treat a prose activation artifact as cut over when the project manifest still grants legacy writes", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-manifest-authority-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const projectRoot = path.join(root, "legacy");
+    await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], migration: { state: "activated", migrationId: "migration", writeAuthority: "legacy" } }));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "migration.activation.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-activation.v1", migrationId: "migration", projectSlug: "legacy", status: "activated", writeAuthority: "prose-adoption", sourceFingerprint: "source", activatedAt: "2026-07-30T00:00:00.000Z"
+    })));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "migration-activation-incomplete" })]);
+  });
+
+  it("does not infer cutover from an activation artifact stored under the wrong migration filename", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-activation-filename-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const projectRoot = path.join(root, "legacy");
+    await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], migration: { state: "activated", migrationId: "migration", writeAuthority: "prose-adoption" } }));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "other.activation.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-activation.v1", migrationId: "migration", projectSlug: "legacy", status: "activated", writeAuthority: "prose-adoption", sourceFingerprint: "source", activatedAt: "2026-07-30T00:00:00.000Z"
+    })));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "migration-activation-incomplete" })]);
+  });
+
+  it("does not infer validation from an artifact stored under the wrong migration filename", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-validation-filename-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const projectRoot = path.join(root, "legacy");
+    await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [] }));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "other.validation.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-validation.v1", migrationId: "migration", projectSlug: "legacy", status: "validated", sourceFingerprint: "source", conflicts: [], resolvedConflicts: [], dependencies: { outlineVersion: "ready" }, validatedAt: "2026-07-30T00:00:00.000Z"
+    })));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "legacy" })]);
+  });
+
+  it("does not infer preview from a preview artifact whose filename id differs from its content id", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-preview-filename-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const projectRoot = path.join(root, "legacy");
+    await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [] }));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "migration-preview-other.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-preview.v1", migrationId: "migration-preview-real", projectSlug: "legacy", status: "preview_only", previewOnly: true, writeAuthority: "legacy_compatibility_only", assetCounts: { chapters: 0, outlines: 0, sceneCards: 0, summaries: 0, ledgers: 0, qualityReports: 0 }, conflicts: [], sourceFingerprint: "source", createdAt: "2026-07-30T00:00:00.000Z"
+    })));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "legacy" })]);
+  });
+
+  it("does not infer cutover from a hashed activation missing required semantic fields", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-activation-fields-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const projectRoot = path.join(root, "legacy");
+    await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], migration: { state: "activated", migrationId: "migration", writeAuthority: "prose-adoption" } }));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "migration.activation.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-activation.v1", migrationId: "migration", projectSlug: "legacy", status: "activated", writeAuthority: "prose-adoption", activatedAt: "2026-07-30T00:00:00.000Z"
+    })));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "migration-activation-incomplete" })]);
+  });
+
+  it("ignores a hashed rollback missing required activation binding", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-rollback-fields-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const projectRoot = path.join(root, "legacy");
+    await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], migration: { state: "activated", migrationId: "migration", writeAuthority: "prose-adoption" } }));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "migration.activation.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-activation.v1", migrationId: "migration", projectSlug: "legacy", status: "activated", writeAuthority: "prose-adoption", sourceFingerprint: "f".repeat(64), activatedAt: "2026-07-30T00:00:00.000Z"
+    })));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "migration.rollback.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-rollback.v1", migrationId: "migration", projectSlug: "legacy", status: "rolled_back", rolledBackAt: "2026-07-30T00:01:00.000Z"
+    })));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "migration-activated" })]);
+  });
+
+  it("does not infer validation from a hashed artifact missing source fingerprint", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-validation-fields-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const projectRoot = path.join(root, "legacy");
+    await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [] }));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "migration.validation.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-validation.v1", migrationId: "migration", projectSlug: "legacy", status: "validated", conflicts: [], resolvedConflicts: [], dependencies: { outlineVersion: "ready" }, validatedAt: "2026-07-30T00:00:00.000Z"
+    })));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "legacy" })]);
+  });
+
+  it("does not infer preview from a hashed artifact with invalid asset counts", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "project-inventory-preview-fields-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const projectRoot = path.join(root, "legacy");
+    await fs.mkdir(path.join(projectRoot, "sessions", "migrations"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "legacy", chapters: [] }));
+    await fs.writeFile(path.join(projectRoot, "sessions", "migrations", "migration-preview-x.json"), JSON.stringify(withFingerprint({
+      schemaVersion: "project-migration-preview.v1", migrationId: "migration-preview-x", projectSlug: "legacy", status: "preview_only", previewOnly: true, writeAuthority: "legacy_compatibility_only", assetCounts: { chapters: -1, outlines: 0, sceneCards: 0, summaries: 0, ledgers: 0, qualityReports: 0 }, conflicts: [], sourceFingerprint: "source", createdAt: "2026-07-30T00:00:00.000Z"
+    })));
+
+    const inventory = await buildProjectInventory();
+
+    expect(inventory.projects).toEqual([expect.objectContaining({ projectSlug: "legacy", governanceState: "legacy" })]);
   });
 });

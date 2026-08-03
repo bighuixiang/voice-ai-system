@@ -35,8 +35,22 @@ async function writeJson(target: string, value: unknown) {
   await fs.rename(temp, target);
 }
 
+export function assertProseRepairRegressionIntegrity(dossier: ProseRepairRegression, expectedId?: string): ProseRepairRegression {
+    const { fingerprint, ...base } = dossier;
+    const refs = (values: unknown) => Array.isArray(values) && values.every((value) => typeof value === "string" && value.trim());
+    const improvementsValid = Array.isArray(dossier.improvements) && dossier.improvements.every((item) => item.findingId.trim() && ["resolved", "persisted"].includes(item.status) && refs(item.evidenceRefs));
+    const regressionsValid = Array.isArray(dossier.regressions) && dossier.regressions.every((item) => item.findingId.trim() && item.detail.trim() && refs(item.evidenceRefs));
+    const passed = dossier.regressions.length === 0 && dossier.improvements.every((item) => item.status === "resolved");
+    const valid = dossier.schemaVersion === "prose-repair-regression.v1" && (!expectedId || dossier.regressionId === expectedId) && [dossier.regressionId, dossier.planId, dossier.parentCandidateFingerprint, dossier.repairedCandidateFingerprint, dossier.parentReviewFingerprint, dossier.repairedReviewFingerprint, dossier.repairedValidationFingerprint, dossier.createdAt].every((value) => typeof value === "string" && value.trim()) && ["passed", "blocked"].includes(dossier.status) && improvementsValid && regressionsValid && dossier.status === (passed ? "passed" : "blocked") && refs(dossier.preservedStrengths) && dossier.canonicalUntouched === true && !Number.isNaN(Date.parse(dossier.createdAt)) && /^[a-f0-9]{64}$/i.test(dossier.fingerprint) && hash(base) === fingerprint;
+    if (!valid) throw new Error("PROSE_REPAIR_REGRESSION_INTEGRITY_FAILED");
+    return dossier;
+}
+
 export async function readProseRepairRegression(root: string, regressionId: string): Promise<ProseRepairRegression | null> {
-  try { return JSON.parse(await fs.readFile(dossierPath(root, regressionId), "utf8")) as ProseRepairRegression; }
+  try {
+    const dossier = JSON.parse(await fs.readFile(dossierPath(root, regressionId), "utf8")) as ProseRepairRegression;
+    return assertProseRepairRegressionIntegrity(dossier, regressionId);
+  }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 

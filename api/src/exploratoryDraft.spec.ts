@@ -8,4 +8,8 @@ describe("exploratory draft", () => {
     expect(draft.isCanon).toBe(false);
     expect(draft.adoptionRequired).toBe(true);
   });
+
+  it("requires provenance before an exploratory candidate can be shown", () => {
+    expect(() => createExploratoryDraft({ draftId: "d-2", text: "Untraceable candidate", sourceRefs: [] })).toThrow("EXPLORATORY_DRAFT_SOURCE_REQUIRED");
+  });
 });

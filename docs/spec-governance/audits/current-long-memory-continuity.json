@@ -7,7 +7,7 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/auditReport.ts",
@@ -15,39 +15,39 @@
     },
     {
       "path": "api/src/contextAssembler.ts",
-      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+      "sha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963"
     },
     {
       "path": "api/src/knowledgeIndex.ts",
-      "sha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74"
+      "sha256": "75fcaf469761c159527b8e8363bb055da4dd809becb5c5d74dada7d7e6459c4a"
     },
     {
       "path": "api/src/runtimeEngine.ts",
-      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      "sha256": "232bd54d3d76d340af9787f1ea5c522966499e7dad92da82faa24dfaa66b6572"
     },
     {
       "path": "api/src/runtimeSnapshot.ts",
-      "sha256": "0a2cda33d0d1fe4859b7583314a25c64b406d3a2603090232a4f2c3b6654c8b6"
+      "sha256": "e006e4dae47be7762cbe32d5e5882c7a6fcc392106dd825684a81eac071db4e2"
     },
     {
       "path": "api/src/storyGraph.ts",
-      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+      "sha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371"
     },
     {
       "path": "api/src/taskTemplates.ts",
-      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+      "sha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57"
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/writingCockpit.ts",
-      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+      "sha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6"
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     }
   ],
   "privacy": {
@@ -78,25 +78,25 @@
   "operationalSnapshot": {
     "substantialInventoryThresholdChars": 800,
     "totals": {
-      "projects": 8,
-      "chapters": 219,
+      "projects": 11,
+      "chapters": 222,
       "substantialChapters": 71,
       "draftedChapters": 70,
       "substantialWithSummary": 1,
       "draftedWithSummary": 1,
       "plannedChapters": 128,
       "plannedWithoutOwnKnowledgeAnchor": 128,
-      "summaryFiles": 13,
-      "signalSummaries": 1,
+      "summaryFiles": 16,
+      "signalSummaries": 2,
       "acceptedRecapIds": 8,
-      "factPatches": 0,
+      "factPatches": 1,
       "characterStatePatches": 0,
-      "knowledgeFacts": 28,
-      "knowledgeTriples": 24,
-      "indexedChapters": 201,
-      "indexedChaptersWithFacts": 1,
-      "vectorEntries": 253,
-      "storyCharacters": 26,
+      "knowledgeFacts": 32,
+      "knowledgeTriples": 26,
+      "indexedChapters": 204,
+      "indexedChaptersWithFacts": 2,
+      "vectorEntries": 262,
+      "storyCharacters": 27,
       "ledgerEntries": 0,
       "continuityTasks": 13,
       "continuityQuestions": 43
@@ -105,7 +105,7 @@
       {
         "projectOrdinal": 1,
         "inputFingerprints": {
-          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "project": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676",
           "chapterSummaries": null,
           "knowledgeFacts": null,
           "knowledgeTriples": null,
@@ -488,6 +488,295 @@
       {
         "projectOrdinal": 5,
         "inputFingerprints": {
+          "project": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe",
+          "chapterSummaries": "73b02a284053aa57ab5fdf2af5af3369b038b38fb6d0a4b347ee3fae2e613e73",
+          "knowledgeFacts": "b82fcbda7aaf35003676fb257f64efeef32771ab1c9bb35bac17a88edc11b1f0",
+          "knowledgeTriples": "38c16d922a1e6fecb9e247a60ea0ea0c22813577a8bf7735e8905a392cd9dcc0",
+          "chapterIndex": "4a0d1d32826be379856772c2b65b5ae629ad7bacd977c9667307f46f54ac2a71",
+          "vectors": "31b2b60309ba1d779713f6e250dda83b654b40647a2df252101a177d40631a2a",
+          "storyControl": "fb10f488f063c532748315bcd2ff809b1eea51ca0d099725cfd4d7fb7a51309c",
+          "ledgers": "b3dc76ddf5eb746cf0d96e99cb3138e3053f1c57679a3f1a8f6fa3b54b7490fa",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 3,
+          "signalSummaries": 1,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 1,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 4,
+          "factsBySource": {
+            "chapter-summary": 2,
+            "story-control": 2
+          },
+          "summaryFacts": 2,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 2,
+          "triplesByPredicate": {
+            "has_role": 1,
+            "participates_in": 1
+          },
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 3,
+          "indexedChaptersWithFacts": 1,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 9,
+          "vectorsByKind": {
+            "chapter": 3,
+            "fact": 4,
+            "triple": 2
+          }
+        },
+        "storyControl": {
+          "exists": true,
+          "characters": 1,
+          "charactersWithCurrentState": 1,
+          "charactersWithKnownSecrets": 1,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": null,
+          "chapterSummaries": null,
+          "knowledgeFacts": null,
+          "knowledgeTriples": null,
+          "chapterIndex": null,
+          "vectors": null,
+          "storyControl": null,
+          "ledgers": null,
+          "taskHistory": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 0,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 0,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 0,
+          "factsBySource": {},
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 0,
+          "triplesByPredicate": {},
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 0,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 0,
+          "vectorsByKind": {}
+        },
+        "storyControl": {
+          "exists": false,
+          "characters": 0,
+          "charactersWithCurrentState": 0,
+          "charactersWithKnownSecrets": 0,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": null,
+          "chapterSummaries": null,
+          "knowledgeFacts": null,
+          "knowledgeTriples": null,
+          "chapterIndex": null,
+          "vectors": null,
+          "storyControl": null,
+          "ledgers": null,
+          "taskHistory": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "invalidSummaryFiles": 0,
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0,
+          "chapterIndexValid": true,
+          "vectorsValid": true,
+          "storyControlValid": true,
+          "invalidTaskLines": 0
+        },
+        "chapters": {
+          "total": 0,
+          "substantialAtLeast800Chars": 0,
+          "drafted": 0,
+          "substantialWithSummarySignal": 0,
+          "draftedWithSummarySignal": 0,
+          "planned": 0,
+          "plannedWithoutOwnKnowledgeAnchor": 0
+        },
+        "summaries": {
+          "files": 0,
+          "signalSummaries": 0,
+          "acceptedRecapIds": 0,
+          "keyEvents": 0,
+          "factPatches": 0,
+          "characterStatePatches": 0,
+          "emotionItems": 0,
+          "continuityRisks": 0,
+          "summariesWithSourceVersion": 0
+        },
+        "knowledge": {
+          "facts": 0,
+          "factsBySource": {},
+          "summaryFacts": 0,
+          "factsWithTruthStatus": 0,
+          "factsWithTemporalValidity": 0,
+          "factsWithConfidence": 0,
+          "factsWithVisibility": 0,
+          "factsWithSourceVersion": 0,
+          "triples": 0,
+          "triplesByPredicate": {},
+          "triplesWithValidityOrSupersession": 0,
+          "indexedChapters": 0,
+          "indexedChaptersWithFacts": 0,
+          "indexedChaptersWithTriples": 0,
+          "vectorEntries": 0,
+          "vectorsByKind": {}
+        },
+        "storyControl": {
+          "exists": false,
+          "characters": 0,
+          "charactersWithCurrentState": 0,
+          "charactersWithKnownSecrets": 0,
+          "charactersWithFirstChapter": 0,
+          "charactersWithLastSeenChapter": 0,
+          "temporalStateEvents": 0,
+          "perPovKnowledgeStates": 0
+        },
+        "ledgers": {
+          "entries": 0,
+          "byKind": {},
+          "byStatus": {}
+        },
+        "continuityTasks": {
+          "total": 0,
+          "byStatus": {},
+          "emittedQuestions": 0,
+          "structuredViolationReports": 0,
+          "resolutionReceipts": 0
+        },
+        "governedProofs": {
+          "contradictionCases": 0,
+          "memoryReadyProofs": 0,
+          "longContinuityCertificates": 0
+        },
+        "interpretation": {
+          "hasAuthoritativeLongMemory": false,
+          "reason": "Summaries, ledgers, StoryControl, knowledge facts/triples, vectors, and continuity task results are useful projections and hints, but they do not share temporal truth status, entity identity, POV visibility, contradiction, source-version, supersession, or settlement authority."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
           "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
           "chapterSummaries": "1a8a14c6bcf969a28bb6890d7a3d23cde3c315fbe69e1cb4592de965e97cc6b1",
           "knowledgeFacts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -579,7 +868,7 @@
         }
       },
       {
-        "projectOrdinal": 6,
+        "projectOrdinal": 9,
         "inputFingerprints": {
           "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
           "chapterSummaries": "23d3a9cd7d4768c5b935140eea6c75c3a7cb818b7a640b50083ab8eba54cfe0c",
@@ -672,7 +961,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": {
           "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
           "chapterSummaries": "312d8a193ef508fae8318ff704338ace36757328eacc948c846d3db42bc8ad26",
@@ -765,7 +1054,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": {
           "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
           "chapterSummaries": "cc6c2aaad503941093ef4a8c1df804a78f38c9c8ca3e81a6787e4752f78e79b8",
@@ -871,15 +1160,15 @@
   },
   "summary": {
     "auditedStages": 14,
-    "projectsScanned": 8,
-    "chaptersInventoried": 219,
+    "projectsScanned": 11,
+    "chaptersInventoried": 222,
     "substantialChapters": 71,
     "substantialChaptersWithSummary": 1,
-    "knowledgeFacts": 28,
-    "knowledgeTriples": 24,
-    "indexedChapters": 201,
-    "indexedChaptersWithFacts": 1,
-    "vectorEntries": 253,
+    "knowledgeFacts": 32,
+    "knowledgeTriples": 26,
+    "indexedChapters": 204,
+    "indexedChaptersWithFacts": 2,
+    "vectorEntries": 262,
     "continuityTasks": 13,
     "structuredContradictionCases": 0,
     "memoryReadyProofs": 0,
@@ -898,7 +1187,7 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 755,
+          "line": 828,
           "evidence": "{ title: \"目标正文\""
         }
       ],
@@ -926,7 +1215,7 @@
       "evidence": [
         {
           "path": "api/src/writingCockpit.ts",
-          "line": 998,
+          "line": 1008,
           "evidence": "export async function acceptWritingRecapPatches"
         }
       ],
@@ -940,7 +1229,7 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 709,
+          "line": 743,
           "evidence": "export interface ChapterFactPatch"
         }
       ],
@@ -954,7 +1243,7 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 701,
+          "line": 735,
           "evidence": "relatedEntities: string[]"
         }
       ],
@@ -968,12 +1257,12 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 562,
+          "line": 588,
           "evidence": "currentState: string"
         },
         {
           "path": "api/src/knowledgeIndex.ts",
-          "line": 317,
+          "line": 323,
           "evidence": "predicate: \"state_after\""
         }
       ],
@@ -987,12 +1276,12 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 722,
+          "line": 782,
           "evidence": "{ title: \"世界观\""
         },
         {
           "path": "api/src/types.ts",
-          "line": 581,
+          "line": 607,
           "evidence": "export interface StoryEventCard"
         }
       ],
@@ -1006,12 +1295,12 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 563,
+          "line": 589,
           "evidence": "knownSecrets: string"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 724,
+          "line": 784,
           "evidence": "{ title: \"故事总控台\""
         }
       ],
@@ -1025,7 +1314,7 @@
       "evidence": [
         {
           "path": "api/src/knowledgeIndex.ts",
-          "line": 671,
+          "line": 695,
           "evidence": "export async function rebuildKnowledgeIndex"
         }
       ],
@@ -1039,7 +1328,7 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 615,
+          "line": 665,
           "evidence": "if (!indexEntry || (!indexEntry.factIds.length && !indexEntry.tripleIds.length)) return []"
         }
       ],
@@ -1053,12 +1342,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 334,
+          "line": 398,
           "evidence": "readChapterSummary(root, chapter.id)"
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 370,
+          "line": 434,
           "evidence": "summarySignals: currentSummary.summary || currentSummary.keyEvents.length ? [currentSummary] : []"
         }
       ],
@@ -1086,12 +1375,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2451,
+          "line": 8105,
           "evidence": "app.put(\"/api/novel/projects/:projectId/memory/chapter-summaries/:chapterId\""
         },
         {
           "path": "api/src/app.ts",
-          "line": 2499,
+          "line": 8489,
           "evidence": "app.post(\"/api/novel/projects/:projectId/knowledge/index/rebuild\""
         }
       ],

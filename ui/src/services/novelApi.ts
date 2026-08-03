@@ -92,6 +92,10 @@ import type {
   KnowledgeIndexProjection,
   KnowledgeSearchQuery,
   KnowledgeSearchResult,
+  MemoryRetrievalPreview,
+  MemoryHealthReport,
+  MemoryReadyProof,
+  LongContinuityAudit,
   LedgerEntry,
   NovelFilePatch,
   NovelProject,
@@ -170,7 +174,7 @@ export const novelApi = {
     const data = await request<{ project: NovelProject }>("/api/novel/projects", {
       method: "POST",
       headers: jsonHeaders,
-      body: JSON.stringify(input)
+      body: JSON.stringify({ ...input, idempotencyKey: `project-create-${Date.now()}-${Math.random().toString(36).slice(2)}` })
     });
     return data.project;
   },
@@ -1670,6 +1674,50 @@ export const novelApi = {
       body: JSON.stringify(input)
     });
     return data.result;
+  },
+
+  async createMemoryRetrievalPreview(projectId: string, input: KnowledgeSearchQuery & { maxResults?: number }): Promise<MemoryRetrievalPreview> {
+    const data = await request<{ preview: MemoryRetrievalPreview }>(`/api/novel/projects/${projectId}/memory/retrieval-previews`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify(input)
+    });
+    return data.preview;
+  },
+
+  async readMemoryRetrievalPreview(projectId: string, retrievalId: string): Promise<MemoryRetrievalPreview> {
+    const data = await request<{ preview: MemoryRetrievalPreview }>(`/api/novel/projects/${projectId}/memory/retrievals/${retrievalId}`);
+    return data.preview;
+  },
+
+  async createMemoryHealthReport(projectId: string): Promise<MemoryHealthReport> {
+    const data = await request<{ report: MemoryHealthReport }>(`/api/novel/projects/${projectId}/memory/health-reports`, { method: "POST" });
+    return data.report;
+  },
+
+  async readMemoryHealthReport(projectId: string, reportId: string): Promise<MemoryHealthReport> {
+    const data = await request<{ report: MemoryHealthReport }>(`/api/novel/projects/${projectId}/memory/health-reports/${reportId}`);
+    return data.report;
+  },
+
+  async createMemoryReadyProof(projectId: string, input: { healthReportId: string; retrievalId: string; continuityAuditId?: string; targetChapterId: string }): Promise<MemoryReadyProof> {
+    const data = await request<{ proof: MemoryReadyProof }>(`/api/novel/projects/${projectId}/memory/ready-proofs`, { method: "POST", headers: jsonHeaders, body: JSON.stringify(input) });
+    return data.proof;
+  },
+
+  async readMemoryReadyProof(projectId: string, proofId: string): Promise<MemoryReadyProof> {
+    const data = await request<{ proof: MemoryReadyProof }>(`/api/novel/projects/${projectId}/memory/ready-proofs/${proofId}`);
+    return data.proof;
+  },
+
+  async createMemoryContinuityAudit(projectId: string, input: { healthReportId: string }): Promise<LongContinuityAudit> {
+    const data = await request<{ audit: LongContinuityAudit }>(`/api/novel/projects/${projectId}/memory/continuity-audits`, { method: "POST", headers: jsonHeaders, body: JSON.stringify(input) });
+    return data.audit;
+  },
+
+  async readMemoryContinuityAudit(projectId: string, auditId: string): Promise<LongContinuityAudit> {
+    const data = await request<{ audit: LongContinuityAudit }>(`/api/novel/projects/${projectId}/memory/continuity-audits/${auditId}`);
+    return data.audit;
   },
 
   async readLedgerEntries(projectId: string, kind: LedgerEntry["kind"]): Promise<LedgerEntry[]> {

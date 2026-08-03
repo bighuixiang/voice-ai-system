@@ -995,6 +995,16 @@ export async function appendWritingRecap(root: string, recap: WritingRecapCandid
   await fs.appendFile(target, `${JSON.stringify(recap)}\n`, "utf8");
 }
 
+export async function appendWritingRecapIfMissing(root: string, recap: WritingRecapCandidate): Promise<boolean> {
+  const target = resolveInside(root, "tasks/recaps.jsonl");
+  const serialized = JSON.stringify(recap);
+  const existing = await fs.readFile(target, "utf8").catch(() => "");
+  if (existing.split(/\r?\n/).some((line) => line === serialized)) return false;
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.appendFile(target, `${serialized}\n`, "utf8");
+  return true;
+}
+
 export async function acceptWritingRecapPatches(root: string, recap: WritingRecapCandidate): Promise<ChapterSummary> {
   const existingSummary = await readChapterSummary(root, recap.chapterId);
   const acceptedFacts = acceptedFactPatches(recap.factPatches?.length ? recap.factPatches : legacyFactPatches(recap));

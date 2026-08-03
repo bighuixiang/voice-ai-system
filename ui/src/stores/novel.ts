@@ -66,6 +66,10 @@ import type {
   FocusWritingGuide,
   KnowledgeIndexProjection,
   KnowledgeSearchResult,
+  MemoryRetrievalPreview,
+  MemoryHealthReport,
+  MemoryReadyProof,
+  LongContinuityAudit,
   LedgerEntry,
   NovelFilePatch,
   NovelChapter,
@@ -195,6 +199,8 @@ interface StoredWorkspacePreference {
 }
 
 const workspacePreferenceStorageKey = "voice-ai-novel-workspace";
+const retrievalPreviewStorageKey = "voice-ai-novel-retrieval-previews";
+const memoryGovernanceStorageKey = "voice-ai-novel-memory-governance";
 
 function makeDefaultPlatformAiConfig(): PlatformAiConfig {
   return {
@@ -249,6 +255,56 @@ function writeStoredWorkspacePreference(projectSlug: string, nextPreference: Sto
     ...nextPreference
   };
   window.localStorage.setItem(workspacePreferenceStorageKey, JSON.stringify(stored));
+}
+
+function readStoredRetrievalPreviewId(projectSlug: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(retrievalPreviewStorageKey) || "{}") as Record<string, unknown>;
+    const value = stored[projectSlug];
+    return typeof value === "string" && /^retrieval-[a-f0-9]{24}$/i.test(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredRetrievalPreviewId(projectSlug: string, retrievalId: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(retrievalPreviewStorageKey) || "{}") as Record<string, unknown>;
+    if (retrievalId) stored[projectSlug] = retrievalId;
+    else delete stored[projectSlug];
+    window.localStorage.setItem(retrievalPreviewStorageKey, JSON.stringify(stored));
+  } catch {
+    // localStorage is an optional recovery hint; server state remains authoritative.
+  }
+}
+
+interface StoredMemoryGovernanceIds {
+  healthReportId?: string;
+  readyProofId?: string;
+  continuityAuditId?: string;
+}
+
+function readStoredMemoryGovernanceIds(projectSlug: string): StoredMemoryGovernanceIds {
+  if (typeof window === "undefined") return {};
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(memoryGovernanceStorageKey) || "{}") as Record<string, StoredMemoryGovernanceIds>;
+    return stored[projectSlug] || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeStoredMemoryGovernanceIds(projectSlug: string, ids: StoredMemoryGovernanceIds) {
+  if (typeof window === "undefined") return;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(memoryGovernanceStorageKey) || "{}") as Record<string, StoredMemoryGovernanceIds>;
+    stored[projectSlug] = ids;
+    window.localStorage.setItem(memoryGovernanceStorageKey, JSON.stringify(stored));
+  } catch {
+    // localStorage is only a recovery hint; server files remain authoritative.
+  }
 }
 
 function resolvePreferredChapter(project: NovelProject, preferredChapterId?: string | null): NovelChapter | null {
@@ -398,6 +454,11 @@ export const useNovelStore = defineStore("novel", () => {
   const storyGraph = ref<StoryGraphProjection | null>(null);
   const knowledgeIndex = ref<KnowledgeIndexProjection | null>(null);
   const knowledgeSearchResult = ref<KnowledgeSearchResult | null>(null);
+  const knowledgeRetrievalPreview = ref<MemoryRetrievalPreview | null>(null);
+  const memoryHealthReport = ref<MemoryHealthReport | null>(null);
+  const memoryReadyProof = ref<MemoryReadyProof | null>(null);
+  const memoryContinuityAudit = ref<LongContinuityAudit | null>(null);
+  const isRunningMemoryGovernance = ref(false);
   const structureIdeaInput = ref("");
   const structureDraftVersion = ref(0);
   const activeLedgerKind = ref<LedgerKind>("foreshadowing");
@@ -2095,6 +2156,10 @@ export const useNovelStore = defineStore("novel", () => {
     storyGraph.value = null;
     knowledgeIndex.value = null;
     knowledgeSearchResult.value = null;
+    knowledgeRetrievalPreview.value = null;
+    memoryHealthReport.value = null;
+    memoryReadyProof.value = null;
+    memoryContinuityAudit.value = null;
     auditReportPreview.value = null;
     fileVersions.value = [];
     currentFileDiff.value = null;
@@ -2590,7 +2655,27 @@ export const useNovelStore = defineStore("novel", () => {
   async function loadKnowledgeIndex() {
     if (!currentProject.value) return;
     try {
-      knowledgeIndex.value = await novelApi.readKnowledgeIndex(currentProject.value.slug);
+      const projectId = currentProject.value.slug;
+      knowledgeIndex.value = await novelApi.readKnowledgeIndex(projectId);
+      const retrievalId = readStoredRetrievalPreviewId(projectId);
+      if (retrievalId) {
+        try {
+          knowledgeRetrievalPreview.value = await novelApi.readMemoryRetrievalPreview(projectId, retrievalId);
+        } catch {
+          writeStoredRetrievalPreviewId(projectId, null);
+          knowledgeRetrievalPreview.value = null;
+        }
+      }
+      const governanceIds = readStoredMemoryGovernanceIds(projectId);
+      if (governanceIds.healthReportId) {
+        try { memoryHealthReport.value = await novelApi.readMemoryHealthReport(projectId, governanceIds.healthReportId); } catch { memoryHealthReport.value = null; }
+      }
+      if (governanceIds.continuityAuditId) {
+        try { memoryContinuityAudit.value = await novelApi.readMemoryContinuityAudit(projectId, governanceIds.continuityAuditId); } catch { memoryContinuityAudit.value = null; }
+      }
+      if (governanceIds.readyProofId) {
+        try { memoryReadyProof.value = await novelApi.readMemoryReadyProof(projectId, governanceIds.readyProofId); } catch { memoryReadyProof.value = null; }
+      }
     } catch {
       knowledgeIndex.value = null;
     }
@@ -2604,6 +2689,8 @@ export const useNovelStore = defineStore("novel", () => {
       await runCurrentProjectBackgroundJob("knowledge.index.rebuild", { source: "workspace" }, "知识索引重建失败");
       knowledgeIndex.value = await novelApi.readKnowledgeIndex(projectId);
       knowledgeSearchResult.value = null;
+      knowledgeRetrievalPreview.value = null;
+      writeStoredRetrievalPreviewId(projectId, null);
       await loadStoryGraph();
     } finally {
       isRebuildingKnowledgeIndex.value = false;
@@ -2834,10 +2921,19 @@ export const useNovelStore = defineStore("novel", () => {
     try {
       const result = await novelApi.searchKnowledgeIndex(currentProject.value.slug, {
         query: normalizedQuery,
+        task: "knowledge-index-search",
         chapterId: currentChapter.value?.id,
         limit: 12
       });
       knowledgeSearchResult.value = result;
+      knowledgeRetrievalPreview.value = await novelApi.createMemoryRetrievalPreview(currentProject.value.slug, {
+        query: normalizedQuery,
+        task: "knowledge-index-search",
+        chapterId: currentChapter.value?.id,
+        limit: 12,
+        maxResults: 12
+      });
+      writeStoredRetrievalPreviewId(currentProject.value.slug, knowledgeRetrievalPreview.value.retrievalId);
       return result;
     } finally {
       isSearchingKnowledge.value = false;
@@ -3228,6 +3324,26 @@ export const useNovelStore = defineStore("novel", () => {
     await loadContextManifest();
     if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
     connectRuntimeEvents();
+  }
+
+  async function runMemoryGovernance() {
+    if (!currentProject.value || !knowledgeRetrievalPreview.value) return null;
+    isRunningMemoryGovernance.value = true;
+    try {
+      const projectId = currentProject.value.slug;
+      const health = await novelApi.createMemoryHealthReport(projectId);
+      memoryHealthReport.value = health;
+      const continuity = await novelApi.createMemoryContinuityAudit(projectId, { healthReportId: health.reportId });
+      memoryContinuityAudit.value = continuity;
+      const targetChapterId = currentChapter.value?.id || currentProject.value.chapters[0]?.id || "";
+      if (!targetChapterId) return { health, continuity, readyProof: null };
+      const readyProof = await novelApi.createMemoryReadyProof(projectId, { healthReportId: health.reportId, retrievalId: knowledgeRetrievalPreview.value.retrievalId, continuityAuditId: continuity.auditId, targetChapterId });
+      memoryReadyProof.value = readyProof;
+      writeStoredMemoryGovernanceIds(projectId, { healthReportId: health.reportId, continuityAuditId: continuity.auditId, readyProofId: readyProof.proofId });
+      return { health, continuity, readyProof };
+    } finally {
+      isRunningMemoryGovernance.value = false;
+    }
   }
 
   async function startChapterProduction(chapterId: string) {
@@ -4743,6 +4859,11 @@ export const useNovelStore = defineStore("novel", () => {
     storyGraph,
     knowledgeIndex,
     knowledgeSearchResult,
+    knowledgeRetrievalPreview,
+    memoryHealthReport,
+    memoryReadyProof,
+    memoryContinuityAudit,
+    isRunningMemoryGovernance,
     structureIdeaInput,
     structureDraftVersion,
     activeLedgerKind,
@@ -4757,6 +4878,7 @@ export const useNovelStore = defineStore("novel", () => {
     qualityImprovementState,
     isRebuildingStoryGraph,
     isSearchingKnowledge,
+    runMemoryGovernance,
     isReverseEngineeringStructure,
     isExportingAuditReport,
     auditReportPreview,

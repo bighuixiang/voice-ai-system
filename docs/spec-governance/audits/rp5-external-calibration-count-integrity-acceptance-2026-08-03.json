@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-external-calibration-count-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "External provider/human calibration submissions must use finite integer aggregate counts.",
+    "Accuracy and minimum threshold values must be finite before evidence is persisted or considered trusted."
+  ],
+  "implementationRefs": [
+    "api/src/qualityCalibration.ts:ingestExternalCalibrationSubmission",
+    "api/src/qualityCalibration.spec.ts:non-integral or non-finite external aggregate counts"
+  ],
+  "tests": {
+    "red": "Fractional and NaN aggregate counts were accepted and persisted as calibrated evidence.",
+    "green": "qualityCalibration.spec.ts passed 15/15 after finite/integer input validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete.",
+    "Complete migration cutover across all legacy-capable surfaces remains unproven."
+  ]
+}

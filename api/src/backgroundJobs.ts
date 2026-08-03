@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { BackgroundJob, BackgroundJobType, NovelProject } from "./types.js";
@@ -30,7 +31,35 @@ function publicJob(job: BackgroundJob): BackgroundJob {
   return { ...job };
 }
 
+function signJob(job: Omit<BackgroundJob, "fingerprint"> | BackgroundJob): BackgroundJob {
+  const { fingerprint: _fingerprint, ...base } = job as BackgroundJob;
+  return { ...base, fingerprint: crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") };
+}
+
+export function assertBackgroundJobIntegrity(job: BackgroundJob, expectedId?: string): BackgroundJob {
+  const { fingerprint: _fingerprint, ...base } = job;
+  const valid = job.schemaVersion === "background-job.v1"
+    && (!expectedId || job.id === expectedId)
+    && Boolean(job.id?.trim() && job.projectId?.trim() && job.inputSummary !== undefined)
+    && ["knowledge.index.rebuild", "quality.series.rebuild", "story.graph.rebuild", "understanding.shadow"].includes(job.type)
+    && ["pending", "running", "success", "error", "cancelled"].includes(job.status)
+    && typeof job.startedAt === "string" && job.startedAt.trim().length > 0
+    && typeof job.updatedAt === "string" && job.updatedAt.trim().length > 0
+    && (job.finishedAt === undefined || (typeof job.finishedAt === "string" && job.finishedAt.trim().length > 0))
+    && (job.durationMs === undefined || (Number.isFinite(job.durationMs) && job.durationMs >= 0))
+    && (job.outputSummary === undefined || typeof job.outputSummary === "string")
+    && (job.resultRef === undefined || typeof job.resultRef === "string")
+    && (job.error === undefined || typeof job.error === "string")
+    && (job.retryOf === undefined || (typeof job.retryOf === "string" && job.retryOf.trim().length > 0))
+    && (job.cancelRequestedAt === undefined || (typeof job.cancelRequestedAt === "string" && job.cancelRequestedAt.trim().length > 0))
+    && /^[a-f0-9]{64}$/i.test(job.fingerprint)
+    && crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") === job.fingerprint;
+  if (!valid) throw new Error("BACKGROUND_JOB_INTEGRITY_FAILED");
+  return job;
+}
+
 async function appendJobHistory(root: string, job: BackgroundJob): Promise<void> {
+  Object.assign(job, signJob(job));
   const target = resolveInside(root, jobHistoryPath);
   await fs.mkdir(path.dirname(target), { recursive: true });
   await fs.appendFile(target, `${JSON.stringify(job)}\n`, "utf8");
@@ -50,8 +79,13 @@ async function readPersistedJobs(root: string): Promise<BackgroundJob[]> {
     .filter(Boolean)
     .map((line) => {
       try {
-        return JSON.parse(line) as BackgroundJob;
-      } catch {
+        const parsed = JSON.parse(line) as Partial<BackgroundJob>;
+        if (!parsed.schemaVersion && !parsed.fingerprint) {
+          return signJob({ ...(parsed as BackgroundJob), schemaVersion: "background-job.v1", fingerprint: "" });
+        }
+        return assertBackgroundJobIntegrity(parsed as BackgroundJob);
+      } catch (error) {
+        if (error instanceof Error && error.message === "BACKGROUND_JOB_INTEGRITY_FAILED") throw error;
         return null;
       }
     })
@@ -79,6 +113,7 @@ export async function enqueueProjectBackgroundJob(
 ): Promise<BackgroundJob> {
   const startedAt = nowIso();
   const job: BackgroundJob = {
+    schemaVersion: "background-job.v1",
     id: jobId(),
     projectId: project.slug,
     type,
@@ -86,8 +121,10 @@ export async function enqueueProjectBackgroundJob(
     inputSummary,
     retryOf: options.retryOf,
     startedAt,
-    updatedAt: startedAt
+    updatedAt: startedAt,
+    fingerprint: ""
   };
+  Object.assign(job, signJob(job));
   jobs.set(job.id, job);
   trimJobs();
   await appendJobHistory(root, job);

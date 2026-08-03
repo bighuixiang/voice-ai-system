@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-prose-canon-semantic-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Persisted prose canon must contain non-empty text and a valid update timestamp.",
+    "Canon semantic validation must run in addition to fingerprint validation."
+  ],
+  "implementationRefs": [
+    "api/src/proseAdoptionTransaction.ts:assertCanonIntegrity",
+    "api/src/proseAdoptionTransaction.spec.ts:rehashed empty canon regression"
+  ],
+  "tests": {
+    "red": "A rehashed canon with empty text and an invalid timestamp was accepted on read.",
+    "green": "proseAdoptionTransaction.spec.ts passed 8/8 after canon semantic validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

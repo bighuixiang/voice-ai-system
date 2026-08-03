@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-prose-manifest-semantic-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Persisted prose-generation manifests must be semantically valid, not merely self-hashed.",
+    "Required references and frozen status must be revalidated on read and persistence."
+  ],
+  "implementationRefs": [
+    "api/src/proseGenerationManifest.ts:assertManifestSemantics",
+    "api/src/proseGenerationManifest.spec.ts:rehashed incomplete manifest regression"
+  ],
+  "tests": {
+    "red": "A rehashed frozen manifest with empty required references was accepted on read.",
+    "green": "proseGenerationManifest.spec.ts passed 5/5 after semantic validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

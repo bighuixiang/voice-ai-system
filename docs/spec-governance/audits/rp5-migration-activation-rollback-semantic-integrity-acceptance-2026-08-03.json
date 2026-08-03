@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-migration-activation-rollback-semantic-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Migration activation and rollback artifacts must fail closed when hashed fields have invalid semantics.",
+    "Activation authority, status, fingerprints, idempotency values, and timestamps must be validated before reuse or rollback."
+  ],
+  "implementationRefs": [
+    "api/src/migrationValidation.ts:readMigrationActivation/readMigrationRollback",
+    "api/src/migrationValidation.spec.ts:validly hashed activation and rollback artifacts with invalid semantic fields"
+  ],
+  "tests": {
+    "red": "Validly hashed activation/rollback records with invalid authority/status were accepted by direct read.",
+    "green": "migrationValidation.spec.ts passed 16/16 after activation and rollback semantic validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

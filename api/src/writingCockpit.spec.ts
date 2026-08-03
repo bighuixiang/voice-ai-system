@@ -15,6 +15,7 @@ import type {
 import {
   acceptWritingRecapPatches,
   appendWritingRecap,
+  appendWritingRecapIfMissing,
   buildSeriesQualityMetrics,
   readChapterDashboard,
   readChapterQualityReport,
@@ -485,6 +486,25 @@ describe("writingCockpit", () => {
 
     const lines = (await fs.readFile(path.join(tempRoot, "tasks", "recaps.jsonl"), "utf8")).trim().split(/\r?\n/);
     expect(lines.map((line) => JSON.parse(line).summary)).toEqual(["The clue cost blood.", "Second recap."]);
+  });
+
+  it("does not append the same recovered recap candidate twice", async () => {
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "writing-cockpit-recap-idempotency-"));
+    const recap: WritingRecapCandidate = {
+      chapterId: "chapter-001",
+      summary: "Recovered recap.",
+      newFacts: [],
+      characterStateChanges: [],
+      foreshadowingUpdates: [],
+      continuityRisks: [],
+      powerProgressionUpdates: [],
+      createdAt: "2026-06-04T00:00:00.000Z"
+    };
+
+    await expect(appendWritingRecapIfMissing(tempRoot, recap)).resolves.toBe(true);
+    await expect(appendWritingRecapIfMissing(tempRoot, recap)).resolves.toBe(false);
+    const lines = (await fs.readFile(path.join(tempRoot, "tasks", "recaps.jsonl"), "utf8")).trim().split(/\r?\n/);
+    expect(lines).toHaveLength(1);
   });
 
   it("accepts recap patches into chapter memory and structured ledgers", async () => {

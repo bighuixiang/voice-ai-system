@@ -35,18 +35,19 @@ function hash(value: unknown): string { return crypto.createHash("sha256").updat
 function contractPath(root: string, contractId: string): string { return resolveInside(root, `sessions/character-contracts/${contractId}.json`); }
 async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const temp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(temp, target); }
 async function readJson<T>(target: string): Promise<T | null> { try { return JSON.parse(await fs.readFile(target, "utf8")) as T; } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
+export function assertCharacterContractIntegrity(contract: CharacterDramaticContract, expectedId?: string): CharacterDramaticContract { const { fingerprint: _fingerprint, ...base } = contract; const required = [contract.contractId, contract.projectSlug, contract.characterId, contract.displayName, contract.externalWant, contract.internalNeed, contract.falseBelief, contract.woundOrFear, contract.contradiction, contract.stake, contract.unacceptableChoice, contract.potentialChange]; const sourcesValid = Array.isArray(contract.sources) && contract.sources.length > 0 && contract.sources.every((source) => Boolean(source?.field?.trim() && source.sourceVersion?.trim() && Array.isArray(source.evidenceRefs) && source.evidenceRefs.length > 0 && source.evidenceRefs.every((ref) => typeof ref === "string" && ref.trim()))); const confirmationValid = contract.lifecycle === "candidate" ? contract.confirmation === undefined : Boolean(contract.confirmation?.actor?.trim() && contract.confirmation.reason?.trim() && contract.confirmation.confirmedAt?.trim()); const valid = contract.schemaVersion === "character-dramatic-contract.v1" && Number.isInteger(contract.contractVersion) && contract.contractVersion > 0 && (!expectedId || contract.contractId === expectedId) && required.every((value) => typeof value === "string" && value.trim()) && [contract.valuesAndBoundaries, contract.unknown].every((values) => Array.isArray(values) && values.length > 0 && values.every((value) => typeof value === "string" && value.trim())) && sourcesValid && ["candidate", "confirmed"].includes(contract.lifecycle) && confirmationValid && /^[a-f0-9]{64}$/i.test(contract.fingerprint) && hash(base) === contract.fingerprint; if (!valid) throw new Error("CHARACTER_CONTRACT_INTEGRITY_FAILED"); return contract; }
 
-export async function readCharacterDramaticContract(root: string, contractId: string): Promise<CharacterDramaticContract | null> { return readJson<CharacterDramaticContract>(contractPath(root, contractId)); }
+export async function readCharacterDramaticContract(root: string, contractId: string): Promise<CharacterDramaticContract | null> { const value = await readJson<CharacterDramaticContract>(contractPath(root, contractId)); return value ? assertCharacterContractIntegrity(value, contractId) : null; }
 
 export async function listCharacterContracts(root: string, projectSlug: string): Promise<CharacterDramaticContract[]> {
   const directory = resolveInside(root, "sessions/character-contracts");
   let names: string[];
   try { names = await fs.readdir(directory); } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return []; throw error; }
-  const records = await Promise.all(names.filter((name) => name.endsWith(".json")).map((name) => readJson<CharacterDramaticContract>(path.join(directory, name))));
+  const records = await Promise.all(names.filter((name) => name.endsWith(".json")).map(async (name) => { const value = await readJson<CharacterDramaticContract>(path.join(directory, name)); return value ? assertCharacterContractIntegrity(value, name.slice(0, -5)) : null; }));
   return records.filter((record): record is CharacterDramaticContract => Boolean(record && record.projectSlug === projectSlug)).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
-export async function createCharacterDramaticContract(input: Omit<CharacterDramaticContract, "schemaVersion" | "contractVersion" | "supersedesContractId" | "contractId" | "lifecycle" | "confirmation" | "createdAt" | "updatedAt" | "fingerprint">): Promise<CharacterDramaticContract> {
+export async function createCharacterDramaticContract(input: Omit<CharacterDramaticContract, "schemaVersion" | "contractVersion" | "supersedesContractId" | "contractId" | "lifecycle" | "confirmation" | "createdAt" | "updatedAt" | "fingerprint"> & { root: string }): Promise<CharacterDramaticContract> {
   const required = [input.projectSlug, input.characterId, input.displayName, input.externalWant, input.internalNeed, input.falseBelief, input.woundOrFear, input.contradiction, input.stake, input.unacceptableChoice, input.potentialChange];
   if (required.some((value) => !value.trim()) || !input.valuesAndBoundaries.length) throw new Error("CHARACTER_CONTRACT_FIELDS_REQUIRED");
   if (!input.unknown.length) throw new Error("CHARACTER_CONTRACT_UNKNOWN_REQUIRED");
@@ -69,7 +70,8 @@ export async function reviseCharacterDramaticContract(input: { root: string; con
   if (!merged.unknown.length) throw new Error("CHARACTER_CONTRACT_UNKNOWN_REQUIRED");
   const version = existing.contractVersion + 1;
   const contractId = `character-contract-${existing.projectSlug}-${existing.characterId}-${hash({ supersedes: existing.contractId, version, changes: input.changes }).slice(0, 12)}`;
-  const base = { ...merged, contractVersion: version, contractId, supersedesContractId: existing.contractId, lifecycle: "candidate" as const, confirmation: undefined, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  const { fingerprint: _oldFingerprint, ...mergedWithoutFingerprint } = merged;
+  const base = { ...mergedWithoutFingerprint, contractVersion: version, contractId, supersedesContractId: existing.contractId, lifecycle: "candidate" as const, confirmation: undefined, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
   const contract: CharacterDramaticContract = { ...base, fingerprint: hash(base) };
   await writeJson(contractPath(input.root, contractId), contract);
   return contract;
@@ -80,7 +82,8 @@ export async function confirmCharacterContract(input: { root: string; contractId
   const existing = await readCharacterDramaticContract(input.root, input.contractId);
   if (!existing) throw new Error("CHARACTER_CONTRACT_NOT_FOUND");
   if (existing.lifecycle === "confirmed") return existing;
-  const base = { ...existing, lifecycle: "confirmed" as const, confirmation: { actor: input.actor, reason: input.reason, confirmedAt: new Date().toISOString() }, updatedAt: new Date().toISOString() };
+  const { fingerprint: _oldFingerprint, ...existingWithoutFingerprint } = existing;
+  const base = { ...existingWithoutFingerprint, lifecycle: "confirmed" as const, confirmation: { actor: input.actor, reason: input.reason, confirmedAt: new Date().toISOString() }, updatedAt: new Date().toISOString() };
   const contract: CharacterDramaticContract = { ...base, fingerprint: hash(base) };
   await writeJson(contractPath(input.root, contract.contractId), contract);
   return contract;

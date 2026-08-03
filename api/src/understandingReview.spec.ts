@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -43,11 +44,24 @@ describe("understanding independent review", () => {
     await expect(readUnderstandingReview(root)).rejects.toThrow("UNDERSTANDING_REVIEW_INTEGRITY_FAILED");
   });
 
+  it("rejects a rehashed review with invalid reviewer and check semantics", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-review-semantic-"));
+    roots.push(root);
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    const base = {
+      schemaVersion: "understanding-review.v1", reviewId: "review-1", projectSlug: "demo", snapshotId: "snapshot-1", snapshotFingerprint: "b".repeat(64), calibrationVersion: "understanding-calibration.v1",
+      reviewer: { kind: "rogue", id: "" }, status: "passed", checks: [], canonWritten: false, createdAt: new Date().toISOString()
+    };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.writeFile(path.join(root, "sessions", "understanding-review.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    await expect(readUnderstandingReview(root)).rejects.toThrow("UNDERSTANDING_REVIEW_SEMANTIC_INVALID");
+  });
+
   it("persists an attested provider or human V2 review without authorizing canon", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-review-external-"));
     roots.push(root);
     await fs.mkdir(path.join(root, "sessions"), { recursive: true });
-    await fs.writeFile(path.join(root, "sessions", "understanding-snapshot.json"), JSON.stringify({
+    const snapshotBase = {
       schemaVersion: "understanding-snapshot.v1",
       snapshotId: "snapshot-1",
       projectSlug: path.basename(root),
@@ -61,7 +75,8 @@ describe("understanding independent review", () => {
       modelCallIssued: false,
       canonWritten: false,
       createdAt: new Date().toISOString()
-    }), "utf8");
+    };
+    await fs.writeFile(path.join(root, "sessions", "understanding-snapshot.json"), JSON.stringify({ ...snapshotBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(snapshotBase)).digest("hex") }), "utf8");
     const review = await ingestExternalUnderstandingReview(root, {
       reviewerKind: "human",
       reviewerId: "reader-panel-01",
@@ -173,9 +188,82 @@ describe("understanding independent review", () => {
     roots.push(root);
     await fs.mkdir(path.join(root, "sessions"), { recursive: true });
     await fs.writeFile(path.join(root, "sessions", "creative-session.json"), JSON.stringify({ schemaVersion: "creative-session.v1", sessionId: "session-review-demo", projectSlug: "review-demo", status: "capturing", messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }), "utf8");
-    await fs.writeFile(path.join(root, "sessions", "understanding-snapshot.json"), JSON.stringify({ schemaVersion: "understanding-snapshot.v1", snapshotId: "snapshot-1", projectSlug: "review-demo", mode: "model", sourceFingerprint: "a".repeat(64), sourceMessageIds: ["missing"], coreExplicit: [{ id: "claim", text: "unsupported", status: "explicit", evidence: [{ messageId: "missing", start: -1, end: 2 }] }], inferred: [], unknowns: [], question: { id: "question-primary-desire", text: "?", status: "candidate", impact: "high", source: "model-gap" }, modelCallIssued: true, canonWritten: false, createdAt: new Date().toISOString() }), "utf8");
+    const staleSnapshotBase = { schemaVersion: "understanding-snapshot.v1", snapshotId: "snapshot-1", projectSlug: "review-demo", mode: "model", sourceFingerprint: "a".repeat(64), sourceMessageIds: ["missing"], coreExplicit: [{ id: "claim", text: "unsupported", status: "explicit", evidence: [{ messageId: "missing", start: 0, end: 2 }] }], inferred: [], unknowns: [], question: { id: "question-primary-desire", text: "?", status: "candidate", impact: "high", source: "model-gap" }, modelCallIssued: true, canonWritten: false, createdAt: new Date().toISOString() };
+    await fs.writeFile(path.join(root, "sessions", "understanding-snapshot.json"), JSON.stringify({ ...staleSnapshotBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(staleSnapshotBase)).digest("hex") }), "utf8");
     const review = await reviewUnderstandingSnapshot(root);
     expect(review).toMatchObject({ status: "blocked" });
     expect(review?.checks.filter((check) => check.status === "failed").map((check) => check.checkId)).toEqual(expect.arrayContaining(["source-fingerprint", "evidence-spans", "branch-separation"]));
+  });
+
+  it("blocks evidence spans outside source bounds across every model claim", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-review-evidence-bounds-"));
+    roots.push(root);
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    const session = {
+      schemaVersion: "creative-session.v1" as const,
+      sessionId: "session-review-bounds",
+      projectSlug: "review-bounds",
+      status: "capturing" as const,
+      messages: [{ id: "message-001", clientMessageId: "m1", role: "author" as const, text: "short", source: { kind: "author" as const }, createdAt: new Date().toISOString() }],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    await fs.writeFile(path.join(root, "sessions", "creative-session.json"), JSON.stringify(session), "utf8");
+    const base = {
+      schemaVersion: "understanding-snapshot.v1" as const,
+      snapshotId: "snapshot-bounds",
+      projectSlug: "review-bounds",
+      mode: "shadow" as const,
+      sourceFingerprint: fingerprintCreativeSession(session),
+      sourceMessageIds: ["message-001"],
+      coreExplicit: [{ id: "core", text: "short", status: "explicit" as const, evidence: [{ messageId: "message-001", start: 0, end: 5 }] }],
+      inferred: [{ id: "inferred", text: "overrun", status: "inferred" as const, evidence: [{ messageId: "message-001", start: 1, end: 99 }] }],
+      unknowns: [{ id: "unknown", text: "missing", status: "unknown" as const, evidence: [{ messageId: "message-001", start: 0, end: 1 }] }],
+      question: { id: "question-primary-desire", text: "?", status: "candidate" as const, impact: "high" as const, source: "model-gap" },
+      modelCallIssued: false,
+      canonWritten: false,
+      createdAt: new Date().toISOString()
+    };
+    await fs.writeFile(path.join(root, "sessions", "understanding-snapshot.json"), JSON.stringify({ ...base, fingerprint: crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") }), "utf8");
+
+    const review = await reviewUnderstandingSnapshot(root);
+    expect(review?.checks.find((check) => check.checkId === "evidence-spans")).toMatchObject({ status: "failed" });
+    expect(review?.status).toBe("blocked");
+  });
+
+  it("blocks non-unknown claims that provide no supporting evidence", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-review-evidence-required-"));
+    roots.push(root);
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    const session = {
+      schemaVersion: "creative-session.v1" as const,
+      sessionId: "session-review-evidence-required",
+      projectSlug: "review-evidence-required",
+      status: "capturing" as const,
+      messages: [{ id: "message-001", clientMessageId: "m1", role: "author" as const, text: "A clear fact.", source: { kind: "author" as const }, createdAt: new Date().toISOString() }],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    await fs.writeFile(path.join(root, "sessions", "creative-session.json"), JSON.stringify(session), "utf8");
+    const base = {
+      schemaVersion: "understanding-snapshot.v1" as const,
+      snapshotId: "snapshot-evidence-required",
+      projectSlug: "review-evidence-required",
+      mode: "shadow" as const,
+      sourceFingerprint: fingerprintCreativeSession(session),
+      sourceMessageIds: ["message-001"],
+      coreExplicit: [{ id: "core", text: "A clear fact.", status: "explicit" as const, evidence: [{ messageId: "message-001", start: 0, end: 13 }] }],
+      inferred: [{ id: "unsupported", text: "An unsupported inference.", status: "inferred" as const, evidence: [] }],
+      unknowns: [],
+      question: { id: "question-primary-desire", text: "?", status: "candidate" as const, impact: "high" as const, source: "model-gap" },
+      modelCallIssued: false,
+      canonWritten: false,
+      createdAt: new Date().toISOString()
+    };
+    await fs.writeFile(path.join(root, "sessions", "understanding-snapshot.json"), JSON.stringify({ ...base, fingerprint: crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") }), "utf8");
+
+    const review = await reviewUnderstandingSnapshot(root);
+    expect(review?.checks.find((check) => check.checkId === "evidence-spans")).toMatchObject({ status: "failed" });
+    expect(review?.status).toBe("blocked");
   });
 });

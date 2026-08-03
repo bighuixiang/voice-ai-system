@@ -16,9 +16,11 @@ import type {
   StoryEventCard,
   StoryGraphEdge,
   StoryGraphNode,
-  StoryGraphProjection
+  StoryGraphProjection,
+  StoryGraphSourceAuthority
 } from "./types.js";
 import { readLedgerEntries, readStoryControl } from "./writingCockpit.js";
+import { evaluateMemoryProjectionFreshness } from "./memoryProjectionGate.js";
 import { resolveInside } from "./pathSafety.js";
 import { readKnowledgeIndex } from "./knowledgeIndex.js";
 
@@ -472,8 +474,24 @@ function buildCharacterRelationGraph(
   };
 }
 
-export async function buildStoryGraphProjection(root: string, project: NovelProject): Promise<StoryGraphProjection> {
+export async function readStoryGraphProjection(root: string): Promise<StoryGraphProjection | null> {
+  const target = resolveInside(root, "story-graph/storyline.json");
+  try {
+    return JSON.parse(await fs.readFile(target, "utf8")) as StoryGraphProjection;
+  } catch {
+    return null;
+  }
+}
+
+export async function writeStoryGraphProjection(root: string, projection: StoryGraphProjection): Promise<void> {
+  const target = resolveInside(root, "story-graph/storyline.json");
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.writeFile(target, `${JSON.stringify(projection, null, 2)}\n`, "utf8");
+}
+
+export async function buildStoryGraphProjection(root: string, project: NovelProject, options: { persist?: boolean } = {}): Promise<StoryGraphProjection> {
   const storyControl = await readStoryControl(root);
+  const memoryProjection = await evaluateMemoryProjectionFreshness(root);
   const nodes = new Map<string, StoryGraphNode>();
   const edges = new Map<string, StoryGraphEdge>();
 
@@ -584,7 +602,8 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
       label: entry.title || entry.id,
       subtitle: entry.kind,
       status: entry.status,
-      chapterIds: entry.chapterIds || []
+      chapterIds: entry.chapterIds || [],
+      sourceAuthority: "legacy-projection"
     });
     for (const chapterId of entry.chapterIds || []) {
       addEdge(edges, {
@@ -592,7 +611,8 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
         source: id,
         target: `chapter:${chapterId}`,
         type: "tracks",
-        label: entry.kind
+        label: entry.kind,
+        sourceAuthority: "legacy-projection"
       });
     }
     for (const entity of entry.relatedEntities || []) {
@@ -603,18 +623,22 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
         source: id,
         target: characterId,
         type: "references",
-        label: entry.kind
+        label: entry.kind,
+        sourceAuthority: "legacy-projection"
       });
     }
   }
 
   const knowledge = await readKnowledgeIndex(root, project);
-  for (const triple of knowledge.triples) {
+  const factAuthority = new Map(knowledge.facts.map((fact) => [fact.id, fact.source.type === "memory-claim" ? "governed" as const : "legacy-projection" as const]));
+  for (const triple of memoryProjection.status === "current" ? knowledge.triples : []) {
     const subject = triple.subject.trim();
     const object = triple.object.trim();
     if (!subject || !object) continue;
     const subjectId = knowledgeNodeId(subject);
     const objectId = knowledgeNodeId(object);
+    const authorities = triple.sourceFactIds.map((factId) => factAuthority.get(factId)).filter((authority): authority is "governed" | "legacy-projection" => Boolean(authority));
+    const sourceAuthority: StoryGraphSourceAuthority = authorities.length === 0 ? "unknown" : authorities.every((authority) => authority === "governed") ? "governed" : "legacy-projection";
     const subjectExisting = nodes.get(subjectId);
     const objectExisting = nodes.get(objectId);
     addNode(nodes, {
@@ -623,7 +647,8 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
       label: subject,
       subtitle: "subject",
       status: "indexed",
-      chapterIds: mergeChapterIds(subjectExisting?.chapterIds, triple.chapterIds)
+      chapterIds: mergeChapterIds(subjectExisting?.chapterIds, triple.chapterIds),
+      sourceAuthority
     });
     addNode(nodes, {
       id: objectId,
@@ -631,14 +656,16 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
       label: object,
       subtitle: "object",
       status: "indexed",
-      chapterIds: mergeChapterIds(objectExisting?.chapterIds, triple.chapterIds)
+      chapterIds: mergeChapterIds(objectExisting?.chapterIds, triple.chapterIds),
+      sourceAuthority
     });
     addEdge(edges, {
       id: `triple:${triple.id}`,
       source: subjectId,
       target: objectId,
       type: "asserts",
-      label: triple.predicate || "asserts"
+      label: triple.predicate || "asserts",
+      sourceAuthority
     });
     for (const chapterId of triple.chapterIds || []) {
       addEdge(edges, {
@@ -646,14 +673,16 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
         source: subjectId,
         target: `chapter:${chapterId}`,
         type: "references",
-        label: "knowledge"
+        label: "knowledge",
+        sourceAuthority
       });
       addEdge(edges, {
         id: `chapter:${chapterId}->${objectId}`,
         source: `chapter:${chapterId}`,
         target: objectId,
         type: "references",
-        label: "knowledge"
+        label: "knowledge",
+        sourceAuthority
       });
     }
   }
@@ -682,10 +711,9 @@ export async function buildStoryGraphProjection(root: string, project: NovelProj
     nodes: [...nodes.values()],
     edges: [...edges.values()],
     characterRelations,
+    memoryProjection,
     updatedAt: nowIso()
   };
-  const target = resolveInside(root, "story-graph/storyline.json");
-  await fs.mkdir(path.dirname(target), { recursive: true });
-  await fs.writeFile(target, `${JSON.stringify(projection, null, 2)}\n`, "utf8");
+  if (options.persist !== false) await writeStoryGraphProjection(root, projection);
   return projection;
 }

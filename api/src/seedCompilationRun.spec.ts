@@ -1,5 +1,8 @@
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { createSeedCompilationRun, replaySeedCompilationRun, transitionSeedCompilationRun } from "./seedCompilationRun.js";
+import { createSeedCompilationRun, persistSeedCompilationRun, readSeedCompilationRun, replaySeedCompilationRun, transitionSeedCompilationRun } from "./seedCompilationRun.js";
 
 describe("seed compilation run", () => {
   it("freezes input and separates container creation from interpretation completion", () => {
@@ -18,5 +21,13 @@ describe("seed compilation run", () => {
     const run = createSeedCompilationRun({ projectSlug: "p1", idempotencyKey: "idem-2", inputFingerprint: "input-2", compilerVersion: "compiler-2", sourceMessageIds: ["m-2"] });
     expect(replaySeedCompilationRun(run, { inputFingerprint: "input-2", compilerVersion: "compiler-2" })).toMatchObject({ replayable: true });
     expect(replaySeedCompilationRun(run, { inputFingerprint: "input-other", compilerVersion: "compiler-2" })).toMatchObject({ replayable: false, reason: "input-fingerprint-stale" });
+  });
+
+  it("persists a captured run so project creation can resume after restart", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "seed-run-"));
+    const run = createSeedCompilationRun({ projectSlug: "p1", idempotencyKey: "idem-persist", inputFingerprint: "input-persist", compilerVersion: "compiler-1", sourceMessageIds: ["message-1"] });
+    await expect(persistSeedCompilationRun(root, run)).resolves.toEqual(run);
+    await expect(readSeedCompilationRun(root, run.runId)).resolves.toEqual(run);
+    await fs.rm(root, { recursive: true, force: true });
   });
 });

@@ -20,4 +20,9 @@ describe("question value gate", () => {
   it("rejects out-of-range inputs", () => {
     expect(() => evaluateQuestionValue({ ...valid, impact: 2 })).toThrow("QUESTION_GATE_VALUE_INVALID");
   });
+
+  it("keeps ambiguity separate from impact in the auditable value breakdown", () => {
+    const result = evaluateQuestionValue(valid);
+    expect(result).toMatchObject({ impact: 0.95, ambiguity: 0.8, valueBreakdown: { impact: 0.95, ambiguity: 0.8, userEffort: 0.1 } });
+  });
 });

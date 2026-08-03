@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-migration-activation-run-count",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Migration activation must not enable new writes when migration run count is invalid.",
+    "NaN, zero, fractional, and negative run counts must fail closed."
+  ],
+  "implementationRefs": [
+    "api/src/migrationActivationGate.ts:evaluateMigrationActivation",
+    "api/src/migrationActivationGate.spec.ts:invalid migration run count regression"
+  ],
+  "tests": {
+    "red": "NaN migrationRuns returned active with newWritesEnabled=true.",
+    "green": "migrationActivationGate.spec.ts passed 3/3 after run-count validation."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

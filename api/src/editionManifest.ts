@@ -46,6 +46,12 @@ function verifyManifest(manifest: EditionManifest): boolean {
   const { fingerprint, ...base } = manifest;
   return hash(base) === fingerprint;
 }
+function verifyManifestSemantics(manifest: EditionManifest): boolean {
+  if (manifest.schemaVersion !== "edition-manifest.v1" || typeof manifest.editionId !== "string" || !manifest.editionId.trim() || typeof manifest.projectSlug !== "string" || !manifest.projectSlug.trim() || typeof manifest.canonCommitFingerprint !== "string" || !manifest.canonCommitFingerprint.trim() || typeof manifest.title !== "string" || !manifest.title.trim() || typeof manifest.author !== "string" || !manifest.author.trim() || typeof manifest.language !== "string" || !manifest.language.trim() || manifest.status !== "frozen" || manifest.readerSafe !== true || typeof manifest.createdAt !== "string" || !manifest.createdAt.trim() || !Array.isArray(manifest.chapters)) return false;
+  const ids = new Set<string>();
+  const orders = new Set<number>();
+  return manifest.chapters.every((chapter) => typeof chapter.chapterId === "string" && chapter.chapterId.trim() && !ids.has(chapter.chapterId) && (ids.add(chapter.chapterId), typeof chapter.title === "string" && chapter.title.trim() && Number.isInteger(chapter.order) && chapter.order >= 1 && !orders.has(chapter.order) && (orders.add(chapter.order), typeof chapter.contentPath === "string" && chapter.contentPath.trim() && typeof chapter.settlementId === "string" && chapter.settlementId.trim() && typeof chapter.contentSha256 === "string" && /^[a-f0-9]{64}$/i.test(chapter.contentSha256))));
+}
 
 async function writeJson(target: string, value: unknown): Promise<void> {
   await fs.mkdir(path.dirname(target), { recursive: true });
@@ -58,6 +64,7 @@ export async function readEditionManifest(root: string, editionId: string): Prom
   try {
     const manifest = JSON.parse(await fs.readFile(manifestPath(root, editionId), "utf8")) as EditionManifest;
     if (!verifyManifest(manifest)) throw new Error("EDITION_MANIFEST_INTEGRITY_FAILED");
+    if (!verifyManifestSemantics(manifest)) throw new Error("EDITION_MANIFEST_SEMANTIC_INVALID");
     return manifest;
   }
   catch (error) {

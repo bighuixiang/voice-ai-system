@@ -27,8 +27,18 @@ async function writeJson(target: string, value: unknown) {
   await fs.rename(temp, target);
 }
 
+export function assertProseRepairCandidateIntegrity(metadata: ProseRepairCandidate, expectedId?: string): ProseRepairCandidate {
+    const { fingerprint, ...base } = metadata;
+    const valid = metadata.schemaVersion === "prose-repair-candidate.v1" && (!expectedId || metadata.repairCandidateId === expectedId) && [metadata.repairCandidateId, metadata.planId, metadata.parentCandidateId, metadata.parentCandidateFingerprint, metadata.candidateId, metadata.createdAt].every((value) => typeof value === "string" && value.trim()) && Array.isArray(metadata.changedParagraphIndexes) && metadata.changedParagraphIndexes.length > 0 && metadata.changedParagraphIndexes.every((index) => Number.isInteger(index) && index >= 0) && ["generated", "validated", "rejected"].includes(metadata.status) && !Number.isNaN(Date.parse(metadata.createdAt)) && /^[a-f0-9]{64}$/i.test(metadata.parentCandidateFingerprint) && /^[a-f0-9]{64}$/i.test(metadata.fingerprint) && hash(base) === fingerprint;
+    if (!valid) throw new Error("PROSE_REPAIR_CANDIDATE_INTEGRITY_FAILED");
+    return metadata;
+}
+
 export async function readProseRepairCandidate(root: string, repairCandidateId: string): Promise<ProseRepairCandidate | null> {
-  try { return JSON.parse(await fs.readFile(metadataPath(root, repairCandidateId), "utf8")) as ProseRepairCandidate; }
+  try {
+    const metadata = JSON.parse(await fs.readFile(metadataPath(root, repairCandidateId), "utf8")) as ProseRepairCandidate;
+    return assertProseRepairCandidateIntegrity(metadata, repairCandidateId);
+  }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 
@@ -41,7 +51,7 @@ export async function createProseRepairCandidate(input: { root: string; plan: Pr
   const changedParagraphIndexes = Array.from({ length: Math.max(before.length, after.length) }, (_, index) => index).filter((index) => before[index] !== after[index]);
   if (changedParagraphIndexes.length > input.plan.scope.maxChangedParagraphs) throw new Error("PROSE_REPAIR_SCOPE_EXCEEDED");
   const sourceFingerprint = hash({ planId: input.plan.planId, parentFingerprint: input.parent.fingerprint, content: input.content });
-  const candidate = await createProseCandidate({ root: input.root, projectSlug: input.parent.projectSlug, chapterId: input.parent.chapterId, content: input.content, outlineVersionId: input.parent.generation.outlineVersionId, executionProofFingerprint: input.parent.generation.executionProofFingerprint, sourceFingerprint });
+  const candidate = await createProseCandidate({ root: input.root, projectSlug: input.parent.projectSlug, chapterId: input.parent.chapterId, content: input.content, outlineVersionId: input.parent.generation.outlineVersionId, executionProofFingerprint: input.parent.generation.executionProofFingerprint, sourceFingerprint, policyVersion: input.parent.policyVersion, riskTier: input.parent.riskTier, ...(input.parent.generation.manifestId ? { generationManifestId: input.parent.generation.manifestId } : {}) });
   const base = { schemaVersion: "prose-repair-candidate.v1" as const, repairCandidateId: `repair-candidate-${candidate.candidateId}`, planId: input.plan.planId, parentCandidateId: input.parent.candidateId, parentCandidateFingerprint: input.parent.fingerprint, candidateId: candidate.candidateId, changedParagraphIndexes, status: "generated" as const, createdAt: new Date().toISOString() };
   const metadata = { ...base, fingerprint: hash(base) };
   await writeJson(metadataPath(input.root, metadata.repairCandidateId), metadata);

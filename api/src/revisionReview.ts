@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
-import type { RevisionChangeSet } from "./revisionChangeSet.js";
+import { readRevisionChangeSet } from "./revisionChangeSet.js";
 
 export interface RevisionReviewInput { decision: "accepted" | "needs_revision" | "rejected"; note: string; actor: "author" | "system"; }
 export interface RevisionReview {
@@ -21,13 +21,11 @@ export interface RevisionReview {
 
 function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
 
-async function readChangeSet(root: string, id: string): Promise<RevisionChangeSet | null> {
-  try { return JSON.parse(await fs.readFile(resolveInside(root, `sessions/revisions/changesets/${id}.json`), "utf8")) as RevisionChangeSet; }
-  catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
-}
+export function assertRevisionReviewIntegrity(review: RevisionReview, expectedId?: string): RevisionReview { const { fingerprint, ...base } = review; const statusConsistent = (review.decision === "accepted" && review.status === "approved_for_adoption") || (review.decision === "needs_revision" && review.status === "needs_revision") || (review.decision === "rejected" && review.status === "rejected"); const valid = review?.schemaVersion === "revision-review.v1" && (!expectedId || review.reviewId === expectedId) && [review.reviewId, review.changeSetId, review.expectedChangeSetFingerprint, review.note, review.createdAt].every((value) => typeof value === "string" && value.trim()) && ["accepted", "needs_revision", "rejected"].includes(review.decision) && statusConsistent && review.actor === "author" && review.canonWritten === false && !Number.isNaN(Date.parse(review.createdAt)) && /^[a-f0-9]{64}$/i.test(review.fingerprint) && hash(base) === fingerprint; if (!valid) throw new Error("REVISION_REVIEW_INTEGRITY_FAILED"); return review; }
+export async function readRevisionReview(root: string, reviewId: string): Promise<RevisionReview | null> { try { const review = JSON.parse(await fs.readFile(resolveInside(root, `sessions/revisions/reviews/${reviewId}.json`), "utf8")) as RevisionReview; return assertRevisionReviewIntegrity(review, reviewId); } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
 
 export async function reviewRevisionChangeSet(root: string, changeSetId: string, expectedChangeSetFingerprint: string, input: RevisionReviewInput): Promise<RevisionReview> {
-  const changeSet = await readChangeSet(root, changeSetId);
+  const changeSet = await readRevisionChangeSet(root, changeSetId);
   if (!changeSet || changeSet.fingerprint !== expectedChangeSetFingerprint) throw new Error("REVISION_CHANGESET_STALE");
   if (input.actor !== "author") throw new Error("REVISION_AUTHOR_AUTHORITY_REQUIRED");
   if (!input.note.trim()) throw new Error("REVISION_REVIEW_NOTE_REQUIRED");

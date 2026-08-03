@@ -70,7 +70,7 @@ export function resolveCraftConflicts(input: CraftConflictInput): CraftConflictR
     }
   }
   const hardConflict = conflicts.some((conflict) => conflict.ruleIds.filter((id) => input.rules.find((rule) => rule.ruleId === id)?.kind === "hard-constraint").length > 1);
-  const status = hardConflict ? "blocked" : "ready";
+  const status: CraftConflictResult["status"] = hardConflict ? "blocked" : "ready";
   const redIds = conflicts.flatMap((conflict) => conflict.ruleIds).filter((id) => rejected.has(id));
   const blueIds = conflicts.flatMap((conflict) => conflict.ruleIds).filter((id) => selected.has(id));
   const base = { schemaVersion: "craft-conflict-resolution.v1" as const, taskId: input.taskId, sceneId: input.sceneId, status, conflicts, red: { ruleIds: redIds, rationale: "challenge lower-priority or conflicting directives" }, blue: { ruleIds: blueIds, rationale: "preserve highest-priority applicable directives" }, selectedRuleIds: [...selected], rejectedRuleIds: [...rejected], promptDirectives: [...selected].map((id) => input.rules.find((rule) => rule.ruleId === id)?.statement || ""), sourceRefs: [...input.sourceRefs] };

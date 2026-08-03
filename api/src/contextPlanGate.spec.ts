@@ -6,7 +6,7 @@ const block = (overrides: Record<string, unknown> = {}) => ({ id: "t0-author", t
 describe("context plan gate", () => {
   it("passes a globally bounded plan with output and tool reserves", () => {
     const result = evaluateContextPlan({ modelContextTokens: 1000, outputReserveTokens: 200, toolReserveTokens: 100, blocks: [block(), block({ id: "t1-world", tier: "T1", originalTokens: 300, finalTokens: 300 })] });
-    expect(result).toMatchObject({ status: "pass", inputTokens: 400, availableInputTokens: 700 });
+    expect(result).toMatchObject({ status: "pass", inputTokens: 400, availableInputTokens: 700, tokenEstimation: "conservative-character-fallback", estimationErrorAssumption: expect.any(String) });
   });
 
   it("blocks silent T0 truncation and global overflow", () => {
@@ -16,5 +16,9 @@ describe("context plan gate", () => {
 
   it("requires an exclusion reason for omitted blocks", () => {
     expect(evaluateContextPlan({ modelContextTokens: 1000, outputReserveTokens: 100, toolReserveTokens: 100, blocks: [block({ selected: false, exclusionReason: "" })] })).toMatchObject({ status: "block", reasons: ["CONTEXT_EXCLUSION_UNEXPLAINED"] });
+  });
+
+  it("blocks impossible reserves instead of silently clamping available input", () => {
+    expect(evaluateContextPlan({ modelContextTokens: 100, outputReserveTokens: 80, toolReserveTokens: 30, blocks: [] })).toMatchObject({ status: "block", reasons: ["CONTEXT_RESERVES_EXCEED_MODEL_WINDOW"] });
   });
 });

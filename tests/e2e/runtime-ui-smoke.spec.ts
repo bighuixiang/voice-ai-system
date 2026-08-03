@@ -28,7 +28,7 @@ async function expectNonWhiteBackground(selector: string, page: Page) {
 }
 
 test("loads runtime workspace panels and dark themed previews", async ({ page, request }) => {
-  const apiBase = process.env.API_BASE_URL || "http://127.0.0.1:8787";
+  const apiBase = "";
   const project = await pickProject(request, apiBase);
   const consoleErrors: string[] = [];
 

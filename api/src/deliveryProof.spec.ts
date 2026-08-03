@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { issueDeliveryProof, revokeDeliveryProof, supersedeDeliveryProof, verifyDeliveryProof } from "./deliveryProof.js";
+import { renderPublicationArtifacts } from "./publicationArtifacts.js";
 
 function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
 
@@ -61,6 +62,33 @@ describe("delivery proof", () => {
     expect(proof.status).toBe("issued");
   });
 
+  it("does not append a revocation event to a tampered proof", async () => {
+    const root = await fixture();
+    const artifactSet = JSON.parse(await fs.readFile(path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json"), "utf8"));
+    await issueDeliveryProof(root, { editionId: "edition-1", approvalId: "author-release-1", approverKind: "author", expectedArtifactSetFingerprint: artifactSet.fingerprint });
+    const target = path.join(root, "sessions", "publication-editions", "edition-1.delivery-proof.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    value.approvalId = "tampered-before-event";
+    await fs.writeFile(target, `${JSON.stringify(value)}\n`, "utf8");
+    await expect(revokeDeliveryProof(root, "edition-1", { actor: "author", reason: "revoke" })).rejects.toThrow("DELIVERY_PROOF_INTEGRITY_FAILED");
+    await expect(fs.stat(path.join(root, "sessions", "publication-editions", "delivery-proof-events"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("does not reuse a re-signed proof event with an invalid status", async () => {
+    const root = await fixture();
+    const artifactSet = JSON.parse(await fs.readFile(path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json"), "utf8"));
+    const proof = await issueDeliveryProof(root, { editionId: "edition-1", approvalId: "author-release-1", approverKind: "author", expectedArtifactSetFingerprint: artifactSet.fingerprint });
+    await revokeDeliveryProof(root, "edition-1", { actor: "author", reason: "author request" });
+    const target = path.join(root, "sessions", "publication-editions", "delivery-proof-events", proof.proofId + ".json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, status: "superseded" };
+    resigned.fingerprint = hash(resigned);
+    await fs.writeFile(target, JSON.stringify(resigned) + "\n", "utf8");
+    await expect(revokeDeliveryProof(root, "edition-1", { actor: "author", reason: "retry" })).rejects.toThrow("DELIVERY_PROOF_EVENT_INTEGRITY_FAILED");
+    await expect(verifyDeliveryProof(root, "edition-1")).resolves.toMatchObject({ valid: false, reasons: ["proof-event-semantics-invalid"] });
+  });
+
   it("rejects a re-signed proof whose identity no longer matches the artifact set", async () => {
     const root = await fixture();
     const artifactSet = JSON.parse(await fs.readFile(path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json"), "utf8"));
@@ -73,5 +101,70 @@ describe("delivery proof", () => {
     await fs.writeFile(target, `${JSON.stringify(resigned)}\n`, "utf8");
 
     await expect(verifyDeliveryProof(root, "edition-1")).resolves.toMatchObject({ valid: false, reasons: ["proof-project-mismatch"] });
+  });
+
+  it("rejects a re-signed proof whose artifact hashes no longer match the persisted set", async () => {
+    const root = await fixture();
+    const artifactSet = JSON.parse(await fs.readFile(path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json"), "utf8"));
+    await issueDeliveryProof(root, { editionId: "edition-1", approvalId: "author-release-1", approverKind: "author", expectedArtifactSetFingerprint: artifactSet.fingerprint });
+    const target = path.join(root, "sessions", "publication-editions", "edition-1.delivery-proof.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, artifactHashes: [] };
+    resigned.fingerprint = hash(resigned);
+    await fs.writeFile(target, JSON.stringify(resigned) + "\n", "utf8");
+    await expect(issueDeliveryProof(root, { editionId: "edition-1", approvalId: "author-release-1", approverKind: "author", expectedArtifactSetFingerprint: artifactSet.fingerprint })).rejects.toThrow("DELIVERY_PROOF_INTEGRITY_FAILED");
+  });
+
+  it("rejects a re-signed proof with an invalid lifecycle status", async () => {
+    const root = await fixture();
+    const artifactSet = JSON.parse(await fs.readFile(path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json"), "utf8"));
+    await issueDeliveryProof(root, { editionId: "edition-1", approvalId: "author-release-1", approverKind: "author", expectedArtifactSetFingerprint: artifactSet.fingerprint });
+    const target = path.join(root, "sessions", "publication-editions", "edition-1.delivery-proof.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, status: "revoked" };
+    resigned.fingerprint = hash(resigned);
+    await fs.writeFile(target, JSON.stringify(resigned) + "\n", "utf8");
+    await expect(verifyDeliveryProof(root, "edition-1")).resolves.toMatchObject({ valid: false, reasons: ["proof-semantics-invalid"] });
+    await expect(issueDeliveryProof(root, { editionId: "edition-1", approvalId: "author-release-1", approverKind: "author", expectedArtifactSetFingerprint: artifactSet.fingerprint })).rejects.toThrow("DELIVERY_PROOF_INTEGRITY_FAILED");
+  });
+
+  it("invalidates a frozen edition proof after a memory retcon", async () => {
+    const root = await fixture();
+    const artifactSet = JSON.parse(await fs.readFile(path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json"), "utf8"));
+    await issueDeliveryProof(root, { editionId: "edition-1", approvalId: "author-release-1", approverKind: "author", expectedArtifactSetFingerprint: artifactSet.fingerprint });
+    await fs.mkdir(path.join(root, "memory"), { recursive: true });
+    await fs.writeFile(path.join(root, "memory", "retcon-invalidations.jsonl"), JSON.stringify({ claimId: "claim-edition", createdAt: new Date(Date.now() + 1000).toISOString() }) + "\n", "utf8");
+    await expect(verifyDeliveryProof(root, "edition-1")).resolves.toMatchObject({ valid: false, reasons: ["memory-retcon-revalidation-required"] });
+  });
+
+  it("publishes and verifies a rebuilt edition after the retcon boundary", async () => {
+    const root = await fixture();
+    const oldArtifactSet = JSON.parse(await fs.readFile(path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json"), "utf8"));
+    await issueDeliveryProof(root, { editionId: "edition-1", approvalId: "author-release-1", approverKind: "author", expectedArtifactSetFingerprint: oldArtifactSet.fingerprint });
+
+    await fs.mkdir(path.join(root, "memory"), { recursive: true });
+    await fs.writeFile(path.join(root, "memory", "retcon-invalidations.jsonl"), JSON.stringify({ claimId: "claim-edition", createdAt: new Date().toISOString() }) + "\n", "utf8");
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    const rebuilt = await renderPublicationArtifacts(root, {
+      editionId: "edition-2",
+      projectSlug: "demo",
+      title: "Demo Rebuilt",
+      author: "Author",
+      language: "zh-CN",
+      fingerprint: "manifest-rebuilt",
+    }, {
+      editionId: "edition-2",
+      projectSlug: "demo",
+      readerSafe: true,
+      fingerprint: "tree-rebuilt",
+      chapters: [{ chapterId: "chapter-1", title: "Rebuilt", blocks: [{ kind: "paragraph", text: "Rebuilt canon" }] }],
+    }, ["markdown"]);
+
+    const proof = await issueDeliveryProof(root, { editionId: "edition-2", approvalId: "author-release-2", approverKind: "author", expectedArtifactSetFingerprint: rebuilt.fingerprint });
+    await expect(verifyDeliveryProof(root, "edition-1")).resolves.toMatchObject({ valid: false, reasons: ["memory-retcon-revalidation-required"] });
+    await expect(verifyDeliveryProof(root, "edition-2")).resolves.toMatchObject({ valid: true, proof: { proofId: proof.proofId } });
   });
 });

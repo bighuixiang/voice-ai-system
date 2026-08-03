@@ -6,6 +6,7 @@ import { createCharacterDramaticContract } from "./characterContract.js";
 import { createCharacterArcContract, listCharacterArcContracts, readCharacterArcContract, recordCharacterArcMilestone } from "./characterArc.js";
 import { createCharacterChoiceEvidence, observeCharacterChoiceEvidence } from "./characterChoice.js";
 import { recordCharacterStateSnapshot } from "./characterState.js";
+import crypto from "node:crypto";
 
 async function fixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "character-arc-"));
@@ -39,5 +40,18 @@ describe("character arc contract", () => {
     await expect(createCharacterArcContract({ root, projectSlug: "demo", characterId: "hero", dramaticContractId: contract.contractId, startState: "", targetChange: "trust", keyPressures: [], plannedChoices: [], plannedCosts: [], relationshipImpacts: [], allowedRegression: "fear", sourceRefs: [] })).rejects.toThrow("CHARACTER_ARC_SOURCE_REQUIRED");
     const arc = await createCharacterArcContract({ root, projectSlug: "demo", characterId: "hero", dramaticContractId: contract.contractId, startState: "isolated", targetChange: "trust", keyPressures: ["risk"], plannedChoices: ["warn"], plannedCosts: ["window"], relationshipImpacts: ["ally trust"], allowedRegression: "fear", sourceRefs: ["plan://arc-1"] });
     await expect(recordCharacterArcMilestone({ root, arcId: arc.arcId, choiceEvidenceId: "missing", milestone: "growth", actualChange: "change", sourceRefs: ["chapter://1"] })).rejects.toThrow("CHARACTER_CHOICE_EVIDENCE_NOT_FOUND");
+  });
+
+  it("fails closed when a re-signed arc contains duplicate milestone identities", async () => {
+    const { root, contract, observedChoice } = await fixture();
+    const arc = await createCharacterArcContract({ root, projectSlug: "demo", characterId: "hero", dramaticContractId: contract.contractId, startState: "isolated", targetChange: "trust", keyPressures: ["risk"], plannedChoices: ["warn"], plannedCosts: ["window"], relationshipImpacts: [], allowedRegression: "fear", sourceRefs: ["plan://arc-1"] });
+    const updated = await recordCharacterArcMilestone({ root, arcId: arc.arcId, choiceEvidenceId: observedChoice.evidenceId, milestone: "growth", actualChange: "trusts ally", sourceRefs: ["chapter://1"] });
+    const target = path.join(root, "sessions", "character-arcs", `${updated.arcId}.json`);
+    const { fingerprint: _old, ...base } = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const milestones = base.milestones as Array<Record<string, unknown>>;
+    const resigned = { ...base, milestones: [...milestones, { ...milestones[0], milestoneId: "milestone-duplicate", choiceEvidenceId: milestones[0].choiceEvidenceId }] };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readCharacterArcContract(root, updated.arcId)).rejects.toThrow("CHARACTER_ARC_INTEGRITY_FAILED");
   });
 });

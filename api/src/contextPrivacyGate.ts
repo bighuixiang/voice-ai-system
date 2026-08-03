@@ -14,6 +14,7 @@ export function evaluateContextPrivacy(input: { projectSlug: string; purpose: st
   const includedSourceIds: string[] = [];
   for (const source of input.sources) {
     const sourceReasons: string[] = [];
+    if (!source.sourceId.trim() || !source.projectSlug.trim() || !source.content.trim() || !["author-text", "project-file", "imported", "retrieval", "model-output"].includes(source.dataClass)) sourceReasons.push("SOURCE_METADATA_INVALID");
     if (source.projectSlug !== input.projectSlug) sourceReasons.push("PROJECT_SCOPE_VIOLATION");
     if (source.rights !== "project-authorized" || !source.providerAuthorized) sourceReasons.push("SOURCE_AUTHORIZATION_REQUIRED");
     if (source.deleted) sourceReasons.push("SOURCE_DELETED");

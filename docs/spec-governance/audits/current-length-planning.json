@@ -7,19 +7,19 @@
   "sourceFiles": [
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/novelProject.ts",
-      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+      "sha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720"
     },
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/runtimeSnapshot.ts",
-      "sha256": "0a2cda33d0d1fe4859b7583314a25c64b406d3a2603090232a4f2c3b6654c8b6"
+      "sha256": "e006e4dae47be7762cbe32d5e5882c7a6fcc392106dd825684a81eac071db4e2"
     },
     {
       "path": "api/src/novelSystemSkills.ts",
@@ -27,11 +27,11 @@
     },
     {
       "path": "ui/src/types/novel.ts",
-      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+      "sha256": "8b40b4f8361cfddaee5bbc1bc946530c5391fe3045d27c4e62dfe5b62629ff24"
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     },
     {
       "path": "ui/src/components/novel/FocusWritingPanel.vue",
@@ -62,14 +62,14 @@
     ]
   },
   "summary": {
-    "projects": 8,
-    "chapters": 219,
+    "projects": 11,
+    "chapters": 222,
     "chaptersWithAtLeast30Words": 72,
-    "actualWords": 121486,
+    "actualWords": 121498,
     "explicitVolumeGroups": 8,
-    "ungroupedChapters": 21,
-    "volumeOutlineFiles": 6,
-    "dashboardFiles": 210,
+    "ungroupedChapters": 24,
+    "volumeOutlineFiles": 7,
+    "dashboardFiles": 213,
     "persistentTargets": 0,
     "projectModelHasFullBookLengthIntent": false,
     "projectModelHasTargetChapterOrVolumeCount": false,
@@ -79,19 +79,19 @@
     "defaultNewProjectChapterCount": 3,
     "importFallbackVolumeSize": 50,
     "chapterTreeFallbackDisplayGroupSize": 100,
-    "governedLengthRuntimeExists": false,
-    "implementationVerified": false
+    "governedLengthRuntimeExists": true,
+    "implementationVerified": true
   },
   "operationalSnapshot": {
     "totals": {
-      "projects": 8,
-      "chapters": 219,
+      "projects": 11,
+      "chapters": 222,
       "chaptersWithAtLeast30Words": 72,
-      "actualWords": 121486,
+      "actualWords": 121498,
       "explicitVolumeGroups": 8,
-      "ungroupedChapters": 21,
-      "volumeOutlineFiles": 6,
-      "dashboardFiles": 210,
+      "ungroupedChapters": 24,
+      "volumeOutlineFiles": 7,
+      "dashboardFiles": 213,
       "persistentTargets": 0
     },
     "projects": [
@@ -101,7 +101,7 @@
           {
             "category": "project",
             "fileCount": 1,
-            "aggregateSha256": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788"
+            "aggregateSha256": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676"
           }
         ],
         "parseHealth": {
@@ -358,6 +358,177 @@
           {
             "category": "dashboard",
             "fileCount": 3,
+            "aggregateSha256": "eb6b2c69ef288353585d6bfe4afe32170ee0d4e062b73a66bb4f98aca0258377"
+          },
+          {
+            "category": "project",
+            "fileCount": 1,
+            "aggregateSha256": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe"
+          }
+        ],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "withContentFile": 3,
+          "withAtLeast30Words": 0,
+          "actualWordCounts": {
+            "sampleCount": 3,
+            "min": 4,
+            "p50": 4,
+            "p95": 4,
+            "max": 4,
+            "average": 4
+          },
+          "actualWordsTotal": 12
+        },
+        "volumes": {
+          "chaptersWithExplicitVolume": 0,
+          "explicitVolumeGroups": 0,
+          "ungroupedChapters": 3,
+          "volumeOutlineFiles": 1
+        },
+        "dashboards": {
+          "files": 3,
+          "withWordCount": 3,
+          "wordCounts": {
+            "sampleCount": 3,
+            "min": 0,
+            "p50": 0,
+            "p95": 0,
+            "max": 0,
+            "average": 0
+          }
+        },
+        "governedIntentCoverage": {
+          "projectLengthFields": 0,
+          "dashboardTargetFields": 0,
+          "persistentFullBookTarget": false,
+          "persistentChapterTarget": false,
+          "persistentVolumeTarget": false,
+          "forecastArtifacts": 0,
+          "varianceDecisions": 0,
+          "authorLengthLocks": 0
+        },
+        "interpretation": "Actual counts and display grouping exist, but no durable author intent, hard/soft lock, forecast range, obligation basis, variance event, or governed length decision is evidenced."
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": [],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0
+        },
+        "chapters": {
+          "total": 0,
+          "statuses": {},
+          "withContentFile": 0,
+          "withAtLeast30Words": 0,
+          "actualWordCounts": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "actualWordsTotal": 0
+        },
+        "volumes": {
+          "chaptersWithExplicitVolume": 0,
+          "explicitVolumeGroups": 0,
+          "ungroupedChapters": 0,
+          "volumeOutlineFiles": 0
+        },
+        "dashboards": {
+          "files": 0,
+          "withWordCount": 0,
+          "wordCounts": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "governedIntentCoverage": {
+          "projectLengthFields": 0,
+          "dashboardTargetFields": 0,
+          "persistentFullBookTarget": false,
+          "persistentChapterTarget": false,
+          "persistentVolumeTarget": false,
+          "forecastArtifacts": 0,
+          "varianceDecisions": 0,
+          "authorLengthLocks": 0
+        },
+        "interpretation": "Actual counts and display grouping exist, but no durable author intent, hard/soft lock, forecast range, obligation basis, variance event, or governed length decision is evidenced."
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": [],
+        "parseHealth": {
+          "invalidJsonArtifacts": 0
+        },
+        "chapters": {
+          "total": 0,
+          "statuses": {},
+          "withContentFile": 0,
+          "withAtLeast30Words": 0,
+          "actualWordCounts": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "actualWordsTotal": 0
+        },
+        "volumes": {
+          "chaptersWithExplicitVolume": 0,
+          "explicitVolumeGroups": 0,
+          "ungroupedChapters": 0,
+          "volumeOutlineFiles": 0
+        },
+        "dashboards": {
+          "files": 0,
+          "withWordCount": 0,
+          "wordCounts": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "governedIntentCoverage": {
+          "projectLengthFields": 0,
+          "dashboardTargetFields": 0,
+          "persistentFullBookTarget": false,
+          "persistentChapterTarget": false,
+          "persistentVolumeTarget": false,
+          "forecastArtifacts": 0,
+          "varianceDecisions": 0,
+          "authorLengthLocks": 0
+        },
+        "interpretation": "Actual counts and display grouping exist, but no durable author intent, hard/soft lock, forecast range, obligation basis, variance event, or governed length decision is evidenced."
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": [
+          {
+            "category": "chapter-content",
+            "fileCount": 3,
+            "aggregateSha256": "f557f9cc16c513c59ab66eebb424fb41beba8311400f6a3eac2e4b41119898e4"
+          },
+          {
+            "category": "dashboard",
+            "fileCount": 3,
             "aggregateSha256": "c8902d51ea6bb24046ca507a8b8c1801432f44789cdd8f9fe3fd72e0abca94e0"
           },
           {
@@ -417,7 +588,7 @@
         "interpretation": "Actual counts and display grouping exist, but no durable author intent, hard/soft lock, forecast range, obligation basis, variance event, or governed length decision is evidenced."
       },
       {
-        "projectOrdinal": 6,
+        "projectOrdinal": 9,
         "inputFingerprints": [
           {
             "category": "chapter-content",
@@ -486,7 +657,7 @@
         "interpretation": "Actual counts and display grouping exist, but no durable author intent, hard/soft lock, forecast range, obligation basis, variance event, or governed length decision is evidenced."
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": [
           {
             "category": "chapter-content",
@@ -555,7 +726,7 @@
         "interpretation": "Actual counts and display grouping exist, but no durable author intent, hard/soft lock, forecast range, obligation basis, variance event, or governed length decision is evidenced."
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": [
           {
             "category": "chapter-content",
@@ -633,12 +804,12 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 931,
+          "line": 1025,
           "evidence": "export interface NovelProject"
         },
         {
           "path": "ui/src/types/novel.ts",
-          "line": 1019,
+          "line": 1128,
           "evidence": "export interface NovelProject"
         }
       ],
@@ -650,17 +821,17 @@
       "evidence": [
         {
           "path": "api/src/novelProject.ts",
-          "line": 87,
+          "line": 90,
           "evidence": "export function createDefaultChapters(count = 3)"
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 162,
+          "line": 165,
           "evidence": "chapters: createDefaultChapters()"
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 285,
+          "line": 314,
           "evidence": "\"outline/volume-01.md\""
         }
       ],
@@ -672,17 +843,17 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 102,
+          "line": 131,
           "evidence": "const DEFAULT_FOCUS_TARGET_WORDS = 3000"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 1224,
+          "line": 1345,
           "evidence": "focusProgressPercent.value >= 85"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 2961,
+          "line": 3121,
           "evidence": "Math.max(300, Math.min(12000"
         }
       ],
@@ -694,12 +865,12 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 304,
+          "line": 321,
           "evidence": "export interface ChapterDashboard"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 2079,
+          "line": 2204,
           "evidence": "focusTargetWords: focusTargetWords.value"
         }
       ],
@@ -711,7 +882,7 @@
       "evidence": [
         {
           "path": "api/src/novelProject.ts",
-          "line": 461,
+          "line": 490,
           "evidence": "const inferredStart = Math.floor"
         },
         {
@@ -728,7 +899,7 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2287,
+          "line": 7941,
           "evidence": "const newChapter = {"
         }
       ],
@@ -740,7 +911,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeSnapshot.ts",
-          "line": 185,
+          "line": 187,
           "evidence": "const hasDraft = wordCount >= 30"
         },
         {
@@ -757,5 +928,5 @@
     "consequence": "It cannot honestly explain whether a book is on scope, why scope changed, whether the ending and payoffs still fit, or whether additional words are valuable rather than filler."
   },
   "invariant": "No word-count percentage, default chapter array, file count, volume filename, import grouping, dashboard count, runtime hasDraft signal, derivative chapter merge, model estimate, or author silence may independently establish narrative progress, agreed scope, permission to expand/contract, chapter settlement, or book completion.",
-  "unresolvedDecisionBoundary": "Q-009 is confirmed as obligation-led elastic length. This audit supplies current-state evidence only; it neither proves nor activates LengthContract, forecasting, variance decisions, or any runtime behavior."
+  "unresolvedDecisionBoundary": "Q-009 is confirmed as obligation-led elastic length. LengthContract, LengthForecast and LengthVarianceDecision now have a tested runtime slice, but this audit does not authorize automatic scope changes or release activation without project evidence and end-to-end acceptance."
 }

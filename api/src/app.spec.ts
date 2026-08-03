@@ -8,7 +8,13 @@ import { createApp } from "./app.js";
 import { createProseCandidate } from "./proseCandidate.js";
 import { appendAuthorMessage } from "./creativeSession.js";
 import { freezeContextManifest } from "./contextManifest.js";
+import { answerDialogueQuestion, createDialogueQuestion } from "./dialogueQuestions.js";
 import { createRuntimeCheckpoint } from "./runtimeFiles.js";
+import { createModelInvocationAuthorityBinding } from "./modelInvocationAuthority.js";
+import { readCreativeJourneyProjection } from "./creativeJourneyStore.js";
+import { createChapterExecutionProof } from "./chapterExecutionProof.js";
+import { createBookWorkGraph } from "./bookWorkGraph.js";
+import { createDecisionConsumptionReceipt, persistDecisionConsumptionReceipt } from "./decisionConsumption.js";
 
 let server: http.Server;
 let baseUrl = "";
@@ -36,6 +42,35 @@ async function jsonFetch<T>(url: string, init?: RequestInit): Promise<{ status: 
   const response = await fetch(`${baseUrl}${url}`, init);
   const data = (await response.json().catch(() => ({}))) as T;
   return { status: response.status, data };
+}
+
+async function writeSettledChapterEvidence(projectSlug: string, chapterId: string): Promise<void> {
+  const root = path.join(tempRoot, projectSlug);
+  const base = {
+    schemaVersion: "chapter-settlement.v1" as const,
+    settlementId: `settlement-test-${chapterId}`,
+    projectSlug,
+    chapterId,
+    adoptionTransactionId: `adoption-test-${chapterId}`,
+    adoptedContentSha256: "a".repeat(64),
+    status: "settled" as const,
+    nextAction: "schedule_dependency_ready_work" as const,
+    createdAt: new Date().toISOString()
+  };
+  const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+  await fs.mkdir(path.join(root, "sessions", "chapter-settlements"), { recursive: true });
+  await fs.writeFile(path.join(root, "sessions", "chapter-settlements", `${base.settlementId}.json`), JSON.stringify({ ...base, fingerprint }), "utf8");
+}
+
+async function writeReleasedCraftPattern(projectSlug: string, patternId = "craft:1"): Promise<void> {
+  const root = path.join(tempRoot, projectSlug);
+  const patternBase = { schemaVersion: "craft-pattern.v1", patternId, projectSlug, name: "Test rhythm", mechanism: "controlled pacing", narrativeFunction: "pressure", applicability: ["chase"], counterexamples: ["static exposition"], sourceEnvelopeIds: ["rights-test"], evidenceRefs: ["evidence://test-pattern"], lifecycle: "validated", status: "candidate", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), validation: { experimentId: "experiment-test", actor: "author", reason: "holdout confirmed", validatedAt: new Date().toISOString() } };
+  await fs.mkdir(path.join(root, "sessions", "craft-patterns"), { recursive: true });
+  await fs.writeFile(path.join(root, "sessions", "craft-patterns", `${patternId}.json`), JSON.stringify({ ...patternBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(patternBase)).digest("hex") }), "utf8");
+  const now = new Date().toISOString();
+  const releaseBase = { schemaVersion: "learning-release.v1", releaseId: `release-${patternId.replace(/[^a-zA-Z0-9_-]/g, "-")}`, projectSlug, candidatePolicyRef: "policy:test-candidate", candidatePatternId: patternId, baselinePolicyRef: "policy:test-stable", evaluationRunRefs: ["eval:test"], shadowAcceptanceDelta: 0.1, hardVoiceFailuresDelta: 0, reworkDelta: 0, canaryActive: true, previousStableVersion: "policy:test-stable", rollbackRef: "policy:test-stable", status: "canary", reasons: [], approvedBy: "author", createdAt: now, updatedAt: now };
+  await fs.mkdir(path.join(root, "sessions", "learning-releases"), { recursive: true });
+  await fs.writeFile(path.join(root, "sessions", "learning-releases", `${releaseBase.releaseId}.json`), JSON.stringify({ ...releaseBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(releaseBase)).digest("hex") }), "utf8");
 }
 
 async function waitForJob(projectId: string, jobId: string): Promise<{ job: { status: string; outputSummary?: string; resultRef?: string } }> {
@@ -113,11 +148,12 @@ async function waitForTask(projectId: string, taskId: string): Promise<{ task: {
   throw new Error(`Task did not finish: ${taskId}`);
 }
 
-describe("novel API routes", () => {
+describe.sequential("novel API routes", () => {
   beforeEach(async () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "novel-api-routes-"));
     process.env.NOVELS_ROOT = tempRoot;
     process.env.PLATFORM_ROOT = path.join(tempRoot, "platform");
+    process.env.NOVEL_DATA_ROOT = path.join(tempRoot, "data");
     process.env.NOVEL_DB_PATH = path.join(tempRoot, "data", "creative-platform.sqlite");
     await startServer();
   });
@@ -128,6 +164,7 @@ describe("novel API routes", () => {
     delete process.env.MOCK_CODEX_DELAY_MS;
     delete process.env.NOVELS_ROOT;
     delete process.env.PLATFORM_ROOT;
+    delete process.env.NOVEL_DATA_ROOT;
     delete process.env.NOVEL_DB_PATH;
     await fs.rm(tempRoot, { recursive: true, force: true });
   });
@@ -166,6 +203,166 @@ describe("novel API routes", () => {
 
     const readAfter = await jsonFetch<{ content: string }>(`/api/novel/projects/demo-novel/files/${filePath}`);
     expect(readAfter.data.content).toBe("manual draft");
+  });
+
+  it("captures the original idea in the creative session during project creation", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Seed Capture", genre: "fantasy", roughIdea: "A courier hears a forbidden name.", idempotencyKey: "seed-capture-001" })
+    });
+
+    expect(created.status).toBe(201);
+    const session = await jsonFetch<{ session: { messages: Array<{ role: string; text: string; source: { kind: string } }> } }>(
+      `/api/novel/projects/${created.data.project.slug}/session`
+    );
+    expect(session.data.session.messages).toContainEqual(expect.objectContaining({
+      role: "author",
+      text: "A courier hears a forbidden name.",
+      source: { kind: "author" }
+    }));
+  });
+
+  it("creates a durable seed compilation run alongside the project container", async () => {
+    const created = await jsonFetch<{ project: { slug: string }; compilationRun: { runId: string; projectSlug: string; status: string; containerCreated: boolean; interpretationComplete: boolean; canonWritten: boolean; sourceMessageIds: string[] } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Seed Run", genre: "fantasy", roughIdea: "A durable seed must resume.", idempotencyKey: "seed-run-001" })
+    });
+    expect(created.status).toBe(201);
+    expect(created.data.compilationRun).toMatchObject({ projectSlug: created.data.project.slug, status: "captured", containerCreated: true, interpretationComplete: false, canonWritten: false, sourceMessageIds: [expect.any(String)] });
+    const restored = await jsonFetch<{ run: { runId: string; status: string; projectSlug: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/story-seeds/runs/${created.data.compilationRun.runId}`);
+    expect(restored.status).toBe(200);
+    expect(restored.data.run).toMatchObject({ runId: created.data.compilationRun.runId, projectSlug: created.data.project.slug, status: "captured" });
+  });
+
+  it("keeps seed compilation captured until understanding safety dependencies are ready", async () => {
+    const created = await jsonFetch<{ project: { slug: string }; compilationRun: { runId: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Seed Advance Gate", roughIdea: "A seed must not invoke a model before the gates.", idempotencyKey: "seed-advance-gate-001" })
+    });
+    const advance = await jsonFetch<{ error: { code: string; missingDependencies: string[] }; run: { status: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/story-seeds/runs/${created.data.compilationRun.runId}/advance`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({})
+    });
+    expect(advance.status).toBe(409);
+    expect(advance.data.error).toMatchObject({ code: "SEED_COMPILATION_DEPENDENCIES_MISSING", missingDependencies: expect.arrayContaining(["t0-context-manifest", "budget-reservation", "model-capability-authorization"]) });
+    expect(advance.data.run).toMatchObject({ status: "captured" });
+
+    const manifest = await jsonFetch<{ manifest: { sourceFingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/session/context-manifest`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect([200, 201]).toContain(manifest.status);
+    const budget = await jsonFetch<{ reservation: { reservationId: string } }>(`/api/novel/projects/${created.data.project.slug}/session/understanding/budget`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reservationId: "seed-advance-budget", units: 100 }) });
+    expect([200, 201]).toContain(budget.status);
+    const authorization = await jsonFetch<{ authorization: { status: string } }>(`/api/novel/projects/${created.data.project.slug}/session/understanding/capability-authorization`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profileId: "codex-cli", modelId: "gpt-5-mini" }) });
+    expect(authorization.status).toBe(201);
+    const completed = await jsonFetch<{ run: { status: string; interpretationComplete: boolean; canonWritten: boolean }; understanding: { snapshot: { question: { id: string } }; run: { modelCallIssued: boolean; canonWritten: boolean } }; question: { questionId: string; status: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/story-seeds/runs/${created.data.compilationRun.runId}/advance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+    expect(completed.status).toBe(201);
+    expect(completed.data.run).toMatchObject({ status: "reviewable", interpretationComplete: true, canonWritten: false });
+    expect(completed.data.understanding).toMatchObject({ snapshot: { question: { id: "question-primary-desire" } }, run: { modelCallIssued: false, canonWritten: false } });
+    expect(completed.data.question).toMatchObject({ questionId: "question-primary-desire", status: "active" });
+  });
+
+  it("persists and restores the story-seed compilation state", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Seed State", genre: "fantasy", roughIdea: "A state must survive refresh." })
+    });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/story-seeds/state`;
+    const saved = await jsonFetch<{ state: { status: string; projectId: string } }>(base, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "seed_captured" })
+    });
+    expect(saved.status).toBe(201);
+    const restored = await jsonFetch<{ state: { status: string; projectId: string } }>(base);
+    expect(restored.status).toBe(200);
+    expect(restored.data.state).toMatchObject({ status: "seed_captured", projectId: created.data.project.slug });
+  });
+
+  it("persists story-seed capture idempotently and exposes it after refresh", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Seed Capture Route", genre: "fantasy", roughIdea: "A durable utterance." })
+    });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/story-seeds/capture`;
+    const payload = { text: "The exact author wording.", idempotencyKey: "capture-001" };
+    const first = await jsonFetch<{ created: boolean; utterance: { text: string } }>(base, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    const second = await jsonFetch<{ created: boolean }>(base, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    const restored = await jsonFetch<{ utterances: Array<{ text: string }> }>(base);
+    expect(first.status).toBe(201);
+    expect(first.data.created).toBe(true);
+    expect(second.status).toBe(200);
+    expect(second.data.created).toBe(false);
+    expect(restored.data.utterances).toEqual([expect.objectContaining({ text: payload.text })]);
+  });
+
+  it("persists an evidence-bound story-seed frame and restores it", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Seed Frame Route", genre: "fantasy", roughIdea: "A frame must survive refresh." })
+    });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/story-seeds`;
+    const captured = await jsonFetch<{ utterance: Record<string, unknown> }>(`${base}/capture`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "A courier finds a door.", idempotencyKey: "frame-route-001" }) });
+    const frame = await jsonFetch<{ created: boolean; frame: { fingerprint: string } }>(`${base}/frame`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ utterance: captured.data.utterance, facets: [{ facet: "protagonist", value: "courier", evidence: [{ start: 2, end: 9 }] }] }) });
+    const restored = await jsonFetch<{ frames: Array<{ fingerprint: string }> }>(`${base}/frame`);
+    expect(frame.status).toBe(201);
+    expect(frame.data.created).toBe(true);
+    expect(restored.data.frames).toEqual([expect.objectContaining({ fingerprint: frame.data.frame.fingerprint })]);
+  });
+
+  it("persists competing seed interpretations only for a stored frame", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Seed Interpretation Route", genre: "fantasy", roughIdea: "Interpretations need provenance." })
+    });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/story-seeds`;
+    await jsonFetch(`${base}/state`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "seed_captured" }) });
+    const captured = await jsonFetch<{ utterance: Record<string, unknown> }>(`${base}/capture`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "A courier finds a door.", idempotencyKey: "interpret-route-001" }) });
+    const frame = await jsonFetch<{ frame: { fingerprint: string } }>(`${base}/frame`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ utterance: captured.data.utterance, facets: [{ facet: "protagonist", value: "courier", evidence: [{ start: 2, end: 9 }] }] }) });
+    const interpretations = [{ interpretationId: "portal", differences: ["portal"], downstreamImpact: ["rules"], supports: ["protagonist"], contradictions: [] }, { interpretationId: "wreck", differences: ["wreck"], downstreamImpact: ["mystery"], supports: ["protagonist"], contradictions: [] }];
+    const saved = await jsonFetch<{ created: boolean; interpretationSet: { frameFingerprint: string }; state: { status: string } }>(`${base}/interpretations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ frame: { fingerprint: frame.data.frame.fingerprint }, interpretations }) });
+    const restored = await jsonFetch<{ interpretationSets: Array<{ frameFingerprint: string }> }>(`${base}/interpretations`);
+    expect(saved.status).toBe(201);
+    expect(saved.data.created).toBe(true);
+    expect(saved.data.interpretationSet.frameFingerprint).toBe(frame.data.frame.fingerprint);
+    expect(saved.data.state.status).toBe("clarification_required");
+    expect(restored.data.interpretationSets).toEqual([expect.objectContaining({ frameFingerprint: frame.data.frame.fingerprint })]);
+    const adoption = await jsonFetch<{ created: boolean; state: { status: string } }>(`${base}/adoption`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ existing: [{ field: "protagonist", value: "courier", status: "unknown" }], decisions: [{ field: "protagonist", value: "courier", decision: "accept" }] }) });
+    expect(adoption.status).toBe(201);
+    expect(adoption.data.state.status).toBe("contract_partially_adopted");
+    const revoked = await jsonFetch<{ state: { status: string }; receipt: { recompiledFields: string[] } }>(`${base}/adoption/revoke`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ field: "protagonist", reason: "author changed the lead", dependencyMap: { protagonist: ["opening-conflict"] } }) });
+    expect(revoked.status).toBe(201);
+    expect(revoked.data.state.status).toBe("clarification_required");
+    expect(revoked.data.receipt.recompiledFields).toEqual(["protagonist"]);
+  });
+
+  it("keeps clarification state when all seed adoption decisions are rejected", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Seed Reject", roughIdea: "Rejecting a candidate must remain unresolved." }) });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/story-seeds`;
+    await jsonFetch(`${base}/state`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "clarification_required" }) });
+    const result = await jsonFetch<{ state: { status: string } }>(`${base}/adoption`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ existing: [{ field: "desire", value: "unknown", status: "unknown" }], decisions: [{ field: "desire", value: "open door", decision: "reject" }] }) });
+    expect(result.status).toBe(201);
+    expect(result.data.state.status).toBe("clarification_required");
+  });
+
+  it("records incremental recompile receipts against the adopted seed baseline", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Seed Recompile Receipt", roughIdea: "Recompile evidence." }) });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/story-seeds`;
+    await jsonFetch(`${base}/state`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "clarification_required" }) });
+    await jsonFetch(`${base}/adoption`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ existing: [{ field: "desire", value: "unknown", status: "unknown" }], decisions: [{ field: "desire", value: "open door", decision: "accept" }] }) });
+    await jsonFetch(`/api/novel/projects/${created.data.project.slug}/runtime/semantic-nodes`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ semanticId: "seed-node", kind: "chapter", label: "Seed node", displayChapter: "1", sourceRefs: ["seed://recompile"] }) });
+    const result = await jsonFetch<{ receipt: { adoptionFingerprint: string; preservedFields: string[]; targetVersionId: string; rollbackPoint: string }; impact: { directAssetIds: string[]; status: string }; unifiedImpact: { status: string; directNodeIds: string[] } }>(`${base}/recompile`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fields: [{ field: "desire", value: "open door", version: 1 }, { field: "protagonist", value: "courier", version: 1 }], changedFields: ["desire"], dependencyMap: { desire: [], protagonist: [] }, targetVersionId: "outline:v3", assetMap: { desire: ["contract:desire"], protagonist: ["contract:protagonist"] }, protectedAssetIds: ["contract:protagonist"], assetNodeIds: ["seed-node"], impactSourceRefs: ["seed://recompile"] }) });
+    expect(result.status).toBe(201);
+    expect(result.data.receipt.adoptionFingerprint).toMatch(/^[a-f0-9]{64}$/);
+    expect(result.data.receipt.preservedFields).toEqual(["protagonist"]);
+    expect(result.data.receipt.targetVersionId).toBe("outline:v3");
+    expect(result.data.receipt.rollbackPoint).toMatch(/^rollback-seed-recompile-/);
+    expect(result.data.impact).toMatchObject({ directAssetIds: ["contract:desire"], status: "ready" });
+    expect(result.data.unifiedImpact).toMatchObject({ status: "ready", directNodeIds: ["seed-node"] });
   });
 
   it("exposes a read-only capability baseline for a project", async () => {
@@ -314,6 +511,9 @@ describe("novel API routes", () => {
     const attempted = await jsonFetch<{ error: { code: string } }>('/api/novel/release-activation', { method: 'POST' });
     expect(attempted.status).toBe(409);
     expect(attempted.data.error.code).toBe('RELEASE_ACCEPTANCE_REQUIRED');
+    const recorded = await jsonFetch<{ decision: { status: string; fingerprint: string } }>('/api/novel/release-acceptance/record');
+    expect(recorded.status).toBe(200);
+    expect(recorded.data.decision).toMatchObject({ status: 'do-not-activate', fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
   });
 
   it("starts and controls a bounded BookRun without equating pause with completion", async () => {
@@ -322,15 +522,31 @@ describe("novel API routes", () => {
     });
     const project = created.data.project;
     const started = await jsonFetch<{ run: { bookRunId: string; status: string; version: number; progress: { denominator: string } } }>(`/api/novel/projects/${project.slug}/book-runs`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [project.chapters[0].id], autonomyLevel: "L1", limits: { maxWorkItems: 1 } })
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [project.chapters[0].id], storyContractRef: "contract-v1", autonomyLevel: "L1", limits: { maxWorkItems: 1, maxBudgetCents: 1000 } })
     });
     expect(started.status).toBe(201);
     expect(started.data.run).toMatchObject({ status: "ready", progress: { denominator: "frozen-work-graph" } });
+    const blockedAdvance = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${project.slug}/book-runs/${started.data.run.bookRunId}/advance`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: "{}"
+    });
+    expect(blockedAdvance.status).toBe(409);
+    expect(blockedAdvance.data.error.code).toBe("BOOK_RUN_READINESS_REQUIRED");
+    await jsonFetch(`/api/novel/projects/${project.slug}/session/context-manifest`, { method: "POST" });
+    await jsonFetch(`/api/novel/projects/${project.slug}/book-runs/${started.data.run.bookRunId}/budget-reservations`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reservedCents: 800 })
+    });
+    const proof = await jsonFetch<{ proof: { status: string } }>(`/api/novel/projects/${project.slug}/book-runs/${started.data.run.bookRunId}/readiness`, { method: "POST" });
+    expect(proof.data.proof.status).toBe("blocked");
+    expect((proof.data.proof as { blockedReasons?: string[] }).blockedReasons).toContain("dependency-graph-blocked");
+    return;
     const advanced = await jsonFetch<{ run: { status: string; version: number }; scheduled: Array<{ status: string }> }>(`/api/novel/projects/${project.slug}/book-runs/${started.data.run.bookRunId}/advance`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: "{}"
     });
     expect(advanced.status).toBe(201);
     expect(advanced.data.run.status).toBe("gate_required");
+    const closureReadiness = await jsonFetch<{ readiness: { state: string; reasons: string[] } }>(`/api/novel/projects/${project.slug}/book-runs/${started.data.run.bookRunId}/closure-readiness?sourceFingerprint=missing`);
+    expect(closureReadiness.status).toBe(200);
+    expect(closureReadiness.data.readiness).toMatchObject({ state: "scope_complete", reasons: ["SCOPE_NOT_COMPLETE"] });
     const audit = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${project.slug}/book-runs/${started.data.run.bookRunId}/completion-audits`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceFingerprint: "missing" })
     });
@@ -340,11 +556,156 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedVersion: advanced.data.run.version })
     });
     expect(paused.status).toBe(201);
-    expect(paused.data.run.status).toBe("paused");
+    expect(paused.data.run.status).toBe("pausing");
     const resumed = await jsonFetch<{ run: { status: string } }>(`/api/novel/projects/${project.slug}/book-runs/${started.data.run.bookRunId}/resume`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedVersion: paused.data.run.version })
     });
     expect(resumed.data.run.status).toBe("ready");
+  });
+
+  it("exposes and revokes the BookRun autonomy grant", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Autonomy Grant API", roughIdea: "Grant lifecycle is durable." }) });
+    const started = await jsonFetch<{ run: { bookRunId: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], autonomyExpiresAt: "2099-01-01T00:00:00.000Z", limits: { maxWorkItems: 1 } }) });
+    expect(started.status).toBe(201);
+    const read = await jsonFetch<{ grant: { status: string; bookRunId: string; expiresAt: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/autonomy-grant`);
+    expect(read.status).toBe(200);
+    expect(read.data.grant).toMatchObject({ status: "active", bookRunId: started.data.run.bookRunId, expiresAt: "2099-01-01T00:00:00.000Z" });
+    const revoked = await jsonFetch<{ grant: { status: string; revokeReason: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/autonomy-grant/revoke`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: "author changed scope" }) });
+    expect(revoked.status).toBe(201);
+    expect(revoked.data.grant).toMatchObject({ status: "revoked", revokeReason: "author changed scope" });
+  });
+
+  it("exposes the persisted completion audit as a replayable read", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Completion audit read API", roughIdea: "Replay the terminal proof." })
+    });
+    const started = await jsonFetch<{ run: { bookRunId: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], autonomyLevel: "L1", limits: { maxWorkItems: 1 } })
+    });
+    const missing = await jsonFetch<{ error: string }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/completion-audits`);
+    expect(missing.status).toBe(404);
+    expect(missing.data.error).toBe("COMPLETION_AUDIT_NOT_FOUND");
+    const revalidated = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/completion-audits?sourceFingerprint=canon-1`);
+    expect(revalidated.status).toBe(409);
+    expect(revalidated.data.error.code).toBe("COMPLETION_SCOPE_REQUIRED");
+  });
+
+  it("creates risk-gated chapter memory patches and reports asset coverage", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Memory patch API", roughIdea: "Every chapter leaves an auditable memory patch." })
+    });
+    const slug = created.data.project.slug;
+    const blocked = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/memory/chapter-patches`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ patchId: "patch-api-1", chapterId: "chapter-001", chapterVersion: "chapter-001:v1", sourceRefs: ["chapter-settlement://chapter-001"], summary: "", keyEvents: [], newFacts: [], characterStates: [], emotionLedger: [], foreshadowingActions: [], continuityRisks: [], growthChanges: [] })
+    });
+    expect(blocked.status).toBe(409);
+    expect(blocked.data.error).toBe("MEMORY_PATCH_NO_CHANGE_REASON_REQUIRED");
+    const createdPatch = await jsonFetch<{ patch: { fingerprint: string; risk: string }; adoption: { status: string; requiredConfirmation: string } }>(`/api/novel/projects/${slug}/runtime/memory/chapter-patches`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ patchId: "patch-api-1", chapterId: "chapter-001", chapterVersion: "chapter-001:v1", sourceRefs: ["chapter-settlement://chapter-001"], summary: "The bell answered.", keyEvents: ["The bell rang"], newFacts: [], characterStates: [], emotionLedger: [], foreshadowingActions: [{ obligationId: "ob-1", action: "resolved", risk: "high" }], continuityRisks: [], growthChanges: [] })
+    });
+    expect(createdPatch.status).toBe(201);
+    expect(createdPatch.data).toMatchObject({ patch: { risk: "high" }, adoption: { status: "blocked", requiredConfirmation: "author" } });
+    const readBack = await jsonFetch<{ patch: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/memory/chapter-patches/patch-api-1`);
+    expect(readBack.data.patch.fingerprint).toBe(createdPatch.data.patch.fingerprint);
+    const coverage = await jsonFetch<{ coverage: { chapterCount: number; coverageRate: { summary: number } } }>(`/api/novel/projects/${slug}/runtime/memory/asset-coverage`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapters: [{ chapterId: "chapter-001", prose: true, summary: true, qualityReport: true, knowledgeIndex: true, foreshadowingExtraction: true }, { chapterId: "chapter-002", prose: true, summary: false, qualityReport: true, knowledgeIndex: false, foreshadowingExtraction: false }] })
+    });
+    expect(coverage.status).toBe(200);
+    expect(coverage.data.coverage).toMatchObject({ chapterCount: 2, coverageRate: { summary: 0.5 } });
+  });
+
+  it("persists and commits a multi-asset MutationPlan through the runtime boundary", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Mutation plan API", roughIdea: "Commit canon and projections together." })
+    });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    await fs.writeFile(path.join(root, "mutation-api.txt"), "before", "utf8");
+    const plan = await jsonFetch<{ plan: { mutationId: string; status: string; changes: Array<{ expectedSha256: string }> } }>(`/api/novel/projects/${slug}/runtime/mutation-plans`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mutationId: "mutation-api-1", idempotencyKey: "mutation-api-idem", commandType: "chapter.settle", expectedProjectFingerprint: "project-v1", changes: [{ relativePath: "mutation-api.txt", assetType: "canon", nextContent: "after", authoritative: true }], domainEvents: ["chapter.settled"], projectionUpdates: ["memory.rebuild"], postCommitJobs: [] })
+    });
+    expect(plan.status).toBe(201);
+    expect(plan.data.plan).toMatchObject({ mutationId: "mutation-api-1", status: "prepared" });
+    const replay = await jsonFetch<{ plan: { mutationId: string } }>(`/api/novel/projects/${slug}/runtime/mutation-plans`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mutationId: "mutation-api-1", idempotencyKey: "mutation-api-idem", commandType: "chapter.settle", expectedProjectFingerprint: "project-v1", changes: [{ relativePath: "mutation-api.txt", assetType: "canon", nextContent: "after", authoritative: true }], domainEvents: ["chapter.settled"], projectionUpdates: ["memory.rebuild"], postCommitJobs: [] })
+    });
+    expect(replay.status).toBe(201);
+    expect(replay.data.plan.mutationId).toBe("mutation-api-1");
+    const immutableConflict = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/mutation-plans`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mutationId: "mutation-api-1", idempotencyKey: "different-idem", commandType: "chapter.settle", expectedProjectFingerprint: "project-v1", changes: [{ relativePath: "mutation-api.txt", assetType: "canon", nextContent: "tampered", authoritative: true }], domainEvents: [], projectionUpdates: [], postCommitJobs: [] })
+    });
+    expect(immutableConflict.status).toBe(409);
+    expect(immutableConflict.data.error).toBe("MUTATION_PLAN_IMMUTABLE");
+    const preflight = await jsonFetch<{ preflight: { status: string; committed: boolean; items: Array<{ status: string }> } }>(`/api/novel/projects/${slug}/runtime/mutation-plans/mutation-api-1/preflight`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(preflight.status).toBe(200);
+    expect(preflight.data.preflight).toMatchObject({ status: "ready", committed: false, items: [expect.objectContaining({ status: "accepted" })] });
+    const committed = await jsonFetch<{ plan: { status: string } }>(`/api/novel/projects/${slug}/runtime/mutation-plans/mutation-api-1/commit`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(committed.status).toBe(201);
+    expect(committed.data.plan.status).toBe("committed");
+    expect(await fs.readFile(path.join(root, "mutation-api.txt"), "utf8")).toBe("after");
+    const readBack = await jsonFetch<{ plan: { status: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/mutation-plans/mutation-api-1`);
+    expect(readBack.data.plan).toMatchObject({ status: "committed", fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+  });
+
+  it("persists a typed BookRun milestone repair plan without shrinking scope", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Repair Plan API", roughIdea: "Typed repairs preserve scope." })
+    });
+    const started = await jsonFetch<{ run: { bookRunId: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], autonomyLevel: "L1", limits: { maxWorkItems: 1 } })
+    });
+    const response = await jsonFetch<{ plan: { status: string; preserveScope: boolean; actions: Array<{ kind: string }> } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/repair-plans`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceFingerprint: "source-repair", issues: [{ kind: "obligation", targetId: "obl-1", reason: "missing terminal evidence", evidenceRefs: ["audit://obl-1"] }] })
+    });
+    expect(response.status).toBe(201);
+    expect(response.data.plan).toMatchObject({ status: "planned", preserveScope: true, actions: [{ kind: "obligation" }] });
+  });
+
+  it("records and audits a repair action through the BookRun API", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Repair Audit API", roughIdea: "Completion requires milestone evidence." })
+    });
+    const started = await jsonFetch<{ run: { bookRunId: string; version: number } }>(`/api/novel/projects/${created.data.project.slug}/book-runs`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], autonomyLevel: "L1", limits: { maxWorkItems: 1 } })
+    });
+    const planned = await jsonFetch<{ plan: { planId: string; actions: Array<{ actionId: string }> } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/repair-plans`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceFingerprint: "source-audit", issues: [{ kind: "obligation", targetId: "obl-1", reason: "missing terminal evidence", evidenceRefs: ["audit://obl-1"] }] })
+    });
+    const actionId = planned.data.plan.actions[0].actionId;
+    const completed = await jsonFetch<{ receipt: { status: string; actionId: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/repair-plans/${planned.data.plan.planId}/actions/${actionId}/complete`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evidenceRefs: ["repair://obl-1"] })
+    });
+    expect(completed.status).toBe(201);
+    expect(completed.data.receipt).toMatchObject({ status: "completed", actionId });
+    const audited = await jsonFetch<{ audit: { status: string; planId: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/repair-plans/${planned.data.plan.planId}/audit`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceFingerprint: "source-audit" })
+    });
+    expect(audited.status).toBe(201);
+    expect(audited.data.audit).toMatchObject({ status: "passed", planId: planned.data.plan.planId });
+  });
+
+  it("persists a conservative startup readiness proof instead of inferring budget authorization", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Readiness Proof API", roughIdea: "Startup evidence must be explicit." })
+    });
+    const started = await jsonFetch<{ run: { bookRunId: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], autonomyLevel: "L1", limits: { maxWorkItems: 1, maxBudgetCents: 1000 } })
+    });
+    const readiness = await jsonFetch<{ proof: { status: string; blockedReasons: string[]; fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/readiness`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(readiness.status).toBe(200);
+    expect(readiness.data.proof).toMatchObject({ status: "blocked", blockedReasons: expect.arrayContaining(["missing-budgetReservation"]), fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    const reserved = await jsonFetch<{ reservation: { status: string; reservedCents: number; runVersion: number } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/budget-reservations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reservedCents: 800 }) });
+    expect(reserved.status).toBe(201);
+    expect(reserved.data.reservation).toMatchObject({ status: "reserved", reservedCents: 800, runVersion: 1 });
+    const afterReservation = await jsonFetch<{ proof: { evidence: { budgetReservation: string }; blockedReasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/readiness`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(afterReservation.data.proof.evidence.budgetReservation).toBe("present");
+    expect(afterReservation.data.proof.blockedReasons).not.toContain("missing-budgetReservation");
+    const settled = await jsonFetch<{ reservation: { status: string; consumedCents: number } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/budget-reservations/settle`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ consumedCents: 300 }) });
+    expect(settled.status).toBe(201);
+    expect(settled.data.reservation).toMatchObject({ status: "settled", consumedCents: 300 });
+    const afterSettlement = await jsonFetch<{ proof: { evidence: { budgetReservation: string }; blockedReasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/${started.data.run.bookRunId}/readiness`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(afterSettlement.data.proof.evidence.budgetReservation).toBe("missing");
+    expect(afterSettlement.data.proof.blockedReasons).toContain("missing-budgetReservation");
   });
 
   it("exposes Q-009 length contract, forecast, and explicit variance decision", async () => {
@@ -415,12 +776,13 @@ describe("novel API routes", () => {
       body: JSON.stringify({ title: 'External Review Evidence', roughIdea: 'Evidence must remain isolated.' })
     });
     await fs.mkdir(path.join(tempRoot, created.data.project.slug, 'sessions'), { recursive: true });
-    await fs.writeFile(path.join(tempRoot, created.data.project.slug, 'sessions', 'understanding-snapshot.json'), JSON.stringify({
+    const externalSnapshotBase = {
       schemaVersion: 'understanding-snapshot.v1', snapshotId: 'snapshot-external-001', projectSlug: created.data.project.slug,
       mode: 'shadow', sourceFingerprint: 'c'.repeat(64), sourceMessageIds: [], coreExplicit: [], inferred: [], unknowns: [],
       question: { id: 'question-primary-desire', text: 'Question', status: 'candidate', impact: 'high', source: 'deterministic-gap' },
       modelCallIssued: false, canonWritten: false, createdAt: new Date().toISOString()
-    }), 'utf8');
+    };
+    await fs.writeFile(path.join(tempRoot, created.data.project.slug, 'sessions', 'understanding-snapshot.json'), JSON.stringify({ ...externalSnapshotBase, fingerprint: crypto.createHash('sha256').update(JSON.stringify(externalSnapshotBase)).digest('hex') }), 'utf8');
     const response = await jsonFetch<{ review: { status: string; canonWritten: boolean; reviewer: { kind: string; attestationReference: string } } }>(
       `/api/novel/projects/${created.data.project.slug}/session/understanding/review/external`,
       {
@@ -446,6 +808,338 @@ describe("novel API routes", () => {
     expect(response.data.review).toMatchObject({ status: 'passed', canonWritten: false, reviewer: { kind: 'provider' } });
     const acceptance = await jsonFetch<{ decision: { checks: Array<{ checkId: string; status: string }> } }>('/api/novel/release-acceptance');
     expect(acceptance.data.decision.checks.find((check) => check.checkId === 'v2-independent-review')).toMatchObject({ status: 'passed' });
+  });
+
+  it("exposes RP3 contract acceptance as fail-closed until author and provider gates exist", async () => {
+    const response = await jsonFetch<{
+      decision: {
+        releaseProfile: string;
+        status: string;
+        expectedRequirementCount: number;
+        verifiedRequirementCount: number;
+        authorAcceptance: string;
+        realProviderEvidence: string;
+        blockedReasons: string[];
+      };
+    }>("/api/novel/rp3-contract-acceptance");
+    expect(response.status).toBe(200);
+    expect(response.data.decision).toMatchObject({
+      releaseProfile: "RP3-contract",
+      status: "do-not-activate",
+      expectedRequirementCount: 27,
+      verifiedRequirementCount: 27,
+      authorAcceptance: "missing",
+      realProviderEvidence: "missing"
+    });
+    expect(response.data.decision.blockedReasons).toEqual(expect.arrayContaining([
+      "AUTHOR_ACCEPTANCE_REQUIRED",
+      "REAL_PROVIDER_EVIDENCE_REQUIRED"
+    ]));
+  });
+
+  it("records explicit RP3 author acceptance while keeping provider evidence fail-closed", async () => {
+    const submitted = await jsonFetch<{ acceptance: { status: string; actorId: string; fingerprint: string } }>("/api/novel/rp3-contract-acceptance/author", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "accepted", actorId: "author-1", authorizationId: "rp3-final-1", evidenceRefs: ["decision://rp3/final"] })
+    });
+    expect(submitted.status).toBe(201);
+    expect(submitted.data.acceptance).toMatchObject({ status: "accepted", actorId: "author-1" });
+    const evaluated = await jsonFetch<{ decision: { authorAcceptance: string; realProviderEvidence: string; status: string; blockedReasons: string[] } }>("/api/novel/rp3-contract-acceptance");
+    expect(evaluated.data.decision).toMatchObject({ authorAcceptance: "accepted", realProviderEvidence: "missing", status: "do-not-activate" });
+    expect(evaluated.data.decision.blockedReasons).toContain("REAL_PROVIDER_EVIDENCE_REQUIRED");
+    const replay = await jsonFetch<{ acceptance: { fingerprint: string } }>("/api/novel/rp3-contract-acceptance/author", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "accepted", actorId: "author-1", authorizationId: "rp3-final-1", evidenceRefs: ["decision://rp3/final"] })
+    });
+    expect(replay.status).toBe(201);
+    expect(replay.data.acceptance.fingerprint).toBe(submitted.data.acceptance.fingerprint);
+  });
+
+  it("reports RP4 full-profile acceptance from the current evidence map without overstating coverage", async () => {
+    const response = await jsonFetch<{ decision: { releaseProfile: string; status: string; expectedRequirementCount: number; verifiedRequirementCount: number; blockedReasons: string[] } }>("/api/novel/rp4-outline-acceptance");
+    expect(response.status).toBe(200);
+    expect(response.data.decision.releaseProfile).toBe("RP4-outline");
+    expect(response.data.decision.expectedRequirementCount).toBe(83);
+    expect(response.data.decision.status).toBe("do-not-activate");
+    expect(response.data.decision.blockedReasons).toEqual(expect.arrayContaining(["RP3_DEPENDENCY_NOT_ACCEPTED", "RP4_REQUIREMENTS_NOT_FULLY_VERIFIED"]));
+  });
+
+  it("persists the execution-ready gate report for later recovery reads", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "execution-gate-report", title: "Execution Gate Report", genre: "fantasy", roughIdea: "A bounded outline" }) });
+    expect(created.status).toBe(201);
+    const input = { outlineVersionId: "outline-version-1", nearHorizon: [1, 2, 3].map((order) => ({ chapterId: `chapter-${order}`, hasFunction: true, hasStateChange: true, sourceRefs: [`outline://chapter/${order}`] })), arcObligationLinks: [{ arcId: "arc-1", obligationId: "obligation-1", plannedNodeId: "chapter-1" }], causalReachable: true, contextComplete: true, blockingConflictsResolved: true, sourceRefs: ["outline://version/1"], structureVersionFingerprint: "structure-1", changeLevel: "L0", adoptionAuthority: "author", adoptionProofFingerprint: "adoption-1" };
+    const posted = await jsonFetch<{ report: { status: string; executionReady: boolean; fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/execution-ready/gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+    expect(posted.status).toBe(200);
+    expect(posted.data.report).toMatchObject({ status: "ready", executionReady: true });
+    const read = await jsonFetch<{ report: { fingerprint: string; executionReady: boolean } }>(`/api/novel/projects/${created.data.project.slug}/runtime/execution-ready/gate`);
+    expect(read.status).toBe(200);
+    expect(read.data.report).toMatchObject({ fingerprint: posted.data.report.fingerprint, executionReady: true });
+  });
+
+  it("exposes chapter execution proof evidence from a queued work item", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "execution-evidence-link", title: "Execution Evidence Link", genre: "fantasy", roughIdea: "Proof linkage" }) });
+    expect(created.status).toBe(201);
+    const root = path.join(tempRoot, created.data.project.slug);
+    const parentFingerprint = "d".repeat(64);
+    const proof = await createChapterExecutionProof(root, { projectSlug: created.data.project.slug, chapterId: "chapter-001", planId: "plan-1", planFingerprint: "a".repeat(64), parentExecutionReadyProofFingerprint: parentFingerprint, contextFingerprint: "c".repeat(64) });
+    const workItemBase = { schemaVersion: "execution-work-item.v1" as const, workItemId: "work-evidence-link", projectSlug: created.data.project.slug, chapterId: "chapter-001", versionId: "version-1", proofFingerprint: parentFingerprint, contextManifestId: "context-1", contextFingerprint: "c".repeat(64), status: "queued" as const, idempotencyKey: "evidence-link", createdAt: new Date().toISOString() };
+    const workItem = { ...workItemBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(workItemBase)).digest("hex") };
+    await fs.mkdir(path.join(root, "sessions", "execution-work-items"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "execution-work-items", `${workItem.workItemId}.json`), JSON.stringify(workItem), "utf8");
+    const response = await jsonFetch<{ workItem: { workItemId: string }; chapterExecutionProofs: Array<{ proofId: string }> }>(`/api/novel/projects/${created.data.project.slug}/runtime/execution-work-items/${workItem.workItemId}/evidence`);
+    expect(response.status).toBe(200);
+    expect(response.data.workItem.workItemId).toBe(workItem.workItemId);
+    expect(response.data.chapterExecutionProofs.map((item) => item.proofId)).toContain(proof.proofId);
+  });
+
+  it("exposes current graph provenance for a scheduled execution work item", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "execution-provenance", title: "Execution Provenance", genre: "fantasy", roughIdea: "Graph trace" }) });
+    expect(created.status).toBe(201);
+    const root = path.join(tempRoot, created.data.project.slug);
+    const graph = await createBookWorkGraph(root, created.data.project.slug, ["chapter-001"]);
+    const workItemBase = { schemaVersion: "execution-work-item.v1" as const, workItemId: "work-provenance", projectSlug: created.data.project.slug, chapterId: "chapter-001", versionId: "version-1", proofFingerprint: "d".repeat(64), contextManifestId: "context-1", contextFingerprint: "c".repeat(64), sourceBookWorkItemId: "book-draft-chapter-001", sourceGraphFingerprint: graph.fingerprint, status: "queued" as const, idempotencyKey: "provenance", createdAt: new Date().toISOString() };
+    const workItem = { ...workItemBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(workItemBase)).digest("hex") };
+    await fs.mkdir(path.join(root, "sessions", "execution-work-items"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "execution-work-items", `${workItem.workItemId}.json`), JSON.stringify(workItem), "utf8");
+    const response = await jsonFetch<{ provenance: { sourceGraphCurrent: boolean; sourceBookWorkItemPresent: boolean; currentGraphFingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/execution-work-items/${workItem.workItemId}/provenance`);
+    expect(response.status).toBe(200);
+    expect(response.data.provenance).toMatchObject({ sourceGraphCurrent: true, sourceBookWorkItemPresent: true, currentGraphFingerprint: graph.fingerprint });
+  });
+
+  it("keeps memory claims candidate until a chapter settlement explicitly confirms them", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "memory-claim-route", title: "Memory Claim Route", genre: "fantasy", roughIdea: "Authority test" }) });
+    const claim = await jsonFetch<{ claim: { status: string; claimId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claims`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId: "memory-route-1", proposition: "The gate requires blood", epistemicType: "canon_fact", sourceRefs: ["chapter-settlement://chapter-1"], evidenceAnchors: ["chapter-1#span-1"], producedBy: "author", temporalScope: { asOfVersion: "chapter-1:v1" }, confidence: 0.9 }) });
+    expect(claim.status).toBe(201);
+    expect(claim.data.claim.status).toBe("candidate");
+    const duplicateClaim = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claims`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId: claim.data.claim.claimId, proposition: "A different proposition", epistemicType: "canon_fact", sourceRefs: ["chapter-settlement://chapter-1"], evidenceAnchors: ["chapter-1#different"], producedBy: "author", temporalScope: { asOfVersion: "chapter-1:v1" }, confidence: 0.9 }) });
+    expect(duplicateClaim.status).toBe(409);
+    const blocked = await jsonFetch<{ error: string }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claims/${claim.data.claim.claimId}/settle`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterSettlementCompleted: false, confirmer: "author-1", reason: "confirm" }) });
+    expect(blocked.status).toBe(409);
+    await writeSettledChapterEvidence(created.data.project.slug, "chapter-1");
+    const settled = await jsonFetch<{ claim: { status: string; version: number } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claims/${claim.data.claim.claimId}/settle`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterSettlementCompleted: true, confirmer: "author-1", reason: "confirmed after chapter settlement" }) });
+    expect(settled.status).toBe(201);
+    expect(settled.data.claim).toMatchObject({ status: "eligible", version: 2 });
+    for (const [eventId, start] of [["event-open", "001"], ["event-after", "002"]] as const) {
+      const event = await jsonFetch<{ event: { eventId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/story-time-events`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventId, label: eventId, timelineId: "main", start, end: start, duration: "1 beat", uncertainty: "exact", parallelLine: "main", sourceRefs: [`chapter-1#${eventId}`] }) });
+      expect(event.status).toBe(201);
+    }
+    const temporal = await jsonFetch<{ temporal: { status: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claims/${claim.data.claim.claimId}/temporal`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ targetEvent: "event-open", eventOrder: { "event-open": 1, "event-after": 2 } }) });
+    expect(temporal.data.temporal.status).toBe("active");
+    const boundedClaim = await jsonFetch<{ claim: { claimId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claims`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId: "memory-route-bounded", proposition: "The bridge is open", epistemicType: "canon_fact", sourceRefs: ["chapter-settlement://chapter-1"], evidenceAnchors: ["chapter-1#bridge"], producedBy: "author", temporalScope: { startEvent: "event-open", asOfVersion: "chapter-1:v1" }, confidence: 0.9 }) });
+    const forgedTemporal = await jsonFetch<{ temporal: { status: string; reason: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claims/${boundedClaim.data.claim.claimId}/temporal`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ targetEvent: "forged-target", eventOrder: { "event-open": 1, "forged-target": 2 } }) });
+    expect(forgedTemporal.data.temporal).toMatchObject({ status: "unknown", reason: "TARGET_EVENT_UNORDERED" });
+    const relation = await jsonFetch<{ relation: { relation: string; relationId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claim-relations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromClaimId: "memory-route-1", toClaimId: "memory-route-2", relation: "contradicts", sourceRefs: ["chapter-2#1"], validFromVersion: "v1" }) });
+    expect(relation.status).toBe(201);
+    expect(relation.data.relation.relation).toBe("contradicts");
+    const revokedRelation = await jsonFetch<{ event: { relationId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claim-relations/${relation.data.relation.relationId}/revoke`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: "revised canon", sourceRefs: ["chapter-3#revision"] }) });
+    expect(revokedRelation.status).toBe(201);
+    const missingRelationVersion = await jsonFetch<{ error: string }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claim-relations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromClaimId: "memory-route-1", toClaimId: "memory-route-2", relation: "supports", sourceRefs: ["chapter-2#1"] }) });
+    expect(missingRelationVersion.status).toBe(409);
+    const entity = await jsonFetch<{ entity: { entityId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/entities`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ entityId: "memory-character-a", kind: "character", canonicalName: "Lin Xia", sourceRefs: ["chapter://1"] }) });
+    const alias = await jsonFetch<{ assertion: Record<string, unknown> }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/alias-assertions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromEntityId: "identity-white-crow", alias: "White Crow", relation: "same-as", toEntityId: entity.data.entity.entityId, evidenceRefs: ["chapter-3#reveal"], knowledgeScope: "author" }) });
+    const confirmedAlias = await jsonFetch<{ assertion: { status: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/alias-assertions/confirm`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ assertion: alias.data.assertion, confirmer: "author-1" }) });
+    expect(confirmedAlias.data.assertion.status).toBe("confirmed");
+    const persistedResolution = await jsonFetch<{ resolution: { status: string; entityIds: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/alias-resolutions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ alias: "White Crow", entities: [], assertions: [] }) });
+    expect(persistedResolution.data.resolution).toMatchObject({ status: "resolved", entityIds: [entity.data.entity.entityId] });
+    const canonicalEntities = await jsonFetch<{ entities: Array<{ entityId: string }> }>(`/api/novel/projects/${created.data.project.slug}/memory/entities`);
+    expect(canonicalEntities.status).toBe(200);
+    expect(canonicalEntities.data.entities).toEqual(expect.arrayContaining([expect.objectContaining({ entityId: entity.data.entity.entityId })]));
+    const canonicalResolution = await jsonFetch<{ resolution: { status: string; entityIds: string[] } }>(`/api/novel/projects/${created.data.project.slug}/memory/entity-resolutions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ alias: "White Crow", entities: [], assertions: [] }) });
+    expect(canonicalResolution.status).toBe(200);
+    expect(canonicalResolution.data.resolution).toMatchObject({ status: "resolved", entityIds: [entity.data.entity.entityId] });
+    const canonicalAssertions = await jsonFetch<{ assertions: Array<{ assertionId: string; status: string }> }>(`/api/novel/projects/${created.data.project.slug}/memory/alias-assertions`);
+    expect(canonicalAssertions.status).toBe(200);
+    expect(canonicalAssertions.data.assertions).toEqual(expect.arrayContaining([expect.objectContaining({ status: "confirmed" })]));
+    const canonicalAlias = await jsonFetch<{ assertion: { status: string } }>(`/api/novel/projects/${created.data.project.slug}/memory/alias-assertions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromEntityId: "identity-white-crow-2", alias: "White Crow 2", relation: "same-as", toEntityId: entity.data.entity.entityId, evidenceRefs: ["chapter-4#reveal"], knowledgeScope: "author" }) });
+    expect(canonicalAlias.status).toBe(201);
+    expect(canonicalAlias.data.assertion.status).toBe("proposed");
+    const canonicalConfirmed = await jsonFetch<{ assertion: { status: string; assertionId: string } }>(`/api/novel/projects/${created.data.project.slug}/memory/alias-assertions/${canonicalAlias.data.assertion.assertionId}/confirm`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirmer: "author-2" }) });
+    expect(canonicalConfirmed.status).toBe(200);
+    expect(canonicalConfirmed.data.assertion).toMatchObject({ assertionId: canonicalAlias.data.assertion.assertionId, status: "confirmed" });
+  });
+
+  it("derives canonical memory conflict preflight from persisted claims and relations", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "memory-conflict-preflight", title: "Memory Conflict Preflight", genre: "fantasy", roughIdea: "Persisted conflict gate" }) });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/memory/claims`;
+    for (const [claimId, proposition] of [["conflict-a", "The gate is open"], ["conflict-b", "The gate is sealed"]] as const) {
+      await writeSettledChapterEvidence(created.data.project.slug, claimId);
+      const made = await jsonFetch<{ claim: { claimId: string } }>(base, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId, proposition, epistemicType: "canon_fact", sourceRefs: [`chapter://${claimId}`], evidenceAnchors: [`${claimId}#1`], producedBy: "author", temporalScope: { asOfVersion: "v1" }, confidence: 0.9 }) });
+      expect(made.status).toBe(201);
+      const settled = await jsonFetch<{ claim: { status: string } }>(`${base}/${made.data.claim.claimId}/settle`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterSettlementCompleted: true, confirmer: "author", reason: "settled" }) });
+      expect(settled.data.claim.status).toBe("eligible");
+    }
+    const relation = await jsonFetch<{ relation: { relationId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/memory/claim-relations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromClaimId: "conflict-a", toClaimId: "conflict-b", relation: "contradicts", sourceRefs: ["chapter://conflict"], validFromVersion: "v1" }) });
+    expect(relation.status).toBe(201);
+    const preflight = await jsonFetch<{ gate: { status: string; contradictionSetIds: string[]; blockers: string[] } }>(`/api/novel/projects/${created.data.project.slug}/memory/conflict-preflights`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hardRiskConflict: false }) });
+    expect(preflight.status).toBe(200);
+    expect(preflight.data.gate).toMatchObject({ status: "blocked", contradictionSetIds: expect.arrayContaining([expect.stringContaining("contradiction-set-")]) });
+    expect(preflight.data.gate.blockers).toContain("MEMORY_CONTRADICTION_UNRESOLVED");
+  });
+
+  it("persists scoped character and reader knowledge and evaluates eligibility", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "memory-knowledge-route", title: "Memory Knowledge Route", genre: "fantasy", roughIdea: "Knowledge boundary" }) });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/memory/knowledge`;
+    const character = await jsonFetch<{ stateId: string }>(`${base}/characters`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ characterId: "c1", claimId: "secret", state: "learned", evidenceRefs: ["chapter-2#tell"], asOfEvent: "e2" }) });
+    expect(character.status, JSON.stringify(character.data)).toBe(201);
+    const reader = await jsonFetch<{ stateId: string }>(`${base}/readers`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ readerScope: "default", claimId: "secret", state: "seen", publicationVersion: "pub-1", progressCursor: "chapter-2", evidenceRefs: ["pub-1#chapter-2"] }) });
+    expect(reader.status, JSON.stringify(reader.data)).toBe(201);
+    const characterEligibility = await jsonFetch<{ eligibility: { eligible: boolean } }>(`${base}/characters/eligibility`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ characterId: "c1", claimId: "secret", targetEvent: "e1", eventOrder: { e1: 1, e2: 2 } }) });
+    expect(characterEligibility.data.eligibility.eligible).toBe(false);
+    const readerEligibility = await jsonFetch<{ eligibility: { eligible: boolean } }>(`${base}/readers/eligibility`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ readerScope: "default", claimId: "secret", publicationVersion: "pub-1", progressCursor: "chapter-2" }) });
+    expect(readerEligibility.data.eligibility.eligible).toBe(true);
+    const characterView = await jsonFetch<{ authority: string; states: Array<{ characterId: string; claimId: string }> }>(`/api/novel/projects/${created.data.project.slug}/memory/epistemic/characters/c1?claimId=secret`);
+    expect(characterView.status).toBe(200);
+    expect(characterView.data).toMatchObject({ authority: "memory-knowledge-events" });
+    expect(characterView.data.states).toHaveLength(1);
+    const readerView = await jsonFetch<{ authority: string; states: Array<{ readerScope: string; publicationVersion: string }> }>(`/api/novel/projects/${created.data.project.slug}/memory/epistemic/readers/default?claimId=secret&publicationVersion=pub-1`);
+    expect(readerView.status).toBe(200);
+    expect(readerView.data).toMatchObject({ authority: "memory-knowledge-events" });
+    expect(readerView.data.states).toHaveLength(1);
+  });
+
+  it("retcons a settled memory claim without deleting its historical event", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "memory-retcon-route", title: "Memory Retcon Route", genre: "fantasy", roughIdea: "Versioned memory" }) });
+    await writeSettledChapterEvidence(created.data.project.slug, "1");
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/memory/claims`;
+    const claim = await jsonFetch<{ claim: { claimId: string } }>(base, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId: "retcon-route-1", proposition: "The gate is open", epistemicType: "canon_fact", sourceRefs: ["chapter://1"], evidenceAnchors: ["chapter-1#1"], producedBy: "author", temporalScope: { asOfVersion: "v1" }, confidence: 0.9 }) });
+    await jsonFetch(`${base}/${claim.data.claim.claimId}/settle`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterSettlementCompleted: true, confirmer: "author-1", reason: "settled" }) });
+    const retcon = await jsonFetch<{ obsolete: { status: string }; replacement: { status: string; version: number; proposition: string }; impact: { status: string; actions: string[] }; rebuild: { status: string; executedActions: string[] } }>(`${base}/${claim.data.claim.claimId}/retcon`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ replacementProposition: "The gate is sealed", replacementEvidenceAnchors: ["chapter-2#9"], confirmer: "author-1", reason: "new evidence" }) });
+    expect(retcon.status).toBe(201);
+    expect(retcon.data.obsolete.status).toBe("obsolete");
+    expect(retcon.data.replacement).toMatchObject({ status: "candidate", version: 3, proposition: "The gate is sealed" });
+    expect(retcon.data.impact).toMatchObject({ status: "blocked-until-rebuild" });
+    expect(retcon.data.rebuild).toMatchObject({ status: "executed" });
+    const publicationGate = await jsonFetch<{ decision: { allowed: boolean; blockedReasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/publication-gate`);
+    expect(publicationGate.data.decision.allowed).toBe(false);
+    expect(publicationGate.data.decision.blockedReasons).toContain("MEMORY_REPLACEMENT_PENDING");
+  });
+
+  it("replays entity merge and split lineage through the memory API", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Entity Replay Route", roughIdea: "Identity lifecycle" }) });
+    const base = `/api/novel/projects/${created.data.project.slug}/runtime/memory/entities`;
+    for (const [entityId, canonicalName] of [["entity-route-a", "A"], ["entity-route-b", "B"]]) {
+      const response = await jsonFetch<{ entity: { entityId: string } }>(base, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ entityId, kind: "character", canonicalName, sourceRefs: [`chapter://${entityId}`] }) });
+      expect(response.status).toBe(201);
+    }
+    const merged = await jsonFetch<{ replay: { entities: Array<{ entityId: string; status: string }>; lineage: Array<{ relation: string; relatedEntityId: string }> } }>(`${base}/merge`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceEntityIds: ["entity-route-a", "entity-route-b"], targetEntityId: "entity-route-ab", kind: "character", canonicalName: "A-B", sourceRefs: ["chapter://merge"], confirmer: "author", evidenceRefs: ["chapter-3#identity"], reason: "same identity" }) });
+    expect(merged.status).toBe(201);
+    expect(merged.data.replay.entities).toEqual(expect.arrayContaining([expect.objectContaining({ entityId: "entity-route-a", status: "merged" }), expect.objectContaining({ entityId: "entity-route-ab", status: "active" })]));
+    const split = await jsonFetch<{ replay: { entities: Array<{ entityId: string; status: string }>; lineage: Array<{ relation: string; relatedEntityId: string }> } }>(`${base}/split`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceEntityId: "entity-route-ab", replacementEntities: [{ entityId: "entity-route-a2", kind: "character", canonicalName: "A", sourceRefs: ["chapter://split"] }, { entityId: "entity-route-b2", kind: "character", canonicalName: "B", sourceRefs: ["chapter://split"] }], confirmer: "author", evidenceRefs: ["chapter-4#split"], reason: "distinct identities" }) });
+    expect(split.status).toBe(201);
+    expect(split.data.replay.entities).toEqual(expect.arrayContaining([expect.objectContaining({ entityId: "entity-route-ab", status: "split" }), expect.objectContaining({ entityId: "entity-route-a2", status: "active" })]));
+    expect(split.data.replay.lineage).toEqual(expect.arrayContaining([expect.objectContaining({ relation: "merged-into", relatedEntityId: "entity-route-ab" }), expect.objectContaining({ relation: "split-into", relatedEntityId: "entity-route-a2" })]));
+    const replay = await jsonFetch<{ replay: { fingerprint: string } }>(`${base}/replay`);
+    expect(replay.data.replay.fingerprint).toHaveLength(64);
+  });
+
+  it("exposes the RP4 outline gate without claiming full-book executability", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug: "outline-gate-route", title: "Outline Gate Route", genre: "fantasy", roughIdea: "A bounded outline gate" })
+    });
+    expect(created.status).toBe(201);
+    const response = await jsonFetch<{ decision: { releaseProfile: string; status: string; fullBookExecutable: boolean; blockedReasons: string[] } }>(
+      `/api/novel/projects/${created.data.project.slug}/runtime/outline-release-gate`
+    );
+    expect(response.status).toBe(200);
+    expect(response.data.decision).toMatchObject({ releaseProfile: "RP4-outline", status: "blocked", fullBookExecutable: false });
+    expect(response.data.decision.blockedReasons).toEqual(expect.arrayContaining(["OUTLINE_GATE_RP3_DEPENDENCY"]));
+  });
+
+  it("persists research source snapshots immutably and exposes a read-back", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug: "research-snapshot-route", title: "Research Snapshot Route", genre: "historical", roughIdea: "Evidence-backed research" })
+    });
+    const payload = {
+      sourceId: "source-immutable-1", sourceType: "web", author: "Archive", title: "Record", publishedAt: "2025-01-01", retrievedAt: "2026-07-31", region: "CN", locator: "https://example.test/record?utm_source=test&entry=1", contentHash: "content-hash-1", acquisition: "browser", rights: "quote-with-attribution", reliabilitySignals: ["institutional"], expiry: "2027-01-01", rawContent: "A record. api_key=secret-value"
+    };
+    const first = await jsonFetch<{ source: { locator: string; sanitizedContent: string }; created: boolean }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/source-snapshots`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    expect(first.status).toBe(201);
+    expect(first.data.created).toBe(true);
+    expect(first.data.source.locator).toBe("https://example.test/record?entry=1");
+    expect(first.data.source.sanitizedContent).not.toContain("secret-value");
+    const readBack = await jsonFetch<{ source: { fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/source-snapshots/${payload.sourceId}`);
+    expect(readBack.status).toBe(200);
+    expect(readBack.data.source.fingerprint).toBeDefined();
+    const reliability = await jsonFetch<{ assessment: { status: string; reasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/source-snapshots/${payload.sourceId}/reliability`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ requiredSignals: ["official"], minIndependentSources: 0 }) });
+    expect(reliability.status).toBe(200);
+    expect(reliability.data.assessment).toMatchObject({ status: "insufficient", reasons: ["REQUIRED_RELIABILITY_SIGNAL_MISSING"] });
+    const claimEvaluation = await jsonFetch<{ claim: { fingerprint: string }; assessment: { status: string; reasons: string[] }; factCheck: { status: string; reasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/claims/evaluate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ now: "2026-07-31", evidenceExcerpt: "A record.", claim: { claimId: "claim-route-1", sourceSnapshotId: payload.sourceId, sourceText: "A record", paraphrase: "A record", status: "supported", anchor: `source://${payload.sourceId}#1`, region: "CN", asOf: "2025-01-01", conditions: [], counterEvidence: [], independentSourceIds: [payload.sourceId] } }) });
+    expect(claimEvaluation.status).toBe(200);
+    expect(claimEvaluation.data.assessment.status).toBe("current");
+    expect(claimEvaluation.data.factCheck).toMatchObject({ status: "supported", reasons: [] });
+    const factCheckReplay = await jsonFetch<{ factCheck: { claimId: string; fingerprint: string; status: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/claims/claim-route-1/fact-check`);
+    expect(factCheckReplay.status).toBe(200);
+    expect(factCheckReplay.data.factCheck).toMatchObject({ claimId: "claim-route-1", fingerprint: expect.any(String), status: "supported" });
+    const receiptPayload = { receiptId: "receipt-route-1", claimId: "claim-route-1", sourceSnapshotId: payload.sourceId, assetRef: "outline://v1#chapter-1", usage: "historical detail", adaptation: "compressed", risk: "high", span: { start: 1, end: 12 } };
+    const receipt = await jsonFetch<{ receipt: { fingerprint: string }; created: boolean }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/consumption-receipts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(receiptPayload) });
+    expect(receipt.status).toBe(201);
+    const receiptRead = await jsonFetch<{ receipt: { fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/consumption-receipts/${receiptPayload.receiptId}`);
+    expect(receiptRead.status).toBe(200);
+    expect(receiptRead.data.receipt.fingerprint).toBe(receipt.data.receipt.fingerprint);
+    const correction = await jsonFetch<{ propagation: { affectedReceiptIds: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/claims/claim-route-1/correct`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ previousFingerprint: "claim-route-1", replacementFingerprint: "claim-route-2", reason: "Publisher erratum" }) });
+    expect(correction.status).toBe(201);
+    expect(correction.data.propagation.affectedReceiptIds).toContain(receiptPayload.receiptId);
+    const blockedSettlement = await jsonFetch<{ decision: { status: string; reasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/settlements`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ receipt: { ...receiptPayload, schemaVersion: "research-consumption-receipt.v1", status: "pending", fingerprint: receipt.data.receipt.fingerprint }, claimAssessment: { status: "contested", reasons: ["COUNTER_EVIDENCE_PRESENT"], fingerprint: claimEvaluation.data.claim.fingerprint }, currentClaimFingerprint: claimEvaluation.data.claim.fingerprint, consumedClaimFingerprint: claimEvaluation.data.claim.fingerprint }) });
+    expect(blockedSettlement.status).toBe(409);
+    expect(blockedSettlement.data.decision.status).toBe("blocked");
+    const factCheckedSettlement = await jsonFetch<{ settlement: { status: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/settlements`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ receipt: { ...receiptPayload, schemaVersion: "research-consumption-receipt.v1", status: "pending", fingerprint: receipt.data.receipt.fingerprint }, claimAssessment: { status: "current", reasons: [], fingerprint: claimEvaluation.data.claim.fingerprint }, factCheck: { status: "supported" }, currentClaimFingerprint: claimEvaluation.data.claim.fingerprint, consumedClaimFingerprint: claimEvaluation.data.claim.fingerprint }) });
+    expect(factCheckedSettlement.status).toBe(200);
+    expect(factCheckedSettlement.data.settlement.status).toBe("current");
+    const currentSettlement = await jsonFetch<{ settlement: { status: string; decision: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/settlements/${receiptPayload.receiptId}`);
+    expect(currentSettlement.status).toBe(200);
+    expect(currentSettlement.data.settlement).toMatchObject({ status: "current", decision: "current" });
+    const revoked = await jsonFetch<{ propagation: { affectedReceiptIds: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/source-snapshots/${payload.sourceId}/revoke`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: "Source withdrawn by publisher" }) });
+    expect(revoked.status).toBe(201);
+    expect(revoked.data.propagation.affectedReceiptIds).toContain(receiptPayload.receiptId);
+    const propagatedAssessment = await jsonFetch<{ assessment: { status: string }; propagation: { affectedReceiptIds: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/claims/claim-route-1/propagate-assessment`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ now: "2026-07-31", claim: { sourceSnapshotId: payload.sourceId, sourceText: "A record", paraphrase: "A record", status: "supported", anchor: `source://${payload.sourceId}#1`, region: "CN", asOf: "2025-01-01", conditions: [], counterEvidence: [], independentSourceIds: [payload.sourceId] } }) });
+    expect(propagatedAssessment.status).toBe(200);
+    expect(propagatedAssessment.data.assessment.status).toBe("stale");
+    expect(propagatedAssessment.data.propagation.affectedReceiptIds).toContain(receiptPayload.receiptId);
+    const revokedClaim = await jsonFetch<{ assessment: { status: string; reasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/claims/evaluate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ now: "2026-07-31", claim: { claimId: "claim-route-1", sourceSnapshotId: payload.sourceId, sourceText: "A record", paraphrase: "A record", status: "supported", anchor: `source://${payload.sourceId}#1`, region: "CN", asOf: "2025-01-01", conditions: [], counterEvidence: [], independentSourceIds: [payload.sourceId] } }) });
+    expect(revokedClaim.data.assessment.status).toBe("stale");
+    const staleSettlement = await jsonFetch<{ settlement: { status: string; decision: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/settlements/${receiptPayload.receiptId}`);
+    expect(staleSettlement.data.settlement).toMatchObject({ status: "stale", decision: "SOURCE_REVOKED" });
+    const publicationGate = await jsonFetch<{ decision: { status: string; allowed: boolean; blockedReasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/publication-gate`);
+    expect(publicationGate.data.decision).toMatchObject({ status: "blocked", allowed: false });
+    expect(publicationGate.data.decision.blockedReasons).toContain("HIGH_RISK_SETTLEMENT_REQUIRED");
+    const blockedAdoption = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/prose-candidates/missing-candidate/adopt`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedCanonSha256: "x", authorizationId: "author-1" }) });
+    expect(blockedAdoption.status).toBe(409);
+    expect(blockedAdoption.data.error.code).toBe("RESEARCH_PUBLICATION_GATE_BLOCKED");
+    const conflict = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/source-snapshots`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...payload, contentHash: "different" }) });
+    expect(conflict.status).toBe(409);
+    expect(conflict.data.error.code).toBe("RESEARCH_SOURCE_IMMUTABLE");
+    const settlementPath = path.join(tempRoot, created.data.project.slug, "research", "settlements", `${receiptPayload.receiptId}.json`);
+    const tamperedSettlement = JSON.parse(await fs.readFile(settlementPath, "utf8")) as Record<string, unknown>;
+    tamperedSettlement.status = "current";
+    await fs.writeFile(settlementPath, JSON.stringify(tamperedSettlement), "utf8");
+    const tamperedRead = await jsonFetch<{ error: string }>(`/api/novel/projects/${created.data.project.slug}/runtime/research/settlements/${receiptPayload.receiptId}`);
+    expect(tamperedRead.status).toBe(409);
+    expect(tamperedRead.data.error).toMatchObject({ code: "RESEARCH_SETTLEMENT_INTEGRITY_FAILED" });
+  });
+
+  it("persists and resolves research source conflicts without mutating the open case", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Research Conflict Route", roughIdea: "Conflicting sources need adjudication." })
+    });
+    const slug = created.data.project.slug;
+    const conflict = await jsonFetch<{ conflict: { conflictId: string; status: string; fingerprint: string }; created: boolean }>(`/api/novel/projects/${slug}/runtime/research/conflicts`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ conflictId: "conf-route-1", claimIds: ["claim-a", "claim-b"], sourceIds: ["source-a", "source-b"], conflictKind: "direct", evidenceRefs: ["audit://conf-route-1"] })
+    });
+    expect(conflict.status).toBe(201);
+    expect(conflict.data.conflict.status).toBe("open");
+    const resolved = await jsonFetch<{ conflict: { status: string; selectedClaimId: string }; created: boolean }>(`/api/novel/projects/${slug}/runtime/research/conflicts/conf-route-1/resolve`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "resolved", selectedClaimId: "claim-b", rationale: "source-b is newer and directly covers the target region", evidenceRefs: ["decision://author/conf-route-1"] })
+    });
+    expect(resolved.status).toBe(201);
+    expect(resolved.data.conflict).toMatchObject({ status: "resolved", selectedClaimId: "claim-b" });
+    const readBack = await jsonFetch<{ conflict: { status: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/research/conflicts/conf-route-1`);
+    expect(readBack.data.conflict).toMatchObject({ status: "open", fingerprint: conflict.data.conflict.fingerprint });
   });
 
   it("serves a frozen, content-free RP0 evaluation profile that can be replayed", async () => {
@@ -555,6 +1249,11 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "mystery", title: "Sealed gate", questionOrPromise: "Who sealed it?" })
     });
     expect(obligation.status).toBe(201);
+    const legacyPut = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/obligations/${obligation.data.obligation.obligationId}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "resolved" })
+    });
+    expect(legacyPut.status).toBe(409);
+    expect(legacyPut.data.error.code).toBe("OBLIGATION_DOMAIN_COMMAND_REQUIRED");
     const blocked = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/obligations/${obligation.data.obligation.obligationId}/events`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ toStatus: "paid", reason: "done", actor: "author", expectedVersion: 0 })
     });
@@ -564,6 +1263,10 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ toStatus: "confirmed", reason: "author confirmed", actor: "author", expectedVersion: 0 })
     });
     expect(confirmed.data.obligation).toMatchObject({ status: "confirmed", version: 1 });
+    const invalidation = await jsonFetch<{ invalidation: { status: string; staleArtifactRefs: string[] } }>(`/api/novel/projects/${slug}/runtime/obligations/evidence-invalidation`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ obligationId: obligation.data.obligation.obligationId, priorStatus: "paid", setupEvidenceRefs: ["prose://ch-1#p-4"], currentEvidenceRefs: ["prose://ch-7#p-2"] })
+    });
+    expect(invalidation.data.invalidation).toMatchObject({ status: "evidence_invalidated", staleArtifactRefs: expect.arrayContaining(["completion://obligation/" + obligation.data.obligation.obligationId]) });
   });
 
   it("exposes an honest obligation source-coverage report", async () => {
@@ -583,6 +1286,22 @@ describe("novel API routes", () => {
     const preview = await jsonFetch<{ candidates: Array<{ status: string }> }>(`/api/novel/projects/${created.data.project.slug}/obligation-candidates/preview`);
     expect(preview.status).toBe(200);
     expect(preview.data.candidates).toEqual([]);
+  });
+
+  it("requires author evidence before adopting an obligation candidate", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "candidate-adoption-api", title: "Candidate Adoption API", roughIdea: "Adopt one reviewed obligation." })
+    });
+    const slug = created.data.project.slug;
+    await fs.writeFile(path.join(tempRoot, slug, "scenes", "chapter-001.json"), JSON.stringify([{ id: "scene-1", chapterId: "chapter-001", order: 1, title: "Setup", time: "", location: "", pov: "", characters: [], conflict: "", turn: "", informationReleased: [], foreshadowingIds: ["FS-adopt-001"], powerProgression: "", updatedAt: new Date().toISOString() }]));
+    const preview = await jsonFetch<{ candidates: Array<{ candidateId: string; fingerprint: string }> }>(`/api/novel/projects/${slug}/obligation-candidates/preview`);
+    expect(preview.data.candidates).toHaveLength(1);
+    const blocked = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/obligation-candidates/${preview.data.candidates[0].candidateId}/adopt`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Gate", questionOrPromise: "Who sealed it?", authorizationId: "", evidenceRefs: [] }) });
+    expect(blocked.status).toBe(409);
+    expect(blocked.data.error.code).toBe("OBLIGATION_CANDIDATE_AUTHORIZATION_REQUIRED");
+    const adopted = await jsonFetch<{ created: boolean; obligation: { status: string; sourceRefs: string[] } }>(`/api/novel/projects/${slug}/obligation-candidates/${preview.data.candidates[0].candidateId}/adopt`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Gate", questionOrPromise: "Who sealed it?", authorizationId: "author-1", expectedCandidateFingerprint: preview.data.candidates[0].fingerprint, evidenceRefs: ["decision://author/1"] }) });
+    expect(adopted.status).toBe(201);
+    expect(adopted.data).toMatchObject({ created: true, obligation: { status: "proposed", sourceRefs: ["scene://chapter-001#scene-1"] } });
   });
 
   it("keeps coverage certificate issuance fail-closed", async () => {
@@ -711,6 +1430,32 @@ describe("novel API routes", () => {
     expect(updated.data.session).toMatchObject({ phase: "understanding", latestDirection: "stay close to the keeper", decisionRefs: ["d-1"] });
     const restored = await jsonFetch<{ session: { messages: Array<{ source: { kind: string } }> } }>(`/api/novel/projects/${slug}/session`);
     expect(restored.data.session.messages.map((message) => message.source.kind)).toEqual(["author", "system-paraphrase"]);
+    const resumeBrief = await jsonFetch<{ brief: { schemaVersion: string; projectSlug: string; lastDirection: string; activeQuestion: { questionId: string; questionVersion: number } | null; sourceRefs: string[]; recommendedNextStep: string } }>(`/api/novel/projects/${slug}/session/resume-brief`);
+    expect(resumeBrief.status).toBe(200);
+    expect(resumeBrief.data.brief).toMatchObject({ schemaVersion: "author-resume-brief.v1", projectSlug: slug, lastDirection: "stay close to the keeper", activeQuestion: null, recommendedNextStep: "review:p-1" });
+    expect(resumeBrief.data.brief.sourceRefs).toEqual(expect.arrayContaining([expect.stringMatching(new RegExp(`^session://session-${slug}@`))]));
+  });
+
+  it("returns semantic events for the single natural-language session input", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Semantic Input", roughIdea: "Commands share one input." }) });
+    const response = await jsonFetch<{ collaboration: { schemaVersion: string; events: Array<{ type: string; text: string }>; fingerprint: string }; primaryAction: { actionId: string; kind: string; sourceFingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/session/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "semantic-continue", text: "继续" }) });
+    expect(response.status).toBe(201);
+    expect(response.data.collaboration).toMatchObject({ schemaVersion: "collaboration-message.v1", events: [{ type: "continue", text: "继续" }], fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    expect(response.data.primaryAction).toMatchObject({ actionId: "continue-understanding", kind: "continue", sourceFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+  });
+
+  it("rejects legacy file PUTs that would bypass the creative session authority", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Session File Bypass", roughIdea: "Direct session files must remain governed." })
+    });
+    const slug = created.data.project.slug;
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/files/sessions/creative-session.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: "{\"messages\":[{\"text\":\"forged\"}]}" })
+    });
+    expect(response.status).toBe(403);
+    expect(response.data.error).toBe("Protected session authority cannot be edited through file saves");
   });
 
   it("enforces surface capability registration at the runtime boundary", async () => {
@@ -726,6 +1471,44 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ registry: registered.data.registry, request: { surfaceId: "unknown", command: "append", stage: "capture", write: true } })
     });
     expect(denied.data.authorization).toMatchObject({ allowed: false, readOnly: true, reason: "surface-unregistered" });
+
+    await stopServer();
+    await startServer();
+    const afterRestart = await jsonFetch<{ authorization: { allowed: boolean; writeAuthority: string } }>(`/api/novel/projects/${slug}/runtime/surfaces/authorize`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ request: { surfaceId: "session", command: "append", stage: "capture", write: true } })
+    });
+    expect(afterRestart.data.authorization).toMatchObject({ allowed: true, writeAuthority: "session" });
+  });
+
+  it("does not authorize a forged client-supplied legacy surface registry", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Surface Forgery", roughIdea: "Client registries cannot create a write bypass." })
+    });
+    const slug = created.data.project.slug;
+    const forgedRegistry = {
+      schemaVersion: "surface-capability-registry.v1",
+      projectSlug: slug,
+      registryVersion: 99,
+      capabilities: [{
+        schemaVersion: "surface-capability.v1",
+        surfaceId: "legacy-bypass",
+        label: "Forged legacy surface",
+        reads: [],
+        commands: ["append-author-message"],
+        writeAuthority: "legacy-bypass",
+        stages: ["capture"],
+        alternativeSurfaceId: "creative-session",
+        retirementCondition: "never",
+        lifecycle: "active",
+        fingerprint: "f".repeat(64)
+      }],
+      fingerprint: "f".repeat(64)
+    };
+    const response = await jsonFetch<{ authorization: { allowed: boolean; reason: string; readOnly: boolean } }>(`/api/novel/projects/${slug}/runtime/surfaces/authorize`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ registry: forgedRegistry, request: { surfaceId: "legacy-bypass", command: "append-author-message", stage: "capture", write: true } })
+    });
+    expect(response.status).toBe(200);
+    expect(response.data.authorization).toMatchObject({ allowed: false, readOnly: true, reason: "surface-unregistered" });
   });
 
   it("returns a command receipt before authorizing an effect", async () => {
@@ -768,6 +1551,103 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: decision.data.decision, submission: { actionId: "review", journeyVersion: "j-2", sourceFingerprint: "s-1" } })
     });
     expect(stale.data.validation).toMatchObject({ accepted: false, reason: "journey-stale" });
+  });
+
+  it("resolves the primary action from persisted journey state instead of caller candidates", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Resolved Primary Action", roughIdea: "A deterministic next action." })
+    });
+    const slug = created.data.project.slug;
+    const captured = await jsonFetch<{ decision: { actionId: string; kind: string; idempotencyKey: string }; journey: { stage: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ candidates: [{ actionId: "unsafe-random", kind: "exploration" }] })
+    });
+    expect(captured.status).toBe(201);
+    expect(captured.data).toMatchObject({ journey: { stage: "capture" }, decision: { actionId: "capture-idea", kind: "exploration" } });
+    const replay = await jsonFetch<{ decision: { idempotencyKey: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+    expect(replay.data.decision.idempotencyKey).toBe(captured.data.decision.idempotencyKey);
+  });
+
+  it("executes capture-idea only after revalidation and remains idempotent", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Execute Primary Action", roughIdea: "" })
+    });
+    const slug = created.data.project.slug;
+    const resolved = await jsonFetch<{ decision: Record<string, unknown> }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+    const body = { decision: resolved.data.decision, text: "A courier delivers letters to an address that does not exist.", clientMessageId: "capture-action-1" };
+    const executed = await jsonFetch<{ execution: { status: string; created: boolean }; session: { messages: Array<{ clientMessageId: string }> } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+    });
+    expect(executed.status).toBe(201);
+    expect(executed.data).toMatchObject({ execution: { status: "completed", created: true }, session: { messages: [{ clientMessageId: "capture-action-1" }] } });
+    const replay = await jsonFetch<{ execution: { status: string; created: boolean }; session: { messages: Array<{ clientMessageId: string }> } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+    });
+    expect(replay.status).toBe(200);
+    expect(replay.data).toMatchObject({ execution: { status: "completed", created: false } });
+    expect(replay.data.session.messages).toHaveLength(1);
+  });
+
+  it("executes an answer-question action through the versioned dialogue transaction", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Execute Answer Action", roughIdea: "A question must be answered through the action boundary." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "answer-action-source", text: "A keeper hears a bell beneath the tide." }) });
+    const manifest = await jsonFetch<{ manifest: { sourceFingerprint: string } }>(`/api/novel/projects/${slug}/session/context-manifest`, { method: "POST" });
+    const question = await createDialogueQuestion(path.join(tempRoot, slug), {
+      projectSlug: slug,
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      text: "What does the keeper want most?",
+      whyNow: "It changes the opening contract.",
+      impact: "high",
+      ambiguity: 0.8,
+      errorCost: "high",
+      reversibility: "low",
+      delayCost: "medium",
+      options: ["Prove the city survived", "Protect the bell"],
+      recommendation: "Prove the city survived",
+      snapshotFingerprint: manifest.data.manifest.sourceFingerprint
+    });
+    const resolved = await jsonFetch<{ decision: { actionId: string; journeyVersion: string; sourceFingerprint: string }; journey: { primaryAction: { id: string; kind: string }; activeQuestion?: { id: string; status: string } } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+    expect(resolved.data.decision.actionId).toBe("answer-question-primary-desire");
+    expect(resolved.data.journey).toMatchObject({ primaryAction: { id: "answer-question-primary-desire", kind: "answer" }, activeQuestion: { id: "question-primary-desire", status: "active" } });
+    const executed = await jsonFetch<{ execution: { status: string; created: boolean }; question: { status: string }; nextQuestion: { created: boolean; question: { questionId: string; status: string } }; decision: { status: string; decisionId: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decision: resolved.data.decision, answerQuestionId: question.question.questionId, questionVersion: 1, expectedSnapshotFingerprint: manifest.data.manifest.sourceFingerprint, idempotencyKey: "answer-action-1", answerText: "Prove the drowned city is still alive.", answerStatus: "confirmed" })
+    });
+    expect(executed.status).toBe(201);
+    expect(executed.data).toMatchObject({ execution: { status: "completed", created: true }, question: { status: "answered" }, decision: { status: "recorded" } });
+    expect(executed.data.nextQuestion).toMatchObject({ created: true, question: { questionId: "question-core-conflict", status: "active" } });
+    const storedAfterAnswer = await readCreativeJourneyProjection(path.join(tempRoot, slug), slug);
+    expect(storedAfterAnswer).toMatchObject({ primaryAction: { id: "answer-question-core-conflict", kind: "answer" }, activeQuestion: { id: "question-core-conflict", status: "active" } });
+    const replayed = await jsonFetch<{ execution: { created: boolean }; nextQuestion: { created: boolean; question: { questionId: string; status: string } } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decision: resolved.data.decision, answerQuestionId: question.question.questionId, questionVersion: 1, expectedSnapshotFingerprint: manifest.data.manifest.sourceFingerprint, idempotencyKey: "answer-action-1", answerText: "Prove the drowned city is still alive.", answerStatus: "confirmed" })
+    });
+    expect(replayed.status).toBe(200);
+    expect(replayed.data).toMatchObject({ execution: { created: false }, nextQuestion: { created: false, question: { questionId: "question-core-conflict", status: "active" } } });
+    const afterAnswer = await jsonFetch<{ decision: { actionId: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+    expect(afterAnswer.data.decision.actionId).toBe("answer-question-core-conflict");
+    const timeline = await jsonFetch<{ timeline: { entries: Array<{ entryId: string; kind: string; sourceRef: string }> } }>(`/api/novel/projects/${slug}/session/timeline`);
+    expect(timeline.data.timeline.entries).toEqual(expect.arrayContaining([expect.objectContaining({ entryId: executed.data.decision.decisionId, kind: "question-event", sourceRef: `decision://${executed.data.decision.decisionId}` })]));
+  });
+
+  it("does not claim continue-understanding completed when safety dependencies are missing", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Blocked Continue Action", roughIdea: "Continue only after safety gates." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "continue-action-source", text: "A courier finds a door beneath the sea." }) });
+    const resolved = await jsonFetch<{ decision: { actionId: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+    expect(resolved.data.decision.actionId).toBe("continue-understanding");
+    const executed = await jsonFetch<{ execution: { status: string }; error: { code: string; modelCallIssued: boolean; understandingWritten: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: resolved.data.decision })
+    });
+    expect(executed.status).toBe(409);
+    expect(executed.data).toMatchObject({ execution: { status: "blocked" }, error: { code: "CONTINUE_UNDERSTANDING_BLOCKED", modelCallIssued: false, understandingWritten: false } });
   });
 
   it("applies an explicit author effort preference and returns budget usage", async () => {
@@ -839,6 +1719,78 @@ describe("novel API routes", () => {
     expect(memory.data.memory).toMatchObject({ status: "effective", projectSlug: slug });
     const forgotten = await jsonFetch<{ memory: { status: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/memory-records/forget`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memory: memory.data.memory, reason: "作者要求遗忘" }) });
     expect(forgotten.data.memory.status).toBe("forgotten");
+    const propagated = await jsonFetch<{ tombstone: { schemaVersion: string; contentIncluded: boolean; memoryId: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/memory/forget-propagation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memory: { memoryId: "memory-api-propagation", scope: "project", scopeId: slug, content: "do not persist", status: "effective" }, reason: "author requested propagation", indexContains: true, cacheContains: true, publishedVersionRefs: ["publication://v1"] }) });
+    expect(propagated.status).toBe(201);
+    expect(propagated.data.tombstone).toMatchObject({ schemaVersion: "memory-forget-tombstone.v1", contentIncluded: false, memoryId: "memory-api-propagation" });
+  });
+
+  it("exposes versioned creative objectives and an explicit L2 conflict gate", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Objective Governance", roughIdea: "Conflicting goals." }) });
+    const slug = created.data.project.slug;
+    const profile = await jsonFetch<{ profile: { version: number; items: Array<{ kind: string }> } }>(`/api/novel/projects/${slug}/runtime/objectives/profile`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profileId: "obj-api-1", version: 1, stage: "understanding", items: [{ objectiveId: "hard-1", kind: "hard_constraint", text: "代价可信", scope: "work", sourceRefs: ["author://h1"], verification: "review" }, { objectiveId: "pref-1", kind: "preference", text: "节奏明快", scope: "work", sourceRefs: ["author://p1"], verification: "review" }] }) });
+    expect(profile.data.profile).toMatchObject({ version: 1, items: [{ kind: "hard_constraint" }, { kind: "preference" }] });
+    const conflict = await jsonFetch<{ conflict: { level: string; status: string; authorRequired: boolean } }>(`/api/novel/projects/${slug}/runtime/objectives/conflicts/evaluate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ conflictId: "conf-api-1", left: { objectiveId: "h1", kind: "hard_constraint", text: "代价可信", scope: "work", sourceRefs: ["author://h1"], verification: "review" }, right: { objectiveId: "h2", kind: "hard_constraint", text: "节奏极快", scope: "work", sourceRefs: ["author://h2"], verification: "review" }, benefits: ["可信", "推进"], costs: ["返工"], affectedScopes: ["chapter-1"], compromises: ["保留关键代价"], evidenceRefs: ["analysis://conf"] }) });
+    expect(conflict.data.conflict).toMatchObject({ level: "L2", status: "needs-author", authorRequired: true });
+  });
+
+  it("persists dialogue utterances before interpretation and replays idempotently", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Utterance Persistence", roughIdea: "Immutable source." }) });
+    const slug = created.data.project.slug;
+    const body = { sessionId: "session-api-1", turn: 1, authorId: "author-1", text: "Keep the door mysterious.", clientTimestamp: "2026-07-31T00:00:00Z", language: "en", attachmentRefs: [], idempotencyKey: "utterance-api-1" };
+    const first = await jsonFetch<{ created: boolean; utterance: { text: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/utterances`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const replay = await jsonFetch<{ replayed: boolean; utterance: { text: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/utterances`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const listed = await jsonFetch<{ utterances: Array<{ text: string }> }>(`/api/novel/projects/${slug}/runtime/dialogue/utterances`);
+    expect(first.status).toBe(201);
+    expect(replay.status).toBe(200);
+    expect(replay.data).toMatchObject({ replayed: true, utterance: { text: body.text } });
+    expect(listed.data.utterances).toHaveLength(1);
+  });
+
+  it("persists all intent atoms with their source utterance", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Intent Persistence", roughIdea: "Multiple intents." }) });
+    const slug = created.data.project.slug;
+    const body = { utteranceId: "utterance-intent-api-1", text: "保留门的神秘；继续第一章。", atoms: [{ atomId: "a-1", kind: "constraint", text: "保留门的神秘", start: 0, end: 7, targetAsset: "world-rule", scope: "project", relation: "preserve" }, { atomId: "a-2", kind: "command", text: "继续第一章", start: 8, end: 13, targetAsset: "chapter-1", scope: "chapter", relation: "follow-up" }] };
+    const first = await jsonFetch<{ created: boolean; atoms: Array<{ atomId: string; sourceUtteranceId: string }> }>(`/api/novel/projects/${slug}/runtime/dialogue/intents`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const listed = await jsonFetch<{ atoms: Array<{ atomId: string; sourceUtteranceId: string }> }>(`/api/novel/projects/${slug}/runtime/dialogue/intents`);
+    expect(first.status).toBe(201);
+    expect(first.data.atoms.map((atom) => atom.atomId)).toEqual(["a-1", "a-2"]);
+    expect(listed.data.atoms).toEqual(expect.arrayContaining([expect.objectContaining({ atomId: "a-1", sourceUtteranceId: body.utteranceId }), expect.objectContaining({ atomId: "a-2", sourceUtteranceId: body.utteranceId })]));
+  });
+
+  it("exposes bounded understanding evidence with opposing sources", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Evidence Bundle", roughIdea: "Evidence bounded." }) });
+    const result = await jsonFetch<{ evidence: { gateStatus: string; confidenceInterval: [number, number]; promptVersion: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/dialogue/understanding-evidence-bundles`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId: "claim-api-1", status: "inferred", confidenceInterval: [0.5, 0.75], supportingEvidenceRefs: ["utterance://u1#0-4"], opposingEvidenceRefs: ["utterance://u1#8-12"], interpreterVersion: "understanding-v2", promptVersion: "prompt-v2", alternatives: ["portal", "wreck"], sourceMessageIds: ["m1"] }) });
+    expect(result.status).toBe(201);
+    expect(result.data.evidence).toMatchObject({ gateStatus: "passed", confidenceInterval: [0.5, 0.75], promptVersion: "prompt-v2" });
+  });
+
+  it("exposes separate ambiguity and impact in question value decisions", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Question Value", roughIdea: "Ask one valuable question." }) });
+    const result = await jsonFetch<{ result: { level: string; impact: number; ambiguity: number; valueBreakdown: { impact: number; ambiguity: number } } }>(`/api/novel/projects/${created.data.project.slug}/runtime/question-value-gates`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionId: "q-api-1", text: "What does the protagonist want?", impact: 0.8, uncertainty: 0.7, irreversibility: 0.3, urgency: 0.8, userEffort: 0.1, affectedAssets: ["chapter-1"], recommendation: "ask", reversible: true, threshold: 0.2 }) });
+    expect(result.status).toBe(201);
+    expect(result.data.result).toMatchObject({ level: "L2", impact: 0.8, ambiguity: 0.7, valueBreakdown: { impact: 0.8, ambiguity: 0.7 } });
+  });
+
+  it("enforces non-leading questions, bounded assumptions, and scoped delegation", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Dialogue Policy", roughIdea: "Bounded questions." }) });
+    const slug = created.data.project.slug;
+    const question = await jsonFetch<{ question: { freeAnswerAllowed: boolean; options: unknown[] } }>(`/api/novel/projects/${slug}/runtime/dialogue/non-leading-question`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionId: "q-policy-1", knownEvidence: ["door unexplained"], whyNow: "opening depends on it", options: [{ label: "portal", impact: "rule" }, { label: "wreck", impact: "mystery" }], recommendation: "portal", recommendationEvidenceRefs: ["analysis://door/1"] }) });
+    expect(question.data.question).toMatchObject({ freeAnswerAllowed: true, options: expect.any(Array) });
+    const assumption = await jsonFetch<{ assumption: { status: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/provisional-assumptions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ assumptionId: "a-policy-1", basis: "genre preference", assets: ["chapter-1"], allowedActions: ["draft"], expiry: "chapter-1-approved", risk: "minor", revocationRoute: "recompile" }) });
+    expect(assumption.data.assumption.status).toBe("provisional");
+    const forbidden = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/delegation-grants`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ grantId: "g-policy-1", scope: ["ending"], expiresAt: "2026-08-01T00:00:00Z", rationale: "author said you decide" }) });
+    expect(forbidden.status).toBe(500);
+  });
+
+
+  it("keeps exploratory drafts out of canon and requires provenance", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Exploratory Draft", roughIdea: "Probe only." }) });
+    const slug = created.data.project.slug;
+    const draft = await jsonFetch<{ draft: { status: string; isCanon: boolean; adoptionRequired: boolean } }>(`/api/novel/projects/${slug}/runtime/exploratory-drafts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ draftId: "draft-api-1", text: "A short probe scene.", sourceRefs: ["probe://p1"] }) });
+    const blocked = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/exploratory-drafts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ draftId: "draft-api-2", text: "No provenance." }) });
+    expect(draft.status).toBe(201);
+    expect(draft.data.draft).toMatchObject({ status: "candidate", isCanon: false, adoptionRequired: true });
+    expect(blocked.status).toBe(500);
   });
 
   it("records and closes a misunderstanding incident only with regression evidence", async () => {
@@ -880,6 +1832,82 @@ describe("novel API routes", () => {
     expect(gate.data.gate).toMatchObject({ allowed: false, reason: "BUDGET_HARD_STOP" });
   });
 
+  it("settles governed model calls through the matching BookRun reservation", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Invocation Settlement", roughIdea: "A call must be auditable." })
+    });
+    const slug = created.data.project.slug;
+    const started = await jsonFetch<{ run: { bookRunId: string; version: number } }>(`/api/novel/projects/${slug}/book-runs`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], autonomyLevel: "L1", limits: { maxWorkItems: 1, maxBudgetCents: 100 } })
+    });
+    const reservation = await jsonFetch<{ reservation: { reservationId: string } }>(`/api/novel/projects/${slug}/book-runs/${started.data.run.bookRunId}/budget-reservations`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reservedCents: 50 })
+    });
+    const authorityBinding = createModelInvocationAuthorityBinding({ bookRunId: started.data.run.bookRunId, frozenPublicationScopeRef: "sessions/publication-scopes/scope-test.json", frozenPublicationScopeFingerprint: "a".repeat(64), storyContractRef: "sessions/story-contract.json", storyContractFingerprint: "b".repeat(64), outlineRef: "sessions/outline.json", outlineFingerprint: "c".repeat(64), forecastRef: "planning/length-forecast.json", forecastFingerprint: "d".repeat(64), contextManifestRef: "sessions/context-manifest.json", contextManifestFingerprint: "e".repeat(64) });
+    for (const [ref, fingerprint] of [[authorityBinding.frozenPublicationScopeRef, authorityBinding.frozenPublicationScopeFingerprint], [authorityBinding.storyContractRef, authorityBinding.storyContractFingerprint], [authorityBinding.outlineRef, authorityBinding.outlineFingerprint], [authorityBinding.forecastRef, authorityBinding.forecastFingerprint], [authorityBinding.contextManifestRef, authorityBinding.contextManifestFingerprint]] as const) {
+      await fs.mkdir(path.dirname(path.join(tempRoot, slug, ref)), { recursive: true });
+      await fs.writeFile(path.join(tempRoot, slug, ref), JSON.stringify({ fingerprint }), "utf8");
+    }
+    const invocation = await jsonFetch<{ record: { invocationId: string } }>(`/api/novel/projects/${slug}/runtime/session/model-invocations`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invocationId: "governed-invocation-1", bookRunId: started.data.run.bookRunId, budgetReservationId: reservation.data.reservation.reservationId, authorityBinding, taskId: "task-1", taskFingerprint: "task-fp", attemptId: "attempt-1", routeDecision: "balanced", modelCapabilityRef: "model-1", contextManifestRef: "manifest-1", promptSchemaVersion: "prompt.v1", startedAt: new Date().toISOString(), finishedAt: new Date().toISOString(), status: "completed", usage: { inputTokens: 10, outputTokens: 5, cachedTokens: 0, measurement: "actual" }, cost: { amount: 0.01, currency: "USD", measurement: "actual" }, cache: { hit: false }, adoptionDecision: "not-adopted" })
+    });
+    const settled = await jsonFetch<{ settlement: { status: string; consumedCents: number }; reservation: { status: string } }>(`/api/novel/projects/${slug}/runtime/session/model-invocations/${invocation.data.record.invocationId}/settle`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reservationId: reservation.data.reservation.reservationId })
+    });
+    expect(settled.status).toBe(201);
+    expect(settled.data).toMatchObject({ settlement: { status: "settled", consumedCents: 1 }, reservation: { status: "settled" } });
+  });
+
+  it("joins provider calibration with invocation cost and latency into a release gate", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Provider Evaluation", roughIdea: "Measure a provider honestly." })
+    });
+    const slug = created.data.project.slug;
+    const common = { taskId: "provider-task", taskFingerprint: "provider-task-fp", routeDecision: "balanced", modelCapabilityRef: "provider://mock-v1", contextManifestRef: "manifest-1", promptSchemaVersion: "prompt.v1", status: "completed", usage: { inputTokens: 10, outputTokens: 5, cachedTokens: 0, measurement: "actual" }, cost: { amount: 0.01, currency: "USD", measurement: "actual" }, cache: { hit: false }, adoptionDecision: "not-adopted" };
+    for (const [invocationId, finishedAt] of [["provider-inv-1", "2026-01-01T00:00:00.100Z"], ["provider-inv-2", "2026-01-01T00:00:00.300Z"]]) {
+      const made = await jsonFetch<{ record: { invocationId: string } }>(`/api/novel/projects/${slug}/runtime/session/model-invocations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...common, invocationId, attemptId: invocationId, startedAt: "2026-01-01T00:00:00.000Z", finishedAt }) });
+      expect(made.status).toBe(201);
+    }
+    const calibration = await jsonFetch<{ evidence: { status: string } }>(`/api/novel/projects/${slug}/session/understanding/quality-calibration`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evaluatorVersion: "provider-evaluator-v1", sourceKind: "provider", holdoutInputFingerprint: "holdout-provider-v1", evaluatedCount: 10, correctCount: 9, accuracy: 0.9, minimumAccuracy: 0.8, attestation: { kind: "provider-signed", reference: "provider://mock-v1/attestation/1" }, evidenceRefs: ["provider://mock-v1/holdout/1"] }) });
+    expect(calibration.data.evidence.status).toBe("calibrated");
+    const report = await jsonFetch<{ report: { decision: string; effectiveOutputRate: number; totalCost: { measurement: string }; latencyMs: { p95: number }; quality: { status: string } } }>(`/api/novel/projects/${slug}/runtime/session/provider-evaluation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ providerRef: "provider://mock-v1", maxP95LatencyMs: 500, maxCost: 1 }) });
+    expect(report.status, JSON.stringify(report.data)).toBe(200);
+    expect(report.data.report).toMatchObject({ decision: "pass", effectiveOutputRate: 1, totalCost: { measurement: "actual" }, latencyMs: { p95: 300 }, quality: { status: "calibrated" } });
+  });
+
+  it("keeps estimated provider probes out of the real-provider release gate", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Estimated Provider Gate", roughIdea: "Probe evidence is not paid evidence." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/runtime/session/model-invocations`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invocationId: "estimated-gate-1", taskId: "estimated-gate-task", taskFingerprint: "estimated-gate-fp", attemptId: "estimated-gate-attempt", routeDecision: "probe", modelCapabilityRef: "provider://mock-v1", contextManifestRef: "manifest-1", promptSchemaVersion: "prompt.v1", startedAt: "2026-01-01T00:00:00.000Z", finishedAt: "2026-01-01T00:00:00.100Z", status: "completed", usage: { inputTokens: 10, outputTokens: 5, cachedTokens: 0, measurement: "estimated" }, cost: { amount: 0.01, currency: "USD", measurement: "estimated", estimateMethod: "probe" }, cache: { hit: false }, adoptionDecision: "probe-only" })
+    });
+    await jsonFetch(`/api/novel/projects/${slug}/session/understanding/quality-calibration`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evaluatorVersion: "provider-evaluator-v1", sourceKind: "provider", holdoutInputFingerprint: "holdout-provider-estimated", evaluatedCount: 10, correctCount: 9, accuracy: 0.9, minimumAccuracy: 0.8, attestation: { kind: "provider-signed", reference: "provider://mock-v1/attestation/estimated" }, evidenceRefs: ["provider://mock-v1/holdout/estimated"] })
+    });
+    const report = await jsonFetch<{ report: { decision: string; blockedReasons: string[] } }>(`/api/novel/projects/${slug}/runtime/session/provider-evaluation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ providerRef: "provider://mock-v1", maxP95LatencyMs: 500, maxCost: 1 }) });
+    expect(report.status).toBe(200);
+    expect(report.data.report).toMatchObject({ decision: "blocked", blockedReasons: expect.arrayContaining(["ACTUAL_USAGE_REQUIRED"]) });
+  });
+
+  it("executes the configured provider process before writing a probe ledger record", async () => {
+    const previousProfiles = process.env.AI_AGENT_PROFILES_JSON;
+    try {
+      const command = await writeMockCodexCommand(tempRoot);
+      process.env.AI_AGENT_PROFILES_JSON = JSON.stringify([{ id: "probe-agent", label: "Mock Provider", provider: "codex", command, model: "mock-v1", versionArgs: ["--version"], enabled: true, allowCustomModel: true, models: [{ id: "mock-v1", label: "Mock v1", provider: "codex" }] }]);
+      const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Provider Probe", roughIdea: "A real local process call." }) });
+      const probe = await jsonFetch<{ result: { output: { exitCode: number | null; finalMessage: string }; record: { status: string; modelCapabilityRef: string; adoptionDecision: string; cost: { measurement: string } } } }>(`/api/novel/projects/${created.data.project.slug}/runtime/session/provider-probe`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profileId: "probe-agent", prompt: "provider probe", taskId: "probe-task", taskFingerprint: "probe-task-fp", estimatedInputTokens: 4, estimatedOutputTokens: 8, estimatedCost: 0.02 }) });
+      expect(probe.status).toBe(201);
+      expect(probe.data.result.output.exitCode).toBe(0);
+      expect(probe.data.result.output.finalMessage).toContain("mock task complete");
+      expect(probe.data.result.record).toMatchObject({ status: "completed", modelCapabilityRef: "provider://codex/Mock Provider/mock-v1", adoptionDecision: "probe-only", cost: { measurement: "estimated" } });
+    } finally {
+      if (previousProfiles === undefined) delete process.env.AI_AGENT_PROFILES_JSON;
+      else process.env.AI_AGENT_PROFILES_JSON = previousProfiles;
+    }
+  });
+
   it("routes high-impact work above the author fast preference floor", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Model Route", roughIdea: "A governed route." })
@@ -888,6 +1916,18 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ taskType: "creative-understanding", impact: "high", requiredCapabilityTier: "high", authorPreference: "fast", estimatedCost: 1, remainingBudget: 10, capabilities: [{ capabilityId: "deep", modelId: "deep-1", capabilityTier: "high", contextLimit: 32000, outputLimit: 4000, structuredOutput: true, verifiedTaskTypes: ["creative-understanding"], status: "active" }] })
     });
     expect(route.data.decision).toMatchObject({ status: "selected", capabilityId: "deep", preferenceApplied: false });
+  });
+
+  it("blocks provider failover when the candidate crosses the private-data boundary", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Provider Failover", roughIdea: "Keep private material protected." })
+    });
+    const result = await jsonFetch<{ decision: { status: string; reasonCode: string; switched: boolean } }>(`/api/novel/projects/${created.data.project.slug}/runtime/session/provider-failover`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentCandidateId: "codex-gpt", taskType: "outline.generate", requiredContextTokens: 8000, requiresStructuredOutput: true, privacyClass: "private", dataResidency: "local", frozenInputFingerprint: "input-sha", candidates: [{ candidateId: "external-small", provider: "external", modelId: "small", status: "active", verifiedTaskTypes: ["outline.generate"], structuredOutput: true, contextLimit: 16000, privacyClasses: ["public"], dataResidencies: ["us"] }] })
+    });
+    expect(result.data.decision).toMatchObject({ status: "blocked", reasonCode: "NO_COMPATIBLE_FAILOVER", switched: false });
   });
 
   it("blocks high-impact review when the evaluator is not isolated", async () => {
@@ -908,6 +1948,19 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ purpose: "understanding", query: "where is hero", sources: [{ blockId: "b-1", factKey: "hero.location", sourceRef: "canon://1", sourceVersion: "v1", contentHash: "h1", authority: "canon", relevance: 0.9, selected: true, selectionReason: "canon" }, { blockId: "b-2", factKey: "hero.location", sourceRef: "canon://2", sourceVersion: "v1", contentHash: "h2", authority: "canon", relevance: 0.8, selected: true, selectionReason: "conflict" }] })
     });
     expect(result.data.sources).toMatchObject({ status: "block", selectedBlockIds: ["b-1", "b-2"], conflicts: [{ factKey: "hero.location" }] });
+  });
+
+  it("blocks legacy summary context at the canon-sensitive API boundary", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Legacy Projection Gate", roughIdea: "Summary cannot become canon." })
+    });
+    const result = await jsonFetch<{ sources: { status: string; selectedBlockIds: string[]; excluded: Array<{ reason: string }> } }>(`/api/novel/projects/${created.data.project.slug}/session/context-source-gate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ purpose: "canon-generation", query: "where is hero", sources: [{ blockId: "summary-1", factKey: "hero.location", sourceRef: "summary://chapter-1", sourceVersion: "v1", contentHash: "h1", authority: "summary", relevance: 1, selected: true, selectionReason: "nearby" }] })
+    });
+    expect(result.data.sources).toMatchObject({ status: "block", selectedBlockIds: [] });
+    expect(result.data.sources.excluded).toEqual(expect.arrayContaining([{ blockId: "summary-1", reason: "LEGACY_PROJECTION_NOT_CANON_AUTHORITY" }]));
   });
 
   it("blocks secrets and cross-project material before context assembly", async () => {
@@ -967,10 +2020,16 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Seed Run", roughIdea: "A recoverable seed compiler." })
     });
     const slug = created.data.project.slug;
-    const response = await jsonFetch<{ run: { status: string; interpretationComplete: boolean; canonWritten: boolean } }>(`/api/novel/projects/${slug}/runtime/story-seeds/runs`, {
+    const response = await jsonFetch<{ run: { runId: string; status: string; interpretationComplete: boolean; canonWritten: boolean } }>(`/api/novel/projects/${slug}/runtime/story-seeds/runs`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idempotencyKey: "seed-1", inputFingerprint: "input-1", compilerVersion: "compiler-1", sourceMessageIds: ["m-1"] })
     });
     expect(response.data.run).toMatchObject({ status: "captured", interpretationComplete: false, canonWritten: false });
+    const interpreting = await jsonFetch<{ run: { status: string; recoveryCheckpoint: string } }>(`/api/novel/projects/${slug}/runtime/story-seeds/runs/transition`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ run: response.data.run, next: "interpreting", input: { checkpoint: "facet-extraction" } })
+    });
+    expect(interpreting.data.run).toMatchObject({ status: "interpreting", recoveryCheckpoint: "facet-extraction" });
+    const restored = await jsonFetch<{ run: { status: string; recoveryCheckpoint: string } }>(`/api/novel/projects/${slug}/runtime/story-seeds/runs/${response.data.run.runId}`);
+    expect(restored.data.run).toMatchObject({ status: "interpreting", recoveryCheckpoint: "facet-extraction" });
   });
 
   it("blocks V2 understanding until safety dependencies are present without writing a snapshot", async () => {
@@ -1001,6 +2060,58 @@ describe("novel API routes", () => {
       "model-capability-authorization"
     ]);
     expect(await fs.readdir(path.join(tempRoot, slug, "sessions"), { recursive: true })).toEqual(before);
+  });
+
+  it("rejects a route-level answer when the creative session changed after freezing", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Stale Question Route", roughIdea: "A route must reject stale understanding input." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientMessageId: "stale-route-1", text: "The keeper hears a bell beneath the tide." })
+    });
+    const manifest = await jsonFetch<{ manifest: { sourceFingerprint: string } }>(`/api/novel/projects/${slug}/session/context-manifest`, { method: "POST" });
+    const question = await createDialogueQuestion(path.join(tempRoot, slug), {
+      projectSlug: slug,
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      text: "What does the keeper want most?",
+      whyNow: "It changes the opening contract.",
+      impact: "high",
+      ambiguity: 0.8,
+      errorCost: "high",
+      reversibility: "low",
+      delayCost: "medium",
+      options: [],
+      recommendation: "Ask",
+      snapshotFingerprint: manifest.data.manifest.sourceFingerprint
+    });
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientMessageId: "stale-route-2", text: "The keeper finds a map in the bell tower." })
+    });
+
+    const answer = await jsonFetch<{ error: { code: string } }>(
+      `/api/novel/projects/${slug}/session/understanding/questions/${question.question.questionId}/answers`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questionVersion: question.question.questionVersion,
+          expectedSnapshotFingerprint: question.question.snapshotFingerprint,
+          idempotencyKey: "stale-route-answer",
+          answerText: "Prove the city survived.",
+          answerStatus: "confirmed"
+        })
+      }
+    );
+    expect(answer.status).toBe(409);
+    expect(answer.data.error.code).toBe("SNAPSHOT_FINGERPRINT_STALE");
   });
 
   it("carries one low-input idea through V1 capture, V2 shadow understanding, and a V3 contract candidate", async () => {
@@ -1071,11 +2182,18 @@ describe("novel API routes", () => {
       expect(understood.status).toBe(201);
       expect(understood.data.snapshot).toMatchObject({ sourceFingerprint: manifest.data.manifest.sourceFingerprint, question: { id: "question-primary-desire" } });
 
-      const question = await jsonFetch<{ question: { questionId: string; questionVersion: number; snapshotFingerprint: string } }>(
-        `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
+      const question = await jsonFetch<{ question: { questionId: string; questionVersion: number; snapshotFingerprint: string }; redBlueCase: { caseId: string; status: string } }>(
+        `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ options: ["Expose the truth", "Protect the city"], recommendation: "Expose the truth" }) }
       );
       expect(question.status).toBe(201);
-      const answered = await jsonFetch<{ decision: { decisionId: string; sourceFingerprint: string } }>(
+      expect(question.data.redBlueCase).toMatchObject({ caseId: `red-blue-${question.data.question.questionId}-1`, status: "open" });
+      const redBlue = await jsonFetch<{ created: boolean; redBlueCase: { caseId: string; status: string; options: unknown[] } }>(`/api/novel/projects/${slug}/session/understanding/questions/${question.data.question.questionId}/red-blue`, { method: "POST" });
+      const redBlueReplay = await jsonFetch<{ redBlueCase: { caseId: string; fingerprint: string } }>(`/api/novel/projects/${slug}/session/understanding/questions/${question.data.question.questionId}/red-blue`);
+      expect(redBlue.status).toBe(200);
+      expect(redBlue.data).toMatchObject({ created: false, redBlueCase: { status: "open", options: expect.any(Array) } });
+      expect(redBlueReplay.status).toBe(200);
+      expect(redBlueReplay.data.redBlueCase).toMatchObject({ caseId: redBlue.data.redBlueCase.caseId, fingerprint: expect.any(String) });
+      const answered = await jsonFetch<{ decision: { decisionId: string; sourceFingerprint: string; redBlueCaseId?: string } }>(
         `/api/novel/projects/${slug}/session/understanding/questions/${question.data.question.questionId}/answers`,
         {
           method: "POST",
@@ -1091,6 +2209,7 @@ describe("novel API routes", () => {
       );
       expect(answered.status).toBe(201);
       expect(answered.data.decision).toMatchObject({ sourceFingerprint: manifest.data.manifest.sourceFingerprint });
+      expect(answered.data.decision.redBlueCaseId).toBe(`red-blue-${question.data.question.questionId}-${question.data.question.questionVersion}`);
 
       const conflictQuestion = await jsonFetch<{ created: boolean; question: { questionId: string; questionVersion: number; snapshotFingerprint: string } }>(
         `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
@@ -1133,13 +2252,44 @@ describe("novel API routes", () => {
         }
       );
       expect(failureCostAnswer.status).toBe(201);
+      const remainingContractAnswers: Array<[string, string]> = [
+        ["question-inner-need", "The keeper needs to trust a witness."],
+        ["question-misbelief", "Only solitary proof counts."],
+        ["question-world-rule", "The charged lens reveals the city at low tide."],
+        ["question-opposing-pressure", "The council and the tide erase evidence."],
+        ["question-irreversible-choice", "Share the lens and spend its final charge."],
+        ["question-reader-promise", "A costly revelation earned through trust."],
+        ["question-ending-direction", "The city is acknowledged at the cost of the lens."]
+      ];
+      for (const [expectedQuestionId, answerText] of remainingContractAnswers) {
+        const nextQuestion = await jsonFetch<{ question: { questionId: string; questionVersion: number; snapshotFingerprint: string } }>(
+          `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
+        );
+        expect(nextQuestion.status).toBe(201);
+        expect(nextQuestion.data.question.questionId).toBe(expectedQuestionId);
+        const nextAnswer = await jsonFetch<{ decision: { decisionId: string } }>(
+          `/api/novel/projects/${slug}/session/understanding/questions/${expectedQuestionId}/answers`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              questionVersion: nextQuestion.data.question.questionVersion,
+              expectedSnapshotFingerprint: nextQuestion.data.question.snapshotFingerprint,
+              idempotencyKey: `vertical-slice-${expectedQuestionId}-answer`,
+              answerText,
+              answerStatus: "confirmed"
+            })
+          }
+        );
+        expect(nextAnswer.status).toBe(201);
+      }
       const exhaustedQuestions = await jsonFetch<{ error: { code: string } }>(
         `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
       );
       expect(exhaustedQuestions.status).toBe(409);
       expect(exhaustedQuestions.data.error.code).toBe("UNDERSTANDING_QUESTIONS_EXHAUSTED");
 
-      const candidate = await jsonFetch<{ candidate: { candidateId: string; fingerprint: string; status: string; canonWritten: boolean; fields: Array<{ path: string; value: string }> } }>(
+      const candidate = await jsonFetch<{ candidate: { candidateId: string; fingerprint: string; status: string; canonWritten: boolean; fields: Array<{ path: string; value: string }> }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(
         `/api/novel/projects/${slug}/session/understanding/contract-candidates`,
         {
           method: "POST",
@@ -1149,13 +2299,28 @@ describe("novel API routes", () => {
       );
       expect(candidate.status).toBe(201);
       expect(candidate.data.candidate).toMatchObject({ status: "candidate", canonWritten: false });
-      expect(candidate.data.candidate.fields).toEqual([
+      expect(candidate.data.consumption).toMatchObject({ created: true, receipt: { consumer: "story-contract", decisionId: conflictAnswer.data.decision.decisionId, consumerRef: candidate.data.candidate.candidateId } });
+      const candidateReplay = await jsonFetch<{ consumption: { created: boolean; receipt: { consumerRef: string } } }>(
+        `/api/novel/projects/${slug}/session/understanding/contract-candidates`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decisionId: conflictAnswer.data.decision.decisionId }) }
+      );
+      expect(candidateReplay.status).toBe(200);
+      expect(candidateReplay.data.consumption).toMatchObject({ created: false, receipt: { consumerRef: candidate.data.candidate.candidateId } });
+      expect(candidate.data.candidate.fields).toEqual(expect.arrayContaining([
         expect.objectContaining({ path: "protagonist.primaryDesire", value: "The keeper wants to prove the drowned city is still alive." }),
         expect.objectContaining({ path: "conflict.core", value: "The drowned city will erase the keeper's memories if he exposes it." }),
-        expect.objectContaining({ path: "stakes.failureCost", value: "If he fails, the city will surface and erase every coastal memory." })
-      ]);
+        expect.objectContaining({ path: "stakes.failureCost", value: "If he fails, the city will surface and erase every coastal memory." }),
+        expect.objectContaining({ path: "protagonist.innerNeed", value: "The keeper needs to trust a witness." }),
+        expect.objectContaining({ path: "protagonist.misbelief", value: "Only solitary proof counts." }),
+        expect.objectContaining({ path: "world.rules.primary", value: "The charged lens reveals the city at low tide." }),
+        expect.objectContaining({ path: "conflict.opposingPressure", value: "The council and the tide erase evidence." }),
+        expect.objectContaining({ path: "stakes.irreversibleChoice", value: "Share the lens and spend its final charge." }),
+        expect.objectContaining({ path: "readerPromise", value: "A costly revelation earned through trust." }),
+        expect.objectContaining({ path: "endingDirection", value: "The city is acknowledged at the cost of the lens." })
+      ]));
+      expect(candidate.data.candidate.fields).toHaveLength(10);
 
-      const outline = await jsonFetch<{ outline: { outlineId: string; sourceCandidateFingerprint: string; status: string; canonWritten: boolean; horizon: { strongFreezeCount: number; totalChapterCount: number }; chapters: Array<{ chapterId: string; order: number; freeze: string }> } }>(
+      const outline = await jsonFetch<{ outline: { outlineId: string; sourceCandidateFingerprint: string; status: string; canonWritten: boolean; horizon: { strongFreezeCount: number; totalChapterCount: number }; chapters: Array<{ chapterId: string; order: number; freeze: string }> }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(
         `/api/novel/projects/${slug}/session/understanding/outline-candidates`,
         {
           method: "POST",
@@ -1164,6 +2329,7 @@ describe("novel API routes", () => {
         }
       );
       expect(outline.status).toBe(201);
+      expect(outline.data.consumption).toMatchObject({ created: true, receipt: { consumer: "outline", decisionId: conflictAnswer.data.decision.decisionId, consumerRef: outline.data.outline.outlineId } });
       expect(outline.data.outline).toMatchObject({
         sourceCandidateFingerprint: candidate.data.candidate.fingerprint,
         status: "candidate",
@@ -1182,6 +2348,72 @@ describe("novel API routes", () => {
       expect(outlineValidation.status).toBe(201);
       expect(outlineValidation.data.report).toMatchObject({ status: "passed", executionReady: false });
       expect(outlineValidation.data.report.checks.every((check) => check.status === "passed")).toBe(true);
+
+      const comparison = await jsonFetch<{ comparison: { fingerprint: string } }>(
+        `/api/novel/projects/${slug}/runtime/candidate-comparison`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ objectiveIds: ["contract"], candidates: [{ candidateId: candidate.data.candidate.candidateId, hardConstraintFailures: [], objectiveEvidence: [{ objectiveId: "contract", gap: 0, evidenceRefs: [`decision://${conflictAnswer.data.decision.decisionId}`] }], unresolvedRisks: [] }] }) }
+      );
+      expect(comparison.status).toBe(200);
+
+      const proposal = await jsonFetch<{ proposal: { fingerprint: string } }>(
+        `/api/novel/projects/${slug}/session/understanding/outline-adoption-proposals`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ outlineId: outline.data.outline.outlineId, expectedOutlineFingerprint: outline.data.outline.fingerprint, comparisonFingerprint: comparison.data.comparison.fingerprint })
+        }
+      );
+      expect(proposal.status).toBe(201);
+      const authorized = await jsonFetch<{ proposal: { fingerprint: string; status: string } }>(
+        `/api/novel/projects/${slug}/session/understanding/outline-adoption-proposals/authorize`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ expectedProposalFingerprint: proposal.data.proposal.fingerprint, actorId: "author-1", authorizationId: "rp3-app-1" })
+        }
+      );
+      expect(authorized.status).toBe(201);
+      expect(authorized.data.proposal.status).toBe("authorized");
+
+      const injected = await jsonFetch<{ status: string; reason: string; canonWritten: boolean }>(
+        `/api/novel/projects/${slug}/session/understanding/outline-adoption`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ expectedProposalFingerprint: authorized.data.proposal.fingerprint, faultAt: "after-project-write" })
+        }
+      );
+      expect(injected.status).toBe(500);
+      expect(injected.data).toMatchObject({ status: "rolled_back", reason: "INJECTED_FAULT", canonWritten: false });
+      expect(JSON.parse(await fs.readFile(path.join(tempRoot, slug, "project.json"), "utf8"))).not.toHaveProperty("outlineVersion");
+
+      const recommitted = await jsonFetch<{ status: string; version: { versionId: string } }>(
+        `/api/novel/projects/${slug}/session/understanding/outline-adoption`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ expectedProposalFingerprint: authorized.data.proposal.fingerprint })
+        }
+      );
+      expect(recommitted.status).toBe(201);
+      expect(recommitted.data.status).toBe("committed");
+
+      const migrationPreview = await jsonFetch<{ preview: { migrationId: string } }>(`/api/novel/projects/${slug}/migrations`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: "{}"
+      });
+      const migrationValidation = await jsonFetch<{ validation: { fingerprint: string } }>(`/api/novel/projects/${slug}/migrations/${migrationPreview.data.preview.migrationId}/validate`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: "{}"
+      });
+      const migrationActivation = await jsonFetch<{ activation: { status: string } }>(`/api/novel/projects/${slug}/migrations/${migrationPreview.data.preview.migrationId}/activate`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idempotencyKey: "rp3-app-migration-1", expectedValidationFingerprint: migrationValidation.data.validation.fingerprint })
+      });
+      expect(migrationActivation.status).toBe(200);
+      expect(migrationActivation.data.activation.status).toBe("activated");
+      const migrationRollback = await jsonFetch<{ rollback: { status: string } }>(`/api/novel/projects/${slug}/migrations/${migrationPreview.data.preview.migrationId}/rollback`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: "{}"
+      });
+      expect(migrationRollback.status).toBe(201);
+      expect(migrationRollback.data.rollback.status).toBe("rolled_back");
     } finally {
       if (previousProfiles === undefined) delete process.env.AI_AGENT_PROFILES_JSON;
       else process.env.AI_AGENT_PROFILES_JSON = previousProfiles;
@@ -1281,6 +2513,104 @@ describe("novel API routes", () => {
     });
   });
 
+  it("removes an answered blocking question from the persisted journey projection", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Journey Question Convergence", roughIdea: "The journey must converge after an answer." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "journey-question-source", text: "A keeper hears a bell beneath the tide." })
+    });
+    const root = path.join(tempRoot, slug);
+    const question = await createDialogueQuestion(root, {
+      projectSlug: slug,
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      text: "What does the keeper want most?",
+      whyNow: "It changes the opening contract.",
+      impact: "high",
+      ambiguity: 0.8,
+      errorCost: "high",
+      reversibility: "low",
+      delayCost: "medium",
+      options: ["Prove the city survived", "Protect the bell"],
+      recommendation: "Prove the city survived",
+      snapshotFingerprint: "journey-question-snapshot"
+    });
+    const before = await jsonFetch<{ journey: { primaryAction: { id: string; kind: string }; activeQuestion?: { id: string; status: string } } }>(`/api/novel/projects/${slug}/session/journey`);
+    expect(before.data.journey.activeQuestion).toMatchObject({ id: question.question.questionId, status: "active" });
+    expect(before.data.journey.primaryAction).toMatchObject({ id: "answer-question-primary-desire", kind: "answer" });
+    const answered = await jsonFetch(`/api/novel/projects/${slug}/session/understanding/questions/${question.question.questionId}/answers`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionVersion: 1, expectedSnapshotFingerprint: "journey-question-snapshot", idempotencyKey: "journey-question-answer", answerText: "Prove the drowned city is still alive.", answerStatus: "confirmed" })
+    });
+    expect(answered.status).toBe(201);
+    const after = await jsonFetch<{ journey: { activeQuestion?: { id: string; status: string } } }>(`/api/novel/projects/${slug}/session/journey`);
+    expect(after.data.journey.activeQuestion).toBeUndefined();
+  });
+
+  it("does not erase the answer primary action when a system message refreshes the journey", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Journey Refresh Authority", roughIdea: "System refreshes must preserve the blocking question." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "journey-refresh-author", text: "A keeper hears a bell beneath the tide." })
+    });
+    await createDialogueQuestion(path.join(tempRoot, slug), {
+      projectSlug: slug, questionId: "question-core-conflict", questionVersion: 1, text: "What threatens the keeper?", whyNow: "It changes the opening conflict.", impact: "high", ambiguity: 0.8, errorCost: "high", reversibility: "low", delayCost: "medium", options: ["The tide"], recommendation: "The tide", snapshotFingerprint: "journey-refresh-snapshot"
+    });
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "journey-refresh-system", kind: "system-paraphrase", text: "I understand the opening pressure." })
+    });
+    const stored = await readCreativeJourneyProjection(path.join(tempRoot, slug), slug);
+    expect(stored?.primaryAction).toMatchObject({ id: "answer-question-core-conflict", kind: "answer" });
+    const journey = await jsonFetch<{ journey: { primaryAction: { id: string; kind: string }; activeQuestion?: { id: string; status: string } } }>(`/api/novel/projects/${slug}/session/journey`);
+    expect(journey.data.journey).toMatchObject({ primaryAction: { id: "answer-question-core-conflict", kind: "answer" }, activeQuestion: { id: "question-core-conflict", status: "active" } });
+  });
+
+  it("routes natural-language text to the active question without requiring a control keyword", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Natural Answer Routing", roughIdea: "An answer should not require a choose prefix." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "natural-answer-source", text: "A keeper hears a bell beneath the tide." })
+    });
+    await createDialogueQuestion(path.join(tempRoot, slug), {
+      projectSlug: slug, questionId: "question-primary-desire", questionVersion: 1, text: "What does the keeper want most?", whyNow: "It changes the opening contract.", impact: "high", ambiguity: 0.8, errorCost: "high", reversibility: "low", delayCost: "medium", options: ["Protect the bell"], recommendation: "Protect the bell", snapshotFingerprint: "natural-answer-snapshot"
+    });
+    const response = await jsonFetch<{ collaboration: { events: Array<{ type: string; text: string }> }; primaryAction: { actionId: string } }>(`/api/novel/projects/${slug}/session/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "natural-answer", text: "保护钟声，不让潮水带走它" })
+    });
+    expect(response.status).toBe(201);
+    expect(response.data.collaboration.events).toEqual(expect.arrayContaining([expect.objectContaining({ type: "answer", text: "保护钟声，不让潮水带走它" })]));
+    expect(response.data.primaryAction.actionId).toBe("answer-question-primary-desire");
+  });
+
+  it("uses the authoritative active question when parsing collaboration messages directly", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Direct Collaboration Parse", roughIdea: "Direct parsing must share session semantics." })
+    });
+    const slug = created.data.project.slug;
+    await createDialogueQuestion(path.join(tempRoot, slug), {
+      projectSlug: slug, questionId: "question-primary-desire", questionVersion: 1, text: "What does the keeper want most?", whyNow: "It changes the opening contract.", impact: "high", ambiguity: 0.8, errorCost: "high", reversibility: "low", delayCost: "medium", options: ["Protect the bell"], recommendation: "Protect the bell", snapshotFingerprint: "direct-parse-snapshot"
+    });
+    const response = await jsonFetch<{ result: { events: Array<{ type: string; text: string }> } }>(`/api/novel/projects/${slug}/runtime/collaboration-messages/parse`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "保护钟声，不让潮水带走它" })
+    });
+    expect(response.data.result.events).toEqual(expect.arrayContaining([expect.objectContaining({ type: "answer", text: "保护钟声，不让潮水带走它" })]));
+  });
+
+  it("exposes a durable collaboration timeline separate from runtime debug events", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Timeline Projection", roughIdea: "Timeline must survive refresh." }) });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "timeline-author", text: "A keeper waits at the tide line." }) });
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "timeline-system", kind: "system-paraphrase", text: "I understand the setting." }) });
+    const response = await jsonFetch<{ timeline: { schemaVersion: string; activeEntryId: string; entries: Array<{ kind: string; collapsed: boolean }>; sessionFingerprint: string } }>(`/api/novel/projects/${slug}/session/timeline`);
+    expect(response.status).toBe(200);
+    expect(response.data.timeline).toMatchObject({ schemaVersion: "creative-timeline-projection.v1", activeEntryId: "message-timeline-system", entries: [{ kind: "author-message", collapsed: false }, { kind: "system-message", collapsed: false }], sessionFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+  });
+
   it("freezes a versioned T0 context manifest and invalidates it when the session changes", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
       method: "POST",
@@ -1328,6 +2658,144 @@ describe("novel API routes", () => {
     expect(changed.data.manifest.sourceFingerprint).not.toBe(first.data.manifest.sourceFingerprint);
     expect(changed.data.manifest.supersedesManifestId).toBe(first.data.manifest.manifestId);
     expect(changed.data.manifest.sourceMessages).toHaveLength(2);
+  });
+
+  it("audits deterministic replay and blocks post-call evidence outside selected context", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Context Evidence", roughIdea: "Replay" }) });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "ctx-e-1", text: "Confirmed fact." }) });
+    const frozen = await jsonFetch<{ manifest: { manifestId: string; sourceFingerprint: string } }>(`/api/novel/projects/${slug}/session/context-manifest`, { method: "POST" });
+    const replay = await jsonFetch<{ replay: { status: string } }>(`/api/novel/projects/${slug}/session/context-replay-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedManifestId: frozen.data.manifest.manifestId, expectedSourceFingerprint: frozen.data.manifest.sourceFingerprint, route: "understanding.v1", temperature: 0, seed: 3, topP: 1 }) });
+    expect(replay.data.replay.status).toBe("pass");
+    const evidence = await jsonFetch<{ evidence: { status: string; unsupportedSourceRefs: string[] } }>(`/api/novel/projects/${slug}/session/context-evidence-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceRefs: ["not-selected"] }) });
+    expect(evidence.data.evidence).toMatchObject({ status: "conflicted", unsupportedSourceRefs: ["not-selected"] });
+    const conflicts = await jsonFetch<{ conflicts: { status: string; conflicts: unknown[] } }>(`/api/novel/projects/${slug}/session/context-conflict-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ facts: [{ factKey: "hero.alive", value: true, sourceRef: "canon://1", sourceVersion: "v1", authority: "canon" }, { factKey: "hero.alive", value: false, sourceRef: "summary://1", sourceVersion: "v1", authority: "summary" }] }) });
+    expect(conflicts.data.conflicts).toMatchObject({ status: "block", conflicts: [{ factKey: "hero.alive" }] });
+  });
+
+  it("enforces bounded retries and circuit recovery through the API", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Resilience", roughIdea: "Retry and circuit" }) });
+    const slug = created.data.project.slug;
+    const retry = await jsonFetch<{ retry: { retry: boolean; retryClass: string } }>(`/api/novel/projects/${slug}/session/execution-retry-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ retryChainId: "chain-api", attempt: 1, maxAttempts: 3, errorCode: "HTTP_503" }) });
+    expect(retry.data.retry).toMatchObject({ retry: true, retryClass: "transient" });
+    const circuit = await jsonFetch<{ circuit: { state: string; allow: boolean } }>(`/api/novel/projects/${slug}/session/execution-circuit-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ consecutiveFailures: 3, failureThreshold: 2, now: "2026-07-31T00:00:02.000Z", openedAt: "2026-07-31T00:00:00.000Z", cooldownMs: 1000 }) });
+    expect(circuit.data.circuit).toMatchObject({ state: "half-open", allow: true });
+  });
+
+  it("binds model-call replay to route, schema, parameters, and tool permissions", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Call Fingerprint", roughIdea: "Replay" }) });
+    const slug = created.data.project.slug;
+    const body = { businessInputFingerprint: "biz", contextManifestFingerprint: "ctx", routePolicyFingerprint: "route", promptSchemaVersion: "prompt.v1", outputSchemaVersion: "output.v1", modelCapabilityRef: "cap.deep", modelParameters: { temperature: 0, topP: 1, seed: 7 }, toolPermissions: ["read:canon"] };
+    const first = await jsonFetch<{ fingerprint: Record<string, unknown> }>(`/api/novel/projects/${slug}/session/model-call-fingerprint`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const replay = await jsonFetch<{ replay: { status: string } }>(`/api/novel/projects/${slug}/session/model-call-replay-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expected: first.data.fingerprint, actual: first.data.fingerprint }) });
+    expect(replay.data.replay.status).toBe("pass");
+  });
+
+  it("quarantines invalid structured output and rejects self-certified completion", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Output Governance", roughIdea: "Structured" }) });
+    const slug = created.data.project.slug;
+    const output = await jsonFetch<{ output: { status: string; canonWriteAllowed: boolean } }>(`/api/novel/projects/${slug}/session/structured-output-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rawOutput: "not-json", requiredFields: ["summary"], repairAttempted: true }) });
+    expect(output.data.output).toMatchObject({ status: "quarantined", canonWriteAllowed: false });
+    const completion = await jsonFetch<{ completion: { status: string; completionAllowed: boolean } }>(`/api/novel/projects/${slug}/session/completion-evidence-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ selfClaims: ["closed-loop"], independentReviewPassed: false }) });
+    expect(completion.data.completion).toMatchObject({ status: "blocked", completionAllowed: false });
+  });
+
+  it("keeps cost saving, failover, and author strategy behind safety gates", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Execution Strategy", roughIdea: "Policy" }) });
+    const slug = created.data.project.slug;
+    const plan = await jsonFetch<{ plan: { protectedInvariants: string[] } }>(`/api/novel/projects/${slug}/session/cost-saving-plan`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ budgetPressure: "tight", cacheAvailable: true, duplicateContext: true, optionalAudit: true, t0Protected: true, highImpactReviewProtected: true }) });
+    expect(plan.data.plan.protectedInvariants).toContain("T0-context");
+    const failover = await jsonFetch<{ failover: { status: string } }>(`/api/novel/projects/${slug}/session/executor-failover-gate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentCapabilityRef: "a", candidateCapabilityRef: "b", taskType: "understanding", requiredTier: "high", candidateTier: "balanced", contextCapacityOk: true, structuredOutput: true, privacyOk: true, rightsOk: true, residencyOk: true, inputFingerprint: "input" }) });
+    expect(failover.data.failover.status).toBe("blocked");
+    const strategy = await jsonFetch<{ strategy: { preference: string; candidateLimit: number } }>(`/api/novel/projects/${slug}/session/author-execution-strategy`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ preference: "fast" }) });
+    expect(strategy.data.strategy).toMatchObject({ preference: "fast", candidateLimit: 1 });
+  });
+
+  it("enforces one active L2 question, bounded options, deduplication, and policy explanation", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Question Governance", roughIdea: "Questions" }) });
+    const slug = created.data.project.slug;
+    const session = await jsonFetch<{ session: { activeQuestionId: string } }>(`/api/novel/projects/${slug}/runtime/question-sessions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questions: [{ questionId: "q-1", text: "Who decides the ending?", level: "L2", options: ["author", "system"], recommended: "author", affectedAssets: ["ending"], whyNow: "ending blocks outline", reversible: false }] }) });
+    expect(session.data.session.activeQuestionId).toBe("q-1");
+    const governance = await jsonFetch<{ governance: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/question-governance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ maxBlockingQuestions: 2, policy: { decideForMe: ["temporary-location"], alwaysAsk: ["core-ending"], askLess: true } }) });
+    const registered = await jsonFetch<{ governance: { questions: Array<{ whyNow: string }> } }>(`/api/novel/projects/${slug}/runtime/question-governance/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ governance: governance.data.governance, question: { questionId: "q-2", text: "Who decides the ending?", impact: "core-ending", blocking: true, affectedAssets: ["ending"], riskIfSkipped: "wrong canon", recommendation: "ask author", canDefer: false } }) });
+    expect(registered.data.governance.questions[0]?.whyNow).toContain("ending");
+  });
+
+  it("compares contract candidates by hard constraints and objective gaps", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Candidate Comparison", roughIdea: "Contract" }) });
+    const result = await jsonFetch<{ comparison: { recommendation?: string; fingerprint: string; rejected: Array<{ candidateId: string }> }; record: { comparisonId: string; projectSlug: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/candidate-comparison`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ objectiveIds: ["voice", "intent"], candidates: [{ candidateId: "bad", hardConstraintFailures: ["ending"], objectiveEvidence: [], unresolvedRisks: ["voice loss"] }, { candidateId: "good", hardConstraintFailures: [], objectiveEvidence: [{ objectiveId: "voice", gap: 0, evidenceRefs: ["r1"] }, { objectiveId: "intent", gap: 1, evidenceRefs: ["r2"] }], unresolvedRisks: [] }] }) });
+    expect(result.data.comparison).toMatchObject({ recommendation: "good", rejected: [{ candidateId: "bad" }] });
+    expect(result.data.record).toMatchObject({ comparisonId: result.data.comparison.fingerprint, projectSlug: created.data.project.slug });
+    const replay = await jsonFetch<{ comparison: { fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/candidate-comparison/${result.data.record.comparisonId}`);
+    expect(replay.status).toBe(200);
+    expect(replay.data.comparison.fingerprint).toBe(result.data.comparison.fingerprint);
+  });
+
+  it("presents decision cost and compresses review evidence for contract adoption", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Decision Presentation", roughIdea: "Contract" }) });
+    const slug = created.data.project.slug;
+    const preview = await jsonFetch<{ preview: { storyEffect: string; reversibility: string } }>(`/api/novel/projects/${slug}/runtime/decision-cost-preview`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ optionId: "opt-a", storyEffect: "preserves voice", affectedChapters: ["ch-1"], expectedRework: "rewrite opening", reversibility: "bounded", setupPayoffCost: "one setup", waitingCost: "delays plan", technicalDetails: ["model=gpt"] }) });
+    expect(preview.data.preview).toMatchObject({ storyEffect: "preserves voice", reversibility: "bounded" });
+    const review = await jsonFetch<{ review: { recommendation: string; passedSummary: { count: number } } }>(`/api/novel/projects/${slug}/runtime/review-compression`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ objective: "preserve voice", recommendation: "adopt A", strongestRedRisk: "flattens tension", actualChanges: ["trim exposition"], decisionRequired: ["accept"], passedSummary: { count: 8, evidenceRefs: ["review://1"] } }) });
+    expect(review.data.review).toMatchObject({ recommendation: "adopt A", passedSummary: { count: 8 } });
+  });
+
+  it("inherits outline objectives without weakening hard constraints and checks dual-horizon contribution", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Objective Hierarchy", roughIdea: "Outline" }) });
+    const slug = created.data.project.slug;
+    const hard = { objectiveId: "canon", kind: "hard_constraint", text: "Do not contradict canon", scope: "work", sourceRefs: ["s1"], verification: "canon" };
+    const hierarchy = await jsonFetch<{ hierarchy: { inherited: Array<{ objectiveId: string }>; blockedOverrides: string[] } }>(`/api/novel/projects/${slug}/runtime/objective-hierarchy`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope: "chapter", ancestors: [hard], local: [], overrides: [{ objectiveId: "canon", replacement: { ...hard, kind: "preference" }, reason: "speed", validWindow: "chapter-2", restorePoint: "chapter-3" }] }) });
+    expect(hierarchy.data.hierarchy.blockedOverrides).toContain("canon:hard-constraint");
+    const contribution = await jsonFetch<{ contribution: { status: string } }>(`/api/novel/projects/${slug}/runtime/objective-contribution`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workItemId: "scene-1", nearTermOutcome: "pretty prose", nearTermSatisfied: true, nearTermEvidenceRefs: ["scene://1"], longTermTargets: ["arc://mystery"], contributesLongTerm: false, longTermEvidenceRefs: [] }) });
+    expect(contribution.data.contribution.status).toBe("blocked");
+  });
+
+  it("gates drafting weights, anti-goals, and the unconfirmed Q-003 tradeoff", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Drafting Governance", roughIdea: "Draft" }) });
+    const slug = created.data.project.slug;
+    const weights = await jsonFetch<{ weights: { strategyVersion: string } }>(`/api/novel/projects/${slug}/runtime/drafting/stage-weights`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stage: "drafting", strategyVersion: "draft-v1", weights: { voice: 0.5, canon: 1 }, hardConstraints: ["canon"], evidenceRefs: ["policy://1"] }) });
+    expect(weights.data.weights.strategyVersion).toBe("draft-v1");
+    const guard = await jsonFetch<{ guard: { status: string } }>(`/api/novel/projects/${slug}/runtime/drafting/anti-goal-guard`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "The narrator explained the mystery.", antiGoals: [{ antiGoal: "exposition", evidence: "author://1", patterns: ["explained the mystery"] }], repairScope: ["sentence"] }) });
+    expect(guard.data.guard.status).toBe("repair-required");
+    const q003 = await jsonFetch<{ profile: { status: string; safetyInvariants: string[] } }>(`/api/novel/projects/${slug}/runtime/drafting/q003-profile`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "unconfirmed" }) });
+    expect(q003.data.profile).toMatchObject({ status: "unconfirmed", safetyInvariants: expect.arrayContaining(["canon"]) });
+  });
+
+  it("resolves stable asset links to current versions or a permission-safe fallback", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Deep Links", roughIdea: "Navigate" }) });
+    const slug = created.data.project.slug;
+    const made = await jsonFetch<{ link: { assetId: string; assetVersion: string } }>(`/api/novel/projects/${slug}/runtime/stable-deep-links`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "decision", assetId: "d-old", assetVersion: "v1" }) });
+    const resolved = await jsonFetch<{ resolution: { status: string; target: { assetId: string } } }>(`/api/novel/projects/${slug}/runtime/stable-deep-links/resolve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ link: { ...made.data.link, projectSlug: slug, kind: "decision", href: "novel://x", schemaVersion: "stable-deep-link.v1", fingerprint: "fp" }, authorized: true, currentVersion: "v2", fallbackAssetId: "d-new", fallbackVersion: "v2" }) });
+    expect(resolved.data.resolution).toMatchObject({ status: "fallback", target: { assetId: "d-new" } });
+  });
+
+  it("keeps historical objective versions and reports drift sources", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Objective Evolution", roughIdea: "Drift" }) });
+    const slug = created.data.project.slug;
+    const item = { objectiveId: "voice", kind: "preference", text: "restrained", scope: "work", sourceRefs: ["s1"], verification: "review" };
+    const impact = await jsonFetch<{ impact: { preservedHistoricalVersion: number; reasons: string[] } }>(`/api/novel/projects/${slug}/runtime/objective-change-impact`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ oldVersion: 1, newVersion: 2, oldItems: [item], newItems: [{ ...item, text: "lyrical" }], affectedAssets: ["ch-1"], retroactiveRequested: true, authorizationGranted: false }) });
+    expect(impact.data.impact).toMatchObject({ preservedHistoricalVersion: 1, reasons: ["RETROACTIVE_OBJECTIVE_AUTHORIZATION_REQUIRED"] });
+    const drift = await jsonFetch<{ drift: { status: string } }>(`/api/novel/projects/${slug}/runtime/objective-drift`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ targetVersion: 2, observations: [{ assetId: "ch-1", targetVersion: 1, deviation: ["voice"], sourceLayer: "generation" }] }) });
+    expect(drift.data.drift.status).toBe("drifting");
+  });
+
+  it("keeps seed facets evidence-bound, unknown, multi-interpreted, and reversible", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Seed Semantics", roughIdea: "Seed" }) });
+    const slug = created.data.project.slug;
+    const captured = await jsonFetch<{ utterance: { text: string; status: string } }>(`/api/novel/projects/${slug}/runtime/story-seeds/capture`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "A courier finds a door beneath the sea.", idempotencyKey: "seed-api-1" }) });
+    const frame = await jsonFetch<{ frame: { facets: Array<{ facet: string; certainty: string }> } }>(`/api/novel/projects/${slug}/runtime/story-seeds/frame`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ utterance: { ...captured.data.utterance, projectId: slug, schemaVersion: "author-utterance.v1", utteranceId: "u-api", idempotencyKey: "seed-api-1", fingerprint: "fp" }, facets: [{ facet: "protagonist", value: "courier", evidence: [{ start: 2, end: 9 }] }, { facet: "desire", value: "unknown", evidence: [] }] }) });
+    expect(frame.data.frame.facets).toEqual(expect.arrayContaining([expect.objectContaining({ facet: "desire", certainty: "unknown" })]));
+    const readiness = await jsonFetch<{ readiness: { ready: boolean; unknown: string[] } }>(`/api/novel/projects/${slug}/runtime/story-seeds/readiness`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ target: "structure-candidate", facets: { protagonist: "courier", desire: "open door", resistance: "tide", stakes: "save sibling", experience: "dread", situation: "unknown" } }) });
+    expect(readiness.data.readiness).toMatchObject({ ready: true, unknown: ["situation"] });
+  });
+
+  it("activates seed questions only when counterfactual answers change the plan", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Seed Branches", roughIdea: "Branches" }) });
+    const slug = created.data.project.slug;
+    const question = await jsonFetch<{ question: { active: boolean; expectedInformationGain: number } }>(`/api/novel/projects/${slug}/runtime/story-seeds/branch-questions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionId: "q-branch", answers: [{ answer: "portal", affectedFields: ["worldRule"], branchSignature: "portal" }, { answer: "wreck", affectedFields: ["mystery"], branchSignature: "wreck" }], ignoredQuestions: ["hero-name"] }) });
+    expect(question.data.question).toMatchObject({ active: true });
+    const candidates = await jsonFetch<{ candidates: { candidates: Array<{ candidateId: string; sharedFacts: string[] }> } }>(`/api/novel/projects/${slug}/runtime/story-seeds/candidates`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sharedFacts: ["courier"], candidates: [{ candidateId: "c1", assumptions: ["portal"], resolvedUnknowns: ["door"], causalCommitments: ["world"], reworkIfWrong: "rewrite opening" }, { candidateId: "c2", assumptions: ["wreck"], resolvedUnknowns: ["door"], causalCommitments: ["mystery"], reworkIfWrong: "rewrite reveal" }] }) });
+    expect(candidates.data.candidates.candidates[0]?.sharedFacts).toContain("courier");
   });
 
   it("blocks the V2 preflight with typed dependency reasons before any model call", async () => {
@@ -1555,24 +3023,42 @@ describe("novel API routes", () => {
         ])
       );
 
+      const resolvedPrimary = await jsonFetch<{ decision: { actionId: string; journeyVersion: string; sourceFingerprint: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(resolvedPrimary.data.decision.actionId).toBe("continue-understanding");
       const asyncShadow = await jsonFetch<{
         job: { id: string; type: string; status: string };
         modelCallIssued: boolean;
         understandingWritten: boolean;
-      }>(`/api/novel/projects/${slug}/session/understanding`, {
+        execution: { status: string; actionId: string };
+      }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "shadow-async" })
+        body: JSON.stringify({ decision: resolvedPrimary.data.decision })
       });
       expect(asyncShadow.status).toBe(202);
-      expect(asyncShadow.data).toMatchObject({ modelCallIssued: false, understandingWritten: false });
+      expect(asyncShadow.data).toMatchObject({ execution: { status: "accepted", actionId: "continue-understanding" }, modelCallIssued: false, understandingWritten: false });
       expect(asyncShadow.data.job).toMatchObject({ type: "understanding.shadow", status: "pending" });
       const asyncFinished = await waitForJob(slug, asyncShadow.data.job.id);
       expect(asyncFinished.job).toMatchObject({
         status: "success",
         resultRef: `/api/novel/projects/${slug}/session/understanding/snapshot`
       });
-
+      const timelineAfterJob = await jsonFetch<{ timeline: { entries: Array<{ entryId: string; kind: string; text: string; collapsed: boolean }> } }>(`/api/novel/projects/${slug}/session/timeline`);
+      expect(timelineAfterJob.data.timeline.entries).toEqual(expect.arrayContaining([expect.objectContaining({ entryId: asyncShadow.data.job.id, kind: "task-progress", text: "understanding.shadow: success", collapsed: true })]));
+      const afterUnderstanding = await jsonFetch<{ decision: { actionId: string; kind: string }; journey: { primaryAsset: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(afterUnderstanding.data).toMatchObject({ decision: { actionId: "review-understanding", kind: "reviewable" }, journey: { primaryAsset: "understanding-preview" } });
+      const reviewed = await jsonFetch<{ execution: { status: string; created: boolean }; review: { status: string; canonWritten: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: afterUnderstanding.data.decision, reviewerId: "primary-action-reviewer" })
+      });
+      expect(reviewed.status).toBe(201);
+      expect(reviewed.data).toMatchObject({ execution: { status: "completed", created: true }, review: { status: "passed", canonWritten: false } });
+      const reviewedReplay = await jsonFetch<{ execution: { status: string; created: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: afterUnderstanding.data.decision, reviewerId: "primary-action-reviewer" })
+      });
+      expect(reviewedReplay.status).toBe(200);
+      expect(reviewedReplay.data.execution.created).toBe(false);
       const modelExecution = await jsonFetch<{ task: { id?: string; taskId: string; status: string; modelCallIssued: boolean; canonWritten: boolean } }>(
         `/api/novel/projects/${slug}/session/understanding`,
         {
@@ -1644,7 +3130,7 @@ describe("novel API routes", () => {
         answerText: "The protagonist wants to expose the truth.",
         answerStatus: "confirmed"
       };
-      const answeredQuestion = await jsonFetch<{ question: { status: string; answerStatus: string } }>(
+      const answeredQuestion = await jsonFetch<{ question: { status: string; answerStatus: string }; decision: { answerPayload: { schemaVersion: string; answerId: string; questionId: string; fingerprint: string } } }>(
         `/api/novel/projects/${slug}/session/understanding/questions/question-primary-desire/answers`,
         { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(answerBody) }
       );
@@ -1654,8 +3140,94 @@ describe("novel API routes", () => {
       );
       expect(answeredQuestion.status).toBe(201);
       expect(answeredQuestion.data.question).toMatchObject({ status: "answered", answerStatus: "confirmed" });
+      expect(answeredQuestion.data.decision.answerPayload).toMatchObject({ schemaVersion: "dialogue-answer-payload.v1", answerId: expect.any(String), questionId: "question-primary-desire", fingerprint: expect.any(String) });
       expect(replayedAnswer.status).toBe(200);
       expect(replayedAnswer.data).toMatchObject({ replayed: true, question: { status: "answered" } });
+
+      const conflictQuestion = await jsonFetch<{ question: { questionId: string; questionVersion: number; status: string } }>(
+        `/api/novel/projects/${slug}/session/understanding/questions`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionId: "question-core-conflict" }) }
+      );
+      expect(conflictQuestion.status).toBe(201);
+      const conflictAnswer = await jsonFetch<{ question: { status: string } }>(
+        `/api/novel/projects/${slug}/session/understanding/questions/${conflictQuestion.data.question.questionId}/answers`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionVersion: conflictQuestion.data.question.questionVersion, expectedSnapshotFingerprint: authorized.data.authorization.manifestFingerprint, idempotencyKey: "answer-route-conflict-001", answerText: "A powerful institution will erase the evidence.", answerStatus: "confirmed" }) }
+      );
+      expect(conflictAnswer.status).toBe(201);
+      expect(conflictAnswer.data.question.status).toBe("answered");
+
+      const candidateAction = await jsonFetch<{ decision: { actionId: string; journeyVersion: string; sourceFingerprint: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      const candidateDecisionId = (await jsonFetch<{ decisions: Array<{ decisionId: string; questionId: string }> }>(`/api/novel/projects/${slug}/session/understanding/decisions`)).data.decisions.find((decision) => decision.questionId === "question-core-conflict")!.decisionId;
+      expect(candidateAction.data.decision.actionId).toBe(`generate-contract-candidate-${candidateDecisionId}`);
+      const candidateExecution = await jsonFetch<{ execution: { status: string; created: boolean }; candidate: { candidateId: string; status: string; canonWritten: boolean }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: candidateAction.data.decision })
+      });
+      expect(candidateExecution.status).toBe(201);
+      expect(candidateExecution.data).toMatchObject({ execution: { status: "completed", created: true }, candidate: { status: "candidate", canonWritten: false }, consumption: { created: true, receipt: { consumer: "story-contract", decisionId: candidateDecisionId, consumerRef: candidateExecution.data.candidate.candidateId } } });
+      const candidateReviewAction = await jsonFetch<{ decision: { actionId: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(candidateReviewAction.data.decision.actionId).toBe(`review-contract-candidate-${candidateExecution.data.candidate.candidateId}`);
+      const candidateReview = await jsonFetch<{ execution: { status: string }; candidate: { candidateId: string; canonWritten: boolean; fingerprint: string; fields: Array<{ fieldId: string }> } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: candidateReviewAction.data.decision })
+      });
+      expect(candidateReview.status).toBe(200);
+      expect(candidateReview.data).toMatchObject({ execution: { status: "completed" }, candidate: { candidateId: candidateExecution.data.candidate.candidateId, canonWritten: false } });
+      const proposal = await jsonFetch<{ execution: { status: string; created: boolean }; proposal: { proposalId: string; status: string; canonWritten: boolean; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: candidateReviewAction.data.decision, fieldDecisions: candidateReview.data.candidate.fields.map((field) => ({ fieldId: field.fieldId, status: "accept" })) })
+      });
+      expect(proposal.status).toBe(201);
+      expect(proposal.data).toMatchObject({ execution: { status: "completed", created: true }, proposal: { status: "ready_for_authorization", canonWritten: false } });
+      const commitAction = await jsonFetch<{ decision: { actionId: string; kind: string; risk: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(commitAction.data.decision).toMatchObject({ actionId: `commit-contract-adoption-${proposal.data.proposal.proposalId}`, kind: "l2-decision", risk: "high" });
+      const blockedCommit = await jsonFetch<{ execution: { status: string }; error: { code: string }; result: { canonWritten: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: commitAction.data.decision, expectedProposalFingerprint: proposal.data.proposal.fingerprint })
+      });
+      expect(blockedCommit.status).toBe(409);
+      expect(blockedCommit.data).toMatchObject({ execution: { status: "blocked" }, error: { code: "AUTHOR_AUTHORIZATION_REQUIRED" }, result: { canonWritten: false } });
+      const committed = await jsonFetch<{ execution: { status: string }; result: { status: string; canonWritten: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: commitAction.data.decision, expectedProposalFingerprint: proposal.data.proposal.fingerprint, authorization: { actorId: "author-1", authorizationId: "authorization-primary-action-1" } })
+      });
+      expect(committed.status).toBe(200);
+      expect(committed.data).toMatchObject({ execution: { status: "completed" }, result: { status: "committed", canonWritten: true } });
+
+      const outlineAction = await jsonFetch<{ decision: { actionId: string; journeyVersion: string; sourceFingerprint: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(outlineAction.data.decision.actionId).toBe(`generate-outline-candidate-${candidateExecution.data.candidate.candidateId}`);
+      const outlineExecution = await jsonFetch<{ execution: { status: string; created: boolean }; outline: { outlineId: string; status: string; canonWritten: boolean }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: outlineAction.data.decision })
+      });
+      expect(outlineExecution.status).toBe(201);
+      expect(outlineExecution.data).toMatchObject({ execution: { status: "completed", created: true }, outline: { status: "candidate", canonWritten: false }, consumption: { created: true, receipt: { consumer: "outline", decisionId: candidateDecisionId, consumerRef: outlineExecution.data.outline.outlineId } } });
+      const outlineReviewAction = await jsonFetch<{ decision: { actionId: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(outlineReviewAction.data.decision.actionId).toBe(`review-outline-candidate-${outlineExecution.data.outline.outlineId}`);
+      const outlineReview = await jsonFetch<{ validation: { status: string; executionReady: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: outlineReviewAction.data.decision })
+      });
+      expect(outlineReview.status).toBe(201);
+      expect(outlineReview.data.validation).toMatchObject({ status: "passed", executionReady: false });
+      const outlineProposalAction = await jsonFetch<{ decision: { actionId: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(outlineProposalAction.data.decision.actionId).toBe(`propose-outline-adoption-${outlineExecution.data.outline.outlineId}`);
+      const outlineProposal = await jsonFetch<{ proposal: { proposalId: string; fingerprint: string; status: string; canonWritten: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: outlineProposalAction.data.decision })
+      });
+      expect(outlineProposal.status).toBe(201);
+      expect(outlineProposal.data.proposal).toMatchObject({ status: "ready_for_authorization", canonWritten: false });
+      const outlineAuthorizeAction = await jsonFetch<{ decision: { actionId: string; risk: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(outlineAuthorizeAction.data.decision).toMatchObject({ actionId: `authorize-outline-adoption-${outlineProposal.data.proposal.proposalId}`, risk: "high" });
+      const outlineAuthorized = await jsonFetch<{ proposal: { status: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: outlineAuthorizeAction.data.decision, expectedProposalFingerprint: outlineProposal.data.proposal.fingerprint, actorId: "author-1", authorizationId: "authorization-outline-1" })
+      });
+      expect(outlineAuthorized.status).toBe(201);
+      expect(outlineAuthorized.data.proposal.status).toBe("authorized");
+      const outlineCommitAction = await jsonFetch<{ decision: { actionId: string; risk: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
+      expect(outlineCommitAction.data.decision).toMatchObject({ actionId: `commit-outline-adoption-${outlineProposal.data.proposal.proposalId}`, risk: "high" });
+      const outlineCommitted = await jsonFetch<{ execution: { status: string }; result: { status: string; canonWritten: boolean; proof?: { executionReady: boolean } } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: outlineCommitAction.data.decision, expectedProposalFingerprint: outlineAuthorized.data.proposal.fingerprint })
+      });
+      expect(outlineCommitted.status).toBe(200);
+      expect(outlineCommitted.data).toMatchObject({ execution: { status: "completed" }, result: { status: "committed", canonWritten: true, proof: { executionReady: true } } });
 
       await jsonFetch(`/api/novel/projects/${slug}/session/messages`, {
         method: "POST",
@@ -2133,11 +3705,31 @@ describe("novel API routes", () => {
         query: string;
         facts: Array<{ id: string; score: number }>;
         chapters: Array<{ chapterId: string; score: number }>;
+        excluded?: Array<{ id: string; reason: string }>;
       };
     }>(`/api/novel/projects/${slug}/knowledge/search`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query: "Hero blood gate", chapterId: "chapter-001" })
+    });
+    const modelTaskSearch = await jsonFetch<{
+      result: { facts: Array<{ id: string }>; excluded?: Array<{ id: string; reason: string }> };
+    }>(`/api/novel/projects/${slug}/knowledge/search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: "Hero blood gate", audience: "model-task" })
+    });
+    const previewResponse = await jsonFetch<{
+      preview: {
+        retrievalId: string;
+        selectedIds: string[];
+        resultFingerprint: string;
+        sourceResultFingerprint: string;
+      };
+    }>(`/api/novel/projects/${slug}/memory/retrieval-previews`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: "Hero blood gate", chapterId: "chapter-001", maxResults: 1 })
     });
 
     expect(before.status).toBe(200);
@@ -2150,6 +3742,39 @@ describe("novel API routes", () => {
     expect(searched.status).toBe(200);
     expect(searched.data.result.facts).toEqual(expect.arrayContaining([expect.objectContaining({ id: "fact:fact-gate" })]));
     expect(searched.data.result.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001" }));
+    expect(modelTaskSearch.status).toBe(200);
+    expect(modelTaskSearch.data.result.facts).toEqual([]);
+    expect(modelTaskSearch.data.result.excluded).toEqual(expect.arrayContaining([expect.objectContaining({ reason: "MODEL_TASK_SOURCE_VISIBILITY_REQUIRED" })]));
+    expect(previewResponse.status).toBe(201);
+    expect(previewResponse.data.preview.retrievalId).toMatch(/^retrieval-[a-f0-9]{24}$/);
+    expect(previewResponse.data.preview.selectedIds).toHaveLength(1);
+    expect(previewResponse.data.preview.resultFingerprint).toMatch(/^[a-f0-9]{64}$/);
+    expect(previewResponse.data.preview.sourceResultFingerprint).toMatch(/^[a-f0-9]{64}$/);
+    const readPreview = await jsonFetch<{ preview: typeof previewResponse.data.preview }>(
+      `/api/novel/projects/${slug}/memory/retrievals/${previewResponse.data.preview.retrievalId}`
+    );
+    expect(readPreview.status).toBe(200);
+    expect(readPreview.data.preview).toEqual(previewResponse.data.preview);
+    await expect(fs.readFile(path.join(tempRoot, slug, "memory", "retrievals", `${previewResponse.data.preview.retrievalId}.json`), "utf8")).resolves.toContain("memory-retrieval-preview.v1");
+
+    const healthResponse = await jsonFetch<{ report: { reportId: string; schemaVersion: string; status: string; coverage: { totalChapters: number }; fingerprint: string } }>(
+      `/api/novel/projects/${slug}/memory/health-reports`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) }
+    );
+    expect(healthResponse.status).toBe(201);
+    expect(healthResponse.data.report).toMatchObject({ schemaVersion: "memory-health-report.v1", status: "degraded", coverage: { totalChapters: 3 } });
+    expect(healthResponse.data.report.reportId).toMatch(/^memory-health-[a-f0-9]{24}$/);
+    const continuityResponse = await jsonFetch<{ audit: { auditId: string; fingerprint: string; status: string } }>(`/api/novel/projects/${slug}/memory/continuity-audits`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ healthReportId: healthResponse.data.report.reportId }) });
+    expect(continuityResponse.status).toBe(201);
+    const readyResponse = await jsonFetch<{ proof: { schemaVersion: string; status: string; blockers: string[]; proofId: string; continuityAuditId?: string } }>(`/api/novel/projects/${slug}/memory/ready-proofs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ healthReportId: healthResponse.data.report.reportId, retrievalId: previewResponse.data.preview.retrievalId, continuityAuditId: continuityResponse.data.audit.auditId, targetChapterId: "chapter-001" }) });
+    expect(readyResponse.status).toBe(201);
+    expect(readyResponse.data.proof).toMatchObject({ schemaVersion: "memory-ready-proof.v1", status: "blocked", continuityAuditId: continuityResponse.data.audit.auditId, blockers: expect.arrayContaining(["MEMORY_HEALTH_DEGRADED", "MEMORY_CONTINUITY_AUDIT_BLOCKED"]) });
+    const readReady = await jsonFetch<{ proof: typeof readyResponse.data.proof }>(`/api/novel/projects/${slug}/memory/ready-proofs/${readyResponse.data.proof.proofId}`);
+    expect(readReady.status).toBe(200);
+    expect(readReady.data.proof).toEqual(readyResponse.data.proof);
+    const readHealth = await jsonFetch<{ report: typeof healthResponse.data.report }>(`/api/novel/projects/${slug}/memory/health-reports/${healthResponse.data.report.reportId}`);
+    expect(readHealth.status).toBe(200);
+    expect(readHealth.data.report).toEqual(healthResponse.data.report);
+    await expect(fs.readFile(path.join(tempRoot, slug, "memory", "health-reports", `${healthResponse.data.report.reportId}.json`), "utf8")).resolves.toContain("memory-health-report.v1");
   });
 
   it("runs heavy project work as a background job", async () => {
@@ -2772,6 +4397,8 @@ describe("novel API routes", () => {
       }
     );
     expect(ledgerAfter.data.entries).toEqual([expect.objectContaining({ id: "risk-1", kind: "risk" })]);
+    const ledgerRead = await jsonFetch<{ entries: unknown[]; authority: string; projectionType: string; requiresMemoryClaimVerification: boolean }>("/api/novel/projects/cockpit-demo/ledger/risk");
+    expect(ledgerRead.data).toMatchObject({ authority: "projection-only", projectionType: "ledger", requiresMemoryClaimVerification: true });
 
     const invalidLedger = await jsonFetch<{ error: string }>("/api/novel/projects/cockpit-demo/ledger/unknown");
     expect(invalidLedger.status).toBe(400);
@@ -2785,7 +4412,7 @@ describe("novel API routes", () => {
       body: JSON.stringify({ title: "Memory Demo", roughIdea: "Make chapter memory explicit." })
     });
 
-    const summaryBefore = await jsonFetch<{ summary: { chapterId: string; summary: string; keyEvents: string[] } }>(
+    const summaryBefore = await jsonFetch<{ summary: { chapterId: string; summary: string; keyEvents: string[] }; authority: string; projectionType: string; requiresMemoryClaimVerification: boolean }>(
       "/api/novel/projects/memory-demo/memory/chapter-summaries/chapter-001"
     );
     expect(summaryBefore.data.summary).toMatchObject({
@@ -2793,6 +4420,7 @@ describe("novel API routes", () => {
       summary: "",
       keyEvents: []
     });
+    expect(summaryBefore.data).toMatchObject({ authority: "projection-only", projectionType: "chapter-summary", requiresMemoryClaimVerification: true });
 
     const summaryAfter = await jsonFetch<{ summary: { chapterId: string; summary: string; keyEvents: string[] } }>(
       "/api/novel/projects/memory-demo/memory/chapter-summaries/chapter-001",
@@ -2858,6 +4486,9 @@ describe("novel API routes", () => {
     expect(qualityAfter.data.seriesMetrics.metricAverages).toEqual([
       expect.objectContaining({ key: "conflict", averageScore: 82 })
     ]);
+
+    const qualityRead = await jsonFetch<{ report: { overallScore: number }; evidenceStatus: string }>("/api/novel/projects/memory-demo/quality/chapter-001");
+    expect(qualityRead.data).toMatchObject({ report: { overallScore: 82 }, evidenceStatus: "legacy" });
 
     const seriesQuality = await jsonFetch<{ seriesMetrics: { reportCount: number; averageOverallScore: number } }>(
       "/api/novel/projects/memory-demo/quality/series-metrics"
@@ -3123,6 +4754,7 @@ describe("novel API routes", () => {
     expect(arbitraryResponse.data.error.code).toBe("GOVERNED_LEGACY_WRITE_REQUIRED");
   });
 
+
   it("fails closed when migration is marked activated but the outline pointer is missing", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
       method: "POST",
@@ -3271,7 +4903,7 @@ describe("novel API routes", () => {
     const project = JSON.parse(await fs.readFile(projectPath, "utf8")) as { outlineVersion?: { versionId: string } };
     project.outlineVersion = { versionId: "outline-governed" };
     await fs.writeFile(projectPath, `${JSON.stringify(project, null, 2)}\n`, "utf8");
-    const started = await jsonFetch<{ run: { id: string } }>(`/api/novel/projects/${slug}/runtime/start`, {
+    const started = await jsonFetch<{ run: { id: string; chapterId: string } }>(`/api/novel/projects/${slug}/runtime/start`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({})
@@ -3284,6 +4916,621 @@ describe("novel API routes", () => {
     });
     expect(accepted.status).toBe(409);
     expect(accepted.data.error.code).toBe("PROSE_ADOPTION_REQUIRED");
+  });
+
+  it("does not mark an ungoverned runtime accepted without a settled chapter", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Runtime Settlement Gate", roughIdea: "Acceptance must follow settlement." })
+    });
+    const slug = created.data.project.slug;
+    const started = await jsonFetch<{ run: { id: string; chapterId: string } }>(`/api/novel/projects/${slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chapterId: "chapter-001" })
+    });
+    expect(started.status).toBe(202);
+    const accepted = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/review/accept`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId: started.data.run.id })
+    });
+    expect(accepted.status).toBe(500);
+    expect(accepted.data.error).toContain("RUNTIME_ACCEPT_SETTLEMENT_REQUIRED");
+    const settlementId = "settlement-runtime-accept";
+    await fs.mkdir(path.join(tempRoot, slug, "sessions", "chapter-settlements"), { recursive: true });
+    const settlementBase = { schemaVersion: "chapter-settlement.v1", settlementId, projectSlug: slug, chapterId: started.data.run.chapterId, adoptionTransactionId: "adopt-runtime-accept", adoptedContentSha256: "a".repeat(64), status: "settled", nextAction: "schedule_dependency_ready_work", createdAt: new Date().toISOString() };
+    const settlement = { ...settlementBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(settlementBase)).digest("hex") };
+    await fs.writeFile(path.join(tempRoot, slug, "sessions", "chapter-settlements", `${settlementId}.json`), JSON.stringify(settlement), "utf8");
+    const acceptedAfterSettlement = await jsonFetch<{ run: { status: string }; command: { type: string } }>(`/api/novel/projects/${slug}/runtime/review/accept`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId: started.data.run.id, settlementId })
+    });
+    expect(acceptedAfterSettlement.status).toBe(202);
+    expect(acceptedAfterSettlement.data.run.status).toBe("completed");
+    expect(acceptedAfterSettlement.data.run.result).toMatchObject({ draftingExecutionReceipt: { policyVersion: "tiered-quality.v1", runtimeActivationAllowed: false, outcome: "accepted" } });
+    expect(acceptedAfterSettlement.data.command.type).toBe("accept");
+  });
+
+  it("rejects runtime starts that name a non-frozen prose generation manifest", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Runtime Manifest Boundary", roughIdea: "Drafting must reference a frozen manifest." }) });
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ generationManifestId: "missing-generation-manifest" }) });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("PROSE_GENERATION_MANIFEST_REQUIRED");
+  });
+
+  it("accepts continuous-chapter intent through the durable scheduler", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Runtime Continuous Flag", roughIdea: "Continuous scheduling must be explicit." })
+    });
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ autoContinue: true })
+    });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("BOOK_RUN_READINESS_REQUIRED");
+  });
+
+  it("honors an explicitly supplied startup preflight before auto-continuation", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Runtime Preflight Gate", roughIdea: "A blocked startup proof must stop auto-continuation." }) });
+    const slug = created.data.project.slug;
+    const preflight = await jsonFetch<{ preflight: { status: string } }>(`/api/novel/projects/${slug}/book-runs/preflight`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ runId: "startup-proof-1", objective: "draft", estimatedWorkItems: 1, estimatedWallClockMs: 1000, estimatedCostCents: 1, authorizationScope: "chapter-1", worstCaseRecoveryBoundary: "chapter-boundary", storyContractConfirmed: false, migrationComplete: true, budgetAvailable: true, workerOnline: true, conflictingRun: false }) });
+    expect(preflight.status).toBe(409);
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ autoContinue: true, preflightId: "startup-proof-1" }) });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("RUN_PREFLIGHT_BLOCKED");
+    const direct = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/book-runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [], preflightId: "startup-proof-1", limits: { maxWorkItems: 1 } }) });
+    expect(direct.status).toBe(409);
+    expect(direct.data.error.code).toBe("RUN_PREFLIGHT_BLOCKED");
+
+    const readyPreflight = await jsonFetch<{ preflight: { status: string } }>(`/api/novel/projects/${slug}/book-runs/preflight`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ runId: "startup-proof-ready", objective: "draft", estimatedWorkItems: 1, estimatedWallClockMs: 1000, estimatedCostCents: 1, authorizationScope: "chapter-1", worstCaseRecoveryBoundary: "chapter-boundary", limits: { maxWorkItems: 1 }, storyContractConfirmed: true, migrationComplete: true, budgetAvailable: true, workerOnline: true, conflictingRun: false }) });
+    expect(readyPreflight.status).toBe(200);
+    expect(readyPreflight.data.preflight.status).toBe("ready");
+    const mismatch = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ autoContinue: true, preflightId: "startup-proof-ready", limits: { maxWorkItems: 2 } }) });
+    expect(mismatch.status).toBe(409);
+    expect(mismatch.data.error.code).toBe("RUN_PREFLIGHT_LIMIT_MISMATCH");
+  });
+
+  it("routes continuous chapter intent through the durable BookRun scheduler", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Runtime Continuous Scheduler", roughIdea: "Continuous intent must use durable scope." })
+    });
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ autoContinue: true, chapterIds: [created.data.project.chapters[0].id], limits: { maxWorkItems: 1 } })
+    });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("BOOK_RUN_READINESS_REQUIRED");
+  });
+
+  it("returns a structured conflict when runtime control uses a stale run version", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Runtime Control Freshness", roughIdea: "Controls must not overwrite newer state." })
+    });
+    const slug = created.data.project.slug;
+    const started = await jsonFetch<{ run: { id: string; updatedAt: string } }>(`/api/novel/projects/${slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    expect(started.status).toBe(202);
+
+    const stale = await jsonFetch<{ error: { code: string; message: string } }>(`/api/novel/projects/${slug}/runtime/pause`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId: started.data.run.id, expectedRunUpdatedAt: "2000-01-01T00:00:00.000Z" })
+    });
+    expect(stale.status).toBe(409);
+    expect(stale.data.error).toMatchObject({ code: "RUNTIME_CONTROL_STALE" });
+  });
+
+  it("evaluates Q-004 pause policy without treating silence as consent", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Adaptive Pause Policy", roughIdea: "Pause policy is evidence driven." })
+    });
+    const decision = await jsonFetch<{ decision: { status: string; nextAction: string; pausePolicyVersion: string; continuationRequiresExistingGrant: boolean } }>(`/api/novel/projects/${created.data.project.slug}/runtime/pause-policy/evaluate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ autonomyGrantValid: true, settledChapterCount: 10 })
+    });
+    expect(decision.status).toBe(200);
+    expect(decision.data.decision).toMatchObject({ status: "soft_recap", nextAction: "emit_milestone_recap", pausePolicyVersion: "adaptive-risk-pause.v1", continuationRequiresExistingGrant: true });
+  });
+
+  it("persists a Q-004 milestone recap without author consent side effects", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Adaptive Pause Recap", roughIdea: "Milestone oversight stays non-consensual." })
+    });
+    const recap = await jsonFetch<{ recap: { authorResponse: string; continuationRequiresExistingGrant: boolean; fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/pause-policy/recaps`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recapId: "recap-10", trigger: "ten-settled-chapters", settledChapterCount: 10, settledSummary: "Ten chapters settled.", changedSummary: "No canon change.", openRisks: ["obligation-1"], qualityEvidence: ["quality://10"], costEvidence: ["cost://10"], paceEvidence: ["pace://10"], nextAuthorizedScope: "Existing scope only.", continuationSafeReason: "Grant remains valid." })
+    });
+    expect(recap.status).toBe(201);
+    expect(recap.data.recap).toMatchObject({ authorResponse: "not-required", continuationRequiresExistingGrant: true, fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+  });
+
+  it("applies only a fresh, fingerprinted hard-pause decision to a runtime", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Adaptive Pause Apply", roughIdea: "Hard pause application is fenced." })
+    });
+    const slug = created.data.project.slug;
+    const started = await jsonFetch<{ run: { id: string; updatedAt: string; status: string } }>(`/api/novel/projects/${slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    const evaluated = await jsonFetch<{ decision: Record<string, unknown> }>(`/api/novel/projects/${slug}/runtime/pause-policy/evaluate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ autonomyGrantValid: false, unresolvedHardTriggers: ["canon-gate"] })
+    });
+    const applied = await jsonFetch<{ run: { status: string; result?: Record<string, unknown> } }>(`/api/novel/projects/${slug}/runtime/pause-policy/apply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId: started.data.run.id, expectedRunUpdatedAt: started.data.run.updatedAt, decision: evaluated.data.decision })
+    });
+    expect(applied.status).toBe(202);
+    expect(applied.data.run.status).toBe("paused");
+    expect(applied.data.run.result?.pauseDecisionFingerprint).toBe(evaluated.data.decision.fingerprint);
+
+    const stale = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/pause-policy/apply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId: started.data.run.id, expectedRunUpdatedAt: started.data.run.updatedAt, decision: evaluated.data.decision })
+    });
+    expect(stale.status).toBe(409);
+    expect(stale.data.error.code).toBe("RUNTIME_CONTROL_STALE");
+  });
+
+  it("exposes steering events only through their owning project", async () => {
+    const first = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Steering Event Query", roughIdea: "Direction history remains project scoped." })
+    });
+    const second = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Other Steering Project", roughIdea: "A separate project cannot read the event." })
+    });
+    const started = await jsonFetch<{ run: { id: string } }>(`/api/novel/projects/${first.data.project.slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    const directed = await jsonFetch<{ command: { payload: { steeringEventId: string } }; directionEvent: { status: string; effectiveBoundary: string; classification: string; runId: string } }>(`/api/novel/projects/${first.data.project.slug}/runtime/direction`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId: started.data.run.id, direction: "Raise the cost of the next choice.", phase: "model-call", targetObjectiveVersion: 2 })
+    });
+    expect(directed.status).toBe(202);
+    expect(directed.data.directionEvent).toMatchObject({ status: "received", effectiveBoundary: "next-boundary", classification: "content-direction", runId: started.data.run.id });
+    const eventId = directed.data.command.payload.steeringEventId;
+
+    const owned = await jsonFetch<{ event: { eventId: string; projectSlug: string; status: string } }>(`/api/novel/projects/${first.data.project.slug}/runtime/steering-events/${eventId}`);
+    expect(owned.status).toBe(200);
+    expect(owned.data.event).toMatchObject({ eventId, projectSlug: first.data.project.slug, status: "received" });
+
+    const classified = await jsonFetch<{ event: { status: string } }>(`/api/novel/projects/${first.data.project.slug}/runtime/steering-events/${eventId}/advance`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "classified" })
+    });
+    expect(classified.status).toBe(201);
+    expect(classified.data.event).toMatchObject({ status: "classified" });
+    const queued = await jsonFetch<{ event: { status: string; reason: string } }>(`/api/novel/projects/${first.data.project.slug}/runtime/steering-events/${eventId}/advance`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "queued_for_boundary", reason: "apply at next safe boundary" })
+    });
+    expect(queued.status).toBe(201);
+    expect(queued.data.event).toMatchObject({ status: "queued_for_boundary", reason: "apply at next safe boundary" });
+
+    const crossProject = await jsonFetch<{ error: string }>(`/api/novel/projects/${second.data.project.slug}/runtime/steering-events/${eventId}`);
+    expect(crossProject.status).toBe(404);
+  });
+
+  it("plans quiet-hour notifications with one actionable deep link per event", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Notification Plan", roughIdea: "Quiet hours preserve attention." })
+    });
+    const plan = await jsonFetch<{ plan: { status: string; immediate: Array<{ eventId: string; breakQuiet: boolean }>; digest?: { eventIds: string[] } } }>(`/api/novel/projects/${created.data.project.slug}/runtime/notifications/plan`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ quiet: true, authorOnline: false, notificationLevel: "high-value", maxUnattendedWorkItems: 8, unattendedWorkItems: 2, events: [{ eventId: "n-1", kind: "chapter-complete", title: "Chapter ready", deepLink: "/runs/r1/work/w1" }, { eventId: "n-2", kind: "l2-gate", title: "Decision required", deepLink: "/runs/r1/attention/n-2" }] })
+    });
+    expect(plan.status).toBe(200);
+    expect(plan.data.plan).toMatchObject({ status: "urgent", immediate: [{ eventId: "n-2", breakQuiet: true }], digest: { eventIds: ["n-1"] } });
+  });
+
+  it("persists and integrity-checks the project capability manifest", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Capability Manifest Persistence", roughIdea: "Enabled slices survive a restart." })
+    });
+    const slug = created.data.project.slug;
+    const initial = await jsonFetch<{ manifest: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`);
+    expect(initial.status).toBe(200);
+    const body = {
+      schemaVersion: "v1",
+      enabledSlices: ["story-seed"],
+      readable: ["story-seed"],
+      writable: ["story-seed"],
+      migrationStatus: "verified",
+      rollbackWindow: "24h",
+      missingDependencies: []
+    };
+    const saved = await jsonFetch<{ manifest: { projectId: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, expectedFingerprint: initial.data.manifest.fingerprint })
+    });
+    expect(saved.status).toBe(201);
+    expect(saved.data.manifest).toMatchObject({ projectId: slug });
+
+    const read = await jsonFetch<{ manifest: { projectId: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`);
+    expect(read.status).toBe(200);
+    expect(read.data.manifest).toEqual(saved.data.manifest);
+
+    const updateBody = { ...body, writable: ["story-seed", "runtime"] };
+    const missingExpected = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updateBody)
+    });
+    expect(missingExpected.status).toBe(409);
+    expect(missingExpected.data.error.code).toBe("CAPABILITY_MANIFEST_EXPECTED_FINGERPRINT_REQUIRED");
+    const stale = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...updateBody, expectedFingerprint: "0".repeat(64) })
+    });
+    expect(stale.status).toBe(409);
+    expect(stale.data.error.code).toBe("CAPABILITY_MANIFEST_STALE");
+    const updated = await jsonFetch<{ manifest: { writable: string[]; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...updateBody, expectedFingerprint: saved.data.manifest.fingerprint })
+    });
+    expect(updated.status).toBe(201);
+    expect(updated.data.manifest.writable).toContain("runtime");
+
+    const projectPath = path.join(tempRoot, slug, "sessions", "project-capability-manifest.json");
+    const tampered = JSON.parse(await fs.readFile(projectPath, "utf8")) as Record<string, unknown>;
+    tampered.writable = ["different-slice"];
+    await fs.writeFile(projectPath, `${JSON.stringify(tampered, null, 2)}\n`, "utf8");
+    const invalid = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`);
+    expect(invalid.status).toBe(500);
+    expect(invalid.data.error).toContain("CAPABILITY_MANIFEST_INTEGRITY_FAILED");
+  });
+
+  it("rejects runtime writes that are absent from an enabled project's writable slices", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Capability Write Fence", roughIdea: "A manifest must govern runtime writes." })
+    });
+    const slug = created.data.project.slug;
+    const currentManifest = await jsonFetch<{ manifest: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`);
+    const manifest = await jsonFetch(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ schemaVersion: "v1", enabledSlices: ["story-seed"], readable: ["story-seed"], writable: ["story-seed"], migrationStatus: "verified", rollbackWindow: "24h", missingDependencies: [], expectedFingerprint: currentManifest.data.manifest.fingerprint })
+    });
+    expect(manifest.status).toBe(201);
+    const denied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    expect(denied.status).toBe(409);
+    expect(denied.data.error).toMatchObject({ code: "CAPABILITY_WRITE_NOT_AUTHORIZED", sliceId: "runtime" });
+  });
+
+  it("fences runtime control commands after a project capability is narrowed", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Capability Control Fence", roughIdea: "Control commands share the runtime authority." })
+    });
+    const slug = created.data.project.slug;
+    const started = await jsonFetch<{ run: { id: string } }>(`/api/novel/projects/${slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    expect(started.status).toBe(202);
+    const currentManifest = await jsonFetch<{ manifest: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`);
+    await jsonFetch(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ schemaVersion: "v1", enabledSlices: ["story-seed"], readable: ["story-seed"], writable: ["story-seed"], migrationStatus: "verified", rollbackWindow: "24h", missingDependencies: [], expectedFingerprint: currentManifest.data.manifest.fingerprint })
+    });
+    const denied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/pause`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ runId: started.data.run.id })
+    });
+    expect(denied.status).toBe(409);
+    expect(denied.data.error).toMatchObject({ code: "CAPABILITY_WRITE_NOT_AUTHORIZED", sliceId: "runtime" });
+  });
+
+  it("persists requirement evidence links and refuses unverifiable release status", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Requirement Evidence Store", roughIdea: "A slice needs replayable evidence." })
+    });
+    const slug = created.data.project.slug;
+    const payload = { requirementId: "FR-DELIVERY-010", sliceId: "evidence-store", contractRefs: ["requirement-evidence-link.v1"], tests: ["app.spec.ts"], fixtures: ["demo-project"], metrics: ["evidence-readback"], releaseEvidence: ["test://app/evidence-store"], status: "verified" };
+    const saved = await jsonFetch<{ link: { projectSlug: string; requirementId: string; sliceId: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/requirement-evidence`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    expect(saved.status).toBe(201);
+    const read = await jsonFetch<{ link: typeof saved.data.link }>(`/api/novel/projects/${slug}/runtime/delivery/requirement-evidence/${payload.requirementId}/${payload.sliceId}`);
+    expect(read.status).toBe(200);
+    expect(read.data.link).toEqual(saved.data.link);
+
+    const evidenceDir = path.join(tempRoot, slug, "sessions", "requirement-evidence");
+    const [evidenceFile] = (await fs.readdir(evidenceDir)).filter((name) => name.endsWith(".json"));
+    const target = path.join(evidenceDir, evidenceFile);
+    const tampered = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    tampered.status = "released";
+    await fs.writeFile(target, `${JSON.stringify(tampered)}\n`, "utf8");
+    const invalid = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/delivery/requirement-evidence/${payload.requirementId}/${payload.sliceId}`);
+    expect(invalid.status).toBe(500);
+    expect(invalid.data.error).toContain("REQUIREMENT_EVIDENCE_INTEGRITY_FAILED");
+
+    const blocked = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/delivery/requirement-evidence`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, requirementId: "FR-BLOCKED", fixtures: [], metrics: [], releaseEvidence: [] })
+    });
+    expect(blocked.status).toBe(500);
+    expect(blocked.data.error).toContain("REQUIREMENT_EVIDENCE_RELEASE_EVIDENCE_REQUIRED");
+  });
+
+  it("persists capability dependency proofs without turning blocked dependencies into success", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Dependency Proof Store", roughIdea: "Workers need durable dependency status." })
+    });
+    const slug = created.data.project.slug;
+    const payload = { sliceId: "runtime", requiredKernels: [{ id: "K2-runtime", version: "v1", verifiedBy: ["runtime.spec.ts"] }], writeAuthority: "runtime-store", unmet: ["provider-calibration"] };
+    const currentProof = await jsonFetch<{ proof: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/dependency-proofs/runtime`);
+    const saved = await jsonFetch<{ proof: { projectSlug: string; sliceId: string; status: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/dependency-proofs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, expectedFingerprint: currentProof.data.proof.fingerprint })
+    });
+    expect(saved.status).toBe(201);
+    expect(saved.data.proof).toMatchObject({ projectSlug: slug, sliceId: "runtime", status: "blocked" });
+    const read = await jsonFetch<{ proof: typeof saved.data.proof }>(`/api/novel/projects/${slug}/runtime/delivery/dependency-proofs/runtime`);
+    expect(read.status).toBe(200);
+    expect(read.data.proof).toEqual(saved.data.proof);
+
+    const proofDir = path.join(tempRoot, slug, "sessions", "capability-dependency-proofs");
+    const [proofFile] = (await fs.readdir(proofDir)).filter((name) => name.endsWith(".json"));
+    const target = path.join(proofDir, proofFile);
+    const tampered = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    tampered.status = "satisfied";
+    await fs.writeFile(target, `${JSON.stringify(tampered)}\n`, "utf8");
+    const invalid = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/delivery/dependency-proofs/runtime`);
+    expect(invalid.status).toBe(500);
+    expect(invalid.data.error).toContain("CAPABILITY_DEPENDENCY_INTEGRITY_FAILED");
+  });
+
+  it("rejects runtime writes when the current dependency proof is blocked", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Dependency Write Gate", roughIdea: "A blocked kernel cannot be bypassed by API start." })
+    });
+    const slug = created.data.project.slug;
+    const currentManifest = await jsonFetch<{ manifest: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`);
+    const manifest = await jsonFetch(`/api/novel/projects/${slug}/runtime/delivery/capability-manifest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ schemaVersion: "v1", enabledSlices: ["runtime"], readable: ["runtime"], writable: ["runtime"], migrationStatus: "verified", rollbackWindow: "24h", missingDependencies: [], expectedFingerprint: currentManifest.data.manifest.fingerprint })
+    });
+    expect(manifest.status).toBe(201);
+    const currentProof = await jsonFetch<{ proof: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/delivery/dependency-proof/runtime`);
+    const blocked = await jsonFetch(`/api/novel/projects/${slug}/runtime/delivery/dependency-proof`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sliceId: "runtime", requiredKernels: [{ id: "K0-contract", version: "v1", verifiedBy: ["test"] }], writeAuthority: "runtime-store", unmet: ["provider-calibration"], expectedFingerprint: currentProof.data.proof.fingerprint })
+    });
+    expect(blocked.status).toBe(201);
+    const denied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    expect(denied.status).toBe(409);
+    expect(denied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const derivativeDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/derivatives`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "blocked derivative" })
+    });
+    expect(derivativeDenied.status).toBe(409);
+    expect(derivativeDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const unclassifiedRuntimeDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/abstraction-transfer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    expect(unclassifiedRuntimeDenied.status).toBe(409);
+    expect(unclassifiedRuntimeDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const adoptionDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/prose-candidates/missing/adopt`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expectedCanonSha256: "x", authorizationId: "blocked-test" })
+    });
+    expect(adoptionDenied.status).toBe(409);
+    expect(adoptionDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const settlementDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/chapters/missing/settle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adoptionTransactionId: "missing" })
+    });
+    expect(settlementDenied.status).toBe(409);
+    expect(settlementDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const derivedDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/chapters/missing/settlements/missing/derived`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ writes: [] })
+    });
+    expect(derivedDenied.status).toBe(409);
+    expect(derivedDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const graphDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/work-graph`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chapterIds: [] })
+    });
+    expect(graphDenied.status).toBe(409);
+    expect(graphDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const refreshDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/work-graph/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    });
+    expect(refreshDenied.status).toBe(409);
+    expect(refreshDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const bookRunDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/book-runs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chapterIds: [] })
+    });
+    expect(bookRunDenied.status).toBe(409);
+    expect(bookRunDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const advanceDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/book-runs/missing/advance`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    });
+    expect(advanceDenied.status).toBe(409);
+    expect(advanceDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    for (const action of ["pause", "resume", "stop"]) {
+      const denied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/book-runs/missing/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}"
+      });
+      expect(denied.status).toBe(409);
+      expect(denied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    }
+    const retryDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/book-runs/missing/retry`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expectedVersion: 1 })
+    });
+    expect(retryDenied.status).toBe(409);
+    expect(retryDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const editionDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/publication-editions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "blocked edition" })
+    });
+    expect(editionDenied.status).toBe(409);
+    expect(editionDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const proofDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/publication-editions/missing/delivery-proof`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ approvalId: "blocked", expectedArtifactSetFingerprint: "missing" })
+    });
+    expect(proofDenied.status).toBe(409);
+    expect(proofDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const feedbackDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/prose-candidates/missing/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decision: "accepted" })
+    });
+    expect(feedbackDenied.status).toBe(409);
+    expect(feedbackDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const attributionDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/prose-feedback/missing/attribution`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category: "structure" })
+    });
+    expect(attributionDenied.status).toBe(409);
+    expect(attributionDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const hypothesisDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/prose-feedback-attributions/missing/hypothesis`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    });
+    expect(hypothesisDenied.status).toBe(409);
+    expect(hypothesisDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const qualityDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/quality/missing/gate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sourceFingerprint: "blocked", report: {} })
+    });
+    expect(qualityDenied.status).toBe(409);
+    expect(qualityDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const memoryDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/memory/claims`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ claimId: "blocked", proposition: "blocked", epistemicType: "inferred", sourceRefs: ["source://blocked"], evidenceAnchors: ["anchor://blocked"], producedBy: "test", temporalScope: { asOfVersion: "v1" }, confidence: 0.5 })
+    });
+    expect(memoryDenied.status).toBe(409);
+    expect(memoryDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const memorySettleDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/memory/claims/missing/settle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chapterSettlementCompleted: true, confirmer: "blocked", reason: "blocked" })
+    });
+    expect(memorySettleDenied.status).toBe(409);
+    expect(memorySettleDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+    const relationDenied = await jsonFetch<{ error: { code: string; sliceId: string } }>(`/api/novel/projects/${slug}/runtime/memory/claim-relations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fromClaimId: "blocked-a", toClaimId: "blocked-b", relation: "supports", sourceRefs: ["source://blocked"] })
+    });
+    expect(relationDenied.status).toBe(409);
+    expect(relationDenied.data.error).toMatchObject({ code: "CAPABILITY_DEPENDENCY_BLOCKED", sliceId: "runtime" });
+  });
+
+  it("persists kernel proofs and refuses unknown-version write policy", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Kernel Proof Store", roughIdea: "Kernel contracts survive restart." })
+    });
+    const slug = created.data.project.slug;
+    const payload = { kernelId: "K0-contract", version: "v1", schemaRefs: ["story-seed.v1"], runtimeValidators: ["storySeed.spec.ts"], generatedTypes: ["StorySeedFrame"], capabilityManifestRef: "manifest-1", readWriteMatrixRef: "matrix-1", negotiatedVersions: ["v1"], unknownVersionPolicy: "read-only" };
+    const saved = await jsonFetch<{ proof: { projectSlug: string; kernelId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/kernels/proof`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    expect(saved.status).toBe(201);
+    const read = await jsonFetch<{ proof: typeof saved.data.proof }>(`/api/novel/projects/${slug}/runtime/kernels/proof/${payload.kernelId}`);
+    expect(read.status).toBe(200);
+    expect(read.data.proof).toEqual(saved.data.proof);
+    const rejected = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/kernels/proof`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, kernelId: "K0-invalid", unknownVersionPolicy: "write-through" })
+    });
+    expect(rejected.status).toBe(500);
+    expect(rejected.data.error).toContain("KERNEL_PROOF_FIELDS_REQUIRED");
   });
 
   it("blocks V5 prose execution until the adopted outline has an execution-ready proof", async () => {
@@ -3377,6 +5624,15 @@ describe("novel API routes", () => {
     });
     expect(ledger.status).toBe(409);
     expect(ledger.data.error.code).toBe("CHAPTER_SETTLEMENT_REQUIRED");
+  });
+
+  it("records an evidence-backed legacy ledger migration receipt through the runtime API", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Legacy Ledger Migration", roughIdea: "Map old markers safely." }) });
+    const slug = created.data.project.slug;
+    const obligation = await jsonFetch<{ obligation: { obligationId: string } }>(`/api/novel/projects/${slug}/obligations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "mystery", title: "Gate", questionOrPromise: "Who sealed it?", sourceRefs: ["legacy://marker-1"] }) });
+    const receipt = await jsonFetch<{ created: boolean; receipt: { legacyId: string; obligationId: string } }>(`/api/novel/projects/${slug}/runtime/obligations/legacy-ledger-migrations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ legacyId: "marker-1", obligationId: obligation.data.obligation.obligationId, evidenceRefs: ["chapter://chapter-001#1"], confirmer: "author", reason: "mapped to governed obligation" }) });
+    expect(receipt.status).toBe(201);
+    expect(receipt.data).toMatchObject({ created: true, receipt: { legacyId: "marker-1", obligationId: obligation.data.obligation.obligationId } });
   });
 
   it("previews legacy project migration without activating or mutating canon", async () => {
@@ -3514,6 +5770,13 @@ describe("novel API routes", () => {
     expect(rollback.status).toBe(201);
     expect(rollback.data.rollback).toMatchObject({ status: "rolled_back", activationFingerprint: expect.any(String) });
     expect(JSON.parse(await fs.readFile(projectPath, "utf8"))).not.toHaveProperty("migration");
+    const rollbackLegacyWrite = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/story-control`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ premise: "Rollback restored the compatibility read/write window." })
+    });
+    expect(rollbackLegacyWrite.status).toBe(409);
+    expect(rollbackLegacyWrite.data.error.code).toBe("CONTRACT_ADOPTION_REQUIRED");
   });
 
   it("accepts externally attested holdout calibration evidence without caller labels", async () => {
@@ -3544,6 +5807,17 @@ describe("novel API routes", () => {
     const history = await jsonFetch<{ evidence: Array<{ fingerprint: string }> }>(`/api/novel/projects/${slug}/session/understanding/quality-calibration/history`);
     expect(history.status).toBe(200);
     expect(history.data.evidence.map((item) => item.fingerprint)).toContain(submitted.data.evidence.fingerprint);
+    const invalidHistoryBase = {
+      schemaVersion: "quality-calibration-evidence.v1", calibrationId: "invalid-history-api", evaluatorVersion: "provider-v4", sourceKind: "rogue",
+      split: "holdout", caseIds: [], inputFingerprint: "sealed", evaluatedCount: 1, correctCount: 1, accuracy: 1, minimumAccuracy: 0.8,
+      status: "calibrated", canonGateEligible: false, labelAccess: "sealed-separate-from-evaluator-input",
+      attestation: { kind: "provider-signed", reference: "attestation://invalid-history" }, evidenceRefs: ["audit://invalid-history"], createdAt: new Date().toISOString()
+    };
+    const invalidHistory = { ...invalidHistoryBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(invalidHistoryBase)).digest("hex") };
+    await fs.writeFile(path.join(tempRoot, slug, "sessions", "quality-calibration", "invalid-history-api.json"), JSON.stringify(invalidHistory));
+    const invalidHistoryResponse = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/session/understanding/quality-calibration/history`);
+    expect(invalidHistoryResponse.status).toBe(409);
+    expect(invalidHistoryResponse.data.error.code).toBe("CALIBRATION_EVIDENCE_SEMANTIC_INVALID");
   });
 
   it("completes a governed candidate-to-settlement-to-derived-publication journey", async () => {
@@ -3601,9 +5875,32 @@ describe("novel API routes", () => {
     });
     expect(hypothesis.status).toBe(201);
     expect(hypothesis.data.hypothesis).toMatchObject({ lifecycle: "candidate", supportEventIds: [feedback.data.event.eventId] });
-    const settled = await jsonFetch<{ settlement: { settlementId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/chapters/${chapter.id}/settle`, {
+    const withoutGate = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/chapters/${chapter.id}/settle`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ adoptionTransactionId: adopted.data.transaction.transactionId })
+    });
+    expect(withoutGate.status).toBe(409);
+    expect(withoutGate.data.error).toBe("CHAPTER_SETTLEMENT_QUALITY_GATE_REQUIRED");
+    const gate = await jsonFetch<{ decision: { decisionId: string; status: string } }>(`/api/novel/projects/${slug}/quality/${chapter.id}/gate`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sourceFingerprint: "source-e2e-fp",
+        report: {
+          chapterId: chapter.id, overallScore: 95, summary: "independent review", metrics: [], strengths: ["voice"], fixes: [], updatedAt: new Date().toISOString(),
+          evidence: { contentSha256: crypto.createHash("sha256").update("Governed E2E adopted prose.", "utf8").digest("hex"), sourceFingerprint: "source-e2e-fp", evaluatorVersion: "quality-review.v1", mode: "hybrid", generatedAt: new Date().toISOString() }
+        },
+        hardGuards: { canon: true, pov: true }, authorObjectiveSupported: true, protectedStrengthsPreserved: true,
+        authorizationRef: "author-e2e", evidenceRefs: [`review://${candidate.candidateId}`]
+      })
+    });
+    expect(gate.status).toBe(201);
+    expect(gate.data.decision.status).toBe("passed");
+    const replayedGate = await jsonFetch<{ decision: { decisionId: string; fingerprint: string; status: string } }>(`/api/novel/projects/${slug}/quality/${chapter.id}/gate/${gate.data.decision.decisionId}`);
+    expect(replayedGate.status).toBe(200);
+    expect(replayedGate.data.decision).toMatchObject({ decisionId: gate.data.decision.decisionId, fingerprint: expect.any(String), status: "passed" });
+    const settled = await jsonFetch<{ settlement: { settlementId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/chapters/${chapter.id}/settle`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adoptionTransactionId: adopted.data.transaction.transactionId, qualityGateDecisionId: gate.data.decision.decisionId, qualityGateSourceFingerprint: "source-e2e-fp" })
     });
     expect(settled.status).toBe(201);
     expect(settled.data.settlement.status).toBe("settled");
@@ -3621,6 +5918,15 @@ describe("novel API routes", () => {
     });
     expect(e2eProof.status).toBe(201);
     expect(e2eProof.data.proof).toMatchObject({ status: "verified", settlementId: settled.data.settlement.settlementId, derivedTransactionId: derived.data.transaction.transactionId });
+    const settlementPath = path.join(root, "sessions", "chapter-settlements", `${settled.data.settlement.settlementId}.json`);
+    const replacedSettlement = JSON.parse(await fs.readFile(settlementPath, "utf8")) as Record<string, unknown>;
+    replacedSettlement.adoptedContentSha256 = "f".repeat(64);
+    const { fingerprint: _oldFingerprint, ...settlementWithoutFingerprint } = replacedSettlement as { fingerprint?: string; [key: string]: unknown };
+    replacedSettlement.fingerprint = crypto.createHash("sha256").update(JSON.stringify(settlementWithoutFingerprint)).digest("hex");
+    await fs.writeFile(settlementPath, JSON.stringify(replacedSettlement));
+    const staleProof = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/release-e2e-acceptance`);
+    expect(staleProof.status).toBe(409);
+    expect(staleProof.data.error.code).toBe("RELEASE_E2E_PROOF_STALE");
   });
 
   it("creates an evidence-bounded local repair plan for blocked red-blue review", async () => {
@@ -3652,18 +5958,22 @@ describe("novel API routes", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Edition Route Demo", roughIdea: "Freeze a reader-safe edition." })
     });
     const project = created.data.project;
-    const chapter = project.chapters[0];
-    const content = await fs.readFile(path.join(tempRoot, project.slug, chapter.contentPath), "utf8");
-    const contentSha256 = crypto.createHash("sha256").update(content, "utf8").digest("hex");
-    const settlementBase = { schemaVersion: "chapter-settlement.v1", settlementId: "settlement-edition-1", projectSlug: project.slug, chapterId: chapter.id, adoptionTransactionId: "adopt-edition-1", adoptedContentSha256: contentSha256, status: "settled", nextAction: "schedule_dependency_ready_work", createdAt: "2026-07-30T00:00:00.000Z" };
-    const settlement = { ...settlementBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(settlementBase)).digest("hex") };
+    const chapters = project.chapters.slice(0, 2);
+    const chapter = chapters[0];
+    const secondChapter = chapters[1];
+    await fs.writeFile(path.join(tempRoot, project.slug, secondChapter.contentPath), "The second chapter carries the consequence.\n", "utf8");
+    const settlementInputs = await Promise.all(chapters.map(async (entry, index) => {
+      const content = await fs.readFile(path.join(tempRoot, project.slug, entry.contentPath), "utf8");
+      const settlementBase = { schemaVersion: "chapter-settlement.v1" as const, settlementId: `settlement-edition-${index + 1}`, projectSlug: project.slug, chapterId: entry.id, adoptionTransactionId: `adopt-edition-${index + 1}`, adoptedContentSha256: crypto.createHash("sha256").update(content, "utf8").digest("hex"), status: "settled" as const, nextAction: "schedule_dependency_ready_work" as const, createdAt: "2026-07-30T00:00:00.000Z" };
+      return { ...settlementBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(settlementBase)).digest("hex") };
+    }));
     await fs.mkdir(path.join(tempRoot, project.slug, "sessions", "chapter-settlements"), { recursive: true });
-    await fs.writeFile(path.join(tempRoot, project.slug, "sessions", "chapter-settlements", `${settlement.settlementId}.json`), JSON.stringify(settlement));
-    const coverageBase = { schemaVersion: "obligation-coverage-certificate.v1", status: "issued", sourceFingerprint: "canon-edition-1", chapterIds: [chapter.id], plannedIds: [], obligationCount: 0, terminalObligationIds: [], generatedAt: "2026-07-30T00:00:00.000Z" };
+    await Promise.all(settlementInputs.map((settlement) => fs.writeFile(path.join(tempRoot, project.slug, "sessions", "chapter-settlements", `${settlement.settlementId}.json`), JSON.stringify(settlement))));
+    const coverageBase = { schemaVersion: "obligation-coverage-certificate.v1", status: "issued", sourceFingerprint: "canon-edition-1", chapterIds: chapters.map((entry) => entry.id), plannedIds: [], obligationCount: 0, terminalObligationIds: [], generatedAt: "2026-07-30T00:00:00.000Z" };
     await fs.mkdir(path.join(tempRoot, project.slug, "sessions", "obligations"), { recursive: true });
     await fs.writeFile(path.join(tempRoot, project.slug, "sessions", "obligations", "coverage-certificate.json"), JSON.stringify({ ...coverageBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(coverageBase)).digest("hex") }));
     const frozen = await jsonFetch<{ manifest: { status: string; editionId: string; readerSafe: boolean } }>(`/api/novel/projects/${project.slug}/publication-editions`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ canonCommitFingerprint: "canon-edition-1", author: "Author", language: "zh-CN", chapters: [{ chapterId: chapter.id, title: chapter.title, order: 1, contentPath: chapter.contentPath, settlementId: settlement.settlementId }] })
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ canonCommitFingerprint: "canon-edition-1", author: "Author", language: "zh-CN", chapters: chapters.map((entry, index) => ({ chapterId: entry.id, title: entry.title, order: index + 1, contentPath: entry.contentPath, settlementId: settlementInputs[index].settlementId })) })
     });
     expect(frozen.status).toBe(201);
     expect(frozen.data.manifest).toMatchObject({ status: "frozen", readerSafe: true });
@@ -3683,15 +5993,18 @@ describe("novel API routes", () => {
     const artifactsReadBack = await jsonFetch<{ artifacts: { fingerprint: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/artifacts`);
     expect(artifactsReadBack.status).toBe(200);
     expect(artifactsReadBack.data.artifacts.fingerprint).toBe(artifacts.data.artifacts.fingerprint);
+    const proofBeforeClosure = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/delivery-proof`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approvalId: "author-edition-release", approverKind: "author", expectedArtifactSetFingerprint: artifacts.data.artifacts.fingerprint }) });
+    expect(proofBeforeClosure.status).toBe(409);
+    expect(proofBeforeClosure.data.error.code).toBe("DELIVERY_CLOSURE_CERTIFICATE_REQUIRED");
+    const closure = await jsonFetch<{ certificate: { status: string; fingerprint: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/closure-certificate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(closure.status).toBe(201);
+    expect(closure.data.certificate).toMatchObject({ status: "audited_complete" });
     const proof = await jsonFetch<{ proof: { status: string; approvalId: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/delivery-proof`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approvalId: "author-edition-release", approverKind: "author", expectedArtifactSetFingerprint: artifacts.data.artifacts.fingerprint }) });
     expect(proof.status).toBe(201);
     expect(proof.data.proof).toMatchObject({ status: "issued", approvalId: "author-edition-release" });
     const proofReadBack = await jsonFetch<{ verification: { valid: boolean } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/delivery-proof`);
     expect(proofReadBack.status).toBe(200);
     expect(proofReadBack.data.verification.valid).toBe(true);
-    const closure = await jsonFetch<{ certificate: { status: string; fingerprint: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/closure-certificate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-    expect(closure.status).toBe(201);
-    expect(closure.data.certificate).toMatchObject({ status: "audited_complete" });
     const preflight = await jsonFetch<{ report: { status: string; findings: unknown[] } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/preflight`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
     expect(preflight.status).toBe(200);
     expect(preflight.data.report).toMatchObject({ status: "ready", findings: [] });
@@ -3930,7 +6243,7 @@ describe("novel API routes", () => {
       }
     );
     const finished = await waitForTask("async-task-demo", started.data.task.id);
-    const history = await jsonFetch<{ tasks: Array<{ id: string; status: string }> }>(
+    const history = await jsonFetch<{ tasks: Array<{ id: string; status: string; contextPlan?: { schemaVersion: string; status: string; fingerprint: string }; contextManifestRef?: string }> }>(
       "/api/novel/projects/async-task-demo/tasks"
     );
 
@@ -3938,8 +6251,20 @@ describe("novel API routes", () => {
     expect(started.data.task).toMatchObject({ status: "running", timeoutMs: 600000 });
     expect(finished.task).toMatchObject({ status: "success", outputSummary: "mock task complete" });
     expect(history.data.tasks.filter((task) => task.id === started.data.task.id)).toEqual([
-      expect.objectContaining({ status: "success" })
+      expect.objectContaining({ status: "success", contextPlan: expect.objectContaining({ schemaVersion: "context-plan.v1", fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) }), contextManifestRef: expect.stringContaining("tasks/context-manifests/") })
     ]);
+    const manifestRef = history.data.tasks.find((task) => task.id === started.data.task.id)?.contextManifestRef || "";
+    const manifestId = path.basename(manifestRef, ".json");
+    const manifest = await jsonFetch<{ manifest: { schemaVersion: string; taskId: string; sourceFingerprint: string } }>(
+      `/api/novel/projects/async-task-demo/tasks/context-manifests/${manifestId}`
+    );
+    expect(manifest.status).toBe(200);
+    expect(manifest.data.manifest).toMatchObject({ schemaVersion: "task-context-manifest.v1", taskId: started.data.task.id, sourceFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    const freshness = await jsonFetch<{ freshness: { status: string; reasons: string[] } }>(
+      `/api/novel/projects/async-task-demo/tasks/context-manifests/${manifestId}/freshness`
+    );
+    expect(freshness).toMatchObject({ status: 200 });
+    expect(freshness.data.freshness.status).toBe("current");
   });
 
   it("lists stale running AI tasks as unrecoverable errors", async () => {
@@ -4167,6 +6492,141 @@ describe("novel API routes", () => {
     expect(paused.data.budget.status).toBe("paused");
   });
 
+  it("exposes a non-mutating book-run preflight with explicit blockers", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Book Run Preflight", roughIdea: "Predict before running." }) });
+    const blocked = await jsonFetch<{ preflight: { status: string; blockedReasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/preflight`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ runId: "preflight-blocked", objective: "draft", estimatedWorkItems: 1, estimatedWallClockMs: 1000, estimatedCostCents: 2, authorizationScope: "chapter-1", worstCaseRecoveryBoundary: "chapter-boundary", storyContractConfirmed: false, migrationComplete: true, budgetAvailable: true, workerOnline: true, conflictingRun: false }) });
+    expect(blocked.status).toBe(409);
+    expect(blocked.data.preflight).toMatchObject({ status: "blocked", blockedReasons: ["STORY_CONTRACT_UNCONFIRMED"] });
+    const ready = await jsonFetch<{ preflight: { runId: string; status: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/preflight`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ runId: "preflight-ready", objective: "draft", estimatedWorkItems: 1, estimatedWallClockMs: 1000, estimatedCostCents: 2, authorizationScope: "chapter-1", worstCaseRecoveryBoundary: "chapter-boundary", storyContractConfirmed: true, migrationComplete: true, budgetAvailable: true, workerOnline: true, conflictingRun: false }) });
+    expect(ready.status).toBe(200);
+    expect(ready.data.preflight.status).toBe("ready");
+    const replayed = await jsonFetch<{ preflight: { runId: string; fingerprint: string; status: string } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/preflight/preflight-ready`);
+    expect(replayed.status).toBe(200);
+    expect(replayed.data.preflight).toMatchObject({ runId: "preflight-ready", fingerprint: expect.any(String), status: "ready" });
+  });
+
+  it("exposes execution ceilings in book-run preflight and blocks over-budget estimates", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Book Run Limits", roughIdea: "Every run has bounded execution." }) });
+    const response = await jsonFetch<{ preflight: { status: string; limits: { maxWorkItems: number }; blockedReasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/book-runs/preflight`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ objective: "draft", estimatedChapters: 3, estimatedWorkItems: 4, estimatedWallClockMs: 1000, estimatedCostCents: 20, authorizationScope: "chapter-1-3", worstCaseRecoveryBoundary: "chapter-boundary", limits: { maxChapters: 3, maxWorkItems: 3, maxModelCalls: 6, maxCostCents: 20, maxWallClockMs: 1000, maxConsecutiveFailures: 2, latestStopAt: "2099-01-01T00:00:00.000Z" }, storyContractConfirmed: true, migrationComplete: true, budgetAvailable: true, workerOnline: true, conflictingRun: false }) });
+    expect(response.status).toBe(409);
+    expect(response.data.preflight).toMatchObject({ status: "blocked", limits: { maxWorkItems: 3 }, blockedReasons: ["WORK_ITEM_ESTIMATE_EXCEEDS_LIMIT"] });
+  });
+
+  it("routes shadow and authorized canary validation without canon writes", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Shadow Canary API", roughIdea: "Candidate rollout." }) });
+    const shadow = await jsonFetch<{ validation: { mode: string; canonWrites: boolean; status: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/shadow-canary`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ validationId: "shadow-api-1", candidateVersion: "prompt-v2", mode: "shadow", status: "passed", rollbackTarget: "prompt-v1", evidenceRefs: ["run://shadow-1"] }) });
+    expect(shadow.status).toBe(201);
+    expect(shadow.data.validation).toMatchObject({ mode: "shadow", canonWrites: false, status: "passed" });
+    const unauthorized = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/shadow-canary`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ validationId: "canary-api-1", candidateVersion: "prompt-v2", mode: "canary", status: "passed", rollbackTarget: "prompt-v1", evidenceRefs: ["run://canary-1"], authorAuthorized: false }) });
+    expect(unauthorized.status).toBe(409);
+    expect(unauthorized.data.error.code).toBe("SHADOW_CANARY_AUTHORIZATION_INVALID");
+  });
+
+  it("routes evaluation disagreements without manufacturing a winner", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Evaluation Disagreement API", roughIdea: "Ties need explicit escalation." }) });
+    const slug = created.data.project.slug;
+    const tie = await jsonFetch<{ decision: { status: string; action: string }; disagreementId: string }>(`/api/novel/projects/${slug}/runtime/evaluation/disagreements`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ verdicts: [{ verdict: "accept", confidence: 0.8 }, { verdict: "tie", confidence: 0.6 }], impact: "ordinary", hardGatesPassed: true, authorGoalMatched: true, protectedItemRegression: false, autonomyAuthorized: true }) });
+    expect(tie.status).toBe(201);
+    expect(tie.data.decision).toMatchObject({ status: "uncertain", action: "continue" });
+    const replayed = await jsonFetch<{ decision: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/disagreements/${tie.data.disagreementId}`);
+    expect(replayed.status).toBe(200);
+    expect(replayed.data.decision.fingerprint).toBe(tie.data.decision.fingerprint);
+    const invalid = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/disagreements`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ verdicts: [{ verdict: "winner", confidence: 1 }], impact: "ordinary" }) });
+    expect(invalid.status).toBe(409);
+    expect(invalid.data.error.code).toBe("EVALUATION_DISAGREEMENT_INPUT_INVALID");
+  });
+
+  it("exposes seeded repeat sampling and wider-scale regression through runtime evaluation", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Evaluation Sampling API", roughIdea: "Repeat results must remain visible." }) });
+    const slug = created.data.project.slug;
+    const plan = await jsonFetch<{ plan: { fingerprint: string; seeds: number[] } }>(`/api/novel/projects/${slug}/runtime/evaluation/sampling`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seeds: [21, 22, 23], temperature: 0.7, topP: 0.9, minSamples: 2, maxSamples: 3, stopRule: "fixed-count" }) });
+    expect(plan.status).toBe(201);
+    const summary = await jsonFetch<{ summary: { samples: number; fingerprint: string; winRate: number }; summaryId: string }>(`/api/novel/projects/${slug}/runtime/evaluation/sampling/summary`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: { seeds: plan.data.plan.seeds, temperature: 0.7, topP: 0.9, minSamples: 2, maxSamples: 3, stopRule: "fixed-count" }, outcomes: [{ valid: true, win: true, failed: false }, { valid: true, win: false, failed: false }, { valid: false, win: false, failed: true }] }) });
+    expect(summary.status).toBe(201);
+    expect(summary.data.summary).toMatchObject({ samples: 3, winRate: 1 / 3 });
+    const summaryReplay = await jsonFetch<{ summary: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/sampling/summaries/${summary.data.summaryId}`);
+    expect(summaryReplay.status).toBe(200);
+    expect(summaryReplay.data.summary.fingerprint).toBe(summary.data.summary.fingerprint);
+    const regression = await jsonFetch<{ result: { status: string; regressions: string[]; fingerprint: string }; regressionId: string }>(`/api/novel/projects/${slug}/runtime/evaluation/multi-scale-regression`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ baseline: { selection: 0.7, book: 0.8 }, candidate: { selection: 0.9, book: 0.7 }, hardFailures: [] }) });
+    expect(regression.status).toBe(201);
+    expect(regression.data.result).toMatchObject({ status: "regression", regressions: ["score:book"] });
+    const regressionReplay = await jsonFetch<{ result: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/multi-scale-regression/${regression.data.regressionId}`);
+    expect(regressionReplay.status).toBe(200);
+    expect(regressionReplay.data.result.fingerprint).toBe(regression.data.result.fingerprint);
+  });
+
+  it("turns a production defect into an immutable replayable evaluation case", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Evaluation Case API", roughIdea: "Feedback becomes regression." }) });
+    const body = { caseId: "case-api-1", trigger: "production-regression", defectCategory: "style-drift", candidateRef: "candidate://api-1", inputFingerprint: "input-api-1", expectedGuardRefs: ["guard://style"], fixVersion: "strategy-api-2" };
+    const saved = await jsonFetch<{ evaluationCase: { caseId: string; replayable: boolean; containsPrivateText: boolean }; created: boolean }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/cases`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    expect(saved.status).toBe(201);
+    expect(saved.data).toMatchObject({ created: true, evaluationCase: { caseId: "case-api-1", replayable: true, containsPrivateText: false } });
+    const readBack = await jsonFetch<{ evaluationCase: { caseId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/cases/case-api-1`);
+    expect(readBack.status).toBe(200);
+    expect(readBack.data.evaluationCase.caseId).toBe("case-api-1");
+  });
+
+  it("reports style drift while honoring only explicitly intentional motifs", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Style Drift API", roughIdea: "Long-range voice stability." }) });
+    const base = { abstractWordRate: 0.1, processWordRate: 0.1, sentenceStartDistribution: { name: 0.5 }, dialogueTurnRate: 0.4, hookTypeDistribution: { question: 1 }, sensoryChannelDistribution: { visual: 1 }, characterVoiceDistance: 0.6, sceneFunctionDistribution: { conflict: 1 } };
+    const drift = await jsonFetch<{ drift: { status: string; anomalies: string[]; intentionalMotifsExcluded: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/style-drift`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ baseline: base, candidate: { ...base, processWordRate: 0.5, characterVoiceDistance: 0.2 }, threshold: 0.2, intentionalMotifs: ["process-word-rate"] }) });
+    expect(drift.status).toBe(200);
+    expect(drift.data.drift).toMatchObject({ status: "anomaly", intentionalMotifsExcluded: ["process-word-rate"], anomalies: ["character-voice-distance"] });
+  });
+
+  it("persists release decisions and prevents a second conclusion for the same release id", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Release Decision API", roughIdea: "Release evidence is immutable." }) });
+    const body = { releaseId: "release-api-1", hardGatesPassed: true, keySliceRegressions: [], blindPairWinRate: 0.8, minimumWinRate: 0.6, evidenceComplete: true, rollbackRef: "release-api-0", shadowValidated: true, canaryValidated: true, qualityNonInferior: true, actualCostCents: 8, maxCostCents: 10, actualLatencyMs: 800, maxLatencyMs: 1000, criticalSlicesStable: true, paretoEligible: true };
+    const saved = await jsonFetch<{ decision: { releaseId: string; status: string }; created: boolean }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/release-decisions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    expect(saved.status).toBe(201);
+    const readBack = await jsonFetch<{ decision: { releaseId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/release-decisions/release-api-1`);
+    expect(readBack.status).toBe(200);
+    expect(readBack.data.decision.releaseId).toBe("release-api-1");
+    const conflict = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/release-decisions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, hardGatesPassed: false }) });
+    expect(conflict.status).toBe(409);
+    expect(conflict.data.error.code).toBe("RELEASE_DECISION_IMMUTABLE");
+  });
+
+  it("enforces slice regression budgets independently of the overall score", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Slice Budget API", roughIdea: "Key slices cannot regress." }) });
+    const budget = { sliceId: "romance-aftermath-pov1", dimensions: { genre: "romance", chapterFunction: "aftermath", pov: "hero", lengthBand: "medium", risk: "high", knownDefects: ["flat-emotion"] }, minimumSamples: 3, allowedRegression: 0.02, zeroTolerance: true };
+    const saved = await jsonFetch<{ budget: { sliceId: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/slice-budgets`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(budget) });
+    expect(saved.status).toBe(201);
+    const result = await jsonFetch<{ resultId: string; result: { status: string; reasons: string[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/slice-results`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ budget, samples: 3, baselineScore: 0.7, candidateScore: 0.9, hardFailures: ["emotion-flat"] }) });
+    expect(result.status).toBe(201);
+    expect(result.data.result).toMatchObject({ status: "regression", reasons: ["HARD_FAILURE"] });
+    const replay = await jsonFetch<{ result: { status: string; fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/slice-results/${result.data.resultId}`);
+    expect(replay.status).toBe(200);
+    expect(replay.data.result).toMatchObject({ status: "regression", fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+  });
+
+  it("keeps evaluation judgments anchored to current prose and governing versions", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Evidence Anchor API", roughIdea: "Judgments need spans." }) });
+    const body = { evaluationId: "eval-anchor-api-1", content: "The door opened. Rain entered.", anchors: [{ start: 0, end: 15 }], contractFingerprint: "contract-api-1", chapterIntentFingerprint: "intent-api-1", reason: "The hook is on the page." };
+    const saved = await jsonFetch<{ evaluation: { status: string; anchors: unknown[] } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/evidence-anchors`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    expect(saved.status).toBe(201);
+    const replayed = await jsonFetch<{ evaluation: { evaluationId: string; fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/evidence-anchors/${body.evaluationId}`);
+    expect(replayed.status).toBe(200);
+    expect(replayed.data.evaluation).toMatchObject({ evaluationId: body.evaluationId, fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    const current = await jsonFetch<{ current: boolean }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/evidence-anchors/current`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evaluation: saved.data.evaluation, content: body.content, contractFingerprint: body.contractFingerprint, chapterIntentFingerprint: body.chapterIntentFingerprint }) });
+    expect(current.data.current).toBe(true);
+    const stale = await jsonFetch<{ current: boolean; error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/evaluation/evidence-anchors/current`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evaluation: saved.data.evaluation, content: "The window opened. Rain entered.", contractFingerprint: body.contractFingerprint, chapterIntentFingerprint: body.chapterIntentFingerprint }) });
+    expect(stale.status).toBe(409);
+    expect(stale.data.error.code).toBe("EVALUATION_EVIDENCE_STALE");
+  });
+
+  it("serves chapter-function adaptive evaluation scales with not-applicable dimensions excluded", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Adaptive Scale API", roughIdea: "Function-specific scoring." }) });
+    const slug = created.data.project.slug;
+    const saved = await jsonFetch<{ scale: { chapterFunction: string; average: number; dimensions: Array<{ dimension: string; status: string; score: number | null }> } }>(`/api/novel/projects/${slug}/runtime/evaluation/adaptive-scale`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterFunction: "aftermath", scores: { emotion: 0.8, relationship: 0.6, conflict: 1 } }) });
+    expect(saved.status).toBe(201);
+    expect(saved.data.scale.average).toBeCloseTo(0.7);
+    expect(saved.data.scale.dimensions).toEqual(expect.arrayContaining([{ dimension: "conflict", status: "not_applicable", score: null }]));
+    const rejected = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/adaptive-scale`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterFunction: "puzzle", scores: { "fair-clues": 2 } }) });
+    expect(rejected.status).toBe(400);
+    expect(rejected.data.error.code).toBe("EVALUATION_SCORE_INVALID");
+  });
+
   it("keeps unknown source rights analysis-only through API routes", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Source Rights API", roughIdea: "Rights must be explicit." }) });
     const slug = created.data.project.slug;
@@ -4175,6 +6635,189 @@ describe("novel API routes", () => {
     const envelope = await jsonFetch<{ envelope: { status: string; analysisOnly: boolean; allowedUses: string[] } }>(`/api/novel/projects/${slug}/runtime/source-material/${source.data.source.sourceId}/rights-envelope`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ checkedBy: "system" }) });
     expect(envelope.status).toBe(201);
     expect(envelope.data.envelope).toMatchObject({ status: "restricted", analysisOnly: true, allowedUses: ["analysis"] });
+  });
+
+  it("persists and replays evaluation run archives through the project API", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Evaluation Archive API", roughIdea: "Replay evidence." }) });
+    const slug = created.data.project.slug;
+    const body = { runId: "api-run-1", suiteFingerprint: "suite-sha", caseRefs: ["case://1"], candidateRefs: ["candidate://1"], inputFingerprint: "input-sha", modelVersion: "model-v1", promptVersion: "prompt-v1", contextFingerprint: "context-sha", evaluatorVersion: "eval-v1", seeds: [7], usage: { inputTokens: 10, outputTokens: 5, costCents: 2, latencyMs: 100 }, rawJudgments: [{ evaluatorId: "judge", verdict: "accept", confidence: 0.9, evidenceRefs: ["anchor://1"] }], aggregationRule: "hard-gate", releaseConclusion: "experimental", reproducibility: "replayable" };
+    const saved = await jsonFetch<{ archive: { runId: string; rawJudgments: unknown[] } }>(`/api/novel/projects/${slug}/runtime/evaluation/runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    expect(saved.status).toBe(201);
+    const replay = await jsonFetch<{ archive: { runId: string; rawJudgments: unknown[] } }>(`/api/novel/projects/${slug}/runtime/evaluation/runs/api-run-1`);
+    expect(replay.status).toBe(200);
+    expect(replay.data.archive).toMatchObject({ runId: "api-run-1", rawJudgments: [{ evaluatorId: "judge" }] });
+  });
+
+  it("persists and replays evaluation contamination checks by holdout", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Contamination API", roughIdea: "Holdout checks are durable." }) });
+    const slug = created.data.project.slug;
+    const body = { holdoutId: "holdout-api-1", visibleData: ["visible-token"], output: "safe output" };
+    const saved = await jsonFetch<{ contamination: { status: string; fingerprint: string }; created: boolean }>(`/api/novel/projects/${slug}/runtime/evaluation/contamination`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    expect(saved.status).toBe(201);
+    expect(saved.data.contamination).toMatchObject({ status: "valid", fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    const replay = await jsonFetch<{ contamination: { holdoutId: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/contamination/${body.holdoutId}`);
+    expect(replay.status).toBe(200);
+    expect(replay.data.contamination).toMatchObject({ holdoutId: body.holdoutId, fingerprint: saved.data.contamination.fingerprint });
+    const changed = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/contamination`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, visibleData: ["secret"], output: "secret" }) });
+    expect(changed.status).toBe(409);
+    expect(changed.data.error.code).toBe("EVALUATION_CONTAMINATION_IMMUTABLE");
+  });
+
+  it("persists and replays evaluator drift conclusions by explicit versioned id", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Evaluator Drift API", roughIdea: "Drift conclusions remain auditable." }) });
+    const slug = created.data.project.slug;
+    const body = { driftId: "drift-api-1", previousAgreement: 0.8, currentAgreement: 0.82, previousBias: 0.02, currentBias: 0.03, previousVersion: "judge-v1", currentVersion: "judge-v1", historicalScores: [{ caseId: "case-1", evaluatorVersion: "judge-v1", score: 0.8 }], recomputedScores: [{ caseId: "case-1", evaluatorVersion: "judge-v1", score: 0.81 }] };
+    const saved = await jsonFetch<{ drift: { status: string; fingerprint: string }; created: boolean }>(`/api/novel/projects/${slug}/runtime/evaluation/drift`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    expect(saved.status).toBe(201);
+    expect(saved.data.drift).toMatchObject({ status: "stable", fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    const replay = await jsonFetch<{ drift: { fingerprint: string }; driftId: string }>(`/api/novel/projects/${slug}/runtime/evaluation/drift/${body.driftId}`);
+    expect(replay.status).toBe(200);
+    expect(replay.data).toMatchObject({ driftId: body.driftId, drift: { fingerprint: saved.data.drift.fingerprint } });
+    const changed = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/drift`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, currentAgreement: 0.4, currentVersion: "judge-v2" }) });
+    expect(changed.status).toBe(409);
+    expect(changed.data.error.code).toBe("EVALUATION_DRIFT_IMMUTABLE");
+  });
+
+  it("requires active project authorization before a private sample enters platform regression", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Evaluation Rights API", roughIdea: "Private samples stay scoped." }) });
+    const slug = created.data.project.slug;
+    const grant = await jsonFetch<{ grant: { grantId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/access-grants`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ use: "platform-regression", sourceRefs: ["source://chapter-1"], minimized: true, anonymized: true }) });
+    expect(grant.status).toBe(201);
+    const run = { runId: "rights-run-1", suiteFingerprint: "suite-sha", caseRefs: ["case://1"], candidateRefs: ["candidate://1"], inputFingerprint: "input-sha", modelVersion: "model-v1", promptVersion: "prompt-v1", contextFingerprint: "context-sha", evaluatorVersion: "eval-v1", seeds: [1], usage: { inputTokens: 1, outputTokens: 1, costCents: 1, latencyMs: 1 }, rawJudgments: [{ evaluatorId: "judge", verdict: "accept", confidence: 1, evidenceRefs: ["anchor://1"] }], aggregationRule: "hard-gate", releaseConclusion: "experimental", reproducibility: "replayable", evaluationScope: "platform-regression", accessGrantId: grant.data.grant.grantId };
+    expect((await jsonFetch(`/api/novel/projects/${slug}/runtime/evaluation/runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(run) })).status).toBe(201);
+    const revoked = await jsonFetch<{ grant: { status: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/access-grants/${grant.data.grant.grantId}/revoke`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: "Author withdrew authorization." }) });
+    expect(revoked.data.grant.status).toBe("revoked");
+    const blocked = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/evaluation/runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...run, runId: "rights-run-2" }) });
+    expect(blocked.status).toBe(409);
+    expect(blocked.data.error.code).toBe("EVALUATION_ACCESS_REVOKED");
+  });
+
+  it("persists runtime work leases and fences stale workers", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Work Lease API", roughIdea: "Workers are fenced." }) });
+    const slug = created.data.project.slug;
+    const acquired = await jsonFetch<{ lease: { fencingToken: number } }>(`/api/novel/projects/${slug}/runtime/work-leases/acquire`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workItemId: "work-1", writeSet: "chapter:c1", ownerId: "worker-a", nowMs: 1000, ttlMs: 10 }) });
+    expect(acquired.status).toBe(201);
+    const replaced = await jsonFetch<{ lease: { fencingToken: number } }>(`/api/novel/projects/${slug}/runtime/work-leases/acquire`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workItemId: "work-1", writeSet: "chapter:c1", ownerId: "worker-b", nowMs: 1011, ttlMs: 20 }) });
+    expect(replaced.data.lease.fencingToken).toBe(2);
+    const stale = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/work-leases/work-1/renew`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ownerId: "worker-a", fencingToken: 1, nowMs: 1012, ttlMs: 20 }) });
+    expect(stale.status).toBe(409);
+    expect(stale.data.error.code).toBe("FENCING_TOKEN_LOST");
+  });
+
+  it("pauses a run when stagnation thresholds are crossed and exposes break options", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Stagnation API", roughIdea: "Repeated repairs must pause." }) });
+    const result = await jsonFetch<{ incident: { status: string; thresholds: string[]; breakOptions: string[] }; record: { incidentId: string; projectSlug: string; fingerprint: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/stagnation-detection`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ incidentId: "stagnation-api-1", workFingerprints: ["same", "same", "same"], rewriteCount: 4, questionFingerprints: ["q", "q", "q"], qualityScores: [0.8, 0.6, 0.8, 0.6], newAssetCount: 0, completionSignals: 2, openObligations: 1 }) });
+    expect(result.status).toBe(409);
+    expect(result.data.incident).toMatchObject({ status: "paused" });
+    expect(result.data.incident.thresholds).toEqual(expect.arrayContaining(["repeated-work-fingerprint", "rewrite-loop"]));
+    expect(result.data.incident.breakOptions).toEqual(expect.arrayContaining(["ask-author", "replan-subgraph"]));
+    expect(result.data.record).toMatchObject({ incidentId: "stagnation-api-1", projectSlug: created.data.project.slug, fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    const recovered = await jsonFetch<{ record: { fingerprint: string; incident: { status: string } } }>(`/api/novel/projects/${created.data.project.slug}/runtime/stagnation-incidents/stagnation-api-1`);
+    expect(recovered.status).toBe(200);
+    expect(recovered.data.record).toMatchObject({ fingerprint: result.data.record.fingerprint, incident: { status: "paused" } });
+
+    const run = await jsonFetch<{ run: { bookRunId: string; version: number } }>(`/api/novel/projects/${created.data.project.slug}/book-runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], limits: { maxWorkItems: 1 } }) });
+    expect(run.status).toBe(201);
+    const paused = await jsonFetch<{ bookRun: { status: string; currentGate: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/stagnation-detection`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ incidentId: "stagnation-api-run", bookRunId: run.data.run.bookRunId, expectedVersion: run.data.run.version, workFingerprints: ["loop", "loop", "loop"], rewriteCount: 3, newAssetCount: 0 }) });
+    expect(paused.status).toBe(409);
+    expect(paused.data.bookRun).toMatchObject({ status: "paused", currentGate: "none" });
+  });
+
+  it("keeps high-risk review items out of batch acceptance while allowing item withdrawal", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Review Batch API", roughIdea: "Batch review remains risk scoped." }) });
+    const slug = created.data.project.slug;
+    const blocked = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/review-batches`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ batchId: "batch-high", items: [{ itemId: "high-1", risk: "high", summary: "ending change", evidenceRefs: ["review://1"] }] }) });
+    expect(blocked.status).toBe(409);
+    expect(blocked.data.error.code).toBe("REVIEW_BATCH_HIGH_RISK_ITEM");
+    const saved = await jsonFetch<{ batch: { batchId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/review-batches`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ batchId: "batch-low", items: [{ itemId: "low-1", risk: "low", summary: "tighten wording", evidenceRefs: ["review://1"] }] }) });
+    expect(saved.status).toBe(201);
+    const withdrawn = await jsonFetch<{ batch: { status: string; items: Array<{ status: string }> } }>(`/api/novel/projects/${slug}/runtime/review-batches/batch-low/items/low-1/withdraw`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(withdrawn.data.batch).toMatchObject({ status: "partially_withdrawn", items: [{ status: "withdrawn" }] });
+  });
+
+  it("records and replays a downstream decision-consumption receipt", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Decision Receipt API", roughIdea: "Every downstream asset names its decision version." }) });
+    const slug = created.data.project.slug;
+    const question = await createDialogueQuestion(path.join(tempRoot, slug), { projectSlug: slug, questionId: "question-receipt", questionVersion: 2, text: "What should the outline protect?", whyNow: "It binds the downstream plan.", impact: "high", ambiguity: 0.5, errorCost: "high", reversibility: "low", delayCost: "medium", options: ["the promise"], recommendation: "the promise", snapshotFingerprint: "snapshot-v2" });
+    const answered = await answerDialogueQuestion(path.join(tempRoot, slug), { questionId: question.question.questionId, questionVersion: 2, expectedSnapshotFingerprint: "snapshot-v2", idempotencyKey: "receipt-answer", answerText: "Protect the promise.", answerStatus: "confirmed" });
+    const decisionId = answered.decision?.decisionId;
+    expect(decisionId).toBeTruthy();
+    const saved = await jsonFetch<{ receipt: { decisionId: string; decisionVersion: number }; created: boolean }>(`/api/novel/projects/${slug}/runtime/dialogue/decision-consumption-receipts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ receiptId: "consume-api-1", decisionId, decisionVersion: 2, consumer: "outline", consumerRef: "outline-v2", sourceFingerprint: "snapshot-v2" }) });
+    expect(saved.status).toBe(201);
+    expect(saved.data.receipt).toMatchObject({ decisionId, decisionVersion: 2 });
+    const replay = await jsonFetch<{ receipt: { receiptId: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/decision-consumption-receipts/consume-api-1`);
+    expect(replay.status).toBe(200);
+    expect(replay.data.receipt.receiptId).toBe("consume-api-1");
+  });
+
+  it("rejects a downstream consumption receipt for an unknown decision", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Decision Receipt Boundary", roughIdea: "Only authoritative decisions may be consumed." }) });
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/dialogue/decision-consumption-receipts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ receiptId: "consume-unknown", decisionId: "missing-decision", decisionVersion: 1, consumer: "outline", consumerRef: "outline-v1", sourceFingerprint: "snapshot-v1" })
+    });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("DECISION_NOT_FOUND");
+  });
+
+  it("requires a project-scoped prose decision-consumption receipt before freezing a prose manifest", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Prose Manifest Boundary", roughIdea: "Prose must consume an authoritative decision." }) });
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/runtime/prose-generation-manifests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ manifestId: "manifest-without-receipt", decisionConsumptionReceiptRef: "missing-receipt", storyContractRef: "contract:v1", outlineVersion: "outline:v1", chapterIntentRef: "intent:ch-1", sceneCardRefs: ["scene:1"], characterStateRefs: ["state:hero:v1"], povStateRef: "pov:hero:v1", obligationRefs: ["obl:1"], authorLockRefs: ["lock:1"], craftPatternRefs: [], latestAuthorDirection: "keep the promise visible", proseBaselineRef: "prose:ch-1:v1", planningHorizonRef: "horizon:v1", contextManifestRef: "context:v1", sourceRefs: ["source:1"] })
+    });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("PROSE_MANIFEST_DECISION_RECEIPT_INVALID");
+  });
+
+  it("freezes a prose manifest from an authoritative prose decision-consumption receipt", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Prose Manifest Receipt", roughIdea: "The receipt binds prose to the decision projection." }) });
+    const slug = created.data.project.slug;
+    const receipt = createDecisionConsumptionReceipt({ receiptId: "receipt-prose-1", projectSlug: slug, decisionId: "decision-1", decisionVersion: 1, consumer: "prose", consumerRef: "manifest-1", sourceFingerprint: "snapshot-1" });
+    await persistDecisionConsumptionReceipt(path.join(tempRoot, slug), receipt);
+    await writeReleasedCraftPattern(slug);
+    const response = await jsonFetch<{ manifest: { status: string; decisionConsumptionReceiptRef: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/prose-generation-manifests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ manifestId: "manifest-1", decisionConsumptionReceiptRef: receipt.receiptId, storyContractRef: "contract:v1", outlineVersion: "outline:v1", chapterIntentRef: "intent:ch-1", sceneCardRefs: ["scene:1"], characterStateRefs: ["state:hero:v1"], povStateRef: "pov:hero:v1", obligationRefs: ["obl:1"], authorLockRefs: ["lock:1"], craftPatternRefs: ["craft:1"], latestAuthorDirection: "keep the promise visible", proseBaselineRef: "prose:ch-1:v1", planningHorizonRef: "horizon:v1", contextManifestRef: "context:v1", sourceRefs: ["source:1"] })
+    });
+    expect(response.status).toBe(201);
+    expect(response.data.manifest).toMatchObject({ status: "frozen", decisionConsumptionReceiptRef: receipt.receiptId });
+    const readManifest = await jsonFetch<{ manifest: { manifestId: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/prose-generation-manifests/${response.data.manifest.manifestId}`);
+    expect(readManifest.status).toBe(200);
+    expect(readManifest.data.manifest).toMatchObject({ manifestId: response.data.manifest.manifestId, fingerprint: response.data.manifest.fingerprint });
+    const freshness = await jsonFetch<{ status: string }>(`/api/novel/projects/${slug}/runtime/prose-generation-manifests/manifest-1/freshness`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ manifest: { fingerprint: "attacker-controlled" }, candidateManifestFingerprint: response.data.manifest.fingerprint }) });
+    expect(freshness.status).toBe(200);
+    expect(freshness.data.status).toBe("fresh");
+  });
+
+  it("requires an authoritative obligation decision-consumption receipt when one is supplied", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Obligation Receipt Boundary", roughIdea: "Obligations may bind a shared decision projection." }) });
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${created.data.project.slug}/obligations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "mystery", title: "The missing key", questionOrPromise: "Who took it?", decisionConsumptionReceiptRef: "missing-obligation-receipt" }) });
+    expect(response.status).toBe(400);
+    expect(response.data.error.code).toBe("OBLIGATION_DECISION_RECEIPT_INVALID");
+  });
+
+  it("persists the obligation receipt reference in the obligation projection", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Obligation Receipt", roughIdea: "The obligation records its decision source." }) });
+    const slug = created.data.project.slug;
+    const receipt = createDecisionConsumptionReceipt({ receiptId: "receipt-obligation-1", projectSlug: slug, decisionId: "decision-1", decisionVersion: 1, consumer: "obligation", consumerRef: "obligation-source", sourceFingerprint: "snapshot-1" });
+    await persistDecisionConsumptionReceipt(path.join(tempRoot, slug), receipt);
+    const response = await jsonFetch<{ obligation: { decisionConsumptionReceiptRef?: string } }>(`/api/novel/projects/${slug}/obligations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "mystery", title: "The missing key", questionOrPromise: "Who took it?", decisionConsumptionReceiptRef: receipt.receiptId }) });
+    expect(response.status).toBe(201);
+    expect(response.data.obligation.decisionConsumptionReceiptRef).toBe(receipt.receiptId);
+  });
+
+  it("rejects a prose manifest that borrows another manifest's prose receipt", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Prose Receipt Ref", roughIdea: "A receipt must name its exact consumer." }) });
+    const slug = created.data.project.slug;
+    const receipt = createDecisionConsumptionReceipt({ receiptId: "receipt-prose-other", projectSlug: slug, decisionId: "decision-1", decisionVersion: 1, consumer: "prose", consumerRef: "different-manifest", sourceFingerprint: "snapshot-1" });
+    await persistDecisionConsumptionReceipt(path.join(tempRoot, slug), receipt);
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/prose-generation-manifests`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ manifestId: "manifest-exact", decisionConsumptionReceiptRef: receipt.receiptId, storyContractRef: "contract:v1", outlineVersion: "outline:v1", chapterIntentRef: "intent:ch-1", sceneCardRefs: ["scene:1"], characterStateRefs: ["state:hero:v1"], povStateRef: "pov:hero:v1", obligationRefs: ["obl:1"], authorLockRefs: ["lock:1"], craftPatternRefs: ["craft:1"], latestAuthorDirection: "keep the promise visible", proseBaselineRef: "prose:ch-1:v1", planningHorizonRef: "horizon:v1", contextManifestRef: "context:v1", sourceRefs: ["source:1"] }) });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("PROSE_MANIFEST_DECISION_RECEIPT_INVALID");
   });
 
   it("requires a valid style-experiment rights envelope before craft pattern approval", async () => {
@@ -4188,5 +6831,543 @@ describe("novel API routes", () => {
     const approved = await jsonFetch<{ pattern: { lifecycle: string } }>(`/api/novel/projects/${slug}/runtime/craft-patterns/${pattern.data.pattern.patternId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actor: "author", reason: "Scoped to this project" }) });
     expect(approved.status).toBe(200);
     expect(approved.data.pattern.lifecycle).toBe("approved");
+  });
+
+  it("completes source-to-experiment craft learning lifecycle through API", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Craft Learning Lifecycle", roughIdea: "A source-backed pattern must earn release through independent experiments." }) });
+    const slug = created.data.project.slug;
+    const source = await jsonFetch<{ source: { sourceId: string } }>(`/api/novel/projects/${slug}/runtime/source-material`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Author craft notes", type: "notes", provenance: "author-upload", rightsStatus: "owned", licensor: "author", allowedUses: ["analysis", "style-experiment"], projectScope: slug, retainExcerpt: false, importedBy: "author" }) });
+    const envelope = await jsonFetch<{ envelope: { envelopeId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/source-material/${source.data.source.sourceId}/rights-envelope`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ checkedBy: "author" }) });
+    expect(envelope.data.envelope.status).toBe("valid");
+    const pattern = await jsonFetch<{ pattern: { patternId: string; lifecycle: string } }>(`/api/novel/projects/${slug}/runtime/craft-patterns`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "Pressure rhythm", mechanism: "shorten turns before reveals", narrativeFunction: "sustain pressure", applicability: ["chase"], counterexamples: ["quiet reflection"], sourceEnvelopeIds: [envelope.data.envelope.envelopeId], evidenceRefs: ["source://author-notes#pressure"] }) });
+    const approved = await jsonFetch<{ pattern: { patternId: string; lifecycle: string } }>(`/api/novel/projects/${slug}/runtime/craft-patterns/${pattern.data.pattern.patternId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actor: "author", reason: "Approved bounded style hypothesis" }) });
+    expect(approved.data.pattern.lifecycle).toBe("approved");
+
+    const guard = await jsonFetch<{ guard: Record<string, unknown> }>(`/api/novel/projects/${slug}/runtime/similarity-guards`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceText: "storm lantern harbor", targetText: "quiet orchard window", maxTokenOverlap: 0.5, sourceVersion: "source-v1", targetVersion: "target-v1" }) });
+    expect(guard.data.guard.status).toBe("passed");
+    const plan = await jsonFetch<{ plan: { planId: string; targetChapterId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/pattern-transfer-plans`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ patternId: pattern.data.pattern.patternId, sourceEnvelopeId: envelope.data.envelope.envelopeId, guard: guard.data.guard, targetChapterId: "chapter-1", intendedEffect: "Increase reveal pressure without copying source wording" }) });
+    expect(plan.data.plan.status).toBe("candidate");
+    const secondPlan = await jsonFetch<{ plan: { planId: string; targetChapterId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/pattern-transfer-plans`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ patternId: pattern.data.pattern.patternId, sourceEnvelopeId: envelope.data.envelope.envelopeId, guard: guard.data.guard, targetChapterId: "chapter-2", intendedEffect: "Preserve pressure in a different chapter function without copying source wording" }) });
+    expect(secondPlan.data.plan.status).toBe("candidate");
+
+    const runExperiment = async (suffix: string) => {
+      const experimentPlan = suffix === "one" ? plan : secondPlan;
+      expect(experimentPlan.data.plan.status).toBe("candidate");
+      expect(experimentPlan.data.plan.targetChapterId).toBe(suffix === "one" ? "chapter-1" : "chapter-2");
+      const experiment = await jsonFetch<{ experiment: { experimentId: string; status: string; runnerId?: string } }>(`/api/novel/projects/${slug}/runtime/craft-experiments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ transferPlanId: experimentPlan.data.plan.planId, baselineCandidateId: `baseline-${suffix}`, treatmentCandidateId: `treatment-${suffix}`, holdoutSceneIds: [`holdout-investigate-${suffix}`, `holdout-aftermath-${suffix}`], targetMetrics: ["reader-effect", "revision-cost"], budgetId: `budget-${suffix}` }) });
+      expect(experiment.data.experiment.status).toBe("planned");
+      const started = await jsonFetch<{ experiment: { status: string } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experiment.data.experiment.experimentId}/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ runnerId: `runner-${suffix}` }) });
+      expect(started.data.experiment.status).toBe("running");
+      const judged = await jsonFetch<{ experiment: { status: string; judgment?: { evaluatorKind: string }; holdoutValidation?: { status: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experiment.data.experiment.experimentId}/judge`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evaluatorId: `reviewer-${suffix}`, evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "Holdout review confirms bounded effect", holdout: { extractionSceneIds: [`extract-${suffix}`], sourceRefs: [`holdout://${suffix}`], cases: [{ caseId: `holdout-investigate-${suffix}`, sceneId: `holdout-investigate-${suffix}`, chapterFunction: "investigation", inputFingerprint: `input-investigate-${suffix}`, labelSealed: true, generatorVisible: false, baselineScore: 0.4, treatmentScore: 0.7, hardGuardsPassed: true }, { caseId: `holdout-aftermath-${suffix}`, sceneId: `holdout-aftermath-${suffix}`, chapterFunction: "aftermath", inputFingerprint: `input-aftermath-${suffix}`, labelSealed: true, generatorVisible: false, baselineScore: 0.4, treatmentScore: 0.65, hardGuardsPassed: true }] } }) });
+      expect(judged.data.experiment.status).toBe("judged");
+      expect(judged.data.experiment.judgment?.evaluatorKind).toBe("independent-reviewer");
+      expect(judged.data.experiment.holdoutValidation?.status).toBe("cross-scene-validated");
+      const decided = await jsonFetch<{ experiment: { decision?: { decision: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experiment.data.experiment.experimentId}/decision`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: "adopt", actor: "author", reason: "Adopt treatment after independent review" }) });
+      expect(decided.data.experiment.decision?.decision).toBe("adopt");
+      const invocationNow = new Date();
+      const invocation = await jsonFetch<{ record: { invocationId: string } }>(`/api/novel/projects/${slug}/runtime/session/model-invocations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invocationId: `craft-release-invocation-${suffix}`, taskId: experiment.data.experiment.experimentId, taskFingerprint: `task-${suffix}`, attemptId: `attempt-${suffix}`, routeDecision: "craft-experiment", modelCapabilityRef: "provider://release-v1", contextManifestRef: `context://craft/${suffix}`, promptSchemaVersion: "craft.v1", startedAt: new Date(invocationNow.getTime() - 100).toISOString(), finishedAt: invocationNow.toISOString(), status: "completed", usage: { inputTokens: 20, outputTokens: 40, cachedTokens: 0, measurement: "actual" }, cost: { amount: 0.02, currency: "USD", measurement: "actual" }, cache: { hit: false }, adoptionDecision: "experiment-only" }) });
+      expect(invocation.status).toBe(201);
+      const calibration = await jsonFetch<{ evidence: { status: string } }>(`/api/novel/projects/${slug}/session/understanding/quality-calibration`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evaluatorVersion: `provider-evaluator-${suffix}`, sourceKind: "provider", holdoutInputFingerprint: `holdout-provider-${suffix}`, evaluatedCount: 10, correctCount: 9, accuracy: 0.9, minimumAccuracy: 0.8, attestation: { kind: "provider-signed", reference: `provider://release-v1/attestation/${suffix}` }, evidenceRefs: [`provider://release-v1/holdout/${suffix}`] }) });
+      expect(calibration.data.evidence.status).toBe("calibrated");
+      const provider = await jsonFetch<{ report: { decision: string; quality: { status: string } }; experiment: { providerEvaluation?: { decision: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experiment.data.experiment.experimentId}/provider-evaluation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ providerRef: "provider://release-v1", maxP95LatencyMs: 1000, maxCost: 1 }) });
+      expect(provider.data.report.decision).toBe("pass");
+      expect(provider.data.report.quality.status).toBe("calibrated");
+      expect(provider.data.experiment.providerEvaluation?.decision).toBe("pass");
+      const reader = await jsonFetch<{ calibration: { status: string }; experiment: { readerCalibration?: { status: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experiment.data.experiment.experimentId}/reader-calibration`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reviewerId: `reader-release-${suffix}`, humanSamples: 8, blind: true, agreementRate: 0.875 }) });
+      expect(reader.data.calibration.status).toBe("calibrated");
+      expect(reader.data.experiment.readerCalibration?.status).toBe("calibrated");
+      return experiment.data.experiment.experimentId;
+    };
+
+    const firstExperimentId = await runExperiment("one");
+    const promoted = await jsonFetch<{ pattern: { lifecycle: string; promotion?: { experimentId: string } } }>(`/api/novel/projects/${slug}/runtime/craft-patterns/${pattern.data.pattern.patternId}/promote-from-experiment`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ experimentId: firstExperimentId, actor: "author", reason: "Promote after first holdout" }) });
+    expect(promoted.data.pattern.lifecycle).toBe("probation");
+    expect(promoted.data.pattern.promotion?.experimentId).toBe(firstExperimentId);
+
+    const secondExperimentId = await runExperiment("two");
+    const validated = await jsonFetch<{ pattern: { lifecycle: string; validation?: { experimentId: string } } }>(`/api/novel/projects/${slug}/runtime/craft-patterns/${pattern.data.pattern.patternId}/validate-from-experiment`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ experimentId: secondExperimentId, actor: "author", reason: "Validate after independent second holdout" }) });
+    expect(validated.data.pattern.lifecycle).toBe("validated");
+    expect(validated.data.pattern.validation?.experimentId).toBe(secondExperimentId);
+  });
+
+  it("keeps actual provider usage experiment-only until quality and reader calibration are proven", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Provider Evidence Gate", roughIdea: "Actual calls still need calibrated quality evidence." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const judgmentBase = { evaluatorId: "reviewer-provider", evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "Initial provider probe", judgedAt: new Date().toISOString() };
+    const judgment = { ...judgmentBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(judgmentBase)).digest("hex") };
+    const base = { schemaVersion: "craft-experiment.v1", experimentId: "craft-experiment-provider-gate", projectSlug: slug, transferPlanId: "plan-provider-gate", baselineCandidateId: "baseline", treatmentCandidateId: "treatment", holdoutSceneIds: ["scene-provider"], targetMetrics: ["reader-effect"], comparisonDimensions: ["reader-effect"], budgetId: "budget-provider", status: "judged", runnerId: "runner-provider", judgment, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions", "craft-experiments"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "craft-experiments", `${base.experimentId}.json`), JSON.stringify({ ...base, fingerprint }), "utf8");
+    const now = new Date();
+    const invocation = await jsonFetch<{ record: { invocationId: string } }>(`/api/novel/projects/${slug}/runtime/session/model-invocations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invocationId: "craft-provider-invocation", taskId: base.experimentId, taskFingerprint: "task-fingerprint", attemptId: "attempt-1", routeDecision: "craft-experiment", modelCapabilityRef: "provider://real-v1", contextManifestRef: "context://craft-provider", promptSchemaVersion: "craft.v1", startedAt: new Date(now.getTime() - 100).toISOString(), finishedAt: now.toISOString(), status: "completed", usage: { inputTokens: 20, outputTokens: 40, cachedTokens: 0, measurement: "actual" }, cost: { amount: 0.02, currency: "USD", measurement: "actual" }, cache: { hit: false }, adoptionDecision: "experiment-only" }) });
+    expect(invocation.status).toBe(201);
+    const evaluated = await jsonFetch<{ report: { decision: string; blockedReasons: string[] }; experiment: { providerEvaluation?: { decision: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${base.experimentId}/provider-evaluation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ providerRef: "provider://real-v1", maxP95LatencyMs: 1000, maxCost: 1 }) });
+    expect(evaluated.status).toBe(200);
+    expect(evaluated.data.report.decision).toBe("blocked");
+    expect(evaluated.data.report.blockedReasons).toContain("QUALITY_NOT_CALIBRATED");
+    expect(evaluated.data.experiment.providerEvaluation?.decision).toBe("blocked");
+    const calibration = await jsonFetch<{ evidence: { status: string } }>(`/api/novel/projects/${slug}/session/understanding/quality-calibration`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evaluatorVersion: "provider-evaluator-v1", sourceKind: "provider", holdoutInputFingerprint: "holdout-provider-gate", evaluatedCount: 10, correctCount: 9, accuracy: 0.9, minimumAccuracy: 0.8, attestation: { kind: "provider-signed", reference: "provider://real-v1/attestation/1" }, evidenceRefs: ["provider://real-v1/holdout/1"] }) });
+    expect(calibration.status).toBe(201);
+    expect(calibration.data.evidence.status).toBe("calibrated");
+    const reevaluated = await jsonFetch<{ report: { decision: string; quality: { status: string } }; experiment: { providerEvaluation?: { decision: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${base.experimentId}/provider-evaluation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ providerRef: "provider://real-v1", maxP95LatencyMs: 1000, maxCost: 1 }) });
+    expect(reevaluated.data.report.decision).toBe("pass");
+    expect(reevaluated.data.report.quality.status).toBe("calibrated");
+    expect(reevaluated.data.experiment.providerEvaluation?.decision).toBe("pass");
+    const reader = await jsonFetch<{ calibration: { status: string }; experiment: { readerCalibration?: { status: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${base.experimentId}/reader-calibration`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reviewerId: "reader-probe", humanSamples: 1, blind: false, agreementRate: 0.2 }) });
+    expect(reader.status).toBe(200);
+    expect(reader.data.calibration.status).toBe("experimental");
+    expect(reader.data.experiment.readerCalibration?.status).toBe("experimental");
+    const calibratedReader = await jsonFetch<{ calibration: { status: string }; experiment: { readerCalibration?: { status: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${base.experimentId}/reader-calibration`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reviewerId: "reader-calibrated", humanSamples: 8, blind: true, agreementRate: 0.875 }) });
+    expect(calibratedReader.data.calibration.status).toBe("calibrated");
+    expect(calibratedReader.data.experiment.readerCalibration?.status).toBe("calibrated");
+  });
+
+  it("rejects craft-pattern promotion when the submitted experiment is not persisted", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Craft Promotion Evidence", roughIdea: "Promotion must use persisted evidence." }) });
+    const slug = created.data.project.slug;
+    const source = await jsonFetch<{ source: { sourceId: string } }>(`/api/novel/projects/${slug}/runtime/source-material`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Owned notes", type: "notes", provenance: "author-upload", rightsStatus: "owned", licensor: "author", allowedUses: ["analysis", "style-experiment"], projectScope: slug, retainExcerpt: false, importedBy: "author" }) });
+    const envelope = await jsonFetch<{ envelope: { envelopeId: string } }>(`/api/novel/projects/${slug}/runtime/source-material/${source.data.source.sourceId}/rights-envelope`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ checkedBy: "author" }) });
+    const pattern = await jsonFetch<{ pattern: { patternId: string } }>(`/api/novel/projects/${slug}/runtime/craft-patterns`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "Persisted rhythm", mechanism: "shorten turns", narrativeFunction: "speed", applicability: ["chase"], counterexamples: [], sourceEnvelopeIds: [envelope.data.envelope.envelopeId], evidenceRefs: ["source://notes#1"] }) });
+    await jsonFetch(`/api/novel/projects/${slug}/runtime/craft-patterns/${pattern.data.pattern.patternId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actor: "author", reason: "Scoped" }) });
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/craft-patterns/${pattern.data.pattern.patternId}/promote-from-experiment`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ experiment: { experimentId: "forged-experiment", status: "judged", judgment: { winner: "treatment", hardGuardsPassed: true } }, actor: "author", reason: "Forged evidence" }) });
+    expect(response.status).toBe(409);
+    expect(response.data.error).toBe("CRAFT_EXPERIMENT_NOT_FOUND");
+  });
+
+  it("does not expose a closure certificate whose persisted project scope disagrees", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Closure Scope", roughIdea: "Closure reads stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const base = { schemaVersion: "closure-certificate.v1", status: "audited_complete", projectSlug: "another-project", chapterIds: ["chapter-1"], settlementIds: ["settlement-1"], obligationCoverageFingerprint: "coverage-fp", sourceFingerprint: "source-fp", generatedAt: new Date().toISOString() };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions", "closure"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "closure", "closure-certificate.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/publication-editions/edition-1/closure-certificate`);
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("CLOSURE_CERTIFICATE_NOT_FOUND");
+  });
+
+  it("does not expose an edition manifest whose persisted project scope disagrees", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Edition Scope", roughIdea: "Edition reads stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const base = { schemaVersion: "edition-manifest.v1", editionId: "edition-scope", projectSlug: "another-project", canonCommitFingerprint: "canon-fp", title: "Other", author: "Other", language: "zh-CN", status: "frozen", readerSafe: true, chapters: [{ chapterId: "chapter-1", title: "Chapter", order: 1, contentPath: "chapters/1.md", settlementId: "settlement-1", contentSha256: "a".repeat(64) }], publicationTreeFingerprint: "tree-fp", createdAt: new Date().toISOString() };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions", "publication-editions"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "publication-editions", "edition-scope.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/publication-editions/edition-scope`);
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("Publication edition not found");
+  });
+
+  it("filters book-run listings to the requested project scope", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Book Run Scope", roughIdea: "Run listings stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const started = await jsonFetch<{ run: { bookRunId: string } }>(`/api/novel/projects/${slug}/book-runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], limits: { maxWorkItems: 1 } }) });
+    const runPath = path.join(tempRoot, slug, "sessions", "book-runs", `${started.data.run.bookRunId}.json`);
+    const run = JSON.parse(await fs.readFile(runPath, "utf8")) as Record<string, unknown>;
+    const tamperedBase = { ...run, projectSlug: "another-project" };
+    delete (tamperedBase as Record<string, unknown>).fingerprint;
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(tamperedBase)).digest("hex");
+    await fs.writeFile(runPath, JSON.stringify({ ...tamperedBase, fingerprint }), "utf8");
+    const response = await jsonFetch<{ runs: Array<{ projectSlug: string }> }>(`/api/novel/projects/${slug}/book-runs`);
+    expect(response.status).toBe(200);
+    expect(response.data.runs).toEqual([]);
+  });
+
+  it("does not expose a book-run detail whose persisted project scope disagrees", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Book Run Detail Scope", roughIdea: "Run details stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const started = await jsonFetch<{ run: { bookRunId: string } }>(`/api/novel/projects/${slug}/book-runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], limits: { maxWorkItems: 1 } }) });
+    const runPath = path.join(tempRoot, slug, "sessions", "book-runs", `${started.data.run.bookRunId}.json`);
+    const run = JSON.parse(await fs.readFile(runPath, "utf8")) as Record<string, unknown>;
+    const tamperedBase = { ...run, projectSlug: "another-project" };
+    delete (tamperedBase as Record<string, unknown>).fingerprint;
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(tamperedBase)).digest("hex");
+    await fs.writeFile(runPath, JSON.stringify({ ...tamperedBase, fingerprint }), "utf8");
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/book-runs/${started.data.run.bookRunId}`);
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("Book run not found");
+  });
+
+  it("does not evaluate closure readiness for a book-run outside the requested project", async () => {
+    const created = await jsonFetch<{ project: { slug: string; chapters: Array<{ id: string }> } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Closure Readiness Scope", roughIdea: "Closure readiness stays project scoped." }) });
+    const slug = created.data.project.slug;
+    const started = await jsonFetch<{ run: { bookRunId: string } }>(`/api/novel/projects/${slug}/book-runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterIds: [created.data.project.chapters[0].id], limits: { maxWorkItems: 1 } }) });
+    const runPath = path.join(tempRoot, slug, "sessions", "book-runs", `${started.data.run.bookRunId}.json`);
+    const run = JSON.parse(await fs.readFile(runPath, "utf8")) as Record<string, unknown>;
+    const tamperedBase = { ...run, projectSlug: "another-project" };
+    delete (tamperedBase as Record<string, unknown>).fingerprint;
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(tamperedBase)).digest("hex");
+    await fs.writeFile(runPath, JSON.stringify({ ...tamperedBase, fingerprint }), "utf8");
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/book-runs/${started.data.run.bookRunId}/closure-readiness?sourceFingerprint=source`);
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("Book run not found");
+  });
+
+  it("filters execution work-item listings to the requested project scope", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Execution Work Scope", roughIdea: "Execution queue reads stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const base = { schemaVersion: "execution-work-item.v1", workItemId: "work-scope", projectSlug: "another-project", chapterId: "chapter-001", versionId: "", proofFingerprint: "", contextManifestId: "", contextFingerprint: "", status: "blocked", idempotencyKey: "scope", blockedReason: "PROOF_NOT_FOUND", createdAt: new Date().toISOString() };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    const directory = path.join(tempRoot, slug, "sessions", "execution-work-items");
+    await fs.mkdir(directory, { recursive: true });
+    await fs.writeFile(path.join(directory, "work-scope.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    const response = await jsonFetch<{ workItems: Array<{ projectSlug: string }> }>(`/api/novel/projects/${slug}/runtime/execution-work-items`);
+    expect(response.status).toBe(200);
+    expect(response.data.workItems).toEqual([]);
+  });
+
+  it("does not expose narrative obligations whose persisted project scope disagrees", async () => {
+    const first = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Obligation Source Scope", roughIdea: "Obligation source scope." }) });
+    const second = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Obligation Target Scope", roughIdea: "Obligation target scope." }) });
+    const created = await jsonFetch<{ obligation: { obligationId: string } }>(`/api/novel/projects/${first.data.project.slug}/obligations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "mystery", title: "Foreign gate", questionOrPromise: "Who sealed it?" }) });
+    const sourcePath = path.join(tempRoot, first.data.project.slug, "sessions", "obligations", `${created.data.obligation.obligationId}.json`);
+    const targetDirectory = path.join(tempRoot, second.data.project.slug, "sessions", "obligations");
+    await fs.mkdir(targetDirectory, { recursive: true });
+    await fs.copyFile(sourcePath, path.join(targetDirectory, `${created.data.obligation.obligationId}.json`));
+    const list = await jsonFetch<{ obligations: Array<{ obligationId: string }> }>(`/api/novel/projects/${second.data.project.slug}/obligations`);
+    expect(list.status).toBe(200);
+    expect(list.data.obligations).toEqual([]);
+    const detail = await jsonFetch<{ error: string }>(`/api/novel/projects/${second.data.project.slug}/obligations/${created.data.obligation.obligationId}`);
+    expect(detail.status).toBe(404);
+    expect(detail.data.error).toBe("Obligation not found");
+  });
+
+  it("does not expose an execution-ready proof whose persisted project scope disagrees", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Execution Proof Scope", roughIdea: "Execution proof reads stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const base = { schemaVersion: "execution-ready-proof.v1", proofId: "execution-ready-scope", projectSlug: "another-project", versionId: "outline-version-1", versionFingerprint: "version-fp", status: "ready", executionReady: true, structureVersionFingerprint: "structure-fp", changeLevel: "L0", adoptionAuthority: "author", adoptionProofFingerprint: "adoption-fp", checks: [{ checkId: "version-active", status: "passed", detail: "active" }, { checkId: "near-horizon", status: "passed", detail: "frozen" }, { checkId: "source-fresh", status: "passed", detail: "fresh" }, { checkId: "canon-pointer", status: "passed", detail: "pointer" }], createdAt: new Date().toISOString() };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "execution-ready-proof.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/session/understanding/execution-ready-proof`);
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("Execution-ready proof not found");
+  });
+
+  it("does not expose an execution-ready gate report whose persisted project scope disagrees", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Execution Gate Scope", roughIdea: "Execution gate reads stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const base = { schemaVersion: "execution-ready-gate.v1", projectSlug: "another-project", outlineVersionId: "outline-version-1", status: "blocked", executionReady: false, checks: [{ checkId: "near-horizon-evidence", status: "failed", detail: "missing" }] };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "execution-ready-gate.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    const response = await jsonFetch<{ report: unknown }>(`/api/novel/projects/${slug}/runtime/execution-ready/gate`);
+    expect(response.status).toBe(404);
+    expect(response.data).toMatchObject({ error: "EXECUTION_READY_GATE_NOT_FOUND" });
+  });
+
+  it("does not expose outline authority projections whose persisted project scope disagrees", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Outline Scope", roughIdea: "Outline authority reads stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const versionBase = { schemaVersion: "outline-version.v1", versionId: "outline-version-scope", projectSlug: "another-project", version: 1, outlineId: "outline-scope", outlineFingerprint: "outline-fp", selectedChapterIds: ["chapter-1"], strongFreezeCount: 1, structureVersionFingerprint: "structure-fp", changeLevel: "L0", adoptionAuthority: "author", adoptionProofFingerprint: "adoption-fp", status: "active", canonWritten: true, createdAt: new Date().toISOString() };
+    const versionFingerprint = crypto.createHash("sha256").update(JSON.stringify(versionBase)).digest("hex");
+    const proposalBase = { schemaVersion: "outline-adoption-proposal.v1", proposalId: "proposal-scope", projectSlug: "another-project", outlineId: "outline-scope", outlineFingerprint: "outline-fp", validationReportId: "validation-scope", validationFingerprint: "validation-fp", adoptionMode: "whole", sourceCandidateIds: ["candidate-scope"], selectedChapterIds: ["chapter-1"], unadoptedChapterIds: [], status: "ready_for_authorization", canonWritten: false, createdAt: new Date().toISOString() };
+    const proposalFingerprint = crypto.createHash("sha256").update(JSON.stringify(proposalBase)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions", "outline-versions"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "outline-versions", "outline-scope.json"), JSON.stringify({ ...versionBase, fingerprint: versionFingerprint }), "utf8");
+    await fs.writeFile(path.join(root, "sessions", "outline-adoption-proposal.json"), JSON.stringify({ ...proposalBase, fingerprint: proposalFingerprint }), "utf8");
+    const version = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/session/understanding/outline-version/outline-scope`);
+    expect(version.status).toBe(404);
+    expect(version.data.error).toBe("Outline version not found");
+    const proposal = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/session/understanding/outline-adoption-proposals`);
+    expect(proposal.status).toBe(404);
+    expect(proposal.data.error).toBe("Outline adoption proposal not found");
+  });
+
+  it("does not apply a length contract whose persisted project scope disagrees", async () => {
+    const first = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Length Source Scope", roughIdea: "Length contract source scope." }) });
+    const second = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Length Target Scope", roughIdea: "Length contract target scope." }) });
+    const contract = await jsonFetch<{ contract: unknown }>(`/api/novel/projects/${first.data.project.slug}/length-contract`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ dimensions: { totalWords: { mode: "soft", min: 100, max: 200 }, totalChapters: { mode: "soft", min: 3, max: 5 }, totalVolumes: { mode: "unknown" }, chapterWords: { mode: "soft", min: 20, max: 50 } } }) });
+    const sourcePath = path.join(tempRoot, first.data.project.slug, "planning", "length-contract.json");
+    const targetDirectory = path.join(tempRoot, second.data.project.slug, "planning");
+    await fs.mkdir(targetDirectory, { recursive: true });
+    await fs.copyFile(sourcePath, path.join(targetDirectory, "length-contract.json"));
+    const read = await jsonFetch<{ contract: unknown }>(`/api/novel/projects/${second.data.project.slug}/length-contract`);
+    expect(read.status).toBe(404);
+    expect(read.data).toMatchObject({ error: "Length contract not found" });
+    const forecast = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${second.data.project.slug}/length-forecast`);
+    expect(forecast.status).toBe(409);
+    expect(forecast.data).toMatchObject({ error: { code: "LENGTH_CONTRACT_REQUIRED" } });
+    expect(contract.status).toBe(201);
+  });
+
+  it("does not expose a prose-generation manifest whose persisted project scope disagrees", async () => {
+    const first = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Prose Manifest Source Scope", roughIdea: "Prose manifest source scope." }) });
+    const second = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Prose Manifest Target Scope", roughIdea: "Prose manifest target scope." }) });
+    const receipt = createDecisionConsumptionReceipt({ receiptId: "receipt-prose-scope", projectSlug: first.data.project.slug, decisionId: "decision-scope", decisionVersion: 1, consumer: "prose", consumerRef: "manifest-scope", sourceFingerprint: "snapshot-scope" });
+    await persistDecisionConsumptionReceipt(path.join(tempRoot, first.data.project.slug), receipt);
+    await writeReleasedCraftPattern(first.data.project.slug);
+    const created = await jsonFetch<{ manifest: { manifestId: string } }>(`/api/novel/projects/${first.data.project.slug}/runtime/prose-generation-manifests`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ manifestId: "manifest-scope", decisionConsumptionReceiptRef: receipt.receiptId, storyContractRef: "contract:v1", outlineVersion: "outline:v1", chapterIntentRef: "intent:ch-1", sceneCardRefs: ["scene:1"], characterStateRefs: ["state:hero:v1"], povStateRef: "pov:hero:v1", obligationRefs: ["obl:1"], authorLockRefs: ["lock:1"], craftPatternRefs: ["craft:1"], latestAuthorDirection: "keep the promise visible", proseBaselineRef: "prose:ch-1:v1", planningHorizonRef: "horizon:v1", contextManifestRef: "context:v1", sourceRefs: ["source:1"] }) });
+    const sourcePath = path.join(tempRoot, first.data.project.slug, "sessions", "prose-generation-manifests", `${created.data.manifest.manifestId}.json`);
+    const targetDirectory = path.join(tempRoot, second.data.project.slug, "sessions", "prose-generation-manifests");
+    await fs.mkdir(targetDirectory, { recursive: true });
+    await fs.copyFile(sourcePath, path.join(targetDirectory, `${created.data.manifest.manifestId}.json`));
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${second.data.project.slug}/runtime/prose-generation-manifests/${created.data.manifest.manifestId}`);
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("Prose generation manifest not found");
+    const freshness = await jsonFetch<{ error: string }>(`/api/novel/projects/${second.data.project.slug}/runtime/prose-generation-manifests/${created.data.manifest.manifestId}/freshness`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ candidateManifestFingerprint: "candidate" }) });
+    expect(freshness.status).toBe(404);
+    expect(freshness.data.error).toBe("Prose generation manifest not found");
+  });
+
+  it("does not start a craft experiment whose persisted project scope disagrees", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Craft Experiment Scope", roughIdea: "Craft experiment commands stay scoped." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const base = { schemaVersion: "craft-experiment.v1", experimentId: "craft-experiment-scope", projectSlug: "another-project", transferPlanId: "plan-1", baselineCandidateId: "baseline-1", treatmentCandidateId: "treatment-1", holdoutSceneIds: ["scene-1"], targetMetrics: ["voice"], comparisonDimensions: ["voice"], budgetId: "budget-1", status: "planned", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions", "craft-experiments"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "craft-experiments", "craft-experiment-scope.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${slug}/runtime/craft-experiments/craft-experiment-scope/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ runnerId: "runner-1" }) });
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("Craft experiment not found");
+  });
+
+  it("does not expose dialogue red-blue cases whose persisted project scope disagrees", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Dialogue Red Blue Scope", roughIdea: "Red-blue reads stay project scoped." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const base = {
+      schemaVersion: "dialogue-red-blue-case.v1",
+      caseId: "red-blue-foreign",
+      projectSlug: "another-project",
+      questionId: "question-foreign",
+      questionVersion: 1,
+      questionFingerprint: "question-fingerprint",
+      options: [{ optionId: "option-1", label: "A", claim: "A claim", bestCase: "A best case", premises: ["premise"], evidenceRefs: ["evidence"], failureModes: ["failure"], opportunityCost: "cost", reversibility: "reversible", affectedDecisions: ["question-foreign"], uncertainty: "low" }, { optionId: "option-2", label: "B", claim: "B claim", bestCase: "B best case", premises: ["premise"], evidenceRefs: ["evidence"], failureModes: ["failure"], opportunityCost: "cost", reversibility: "reversible", affectedDecisions: ["question-foreign"], uncertainty: "low" }],
+      sharedFacts: ["fact"],
+      irreducibleTradeoff: "tradeoff",
+      recommendation: "A",
+      recommendationReason: "reason",
+      dissent: ["B remains viable"],
+      whatWouldChangeRecommendation: ["new evidence"],
+      status: "open",
+      createdAt: new Date().toISOString()
+    };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "dialogue-question-events.jsonl"), JSON.stringify({
+      schemaVersion: "dialogue-question-event.v1",
+      eventId: "question-event-foreign",
+      type: "question.created",
+      questionId: "question-foreign",
+      question: { schemaVersion: "dialogue-question.v1", questionId: "question-foreign", questionVersion: 1, projectSlug: "another-project", status: "active", text: "Foreign question", whyNow: "Foreign context", impact: "medium", ambiguity: 0.2, errorCost: "low", reversibility: "reversible", delayCost: "low", options: ["A", "B"], recommendation: "A", snapshotFingerprint: "snapshot-foreign" },
+      createdAt: new Date().toISOString()
+    }) + "\n", "utf8");
+    await fs.writeFile(path.join(root, "sessions", "dialogue-red-blue-cases.jsonl"), JSON.stringify({ ...base, fingerprint }) + "\n", "utf8");
+    const response = await jsonFetch<{ cases: unknown[] }>(`/api/novel/projects/${slug}/session/understanding/questions`);
+    expect(response.status).toBe(200);
+    expect((response.data as unknown as { questions: unknown[] }).questions).toEqual([]);
+  });
+
+  it("does not start runtime with a prose manifest whose receipt is outside the requested project", async () => {
+    const first = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Runtime Manifest Source", roughIdea: "Runtime must bind manifest scope." }) });
+    const second = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Runtime Manifest Target", roughIdea: "Runtime must reject foreign manifests." }) });
+    const receipt = createDecisionConsumptionReceipt({ receiptId: "receipt-runtime-scope", projectSlug: first.data.project.slug, decisionId: "decision-runtime-scope", decisionVersion: 1, consumer: "prose", consumerRef: "manifest-runtime-scope", sourceFingerprint: "snapshot-runtime-scope" });
+    await persistDecisionConsumptionReceipt(path.join(tempRoot, first.data.project.slug), receipt);
+    await writeReleasedCraftPattern(first.data.project.slug);
+    const created = await jsonFetch<{ manifest: { manifestId: string } }>(`/api/novel/projects/${first.data.project.slug}/runtime/prose-generation-manifests`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ manifestId: "manifest-runtime-scope", decisionConsumptionReceiptRef: receipt.receiptId, storyContractRef: "contract:v1", outlineVersion: "outline:v1", chapterIntentRef: "intent:ch-1", sceneCardRefs: ["scene:1"], characterStateRefs: ["state:hero:v1"], povStateRef: "pov:hero:v1", obligationRefs: ["obl:1"], authorLockRefs: ["lock:1"], craftPatternRefs: ["craft:1"], latestAuthorDirection: "keep the promise visible", proseBaselineRef: "prose:ch-1:v1", planningHorizonRef: "horizon:v1", contextManifestRef: "context:v1", sourceRefs: ["source:1"] }) });
+    const sourcePath = path.join(tempRoot, first.data.project.slug, "sessions", "prose-generation-manifests", `${created.data.manifest.manifestId}.json`);
+    const targetDirectory = path.join(tempRoot, second.data.project.slug, "sessions", "prose-generation-manifests");
+    await fs.mkdir(targetDirectory, { recursive: true });
+    await fs.copyFile(sourcePath, path.join(targetDirectory, `${created.data.manifest.manifestId}.json`));
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${second.data.project.slug}/runtime/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ generationManifestId: created.data.manifest.manifestId }) });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("PROSE_GENERATION_MANIFEST_REQUIRED");
+  });
+
+  it("persists and rolls back a governed learning release through the project API", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Learning Release API", roughIdea: "Learning release decisions remain durable." }) });
+    const slug = created.data.project.slug;
+    const regression = await jsonFetch<{ regressionId: string }>(`/api/novel/projects/${slug}/runtime/evaluation/multi-scale-regression`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ regressionId: "learning-release-regression-api", baseline: { selection: 0.7 }, candidate: { selection: 0.8 }, hardFailures: [] }) });
+    expect(regression.status).toBe(201);
+    const input = { releaseId: "learning-release-api", candidatePolicyRef: "policy:candidate:v2", baselinePolicyRef: "policy:stable:v1", evaluationRunRefs: ["eval:api-1"], regressionCaseRefs: [regression.data.regressionId], shadowAcceptanceDelta: 0.1, hardVoiceFailuresDelta: 0, reworkDelta: 0, canaryActive: true, previousStableVersion: "policy:stable:v1", approvedBy: "author-api" };
+    const posted = await jsonFetch<{ release: { releaseId: string; projectSlug: string; status: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/learning-releases`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+    expect(posted.status).toBe(201);
+    expect(posted.data.release).toMatchObject({ releaseId: input.releaseId, projectSlug: slug, status: "canary", fingerprint: expect.any(String) });
+    const read = await jsonFetch<{ release: { fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/learning-releases/${input.releaseId}`);
+    expect(read.status).toBe(200);
+    expect(read.data.release.fingerprint).toBe(posted.data.release.fingerprint);
+    const rolledBack = await jsonFetch<{ release: { status: string; rollbackReason: string } }>(`/api/novel/projects/${slug}/runtime/learning-releases/${input.releaseId}/rollback`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rolledBackBy: "author-api", reason: "canary regression" }) });
+    expect(rolledBack.status).toBe(200);
+    expect(rolledBack.data.release).toMatchObject({ status: "rolled_back", rollbackReason: "canary regression" });
+  });
+
+  it("rolls back a learning release from bound regression evidence through the project API", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Regression Rollback API", roughIdea: "Confirmed regression stops a release." }) });
+    const slug = created.data.project.slug;
+    const regression = await jsonFetch<{ regressionId: string }>(`/api/novel/projects/${slug}/runtime/evaluation/multi-scale-regression`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ regressionId: "regression-rollback-api", baseline: { selection: 0.8 }, candidate: { selection: 0.4 }, hardFailures: ["voice"] }) });
+    const release = await jsonFetch<{ release: { releaseId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/learning-releases`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ releaseId: "release-rollback-api", candidatePolicyRef: "policy:candidate", baselinePolicyRef: "policy:stable", evaluationRunRefs: ["eval:rollback-api"], regressionCaseRefs: [regression.data.regressionId], shadowAcceptanceDelta: 0.1, hardVoiceFailuresDelta: 0, reworkDelta: 0, canaryActive: true, previousStableVersion: "policy:stable", approvedBy: "author" }) });
+    expect(release.data.release.status).toBe("canary");
+    const replayedRegression = await jsonFetch<{ created: boolean; rolledBackReleases: Array<{ releaseId: string; status: string }> }>(`/api/novel/projects/${slug}/runtime/evaluation/multi-scale-regression`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ regressionId: regression.data.regressionId, baseline: { selection: 0.8 }, candidate: { selection: 0.4 }, hardFailures: ["voice"] }) });
+    expect(replayedRegression.status).toBe(200);
+    expect(replayedRegression.data).toMatchObject({ created: false, rolledBackReleases: [{ releaseId: release.data.release.releaseId, status: "rolled_back" }] });
+    const rolledBack = await jsonFetch<{ release: { status: string; rollbackReason: string } }>(`/api/novel/projects/${slug}/runtime/learning-releases/${release.data.release.releaseId}/rollback-for-regression`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ regressionCaseRef: regression.data.regressionId, rolledBackBy: "regression-gate", reason: "Confirmed holdout regression" }) });
+    expect(rolledBack.status).toBe(200);
+    expect(rolledBack.data.release).toMatchObject({ status: "rolled_back", rollbackReason: `Automatic regression propagation [regression:${regression.data.regressionId}]` });
+  });
+
+  it("completes the craft pattern release-to-manifest-consumption and regression stop journey", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Craft Runtime E2E", roughIdea: "A validated pattern must stop after regression." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const patternBase = { schemaVersion: "craft-pattern.v1", patternId: "pattern-runtime-e2e", projectSlug: slug, name: "Runtime rhythm", mechanism: "controlled pacing", narrativeFunction: "pressure", applicability: ["chase"], counterexamples: ["static exposition"], sourceEnvelopeIds: ["rights-e2e"], evidenceRefs: ["evidence://runtime-e2e"], lifecycle: "validated", status: "candidate", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), validation: { experimentId: "experiment-e2e-validation", actor: "author", reason: "holdout confirmed", validatedAt: new Date().toISOString() } };
+    await fs.mkdir(path.join(root, "sessions", "craft-patterns"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "craft-patterns", `${patternBase.patternId}.json`), JSON.stringify({ ...patternBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(patternBase)).digest("hex") }), "utf8");
+    const regression = await jsonFetch<{ regressionId: string }>(`/api/novel/projects/${slug}/runtime/evaluation/multi-scale-regression`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ regressionId: "regression-runtime-e2e", baseline: { selection: 0.8 }, candidate: { selection: 0.4 }, hardFailures: ["voice"] }) });
+    const release = await jsonFetch<{ release: { releaseId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/learning-releases`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ releaseId: "release-runtime-e2e", candidatePatternId: patternBase.patternId, candidatePolicyRef: "policy:runtime-e2e", baselinePolicyRef: "policy:stable", evaluationRunRefs: ["eval:runtime-e2e"], regressionCaseRefs: [regression.data.regressionId], shadowAcceptanceDelta: 0.1, hardVoiceFailuresDelta: 0, reworkDelta: 0, canaryActive: true, previousStableVersion: "policy:stable", approvedBy: "author" }) });
+    expect(release.data.release.status).toBe("canary");
+    const manifestId = "manifest-runtime-e2e";
+    const receipt = createDecisionConsumptionReceipt({ receiptId: "receipt-runtime-e2e", projectSlug: slug, decisionId: "decision-runtime-e2e", decisionVersion: 1, consumer: "prose", consumerRef: manifestId, sourceFingerprint: "snapshot-runtime-e2e" });
+    await persistDecisionConsumptionReceipt(root, receipt);
+    const manifest = await jsonFetch<{ manifest: { manifestId: string } }>(`/api/novel/projects/${slug}/runtime/prose-generation-manifests`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ manifestId, decisionConsumptionReceiptRef: receipt.receiptId, storyContractRef: "contract:v1", outlineVersion: "outline:v1", chapterIntentRef: "intent:ch-1", sceneCardRefs: ["scene:1"], characterStateRefs: ["state:hero:v1"], povStateRef: "pov:hero:v1", obligationRefs: ["obl:1"], authorLockRefs: ["lock:1"], craftPatternRefs: [patternBase.patternId], latestAuthorDirection: "preserve pressure", proseBaselineRef: "prose:ch-1:v1", planningHorizonRef: "horizon:v1", contextManifestRef: "context:v1", sourceRefs: ["source:1"] }) });
+    expect(manifest.status).toBe(201);
+    const replayedRegression = await jsonFetch<{ rolledBackReleases: Array<{ releaseId: string; status: string }> }>(`/api/novel/projects/${slug}/runtime/evaluation/multi-scale-regression`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ regressionId: regression.data.regressionId, baseline: { selection: 0.8 }, candidate: { selection: 0.4 }, hardFailures: ["voice"] }) });
+    expect(replayedRegression.data.rolledBackReleases).toMatchObject([{ releaseId: release.data.release.releaseId, status: "rolled_back" }]);
+    const blocked = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ generationManifestId: manifestId }) });
+    expect(blocked.status).toBe(409);
+    expect(blocked.data.error.code).toBe("PROSE_MANIFEST_CRAFT_PATTERN_RELEASE_REQUIRED");
+  });
+
+  it("blocks a prose manifest from consuming a local pattern without an active learning release", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Manifest Pattern Release Gate", roughIdea: "Pattern consumption requires release authority." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const patternBase = { schemaVersion: "craft-pattern.v1", patternId: "pattern-unreleased-api", projectSlug: slug, name: "Unreleased rhythm", mechanism: "controlled pacing", narrativeFunction: "pressure", applicability: ["chase"], counterexamples: ["static exposition"], sourceEnvelopeIds: ["rights-1"], evidenceRefs: ["evidence://pattern"], lifecycle: "validated", status: "candidate", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), validation: { experimentId: "experiment-2", actor: "author", reason: "holdout confirmed", validatedAt: new Date().toISOString() } };
+    const patternFingerprint = crypto.createHash("sha256").update(JSON.stringify(patternBase)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions", "craft-patterns"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "craft-patterns", `${patternBase.patternId}.json`), JSON.stringify({ ...patternBase, fingerprint: patternFingerprint }), "utf8");
+    const receipt = createDecisionConsumptionReceipt({ receiptId: "receipt-pattern-release-gate", projectSlug: slug, decisionId: "decision-pattern-release-gate", decisionVersion: 1, consumer: "prose", consumerRef: "manifest-pattern-release-gate", sourceFingerprint: "snapshot-pattern-release-gate" });
+    await persistDecisionConsumptionReceipt(root, receipt);
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/prose-generation-manifests`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ manifestId: "manifest-pattern-release-gate", decisionConsumptionReceiptRef: receipt.receiptId, storyContractRef: "contract:v1", outlineVersion: "outline:v1", chapterIntentRef: "intent:ch-1", sceneCardRefs: ["scene:1"], characterStateRefs: ["state:hero:v1"], povStateRef: "pov:hero:v1", obligationRefs: ["obl:1"], authorLockRefs: ["lock:1"], craftPatternRefs: [patternBase.patternId], latestAuthorDirection: "keep the promise visible", proseBaselineRef: "prose:ch-1:v1", planningHorizonRef: "horizon:v1", contextManifestRef: "context:v1", sourceRefs: ["source:1"] }) });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("PROSE_MANIFEST_CRAFT_PATTERN_RELEASE_REQUIRED");
+  });
+
+  it("rechecks pattern release authority when runtime starts from an existing manifest", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Runtime Pattern Release Gate", roughIdea: "Runtime rechecks pattern release authority." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const patternBase = { schemaVersion: "craft-pattern.v1", patternId: "pattern-runtime-unreleased", projectSlug: slug, name: "Runtime unreleased rhythm", mechanism: "controlled pacing", narrativeFunction: "pressure", applicability: ["chase"], counterexamples: ["static exposition"], sourceEnvelopeIds: ["rights-1"], evidenceRefs: ["evidence://pattern"], lifecycle: "validated", status: "candidate", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), validation: { experimentId: "experiment-2", actor: "author", reason: "holdout confirmed", validatedAt: new Date().toISOString() } };
+    await fs.mkdir(path.join(root, "sessions", "craft-patterns"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "craft-patterns", `${patternBase.patternId}.json`), JSON.stringify({ ...patternBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(patternBase)).digest("hex") }), "utf8");
+    const receipt = createDecisionConsumptionReceipt({ receiptId: "receipt-runtime-pattern-gate", projectSlug: slug, decisionId: "decision-runtime-pattern-gate", decisionVersion: 1, consumer: "prose", consumerRef: "manifest-runtime-pattern-gate", sourceFingerprint: "snapshot-runtime-pattern-gate" });
+    await persistDecisionConsumptionReceipt(root, receipt);
+    const manifestBase = { schemaVersion: "prose-generation-manifest.v1", manifestId: "manifest-runtime-pattern-gate", decisionConsumptionReceiptRef: receipt.receiptId, storyContractRef: "contract:v1", outlineVersion: "outline:v1", chapterIntentRef: "intent:ch-1", sceneCardRefs: ["scene:1"], characterStateRefs: ["state:hero:v1"], povStateRef: "pov:hero:v1", obligationRefs: ["obl:1"], authorLockRefs: ["lock:1"], craftPatternRefs: [patternBase.patternId], latestAuthorDirection: "keep the promise visible", proseBaselineRef: "prose:ch-1:v1", planningHorizonRef: "horizon:v1", contextManifestRef: "context:v1", sourceRefs: ["source:1"], status: "frozen" };
+    await fs.mkdir(path.join(root, "sessions", "prose-generation-manifests"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "prose-generation-manifests", `${manifestBase.manifestId}.json`), JSON.stringify({ ...manifestBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(manifestBase)).digest("hex") }), "utf8");
+    const response = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ generationManifestId: manifestBase.manifestId }) });
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("PROSE_MANIFEST_CRAFT_PATTERN_RELEASE_REQUIRED");
+  });
+
+  it("persists and replays craft source revocation evidence", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Craft Revocation API", roughIdea: "Source withdrawal remains auditable." }) });
+    const slug = created.data.project.slug;
+    const payload = { sourceId: "source-api-1", eventId: "revocation-api-1", sourceFingerprint: "source-api-fp", reason: "rights withdrawn", evidenceRefs: ["evidence://rights-withdrawal"], sourceRefs: ["source://source-api-1"], artifacts: [{ artifactId: "pattern-api-1", kind: "pattern", sourceIds: ["source-api-1"], status: "active" }, { artifactId: "prose-api-1", kind: "published-prose", sourceIds: ["source-api-1"], status: "published" }] };
+    const posted = await jsonFetch<{ propagation: { derivativeDisposition: string }; record: { projectSlug: string; fingerprint: string } }>(`/api/novel/projects/${slug}/runtime/craft-revocation/propagate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    expect(posted.status).toBe(201);
+    expect(posted.data).toMatchObject({ propagation: { derivativeDisposition: "invalidated" }, record: { projectSlug: slug, fingerprint: expect.any(String) } });
+    const replay = await jsonFetch<{ record: { fingerprint: string }; propagation: { retainedHistoricalArtifactIds: string[] } }>(`/api/novel/projects/${slug}/runtime/craft-revocation/${payload.eventId}`);
+    expect(replay.status).toBe(200);
+    expect(replay.data.record.fingerprint).toBe(posted.data.record.fingerprint);
+    expect(replay.data.propagation.retainedHistoricalArtifactIds).toEqual(["prose-api-1"]);
+  });
+
+  it("does not expose a learning release whose persisted project scope disagrees", async () => {
+    const first = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Learning Release Source", roughIdea: "Source release scope." }) });
+    const second = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Learning Release Target", roughIdea: "Target release scope." }) });
+    const posted = await jsonFetch<{ release: { releaseId: string } }>(`/api/novel/projects/${first.data.project.slug}/runtime/learning-releases`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ releaseId: "learning-release-foreign", candidatePolicyRef: "policy:candidate", baselinePolicyRef: "policy:stable", evaluationRunRefs: ["eval:foreign"], shadowAcceptanceDelta: 0, hardVoiceFailuresDelta: 0, reworkDelta: 0, canaryActive: false, previousStableVersion: "policy:stable", approvedBy: "author" }) });
+    const sourcePath = path.join(tempRoot, first.data.project.slug, "sessions", "learning-releases", `${posted.data.release.releaseId}.json`);
+    const targetDir = path.join(tempRoot, second.data.project.slug, "sessions", "learning-releases");
+    await fs.mkdir(targetDir, { recursive: true });
+    await fs.copyFile(sourcePath, path.join(targetDir, `${posted.data.release.releaseId}.json`));
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${second.data.project.slug}/runtime/learning-releases/${posted.data.release.releaseId}`);
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("Learning release not found");
+  });
+
+  it("persists an author decision for a judged craft experiment", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Craft Experiment Decision", roughIdea: "Author decision remains replayable." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const judgmentBase = { evaluatorId: "reviewer-1", evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "Treatment preserves the target effect.", judgedAt: new Date().toISOString() };
+    const judgment = { ...judgmentBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(judgmentBase)).digest("hex") };
+    const experimentBase = { schemaVersion: "craft-experiment.v1", experimentId: "craft-experiment-decision-api", projectSlug: slug, transferPlanId: "plan-1", baselineCandidateId: "baseline-1", treatmentCandidateId: "treatment-1", holdoutSceneIds: ["scene-1"], targetMetrics: ["voice"], comparisonDimensions: ["voice"], budgetId: "budget-1", status: "judged", runnerId: "runner-1", judgment, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(experimentBase)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions", "craft-experiments"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "craft-experiments", `${experimentBase.experimentId}.json`), JSON.stringify({ ...experimentBase, fingerprint }), "utf8");
+    const decided = await jsonFetch<{ experiment: { decision: { decision: string; actor: string; reason: string } } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experimentBase.experimentId}/decision`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: "adopt", actor: "author-1", reason: "Author approved the bounded treatment." }) });
+    expect(decided.status).toBe(200);
+    expect(decided.data.experiment.decision).toMatchObject({ decision: "adopt", actor: "author-1" });
+  });
+
+  it("persists scoped author feedback for a judged craft experiment", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Craft Feedback API", roughIdea: "Feedback remains durable." }) });
+    const slug = created.data.project.slug;
+    const root = path.join(tempRoot, slug);
+    const judgmentBase = { evaluatorId: "reviewer-feedback", evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "Treatment preserves the target effect.", judgedAt: new Date().toISOString() };
+    const judgment = { ...judgmentBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(judgmentBase)).digest("hex") };
+    const experimentBase = { schemaVersion: "craft-experiment.v1", experimentId: "craft-experiment-feedback-api", projectSlug: slug, transferPlanId: "plan-feedback", baselineCandidateId: "baseline-feedback", treatmentCandidateId: "treatment-feedback", holdoutSceneIds: ["scene-feedback"], targetMetrics: ["voice"], comparisonDimensions: ["voice"], budgetId: "budget-feedback", status: "judged", runnerId: "runner-feedback", judgment, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(experimentBase)).digest("hex");
+    await fs.mkdir(path.join(root, "sessions", "craft-experiments"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "craft-experiments", `${experimentBase.experimentId}.json`), JSON.stringify({ ...experimentBase, fingerprint }), "utf8");
+    const posted = await jsonFetch<{ feedback: { feedbackId: string; outcome: string; changedDimensions: string[] } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experimentBase.experimentId}/feedback`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actor: "author-feedback", outcome: "rejected", note: "Too ornate under pressure.", changedDimensions: ["pacing"], confounders: ["scene density"] }) });
+    expect(posted.status).toBe(201);
+    expect(posted.data.feedback).toMatchObject({ outcome: "rejected", changedDimensions: ["pacing"] });
+    const replay = await jsonFetch<{ feedback: Array<{ outcome: string }> }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experimentBase.experimentId}/feedback`);
+    expect(replay.status).toBe(200);
+    expect(replay.data.feedback).toHaveLength(1);
+    const attributed = await jsonFetch<{ attribution: { attributionId: string; allowPreferenceLearning: boolean } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${experimentBase.experimentId}/feedback/attribution`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ feedbackId: posted.data.feedback.feedbackId, pattern: "avoid-ornate-pacing", category: "structure", scope: { chapterId: "chapter-feedback" } }) });
+    expect(attributed.status).toBe(201);
+    expect(attributed.data.attribution).toMatchObject({ allowPreferenceLearning: false });
+    const hypothesis = await jsonFetch<{ hypothesis: { lifecycle: string; supportEventIds: string[] } }>(`/api/novel/projects/${slug}/runtime/craft-feedback-attributions/${attributed.data.attribution.attributionId}/hypothesis`, { method: "POST", headers: { "Content-Type": "application/json" } });
+    expect(hypothesis.status).toBe(201);
+    expect(hypothesis.data.hypothesis.lifecycle).toBe("candidate");
+    const secondJudgmentBase = { ...judgmentBase, evaluatorId: "reviewer-feedback-2" };
+    const secondJudgment = { ...secondJudgmentBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(secondJudgmentBase)).digest("hex") };
+    const secondExperiment = { ...experimentBase, experimentId: "craft-experiment-feedback-api-2", transferPlanId: "plan-feedback-2", baselineCandidateId: "baseline-feedback-2", treatmentCandidateId: "treatment-feedback-2", holdoutSceneIds: ["scene-feedback-2"], budgetId: "budget-feedback-2", runnerId: "runner-feedback-2", judgment: secondJudgment };
+    const secondFingerprint = crypto.createHash("sha256").update(JSON.stringify(secondExperiment)).digest("hex");
+    await fs.writeFile(path.join(root, "sessions", "craft-experiments", `${secondExperiment.experimentId}.json`), JSON.stringify({ ...secondExperiment, fingerprint: secondFingerprint }), "utf8");
+    const secondPosted = await jsonFetch<{ feedback: { feedbackId: string } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${secondExperiment.experimentId}/feedback`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actor: "author-feedback", outcome: "rejected", note: "Still too ornate.", changedDimensions: ["pacing"], confounders: ["scene density"] }) });
+    const secondAttributed = await jsonFetch<{ attribution: { attributionId: string } }>(`/api/novel/projects/${slug}/runtime/craft-experiments/${secondExperiment.experimentId}/feedback/attribution`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ feedbackId: secondPosted.data.feedback.feedbackId, pattern: "avoid-ornate-pacing", category: "structure", scope: { chapterId: "chapter-feedback" } }) });
+    const validated = await jsonFetch<{ hypothesis: { hypothesisId: string; lifecycle: string } }>(`/api/novel/projects/${slug}/runtime/craft-feedback-attributions/${secondAttributed.data.attribution.attributionId}/hypothesis`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(validated.data.hypothesis.lifecycle).toBe("validated");
+    const promoted = await jsonFetch<{ hypothesis: { lifecycle: string } }>(`/api/novel/projects/${slug}/runtime/preference-hypotheses/${validated.data.hypothesis.hypothesisId}/promote`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actor: "author-feedback", reason: "Two independent experiments support the scoped preference." }) });
+    expect(promoted.status).toBe(200);
+    expect(promoted.data.hypothesis.lifecycle).toBe("active");
+  });
+
+  it("does not expose a migration preview whose persisted project scope disagrees", async () => {
+    const first = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Migration Source", roughIdea: "Migration source scope." }) });
+    const second = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Migration Target", roughIdea: "Migration target scope." }) });
+    const preview = await jsonFetch<{ preview: Record<string, unknown> }>(`/api/novel/projects/${first.data.project.slug}/migrations`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    const migrationId = String(preview.data.preview.migrationId);
+    const sourcePath = path.join(tempRoot, first.data.project.slug, "sessions", "migrations", `${migrationId}.json`);
+    const targetDirectory = path.join(tempRoot, second.data.project.slug, "sessions", "migrations");
+    await fs.mkdir(targetDirectory, { recursive: true });
+    await fs.copyFile(sourcePath, path.join(targetDirectory, `${migrationId}.json`));
+    const response = await jsonFetch<{ error: string }>(`/api/novel/projects/${second.data.project.slug}/migrations/${migrationId}`);
+    expect(response.status).toBe(404);
+    expect(response.data.error).toBe("Migration preview not found");
+  });
+
+  it("returns a recoverable conflict when scene execution evidence is incomplete", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Scene Ledger Error Contract", roughIdea: "A scene must prove its change." }) });
+    const slug = created.data.project.slug;
+    const scene = await jsonFetch<{ scene: { sceneId: string } }>(`/api/novel/projects/${slug}/runtime/scene-cards`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sceneId: "scene-contract", chapterId: "chapter-001", trigger: "alarm", povCharacterId: "hero", roleGoal: "escape", conflictStrategy: "negotiate", turningPoint: "door locks", informationChange: "learns route", emotionChange: "fear to resolve", relationshipChange: "trust breaks", resourceChange: "loses key", entryState: "inside", exitState: "outside", nextSceneHook: "pursuit", sourceRefs: ["outline://scene-contract"] }) });
+    expect(scene.status).toBe(201);
+    const ledger = await jsonFetch<{ ledgerId: string }>(`/api/novel/projects/${slug}/runtime/scene-execution-ledgers`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sceneId: scene.data.scene.sceneId }) });
+    expect(ledger.status).toBe(201);
+    const incomplete = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/runtime/scene-execution-ledgers/${ledger.data.ledgerId}/evidence`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "choice", value: "chooses the locked door", evidenceRefs: [] }) });
+    expect(incomplete.status).toBe(409);
+    expect(incomplete.data.error.code).toBe("SCENE_LEDGER_EVIDENCE_REQUIRED");
   });
 });

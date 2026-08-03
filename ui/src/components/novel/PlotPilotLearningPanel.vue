@@ -32,16 +32,40 @@
         </div>
       </article>
     </div>
+
+    <div v-if="experiments.length" class="craft-evidence-summary" aria-label="craft experiment evidence">
+      <div class="craft-evidence-header">
+        <strong>工艺实验证据</strong>
+        <span data-testid="craft-release-status">{{ craftReleaseStatus }}</span>
+      </div>
+      <div class="craft-evidence-flags">
+        <span :class="flagClass(hasHoldout)">Holdout {{ hasHoldout ? "已验证" : "待验证" }}</span>
+        <span :class="flagClass(hasProvider)" >Provider {{ hasProvider ? "有实际用量" : "待补证据" }}</span>
+        <span :class="flagClass(hasReaderCalibration)">读者校准 {{ hasReaderCalibration ? "已校准" : "未校准" }}</span>
+      </div>
+      <p class="craft-evidence-note">{{ craftEvidenceNote }}</p>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import type { CreationLoopAction, PlotPilotLearningItem, WorkbenchCommand } from "@/types/novel";
+import type { CraftExperiment } from "@/types/novel";
 
 const props = defineProps<{
   items: PlotPilotLearningItem[];
+  experiments?: CraftExperiment[];
 }>();
+
+const experiments = computed(() => props.experiments ?? []);
+const judgedExperiments = computed(() => experiments.value.filter((experiment) => experiment.status === "judged"));
+const hasHoldout = computed(() => judgedExperiments.value.some((experiment) => experiment.holdoutValidation?.status === "cross-scene-validated"));
+const hasProvider = computed(() => judgedExperiments.value.some((experiment) => experiment.providerEvaluation?.decision === "pass" && experiment.providerEvaluation.totalCost.measurement === "actual"));
+const hasReaderCalibration = computed(() => judgedExperiments.value.some((experiment) => experiment.readerCalibration?.status === "calibrated" && experiment.readerCalibration.blind));
+const craftReleaseReady = computed(() => hasHoldout.value && hasProvider.value && hasReaderCalibration.value);
+const craftReleaseStatus = computed(() => craftReleaseReady.value ? "可进入发布审阅" : "仅实验，不进入默认创作");
+const craftEvidenceNote = computed(() => craftReleaseReady.value ? "三类证据已齐全，仍需作者确认发布范围。" : "缺少 holdout、实际 provider 用量或盲评校准时，模式不会进入默认创作。" );
 
 const emit = defineEmits<{
   action: [action: CreationLoopAction];
@@ -63,6 +87,8 @@ function runEntry(item: PlotPilotLearningItem) {
   }
   if (item.entryAction) emit("action", item.entryAction);
 }
+
+function flagClass(value: boolean) { return value ? "is-valid" : "is-missing"; }
 </script>
 
 <style scoped lang="scss">
@@ -152,6 +178,37 @@ article {
   justify-content: space-between;
   gap: 8px;
 }
+
+.craft-evidence-summary {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-bg-soft);
+}
+
+.craft-evidence-header,
+.craft-evidence-flags {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.craft-evidence-header span,
+.craft-evidence-flags span {
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.craft-evidence-header span { background: var(--app-primary-soft); color: var(--app-primary-text); }
+.craft-evidence-flags .is-valid { border: 1px solid color-mix(in srgb, var(--app-success-text) 38%, var(--app-border)); color: var(--app-success-text); }
+.craft-evidence-flags .is-missing { border: 1px solid color-mix(in srgb, var(--app-warning-text) 38%, var(--app-border)); color: var(--app-warning-text); }
+.craft-evidence-note { margin: 0; color: var(--app-text-muted); font-size: 12px; line-height: 1.45; }
 
 .item-topline {
   strong {

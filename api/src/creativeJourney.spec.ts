@@ -44,4 +44,15 @@ describe("creative journey projection", () => {
     expect(projection.unsavedState).toMatchObject({ hasDraft: false });
     expect(assessJourneyFreshness(projection, { sourceFingerprint: "different", projectionVersion: projection.projectionVersion })).toMatchObject({ freshness: "conflicted", primaryAction: "reconcile" });
   });
+
+  it("projects the authoritative active question and converges after its decision is recorded", () => {
+    const input = session([{
+      id: "message-2", clientMessageId: "client-2", role: "author", text: "A keeper hears a bell beneath the tide.", source: { kind: "author" }, createdAt: "2026-07-30T00:01:00.000Z"
+    }]);
+    const active = buildCreativeJourneyProjection(input, { activeQuestion: { questionId: "question-core-conflict", text: "What threatens the keeper?", source: "deterministic-gap" } });
+    expect(active.activeQuestion).toMatchObject({ id: "question-core-conflict", status: "active", text: "What threatens the keeper?" });
+    const answered = buildCreativeJourneyProjection(input, { answeredQuestionIds: ["question-primary-desire"] });
+    expect(answered.activeQuestion).toBeUndefined();
+    expect(answered.fingerprint).not.toBe(active.fingerprint);
+  });
 });

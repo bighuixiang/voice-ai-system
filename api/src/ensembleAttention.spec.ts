@@ -24,4 +24,9 @@ describe("ensemble attention allocation", () => {
     expect(result.unequalAttentionAllowed).toBe(true);
     expect(result.issues).not.toContain("ENSEMBLE_EQUAL_SHARE_REQUIRED");
   });
+
+  it("rejects duplicate characters and empty functional evidence", () => {
+    expect(() => recordEnsembleChapter({ ...chapter, characters: [{ ...chapter.characters[0], choices: [""] }, chapter.characters[1]] })).toThrow("ENSEMBLE_CHARACTER_ENTRY_INVALID");
+    expect(() => recordEnsembleChapter({ ...chapter, characters: [{ ...chapter.characters[0], characterId: "hero" }, { ...chapter.characters[1], characterId: "hero" }] })).toThrow("ENSEMBLE_CHARACTER_DUPLICATE");
+  });
 });

@@ -7,6 +7,7 @@ import { startBookRun, advanceBookRun, readBookRun } from "./bookRun.js";
 import { issueClosureCertificate } from "./closureCertificate.js";
 import { issueQuiescenceProof } from "./quiescenceProof.js";
 import { runBookCompletionAudit } from "./completionAudit.js";
+import { readBookRunImpactSubgraph } from "./bookRunImpact.js";
 
 function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
 async function fixture(): Promise<string> { return fs.mkdtemp(path.join(os.tmpdir(), "completion-audit-")); }
@@ -38,7 +39,20 @@ describe("completion audit", () => {
     const audit = await runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-1" });
     expect(audit).toMatchObject({ schemaVersion: "completion-audit.v1", status: "audited_complete", bookRunId: run.bookRunId, workGraphFingerprint: scoped.graph.fingerprint });
     await expect(runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-1" })).resolves.toMatchObject({ fingerprint: audit.fingerprint });
-    await expect(runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-2" })).rejects.toThrow("COMPLETION_AUDIT_STALE");
+    const auditPath = path.join(root, "sessions/completion", `${audit.bookRunId ? (await readBookRun(root, run.bookRunId))!.completionAuditRef!.split("/").at(-1) : ""}`);
+    const persistedAudit = JSON.parse(await fs.readFile(auditPath, "utf8")) as Record<string, unknown>;
+    persistedAudit.sourceFingerprint = "tampered-source";
+    await fs.writeFile(auditPath, JSON.stringify(persistedAudit), "utf8");
+    await expect(runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-1" })).rejects.toThrow("COMPLETION_AUDIT_INTEGRITY_FAILED");
+    await fs.writeFile(auditPath, JSON.stringify(audit), "utf8");
+    const coveragePath = path.join(root, "sessions/obligations/coverage-certificate.json");
+    const coverage = JSON.parse(await fs.readFile(coveragePath, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _old, ...coverageBase } = coverage;
+    await fs.writeFile(coveragePath, JSON.stringify({ ...coverageBase, generatedAt: "2026-07-31T00:00:00.000Z", fingerprint: hash({ ...coverageBase, generatedAt: "2026-07-31T00:00:00.000Z" }) }), "utf8");
+    await expect(runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-1" })).rejects.toThrow("COMPLETION_AUDIT_STALE");
     expect((await readBookRun(root, run.bookRunId))?.status).toBe("repair_required");
+    const impactFiles = await fs.readdir(path.join(root, "sessions/book-run-impact"));
+    expect(impactFiles).toHaveLength(1);
+    expect((await readBookRunImpactSubgraph(root, impactFiles[0].replace(/\.json$/, "")))?.affectedWorkItemIds).toHaveLength(1);
   });
 });

@@ -2,13 +2,51 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { evaluateReleaseAcceptance } from "./releaseAcceptance.js";
+import { assertReleaseAcceptanceIntegrity, evaluateReleaseAcceptance, persistReleaseAcceptance, readPersistedReleaseAcceptance } from "./releaseAcceptance.js";
 import crypto from "node:crypto";
 
 const roots: string[] = [];
 afterEach(async () => { delete process.env.NOVELS_ROOT; await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true }))); });
 
 describe("release acceptance gate", () => {
+  it("persists an integrity-checked acceptance decision and is idempotent", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "release-acceptance-persisted-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const decision = await evaluateReleaseAcceptance();
+    const first = await persistReleaseAcceptance(root, decision);
+    const second = await persistReleaseAcceptance(root, { ...decision, evaluatedAt: new Date(Date.now() + 1000).toISOString() });
+    expect(second).toEqual(first);
+    await expect(readPersistedReleaseAcceptance(root)).resolves.toEqual(first);
+  });
+
+  it("fails closed when the persisted acceptance fingerprint is tampered", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "release-acceptance-tamper-"));
+    roots.push(root);
+    process.env.NOVELS_ROOT = root;
+    const decision = await evaluateReleaseAcceptance();
+    await persistReleaseAcceptance(root, decision);
+    const target = path.join(root, "release-acceptance.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    value.fingerprint = "f".repeat(64);
+    await fs.writeFile(target, `${JSON.stringify(value)}\n`, "utf8");
+    await expect(readPersistedReleaseAcceptance(root)).rejects.toThrow("RELEASE_ACCEPTANCE_CORRUPT");
+  });
+
+  it("rejects a rehashed acceptance decision with malformed checks", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "release-acceptance-semantic-"));
+    roots.push(root);
+    const base = {
+      schemaVersion: "release-acceptance.v1", releaseProfile: "RP5-drafting", status: "accepted",
+      checks: [{ checkId: "not-a-real-check", status: "passed", evidence: [], reason: " forged " }],
+      evaluatedAt: new Date().toISOString()
+    };
+    const { evaluatedAt: _evaluatedAt, ...stableBase } = base;
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(stableBase)).digest("hex");
+    await fs.writeFile(path.join(root, "release-acceptance.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    await expect(readPersistedReleaseAcceptance(root)).rejects.toThrow("RELEASE_ACCEPTANCE_CORRUPT");
+  });
+
   it("returns do-not-activate with explicit missing evidence instead of inferring readiness", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "release-acceptance-"));
     roots.push(root);
@@ -22,6 +60,19 @@ describe("release acceptance gate", () => {
       expect.objectContaining({ checkId: "v2-independent-review", status: "missing" }),
       expect.objectContaining({ checkId: "delivery-proof", status: "missing" })
     ]));
+  });
+
+  it("rejects a rehashed accepted decision with any missing check", () => {
+    const base = { schemaVersion: "release-acceptance.v1" as const, releaseProfile: "RP5-drafting" as const, status: "accepted" as const, checks: [
+      { checkId: "migration-cutover" as const, status: "missing" as const, evidence: [], reason: "missing" },
+      { checkId: "external-calibration" as const, status: "passed" as const, evidence: [], reason: "ok" },
+      { checkId: "governed-e2e" as const, status: "passed" as const, evidence: [], reason: "ok" },
+      { checkId: "v2-independent-review" as const, status: "passed" as const, evidence: [], reason: "ok" },
+      { checkId: "delivery-proof" as const, status: "passed" as const, evidence: [], reason: "ok" }
+    ], evaluatedAt: new Date().toISOString() };
+    const stable = { ...base, evaluatedAt: undefined };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify({ ...stable, evaluatedAt: undefined })).digest("hex");
+    expect(() => assertReleaseAcceptanceIntegrity({ ...base, fingerprint })).toThrow("RELEASE_ACCEPTANCE_INTEGRITY_FAILED");
   });
 
   it("keeps the acceptance fingerprint stable when evidence is unchanged", async () => {
@@ -114,6 +165,23 @@ describe("release acceptance gate", () => {
     await fs.writeFile(path.join(root, "demo", "sessions", "quality-calibration-evidence.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
     process.env.NOVELS_ROOT = root;
     const decision = await evaluateReleaseAcceptance();
+    expect(decision.checks.find((check) => check.checkId === "external-calibration")).toMatchObject({ status: "missing" });
+  });
+
+  it("does not accept a self-hashed calibration artifact with duplicate holdout cases", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "release-acceptance-calibration-duplicate-cases-"));
+    roots.push(root);
+    await fs.mkdir(path.join(root, "demo", "sessions"), { recursive: true });
+    await fs.writeFile(path.join(root, "demo", "project.json"), JSON.stringify({ slug: "demo", chapters: [] }), "utf8");
+    const base = {
+      schemaVersion: "quality-calibration-evidence.v1", calibrationId: "calibration-duplicate-cases", evaluatorVersion: "provider-v1", sourceKind: "provider", split: "holdout", caseIds: ["case-1", "case-1"], inputFingerprint: "holdout-1", evaluatedCount: 2, correctCount: 2, accuracy: 1, minimumAccuracy: 0.8, status: "calibrated", canonGateEligible: false, labelAccess: "sealed-separate-from-evaluator-input", attestation: { kind: "provider-signed", reference: "attestation://provider/duplicate-cases" }, evidenceRefs: ["audit://provider/duplicate-cases"], createdAt: new Date().toISOString()
+    };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.writeFile(path.join(root, "demo", "sessions", "quality-calibration-evidence.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    process.env.NOVELS_ROOT = root;
+
+    const decision = await evaluateReleaseAcceptance();
+
     expect(decision.checks.find((check) => check.checkId === "external-calibration")).toMatchObject({ status: "missing" });
   });
 

@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-export type CharacterRevisionDependencyKind = "arc" | "relationship" | "obligation" | "chapter" | "voice" | "state";
+export type CharacterRevisionDependencyKind = "arc" | "relationship" | "obligation" | "chapter" | "voice" | "state" | "outline" | "prose" | "knowledge" | "presence" | "reader-experience" | "ending";
 export interface CharacterRevisionDependency { dependencyId: string; kind: CharacterRevisionDependencyKind; characterId: string; references: string[]; status: "current" | "stale"; projectSlug?: string; }
 export interface CharacterRevisionImpact { schemaVersion: "character-revision-impact.v1"; revisionId: string; projectSlug: string; characterId: string; staleDependencyIds: string[]; unchangedDependencyIds: string[]; minimumActions: string[]; issues: string[]; sourceRefs: string[]; fingerprint: string; }
 const hash = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");

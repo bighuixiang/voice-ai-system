@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-calibration-history-filename-binding",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Calibration history records must bind their filename to calibrationId.",
+    "A validly hashed evidence record copied under another filename must fail closed during history reads."
+  ],
+  "implementationRefs": [
+    "api/src/qualityCalibration.ts:readQualityCalibrationEvidenceHistory",
+    "api/src/qualityCalibration.spec.ts:history filename does not match calibration identity"
+  ],
+  "tests": {
+    "red": "A validly hashed calibration record under calibration-other.json was accepted as history for calibration-real.",
+    "green": "qualityCalibration.spec.ts passed 17/17 after filename identity binding was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete.",
+    "Complete migration cutover across all legacy-capable surfaces remains unproven."
+  ]
+}

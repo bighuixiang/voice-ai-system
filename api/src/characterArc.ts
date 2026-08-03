@@ -30,11 +30,37 @@ function hash(value: unknown): string { return crypto.createHash("sha256").updat
 function arcPath(root: string, arcId: string): string { return resolveInside(root, `sessions/character-arcs/${arcId}.json`); }
 async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const temp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(temp, target); }
 async function readJson<T>(target: string): Promise<T | null> { try { return JSON.parse(await fs.readFile(target, "utf8")) as T; } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
-export async function readCharacterArcContract(root: string, arcId: string): Promise<CharacterArcContract | null> { return readJson<CharacterArcContract>(arcPath(root, arcId)); }
+function nonEmptyString(value: unknown): value is string { return typeof value === "string" && value.trim().length > 0; }
+function nonEmptyStringArray(value: unknown): value is string[] { return Array.isArray(value) && value.length > 0 && value.every(nonEmptyString); }
+function stringArray(value: unknown): value is string[] { return Array.isArray(value) && value.every(nonEmptyString); }
+export function assertCharacterArcContractIntegrity(arc: CharacterArcContract, expectedId?: string): CharacterArcContract {
+  const { fingerprint, ...base } = arc;
+  const milestonesValid = Array.isArray(arc.milestones) && arc.milestones.every((milestone) => Boolean(
+    milestone && nonEmptyString(milestone.milestoneId) && nonEmptyString(milestone.choiceEvidenceId) &&
+    nonEmptyString(milestone.milestone) && nonEmptyString(milestone.actualChange) &&
+    nonEmptyStringArray(milestone.sourceRefs) && nonEmptyString(milestone.recordedAt) &&
+    Number.isFinite(Date.parse(milestone.recordedAt))
+  )) && new Set(arc.milestones.map((milestone) => milestone.milestoneId)).size === arc.milestones.length &&
+    new Set(arc.milestones.map((milestone) => milestone.choiceEvidenceId)).size === arc.milestones.length;
+  const valid = arc.schemaVersion === "character-arc-contract.v1" && (!expectedId || arc.arcId === expectedId) &&
+    [arc.arcId, arc.projectSlug, arc.characterId, arc.dramaticContractId, arc.startState, arc.targetChange, arc.allowedRegression, arc.createdAt, arc.updatedAt].every(nonEmptyString) &&
+    [arc.keyPressures, arc.plannedChoices, arc.plannedCosts, arc.sourceRefs].every(nonEmptyStringArray) && stringArray(arc.relationshipImpacts) &&
+    ["planned", "active", "closed"].includes(arc.lifecycle) && milestonesValid &&
+    /^[a-f0-9]{64}$/i.test(arc.fingerprint) && hash(base) === arc.fingerprint;
+  if (!valid) throw new Error("CHARACTER_ARC_INTEGRITY_FAILED");
+  return arc;
+}
+export async function readCharacterArcContract(root: string, arcId: string): Promise<CharacterArcContract | null> {
+  const arc = await readJson<CharacterArcContract>(arcPath(root, arcId));
+  return arc ? assertCharacterArcContractIntegrity(arc, arcId) : null;
+}
 export async function listCharacterArcContracts(root: string, projectSlug: string, characterId?: string): Promise<CharacterArcContract[]> {
   const directory = resolveInside(root, "sessions/character-arcs"); let names: string[];
   try { names = await fs.readdir(directory); } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return []; throw error; }
-  const records = await Promise.all(names.filter((name) => name.endsWith(".json")).map((name) => readJson<CharacterArcContract>(path.join(directory, name))));
+  const records = await Promise.all(names.filter((name) => name.endsWith(".json")).map(async (name) => {
+    const record = await readJson<CharacterArcContract>(path.join(directory, name));
+    return record ? assertCharacterArcContractIntegrity(record, name.slice(0, -5)) : null;
+  }));
   return records.filter((record): record is CharacterArcContract => Boolean(record && record.projectSlug === projectSlug && (!characterId || record.characterId === characterId))).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 export async function createCharacterArcContract(input: { root: string; projectSlug: string; characterId: string; dramaticContractId: string; startState: string; targetChange: string; keyPressures: readonly string[]; plannedChoices: readonly string[]; plannedCosts: readonly string[]; relationshipImpacts: readonly string[]; allowedRegression: string; sourceRefs: readonly string[] }): Promise<CharacterArcContract> {
@@ -55,6 +81,7 @@ export async function recordCharacterArcMilestone(input: { root: string; arcId: 
   if (!input.milestone.trim() || !input.actualChange.trim() || !input.sourceRefs.length) throw new Error("CHARACTER_ARC_MILESTONE_REQUIRED");
   const existing = arc.milestones.find((item) => item.choiceEvidenceId === input.choiceEvidenceId); if (existing) return arc;
   const milestoneBase = { milestoneId: `arc-milestone-${hash({ arc: arc.arcId, evidence: input.choiceEvidenceId }).slice(0, 16)}`, choiceEvidenceId: input.choiceEvidenceId, milestone: input.milestone, actualChange: input.actualChange, sourceRefs: [...input.sourceRefs], recordedAt: new Date().toISOString() };
-  const base = { ...arc, lifecycle: "active" as const, milestones: [...arc.milestones, milestoneBase], updatedAt: new Date().toISOString() };
+  const { fingerprint: _oldFingerprint, ...arcWithoutFingerprint } = arc;
+  const base = { ...arcWithoutFingerprint, lifecycle: "active" as const, milestones: [...arc.milestones, milestoneBase], updatedAt: new Date().toISOString() };
   const updated: CharacterArcContract = { ...base, fingerprint: hash(base) }; await writeJson(arcPath(input.root, arc.arcId), updated); return updated;
 }

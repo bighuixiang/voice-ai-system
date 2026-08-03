@@ -36,6 +36,15 @@ describe("CreativeSessionPanel", () => {
     expect(wrapper.emitted("submit")).toEqual([["Keep the mysterious letter."]]);
   });
 
+  it("keeps the low-input author field writable while the session hydrates", async () => {
+    const wrapper = mount(CreativeSessionPanel, { props: { session: null, loading: true } });
+    const input = wrapper.get('textarea[aria-label="Author input"]');
+
+    expect((input.element as HTMLTextAreaElement).disabled).toBe(false);
+    await input.setValue("A short idea while the workspace is loading.");
+    expect((wrapper.get('button[type="submit"]').element as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it("offers an explicit T0 freeze action without changing the preview", async () => {
     const wrapper = mount(CreativeSessionPanel, {
       props: {
@@ -133,6 +142,35 @@ describe("CreativeSessionPanel", () => {
     await wrapper.get('[data-testid="dialogue-answer-form"]').trigger("submit");
 
     expect(wrapper.emitted("answer")).toEqual([["Find the lost name", "confirmed"]]);
+  });
+
+  it("shows the governed red-blue evidence before the author answers", () => {
+    const wrapper = mount(CreativeSessionPanel, {
+      props: {
+        session: null,
+        question: {
+          schemaVersion: "dialogue-question.v1", questionId: "question-primary-desire", questionVersion: 1, projectSlug: "demo", status: "active", text: "What must the protagonist want most?", whyNow: "The contract depends on this.", impact: "high", ambiguity: 0.8, errorCost: "Wrong opening", reversibility: "Reversible", delayCost: "Blocks progress", options: ["Expose the truth", "Protect the family"], recommendation: "Expose the truth", snapshotFingerprint: "b".repeat(64),
+          redBlueCase: { caseId: "red-blue-question-primary-desire-1", status: "open", options: [{ optionId: "a", label: "Expose the truth", claim: "Shared proof", bestCase: "Trust grows", failureModes: ["Too early"], opportunityCost: "Privacy", reversibility: "low", uncertainty: "high" }, { optionId: "b", label: "Protect the family", claim: "Safety first", bestCase: "Stability", failureModes: ["Truth delayed"], opportunityCost: "Momentum", reversibility: "medium", uncertainty: "medium" }], sharedFacts: ["The opening depends on this."], irreducibleTradeoff: "Truth versus safety.", recommendation: "Expose the truth", recommendationReason: "It best serves the stated promise.", dissent: ["Safety remains viable."], whatWouldChangeRecommendation: ["Author correction"], fingerprint: "c".repeat(64) }
+        }
+      }
+    });
+    expect(wrapper.get('[data-testid="red-blue-case"]').text()).toContain("Truth versus safety.");
+    expect(wrapper.get('[data-testid="red-blue-case"]').text()).toContain("Expose the truth");
+  });
+
+  it("uses a red-blue option as a draft without submitting or adopting it", async () => {
+    const wrapper = mount(CreativeSessionPanel, {
+      props: {
+        session: null,
+        question: {
+          schemaVersion: "dialogue-question.v1", questionId: "q", questionVersion: 1, projectSlug: "demo", status: "active", text: "Choose", whyNow: "Now", impact: "high", ambiguity: 0.8, errorCost: "high", reversibility: "low", delayCost: "medium", options: ["A", "B"], recommendation: "A", snapshotFingerprint: "f".repeat(64),
+          redBlueCase: { caseId: "case", status: "open", options: [{ optionId: "a", label: "A", claim: "claim", bestCase: "best", failureModes: ["risk"], opportunityCost: "cost", reversibility: "low", uncertainty: "high" }, { optionId: "b", label: "B", claim: "claim", bestCase: "best", failureModes: ["risk"], opportunityCost: "cost", reversibility: "medium", uncertainty: "medium" }], sharedFacts: ["fact"], irreducibleTradeoff: "tradeoff", recommendation: "A", recommendationReason: "reason", dissent: [], whatWouldChangeRecommendation: [], fingerprint: "c".repeat(64) }
+        }
+      }
+    });
+    await wrapper.get('[data-testid="red-blue-option-a"]').trigger("click");
+    expect(((wrapper.get('[data-testid="dialogue-answer"]') as any).element as HTMLTextAreaElement).value).toBe("A");
+    expect(wrapper.emitted("answer")).toBeUndefined();
   });
 
   it("offers question preparation when understanding has no durable question yet", async () => {

@@ -18,4 +18,9 @@ describe("collaboration message", () => {
     const result = parseCollaborationMessage("今天天气不错");
     expect(result.events[0]).toMatchObject({ type: "unrelated" });
   });
+
+  it("classifies otherwise-natural text as an answer when a blocking question is active", () => {
+    const result = parseCollaborationMessage("保护钟声，不让潮水带走它", { activeQuestionId: "question-primary-desire" });
+    expect(result.events[0]).toMatchObject({ type: "answer", text: "保护钟声，不让潮水带走它" });
+  });
 });

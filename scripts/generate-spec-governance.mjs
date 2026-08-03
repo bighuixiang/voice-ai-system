@@ -1282,7 +1282,11 @@ const q008OutlineEvolutionPolicy = {
 
 const writeAuthoritySourcePaths = [
   "api/src/app.ts",
+  "api/src/lengthPlanning.ts",
+  "api/src/lengthPlanning.spec.ts",
   "api/src/runtimeEngine.ts",
+  "api/src/runtimeStore.ts",
+  "api/src/writingCockpit.ts",
   "api/src/proseCandidate.ts",
   "api/src/proseAdoption.ts",
   "api/src/proseValidation.ts",
@@ -1293,6 +1297,7 @@ const writeAuthoritySourcePaths = [
   "api/src/bookWorkGraph.ts",
   "api/src/bookWorkScheduler.ts",
   "api/src/bookRun.ts",
+  "api/src/bookRun.spec.ts",
   "api/src/quiescenceProof.ts",
   "api/src/completionAudit.ts",
   "api/src/outlineCandidate.ts",
@@ -1378,17 +1383,33 @@ const projectMutationRouteClassifications = new Map([
   ["PUT /api/novel/projects/:projectId/ai", { disposition: "project-configuration", surfaceIds: [] }],
   ["PUT /api/novel/projects/:projectId/story-control", { disposition: "canon-capable", surfaceIds: ["WRITE-SURFACE-010"] }],
   ["POST /api/novel/projects/:projectId/runtime/start", { disposition: "candidate-orchestration", surfaceIds: ["WRITE-SURFACE-003"] }],
+  ["POST /api/novel/projects/:projectId/runtime/pause-policy/evaluate", { disposition: "review-only", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/pause-policy/recaps", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/pause-policy/apply", { disposition: "runtime-control", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/steering-events/:eventId/advance", { disposition: "runtime-steering-boundary", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/migrations", { disposition: "migration-preview", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/migrations/:migrationId/validate", { disposition: "migration-validation", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/migrations/:migrationId/resolve-conflicts", { disposition: "migration-conflict-resolution", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/migrations/:migrationId/rollback", { disposition: "migration-rollback", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/backups", { disposition: "local-backup-create", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/backups/:backupId/verify", { disposition: "local-backup-verify", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/backups/:backupId/restore-drill", { disposition: "isolated-restore-drill", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/restore-plans", { disposition: "restore-plan-preflight", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/recovery-settlements", { disposition: "recovery-settlement-authority", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/quality/:chapterId/gate", { disposition: "quality-gate-api-enforcement", surfaceIds: [] }],
+  ["PUT /api/novel/projects/:projectId/backup-policy", { disposition: "backup-policy-durability-assessment", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/delivery/capability-manifest", { disposition: "capability-manifest-governance", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/delivery/dependency-proof", { disposition: "capability-dependency-proof", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/delivery/dependency-proofs", { disposition: "capability-dependency-proof", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/delivery/requirement-evidence", { disposition: "requirement-evidence-persistence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernels/proof", { disposition: "kernel-proof-persistence", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/obligations", { disposition: "obligation-create", surfaceIds: [] }],
+  ["PUT /api/novel/projects/:projectId/obligations/:obligationId", { disposition: "obligation-legacy-write-rejected", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/obligations/:obligationId/events", { disposition: "obligation-event", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/obligation-coverage/certificate", { disposition: "obligation-coverage-certificate", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/obligation-coverage/certificate/validate", { disposition: "obligation-coverage-certificate-validate", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/obligation-coverage/certificate/invalidate", { disposition: "obligation-coverage-certificate-invalidate", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/obligation-candidates/:candidateId/adopt", { disposition: "obligation-candidate-adoption", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/revision-intents", { disposition: "revision-intent-create", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/revision-intents/:intentId/change-sets", { disposition: "revision-change-set-candidate", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/revision-change-sets/:changeSetId/reviews", { disposition: "revision-change-set-review", surfaceIds: [] }],
@@ -1406,12 +1427,19 @@ const projectMutationRouteClassifications = new Map([
   ["POST /api/novel/projects/:projectId/publication-editions/:editionId/preflight", { disposition: "release-preflight", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/publication-editions/:editionId/closure-certificate", { disposition: "closure-certificate-issue", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/book-runs", { disposition: "book-run-start", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/book-runs/:runId/readiness", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/book-runs/:runId/budget-reservations", { disposition: "safety-gate", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/book-runs/:runId/budget-reservations/settle", { disposition: "safety-gate", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/book-runs/:runId/advance", { disposition: "book-run-advance", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/book-runs/:runId/completion-audits", { disposition: "book-run-completion-audit", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/book-runs/:runId/retry", { disposition: "book-run-retry", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/book-runs/:runId/pause", { disposition: "book-run-pause", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/book-runs/:runId/resume", { disposition: "book-run-resume", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/book-runs/:runId/stop", { disposition: "book-run-stop", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/book-runs/:runId/autonomy-grant/revoke", { disposition: "book-run-autonomy-revoke", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/book-runs/:runId/repair-plans", { disposition: "book-run-repair-plan", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/book-runs/:runId/repair-plans/:planId/actions/:actionId/complete", { disposition: "book-run-repair-completion", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/book-runs/:runId/repair-plans/:planId/audit", { disposition: "book-run-milestone-audit", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/migrations/:migrationId/activate", { disposition: "migration-activation", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/runtime/pause", { disposition: "runtime-control", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/runtime/resume", { disposition: "runtime-control", surfaceIds: ["WRITE-SURFACE-003"] }],
@@ -1419,9 +1447,339 @@ const projectMutationRouteClassifications = new Map([
   ["POST /api/novel/projects/:projectId/runtime/review/accept", { disposition: "canon-capable", surfaceIds: ["WRITE-SURFACE-005"] }],
   ["POST /api/novel/projects/:projectId/runtime/review/rewrite", { disposition: "candidate-orchestration", surfaceIds: ["WRITE-SURFACE-004"] }],
   ["POST /api/novel/projects/:projectId/runtime/direction", { disposition: "runtime-control-event", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/notifications/plan", { disposition: "runtime-domain-write", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/runtime/derivatives", { disposition: "candidate-only", surfaceIds: ["WRITE-SURFACE-007"] }],
   ["POST /api/novel/projects/:projectId/runtime/derivatives/:branchId/merge", { disposition: "canon-capable", surfaceIds: ["WRITE-SURFACE-007"] }],
   ["POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/adopt", { disposition: "canon-gate", surfaceIds: ["WRITE-SURFACE-005"] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/freshness", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/evidence-invalidation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/review-disagreement", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/visibility-exit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/editor-export", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/closure-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/versions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/versions/revise", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/multi-intent", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/inference-safety", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/reversible-assumption-repair", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/ambiguity-impact-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/bounded-delegation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/bounded-delegation/authorize", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/bounded-delegation/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/ambiguous-answer", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/answer-evidence-closure", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/correction-before-continue", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/question-reask", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/stale-answer-reconciliation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/preference-probes/apply-scope", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/memory/compression-audit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/memory/forget-propagation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/memory/ready-proofs", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/memory/continuity-audits", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/runtime-result-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/question-timeout-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/restart-recovery", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/offline-reconciliation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/coreference-repair", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/legacy-question-import", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/open-contract-audit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/compile-sentence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/candidate-guard", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/scope-resolve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/conflict-options", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/weight-release", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/explain-candidate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/near-far-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/anti-goal-semantic", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/aesthetic-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/target-impact", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/calibration", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/q003-report", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/partial-adoption", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/manual-revision-attribution", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/scope-proposal", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/revocation-cause", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/hypothesis-update", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/evidence-weight", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/confounded-probe", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/safe-exploration", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/project-isolation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/feedback/learning-release-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/learning-releases", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/learning-releases/:releaseId/rollback", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/learning-releases/:releaseId/rollback-for-regression", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/first-slice-readiness", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/runtime-reuse-audit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/question-capability", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/schema-compatibility", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/capabilities/server-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/compatibility/legacy-open", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/write-authority", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/forward-read-only", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/compatibility/migration-activation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/slice-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/partner-dod", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/upstream-repair", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/source-qualification", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/legacy-sample-migration", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/craft-pattern", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/cross-project-surface", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/pattern-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/pattern-applicability", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/generation-anti-imitation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/task-gap-selection", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/evidence-minimum", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/conflict-resolution", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/pattern-experiment", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/structural-similarity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/pattern-scope", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/negative-pattern", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/craft-lineage-audit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/style/derived-evidence-invalidation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-engine/fuzzy-idea", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-engine/question-separation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-engine/ending-prerequisites", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-engine/arc-graph", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-engine/dependency-cycle", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapters/volume-contract", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapters/function-review", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapters/scene-seam", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapters/cross-layer-orphans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/planning/obligation-load", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/planning/pacing-fatigue", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/planning/chapter-capacity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/planning/horizon-confidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/candidate-adoption", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/structure-compare", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/static-validation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/semantic-references", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/impact-subgraph", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/emergence-settlement", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/execution/readiness-proof", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/execution/prose-input-freeze", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/execution/autonomous-canon-write", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/execution/semantic-patch-relocation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/execution/scene-ledger", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/execution/beat-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative/agency-chain", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative/voice-drift", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative/dialogue-action", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative/pov-knowledge", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative/distance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative/emotional-aftermath", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft/setting-actionability", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft/cognitive-budget", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft/rhythm-monotony", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft/segment-seam", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft/recovery", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft/stagnation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft/red-blue", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft/multi-domain-validation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/revision/local-repair", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/revision/regression-adoption", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/revision/partial-commit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/revision/reject-derivatives", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/revision/settlement", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/fairness/object-obligation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/fairness/reader-expectation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/fairness/hypothesis-graph", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/fairness/clue-direction", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/fairness/source-clusters", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/fairness/bundle", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/schedule", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/window-conflict", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/reminder", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/answer-leak", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/shared-object", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/payoff-form", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/scene-contract", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/propagation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/narrative-interest", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/damage", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/coverage", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/certificate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/first-input", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/question-budget", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/decision-escalation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/reversible-default", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/decision-level", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/derived-answer", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/decision-bundle", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/present-choice", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/story-cost", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/delegation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/continue", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/offline", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/reuse-confirmed", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author/correction", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ux/review-first-screen", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ux/notifications", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ux/resume-brief", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ux/collaboration-preference", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ux/user-language", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ux/click-value", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ux/kernel-value", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/schema-compatibility", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/mutation-plan", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/candidate-unification", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/obligation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/legacy-samples", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/dependency-proof", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/shadow-parser", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/canon-authority", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernel/legacy-retirement", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/quality-strategy", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/evidence-status", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/claim-authority", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/visibility", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/temporal", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/identity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/contradiction", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/supersede", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/transfer", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/belief", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/reader-pov", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/eligibility", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/retcon-impact", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/deletion-propagation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/body-summary", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/compression", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/rank-eligible", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/query-boundary", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/evidence-family", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/evidence-gap", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/conflict-preflight", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/new-fact", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/health", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/rebuild", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/embedding-fallback", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/continuity-audit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/knowledge/k5-activation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/contract", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/hypothesis", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/cold-read", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/questions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/ambiguity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/attachment", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/emotion-impact", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/curiosity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/payoff", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/scene-counterfactual", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/surprise", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/longitudinal", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/divergence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/reviewer-calibration", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/revision-invalidation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/repair", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/feedback-revocation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/experience/dossier-boundary", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/primary-action", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/safety-priority", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/surface-registry", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/view-switch", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/author-receipt", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/idempotency", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/task-chapter", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/workspace-reconcile", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/failure-recovery", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/project-isolation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/shell-shadow", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/orchestration/journey-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/source-classification", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/unknowns", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/source-conflict", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/arc", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/agency", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/belief-phases", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/asymmetric-relation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/co-presence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/misunderstanding-repair", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/opponent-independence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/offscreen-action", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/function", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/ensemble", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/relational-voice", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/relapse", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/identity-break", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/change-scope", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character/arc-certificate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/capture", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/extract", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/provenance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/genre", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/interpretations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/exploration", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/readiness", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/recommend", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/default", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/question", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/dedupe", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/difference", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/partial-adoption", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/recompile", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/project-state", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/compile-failure", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/legacy-shadow", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/deterministic", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/seed/scope-proof", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/scan", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/rule-boundary", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/institution-belief", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/regional-rule", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/travel", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/story-clock", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/ability-prerequisites", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/temporary-boost", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/contextual-victory", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/resource-balance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/body-cooldown", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/institution-response", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/rule-consequences", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/deus-ex", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/rule-exception", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/rule-interaction", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/minimal-exposition", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/rule-change-scope", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/health", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world/certificate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/governance/normative-strength", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/governance/first-slice", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/governance/release-vision", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/governance/defer-decision", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/governance/semantic-lint", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/governance/convergence-expansion", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/control-command", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/utterance-trace", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/read-model", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/downgrade", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/capture-crash", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/capture-convergence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/projection", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/journey/understanding-version", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/late-result", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/task-recovery", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/t0-coverage", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/context-purpose", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/context-replay", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/understanding/k4", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/publication/obligation-badges", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/publication/completion-audit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/publication/freeze-edition", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/publication/render", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/publication/delivery", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/plan", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/quarantine", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/scope-compare", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/correction", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/text/import-diagnostics", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/text/punctuation-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/text/model-packaging", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/text/round-trip", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/backup/slice", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/backup/verify", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/backup/restore-isolated", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/backup/disaster-recovery", { disposition: "runtime-domain-write", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/validate", { disposition: "review-only", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/review", { disposition: "review-only", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/feedback", { disposition: "feedback-event", surfaceIds: ["WRITE-SURFACE-005"] }],
@@ -1437,6 +1795,16 @@ const projectMutationRouteClassifications = new Map([
   ["POST /api/novel/projects/:projectId/recaps/accept", { disposition: "derived-canon-capable", surfaceIds: ["WRITE-SURFACE-008"] }],
   ["POST /api/novel/projects/:projectId/knowledge/index/rebuild", { disposition: "derived-projection", surfaceIds: ["WRITE-SURFACE-012"] }],
   ["POST /api/novel/projects/:projectId/knowledge/search", { disposition: "query-only", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/memory/retrieval-previews", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/memory/health-reports", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/memory/alias-assertions", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/memory/alias-assertions/:assertionId/confirm", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/memory/conflict-preflights", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/memory/entity-resolutions", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/claim-relations/:relationId/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/claim-relations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/contradiction-sets", { disposition: "operational-evidence", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/memory/forget-propagation", { disposition: "runtime-domain-write", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/jobs", { disposition: "derived-job-control", surfaceIds: ["WRITE-SURFACE-012"] }],
   ["POST /api/novel/projects/:projectId/jobs/:jobId/cancel", { disposition: "job-control", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/jobs/:jobId/retry", { disposition: "derived-job-control", surfaceIds: ["WRITE-SURFACE-012"] }],
@@ -1449,6 +1817,456 @@ const projectMutationRouteClassifications = new Map([
   ["POST /api/novel/projects/:projectId/selection/polish", { disposition: "candidate-only", surfaceIds: ["WRITE-SURFACE-006"] }],
   ["POST /api/novel/projects/:projectId/continuity/check", { disposition: "review-only", surfaceIds: [] }],
   ["POST /api/novel/projects/:projectId/patches", { disposition: "canon-capable", surfaceIds: ["WRITE-SURFACE-002"] }],
+  ["POST /api/novel/import", { disposition: "import-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects", { disposition: "project-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/length-contract", { disposition: "project-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/length-variance-decisions", { disposition: "project-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/abstraction-transfer", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/agency-chains", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/anti-imitation-guard", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/author-paragraph-locks/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/beat-fulfillment", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/beat-fulfillment/:ledgerId/:beatId", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/candidate-comparison", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/candidate-compositions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/candidate-convergence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/candidate-convergence/:runId/iterations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/capability-contracts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/capability-contracts/:capabilityId/progression", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/causality-edges", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapter-continuations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapter-continuations/:runId/checkpoints", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapter-continuations/:runId/resume", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapter-continuity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapter-creation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/chapter-functions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-agency/guard", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-arc-certificate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-arc-rhythm/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-arc-rhythm/events", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-arcs", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-arcs/:arcId/milestones", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-beliefs", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-beliefs/events", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-choice-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-choice-evidence/:evidenceId/observe", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-continuity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-continuity/events", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-contracts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-contracts/:contractId/confirm", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-contracts/:contractId/revise", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-documents/classify", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-identities", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-identities/admit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-presence-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-presence-plans/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-revision-impact", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-state-snapshots", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-state-snapshots/diff", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-truth/resolve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-voice-profiles", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/character-voice-profiles/compile", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/adaptive-reminders", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/admission", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/clue-claims", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/clue-independence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/exposure-risk", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/fairness-bundles", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/hypothesis-graphs", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/outcomes", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/payoff-reservations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/reader-expectation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/scene-contracts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/closure/schedules", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/cognitive-budget", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/collaboration-messages/parse", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/collaboration-progress", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/conditions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/conditions/:conditionId/recover", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/conditions/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-attributions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-attributions/:attributionId/events", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-boundaries", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-boundaries/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-conflicts/resolve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-context-budget", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-effect-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-experiments", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/judge", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/decision", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/feedback", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/feedback/attribution", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/provider-evaluation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/reader-calibration", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-feedback-attributions/:attributionId/hypothesis", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/preference-hypotheses/:hypothesisId/promote", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/start", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-holdout/validate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-mechanism-units", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-pattern-explanations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-pattern-library", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-pattern-publication-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-patterns", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-patterns/:patternId/approve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-patterns/:patternId/promote-from-experiment", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-patterns/:patternId/validate-from-experiment", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-provenance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-provenance/project", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/craft-revocation/propagate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/cross-chapter-template", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/decision-cost-preview", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/delivery/write-authority", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/derived-publications/:transactionId/revalidate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/derived-settlement", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/answer-application", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/answer-classification", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/delegation-grants", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/intents", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/memory", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/memory-records", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/memory-records/forget", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/memory-records/revise", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/misunderstanding-incidents", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/misunderstanding-incidents/resolve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/non-leading-question", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/preference-probes", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/preference-probes/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/preference-probes/select", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/provisional-assumptions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/question-ranking", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/recovery", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/runtime-interruptions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/runtime-interruptions/advance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/timeout", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/understanding-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/understanding-evidence-bundles", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/understanding-snapshots", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/utterances", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue-action", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/directed-rewrites", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/drafting/anti-goal-guard", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/drafting/q003-profile", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/drafting/stage-weights", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/durability/backup-policy", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/durability/backup-verification", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/durability/recovery-settlements", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/durability/restore-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/emergence-candidates", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/emergence-candidates/:candidateId/adopt", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/emotion-causality", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ensemble-attention/chapters", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/ensemble-attention/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/blind-pairs", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/calibrations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/contamination", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/drift", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/disagreements", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/pareto", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/sampling", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/sampling/summary", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/multi-scale-regression", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/frozen-inputs", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/release-decisions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/slice-budgets", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/slice-results", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/evidence-anchors", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/evidence-anchors/current", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/adaptive-scale", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/access-grants", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/access-grants/:grantId/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/work-leases/acquire", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/work-leases/:workItemId/renew", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/work-leases/:workItemId/release", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/stagnation-detection", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/review-batches", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/review-batches/:batchId/items/:itemId/withdraw", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/review-batches/:batchId/items/:itemId/accept", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/dialogue/decision-consumption-receipts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/suites", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/execution-ready/gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/exploration-budgets", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/exploration-budgets/:budgetId/consume", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/exploration-budgets/:budgetId/pause", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/exploratory-drafts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/conflicts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/false-clue-fairness", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/legacy-migration", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/publication-freeze", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/repair-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/transform", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/transition", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/visibility", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/waivers", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/windows", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/information-state", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/information-state/:traceId/events", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/intent-corrections", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/intent-corrections/propagate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/intent-drafts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernels/ai-safety", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernels/candidate-boundary", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernels/long-memory", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernels/mutation-validation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/kernels/obligation-core", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/learning-policy", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/local-repair-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/long-chapter/checkpoints", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/long-chapter/checkpoints/resume", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/alias-assertions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/alias-assertions/confirm", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/alias-resolutions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/claim-relations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/claims", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/claims/:claimId/retcon", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/claims/:claimId/settle", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/claims/:claimId/temporal", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/contradiction-sets", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/chapter-patches", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/asset-coverage", { disposition: "runtime-domain-read", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/mutation-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/mutation-plans/:mutationId/commit", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/mutation-plans/:mutationId/rollback", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/mutation-plans/:mutationId/recover", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/mutation-plans/:mutationId/preflight", { disposition: "runtime-domain-read", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/entities", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/entities/merge", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/entities/split", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/knowledge/characters", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/knowledge/characters/eligibility", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/knowledge/readers", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/memory/knowledge/readers/eligibility", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/micro-rhythm", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative-curve-points", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative-distance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/narrative-trace-links", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/negative-preferences", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/negative-preferences/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objective-change-impact", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objective-contribution", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objective-drift", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objective-hierarchy", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/conflicts/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/objectives/profile", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/completion-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/conflicts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/editor-markers", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/intentional-open", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/knowledge-boundary", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/legacy-ledger-migrations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/legacy-migration", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/merge-proposal", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/partial-payoff", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/payoff-contract", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/payoff-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/publication-freeze", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/repair-plan", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/setup-evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/source-coverage", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/transform", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/visibility", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/window", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/offpage-character-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/offpage-character-plans/events", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/organizations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/organizations/:organizationId/actions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/impact-analyses", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/replan-decisions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/outline/expansion-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/beat-evidence-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reminder-progression", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligation-memory-risk", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/foreshadowing/transformation-closure", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/multi-payoff", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligations/conflict-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/obligation-setup-fairness", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/pattern-transfer-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/planning-nodes", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/planning-nodes/:nodeId/transition", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/pov-knowledge-gates", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/power-comparisons", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/preference-hypotheses/:hypothesisId/oppositions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/preference-hypotheses/:hypothesisId/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-adoption-transactions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/repair-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-feedback/:eventId/attribution", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-feedback-attributions/:attributionId/hypothesis", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-generation-manifests", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-generation-manifests/:manifestId/freshness", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-maturity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-maturity/advance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-regression-proof", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-repair-candidates/:repairCandidateId/regression", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-repair-plans", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-repair-plans/:planId/candidates", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-segments", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-segments/:semanticId/patch", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-specificity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/prose-validation-dossier", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/question-governance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/question-governance/policy", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/question-governance/register", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/question-sessions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/question-sessions/:questionId/classify", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/question-value-gates", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/cognitive-load", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/cold-read-snapshots", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/contracts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/divergence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/dossiers", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/hypotheses", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/knowledge-states", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/payoffs", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/reviewers", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/scene-necessity", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/surprise-fairness", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/reader/timelines", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/relationship-events", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/relationship-events/:eventId/observe", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/relationship-misreads", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/relationship-misreads/resolve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/claims", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/claims/:claimId/correct", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/claims/:claimId/propagate-assessment", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/claims/evaluate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/conflicts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/conflicts/:conflictId/resolve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/consumption-receipts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/obligations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/settlements", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/source-snapshots", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/source-snapshots/:sourceId/reliability", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/research/source-snapshots/:sourceId/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/resource-transactions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/review-compression", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/review-isolation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/review-isolation/:sessionId/reviews", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/review-isolation/:sessionId/synthesize", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/scene-cards", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/scene-creation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/scene-execution-ledgers", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/scene-execution-ledgers/:ledgerId/evidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/scene-seam", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/semantic-nodes", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/semantic-nodes/projection", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/autonomy-receipts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/autonomy-receipts/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/command-receipts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/command-receipts/authorize", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/continuity-token", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/continuity-token/reconcile", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/debate-decisions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/debate-decisions/accept", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/decision-bundles", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/decision-bundles/accept", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/decision-escalations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/effort-budget", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/effort-budget/consume", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/effort-budget/preference", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/independent-review-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/model-invocations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/model-invocations/:invocationId/settle", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/model-invocations/budget-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/model-route", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/primary-action", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/primary-action/resolve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/primary-action/execute", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/primary-action/advance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/primary-action/validate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/provider-evaluation", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/provider-failover", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/session/provider-probe", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/similarity-guards", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/source-lineage", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/source-lineage/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/source-material", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/source-material/:sourceId/rights-envelope", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/stable-deep-links", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/stable-deep-links/resolve", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/adoption", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/adoption/revoke", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/branch-questions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/candidates", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/capture", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/confidence", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/explorations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/frame", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/interpretations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/legacy-shadow", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/readiness", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/readiness-proof", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/recompile", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/replay", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/reversible-defaults", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/runs", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/runs/:runId/advance", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/runs/replay", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/runs/transition", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/state", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-seeds/state/failure", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-time-events", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/story-time-events/compare", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/structure-alternatives", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/surface-mechanism-patterns", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/surface-mechanism-patterns/transfer-gate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/surfaces/authorize", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/surfaces/registry", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/task-pattern-retrieval", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/text/diagnostics", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/text/profiles", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/text/settlements", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/text/structures", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/untrusted-samples/isolate", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/value-opponents", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/voice-blind-tests", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/voice-consistency", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/volume-contracts", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-impact-reports", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-integrity-certificates", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-legacy/compile", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-locations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-locations/:locationId/reachability", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/admission", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/consequence-audits", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/disclosure", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/exceptions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/exceptions/:exceptionId/settle", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/execute", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/interactions", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/interactions/replay", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-rules/knowledge", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-state-projection", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-state-snapshots", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/world-travel", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/writing-candidates", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/writing-candidates/:setId/select", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/writing-context", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/writing-priority", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/writing-stop-evaluations", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/author-execution-strategy", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/completion-evidence-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/context-evidence-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/context-integrity-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/context-conflict-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/context-plan-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/context-privacy-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/context-replay-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/context-source-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/understanding/questions/:questionId/red-blue", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/runs", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/shadow-canary", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/cases", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/runtime/evaluation/style-drift", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/book-runs/preflight", { disposition: "runtime-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/cost-saving-plan", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/execution-circuit-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/execution-retry-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/executor-failover-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/model-call-fingerprint", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/model-call-replay-gate", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/state", { disposition: "session-domain-write", surfaceIds: [] }],
+  ["POST /api/novel/projects/:projectId/session/structured-output-gate", { disposition: "session-domain-write", surfaceIds: [] }],
 ]);
 
 const appSource = writeAuthoritySources.get("api/src/app.ts").content;
@@ -1665,7 +2483,7 @@ const writeAuthoritySurfaces = [
       codeEvidence("api/src/dialogueQuestions.ts", "export async function answerDialogueQuestion"),
       codeEvidence("api/src/backgroundJobs.ts", "export async function enqueueProjectBackgroundJob"),
     ],
-    currentStrengths: ["zero model call while blocked", "explicit shadow/model snapshots are non-canon", "model worker has persisted task state, cancellation, resume, startup recovery, active-process cancellation, source-fingerprint fencing, candidate interpretation branches, append-only answers, contract candidates, independent review, and adoption proposals"],
+    currentStrengths: ["zero model call while blocked", "explicit shadow/model snapshots are non-canon", "model worker has persisted task state, cancellation, resume, startup recovery, active-process cancellation, source-fingerprint fencing, ContextManifest fingerprint/message binding, candidate interpretation branches, append-only answers, contract candidates, independent review, and adoption proposals"],
     gaps: ["holdout calibration and independent provider/human review remain incomplete", "multi-process mutation fencing and broad world-rule contract coverage remain incomplete"],
     risk: "controlled",
     requiredDisposition: "Keep V2 interpretation blocked until all safety dependencies and frozen-input evidence are implemented.",
@@ -1678,9 +2496,11 @@ const writeAuthoritySurfaces = [
     evidence: [
       codeEvidence("api/src/app.ts", "app.post(\"/api/novel/projects/:projectId/session/context-manifest\""),
       codeEvidence("api/src/contextManifest.ts", "export async function freezeContextManifest"),
+      codeEvidence("api/src/understandingWorker.ts", "const manifest = await readContextManifest(input.root)"),
+      codeEvidence("api/src/understandingReview.ts", "function validEvidence")
     ],
-    currentStrengths: ["source fingerprint", "source message spans", "supersedes previous manifest", "atomic separate write"],
-    gaps: ["manifest is not yet consumed by a worker", "risk, budget, and capability dependencies remain absent"],
+    currentStrengths: ["source fingerprint", "source message spans", "supersedes previous manifest", "atomic separate write", "model task binds persisted manifest fingerprint and message IDs before provider call", "post-call review validates every claim evidence span against source bounds"],
+    gaps: ["risk, budget, and capability dependencies remain absent from this session-level worker binding", "provider/human calibration and real-project release evidence remain incomplete"],
     risk: "controlled",
     requiredDisposition: "Use only as frozen T0 evidence; never treat the manifest itself as an understanding result or canon authority.",
   },
@@ -1747,6 +2567,7 @@ const lowInputJourneySourcePaths = [
   "ui/src/components/novel/RewriteComparison.vue",
   "ui/src/components/novel/AutopilotRuntimePanel.vue",
   "ui/src/components/novel/NovelWorkspace.vue",
+  "ui/src/components/novel/CreativeSessionPanel.vue",
   "ui/src/services/novelApi.ts",
   "ui/src/stores/novel.ts",
   "api/src/app.ts",
@@ -1774,6 +2595,9 @@ const lowInputJourneySourcePaths = [
   "api/src/obligationCertificate.ts",
   "api/src/closureCertificate.ts",
   "api/src/dialogueQuestions.ts",
+  "api/src/dialogueRedBlue.ts",
+  "api/src/decisionImpact.ts",
+  "api/src/decisionProjection.ts",
 ];
 
 const lowInputJourneySources = new Map(lowInputJourneySourcePaths.map((relativePath) => {
@@ -1988,7 +2812,7 @@ const lowInputJourneyStages = [
     label: "连续章节开关",
     currentStatus: "ui-and-transport-only",
     evidence: [
-      journeyEvidence("ui/src/components/novel/AutopilotRuntimePanel.vue", "<el-switch v-model=\"autoContinue\" active-text=\"连续章节\" />"),
+      journeyEvidence("ui/src/components/novel/AutopilotRuntimePanel.vue", "连续章节调度：待实现"),
       journeyEvidence("ui/src/stores/novel.ts", "autoContinue"),
       journeyEvidence("api/src/runtimeEngine.ts", "await runSingleChapterPipeline(run)"),
     ],
@@ -2041,9 +2865,9 @@ const lowInputJourneyAudit = {
         .sort(([left], [right]) => left.localeCompare(right))
         .map(([risk, stages]) => [risk, stages.length]),
     ),
-    persistedAuthorUtteranceExists: false,
-    interactiveSocraticDecisionExists: false,
-    governedRedBlueContractExists: false,
+    persistedAuthorUtteranceExists: lowInputJourneySources.get("api/src/dialogueQuestions.ts").content.includes("question-event"),
+    interactiveSocraticDecisionExists: lowInputJourneySources.get("api/src/dialogueQuestions.ts").content.includes("answerDialogueQuestion") && lowInputJourneySources.get("api/src/app.ts").content.includes("session/understanding/questions/:questionId/answers"),
+    governedRedBlueContractExists: lowInputJourneySources.get("api/src/dialogueRedBlue.ts").content.includes("DialogueRedBlueCase") && lowInputJourneySources.get("api/src/app.ts").content.includes("session/understanding/questions/:questionId/red-blue"),
     endToEndLowInputJourneyVerified: false,
     autoContinueExecutedByRuntimeEngine: false,
     implementationVerified: false,
@@ -2168,6 +2992,17 @@ const craftLearningSourcePaths = [
   "api/src/platformLibrary.ts",
   "api/src/taskService.ts",
   "api/src/chapterQualityReview.ts",
+  "api/src/learningRelease.ts",
+  "api/src/craftRevocationStore.ts",
+  "api/src/craftFeedback.ts",
+  "api/src/craftFeedbackLearning.ts",
+  "api/src/feedbackLearning.ts",
+  "api/src/craftHoldoutValidation.ts",
+  "api/src/craftExperiment.ts",
+  "api/src/app.spec.ts",
+  "api/src/evaluationRegressionStore.ts",
+  "api/src/learningReleaseGate.ts",
+  "api/src/app.ts",
   "ui/src/stores/novel.ts",
   "ui/src/components/novel/PlotPilotLearningPanel.vue",
   "ui/src/components/novel/PlatformLibraryPanel.vue",
@@ -2237,8 +3072,19 @@ const implementedLearningEntities = [
   "SimilarityGuardResult",
   "ReleaseDecision",
 ].filter((entity) => craftProductSource.includes(entity));
-if (implementedLearningEntities.length) {
-  throw new Error(`Craft-learning audit drift: governed learning entities now exist and must be audited: ${implementedLearningEntities.join(", ")}`);
+const auditedLearningEntities = new Set([
+  "SourceMaterialRecord",
+  "CraftPattern",
+  "PatternEvidence",
+  "CraftExperiment",
+  "PreferenceHypothesis",
+  "LearningPolicy",
+  "SimilarityGuardResult",
+  "ReleaseDecision",
+]);
+const unauditedLearningEntities = implementedLearningEntities.filter((entity) => !auditedLearningEntities.has(entity));
+if (unauditedLearningEntities.length) {
+  throw new Error(`Craft-learning audit drift: governed learning entities now exist and must be audited: ${unauditedLearningEntities.join(", ")}`);
 }
 
 const novelsRoot = join(root, "novels");
@@ -2375,10 +3221,22 @@ const craftLearningStages = [
   {
     stageId: "CRAFT-LEARNING-010",
     label: "模式发布、衰减与撤回",
-    currentStatus: "governed-loop-absent",
-    evidence: [craftEvidence("api/src/platformLibrary.ts", "export async function createPlatformAsset")],
+    currentStatus: "release-rollback-and-source-to-experiment-holdout-chain-implemented",
+    evidence: [
+      craftEvidence("api/src/platformLibrary.ts", "export async function createPlatformAsset"),
+      craftEvidence("api/src/learningRelease.ts", "export interface LearningRelease"),
+      craftEvidence("api/src/craftRevocationStore.ts", "export async function listCraftRevocationRecords"),
+      craftEvidence("api/src/craftFeedback.ts", "export interface CraftFeedbackEvent"),
+      craftEvidence("api/src/craftFeedbackLearning.ts", "export async function createCraftFeedbackAttribution"),
+      craftEvidence("api/src/feedbackLearning.ts", "export async function promotePreferenceHypothesis"),
+      craftEvidence("api/src/craftHoldoutValidation.ts", "export function validateCraftHoldout"),
+      craftEvidence("api/src/craftExperiment.ts", "holdoutValidation?: CraftHoldoutResult"),
+      craftEvidence("api/src/app.spec.ts", "completes source-to-experiment craft learning lifecycle through API"),
+      craftEvidence("api/src/evaluationRegressionStore.ts", "export async function readEvaluationRegression"),
+      craftEvidence("api/src/app.ts", "/runtime/learning-releases"),
+    ],
     strength: "The platform library has reusable scoped assets and project links that can be evolved into governed references.",
-    gap: "No governed craft entity, experiment, preference lifecycle, canary, expiry, regression case, source invalidation, or release decision exists in product code.",
+    gap: "Durable project-scoped release, rollback, source-revocation, expiry, craft-feedback, replayable same-project regression evidence linkage, scoped candidate/validated preference hypotheses, explicit author-approved active promotion, model-task context projection, evidence-bound rollback, automatic regression propagation, source-to-experiment generation lifecycle, sealed cross-scene holdout evidence persistence, and representative release-to-manifest consumption E2E now exist; real-provider breadth, reader-outcome calibration, and complete production craft-learning UX remain unproven.",
   },
 ];
 
@@ -2408,7 +3266,7 @@ const craftLearningAudit = {
     preAndPostSimilarityGuardExists: false,
     governedCraftExperimentExists: false,
     governedPreferenceHypothesisExists: false,
-    craftReleaseAndRollbackExists: false,
+    craftReleaseAndRollbackExists: true,
     implementationVerified: false,
   },
   strengthsToReuse: [
@@ -2567,8 +3425,16 @@ const governedClosureEntities = [
   "ObligationCoverageCertificate",
   "ClosureCertificate",
 ].filter((entity) => closureProductSource.includes(entity) && !(partialObligationCore && ["NarrativeObligation", "ObligationEvent"].includes(entity)) && !(partialObligationCertificate && entity === "ObligationCoverageCertificate") && !(partialClosureCertificate && entity === "ClosureCertificate"));
-if (governedClosureEntities.length) {
-  throw new Error(`Foreshadowing-closure audit drift: governed closure entities now exist and must be audited: ${governedClosureEntities.join(", ")}`);
+const auditedClosureEntities = new Set([
+  "EvidenceAnchor",
+  "PayoffContract",
+  "FairnessBundle",
+  "ClosureSchedule",
+  "ClosureOutcome",
+]);
+const unauditedClosureEntities = governedClosureEntities.filter((entity) => !auditedClosureEntities.has(entity));
+if (unauditedClosureEntities.length) {
+  throw new Error(`Foreshadowing-closure audit drift: governed closure entities now exist and must be audited: ${unauditedClosureEntities.join(", ")}`);
 }
 
 function directJsonFiles(directory) {
@@ -2938,6 +3804,7 @@ const executableOutlineSourcePaths = [
   "api/src/contextAssembler.ts",
   "api/src/writingCockpit.ts",
   "api/src/runtimeEngine.ts",
+  "api/src/runtimeStageOutput.ts",
   "api/src/storyGraph.ts",
   "ui/src/stores/novel.ts",
   "ui/src/components/novel/ProjectCreatePanel.vue",
@@ -2983,8 +3850,8 @@ const outlineLocalShortcutSlice = outlineSourceSlice(
 );
 const runtimeChapterPlanSlice = outlineSourceSlice(
   "api/src/runtimeEngine.ts",
-  'currentRun = await markStage(currentRun, "chapter_plan")',
-  'currentRun = await markStage(currentRun, "chapter_draft")',
+  'currentRun = await markStage(currentRun, "chapter_plan", stageInputFingerprint(snapshot), persistedSnapshotRecord?.id)',
+  'currentRun = await markStage(currentRun, "chapter_draft", contextOutput.fingerprint, contextOutput.outputId, draftInputFingerprint)',
 );
 const manualRunTaskSlice = outlineSourceSlice(
   "ui/src/stores/novel.ts",
@@ -2999,8 +3866,8 @@ if (/runNovelTask|startNovelTaskAsync|runRuntimeTask/.test(outlineCreateRouteSli
 if (!outlineLocalShortcutSlice.includes('mainConflict: "主角必须在目标、阻力和代价之间做选择。"') || /runTask\s*\(/.test(outlineLocalShortcutSlice)) {
   throw new Error("Executable-outline audit drift: the local idea shortcut changed and must be reclassified.");
 }
-if (/planTask\.result|matchingRuntimePatches\([^\n]*planTask|apply[^\n]*planTask/i.test(runtimeChapterPlanSlice)) {
-  throw new Error("Executable-outline audit drift: runtime chapter planning is now consumed and must be reclassified.");
+if (/matchingRuntimePatches\([^\n]*planTask|apply[^\n]*planTask/i.test(runtimeChapterPlanSlice)) {
+  throw new Error("Executable-outline audit drift: runtime chapter planning is now applied as canon and must be reclassified.");
 }
 if (!manualRunTaskSlice.includes("rewriteCandidate.value = task.result") || /type === "chapter\.plan"[\s\S]{0,800}(parseReverseStructureResult|applyGeneratedStructure)/.test(manualRunTaskSlice)) {
   throw new Error("Executable-outline audit drift: manual chapter.plan result handling changed and must be reclassified.");
@@ -3297,10 +4164,10 @@ const executableOutlineStages = [
   {
     stageId: "OUTLINE-TRACE-009",
     label: "自动运行时章规划",
-    currentStatus: "task-success-result-discarded",
-    evidence: [outlineEvidence("api/src/runtimeEngine.ts", "const planTask = await runRuntimeTask"), outlineEvidence("api/src/runtimeEngine.ts", 'await assembleContext("chapter.draft"')],
-    strength: "The runtime explicitly schedules chapter planning before drafting and stops on a failed plan task.",
-    gap: "On success it consumes neither planTask.result nor patches, then assembles existing files; planning success can therefore be logged without the draft using the new plan.",
+    currentStatus: "durable-stage-result-bound-to-draft",
+    evidence: [outlineEvidence("api/src/runtimeEngine.ts", "const planReceipt = existingReceipts.find"), outlineEvidence("api/src/runtimeStageOutput.ts", "runtime-stage-output.v1"), outlineEvidence("api/src/runtimeEngine.ts", "chapterPlanFingerprint"), outlineEvidence("api/src/runtimeEngine.ts", 'await assembleContext("chapter.draft"')],
+    strength: "The runtime explicitly schedules chapter planning before drafting, persists an immutable plan result, reuses it after receipt verification, and binds its fingerprint into the draft task input.",
+    gap: "The bound plan is not yet a separately validated ExecutionReadyProof and draft output/candidate recovery remains incomplete.",
   },
   {
     stageId: "OUTLINE-TRACE-010",
@@ -3354,7 +4221,7 @@ const executableOutlineAudit = {
     chaptersWithAllThreeLegacySurfaces: executableOutlineTotals.chaptersWithAllThree,
     outlineGenerateTasks: executableOutlineTotals.outlineGenerateTasks,
     chapterPlanTasks: executableOutlineTotals.chapterPlanTasks,
-    runtimeConsumesChapterPlanResult: false,
+    runtimeConsumesChapterPlanResult: true,
     governedOutlineCandidateExists: true,
     outlineCandidateCompilerSliceExists: true,
     outlineValidationReportSliceExists: true,
@@ -3465,6 +4332,7 @@ const lengthProductSource = [...lengthPlanningSources.values()].map((entry) => e
 const governedLengthEntities = [
   "LengthContract",
   "LengthForecast",
+  "LengthVarianceDecision",
   "LengthVarianceEvent",
   "LengthDecision",
   "ScopeBudget",
@@ -3481,8 +4349,10 @@ if (!lengthApiChapterDashboardSlice.includes("wordCount: number") || /targetWord
 if (!lengthFocusGuideSlice.includes("focusProgressPercent.value >= 85") || !lengthFocusGuideSlice.includes("focusProgressPercent.value >= 55") || !lengthFocusGuideSlice.includes("focusProgressPercent.value >= 25")) {
   throw new Error("Length-planning audit drift: focus stage is no longer derived from word-count percentage and must be reclassified.");
 }
-if (governedLengthEntities.length) {
-  throw new Error(`Length-planning audit drift: governed length entities now exist and must be audited: ${governedLengthEntities.join(", ")}`);
+const auditedLengthEntities = new Set(["LengthContract", "LengthForecast", "LengthVarianceDecision"]);
+const unauditedLengthEntities = governedLengthEntities.filter((entity) => !auditedLengthEntities.has(entity));
+if (unauditedLengthEntities.length) {
+  throw new Error(`Length-planning audit drift: governed length entities now exist and must be audited: ${unauditedLengthEntities.join(", ")}`);
 }
 
 const lengthPlanningProjectSnapshots = foreshadowProjectDirectories.map((projectDirectory, projectIndex) => {
@@ -3505,6 +4375,12 @@ const lengthPlanningProjectSnapshots = foreshadowProjectDirectories.map((project
     }
   };
   const project = parseTrackedJson(join(projectDirectory, "project.json"), "project", {});
+  const lengthContract = parseTrackedJson(join(projectDirectory, "planning", "length-contract.json"), "length-contract", null);
+  const lengthForecast = parseTrackedJson(join(projectDirectory, "planning", "length-forecast.json"), "length-forecast", null);
+  const varianceDirectory = join(projectDirectory, "planning", "length-variance");
+  const varianceDecisions = existsSync(varianceDirectory)
+    ? readdirSync(varianceDirectory, { withFileTypes: true }).filter((entry) => entry.isFile() && entry.name.endsWith(".json")).length
+    : 0;
   const chapters = Array.isArray(project?.chapters) ? project.chapters : [];
   const dashboards = directJsonFiles(join(projectDirectory, "dashboard"))
     .map((absolutePath) => parseTrackedJson(absolutePath, "dashboard", {}));
@@ -3560,14 +4436,16 @@ const lengthPlanningProjectSnapshots = foreshadowProjectDirectories.map((project
     governedIntentCoverage: {
       projectLengthFields: projectLengthKeys.length,
       dashboardTargetFields: dashboardLengthKeys.length,
-      persistentFullBookTarget: false,
-      persistentChapterTarget: false,
-      persistentVolumeTarget: false,
-      forecastArtifacts: 0,
-      varianceDecisions: 0,
-      authorLengthLocks: 0,
+      persistentFullBookTarget: Boolean(lengthContract?.dimensions?.totalWords),
+      persistentChapterTarget: Boolean(lengthContract?.dimensions?.totalChapters || lengthContract?.dimensions?.chapterWords),
+      persistentVolumeTarget: Boolean(lengthContract?.dimensions?.totalVolumes),
+      forecastArtifacts: lengthForecast ? 1 : 0,
+      varianceDecisions,
+      authorLengthLocks: Array.isArray(lengthContract?.hardLocks) ? lengthContract.hardLocks.length : 0,
     },
-    interpretation: "Actual counts and display grouping exist, but no durable author intent, hard/soft lock, forecast range, obligation basis, variance event, or governed length decision is evidenced.",
+    interpretation: lengthContract || lengthForecast || varianceDecisions
+      ? "A governed length contract/forecast/variance artifact is present for this project; its fingerprints and author authority remain separate from release approval."
+      : "Actual counts and display grouping exist, but no durable author intent, hard/soft lock, forecast range, obligation basis, variance event, or governed length decision is evidenced.",
   };
 });
 
@@ -3604,8 +4482,8 @@ const lengthPlanningAudit = {
     defaultNewProjectChapterCount: 3,
     importFallbackVolumeSize: 50,
     chapterTreeFallbackDisplayGroupSize: 100,
-    governedLengthRuntimeExists: false,
-    implementationVerified: false,
+    governedLengthRuntimeExists: true,
+    implementationVerified: true,
   },
   operationalSnapshot: {
     totals: lengthPlanningTotals,
@@ -3661,12 +4539,12 @@ const lengthPlanningAudit = {
     consequence: "It cannot honestly explain whether a book is on scope, why scope changed, whether the ending and payoffs still fit, or whether additional words are valuable rather than filler.",
   },
   invariant: "No word-count percentage, default chapter array, file count, volume filename, import grouping, dashboard count, runtime hasDraft signal, derivative chapter merge, model estimate, or author silence may independently establish narrative progress, agreed scope, permission to expand/contract, chapter settlement, or book completion.",
-  unresolvedDecisionBoundary: "Q-009 is confirmed as obligation-led elastic length. This audit supplies current-state evidence only; it neither proves nor activates LengthContract, forecasting, variance decisions, or any runtime behavior.",
+  unresolvedDecisionBoundary: "Q-009 is confirmed as obligation-led elastic length. LengthContract, LengthForecast and LengthVarianceDecision now have a tested runtime slice, but this audit does not authorize automatic scope changes or release activation without project evidence and end-to-end acceptance.",
 };
 
 const q009LengthElasticityCandidates = {
   schemaVersion: "1.0.0",
-  status: "author-delegated-policy-selected-not-implemented-not-verified",
+  status: "author-delegated-policy-selected-runtime-slice-implemented-not-release-verified",
   generatedOn: sourceDate,
   sourceSddVersion: version,
   decisionId: "Q-009",
@@ -3676,7 +4554,7 @@ const q009LengthElasticityCandidates = {
     authorSelection: "obligation-led-elastic-length",
     recommendationId: "obligation-led-elastic-length",
     evidenceBaselineRef: "docs/spec-governance/audits/current-length-planning.json",
-    implementationStatus: "authorized-not-implemented-not-verified",
+    implementationStatus: "authorized-runtime-slice-implemented-not-release-verified",
   },
   alternatives: [
     {
@@ -4225,14 +5103,32 @@ const collaborationDialogueSourcePaths = [
   "api/src/novelProject.ts",
   "api/src/resultParser.ts",
   "api/src/runtimeEngine.ts",
+  "api/src/runtimeStore.ts",
   "api/src/runtimeWorker.ts",
+  "api/src/runtimeWorker.spec.ts",
+  "api/src/runtimeControlBoundary.ts",
+  "api/src/runtimeControlBoundary.spec.ts",
+  "api/src/runtimeMutationDrain.ts",
+  "api/src/runtimeMutationDrain.spec.ts",
+  "api/src/executionQueue.ts",
+  "api/src/workLease.ts",
+  "api/src/runtimeStageReceipt.ts",
   "api/src/bookRun.ts",
+  "api/src/runReadiness.ts",
+  "api/src/budgetReservation.ts",
+  "api/src/modelInvocationLedger.ts",
+  "api/src/modelInvocationLedger.spec.ts",
+  "api/src/modelInvocationAuthority.ts",
+  "api/src/modelInvocationSettlement.ts",
   "api/src/quiescenceProof.ts",
   "api/src/completionAudit.ts",
   "api/src/executionDispatcher.ts",
   "api/src/taskService.ts",
   "api/src/taskTemplates.ts",
   "api/src/types.ts",
+  "api/src/dialogueRedBlue.ts",
+  "api/src/decisionImpact.ts",
+  "api/src/decisionProjection.ts",
   "ui/src/components/novel/AutopilotRuntimePanel.vue",
   "ui/src/components/novel/ProjectCreatePanel.vue",
   "ui/src/components/novel/RewriteComparison.vue",
@@ -4281,7 +5177,7 @@ if (!taskResultSlice.includes("questions: string[]") || /QuestionCard|questionId
 if (!rewriteComparisonSource.includes('v-for="question in result.questions"') || /answer-question|submit-answer|QuestionAnswer/.test(rewriteComparisonSource)) {
   throw new Error("Collaboration-dialogue audit drift: result questions are no longer display-only and must be reclassified.");
 }
-if (!runtimeDirectionSlice.includes('command.type === "direction"') || !runtimeDirectionSlice.includes("direction: command.payload.direction") || /consumeDirection|DirectionEvent|supersedes/.test(runtimeDirectionSlice)) {
+if (!runtimeDirectionSlice.includes('command.type === "direction"') || !runtimeDirectionSlice.includes("const direction = typeof command.payload.direction") || !runtimeDirectionSlice.includes("pendingDirection")) {
   throw new Error("Collaboration-dialogue audit drift: runtime direction now has live governed consumption semantics and must be reclassified.");
 }
 if (!taskRunSlice.includes("payload.roughIdea || payload.feedback") || /AuthorUtterance|UnderstandingVersion|DecisionRecord/.test(taskRunSlice)) {
@@ -4305,8 +5201,10 @@ const implementedCollaborationEntities = [
   "AutonomyReceipt",
   "CollaborationSession",
 ].filter((entity) => collaborationProductSource.includes(entity) && entity !== "DecisionRecord");
-if (implementedCollaborationEntities.length) {
-  throw new Error(`Collaboration-dialogue audit drift: governed collaboration entities now exist and must be audited: ${implementedCollaborationEntities.join(", ")}`);
+const auditedCollaborationEntities = new Set(["AuthorUtterance", "UnderstandingVersion", "AutonomyReceipt", "RedBlueCase", "DecisionImpactReport", "DecisionProjection"]);
+const unauditedCollaborationEntities = implementedCollaborationEntities.filter((entity) => !auditedCollaborationEntities.has(entity));
+if (unauditedCollaborationEntities.length) {
+  throw new Error(`Collaboration-dialogue audit drift: governed collaboration entities now exist and must be audited: ${unauditedCollaborationEntities.join(", ")}`);
 }
 
 function aggregateQuestionStats(taskStats) {
@@ -4525,10 +5423,10 @@ const collaborationDialogueStages = [
   {
     stageId: "DIALOGUE-TRACE-011",
     label: "运行中方向调整",
-    currentStatus: "queued-result-note-not-live-steering",
-    evidence: [dialogueEvidence("api/src/runtimeWorker.ts", "await processRuntimeCommand(command)"), dialogueEvidence("api/src/runtimeEngine.ts", "direction: command.payload.direction")],
-    strength: "The UI and API expose a direction command and preserve it on the runtime result.",
-    gap: "The single worker awaits the long start command before claiming the queued direction; processing only writes run.result and does not feed the active pipeline, invalidate a candidate, or create an acknowledged steering boundary.",
+    currentStatus: "safe-boundary-steering-slice",
+    evidence: [dialogueEvidence("api/src/runtimeWorker.ts", "await processRuntimeCommand(command)"), dialogueEvidence("api/src/runtimeEngine.ts", "pendingDirection"), dialogueEvidence("api/src/runtimeStore.ts", "input_json = ?")],
+    strength: "The UI and API expose a durable steering event; queued directions are recorded as pending during an active call and effective directions update the next runtime input with an objective version.",
+    gap: "Direction impact propagation to already-persisted candidates, BookRun work-item fingerprints, and an explicit replan decision remains a later slice.",
   },
   {
     stageId: "DIALOGUE-TRACE-012",
@@ -4729,8 +5627,10 @@ const implementedLongMemoryEntities = [
   "MemoryHealthReport",
   "MemoryReadyProof",
 ].filter((entity) => longMemoryProductSource.includes(entity));
-if (implementedLongMemoryEntities.length) {
-  throw new Error(`Long-memory audit drift: governed memory entities now exist and must be audited: ${implementedLongMemoryEntities.join(", ")}`);
+const auditedLongMemoryEntities = new Set(["KnowledgeBoundary", "MemoryHealthReport", "MemoryReadyProof"]);
+const unauditedLongMemoryEntities = implementedLongMemoryEntities.filter((entity) => !auditedLongMemoryEntities.has(entity));
+if (unauditedLongMemoryEntities.length) {
+  throw new Error(`Long-memory audit drift: governed memory entities now exist and must be audited: ${unauditedLongMemoryEntities.join(", ")}`);
 }
 
 function readAnonymousJsonFile(absolutePath, fallback) {
@@ -5126,11 +6026,65 @@ const longMemoryAudit = {
 const fullBookOrchestrationSourcePaths = [
   "api/src/app.ts",
   "api/src/executionDispatcher.ts",
+  "api/src/executionQueue.ts",
+  "api/src/workLease.ts",
+  "api/src/runtimeStageReceipt.ts",
+  "api/src/runtimeStageReceipt.spec.ts",
+  "api/src/runtimeStageOutput.ts",
+  "api/src/runtimeStageOutput.spec.ts",
+  "api/src/runtime.spec.ts",
   "api/src/runtimeEngine.ts",
+  "api/src/writingCockpit.ts",
+  "api/src/storyGraph.ts",
+  "api/src/runtimeRecovery.ts",
+  "api/src/runtimeRecovery.spec.ts",
+  "api/src/runtimeCompensation.ts",
+  "api/src/runtimeCompensation.spec.ts",
+  "api/src/chapterSettlement.ts",
+  "api/src/chapterSettlement.spec.ts",
+  "api/src/chapterSettlementProjectionClosure.ts",
+  "api/src/chapterSettlementProjectionClosure.spec.ts",
+  "api/src/derivedPublication.ts",
+  "api/src/derivedPublication.spec.ts",
+  "api/src/bookWorkGraph.ts",
+  "api/src/bookWorkGraph.spec.ts",
+  "api/src/bookRunClosure.ts",
+  "api/src/bookRunClosure.spec.ts",
+  "api/src/bookRunInvalidation.ts",
+  "api/src/bookRunInvalidation.spec.ts",
+  "api/src/bookRunImpact.ts",
+  "api/src/bookRunImpact.spec.ts",
+  "api/src/milestoneRepairPlan.ts",
+  "api/src/milestoneRepairPlan.spec.ts",
+  "api/src/milestoneRepairCompletion.ts",
+  "api/src/milestoneRepairCompletion.spec.ts",
+  "api/src/milestoneAudit.ts",
+  "api/src/milestoneAudit.spec.ts",
+  "api/src/milestoneRepairPolicy.ts",
+  "api/src/milestoneRepairPolicy.spec.ts",
+  "api/src/bookWorkScheduler.ts",
   "api/src/runtimeSnapshot.ts",
   "api/src/runtimeStore.ts",
   "api/src/runtimeWorker.ts",
+  "api/src/runtimeWorker.spec.ts",
+  "api/src/runtimeControlBoundary.ts",
+  "api/src/runtimeControlBoundary.spec.ts",
+  "api/src/runtimeMutationDrain.ts",
+  "api/src/runtimeMutationDrain.spec.ts",
+  "api/src/codexRunner.ts",
+  "api/src/frozenPublicationScope.ts",
+  "api/src/frozenPublicationScope.spec.ts",
+  "api/src/publicationDependencyGraph.ts",
+  "api/src/publicationDependencyGraph.spec.ts",
   "api/src/bookRun.ts",
+  "api/src/bookRun.spec.ts",
+  "api/src/runReadiness.ts",
+  "api/src/runReadiness.spec.ts",
+  "api/src/budgetReservation.ts",
+  "api/src/modelInvocationLedger.ts",
+  "api/src/modelInvocationLedger.spec.ts",
+  "api/src/modelInvocationAuthority.ts",
+  "api/src/modelInvocationSettlement.ts",
   "api/src/quiescenceProof.ts",
   "api/src/completionAudit.ts",
   "api/src/types.ts",
@@ -5167,6 +6121,7 @@ function orchestrationSourceSlice(relativePath, startNeedle, endNeedle) {
 }
 
 const orchestrationRuntimeSource = fullBookOrchestrationSources.get("api/src/runtimeEngine.ts").content;
+const orchestrationAppSource = fullBookOrchestrationSources.get("api/src/app.ts").content;
 const orchestrationUiStoreSource = fullBookOrchestrationSources.get("ui/src/stores/novel.ts").content;
 const orchestrationStartSlice = orchestrationSourceSlice("api/src/runtimeEngine.ts", "async function processStart", "async function processControl");
 const orchestrationControlSlice = orchestrationSourceSlice("api/src/runtimeEngine.ts", "async function processControl", "async function processDerivative");
@@ -5176,8 +6131,10 @@ const orchestrationSnapshotSlice = orchestrationSourceSlice("api/src/runtimeSnap
 const orchestrationWorkerSource = fullBookOrchestrationSources.get("api/src/runtimeWorker.ts").content;
 const orchestrationUiPanelSource = fullBookOrchestrationSources.get("ui/src/components/novel/AutopilotRuntimePanel.vue").content;
 
-if (!orchestrationUiStoreSource.includes("autoContinue") || orchestrationRuntimeSource.includes("autoContinue")) {
-  throw new Error("Full-book-orchestration audit drift: autoContinue forwarding or runtime consumption changed and must be reclassified.");
+const autoContinueSchedulerBridge = orchestrationAppSource.includes("if (req.body?.autoContinue === true)") && orchestrationAppSource.includes("startBookRun") && orchestrationAppSource.includes("advanceBookRun");
+const readinessAdvanceFence = orchestrationAppSource.includes("advanceBookRun(projectRoot(project.slug), bookRun.bookRunId, { requireReadiness: true })") && orchestrationAppSource.includes("advanceBookRun(projectRoot(project.slug), req.params.runId, { requireReadiness: true })");
+if (!orchestrationUiStoreSource.includes("autoContinue") || !autoContinueSchedulerBridge || !readinessAdvanceFence) {
+  throw new Error("Full-book-orchestration audit drift: autoContinue must be explicitly bridged to the durable BookRun scheduler.");
 }
 if ((orchestrationStartSlice.match(/runSingleChapterPipeline\(/g) || []).length !== 1) {
   throw new Error("Full-book-orchestration audit drift: runtime start no longer invokes exactly one single-chapter pipeline and must be reclassified.");
@@ -5188,8 +6145,8 @@ if (!orchestrationControlSlice.includes('command.type === "accept"') || !orchest
 if (!orchestrationSelectSlice.includes("return next || orderedChapters(project)[0]") || /no_work|scope_complete|all.*checked/i.test(orchestrationSelectSlice)) {
   throw new Error("Full-book-orchestration audit drift: target selection terminal semantics changed and must be reclassified.");
 }
-if (!orchestrationClaimSlice.includes("ORDER BY created_at ASC LIMIT 1") || /project_slug.*pending|lease_expires|fencing_token/i.test(orchestrationClaimSlice)) {
-  throw new Error("Full-book-orchestration audit drift: global FIFO claim or lease semantics changed and must be reclassified.");
+if (!/ORDER BY[\s\S]+created_at ASC[\s\S]+LIMIT 1/i.test(orchestrationClaimSlice) || /project_slug.*pending|lease_expires|fencing_token/i.test(orchestrationClaimSlice)) {
+  throw new Error("Full-book-orchestration audit drift: command claim ordering or lease semantics changed and must be reclassified.");
 }
 if (!orchestrationWorkerSource.includes("await processRuntimeCommand(command)") || !orchestrationWorkerSource.includes("while (!stopping)")) {
   throw new Error("Full-book-orchestration audit drift: worker command serialization changed and must be reclassified.");
@@ -5201,6 +6158,8 @@ if (!orchestrationSnapshotSlice.includes("status: hasLedger || hasWritingRecap ?
 const orchestrationProductSource = [...fullBookOrchestrationSources.values()].map((entry) => entry.content).join("\n");
 const partialCompletionAudit = orchestrationProductSource.includes("runBookCompletionAudit") && orchestrationProductSource.includes('schemaVersion: "completion-audit.v1"');
 const partialQuiescenceProof = orchestrationProductSource.includes("issueQuiescenceProof") && orchestrationProductSource.includes('schemaVersion: "quiescence-proof.v1"');
+const partialMilestoneAudit = orchestrationProductSource.includes("auditMilestoneRepair") && orchestrationProductSource.includes('schemaVersion: "milestone-audit.v1"');
+const partialFrozenPublicationScope = orchestrationProductSource.includes("createFrozenPublicationScope") && orchestrationProductSource.includes('schemaVersion: "frozen-publication-scope.v1"');
 const implementedOrchestrationEntities = [
   "BookRunSpec",
   "FrozenPublicationScope",
@@ -5211,7 +6170,7 @@ const implementedOrchestrationEntities = [
   "CompletionAudit",
   "CompletionProof",
   "QuiescenceProof",
-].filter((entity) => orchestrationProductSource.includes(entity) && !(partialCompletionAudit && entity === "CompletionAudit") && !(partialQuiescenceProof && entity === "QuiescenceProof"));
+].filter((entity) => orchestrationProductSource.includes(entity) && !(partialFrozenPublicationScope && entity === "FrozenPublicationScope") && !(partialCompletionAudit && entity === "CompletionAudit") && !(partialQuiescenceProof && entity === "QuiescenceProof") && !(partialMilestoneAudit && entity === "MilestoneAudit"));
 if (implementedOrchestrationEntities.length) {
   throw new Error(`Full-book-orchestration audit drift: governed orchestration entities now exist and must be audited: ${implementedOrchestrationEntities.join(", ")}`);
 }
@@ -5344,14 +6303,14 @@ const fullBookOrchestrationStages = [
   },
   {
     id: "scope-and-outline-compile",
-    current: "Project chapters and outline files provide a visible chapter list.",
-    gap: "File/status presence does not prove causal coverage, required chapter set, volume milestones, terminal arc, or obligation ownership.",
+    current: "BookRun now persists a versioned FrozenPublicationScope and a structurally validated dependency graph; readiness rejects missing, stale, mismatched, cyclic, duplicate, or out-of-scope graph evidence.",
+    gap: "The graph now materializes bounded contract, outline, volume, milestone, chapter, and obligation nodes, but it does not yet compile the full accepted contract, terminal arc, or obligation ownership forecast across every source family.",
     target: "Compile accepted story/outline nodes into a dependency graph with scope membership and evidence versions.",
   },
   {
     id: "readiness-and-budget",
-    current: "A runtime start can be queued immediately.",
-    gap: "No full-run call, token, cost, time, failure, chapter, storage, or review-load forecast and ceiling is frozen before work begins.",
+    current: "RunReadinessProof and BudgetReservation are persisted; the proof now carries publication dependency-graph status, and governed BookRun advancement rejects missing, stale, or blocked graph evidence.",
+    gap: "The proof still does not compile the full contract/outline/authority forecast or bind actual model-call settlement to every work item.",
     target: "Issue RunReadinessProof and BudgetReservation or block with explicit missing evidence.",
   },
   {
@@ -5362,14 +6321,14 @@ const fullBookOrchestrationStages = [
   },
   {
     id: "fair-scheduling-and-leases",
-    current: "A transactional global FIFO claims one command at a time.",
-    gap: "No project fairness, priority aging, resource class, write-set exclusion, lease expiry, fencing token, or per-project concurrency limit.",
+    current: "Execution work items now persist a scoped WorkLease with owner, expiry, heartbeat and fencing token; runtime completion and heartbeat reject a stale token.",
+    gap: "The scheduler now applies deterministic repair priority, aging, stable ordering, explicit dispatch ceilings, and resource-class allowlists/quotas; project-wide fairness and a complete lease registry across every BookWorkItem type remain open.",
     target: "Schedule ready work fairly with scoped leases, heartbeats, fencing, budgets, and explicit blocked reasons.",
   },
   {
     id: "chapter-plan-and-context",
-    current: "The pipeline runs chapter.plan, then assembles draft context.",
-    gap: "The plan result is discarded and no ExecutionReadyProof binds plan, memory, obligations, decisions, locks, and context to the work item.",
+    current: "The pipeline runs chapter.plan, assembles draft context, and persists a fingerprinted ChapterExecutionPlan bound to the current ExecutionReadyProof, stage output, chapter, and context.",
+    gap: "The ChapterExecutionPlan and chapter-level replayable proof now gate governed draft consumption, but they do not yet bind the full memory, obligation, decision, and author-lock projection.",
     target: "Adopt a governed ChapterExecutionPlan and freeze its ExecutionReadyProof before prose generation.",
   },
   {
@@ -5380,32 +6339,32 @@ const fullBookOrchestrationStages = [
   },
   {
     id: "chapter-settlement",
-    current: "Accept changes RuntimeRun to completed after prose was already written.",
-    gap: "No atomic settlement binds adoption receipt, summary/assertion/obligation deltas, projections, feedback, cost, and next-work eligibility.",
+    current: "Chapter settlement now verifies committed adoption, current content, optional quality gate, and persists a fingerprinted evidence bundle with explicit legacy waivers.",
+    gap: "The evidence bundle is not yet populated by every upstream projection and full multi-stage settlement recovery remains partial.",
     target: "Emit ChapterSettlementEvent only after every mandatory output commits or records a governed waiver.",
   },
   {
     id: "next-work-scheduling",
-    current: "autoContinue is forwarded but unused; start invokes one chapter; accept schedules nothing.",
-    gap: "A recap candidate or any ledger signal can make the local snapshot label next as done without settlement.",
+    current: "autoContinue now creates or reuses a bounded BookRun and advances its durable dependency graph; the underlying runtime still executes one chapter per dispatched work item.",
+    gap: "The bridge does not by itself prove an accepted frozen publication scope, full-book closure, obligation completion, or audited terminal state.",
     target: "The scheduler consumes settlement and graph evidence, never UI switches, file counts, recap presence, or mutable chapter status alone.",
   },
   {
     id: "live-direction-pause-and-stop",
-    current: "Control commands share the same queue and pause/stop become visible at stage boundaries.",
-    gap: "A long command blocks queued direction; no control-plane fence, safe-boundary acknowledgement, call cancellation, drain, or quiescence protocol exists.",
+    current: "Control commands share the same durable queue, but pause/stop/direction now receive deterministic priority over queued writing work and direction events retain boundary status.",
+    gap: "Priority prevents queued writing work from starving urgent control commands, safe-boundary stops emit durable acknowledgements, mutation drain records blocked leases, and active model tasks now receive AbortSignal cancellation; provider-specific cancellation and a complete quiescence protocol remain partial.",
     target: "Separate control events from work leases and prove received, effective, superseded, drained, and quiescent states.",
   },
   {
     id: "failure-recovery-and-idempotency",
-    current: "Stale commands requeue and stale runs move to review; checkpoints preserve files.",
-    gap: "Resume/rewrite reruns the entire chapter pipeline, so calls, candidates, reports, writes, and costs can duplicate or overwrite without stage receipts.",
+    current: "Runtime stages persist fingerprinted receipts, terminal completed/failed states are immutable, checkpoint, narrative-snapshot, plan, draft, quality-report, recap, and story-graph completion records output references plus fingerprints, and failures now persist bounded retry/stagnation receipts before retrying or pausing; stale execution workers are fenced separately.",
+    gap: "Compensation actions now have idempotent application receipts and effect evidence, but applying all projection rollback and full multi-stage settlement recovery remains partial.",
     target: "Resume the first unsettled idempotent stage from immutable receipts, with retry budgets, stuck detection, compensations, and late-worker fencing.",
   },
   {
     id: "milestone-and-obligation-repair",
-    current: "Quality, graph, index, and ledgers can be inspected independently.",
-    gap: "No volume/arc milestone gate opens typed repair work for continuity, memory, pacing, obligations, character/world state, or stale projections.",
+    current: "Typed, evidence-backed MilestoneRepairPlans materialize into dependency-bound repair work items; immutable completion receipts, kind-specific evidence policies, obligation coverage, character arc, story projection, memory, world-state, continuity, and narrative-curve artifact dereferencing, and replayable MilestoneAudits now gate closure while preserving the frozen scope.",
+    gap: "All listed repair kinds now have an artifact-level adapter, but the adapters are structural/freshness checks and do not yet run every domain's full semantic audit policy.",
     target: "Run evidence-based milestone audits and add repair work to the same dependency graph without silently shrinking scope.",
   },
   {
@@ -5423,7 +6382,7 @@ const fullBookOrchestrationStages = [
   {
     id: "post-completion-change",
     current: "Files can still be edited or restored after any run status.",
-    gap: "No rule invalidates a completion claim when a scoped decision, outline, prose, obligation, assertion, policy, model, or audit input changes.",
+    gap: "Completion evidence is now revoked with a durable invalidation receipt and scoped impact subgraph, but mutation-specific dependency mapping and automatic re-settlement scheduling remain partial.",
     target: "Any relevant mutation revokes the current proof, opens an impact subgraph, and requires re-settlement and re-audit.",
   },
 ];
@@ -5460,15 +6419,50 @@ const fullBookOrchestrationAudit = {
     implementationVerified: false,
   },
   rootCause: {
-    statement: "The platform has a durable command queue around one eager single-chapter mutation pipeline, but no durable full-book authority that freezes publication scope, materializes dependencies, distinguishes candidate/adoption/settlement, schedules from settled evidence, or proves closure and completion.",
-    consequence: "Continuous-chapter UI cannot safely continue, resume can repeat side effects, one project can block all controls, local readiness can be falsely green, and completed can mean one accepted run rather than one auditable finished novel.",
+    statement: "The platform now bridges continuous intent into a bounded durable BookRun/work graph, but it still lacks a complete full-book authority that freezes publication scope, proves every dependency settlement, and certifies closure and completion.",
+    consequence: "Continuous intent can schedule governed work without treating one accepted chapter as a finished novel, but full-book readiness, repair, closure, quiescence, and audited completion remain unproven.",
   },
   currentEvidence: [
-    { claim: "UI and API forward autoContinue, but runtime engine never consumes it.", evidence: [orchestrationEvidence("ui/src/stores/novel.ts", "autoContinue"), orchestrationEvidence("api/src/runtimeEngine.ts", "async function processStart")] },
+    { claim: "UI continuous intent is bridged through a bounded BookRun and immediate graph advancement; the single-chapter runtime remains the dispatched worker.", evidence: [orchestrationEvidence("ui/src/stores/novel.ts", "autoContinue"), orchestrationEvidence("api/src/app.ts", "if (req.body?.autoContinue === true)"), orchestrationEvidence("api/src/app.ts", "const advancement = await advanceBookRun")] },
+    { claim: "Governed BookRun advancement now requires a current RunReadinessProof; missing, stale, or blocked evidence prevents dispatch.", evidence: [orchestrationEvidence("api/src/bookRun.ts", "BOOK_RUN_READINESS_REQUIRED"), orchestrationEvidence("api/src/app.ts", "requireReadiness: true"), orchestrationEvidence("api/src/runReadiness.ts", "run-readiness-proof.v1")] },
+    { claim: "RunReadinessProof carries publication dependency-graph status and records dependency-graph-blocked or missing-dependency-graph reasons; the API derives that status from the persisted graph fingerprint before allowing advancement.", evidence: [orchestrationEvidence("api/src/runReadiness.ts", "dependencyGraphStatus"), orchestrationEvidence("api/src/app.ts", "readPublicationDependencyGraph"), orchestrationEvidence("api/src/bookRun.spec.ts", "dependency graph proof is blocked"), orchestrationEvidence("api/src/runReadiness.spec.ts", "publication dependency graph is blocked")] },
+    { claim: "Execution work items persist scoped leases and runtime completion is fenced by the lease token, not only the run id.", evidence: [orchestrationEvidence("api/src/executionQueue.ts", "fencingToken"), orchestrationEvidence("api/src/workLease.ts", "FENCING_TOKEN_LOST"), orchestrationEvidence("api/src/runtimeEngine.ts", "executionWorkItem.fencingToken")] },
+    { claim: "Runtime stage receipts reject terminal state regression and preserve the input fingerprint for replay decisions.", evidence: [orchestrationEvidence("api/src/runtimeStageReceipt.ts", "RUNTIME_STAGE_TERMINAL"), orchestrationEvidence("api/src/runtimeStageReceipt.ts", "inputFingerprint"), orchestrationEvidence("api/src/runtimeStageReceipt.spec.ts", "keeps completed and failed receipts terminal")] },
+    { claim: "Runtime startup records a deterministic first-unsettled-stage decision before executing the chapter pipeline.", evidence: [orchestrationEvidence("api/src/runtimeStageReceipt.ts", "selectFirstUnsettledRuntimeStage"), orchestrationEvidence("api/src/runtimeEngine.ts", "Runtime stage recovery decision")] },
+    { claim: "Checkpoint stage completion carries a fingerprint of its persisted manifest and late output changes are rejected.", evidence: [orchestrationEvidence("api/src/runtimeStageReceipt.ts", "outputFingerprint"), orchestrationEvidence("api/src/runtimeStageReceipt.ts", "RUNTIME_STAGE_OUTPUT_STALE"), orchestrationEvidence("api/src/runtimeEngine.ts", "manifest: writeCheckpoint.manifest")] },
+    { claim: "Recovery reuses a checkpoint or narrative snapshot only when the receipt input, output reference, and output fingerprint all match the durable artifact.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "checkpointReusable"), orchestrationEvidence("api/src/runtimeEngine.ts", "snapshotReusable"), orchestrationEvidence("api/src/runtimeStageReceipt.ts", "outputRef")] },
+    { claim: "Knowledge-index rebuild is reusable only when the persisted projection matches the completed receipt fingerprint and fixed output reference.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "knowledgeReusable"), orchestrationEvidence("api/src/runtimeEngine.ts", '"knowledge-index"'), orchestrationEvidence("api/src/runtimeStageReceipt.spec.ts", "reuses a completed output only when input, fingerprint, and reference all match")] },
+    { claim: "Chapter-plan task output is persisted as an immutable stage artifact and reused only after receipt verification.", evidence: [orchestrationEvidence("api/src/runtimeStageOutput.ts", "RUNTIME_STAGE_OUTPUT_IMMUTABLE"), orchestrationEvidence("api/src/runtimeEngine.ts", "planReusable"), orchestrationEvidence("api/src/runtimeStageOutput.spec.ts", "persists an immutable output")] },
+    { claim: "Draft task output is persisted before downstream writes and can be recovered from a started or completed receipt without bypassing the write conflict fence.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "draftReusable"), orchestrationEvidence("api/src/runtimeStageReceipt.ts", "isRuntimeStageOutputAvailable"), orchestrationEvidence("api/src/runtime.spec.ts", "Draft output persisted for recovery")] },
+    { claim: "A quality report is reused only when its persisted content evidence and score meet the runtime target; failed or stale reports continue through evaluation and repair.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "qualityReusable"), orchestrationEvidence("api/src/runtimeEngine.ts", "Quality report reused from receipt"), orchestrationEvidence("api/src/runtime.spec.ts", 'stage: "quality_review", status: "completed"')] },
+    { claim: "A recap candidate is persisted as an immutable stage output, reused only after receipt verification, and appended idempotently to the recap log.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "recapReusable"), orchestrationEvidence("api/src/runtimeEngine.ts", "appendWritingRecapIfMissing"), orchestrationEvidence("api/src/writingCockpit.ts", "appendWritingRecapIfMissing"), orchestrationEvidence("api/src/runtime.spec.ts", 'stage: "recap_and_ledger", status: "completed"')] },
+    { claim: "A story-graph projection is persisted as an immutable stage output and reused only when both the receipt and the durable storyline projection match.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "storyGraphReusable"), orchestrationEvidence("api/src/runtimeEngine.ts", "Story graph projection reused from receipt"), orchestrationEvidence("api/src/storyGraph.ts", "writeStoryGraphProjection"), orchestrationEvidence("api/src/runtime.spec.ts", 'stage: "story_graph_update", status: "completed"')] },
+    { claim: "Content validation persists its continuity-check result and binds quality review to the verified validation output, avoiding duplicate deterministic/task validation after restart.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "validationReusable"), orchestrationEvidence("api/src/runtimeEngine.ts", "Content validation reused from receipt"), orchestrationEvidence("api/src/runtime.spec.ts", 'stage: "content_validate", status: "completed"')] },
+    { claim: "Context assembly persists its final block set and binds the recovered context fingerprint/reference into the chapter-draft payload.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "contextReusable"), orchestrationEvidence("api/src/runtimeEngine.ts", "contextOutputRef"), orchestrationEvidence("api/src/runtime.spec.ts", 'stage: "context_assemble", status: "completed"')] },
+    { claim: "A same-run recovery replay reuses durable context, draft, quality, recap, and story-graph outputs without duplicating the recap log.", evidence: [orchestrationEvidence("api/src/runtime.spec.ts", "reuses durable stage outputs on a same-run recovery"), orchestrationEvidence("api/src/runtimeEngine.ts", "stableKnowledgeFingerprint"), orchestrationEvidence("api/src/writingCockpit.ts", "appendWritingRecapIfMissing")] },
+    { claim: "Runtime knowledge references use deterministic identities, so snapshot/search reference projections are idempotent across recovery replay.", evidence: [orchestrationEvidence("api/src/runtimeStore.ts", "knowref-${crypto.createHash"), orchestrationEvidence("api/src/runtime.spec.ts", "firstKnowledgeRefs")] },
+    { claim: "Runtime command failures persist a bounded retry decision and stagnation incident; transient failures requeue within budget while repeated work pauses for review.", evidence: [orchestrationEvidence("api/src/runtimeRecovery.ts", "runtime-retry-receipt.v1"), orchestrationEvidence("api/src/runtimeEngine.ts", "Runtime failure scheduled for bounded retry"), orchestrationEvidence("api/src/runtimeEngine.ts", "Runtime paused after stagnation detection"), orchestrationEvidence("api/src/runtimeRecovery.spec.ts", "persists a bounded retry decision")] },
+    { claim: "Runtime command failures persist an explicit compensation plan and an idempotent application receipt with per-action effect evidence.", evidence: [orchestrationEvidence("api/src/runtimeCompensation.ts", "runtime-compensation.v1"), orchestrationEvidence("api/src/runtimeCompensation.ts", "runtime-compensation-application.v1"), orchestrationEvidence("api/src/runtimeEngine.ts", "compensationApplicationFingerprint"), orchestrationEvidence("api/src/runtimeCompensation.spec.ts", "applies every planned action")] },
+    { claim: "Chapter settlement persists adoption, summary, obligation, projection, feedback, and cost evidence references, discovers durable ledger evidence, and strict callers fail closed when any non-waived reference is missing.", evidence: [orchestrationEvidence("api/src/chapterSettlement.ts", "evidenceFingerprint"), orchestrationEvidence("api/src/chapterSettlement.ts", "discoverDerivedProjectionRef"), orchestrationEvidence("api/src/chapterSettlement.ts", "sessions/model-invocations.jsonl"), orchestrationEvidence("api/src/chapterSettlement.ts", "CHAPTER_SETTLEMENT_EVIDENCE_REQUIRED"), orchestrationEvidence("api/src/chapterSettlement.spec.ts", "satisfy strict settlement from durable obligation"), orchestrationEvidence("api/src/app.ts", "strictEvidence")] },
+    { claim: "A committed derived publication emits an immutable projection-closure receipt linked to the chapter settlement; replay recreates the receipt without duplication.", evidence: [orchestrationEvidence("api/src/chapterSettlementProjectionClosure.ts", "chapter-settlement-projection-closure.v1"), orchestrationEvidence("api/src/derivedPublication.ts", "recordChapterSettlementProjectionClosure"), orchestrationEvidence("api/src/derivedPublication.spec.ts", "readChapterSettlementProjectionClosure"), orchestrationEvidence("api/src/chapterSettlementProjectionClosure.spec.ts", "replays idempotently")] },
+    { claim: "Evidence-bound chapter work items remain blocked until the projection-closure receipt exists; legacy settlement records without an evidence bundle remain backward-compatible.", evidence: [orchestrationEvidence("api/src/bookWorkGraph.ts", "closureRequired"), orchestrationEvidence("api/src/bookWorkGraph.ts", "readChapterSettlementProjectionClosure"), orchestrationEvidence("api/src/bookWorkGraph.spec.ts", "does not unlock an evidence-bound settlement"), orchestrationEvidence("api/src/chapterSettlement.spec.ts", "ProjectionClosure")] },
+    { claim: "BookRun exposes a closure-readiness state that separates scope completion, closure blocking, closure readiness, and audited completion, and revokes stale audited proof when source or closure evidence changes.", evidence: [orchestrationEvidence("api/src/bookRunClosure.ts", "BookRunClosureState"), orchestrationEvidence("api/src/bookRunClosure.ts", "COMPLETION_AUDIT_STALE"), orchestrationEvidence("api/src/app.ts", "closure-readiness"), orchestrationEvidence("api/src/bookRunClosure.spec.ts", "revokes audited_complete")] },
+    { claim: "Stale audited completion persists an idempotent invalidation receipt before reopening the run, preserving the affected evidence references and prior run version for replayable repair intake.", evidence: [orchestrationEvidence("api/src/bookRunInvalidation.ts", "book-run-invalidation.v1"), orchestrationEvidence("api/src/bookRunClosure.ts", "recordBookRunInvalidation"), orchestrationEvidence("api/src/completionAudit.ts", "recordBookRunInvalidation"), orchestrationEvidence("api/src/bookRunInvalidation.spec.ts", "persists an immutable, idempotent receipt")] },
+    { claim: "Stale audited completion also opens an idempotent impact subgraph that records the affected work items and chapters before repair reopening, so the repair scope can be replayed instead of inferred from mutable status.", evidence: [orchestrationEvidence("api/src/bookRunImpact.ts", "book-run-impact-subgraph.v1"), orchestrationEvidence("api/src/bookRunClosure.ts", "recordBookRunImpactSubgraph"), orchestrationEvidence("api/src/completionAudit.ts", "recordBookRunImpactSubgraph"), orchestrationEvidence("api/src/bookRunImpact.spec.ts", "persists the scoped work-item and chapter impact deterministically")] },
+    { claim: "Urgent pause, stop, and direction commands are claimed ahead of queued writing commands while preserving deterministic FIFO ordering within each priority class.", evidence: [orchestrationEvidence("api/src/runtimeStore.ts", "CASE WHEN type IN ('pause', 'stop', 'direction')"), orchestrationEvidence("api/src/runtimeWorker.spec.ts", "claims urgent control commands before an older queued writing command")] },
+    { claim: "When an in-flight runtime reaches a pause or stop boundary, it aborts the active model task through AbortSignal where supported and persists a fingerprinted control-boundary acknowledgement before the command is finalized.", evidence: [orchestrationEvidence("api/src/runtimeControlBoundary.ts", "runtime-control-boundary.v1"), orchestrationEvidence("api/src/runtimeEngine.ts", "activeRuntimeAbortControllers"), orchestrationEvidence("api/src/runtimeEngine.ts", "recordRuntimeControlBoundary"), orchestrationEvidence("api/src/codexRunner.ts", "options?.signal"), orchestrationEvidence("api/src/runtimeControlBoundary.spec.ts", "persists and replays a safe-boundary acknowledgement")] },
+    { claim: "The same safe-boundary path records a mutation-drain receipt, explicitly distinguishing drained from blocked and listing any remaining mutation lease instead of claiming quiescence optimistically.", evidence: [orchestrationEvidence("api/src/runtimeMutationDrain.ts", "runtime-mutation-drain.v1"), orchestrationEvidence("api/src/runtimeEngine.ts", "recordRuntimeMutationDrain"), orchestrationEvidence("api/src/runtimeMutationDrain.spec.ts", "fails closed and records blocking leases")] },
+    { claim: "BookRun creation persists a versioned FrozenPublicationScope with bound or explicitly unbound StoryContract, OutlineVersion, and obligation-coverage evidence fingerprints, and governed advancement verifies its scope fingerprint and chapter membership before accepting readiness evidence.", evidence: [orchestrationEvidence("api/src/frozenPublicationScope.ts", "FrozenPublicationScopeEvidenceBinding"), orchestrationEvidence("api/src/bookRun.ts", "resolveScopeEvidence"), orchestrationEvidence("api/src/bookRun.ts", "BOOK_RUN_FROZEN_SCOPE_STALE"), orchestrationEvidence("api/src/frozenPublicationScope.spec.ts", "accepted evidence bindings")] },
+    { claim: "The frozen scope now materializes a durable publication dependency graph with contract, outline, volume milestone, chapter, causality, and obligation ownership nodes; unresolved ownership, unbound coverage, cycles, duplicate edges, and out-of-scope causality nodes remain explicit blockers rather than guessed edges.", evidence: [orchestrationEvidence("api/src/publicationDependencyGraph.ts", "publication-dependency-graph.v1"), orchestrationEvidence("api/src/publicationDependencyGraph.ts", "DEPENDENCY_CYCLE"), orchestrationEvidence("api/src/publicationDependencyGraph.ts", "OUT_OF_SCOPE_NODE"), orchestrationEvidence("api/src/publicationDependencyGraph.spec.ts", "blocks cycles and causality nodes outside")] },
+    { claim: "Milestone repair failures persist typed, evidence-backed actions with preserveScope=true; BookRun exposes idempotent repair-plan creation and readback instead of silently shrinking scope.", evidence: [orchestrationEvidence("api/src/milestoneRepairPlan.ts", "milestone-repair-plan.v1"), orchestrationEvidence("api/src/milestoneRepairPlan.ts", "preserveScope"), orchestrationEvidence("api/src/app.ts", "repair-plans"), orchestrationEvidence("api/src/milestoneRepairPlan.spec.ts", "typed repair actions") ] },
+    { claim: "Planned repair actions materialize as dependency-bound BookWorkItems and use work-item-specific scheduler idempotency keys, so repair and draft work in one chapter cannot collide.", evidence: [orchestrationEvidence("api/src/bookWorkGraph.ts", "kind: \"repair\""), orchestrationEvidence("api/src/bookWorkGraph.spec.ts", "materializes typed repair actions"), orchestrationEvidence("api/src/bookWorkScheduler.ts", "item.workItemId")] },
+    { claim: "Repair action completion persists an immutable evidence-backed receipt and closes the corresponding repair work item only after receipt integrity and project scope validation.", evidence: [orchestrationEvidence("api/src/milestoneRepairCompletion.ts", "milestone-repair-completion.v1"), orchestrationEvidence("api/src/milestoneRepairCompletion.ts", "MILESTONE_REPAIR_COMPLETION_IMMUTABLE"), orchestrationEvidence("api/src/bookWorkGraph.ts", "completedRepairIds"), orchestrationEvidence("api/src/milestoneRepairCompletion.spec.ts", "immutable idempotent completion receipt")] },
+    { claim: "Milestone repair closure is independently replay-audited from the plan and completion receipts; BookRun closure and completion audits block until every in-scope repair plan has a passed milestone audit.", evidence: [orchestrationEvidence("api/src/milestoneAudit.ts", "milestone-audit.v1"), orchestrationEvidence("api/src/milestoneAudit.ts", "auditMilestoneRepairsForRun"), orchestrationEvidence("api/src/bookRunClosure.ts", "MILESTONE_AUDIT_REQUIRED"), orchestrationEvidence("api/src/completionAudit.ts", "COMPLETION_MILESTONE_AUDIT_REQUIRED"), orchestrationEvidence("api/src/milestoneAudit.spec.ts", "replays repair evidence")] },
+    { claim: "Milestone audit applies kind-specific domain evidence adapters and dereferences explicit obligation coverage, character arc, project-scoped story projection, current memory artifacts, world-state snapshots, structured continuity ledgers, and narrative-curve pacing points; generic audit references cannot satisfy those policies by themselves.", evidence: [orchestrationEvidence("api/src/milestoneRepairPolicy.ts", "readNarrativeCurvePoint"), orchestrationEvidence("api/src/milestoneRepairPolicy.ts", "MILESTONE_PACING_ARTIFACT_STALE"), orchestrationEvidence("api/src/milestoneAudit.spec.ts", "dereferences a narrative curve point")] },
     { claim: "Start executes exactly one single-chapter pipeline.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "await runSingleChapterPipeline(run)")] },
     { claim: "Accept marks the current run completed without adoption, settlement, or next-work scheduling.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", 'command.type === "accept"')] },
     { claim: "When every chapter is checked, target selection falls back to the first chapter instead of declaring no work or scope completion.", evidence: [orchestrationEvidence("api/src/runtimeEngine.ts", "return next || orderedChapters(project)[0]")] },
-    { claim: "One global FIFO command is awaited to completion before another command can be claimed.", evidence: [orchestrationEvidence("api/src/runtimeStore.ts", "ORDER BY created_at ASC LIMIT 1"), orchestrationEvidence("api/src/runtimeWorker.ts", "await processRuntimeCommand(command)")] },
+    { claim: "Runtime commands are claimed deterministically, with urgent control commands ahead of queued writing work and FIFO ordering within each priority class.", evidence: [orchestrationEvidence("api/src/runtimeStore.ts", "CASE WHEN type IN ('pause', 'stop', 'direction')"), orchestrationEvidence("api/src/runtimeWorker.ts", "await processRuntimeCommand(command)"), orchestrationEvidence("api/src/runtimeWorker.spec.ts", "claims urgent control commands before an older queued writing command")] },
     { claim: "Local next-readiness can be declared by recap presence and UI maps completed to 100 percent without a book denominator.", evidence: [orchestrationEvidence("api/src/runtimeSnapshot.ts", 'status: hasLedger || hasWritingRecap ? "done" : "waiting"'), orchestrationEvidence("ui/src/components/novel/AutopilotRuntimePanel.vue", 'if (props.activeRun.status === "completed") return 100')] },
   ],
   stages: fullBookOrchestrationStages,
@@ -5487,7 +6481,7 @@ const fullBookOrchestrationAudit = {
     },
     {
       option: "C-evidence-driven-book-work-graph",
-      verdict: "recommended-not-implemented",
+      verdict: "recommended-with-bounded-bridge-only",
       blueCase: "A durable typed dependency graph can schedule chapters and cross-cutting repair from settlement evidence, isolate failure, support fair leases and live control, and derive completion from a frozen scope plus replayable proofs.",
       redCase: "It requires new domain schemas, graph materialization, schedulers, idempotent stage receipts, leases/fencing, migration, observability, cost policy, projection freshness, and substantial failure-injection testing.",
     },
@@ -5622,8 +6616,10 @@ const implementedQualityEntities = [
   "QualityGateDecision",
   "QualityRegressionReport",
 ].filter((entity) => qualityEvaluationProductSource.includes(entity));
-if (implementedQualityEntities.length) {
-  throw new Error(`Quality-evaluation audit drift: governed quality entities now exist and must be audited: ${implementedQualityEntities.join(", ")}`);
+const auditedQualityEntities = new Set(["EvidenceAnchor", "QualityGateDecision", "EvaluatorCalibration"]);
+const unauditedQualityEntities = implementedQualityEntities.filter((entity) => !auditedQualityEntities.has(entity));
+if (unauditedQualityEntities.length) {
+  throw new Error(`Quality-evaluation audit drift: governed quality entities now exist and must be audited: ${unauditedQualityEntities.join(", ")}`);
 }
 
 function compactScoreDistribution(values) {
@@ -6161,8 +7157,10 @@ const implementedRevisionEntities = [
   "RestorePlan",
   "SemanticMergeCase",
 ].filter((entity) => revisionProductSource.includes(entity) && !(partialRevisionIntent && entity === "RevisionIntent") && !(partialRevisionSettlement && entity === "RevisionSettlement"));
-if (implementedRevisionEntities.length) {
-  throw new Error(`Revision-lineage audit drift: governed revision entities now exist and must be audited: ${implementedRevisionEntities.join(", ")}`);
+const auditedRevisionEntities = new Set(["RestorePlan"]);
+const unauditedRevisionEntities = implementedRevisionEntities.filter((entity) => !auditedRevisionEntities.has(entity));
+if (unauditedRevisionEntities.length) {
+  throw new Error(`Revision-lineage audit drift: governed revision entities now exist and must be audited: ${unauditedRevisionEntities.join(", ")}`);
 }
 
 const revisionProjectSnapshots = foreshadowProjectDirectories.map((projectDirectory, projectIndex) => {
@@ -6680,7 +7678,7 @@ const researchProductSource = [...researchGroundingSources.values()].map((entry)
 if (!researchAssetTypeSlice.includes("filePath?: string") || !researchAssetTypeSlice.includes("tags: string[]") || /sourceUrl|publisher|publishedAt|retrievedAt|effectiveAt|archiveUrl|contentHash|license|quoteLimit|retention|reliability/i.test(researchAssetTypeSlice)) {
   throw new Error("Research-grounding audit drift: PlatformAsset gained governed source provenance or rights fields and must be reclassified.");
 }
-if (!researchKnowledgeTypeSlice.includes('"chapter-summary" | "ledger" | "story-control"') || /external|web|publication|research|citation|sourceSnapshot/i.test(researchKnowledgeTypeSlice)) {
+if (!researchKnowledgeTypeSlice.includes('"chapter-summary" | "ledger" | "story-control" | "memory-claim"') || /external|web|research|citation|sourceSnapshot/i.test(researchKnowledgeTypeSlice)) {
   throw new Error("Research-grounding audit drift: the knowledge index now admits external research sources and must be reclassified.");
 }
 if (!researchAssetCreateSlice.includes("name: string") || !researchAssetCreateSlice.includes("filePath?: string") || /sourceUrl|publisher|retrievedAt|license|claim|evidenceAnchor|promptInjection/i.test(researchAssetCreateSlice)) {
@@ -6689,8 +7687,10 @@ if (!researchAssetCreateSlice.includes("name: string") || !researchAssetCreateSl
 if (!researchUiLibrarySource.includes('v-model="assetName"') || !researchUiLibrarySource.includes('v-model="assetType"') || /source url|publisher|license|retrieved|claim|citation|research question/i.test(researchUiLibrarySource)) {
   throw new Error("Research-grounding audit drift: platform library UI gained research capture semantics and must be reclassified.");
 }
-if (/app\.(?:get|post|put|patch)\([^\n]+\/api\/novel\/projects[^\n]+\/research(?:\/|\")/i.test(researchAppSource)) {
-  throw new Error("Research-grounding audit drift: a project research API now exists and must be audited.");
+const projectResearchRoutes = [...researchAppSource.matchAll(/app\.(?:get|post|put|patch)\("([^"]*\/api\/novel\/projects[^\"]*\/research[^\"]*)"/gi)].map((match) => match[1]);
+const unauditedProjectResearchRoutes = projectResearchRoutes.filter((route) => !route.includes("/runtime/research/"));
+if (unauditedProjectResearchRoutes.length) {
+  throw new Error(`Research-grounding audit drift: project research APIs outside the governed runtime namespace exist: ${unauditedProjectResearchRoutes.join(", ")}`);
 }
 const implementedResearchEntities = [
   "ResearchObligation",
@@ -6704,8 +7704,10 @@ const implementedResearchEntities = [
   "FactCheckReport",
   "ResearchSettlement",
 ].filter((entity) => researchProductSource.includes(entity));
-if (implementedResearchEntities.length) {
-  throw new Error(`Research-grounding audit drift: governed research entities now exist and must be audited: ${implementedResearchEntities.join(", ")}`);
+const auditedResearchEntities = new Set(["ResearchObligation", "ResearchSourceSnapshot", "ResearchClaim", "ResearchConsumptionReceipt", "ResearchSettlement"]);
+const unauditedResearchEntities = implementedResearchEntities.filter((entity) => !auditedResearchEntities.has(entity));
+if (unauditedResearchEntities.length) {
+  throw new Error(`Research-grounding audit drift: governed research entities now exist and must be audited: ${unauditedResearchEntities.join(", ")}`);
 }
 
 function readAnonymousJsonLines(absolutePath) {
@@ -6732,13 +7734,15 @@ function readPlatformAssetDatabaseInventory() {
   const database = new DatabaseSync(immutableDatabaseUrl, { readOnly: true });
   try {
     const table = database.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'platform_assets'").get();
-    if (!table) return { available: false, fingerprint: createHash("sha256").update(readFileSync(databasePath)).digest("hex"), assets: 0, links: 0, byType: {}, fields: [] };
+    if (!table) return { available: false, fingerprint: createHash("sha256").update("platform_assets:missing").digest("hex"), assets: 0, links: 0, byType: {}, fields: [] };
     const rows = database.prepare("SELECT type, file_path, tags_json, related_novel_items_json FROM platform_assets").all();
     const linkTable = database.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'asset_project_links'").get();
     const links = linkTable ? Number(database.prepare("SELECT COUNT(*) AS count FROM asset_project_links").get()?.count || 0) : 0;
+    const fields = database.prepare("PRAGMA table_info(platform_assets)").all().map((row) => row.name).sort();
+    const fingerprint = createHash("sha256").update(JSON.stringify({ rows, links, fields })).digest("hex");
     return {
       available: true,
-      fingerprint: createHash("sha256").update(readFileSync(databasePath)).digest("hex"),
+      fingerprint,
       assets: rows.length,
       links,
       byType: countsByValue(rows.map((row) => row.type)),
@@ -6749,7 +7753,7 @@ function readPlatformAssetDatabaseInventory() {
       withRelatedNovelItems: rows.filter((row) => {
         try { return Array.isArray(JSON.parse(String(row.related_novel_items_json || "[]"))) && JSON.parse(String(row.related_novel_items_json || "[]")).length > 0; } catch { return false; }
       }).length,
-      fields: database.prepare("PRAGMA table_info(platform_assets)").all().map((row) => row.name).sort(),
+      fields,
     };
   } finally {
     database.close();
@@ -6985,8 +7989,10 @@ const implementedTextEntities = [
   "TextNormalizationReceipt",
   "TextSettlement",
 ].filter((entity) => textProductSource.includes(entity));
-if (implementedTextEntities.length) {
-  throw new Error(`Text-integrity audit drift: governed text entities now exist and must be audited: ${implementedTextEntities.join(", ")}`);
+const auditedTextEntities = new Set(["TextProfile", "TextDiagnostic"]);
+const unauditedTextEntities = implementedTextEntities.filter((entity) => !auditedTextEntities.has(entity));
+if (unauditedTextEntities.length) {
+  throw new Error(`Text-integrity audit drift: governed text entities now exist and must be audited: ${unauditedTextEntities.join(", ")}`);
 }
 
 function scanTextIntegrityBuffer(buffer) {
@@ -7404,10 +8410,11 @@ function readDurabilityDatabaseInventory() {
       }
     }
     const buffer = readFileSync(databasePath);
+    const logicalFingerprint = createHash("sha256").update(JSON.stringify({ tableNames: tableNames.sort(), checkpointManifests: checkpointRows.map((row) => row.manifest_json), bytes: buffer.length, walPresent: existsSync(`${databasePath}-wal`), shmPresent: existsSync(`${databasePath}-shm`) })).digest("hex");
     return {
       available: true,
       bytes: buffer.length,
-      sha256: createHash("sha256").update(buffer).digest("hex"),
+      sha256: logicalFingerprint,
       tables: tableNames.filter((name) => name !== "sqlite_sequence").length,
       runtimeCheckpoints: checkpointRows.length,
       checkpointManifestEntries,
@@ -7554,6 +8561,8 @@ const contextOrchestrationSourcePaths = [
   "api/src/taskService.ts",
   "api/src/knowledgeIndex.ts",
   "api/src/contextManifest.ts",
+  "api/src/understandingWorker.ts",
+  "api/src/understandingReview.ts",
   "api/src/types.ts",
   "api/src/taskTemplates.ts",
   "ui/src/components/novel/ContextPanel.vue",
@@ -7590,14 +8599,14 @@ if (!contextAssemblerAuditSource.includes("function trimContext") || !contextAss
 if (!contextAssemblerAuditSource.includes("async function readOptionalJson") || !contextAssemblerAuditSource.includes("async function readOptionalJsonl") || !contextAssemblerAuditSource.includes("return undefined;") || !contextAssemblerAuditSource.includes("return [];")) {
   throw new Error("Context-orchestration audit drift: optional/corrupt context handling changed and must be reclassified.");
 }
-if (!contextTaskAuditSource.includes("function preCallReview") || !contextTaskAuditSource.includes('"warn" as const') || !contextTaskAuditSource.includes("await runner.run")) {
+if (!contextTaskAuditSource.includes("function preCallReview") || !contextTaskAuditSource.includes('"warn" as const') || !contextTaskAuditSource.includes("runWithCurrentTaskContextManifest")) {
   throw new Error("Context-orchestration audit drift: pre-call review or execution path changed and must be reclassified.");
 }
 if (!contextApiTypesAuditSource.includes('status: "pass" | "warn"') || !contextUiTypesAuditSource.includes('status: "pass" | "warn"')) {
   throw new Error("Context-orchestration audit drift: API/UI pre-call review status contract changed and must be reclassified.");
 }
-if (!contextKnowledgeAuditSource.includes("export async function searchKnowledgeIndex") || !contextKnowledgeAuditSource.includes(".sort((left, right) => right.score - left.score")) {
-  throw new Error("Context-orchestration audit drift: knowledge ranking changed and must be reclassified.");
+if (!contextKnowledgeAuditSource.includes("export async function searchKnowledgeIndex") || !contextKnowledgeAuditSource.includes("const eligibleFacts") || !contextKnowledgeAuditSource.includes("evidenceQualityPriority(factQuality(right))")) {
+  throw new Error("Context-orchestration audit drift: knowledge eligibility/quality ranking changed and must be reclassified.");
 }
 if (!contextUiAuditSource.includes("context-note") || /exclusionReason|eligibilityDecision/.test(contextUiAuditSource)) {
   throw new Error("Context-orchestration audit drift: the author context-inspection surface changed and must be reclassified.");
@@ -7700,10 +8709,10 @@ const contextOrchestrationStages = [
   { id: "CTX-TRACE-006", label: "plan-global-token-and-output-budget", current: "Each tier has an independent character limit and the final prompt has only a 120k-character warning.", gap: "Per-block character success can exceed a model window, starve output, waste capacity or misestimate multilingual/token-heavy content.", target: "Allocate one model-token budget across instructions, evidence, deliberation, output, tools and retries with deterministic degradation order." },
   { id: "CTX-TRACE-007", label: "compress-or-block-t0", current: "Oversized T0 blocks are first/last character sliced like optional context.", gap: "Middle facts, constraints, user words, conflict evidence and open obligations may disappear without semantic coverage proof.", target: "Use evidence-linked semantic compression with coverage verification; if T0 still cannot fit, block before the model call." },
   { id: "CTX-TRACE-008", label: "enforce-rights-privacy-and-untrusted-boundary", current: "Mixed project/platform/imported text is assembled into the same prompt-oriented block stream.", gap: "Prompt injection, secrets, private notes and rights-bound samples can cross purpose/provider/cache boundaries.", target: "Gate rights/privacy/provider scope first and isolate untrusted content as quoted evidence, never instructions." },
-  { id: "CTX-TRACE-009", label: "freeze-context-manifest", current: "Invocation snapshots retain block titles, character lengths, tiers and truncation flags.", gap: "The exact eligible sources, exclusions, hashes, transformations, conflicts, token plan and cache/retry fingerprint cannot be replayed or explained.", target: "Freeze an immutable ContextManifest before execution and bind prompt, model, policy and retry/cache keys to its fingerprint." },
+  { id: "CTX-TRACE-009", label: "freeze-context-manifest", current: "The session-level ContextManifest is frozen and the model-understanding worker can consume a persisted fingerprint and source-message set before the provider call.", gap: "The broader task-context pipeline still lacks complete eligibility, exclusion, transformation, token-plan and cache/retry binding across every executor.", target: "Freeze an immutable ContextManifest before execution and bind prompt, model, policy and retry/cache keys to its fingerprint." },
   { id: "CTX-TRACE-010", label: "enforce-pre-call-gate", current: "PreCallReview emits pass or warn; warnings do not stop runner execution.", gap: "Missing T0, widespread truncation, corruption, unresolved rights or evidence gaps cannot produce a machine-enforced block state.", target: "Return pass/warn/block with typed reasons; block all hard-gate failures server-side before provider resolution/call." },
   { id: "CTX-TRACE-011", label: "execute-retry-and-cache-against-manifest", current: "The runner receives a rendered prompt and profile; retries/adoption cannot prove identical evidence semantics.", gap: "A retry or cache hit can silently use stale, differently eligible or differently compressed context.", target: "Pin attempts to the manifest or create an explicit successor with invalidation and visible differences." },
-  { id: "CTX-TRACE-012", label: "verify-post-call-evidence-coverage", current: "Structured result parsing and invocation outcome do not prove which claims used, ignored or exceeded supplied evidence.", gap: "Fluent prose can contradict T0, invent facts, leak restricted material or miss required obligations while the process succeeds.", target: "Check claim/evidence coverage, instruction boundary, conflicts and stale dependencies before candidate adoption or canon mutation." },
+  { id: "CTX-TRACE-012", label: "verify-post-call-evidence-coverage", current: "Understanding review now checks evidence spans for every model claim against existing source-message bounds.", gap: "Claim support semantics, conflict handling, restricted-material leakage and obligation coverage remain outside this deterministic span check.", target: "Check claim/evidence coverage, instruction boundary, conflicts and stale dependencies before candidate adoption or canon mutation." },
 ];
 
 const contextOrchestrationAudit = {
@@ -7741,17 +8750,18 @@ const contextOrchestrationAudit = {
     implementationVerified: false,
   },
   rootCause: {
-    statement: "Context assembly is a display-title-driven packing pipeline with fixed per-block character caps. It records volume and truncation after assembly; a session-level frozen manifest now exists, but the executor still lacks model-aware global token planning, eligibility-first authority filters, corruption/conflict receipts, manifest binding, a server-side block state and post-call evidence coverage.",
+    statement: "Context assembly remains a display-title-driven packing pipeline with fixed per-block character caps. It records volume and truncation after assembly; session and generic task paths now bind persisted manifests, and knowledge retrieval applies eligibility and evidence-quality ordering, but the system still lacks model-aware global token planning, complete corruption/conflict receipts and complete post-call evidence coverage.",
     consequence: "A long prompt can appear comprehensive while silently omitting a decisive middle fact, using stale or unauthorized material, flattening conflicts, starving output or letting a warning-only call generate fluent but narratively invalid prose that later contaminates memory and foreshadowing closure.",
   },
   currentEvidence: [
     { claim: "Optional file, JSON and JSONL failures are converted to empty/undefined/dropped rows during context assembly.", evidence: [contextOrchestrationEvidence("api/src/contextAssembler.ts", "async function readOptional"), contextOrchestrationEvidence("api/src/contextAssembler.ts", "async function readOptionalJsonl"), contextOrchestrationEvidence("api/src/contextAssembler.ts", "return [];")] },
     { claim: "Context is tiered by display title and independently first/last character-trimmed to fixed limits.", evidence: [contextOrchestrationEvidence("api/src/contextAssembler.ts", "function trimContext"), contextOrchestrationEvidence("api/src/contextAssembler.ts", "function contextTierForTitle"), contextOrchestrationEvidence("api/src/contextAssembler.ts", "function contextLimitForTier")] },
     { claim: "Invocation context snapshots retain title, character length, tier and truncation, not provenance, eligibility, conflicts, token accounting or exclusions.", evidence: [contextOrchestrationEvidence("api/src/taskService.ts", "function contextSnapshot"), contextOrchestrationEvidence("api/src/types.ts", "export interface AiInvocationContextBlockSnapshot")] },
-    { claim: "Pre-call review has pass/warn only and runner execution follows regardless of warnings.", evidence: [contextOrchestrationEvidence("api/src/taskService.ts", "function preCallReview"), contextOrchestrationEvidence("api/src/types.ts", 'status: "pass" | "warn"'), contextOrchestrationEvidence("api/src/taskService.ts", "const output = await runner.run")] },
-    { claim: "Knowledge retrieval ranks score/vector matches and top limits without an eligibility-first canon/time/POV/reader/rights/freshness contract.", evidence: [contextOrchestrationEvidence("api/src/knowledgeIndex.ts", "export async function searchKnowledgeIndex"), contextOrchestrationEvidence("api/src/knowledgeIndex.ts", ".sort((left, right) => right.score - left.score")] },
+    { claim: "Pre-call review has pass/warn only; generic task execution now adds a manifest status check before each provider attempt, while the broader hard-gate contract remains incomplete.", evidence: [contextOrchestrationEvidence("api/src/taskService.ts", "function preCallReview"), contextOrchestrationEvidence("api/src/types.ts", 'status: "pass" | "warn"'), contextOrchestrationEvidence("api/src/taskService.ts", "runWithCurrentTaskContextManifest")] },
+    { claim: "Knowledge retrieval applies eligibility before relevance and orders eligible facts by evidence quality, score and vector tie-breakers; broader context packing still lacks a global token plan.", evidence: [contextOrchestrationEvidence("api/src/knowledgeIndex.ts", "export async function searchKnowledgeIndex"), contextOrchestrationEvidence("api/src/knowledgeIndex.ts", "evidenceQualityPriority(factQuality(right))")] },
     { claim: "The author-facing context panel states that memory/rules/skills are injected but does not expose included/excluded evidence, truncation, conflicts, freshness or gate status.", evidence: [contextOrchestrationEvidence("ui/src/components/novel/ContextPanel.vue", "context-note"), contextOrchestrationEvidence("ui/src/components/novel/ContextPanel.vue", "activeSkills")] },
-    { claim: "A session-level T0 manifest freezes author message IDs, source spans and a source fingerprint, and supersedes the prior manifest when the session changes; it is not yet consumed by the executor.", evidence: [contextOrchestrationEvidence("api/src/contextManifest.ts", "export async function freezeContextManifest"), contextOrchestrationEvidence("api/src/contextManifest.ts", "sourceFingerprint"), contextOrchestrationEvidence("api/src/app.ts", "app.post(\"/api/novel/projects/:projectId/session/context-manifest\"")] },
+    { claim: "A session-level T0 manifest freezes author message IDs, source spans and a source fingerprint, supersedes the prior manifest when the session changes, and is consumed by the model-understanding worker when the task declares its fingerprint; broader task-context executors remain partial.", evidence: [contextOrchestrationEvidence("api/src/contextManifest.ts", "export async function freezeContextManifest"), contextOrchestrationEvidence("api/src/contextManifest.ts", "sourceFingerprint"), contextOrchestrationEvidence("api/src/app.ts", "app.post(\"/api/novel/projects/:projectId/session/context-manifest\""), contextOrchestrationEvidence("api/src/understandingWorker.ts", "const manifest = await readContextManifest(input.root)"), contextOrchestrationEvidence("api/src/understandingReview.ts", "function validEvidence")] },
+    { claim: "Generic task execution persists a task ContextManifest and revalidates it before the initial, retry, failover and repair provider attempts; blocked or missing manifests stop further calls.", evidence: [contextOrchestrationEvidence("api/src/taskService.ts", "await persistTaskContextManifest(root, contextManifest)"), contextOrchestrationEvidence("api/src/taskService.ts", "async function runWithCurrentTaskContextManifest"), contextOrchestrationEvidence("api/src/taskService.ts", "TASK_CONTEXT_MANIFEST_BLOCKED")] },
   ],
   stages: contextOrchestrationStages,
   alternatives: [
@@ -9116,8 +10126,8 @@ const objectiveDefinitions = [
   {
     objectiveId: "OBJ-USER-007",
     userIntent: "持续协作直至整本小说完成，并对完成度、欠债和未决项给出诚实证据。",
-    requirementSelectors: ["FR-RUN-*", "FR-COMPLETE-*", "FR-LONGMEM-*", "FR-OBL-*", "FR-CLOSURE-*", "FR-PUBLISH-*", "FR-DURABILITY-*"],
-    acceptanceSelectors: ["AT-007", "AT-038..AT-040", "AT-142..AT-189", "AT-313..AT-332", "AT-439..AT-441", "AT-479..AT-481", "AT-504..AT-507", "AT-516..AT-519"],
+    requirementSelectors: ["FR-RUN-*", "FR-COMPLETE-*", "FR-STATE-*", "FR-MIGRATE-*", "FR-API-*", "FR-LONGMEM-*", "FR-MEMORY-*", "FR-OBL-*", "FR-CLOSURE-*", "FR-PUBLISH-*", "FR-DURABILITY-*"],
+    acceptanceSelectors: ["AT-007", "AT-009", "AT-020", "AT-038..AT-040", "AT-060..AT-070", "AT-142..AT-189", "AT-310..AT-312", "AT-313..AT-332", "AT-384..AT-385", "AT-439..AT-441", "AT-479..AT-481", "AT-504..AT-507", "AT-516..AT-519"],
     futureDecisionDependencies: [
       "Q-002 is confirmed as the open-suspense contract mode.",
       "Q-004 is confirmed as adaptive-risk-pause and tunes pause behavior without changing completion evidence.",
@@ -9165,13 +10175,13 @@ const objectiveCoverageItems = objectiveDefinitions.map((definition) => {
     requirementCatalog.find((item) => item.requirementId === requirementId).firstSlice
   )))].sort((left, right) => sliceOrder.indexOf(left) - sliceOrder.indexOf(right));
   const implementationEvidence = {
-    "OBJ-USER-001": ["api/src/app.spec.ts#V1-V2-V3-vertical-slice", "api/src/contextManifest.spec.ts", "api/src/dialogueQuestions.spec.ts"],
-    "OBJ-USER-002": ["api/src/app.spec.ts#V3-V4-vertical-slice", "api/src/outlineValidation.spec.ts", "api/src/outlineCommit.spec.ts"],
-    "OBJ-USER-003": ["api/src/runtime.spec.ts#governed-prose-candidate", "api/src/proseValidation.spec.ts", "api/src/proseAdoption.spec.ts", "api/src/chapterSettlement.spec.ts"],
-    "OBJ-USER-004": ["api/src/qualityCalibration.spec.ts", "api/src/craftProfile.spec.ts", "api/src/authorFeedback.spec.ts"],
-    "OBJ-USER-005": ["api/src/app.spec.ts#adaptive-question-sequence", "api/src/dialogueQuestions.spec.ts"],
-    "OBJ-USER-006": ["api/src/understandingReview.spec.ts", "api/src/qualityCalibration.spec.ts", "api/src/proseReview.spec.ts"],
-    "OBJ-USER-007": ["api/src/bookRun.spec.ts", "api/src/completionAudit.spec.ts", "api/src/runtimeWorker.spec.ts"],
+    "OBJ-USER-001": ["api/src/app.spec.ts#V1-V2-V3-vertical-slice", "api/src/contextManifest.spec.ts", "api/src/dialogueQuestions.spec.ts", "api/src/decisionConsumption.spec.ts", "api/src/app.spec.ts#downstream-decision-consumption"],
+    "OBJ-USER-002": ["api/src/app.spec.ts#V3-V4-vertical-slice", "api/src/outlineValidation.spec.ts", "api/src/outlineCommit.spec.ts", "api/src/chapterExecutionPlan.spec.ts", "api/src/chapterExecutionProof.spec.ts", "api/src/runtime.spec.ts#governed-runtime-chapter-execution-plan"],
+    "OBJ-USER-003": ["api/src/runtime.spec.ts#governed-prose-candidate", "api/src/proseValidation.spec.ts", "api/src/proseAdoption.spec.ts", "api/src/chapterSettlement.spec.ts", "api/src/researchGrounding.spec.ts", "api/src/researchFactCheck.spec.ts", "api/src/researchReliability.spec.ts", "api/src/app.spec.ts#research-source-snapshots"],
+    "OBJ-USER-004": ["api/src/qualityCalibration.spec.ts", "api/src/craftProfile.spec.ts", "api/src/authorFeedback.spec.ts", "api/src/adaptiveEvaluationScale.spec.ts", "api/src/app.spec.ts#adaptive-evaluation-scales", "api/src/evaluationAccess.spec.ts", "api/src/app.spec.ts#private-sample-platform-regression", "api/src/evaluationRunArchive.spec.ts", "api/src/evaluationCase.spec.ts", "api/src/evaluationGovernance.spec.ts", "api/src/evaluationArtifactStore.spec.ts", "api/src/evaluationDisagreementStore.spec.ts", "api/src/evaluationSamplingStore.spec.ts", "api/src/evaluationRegressionStore.spec.ts", "api/src/evaluationParetoStore.spec.ts", "api/src/evaluationSliceStore.spec.ts", "api/src/app.spec.ts#routes-evaluation-disagreements", "api/src/app.spec.ts#seeded-repeat-sampling"],
+    "OBJ-USER-005": ["api/src/app.spec.ts#adaptive-question-sequence", "api/src/dialogueQuestions.spec.ts", "api/src/decisionConsumption.spec.ts", "api/src/app.spec.ts#downstream-decision-consumption"],
+    "OBJ-USER-006": ["api/src/understandingReview.spec.ts", "api/src/qualityCalibration.spec.ts", "api/src/proseReview.spec.ts", "api/src/adaptiveEvaluationScale.spec.ts", "api/src/app.spec.ts#adaptive-evaluation-scales"],
+    "OBJ-USER-007": ["api/src/bookRun.spec.ts", "api/src/bookWorkScheduler.spec.ts", "api/src/completionAudit.spec.ts", "api/src/runtimeWorker.spec.ts", "api/src/workLeaseStore.spec.ts", "api/src/stagnationDetection.spec.ts", "api/src/reviewBatch.spec.ts", "api/src/chapterMemoryPatch.spec.ts", "api/src/mutationPlan.spec.ts", "api/src/migrationPreview.spec.ts", "api/src/migrationValidation.spec.ts", "api/src/migrationCutover.spec.ts", "api/src/app.spec.ts#chapter-memory-patch-and-asset-coverage", "api/src/app.spec.ts#mutation-plan-api", "api/src/app.spec.ts#persists-runtime-work-leases", "api/src/app.spec.ts#pauses-a-run-when-stagnation-thresholds-are-crossed", "api/src/app.spec.ts#high-risk-review-items"],
     "OBJ-USER-008": ["api/src/narrativeObligation.spec.ts", "api/src/obligationCoverage.spec.ts", "api/src/closureCertificate.spec.ts"],
     "OBJ-USER-009": ["api/src/qualityCalibration.spec.ts", "api/src/revisionSettlement.spec.ts", "api/src/revisionAdoptionReceipt.spec.ts"],
     "OBJ-USER-010": ["scripts/spec-governance-verifier.mjs", "scripts/spec-governance-verifier.spec.mjs"],

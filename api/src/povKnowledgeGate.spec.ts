@@ -20,4 +20,16 @@ describe("POV knowledge gate", () => {
     const result = evaluatePovKnowledgeGate({ ...valid, claims: [{ text: "The captain betrayed us.", kind: "secret" as const, evidenceRefs: [] }] });
     expect(result.violations[0]?.repair).toBeTruthy();
   });
+
+  it("requires evidence for every claim and enforces declared narrative distance", () => {
+    const result = evaluatePovKnowledgeGate({ ...valid, claims: [{ text: "He knew the council's secret.", kind: "pov-belief" as const, evidenceRefs: [] }, { text: "The council knew everything.", kind: "omniscient" as const, evidenceRefs: ["scene://1"] }] });
+    expect(result.status).toBe("blocked");
+    expect(result.violations.map((item) => item.code)).toEqual(expect.arrayContaining(["POV_CLAIM_EVIDENCE_REQUIRED", "POV_DISTANCE_JUMP"]));
+  });
+
+  it("blocks an author-only truth from entering a limited POV even when a source anchor exists", () => {
+    const result = evaluatePovKnowledgeGate({ ...valid, prohibitedDisclosure: ["the captain is the killer"], claims: [{ text: "The captain is the killer.", kind: "observed" as const, evidenceRefs: ["author://truth/1"] }] });
+    expect(result.status).toBe("blocked");
+    expect(result.violations).toEqual(expect.arrayContaining([expect.objectContaining({ code: "POV_AUTHOR_TRUTH_LEAK" })]));
+  });
 });

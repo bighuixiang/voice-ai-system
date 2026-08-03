@@ -3513,7 +3513,8 @@
       "label": "双女主感情线冲突处理方案（第15-40章）",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:00-世界观设定",
@@ -3521,7 +3522,8 @@
       "label": "00-世界观设定",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:艾德里安-帝国三王子的救赎之路-完整版",
@@ -3529,7 +3531,8 @@
       "label": "艾德里安 - 帝国三王子的救赎之路（完整版）",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:反派",
@@ -3537,7 +3540,8 @@
       "label": "反派",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:将臣-万年冤种僵尸王",
@@ -3545,7 +3549,8 @@
       "label": "将臣——万年冤种僵尸王",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:魔兽",
@@ -3553,7 +3558,8 @@
       "label": "魔兽",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:索菲亚-学院校花",
@@ -3561,7 +3567,8 @@
       "label": "索菲亚 - 学院校花",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:双女主",
@@ -3569,7 +3576,8 @@
       "label": "双女主",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:伊莎贝拉-异界美女师父",
@@ -3577,7 +3585,8 @@
       "label": "伊莎贝拉——异界美女师父",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:艾米莉亚-amelia-天然呆可爱担当-完整版",
@@ -3585,7 +3594,8 @@
       "label": "艾米莉亚（Amelia）- 天然呆可爱担当（完整版）",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:小伙伴",
@@ -3593,7 +3603,8 @@
       "label": "小伙伴",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:弗拉姆-热血火法师-完整版",
@@ -3601,7 +3612,8 @@
       "label": "弗拉姆 - 热血火法师（完整版）",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:格蕾丝-温柔治疗师-完整版",
@@ -3609,7 +3621,8 @@
       "label": "格蕾丝 - 温柔治疗师（完整版）",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:凯尔-正义之剑",
@@ -3617,7 +3630,8 @@
       "label": "凯尔——正义之剑",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:瑟莱恩-福奇-thrain-forge-完整故事线",
@@ -3625,7 +3639,8 @@
       "label": "瑟莱恩·福奇（Thrain Forge）完整故事线",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:魔道尸祖-封面设计方案",
@@ -3633,7 +3648,8 @@
       "label": "《魔道尸祖》封面设计方案",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:小说封面-文生图设计方案-md",
@@ -3641,7 +3657,8 @@
       "label": "小说封面-文生图设计方案.md",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:向守一-现代师父-异界篇",
@@ -3649,7 +3666,8 @@
       "label": "向守一 - 现代师父（异界篇）",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:异界师父",
@@ -3657,7 +3675,8 @@
       "label": "异界师父",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:光明主宰-奥瑞尔",
@@ -3665,7 +3684,8 @@
       "label": "光明主宰·奥瑞尔",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:至高神主宰",
@@ -3673,7 +3693,8 @@
       "label": "至高神主宰",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:黑暗主宰-最终反派",
@@ -3681,7 +3702,8 @@
       "label": "黑暗主宰——最终反派",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:生命主宰-盖亚",
@@ -3689,7 +3711,8 @@
       "label": "生命主宰·盖亚",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:向德豪",
@@ -3697,7 +3720,8 @@
       "label": "向德豪",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:主角",
@@ -3705,7 +3729,8 @@
       "label": "主角",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:人物语音手册-v1",
@@ -3713,7 +3738,8 @@
       "label": "人物语音手册 v1",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:主线剧情",
@@ -3721,7 +3747,8 @@
       "label": "主线剧情",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:人物语音手册-v2",
@@ -3729,7 +3756,8 @@
       "label": "人物语音手册 v2",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:双女主初遇-秩序与直球",
@@ -3737,7 +3765,8 @@
       "label": "双女主初遇·秩序与直球",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:第二卷-学院-伙伴-双凤",
@@ -3745,7 +3774,8 @@
       "label": "第二卷-学院·伙伴·双凤",
       "subtitle": "object",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:魔兽岭历练-艾德里安的阴谋",
@@ -3753,7 +3783,8 @@
       "label": "魔兽岭历练·艾德里安的阴谋",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:魔兽岭第二次-心意与战损",
@@ -3761,7 +3792,8 @@
       "label": "魔兽岭第二次·心意与战损",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "knowledge:战场停战条约-先活下来",
@@ -3769,7 +3801,8 @@
       "label": "战场停战条约·先活下来",
       "subtitle": "subject",
       "status": "indexed",
-      "chapterIds": []
+      "chapterIds": [],
+      "sourceAuthority": "legacy-projection"
     }
   ],
   "edges": [
@@ -11723,154 +11756,176 @@
       "source": "knowledge:双女主感情线冲突处理方案-第15-40章",
       "target": "knowledge:00-世界观设定",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-002-01-角色设定-反派-艾德里安-帝国王子",
       "source": "knowledge:艾德里安-帝国三王子的救赎之路-完整版",
       "target": "knowledge:反派",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-003-01-角色设定-魔兽-将臣",
       "source": "knowledge:将臣-万年冤种僵尸王",
       "target": "knowledge:魔兽",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-004-01-角色设定-双女主-索菲亚-校花",
       "source": "knowledge:索菲亚-学院校花",
       "target": "knowledge:双女主",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-005-01-角色设定-双女主-伊莎贝拉-精灵族院长",
       "source": "knowledge:伊莎贝拉-异界美女师父",
       "target": "knowledge:双女主",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-006-01-角色设定-小伙伴-艾米莉亚-完整版",
       "source": "knowledge:艾米莉亚-amelia-天然呆可爱担当-完整版",
       "target": "knowledge:小伙伴",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-007-01-角色设定-小伙伴-弗拉姆-完整版",
       "source": "knowledge:弗拉姆-热血火法师-完整版",
       "target": "knowledge:小伙伴",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-008-01-角色设定-小伙伴-格蕾丝-完整版",
       "source": "knowledge:格蕾丝-温柔治疗师-完整版",
       "target": "knowledge:小伙伴",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-009-01-角色设定-小伙伴-凯尔",
       "source": "knowledge:凯尔-正义之剑",
       "target": "knowledge:小伙伴",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-010-01-角色设定-小伙伴-瑟莱恩-福奇-第七王子",
       "source": "knowledge:瑟莱恩-福奇-thrain-forge-完整故事线",
       "target": "knowledge:小伙伴",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-011-01-角色设定-小说封面-文生图设计方案",
       "source": "knowledge:魔道尸祖-封面设计方案",
       "target": "knowledge:小说封面-文生图设计方案-md",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-012-01-角色设定-异界师父-向守一",
       "source": "knowledge:向守一-现代师父-异界篇",
       "target": "knowledge:异界师父",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-013-01-角色设定-至高神主宰-光明主宰",
       "source": "knowledge:光明主宰-奥瑞尔",
       "target": "knowledge:至高神主宰",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-014-01-角色设定-至高神主宰-黑暗主宰",
       "source": "knowledge:黑暗主宰-最终反派",
       "target": "knowledge:至高神主宰",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-015-01-角色设定-至高神主宰-生命主宰",
       "source": "knowledge:生命主宰-盖亚",
       "target": "knowledge:至高神主宰",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-016-01-角色设定-主角-向德豪",
       "source": "knowledge:向德豪",
       "target": "knowledge:主角",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-017-02-故事大纲-主线剧情-人物语音手册_v1",
       "source": "knowledge:人物语音手册-v1",
       "target": "knowledge:主线剧情",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-018-02-故事大纲-主线剧情-人物语音手册_v2",
       "source": "knowledge:人物语音手册-v2",
       "target": "knowledge:主线剧情",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-019-03-章节正文-第二卷-学院-伙伴-双凤-第13章-双女主初遇-",
       "source": "knowledge:双女主初遇-秩序与直球",
       "target": "knowledge:第二卷-学院-伙伴-双凤",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-020-03-章节正文-第二卷-学院-伙伴-双凤-第15章-魔兽岭历练-",
       "source": "knowledge:魔兽岭历练-艾德里安的阴谋",
       "target": "knowledge:第二卷-学院-伙伴-双凤",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-021-03-章节正文-第二卷-学院-伙伴-双凤-第22章-魔兽岭第二次",
       "source": "knowledge:魔兽岭第二次-心意与战损",
       "target": "knowledge:第二卷-学院-伙伴-双凤",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     },
     {
       "id": "triple:triple:story-character-role:char-022-03-章节正文-第二卷-学院-伙伴-双凤-第23章-双女主对话-",
       "source": "knowledge:战场停战条约-先活下来",
       "target": "knowledge:第二卷-学院-伙伴-双凤",
       "type": "asserts",
-      "label": "has_role"
+      "label": "has_role",
+      "sourceAuthority": "legacy-projection"
     }
   ],
   "characterRelations": {
@@ -12554,5 +12609,10 @@
       }
     ]
   },
-  "updatedAt": "2026-07-30T01:40:18.109Z"
+  "memoryProjection": {
+    "status": "current",
+    "blockingReasons": [],
+    "affectedClaimIds": []
+  },
+  "updatedAt": "2026-08-02T07:54:17.296Z"
 }

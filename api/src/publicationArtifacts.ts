@@ -35,6 +35,10 @@ function verifyArtifactSet(set: PublicationArtifactSet): boolean {
   const { fingerprint, ...base } = set;
   return hash(base) === fingerprint;
 }
+function verifyArtifactSetSemantics(set: PublicationArtifactSet): boolean {
+  if (set.schemaVersion !== "publication-artifact-set.v1" || typeof set.artifactSetId !== "string" || !set.artifactSetId.trim() || typeof set.editionId !== "string" || !set.editionId.trim() || typeof set.projectSlug !== "string" || !set.projectSlug.trim() || set.status !== "validated" || typeof set.createdAt !== "string" || !set.createdAt.trim() || !Array.isArray(set.artifacts)) return false;
+  return set.artifacts.every((artifact) => artifact && (artifact.format === "markdown" || artifact.format === "txt") && typeof artifact.relativePath === "string" && artifact.relativePath.trim().length > 0 && typeof artifact.sha256 === "string" && /^[a-f0-9]{64}$/i.test(artifact.sha256) && Number.isInteger(artifact.size) && artifact.size > 0 && artifact.rendererVersion === "publication-renderer.v1");
+}
 
 function renderMarkdown(manifest: ManifestIdentity, tree: PublicationTree): string {
   const lines = [`# ${manifest.title}`, ``, `作者：${manifest.author}`, ``];
@@ -65,6 +69,7 @@ export async function readPublicationArtifactSet(root: string, editionId: string
   try {
     const set = JSON.parse(await fs.readFile(setPath(root, editionId), "utf8")) as PublicationArtifactSet;
     if (!verifyArtifactSet(set)) throw new Error("PUBLICATION_ARTIFACT_SET_INTEGRITY_FAILED");
+    if (!verifyArtifactSetSemantics(set)) throw new Error("PUBLICATION_ARTIFACT_SET_SEMANTIC_INVALID");
     return set;
   }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }

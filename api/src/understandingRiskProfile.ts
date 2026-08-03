@@ -12,6 +12,12 @@ export interface UnderstandingRiskProfile {
   fingerprint: string;
 }
 
+export function assertUnderstandingRiskProfileIntegrity(profile: UnderstandingRiskProfile): UnderstandingRiskProfile {
+  const { fingerprint, ...base } = profile;
+  if (profile.schemaVersion !== "task-risk-profile.v1" || profile.taskType !== "creative-understanding" || profile.impact !== "high" || profile.reversibility !== "reversible-candidate" || profile.writesCanon || !profile.requiresAuthorDecision || !profile.t0Required || !profile.riskFactors.length || profile.riskFactors.some((factor) => !factor.trim()) || crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") !== fingerprint) throw new Error("TASK_RISK_PROFILE_INTEGRITY_FAILED");
+  return profile;
+}
+
 export function buildUnderstandingRiskProfile(): UnderstandingRiskProfile {
   const base = {
     schemaVersion: "task-risk-profile.v1" as const,

@@ -159,6 +159,13 @@ describe("AutopilotRuntimePanel", () => {
     expect(wrapper.emitted("direction")).toBeUndefined();
   });
 
+  it("does not present single-chapter acceptance as whole-book completion", () => {
+    const wrapper = mountPanel({ activeRun: { ...activeRun, status: "completed" } });
+    expect(wrapper.text()).toContain("本次单章运行已接受");
+    expect(wrapper.text()).toContain("连续章节调度：待实现");
+    expect(wrapper.find(".auto-continue-switch").exists()).toBe(false);
+  });
+
   it("keeps sending direction updates to the active run when one exists", async () => {
     const wrapper = mountPanel({ activeRun });
 

@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createEditionManifest, readEditionManifest } from "./editionManifest.js";
+import crypto from "node:crypto";
 
 async function fixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "edition-manifest-"));
@@ -44,5 +45,18 @@ describe("edition manifest", () => {
     value.title = "tampered";
     await fs.writeFile(target, `${JSON.stringify(value)}\n`, "utf8");
     await expect(createEditionManifest(input)).rejects.toThrow("EDITION_MANIFEST_INTEGRITY_FAILED");
+  });
+
+  it("rejects a re-signed manifest that is no longer frozen", async () => {
+    const { root } = await fixture();
+    const input = { root, projectSlug: "demo", canonCommitFingerprint: "canon-001", title: "Demo Novel", author: "Author", language: "zh-CN", chapters: [{ chapterId: "chapter-001", title: "Chapter 1", order: 1, contentPath: "chapters/chapter-001.md", settlementId: "settlement-001" }] };
+    const manifest = await createEditionManifest(input);
+    const target = path.join(root, "sessions", "publication-editions", manifest.editionId + ".json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, status: "draft" };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readEditionManifest(root, manifest.editionId)).rejects.toThrow("EDITION_MANIFEST_SEMANTIC_INVALID");
   });
 });

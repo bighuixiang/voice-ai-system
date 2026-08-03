@@ -1,0 +1,4 @@
+export function auditRuntimeReuse(input: { orchestratorExecutorRef: string; existingExecutorRef: string; queueImplementations: number; progressEventsObserved: boolean; cancellationSupported: boolean; checkpointSupported: boolean }): { status: "passed" | "blocked"; duplicateExecutor: boolean; reasons: string[] } {
+  const reasons = [...(input.orchestratorExecutorRef !== input.existingExecutorRef ? ["DUPLICATE_EXECUTOR"] : []), ...(input.queueImplementations !== 1 ? ["DUPLICATE_QUEUE"] : []), ...(!input.progressEventsObserved ? ["PROGRESS_EVENTS_MISSING"] : []), ...(!input.cancellationSupported ? ["CANCELLATION_MISSING"] : []), ...(!input.checkpointSupported ? ["CHECKPOINT_MISSING"] : [])];
+  return { status: reasons.length ? "blocked" : "passed", duplicateExecutor: input.orchestratorExecutorRef !== input.existingExecutorRef, reasons };
+}

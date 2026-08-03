@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-inventory-activation-semantic-parity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Inventory cutover state must apply the same required activation semantics as direct activation reads.",
+    "A hashed activation missing source fingerprint or activation timestamp must not prove migration cutover."
+  ],
+  "implementationRefs": [
+    "api/src/projectInventory.ts:governanceState activation scan",
+    "api/src/projectInventory.spec.ts:hashed activation missing required semantic fields"
+  ],
+  "tests": {
+    "red": "Inventory classified a validly hashed activation without sourceFingerprint as migration-activated.",
+    "green": "projectInventory.spec.ts passed 14/14 after activation semantic parity checks were added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

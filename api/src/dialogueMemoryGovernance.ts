@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 
-type Probe = { probeId: string; frozenFacts: readonly string[]; dimension: string; variants: readonly Array<{ variantId: string; text: string }> };
-export interface PreferenceProbeSelection { schemaVersion: "preference-probe-selection.v1"; selectionId: string; probeId: string; selectedVariantId: string; hypothesis: string; reason: string; scope: "scene" | "chapter" | "project"; validationContexts: string[]; evidenceRefs: string[]; status: "active" | "revoked"; revocationReason?: string; fingerprint: string; }
+type Probe = { probeId: string; frozenFacts: readonly string[]; dimension: string; variants: ReadonlyArray<{ variantId: string; text: string }> };
+export interface PreferenceProbeSelection { schemaVersion: "preference-probe-selection.v1"; selectionId: string; probeId: string; selectedVariantId: string; hypothesis: string; reason: string; scope: "scene" | "chapter" | "project"; validationContexts: string[]; evidenceRefs: string[]; adoption: "preference_only"; canonWritten: false; status: "active" | "revoked"; revocationReason?: string; fingerprint: string; }
 export interface DialogueMemoryRecord { schemaVersion: "dialogue-memory-record.v1"; memoryId: string; projectSlug: string; content: string; sourceRefs: string[]; scope: "scene" | "chapter" | "project"; confidence: "explicit" | "inferred" | "provisional"; derivedCanonRefs: string[]; compressionVersion: string; status: "effective" | "corrected" | "forgotten"; correctionRefs: string[]; forgetReason?: string; fingerprint: string; }
 
 const hash = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -11,7 +11,7 @@ export function createPreferenceProbeSelection(input: { probe: Probe; selectedVa
   const selected = input.probe.variants.find((variant) => variant.variantId === input.selectedVariantId);
   if (!selected) throw new Error("PREFERENCE_SELECTION_VARIANT_INVALID");
   if (!input.evidenceRefs.length) throw new Error("PREFERENCE_SELECTION_EVIDENCE_REQUIRED");
-  const base = { schemaVersion: "preference-probe-selection.v1" as const, selectionId: `selection-${input.probe.probeId}-${selected.variantId}`, probeId: input.probe.probeId, selectedVariantId: selected.variantId, hypothesis: `${input.probe.dimension}=${selected.text}`, reason: input.reason, scope: input.scope, validationContexts: [...input.validationContexts], evidenceRefs: [...input.evidenceRefs], status: "active" as const };
+  const base = { schemaVersion: "preference-probe-selection.v1" as const, selectionId: `selection-${input.probe.probeId}-${selected.variantId}`, probeId: input.probe.probeId, selectedVariantId: selected.variantId, hypothesis: `${input.probe.dimension}=${selected.text}`, reason: input.reason, scope: input.scope, validationContexts: [...input.validationContexts], evidenceRefs: [...input.evidenceRefs], adoption: "preference_only" as const, canonWritten: false as const, status: "active" as const };
   return { ...base, fingerprint: hash(base) };
 }
 

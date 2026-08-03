@@ -57,4 +57,60 @@ describe("PlotPilotLearningPanel", () => {
 
     expect(wrapper.emitted("action")).toEqual([["request-recap"]]);
   });
+
+  it("shows experiment-only status when holdout or calibration evidence is missing", () => {
+    const wrapper = mount(PlotPilotLearningPanel, {
+      props: {
+        items,
+        experiments: [{
+          schemaVersion: "craft-experiment.v1",
+          experimentId: "experiment-ui-1",
+          projectSlug: "demo",
+          transferPlanId: "plan-1",
+          baselineCandidateId: "baseline",
+          treatmentCandidateId: "treatment",
+          holdoutSceneIds: ["scene-1"],
+          targetMetrics: ["pressure"],
+          budgetId: "budget-1",
+          status: "judged",
+          judgment: { evaluatorId: "reviewer", evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "reviewed", judgedAt: "2026-01-01T00:00:00.000Z", fingerprint: "judgment" },
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          fingerprint: "experiment"
+        }]
+      }
+    });
+
+    expect(wrapper.get('[data-testid="craft-release-status"]').text()).toContain("仅实验");
+    expect(wrapper.text()).toContain("不会进入默认创作");
+  });
+
+  it("shows release review readiness only when all evidence classes are present", () => {
+    const wrapper = mount(PlotPilotLearningPanel, {
+      props: {
+        items,
+        experiments: [{
+          schemaVersion: "craft-experiment.v1",
+          experimentId: "experiment-ui-2",
+          projectSlug: "demo",
+          transferPlanId: "plan-2",
+          baselineCandidateId: "baseline",
+          treatmentCandidateId: "treatment",
+          holdoutSceneIds: ["scene-1", "scene-2"],
+          targetMetrics: ["reader-effect"],
+          budgetId: "budget-2",
+          status: "judged",
+          holdoutValidation: { status: "cross-scene-validated", holdoutCaseIds: ["h1", "h2"], sceneFunctions: ["investigation", "aftermath"] },
+          providerEvaluation: { providerRef: "provider://v1", decision: "pass", quality: { status: "calibrated" }, totalCost: { measurement: "actual" } },
+          readerCalibration: { reviewerId: "reader-v1", status: "calibrated", humanSamples: 8, blind: true, agreementRate: 0.875 },
+          judgment: { evaluatorId: "reviewer", evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "reviewed", judgedAt: "2026-01-01T00:00:00.000Z", fingerprint: "judgment" },
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          fingerprint: "experiment"
+        }]
+      }
+    });
+
+    expect(wrapper.get('[data-testid="craft-release-status"]').text()).toContain("可进入发布审阅");
+  });
 });

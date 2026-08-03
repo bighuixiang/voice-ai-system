@@ -94,7 +94,7 @@ describe("migration cutover readiness", () => {
       projectSlug: "ready",
       status: "activated",
       writeAuthority: "prose-adoption",
-      sourceFingerprint: "source-ready",
+      sourceFingerprint: "f".repeat(64),
       activatedAt: "2026-07-30T00:00:00.000Z"
     };
     const activation = { ...activationBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(activationBase)).digest("hex") };

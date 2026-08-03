@@ -29,6 +29,18 @@
       <strong>{{ question.text }}</strong>
       <small>{{ question.whyNow }}</small>
       <textarea v-model="answerDraft" data-testid="dialogue-answer" rows="2" placeholder="用一句话回答这个问题..." />
+      <div v-if="question.redBlueCase" class="red-blue-case" data-testid="red-blue-case">
+        <strong>红蓝证据对照</strong>
+        <p class="red-blue-tradeoff">{{ question.redBlueCase.irreducibleTradeoff }}</p>
+        <ul>
+          <li v-for="option in question.redBlueCase.options" :key="option.optionId">
+            <button type="button" class="red-blue-option" :data-testid="`red-blue-option-${option.optionId}`" @click="selectRedBlueOption(option.label)">{{ option.label }}</button>
+            <span>{{ option.claim }}</span>
+            <small>最佳情形：{{ option.bestCase }}；风险：{{ option.failureModes.join("、") }}</small>
+          </li>
+        </ul>
+        <small>当前推荐：{{ question.redBlueCase.recommendation }}。{{ question.redBlueCase.recommendationReason }}</small>
+      </div>
       <button type="submit" :disabled="!answerDraft.trim()">确认回答</button>
     </form>
     <ol v-if="session?.messages.length" class="session-messages" aria-label="Captured messages">
@@ -59,9 +71,9 @@
         aria-label="Author input"
         rows="3"
         placeholder="Write the idea, scene, question, or constraint in your own words..."
-        :disabled="loading || submitting"
+        :disabled="submitting"
       />
-      <button type="submit" :disabled="loading || submitting || !draft.trim()">
+      <button type="submit" :disabled="submitting || !draft.trim()">
         {{ submitting ? "Saving" : "Capture words" }}
       </button>
     </form>
@@ -105,6 +117,10 @@ function submitAnswer() {
   emit("answer", text, "confirmed");
   answerDraft.value = "";
 }
+
+function selectRedBlueOption(label: string) {
+  answerDraft.value = label;
+}
 </script>
 
 <style scoped>
@@ -127,6 +143,12 @@ function submitAnswer() {
 .freeze-button { justify-self: start; padding: 7px 11px; border: 1px solid var(--el-color-warning); border-radius: 7px; background: transparent; color: var(--el-color-warning-dark-2); cursor: pointer; }
 .freeze-button:disabled { opacity: .5; cursor: not-allowed; }
 .manifest-state { margin: 0; color: var(--el-color-success); font-size: 12px; }
+.red-blue-case { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--el-color-warning-light-5); border-radius: 8px; background: var(--el-color-warning-light-9); }
+.red-blue-case p, .red-blue-case ul { margin: 0; }
+.red-blue-case ul { display: grid; gap: 6px; padding-left: 18px; }
+.red-blue-case li { display: grid; gap: 2px; }
+.red-blue-option { justify-self: start; border: 0; padding: 0; color: var(--el-color-primary); background: transparent; font-weight: 700; cursor: pointer; }
+.red-blue-case span, .red-blue-case small { color: var(--el-text-color-secondary); }
 .session-input { display: grid; gap: 8px; }
 .session-input label { font-weight: 600; }
 .session-input textarea { width: 100%; resize: vertical; box-sizing: border-box; padding: 10px; border: 1px solid var(--el-border-color); border-radius: 8px; font: inherit; background: var(--el-bg-color); color: var(--el-text-color-primary); }

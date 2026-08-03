@@ -42,6 +42,16 @@
           <span>“{{ searchResult.query }}”</span>
           <em>{{ searchResult.facts.length }} facts / {{ searchResult.triples.length }} triples / {{ vectorHitCount }} vectors</em>
         </div>
+        <div v-if="searchResult.retrievalAudit" class="retrieval-audit" aria-label="retrieval audit">
+          <strong>Retrieval audit</strong>
+          <span>{{ searchResult.retrievalAudit.eligibleFactIds.length }} eligible / {{ searchResult.retrievalAudit.excluded.length }} excluded</span>
+          <span v-if="searchResult.retrievalAudit.boundary.task">task: {{ searchResult.retrievalAudit.boundary.task }}</span>
+          <span>{{ searchResult.retrievalAudit.evidenceProfile?.independentSourceCount ?? searchResult.retrievalAudit.evidenceSourceCount }} independent sources</span>
+          <small v-if="searchResult.retrievalAudit.evidenceProfile?.gaps.length">evidence gaps: {{ searchResult.retrievalAudit.evidenceProfile.gaps.join(", ") }}</small>
+          <small>fingerprint {{ searchResult.retrievalAudit.resultFingerprint.slice(0, 12) }}</small>
+          <small v-if="searchResult.queryEmbeddingFallback">query embedding fallback: {{ searchResult.queryEmbeddingFallback.reason }}</small>
+          <small v-if="retrievalPreviewId">saved preview {{ retrievalPreviewId }}</small>
+        </div>
         <div v-if="searchResult.facts.length" class="result-list">
           <article v-for="fact in searchResult.facts.slice(0, 5)" :key="fact.id">
             <strong>{{ fact.text }}</strong>
@@ -57,6 +67,13 @@
           <span v-for="chapter in searchResult.chapters.slice(0, 6)" :key="chapter.chapterId">{{ chapter.title }}</span>
         </div>
         <p v-if="!searchResult.facts.length && !searchResult.triples.length" class="empty-state">没有命中事实或关系。</p>
+      </div>
+
+      <div v-if="retrievalPreview && !searchResult" class="retrieval-audit retrieval-preview-recovery" aria-label="saved retrieval preview">
+        <strong>Saved retrieval preview</strong>
+        <span>saved preview {{ retrievalPreview.retrievalId }}</span>
+        <span>{{ retrievalPreview.selectedIds.length }} selected / {{ retrievalPreview.truncatedIds.length }} truncated</span>
+        <small>fingerprint {{ retrievalPreview.resultFingerprint.slice(0, 12) }}</small>
       </div>
 
       <div class="keyword-strip" v-if="visibleKeywords.length">
@@ -78,12 +95,13 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { Refresh } from "@element-plus/icons-vue";
-import type { KnowledgeIndexProjection, KnowledgeSearchResult } from "@/types/novel";
+import type { KnowledgeIndexProjection, KnowledgeSearchResult, MemoryRetrievalPreview } from "@/types/novel";
 
 const props = defineProps<{
   index: KnowledgeIndexProjection | null;
   isRebuilding: boolean;
   searchResult?: KnowledgeSearchResult | null;
+  retrievalPreview?: MemoryRetrievalPreview | null;
   isSearching?: boolean;
 }>();
 
@@ -122,6 +140,8 @@ const vectorHitCount = computed(() => {
   if (!props.searchResult) return 0;
   return [...props.searchResult.facts, ...props.searchResult.triples, ...props.searchResult.chapters].filter((item) => (item.vectorScore || 0) > 0).length;
 });
+
+const retrievalPreviewId = computed(() => props.retrievalPreview?.retrievalId || "");
 
 const summaryText = computed(() => {
   if (!props.index) return "从章节摘要、台账和故事总控重建";
@@ -227,6 +247,26 @@ p {
   small {
     color: var(--app-warning-text);
     font-size: 11px;
+  }
+}
+
+.retrieval-audit {
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-bg-soft);
+  color: var(--app-text-muted);
+  font-size: 11px;
+
+  strong {
+    color: var(--app-text-primary);
+    font-size: 12px;
+  }
+
+  small {
+    color: var(--app-warning-text);
   }
 }
 

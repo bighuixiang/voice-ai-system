@@ -21,7 +21,7 @@ export function evaluateStoryContractReadiness(input: { target: string; facets: 
   return { ...base, fingerprint: hash(base) };
 }
 
-export function assessSeedConfidence(input: { facets: readonly Array<{ name: string; value: string; evidenceStrength: number }>; conflicts: readonly string[] }): SeedConfidence {
+export function assessSeedConfidence(input: { facets: ReadonlyArray<{ name: string; value: string; evidenceStrength: number }>; conflicts: readonly string[] }): SeedConfidence {
   if (!input.facets.length) throw new Error("SEED_FACETS_REQUIRED");
   const unknown = input.facets.filter((facet) => !facet.value.trim() || facet.value.toLowerCase() === "unknown").map((facet) => facet.name);
   const base = { schemaVersion: "seed-confidence.v1" as const, coverage: Number(((input.facets.length - unknown.length) / input.facets.length).toFixed(4)), evidenceStrength: Number((input.facets.reduce((sum, facet) => sum + Math.max(0, Math.min(1, facet.evidenceStrength)), 0) / input.facets.length).toFixed(4)), conflicts: [...input.conflicts], unknown };

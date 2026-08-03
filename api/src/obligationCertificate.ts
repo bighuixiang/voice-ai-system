@@ -37,6 +37,9 @@ function verifyCertificateFingerprint(certificate: ObligationCoverageCertificate
   const { fingerprint, ...base } = certificate;
   return hash(base) === fingerprint;
 }
+function verifyCertificateSemantics(certificate: ObligationCoverageCertificate): boolean {
+  return certificate.schemaVersion === "obligation-coverage-certificate.v1" && certificate.status === "issued" && typeof certificate.sourceFingerprint === "string" && certificate.sourceFingerprint.trim().length > 0 && Array.isArray(certificate.chapterIds) && certificate.chapterIds.every((id) => typeof id === "string" && id.trim().length > 0) && Array.isArray(certificate.plannedIds) && certificate.plannedIds.every((id) => typeof id === "string" && id.trim().length > 0) && Number.isInteger(certificate.obligationCount) && certificate.obligationCount >= 0 && Array.isArray(certificate.terminalObligationIds) && certificate.terminalObligationIds.length === certificate.obligationCount && certificate.terminalObligationIds.every((id) => typeof id === "string" && id.trim().length > 0) && typeof certificate.generatedAt === "string" && certificate.generatedAt.trim().length > 0;
+}
 
 function isUri(value: string): boolean {
   return /^[a-z][a-z0-9+.-]*:\/\/[^\s]+$/i.test(value.trim());
@@ -56,6 +59,7 @@ export async function issueObligationCoverageCertificate(root: string, chapterId
   if (!sourceFingerprint.trim()) throw new Error("OBLIGATION_COVERAGE_SOURCE_FINGERPRINT_REQUIRED");
   const coverage = await auditNarrativeObligationCoverage(root, chapterIds);
   const obligations = await listNarrativeObligations(root);
+  if (coverage.unmigratedLegacyLedgerIds.length > 0) throw new Error("OBLIGATION_COVERAGE_LEGACY_PROJECTION_UNMIGRATED");
   if (coverage.sourceCoverageStatus !== "covered" || coverage.orphanPlannedIds.length > 0 || obligations.length === 0) {
     throw new Error("OBLIGATION_COVERAGE_CERTIFICATE_BLOCKED");
   }
@@ -113,6 +117,7 @@ export async function assertObligationCoverageCertificateCurrent(root: string, c
   if (!certificate || !currentSourceFingerprint.trim()) throw new Error("OBLIGATION_COVERAGE_CERTIFICATE_STALE");
   const invalidation = await readInvalidation(root);
   if (invalidation || certificate.sourceFingerprint !== currentSourceFingerprint.trim() || !verifyCertificateFingerprint(certificate)) throw new Error("OBLIGATION_COVERAGE_CERTIFICATE_STALE");
+  if (!verifyCertificateSemantics(certificate)) throw new Error("OBLIGATION_COVERAGE_CERTIFICATE_SEMANTIC_INVALID");
   return { valid: true, certificate };
 }
 

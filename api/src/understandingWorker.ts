@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
-import { fingerprintCreativeSession } from "./contextManifest.js";
+import { fingerprintCreativeSession, readContextManifest } from "./contextManifest.js";
 import { readCreativeSession } from "./creativeSession.js";
 import type { AgentRunConfig, CodexRunOutput, ProcessRunner, ProcessRunOptions } from "./codexRunner.js";
 import type { UnderstandingClaim } from "./understandingPreview.js";
@@ -17,6 +17,7 @@ export interface UnderstandingTaskRecord {
   status: UnderstandingWorkerStatus;
   sourceFingerprint: string;
   sourceMessageIds: string[];
+  contextManifestFingerprint?: string;
   promptFingerprint: string;
   prompt: string;
   agent: AgentRunConfig & { id?: string };
@@ -25,6 +26,7 @@ export interface UnderstandingTaskRecord {
   modelCallIssued: boolean;
   canonWritten: false;
   snapshotId?: string;
+  fingerprint: string;
   error?: string;
   startedAt: string;
   updatedAt: string;
@@ -36,6 +38,7 @@ export interface UnderstandingWorkerInput {
   projectSlug: string;
   sourceFingerprint: string;
   sourceMessageIds: string[];
+  contextManifestFingerprint?: string;
   prompt: string;
   agent: AgentRunConfig & { id?: string };
   taskId?: string;
@@ -65,18 +68,74 @@ function nowIso(): string {
 
 async function writeJson(root: string, relativePath: string, value: unknown): Promise<void> {
   const target = resolveInside(root, relativePath);
-  await fs.mkdir(path.dirname(target), { recursive: true });
-  const temporary = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`;
-  await fs.writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, "utf8");
-  await fs.rename(temporary, target);
+  const previous = writeLocks.get(target) || Promise.resolve();
+  let release!: () => void;
+  const current = new Promise<void>((resolve) => { release = resolve; });
+  writeLocks.set(target, current);
+  await previous;
+  try {
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    const temporary = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`;
+    await fs.writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+    let renamed = false;
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 5 && !renamed; attempt += 1) {
+      try {
+        await fs.rename(temporary, target);
+        renamed = true;
+      } catch (error) {
+        lastError = error;
+        const code = error instanceof Error && "code" in error ? (error as { code?: string }).code : undefined;
+        if (code !== "EPERM" && code !== "EBUSY") throw error;
+        await new Promise((resolve) => setTimeout(resolve, 10 * (attempt + 1)));
+      }
+    }
+    if (!renamed) throw lastError;
+  } finally {
+    release();
+    if (writeLocks.get(target) === current) writeLocks.delete(target);
+  }
 }
 
 async function writeTask(root: string, task: UnderstandingTaskRecord): Promise<void> {
-  await writeJson(root, `sessions/understanding-tasks/${task.taskId}.json`, task);
+  const signed = withTaskFingerprint(task);
+  await writeJson(root, `sessions/understanding-tasks/${signed.taskId}.json`, signed);
 }
 
 function promptFingerprint(prompt: string): string {
   return crypto.createHash("sha256").update(prompt).digest("hex");
+}
+
+function taskFingerprint(task: Omit<UnderstandingTaskRecord, "fingerprint">): string {
+  return crypto.createHash("sha256").update(JSON.stringify(task)).digest("hex");
+}
+
+function withTaskFingerprint(task: Omit<UnderstandingTaskRecord, "fingerprint"> | UnderstandingTaskRecord): UnderstandingTaskRecord {
+  const { fingerprint: _fingerprint, ...base } = task as UnderstandingTaskRecord;
+  return { ...base, fingerprint: taskFingerprint(base) };
+}
+
+export function assertUnderstandingTaskIntegrity(task: UnderstandingTaskRecord, expectedTaskId?: string): UnderstandingTaskRecord {
+  const { fingerprint: _fingerprint, ...base } = task;
+  const validStatus = ["queued", "running", "completed", "cancelled", "failed", "stale"].includes(task.status);
+  const valid = task.schemaVersion === "understanding-task.v1"
+    && (!expectedTaskId || task.taskId === expectedTaskId)
+    && Boolean(task.taskId?.trim() && task.projectSlug?.trim() && task.sourceFingerprint?.trim() && task.prompt?.trim())
+    && Array.isArray(task.sourceMessageIds) && task.sourceMessageIds.every((id) => typeof id === "string" && id.trim())
+    && Boolean(task.agent && typeof task.agent === "object" && typeof task.agent.command === "string" && task.agent.command.trim() && typeof task.agent.label === "string" && task.agent.label.trim())
+    && /^[a-f0-9]{64}$/i.test(task.promptFingerprint)
+    && validStatus
+    && typeof task.modelCallIssued === "boolean"
+    && task.canonWritten === false
+    && typeof task.startedAt === "string" && task.startedAt.trim().length > 0
+    && typeof task.updatedAt === "string" && task.updatedAt.trim().length > 0
+    && (task.finishedAt === undefined || (typeof task.finishedAt === "string" && task.finishedAt.trim().length > 0))
+    && (task.error === undefined || (typeof task.error === "string" && task.error.trim().length > 0))
+    && (task.snapshotId === undefined || (typeof task.snapshotId === "string" && task.snapshotId.trim().length > 0))
+    && /^[a-f0-9]{64}$/i.test(task.fingerprint)
+    && taskFingerprint(base) === task.fingerprint;
+  if (!valid) throw new Error("UNDERSTANDING_TASK_INTEGRITY_FAILED");
+  return task;
 }
 
 function parseModelOutput(finalMessage: string): {
@@ -143,13 +202,14 @@ function parseModelOutput(finalMessage: string): {
 
 function initialTask(input: UnderstandingWorkerInput): UnderstandingTaskRecord {
   const timestamp = nowIso();
-  return {
+  return withTaskFingerprint({
     schemaVersion: "understanding-task.v1",
     taskId: input.taskId || createTaskId(),
     projectSlug: input.projectSlug,
     status: "running",
     sourceFingerprint: input.sourceFingerprint,
     sourceMessageIds: [...input.sourceMessageIds],
+    ...(input.contextManifestFingerprint ? { contextManifestFingerprint: input.contextManifestFingerprint } : {}),
     promptFingerprint: promptFingerprint(input.prompt),
     prompt: input.prompt,
     agent: input.agent,
@@ -159,14 +219,15 @@ function initialTask(input: UnderstandingWorkerInput): UnderstandingTaskRecord {
     canonWritten: false,
     startedAt: timestamp,
     updatedAt: timestamp
-  };
+  });
 }
 
 const activeUnderstandingTasks = new Map<string, { controller: AbortController; input: UnderstandingWorkerInput; runner: ProcessRunner }>();
+const writeLocks = new Map<string, Promise<void>>();
 
 async function readTaskFile(root: string, taskId: string): Promise<UnderstandingTaskRecord | null> {
   try {
-    return JSON.parse(await fs.readFile(resolveInside(root, `sessions/understanding-tasks/${taskId}.json`), "utf8")) as UnderstandingTaskRecord;
+    return assertUnderstandingTaskIntegrity(JSON.parse(await fs.readFile(resolveInside(root, `sessions/understanding-tasks/${taskId}.json`), "utf8")) as UnderstandingTaskRecord, taskId);
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null;
     throw error;
@@ -233,6 +294,7 @@ export async function resumeUnderstandingTask(
     projectSlug: task.projectSlug,
     sourceFingerprint: task.sourceFingerprint,
     sourceMessageIds: task.sourceMessageIds,
+    ...(task.contextManifestFingerprint ? { contextManifestFingerprint: task.contextManifestFingerprint } : {}),
     prompt: task.prompt,
     agent: task.agent,
     taskId: task.taskId,
@@ -312,19 +374,30 @@ export async function recoverUnderstandingTasksAtStartup(
 
 function finishTask(task: UnderstandingTaskRecord, status: UnderstandingWorkerStatus, error?: string): UnderstandingTaskRecord {
   const timestamp = nowIso();
-  return {
+  return withTaskFingerprint({
     ...task,
+    fingerprint: undefined as never,
     status,
     ...(error ? { error } : {}),
     updatedAt: timestamp,
     finishedAt: timestamp
-  };
+  });
 }
 
 export async function executeModelUnderstanding(
   input: UnderstandingWorkerInput,
   dependencies: { run: ProcessRunner["run"] }
 ): Promise<UnderstandingModelResult> {
+  if (input.contextManifestFingerprint) {
+    const manifest = await readContextManifest(input.root);
+    if (!manifest) throw new Error("UNDERSTANDING_CONTEXT_MANIFEST_REQUIRED");
+    if (manifest.fingerprint !== input.contextManifestFingerprint || manifest.sourceFingerprint !== input.sourceFingerprint) {
+      throw new Error("UNDERSTANDING_CONTEXT_MANIFEST_STALE");
+    }
+    const expectedMessageIds = [...input.sourceMessageIds].sort();
+    const manifestMessageIds = manifest.sourceMessages.map((message) => message.id).sort();
+    if (JSON.stringify(expectedMessageIds) !== JSON.stringify(manifestMessageIds)) throw new Error("UNDERSTANDING_CONTEXT_MANIFEST_MESSAGES_STALE");
+  }
   let task = initialTask(input);
   await writeTask(input.root, task);
   if (input.signal?.aborted) {
@@ -373,7 +446,7 @@ export async function executeModelUnderstanding(
 
   const timestamp = nowIso();
   const snapshotId = `understanding-model-${input.sourceFingerprint.slice(0, 16)}`;
-  const snapshot: UnderstandingSnapshot = {
+  const snapshotBase: Omit<UnderstandingSnapshot, "fingerprint"> = {
     schemaVersion: "understanding-snapshot.v1",
     snapshotId,
     projectSlug: input.projectSlug,
@@ -388,6 +461,10 @@ export async function executeModelUnderstanding(
     modelCallIssued: true,
     canonWritten: false,
     createdAt: timestamp
+  };
+  const snapshot: UnderstandingSnapshot = {
+    ...snapshotBase,
+    fingerprint: crypto.createHash("sha256").update(JSON.stringify(snapshotBase)).digest("hex")
   };
   await writeJson(input.root, "sessions/understanding-snapshot.json", snapshot);
   task = finishTask({ ...task, snapshotId }, "completed");

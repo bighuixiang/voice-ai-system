@@ -3,6 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
 
+function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
+
 export type WorldRuleKnowledgeKind = "objective_canon" | "character_belief" | "institution_belief" | "author_proposal" | "unknown";
 
 export interface WorldRuleContractInput {
@@ -116,11 +118,22 @@ export async function createWorldRuleContract(
 
 export async function readWorldRuleContract(root: string, ruleId: string): Promise<WorldRuleContract | null> {
   try {
-    return JSON.parse(await fs.readFile(contractPath(root, ruleId), "utf8")) as WorldRuleContract;
+    const contract = JSON.parse(await fs.readFile(contractPath(root, ruleId), "utf8")) as WorldRuleContract;
+    return assertWorldRuleContractIntegrity(contract, ruleId);
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null;
     throw error;
   }
+}
+
+export function assertWorldRuleContractIntegrity(contract: WorldRuleContract, expectedId?: string): WorldRuleContract {
+  const { fingerprint: _fingerprint, ...base } = contract;
+  const proposition = contract.proposition;
+  const scope = contract.scope;
+  const disclosure = contract.disclosure;
+  const valid = contract.schemaVersion === "world-rule-contract.v1" && (!expectedId || contract.ruleId === expectedId) && Boolean(contract.ruleId?.trim() && contract.projectSlug?.trim() && contract.sourceCandidateId?.trim()) && /^[a-f0-9]{64}$/i.test(contract.sourceFingerprint) && Number.isInteger(contract.version) && contract.version > 0 && ["candidate", "accepted", "stale"].includes(contract.status) && contract.canonWritten === false && [proposition?.condition, proposition?.mechanism, proposition?.result, proposition?.cost, proposition?.limit, proposition?.failure].every((value) => typeof value === "string" && value.trim()) && Array.isArray(scope?.subjects) && scope.subjects.length > 0 && scope.subjects.every((value) => typeof value === "string" && value.trim()) && Array.isArray(scope?.regions) && scope.regions.length > 0 && scope.regions.every((value) => typeof value === "string" && value.trim()) && ["accepted", "proposed", "unknown"].includes(disclosure?.objectiveStatus) && Array.isArray(disclosure?.domains) && disclosure.domains.length > 0 && disclosure.domains.every((domain) => Boolean(domain?.domainId?.trim() && domain.claim?.trim()) && ["objective_canon", "character_belief", "institution_belief", "author_proposal", "other_view", "plan", "inference", "unknown"].includes(domain.kind)) && Array.isArray(contract.evidenceRefs) && contract.evidenceRefs.length > 0 && contract.evidenceRefs.every((ref) => ["dialogue-question", "canon-asset", "decision-record"].includes(ref.kind) && ref.refId?.trim()) && hash(base) === contract.fingerprint;
+  if (!valid) throw new Error("WORLD_RULE_CONTRACT_INTEGRITY_FAILED");
+  return contract;
 }
 
 export async function listWorldRuleContracts(root: string): Promise<WorldRuleContract[]> {

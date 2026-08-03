@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createProjectFiles, createProjectSkeleton, projectRoot } from "./novelProject.js";
 import { buildStoryGraphProjection } from "./storyGraph.js";
 import { saveLedgerEntries, saveStoryControl } from "./writingCockpit.js";
+import { createMemoryClaim, persistMemoryClaim, retconMemoryClaim, settleMemoryClaim } from "./memoryClaim.js";
 
 let tempRoot = "";
 
@@ -144,7 +145,7 @@ describe("storyGraph", () => {
       expect.objectContaining({ id: "character:hero", type: "character" }),
       expect.objectContaining({ id: "character:mentor", type: "character" }),
       expect.objectContaining({ id: "event:gate-opens", type: "event" }),
-      expect.objectContaining({ id: "ledger:foreshadow-1", type: "ledger" }),
+      expect.objectContaining({ id: "ledger:foreshadow-1", type: "ledger", sourceAuthority: "legacy-projection" }),
       expect.objectContaining({ id: "knowledge:hero", type: "knowledge" }),
       expect.objectContaining({ id: "knowledge:sealed-gate", type: "knowledge" })
     ]));
@@ -152,9 +153,9 @@ describe("storyGraph", () => {
       expect.objectContaining({ source: "arc:arc-main", target: "chapter:chapter-001", type: "contains" }),
       expect.objectContaining({ source: "event:gate-opens", target: "character:hero", type: "involves" }),
       expect.objectContaining({ source: "event:gate-opens", target: "character:mentor", type: "involves" }),
-      expect.objectContaining({ source: "ledger:foreshadow-1", target: "chapter:chapter-001", type: "tracks" }),
+      expect.objectContaining({ source: "ledger:foreshadow-1", target: "chapter:chapter-001", type: "tracks", sourceAuthority: "legacy-projection" }),
       expect.objectContaining({ source: "ledger:foreshadow-1", target: "character:hero", type: "references" }),
-      expect.objectContaining({ source: "knowledge:hero", target: "knowledge:sealed-gate", type: "asserts", label: "opens" }),
+      expect.objectContaining({ source: "knowledge:hero", target: "knowledge:sealed-gate", type: "asserts", label: "opens", sourceAuthority: "unknown" }),
       expect.objectContaining({ source: "knowledge:hero", target: "chapter:chapter-001", type: "references", label: "knowledge" }),
       expect.objectContaining({ source: "character:hero", target: "character:mentor", type: "relationship", label: "trusts" }),
       expect.objectContaining({ source: "character:hero", target: "character:mentor", type: "relationship", label: "co-appears" }),
@@ -197,5 +198,18 @@ describe("storyGraph", () => {
         appearanceSignals: expect.arrayContaining([expect.objectContaining({ name: "Shadow", status: "should-appear" })])
       }
     });
+  });
+
+  it("marks the graph stale when a canon claim has a pending replacement", async () => {
+    const project = createProjectSkeleton({ title: "Graph Memory Gate", roughIdea: "Stale graph protection." });
+    await createProjectFiles(project);
+    const root = projectRoot(project.slug);
+    const settled = settleMemoryClaim({ claim: createMemoryClaim({ claimId: "graph-claim", proposition: "The gate is open", epistemicType: "canon_fact", sourceRefs: ["chapter://1"], evidenceAnchors: ["chapter-1#1"], producedBy: "author", temporalScope: { asOfVersion: "v1" }, confidence: 0.9 }), chapterSettlementCompleted: true, confirmer: "author-1", reason: "settled" });
+    const retcon = retconMemoryClaim({ claim: settled, replacementProposition: "The gate is sealed", replacementEvidenceAnchors: ["chapter-2#9"], confirmer: "author-1", reason: "retcon" });
+    await persistMemoryClaim(root, settled, "settled", "original");
+    await persistMemoryClaim(root, retcon.obsolete, "obsoleted", "retcon");
+    await persistMemoryClaim(root, retcon.replacement, "created", "replacement");
+    const graph = await buildStoryGraphProjection(root, project);
+    expect(graph.memoryProjection).toMatchObject({ status: "replacement-pending", affectedClaimIds: ["graph-claim"] });
   });
 });

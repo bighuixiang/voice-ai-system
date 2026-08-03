@@ -167,24 +167,66 @@
         "api/src/app.spec.ts#V1-V2-V3-vertical-slice",
         "api/src/contextManifest.spec.ts",
         "api/src/dialogueQuestions.spec.ts",
+        "api/src/decisionConsumption.spec.ts",
+        "api/src/app.spec.ts#downstream-decision-consumption",
         "api/src/app.spec.ts#V3-V4-vertical-slice",
         "api/src/outlineValidation.spec.ts",
         "api/src/outlineCommit.spec.ts",
+        "api/src/chapterExecutionPlan.spec.ts",
+        "api/src/chapterExecutionProof.spec.ts",
+        "api/src/runtime.spec.ts#governed-runtime-chapter-execution-plan",
         "api/src/runtime.spec.ts#governed-prose-candidate",
         "api/src/proseValidation.spec.ts",
         "api/src/proseAdoption.spec.ts",
         "api/src/chapterSettlement.spec.ts",
+        "api/src/researchGrounding.spec.ts",
+        "api/src/researchFactCheck.spec.ts",
+        "api/src/researchReliability.spec.ts",
+        "api/src/app.spec.ts#research-source-snapshots",
         "api/src/qualityCalibration.spec.ts",
         "api/src/craftProfile.spec.ts",
         "api/src/authorFeedback.spec.ts",
+        "api/src/adaptiveEvaluationScale.spec.ts",
+        "api/src/app.spec.ts#adaptive-evaluation-scales",
+        "api/src/evaluationAccess.spec.ts",
+        "api/src/app.spec.ts#private-sample-platform-regression",
+        "api/src/evaluationRunArchive.spec.ts",
+        "api/src/evaluationCase.spec.ts",
+        "api/src/evaluationGovernance.spec.ts",
+        "api/src/evaluationArtifactStore.spec.ts",
+        "api/src/evaluationDisagreementStore.spec.ts",
+        "api/src/evaluationSamplingStore.spec.ts",
+        "api/src/evaluationRegressionStore.spec.ts",
+        "api/src/evaluationParetoStore.spec.ts",
+        "api/src/evaluationSliceStore.spec.ts",
+        "api/src/app.spec.ts#routes-evaluation-disagreements",
+        "api/src/app.spec.ts#seeded-repeat-sampling",
         "api/src/app.spec.ts#adaptive-question-sequence",
         "api/src/dialogueQuestions.spec.ts",
+        "api/src/decisionConsumption.spec.ts",
+        "api/src/app.spec.ts#downstream-decision-consumption",
         "api/src/understandingReview.spec.ts",
         "api/src/qualityCalibration.spec.ts",
         "api/src/proseReview.spec.ts",
+        "api/src/adaptiveEvaluationScale.spec.ts",
+        "api/src/app.spec.ts#adaptive-evaluation-scales",
         "api/src/bookRun.spec.ts",
+        "api/src/bookWorkScheduler.spec.ts",
         "api/src/completionAudit.spec.ts",
         "api/src/runtimeWorker.spec.ts",
+        "api/src/workLeaseStore.spec.ts",
+        "api/src/stagnationDetection.spec.ts",
+        "api/src/reviewBatch.spec.ts",
+        "api/src/chapterMemoryPatch.spec.ts",
+        "api/src/mutationPlan.spec.ts",
+        "api/src/migrationPreview.spec.ts",
+        "api/src/migrationValidation.spec.ts",
+        "api/src/migrationCutover.spec.ts",
+        "api/src/app.spec.ts#chapter-memory-patch-and-asset-coverage",
+        "api/src/app.spec.ts#mutation-plan-api",
+        "api/src/app.spec.ts#persists-runtime-work-leases",
+        "api/src/app.spec.ts#pauses-a-run-when-stagnation-thresholds-are-crossed",
+        "api/src/app.spec.ts#high-risk-review-items",
         "api/src/narrativeObligation.spec.ts",
         "api/src/obligationCoverage.spec.ts",
         "api/src/closureCertificate.spec.ts",
@@ -222,7 +264,7 @@
       ],
       "currentFacts": {
         "endToEndLowInputJourneyVerified": false,
-        "interactiveSocraticDecisionExists": false,
+        "interactiveSocraticDecisionExists": true,
         "structuredAnswerPayloads": 0,
         "decisionConsumptionReceipts": 0,
         "contextManifests": 0
@@ -261,7 +303,9 @@
         "evidence": [
           "api/src/app.spec.ts#V1-V2-V3-vertical-slice",
           "api/src/contextManifest.spec.ts",
-          "api/src/dialogueQuestions.spec.ts"
+          "api/src/dialogueQuestions.spec.ts",
+          "api/src/decisionConsumption.spec.ts",
+          "api/src/app.spec.ts#downstream-decision-consumption"
         ],
         "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
       },
@@ -285,7 +329,7 @@
       ],
       "currentFacts": {
         "governedOutlineCandidateExists": true,
-        "runtimeConsumesChapterPlanResult": false,
+        "runtimeConsumesChapterPlanResult": true,
         "executionReadyProofExists": false,
         "persistentLengthTargets": 0,
         "characterArcCertificates": 0,
@@ -326,7 +370,10 @@
         "evidence": [
           "api/src/app.spec.ts#V3-V4-vertical-slice",
           "api/src/outlineValidation.spec.ts",
-          "api/src/outlineCommit.spec.ts"
+          "api/src/outlineCommit.spec.ts",
+          "api/src/chapterExecutionPlan.spec.ts",
+          "api/src/chapterExecutionProof.spec.ts",
+          "api/src/runtime.spec.ts#governed-runtime-chapter-execution-plan"
         ],
         "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
       },
@@ -407,7 +454,11 @@
           "api/src/runtime.spec.ts#governed-prose-candidate",
           "api/src/proseValidation.spec.ts",
           "api/src/proseAdoption.spec.ts",
-          "api/src/chapterSettlement.spec.ts"
+          "api/src/chapterSettlement.spec.ts",
+          "api/src/researchGrounding.spec.ts",
+          "api/src/researchFactCheck.spec.ts",
+          "api/src/researchReliability.spec.ts",
+          "api/src/app.spec.ts#research-source-snapshots"
         ],
         "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
       },
@@ -429,7 +480,7 @@
       "currentFacts": {
         "governedCraftExperimentExists": false,
         "governedPreferenceHypothesisExists": false,
-        "craftReleaseAndRollbackExists": false,
+        "craftReleaseAndRollbackExists": true,
         "externalKnowledgeSourceRecords": 0,
         "researchSettlements": 0
       },
@@ -463,7 +514,22 @@
         "evidence": [
           "api/src/qualityCalibration.spec.ts",
           "api/src/craftProfile.spec.ts",
-          "api/src/authorFeedback.spec.ts"
+          "api/src/authorFeedback.spec.ts",
+          "api/src/adaptiveEvaluationScale.spec.ts",
+          "api/src/app.spec.ts#adaptive-evaluation-scales",
+          "api/src/evaluationAccess.spec.ts",
+          "api/src/app.spec.ts#private-sample-platform-regression",
+          "api/src/evaluationRunArchive.spec.ts",
+          "api/src/evaluationCase.spec.ts",
+          "api/src/evaluationGovernance.spec.ts",
+          "api/src/evaluationArtifactStore.spec.ts",
+          "api/src/evaluationDisagreementStore.spec.ts",
+          "api/src/evaluationSamplingStore.spec.ts",
+          "api/src/evaluationRegressionStore.spec.ts",
+          "api/src/evaluationParetoStore.spec.ts",
+          "api/src/evaluationSliceStore.spec.ts",
+          "api/src/app.spec.ts#routes-evaluation-disagreements",
+          "api/src/app.spec.ts#seeded-repeat-sampling"
         ],
         "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
       },
@@ -520,7 +586,9 @@
         "status": "partially-verified",
         "evidence": [
           "api/src/app.spec.ts#adaptive-question-sequence",
-          "api/src/dialogueQuestions.spec.ts"
+          "api/src/dialogueQuestions.spec.ts",
+          "api/src/decisionConsumption.spec.ts",
+          "api/src/app.spec.ts#downstream-decision-consumption"
         ],
         "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
       },
@@ -542,7 +610,7 @@
       ],
       "currentFacts": {
         "redBlueCases": 0,
-        "governedRedBlueContractExists": false,
+        "governedRedBlueContractExists": true,
         "reportsWithEvidenceOrProvenance": 0,
         "calibratedEvaluatorSuites": 0
       },
@@ -575,7 +643,9 @@
         "evidence": [
           "api/src/understandingReview.spec.ts",
           "api/src/qualityCalibration.spec.ts",
-          "api/src/proseReview.spec.ts"
+          "api/src/proseReview.spec.ts",
+          "api/src/adaptiveEvaluationScale.spec.ts",
+          "api/src/app.spec.ts#adaptive-evaluation-scales"
         ],
         "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
       },
@@ -615,10 +685,13 @@
       "proofRequired": "A recoverable BookRun must execute an obligation-aware work graph through chapter settlements, continuity/revision/closure/quality audits, stable quiescence, immutable edition rendering and replayable DeliveryProof.",
       "specificationEvidence": {
         "status": "covered",
-        "requirementCount": 106,
-        "acceptanceTestCount": 86,
+        "requirementCount": 131,
+        "acceptanceTestCount": 104,
         "firstSlices": [
           "V0-baseline",
+          "V1-conversation",
+          "V2-understanding",
+          "V3-contract",
           "V4-outline",
           "V5-drafting",
           "V6-obligations",
@@ -655,8 +728,22 @@
         "status": "partially-verified",
         "evidence": [
           "api/src/bookRun.spec.ts",
+          "api/src/bookWorkScheduler.spec.ts",
           "api/src/completionAudit.spec.ts",
-          "api/src/runtimeWorker.spec.ts"
+          "api/src/runtimeWorker.spec.ts",
+          "api/src/workLeaseStore.spec.ts",
+          "api/src/stagnationDetection.spec.ts",
+          "api/src/reviewBatch.spec.ts",
+          "api/src/chapterMemoryPatch.spec.ts",
+          "api/src/mutationPlan.spec.ts",
+          "api/src/migrationPreview.spec.ts",
+          "api/src/migrationValidation.spec.ts",
+          "api/src/migrationCutover.spec.ts",
+          "api/src/app.spec.ts#chapter-memory-patch-and-asset-coverage",
+          "api/src/app.spec.ts#mutation-plan-api",
+          "api/src/app.spec.ts#persists-runtime-work-leases",
+          "api/src/app.spec.ts#pauses-a-run-when-stagnation-thresholds-are-crossed",
+          "api/src/app.spec.ts#high-risk-review-items"
         ],
         "boundary": "Partial component/integration evidence exists; full objective, representative end-to-end journey and release proof remain unverified."
       },

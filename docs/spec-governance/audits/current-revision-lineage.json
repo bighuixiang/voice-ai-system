@@ -7,7 +7,7 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/revisionImpact.ts",
@@ -15,27 +15,27 @@
     },
     {
       "path": "api/src/revisionChangeSet.ts",
-      "sha256": "be3c08c41890ee2dc06dd42b1013d12355c36981a61a04a4700845f7bccffc91"
+      "sha256": "5b478a665babc3b920c3860c69929ef297e3ca0e48ebefbf307d5ee9e20c5f7d"
     },
     {
       "path": "api/src/revisionReview.ts",
-      "sha256": "54e4b3c83a165446c65f919da6366097cc1fc8e3300617a38ee1875d86fb3013"
+      "sha256": "071e6cbc3dd67e8504bbeacbf87009e9e66a6c971ebad5016c4be3eff03f6467"
     },
     {
       "path": "api/src/revisionAdoptionProposal.ts",
-      "sha256": "87ac98fed58d6857b1a38a6dcd2678546d288ff72dbcdb9ef0b3c176900edc9a"
+      "sha256": "210bb48c4fba2997e3594d389b4b231a52e63ca5526536f4b8b839049c0b2d87"
     },
     {
       "path": "api/src/revisionAdoptionReceipt.ts",
-      "sha256": "9e7fdf3c7542ff144787767ef9c85a3568ba461d22fe70183cc0649102e956df"
+      "sha256": "72b2e65f7daad581a4671f68bb6a80398a6a7227accc75e6f2bb4c58cb20f162"
     },
     {
       "path": "api/src/revisionSettlement.ts",
-      "sha256": "d5fe0a6a433af5eed65d5e78e7def81a16d2e60cbc400bed1cd1d9393b75fae6"
+      "sha256": "158a0f21f787fe570aeb265dd2bf175fc272407307c1d12d7f3571bc53639243"
     },
     {
       "path": "api/src/editionManifest.ts",
-      "sha256": "603898e0ceb1d513d8214b9a464c2222a67a2ad5b7439dffebfc3d0f471f25e7"
+      "sha256": "13ad3562f2ce3e04f52307ad1443188ec6d2de9bd496c24d920dcb0e7696dbc0"
     },
     {
       "path": "api/src/fileVersions.ts",
@@ -43,15 +43,15 @@
     },
     {
       "path": "api/src/runtimeFiles.ts",
-      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
+      "sha256": "c041b4689b107f2798788aa7effa7edfa0fb32efda1cd8ec0a6b58c0ecae75d2"
     },
     {
       "path": "api/src/runtimeStore.ts",
-      "sha256": "575cc0dfa899d35ade781b8c8498e6db8d81d50914433731f49beb2cac6492a5"
+      "sha256": "aee9cf825fb26f972a8e5f7bba5598b1adf8f68c203b3b6016c2cc35f6e722ad"
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "ui/src/components/novel/FileVersionDiffPanel.vue",
@@ -59,11 +59,11 @@
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     },
     {
       "path": "ui/src/types/novel.ts",
-      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+      "sha256": "8b40b4f8361cfddaee5bbc1bc946530c5391fe3045d27c4e62dfe5b62629ff24"
     }
   ],
   "privacy": {
@@ -91,20 +91,20 @@
   },
   "operationalSnapshot": {
     "totals": {
-      "projects": 8,
-      "chapters": 219,
-      "declaredWritingPaths": 438,
+      "projects": 11,
+      "chapters": 222,
+      "declaredWritingPaths": 444,
       "fileSnapshots": 19,
       "snapshotFilesPresent": 19,
       "snapshotPathsCovered": 3,
       "snapshotsWithParentOrBaseIdentity": 0,
-      "derivedAssets": 461
+      "derivedAssets": 475
     },
     "projects": [
       {
         "projectOrdinal": 1,
         "inputFingerprints": {
-          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "project": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676",
           "versionManifest": null
         },
         "parseHealth": {
@@ -271,7 +271,7 @@
       {
         "projectOrdinal": 5,
         "inputFingerprints": {
-          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "project": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe",
           "versionManifest": null
         },
         "parseHealth": {
@@ -309,6 +309,120 @@
       {
         "projectOrdinal": 6,
         "inputFingerprints": {
+          "project": null,
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 0,
+          "declaredWritingPaths": 0
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 0,
+          "sceneCards": 0,
+          "summaries": 0,
+          "qualityReports": 0,
+          "ledgers": 0
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": null,
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 0,
+          "declaredWritingPaths": 0
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 0,
+          "sceneCards": 0,
+          "summaries": 0,
+          "qualityReports": 0,
+          "ledgers": 0
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true
+        },
+        "writingSurface": {
+          "chapters": 3,
+          "declaredWritingPaths": 6
+        },
+        "fileSnapshots": {
+          "count": 0,
+          "filesCovered": 0,
+          "snapshotFilesPresent": 0,
+          "fields": [],
+          "bySource": {},
+          "byReason": {},
+          "withRunId": 0,
+          "withParentOrBaseIdentity": 0
+        },
+        "derivedAssets": {
+          "dashboards": 3,
+          "sceneCards": 3,
+          "summaries": 3,
+          "qualityReports": 0,
+          "ledgers": 5
+        },
+        "invalidationArtifacts": {
+          "damageEvents": 0,
+          "selectiveRecomputePlans": 0,
+          "revisionSettlements": 0,
+          "note": "Current project files expose no governed revision/damage/recompute/settlement artifact; a derived file count is not evidence that it is fresh for the current canon."
+        }
+      },
+      {
+        "projectOrdinal": 9,
+        "inputFingerprints": {
           "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
           "versionManifest": null
         },
@@ -345,7 +459,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": {
           "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
           "versionManifest": null
@@ -383,7 +497,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": {
           "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
           "versionManifest": "d5d1ee18b78b17e34a09dc4d9178a60e08ee70b33d1f92856b0e4b67b15b0e8f"
@@ -445,9 +559,9 @@
   },
   "summary": {
     "auditedStages": 14,
-    "projectsScanned": 8,
-    "chaptersInventoried": 219,
-    "declaredWritingPaths": 438,
+    "projectsScanned": 11,
+    "chaptersInventoried": 222,
+    "declaredWritingPaths": 444,
     "fileSnapshots": 19,
     "fileSnapshotPathsCovered": 3,
     "snapshotsWithParentOrBaseIdentity": 0,
@@ -476,7 +590,7 @@
         },
         {
           "path": "api/src/types.ts",
-          "line": 961,
+          "line": 1055,
           "evidence": "export interface FileVersionSnapshot"
         }
       ]
@@ -486,7 +600,7 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2619,
+          "line": 8714,
           "evidence": "app.get(\"/api/novel/projects/:projectId/file-versions/*\""
         },
         {
@@ -501,12 +615,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeFiles.ts",
-          "line": 148,
+          "line": 157,
           "evidence": "await fs.rm(target, { force: true })"
         },
         {
           "path": "api/src/runtimeFiles.ts",
-          "line": 153,
+          "line": 162,
           "evidence": "await fs.copyFile(source, target)"
         }
       ]
@@ -516,12 +630,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeFiles.ts",
-          "line": 214,
+          "line": 226,
           "evidence": "for (const write of input.writes)"
         },
         {
           "path": "api/src/runtimeFiles.ts",
-          "line": 231,
+          "line": 255,
           "evidence": "await atomicWrite(input.root, safePath, write.content"
         }
       ]
@@ -531,12 +645,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2322,
+          "line": 7976,
           "evidence": "dispatchRuntimeWrites({"
         },
         {
           "path": "api/src/app.ts",
-          "line": 2369,
+          "line": 8023,
           "evidence": "canonPolicy: \"accepted_for_canon\""
         }
       ]

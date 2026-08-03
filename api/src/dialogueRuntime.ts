@@ -6,7 +6,7 @@ export interface DialogueRecovery { schemaVersion: "dialogue-recovery.v1"; sourc
 const hash = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 export function classifyRuntimeInterruption(input: { messageId: string; text: string; taskId: string }): RuntimeInterruption {
   if (!input.messageId.trim() || !input.taskId.trim() || !input.text.trim()) throw new Error("RUNTIME_MESSAGE_FIELDS_REQUIRED");
-  const kind: RuntimeInterruptionKind = /\bstop\b|停止|暂停/i.test(input.text) ? "stop" : /wrong|错了|不是|纠正/i.test(input.text) ? "correction" : /constraint|必须|不要/i.test(input.text) ? "constraint" : /question|问题|吗[？?]/i.test(input.text) ? "question" : /use|采用|改成|方向/i.test(input.text) ? "direction" : "comment";
+  const kind: RuntimeInterruptionKind = /\bstop\b|停止|暂停/i.test(input.text) ? "stop" : /wrong|错了|不是|纠正/i.test(input.text) ? "correction" : /constraint|必须|不要|不能|不得/i.test(input.text) ? "constraint" : /question|问题|吗[？?]/i.test(input.text) ? "question" : /use|采用|改成|方向/i.test(input.text) ? "direction" : "comment";
   const effect = kind === "stop" || kind === "correction" ? "gate-now" as const : kind === "direction" || kind === "constraint" ? "queue" as const : "observe" as const;
   const lifecycle = effect === "gate-now" ? ["received", "classified", "effective"] as const : effect === "queue" ? ["received", "classified", "queued"] as const : ["received", "classified"] as const;
   const base = { schemaVersion: "runtime-interruption.v1" as const, messageId: input.messageId, taskId: input.taskId, kind, effect, lifecycle: [...lifecycle] };

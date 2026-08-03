@@ -5,7 +5,7 @@ export interface SeedReplay { schemaVersion: "seed-replay.v1"; compilerVersion: 
 export interface StoryContractReadinessProof { schemaVersion: "story-contract-readiness-proof.v1"; target: string; requiredFields: string[]; evidenceCovered: string[]; unresolved: string[]; provisionalAssumptions: string[]; authorAdopted: string[]; conflicts: string[]; conclusion: "sufficient-for-target" | "insufficient"; claimsWholeNovelSolved: false; fingerprint: string; }
 const hash = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
-export function compileLegacySeedShadow(input: { projectId: string; materials: readonly Array<{ source: string; text: string }> }): LegacySeedShadow {
+export function compileLegacySeedShadow(input: { projectId: string; materials: ReadonlyArray<{ source: string; text: string }> }): LegacySeedShadow {
   if (!input.projectId.trim() || !input.materials.length) throw new Error("LEGACY_SEED_MATERIALS_REQUIRED");
   const sourceRefs = input.materials.map((material) => material.source); const base = { schemaVersion: "legacy-seed-shadow.v1" as const, projectId: input.projectId, mode: "shadow" as const, changesCanon: false as const, sourceRefs, conflicts: [], unknown: ["author-adoption"] };
   return { ...base, fingerprint: hash(base) };

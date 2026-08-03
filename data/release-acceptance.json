@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "release-acceptance.v1",
+  "releaseProfile": "RP5-drafting",
+  "status": "do-not-activate",
+  "checks": [
+    {
+      "checkId": "migration-cutover",
+      "status": "missing",
+      "evidence": [
+        "no-projects"
+      ],
+      "reason": "Legacy, preview, validated, unmanaged, invalid, or no projects remain in the inventory."
+    },
+    {
+      "checkId": "external-calibration",
+      "status": "missing",
+      "evidence": [],
+      "reason": "No externally attested provider/human holdout artifact is attached."
+    },
+    {
+      "checkId": "governed-e2e",
+      "status": "missing",
+      "evidence": [],
+      "reason": "No durable real-project release E2E artifact is attached."
+    },
+    {
+      "checkId": "v2-independent-review",
+      "status": "missing",
+      "evidence": [],
+      "reason": "No passing independent V2 review artifact is attached."
+    },
+    {
+      "checkId": "delivery-proof",
+      "status": "missing",
+      "evidence": [],
+      "reason": "No current byte-verifiable DeliveryProof is attached."
+    }
+  ],
+  "evaluatedAt": "2026-07-31T03:42:59.788Z",
+  "fingerprint": "86b487ec4f00e8d2a12d98d3692c6562c4f0e7d85ea43bf7eebf25da870e2ab9"
+}

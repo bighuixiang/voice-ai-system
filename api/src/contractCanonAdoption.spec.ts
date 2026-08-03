@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -126,8 +127,10 @@ describe("contract canon adoption transaction", () => {
       evidenceRefs: [{ kind: "dialogue-question", refId: "question-world-rule" }],
       canonWritten: false,
       createdAt: new Date().toISOString(),
-      fingerprint: "w".repeat(64)
+      fingerprint: ""
     };
+    const { fingerprint: _fingerprint, ...worldRuleBase } = worldRule;
+    worldRule.fingerprint = crypto.createHash("sha256").update(JSON.stringify(worldRuleBase)).digest("hex");
     await fs.mkdir(path.join(root, "sessions", "world-rule-contracts"), { recursive: true });
     await fs.writeFile(path.join(root, "sessions", "world-rule-contracts", "world-rule-1.json"), JSON.stringify(worldRule), "utf8");
     const expanded = {

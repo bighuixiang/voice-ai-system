@@ -1,0 +1,892 @@
+{
+  "schemaVersion": "implementation-slice-acceptance.v1",
+  "status": "partial-implementation-verified",
+  "sourceSdd": "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+  "sourceSddVersion": "v1.18.40",
+  "verifiedOn": "2026-08-03",
+  "profiles": ["RP4-long-memory"],
+  "scope": "Knowledge retrieval auditability, evidence reliability disclosure, and refresh-safe retrieval preview recovery.",
+  "verifiedSlices": [
+    {
+      "sliceId": "RP4-knowledge-retrieval-audit",
+      "requirements": ["FR-MEMORY-006", "FR-CONTEXT-006"],
+      "implementationRefs": [
+        "api/src/knowledgeIndex.ts",
+        "api/src/types.ts",
+        "api/src/memoryRetrievalPreview.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/knowledgeIndex.spec.ts",
+        "api/src/memoryRetrievalPreview.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "13 knowledge-index tests passed",
+        "3 retrieval-preview tests passed",
+        "app regression suite passed (255 tests)"
+      ]
+    },
+    {
+      "sliceId": "RP4-retrieval-preview-ui-recovery",
+      "requirements": ["FR-UX-029", "FR-MEMORY-008"],
+      "implementationRefs": [
+        "ui/src/services/novelApi.ts",
+        "ui/src/stores/novel.ts",
+        "ui/src/components/novel/KnowledgeIndexPanel.vue",
+        "ui/src/components/novel/NovelWorkspace.vue"
+      ],
+      "tests": [
+        "ui/src/services/novelApi.spec.ts",
+        "ui/src/stores/novel.spec.ts",
+        "ui/src/components/novel/KnowledgeIndexPanel.spec.ts",
+        "tests/e2e/retrieval-preview.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "UI service/store/component regression passed (165 tests)",
+        "UI production build passed",
+        "Playwright Chromium journey passed: search creates a preview and page refresh restores the same preview ID"
+      ]
+    },
+    {
+      "sliceId": "RP4-memory-health-report",
+      "requirements": ["FR-LONGMEM-022", "FR-LONGMEM-023"],
+      "implementationRefs": [
+        "api/src/memoryHealthReport.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/memoryHealthReport.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "3 memory-health report tests passed",
+        "API app regression suite passed (255 tests)",
+        "report is persisted under memory/health-reports and read-back verifies its fingerprint",
+        "malformed settlement evidence is reported as blocked rather than healthy"
+      ]
+    },
+    {
+      "sliceId": "RP4-epistemic-view-readback",
+      "requirements": ["FR-LONGMEM-009", "FR-LONGMEM-010", "FR-LONGMEM-011", "FR-LONGMEM-017"],
+      "implementationRefs": [
+        "api/src/memoryKnowledge.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/memoryKnowledge.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "character and reader state eligibility remains scoped by event/publication progress",
+        "epistemic GET routes return only the requested character/reader scope and claim filters",
+        "responses identify memory-knowledge-events as the read authority"
+      ]
+    },
+    {
+      "sliceId": "RP4-claim-relation-authority",
+      "requirements": ["FR-LONGMEM-006", "FR-LONGMEM-007"],
+      "implementationRefs": [
+        "api/src/memoryClaim.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaim.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "11 memory-claim tests passed, including append-only relation replay and tamper rejection",
+        "targeted epistemic app journey passed; unrelated full-app runs intermittently hit existing fetch bad-port setup failures",
+        "contradiction-set API now replays persisted claims and relations instead of trusting caller-supplied arrays"
+      ]
+    },
+    {
+      "sliceId": "RP4-forget-propagation-tombstone",
+      "requirements": ["FR-LONGMEM-013", "FR-DIALOGUE-020"],
+      "implementationRefs": [
+        "api/src/memoryForgetPropagation.ts",
+        "api/src/memoryForgetStore.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/memoryForgetPropagation.spec.ts",
+        "api/src/memoryForgetStore.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "4 forget-propagation/store tests passed",
+        "forget route now persists a content-free tombstone",
+        "tampered tombstones fail integrity validation",
+        "index removal, cache invalidation, future-context exclusion and history preservation are explicit in the durable record"
+      ]
+    },
+    {
+      "sliceId": "RP4-memory-ready-proof",
+      "requirements": ["FR-LONGMEM-020", "FR-LONGMEM-023"],
+      "implementationRefs": [
+        "api/src/memoryReadyProof.ts",
+        "api/src/memoryProjectionGate.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/memoryReadyProof.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "2 MemoryReadyProof unit tests passed",
+        "knowledge-related API regression group passed (308 tests)",
+        "proof freezes health, retrieval, projection freshness and contradiction-set fingerprints",
+        "degraded health or unresolved conflicts produce blocked proof instead of false readiness"
+      ]
+    },
+    {
+      "sliceId": "RP4-post-generation-claim-isolation",
+      "requirements": ["FR-LONGMEM-021", "FR-LONGMEM-008"],
+      "implementationRefs": [
+        "api/src/memoryClaimCandidate.ts",
+        "api/src/chapterMemoryPatch.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaimCandidate.spec.ts",
+        "api/src/chapterMemoryPatch.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "8 patch/candidate tests passed",
+        "newFacts now become sourced system-inference candidates with patch evidence anchors",
+        "candidate persistence is idempotent and does not emit duplicate claim events",
+        "candidate status remains ineligible until explicit chapter settlement"
+      ]
+    },
+    {
+      "sliceId": "RP4-long-continuity-audit",
+      "requirements": ["FR-LONGMEM-024"],
+      "implementationRefs": [
+        "api/src/longContinuityAudit.ts",
+        "api/src/memoryHealthReport.ts",
+        "api/src/memoryClaim.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/longContinuityAudit.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "2 continuity-audit tests passed",
+        "audit distinguishes audited-consistent, conditionally-consistent and blocked",
+        "incomplete settlement coverage, candidate claims, contradiction sets and stale projections are explicit blockers",
+        "audit is persisted with health and claim/relations source references"
+      ]
+    },
+    {
+      "sliceId": "RP4-retrieval-evidence-diversity",
+      "requirements": ["FR-LONGMEM-018", "FR-LONGMEM-019"],
+      "implementationRefs": [
+        "api/src/knowledgeEvidence.ts",
+        "api/src/knowledgeIndex.ts",
+        "api/src/memoryRetrievalPreview.ts",
+        "api/src/types.ts",
+        "ui/src/types/novel.ts",
+        "ui/src/components/novel/KnowledgeIndexPanel.vue"
+      ],
+      "tests": [
+        "api/src/knowledgeEvidence.spec.ts",
+        "api/src/knowledgeIndex.spec.ts",
+        "api/src/memoryRetrievalPreview.spec.ts",
+        "ui/src/components/novel/KnowledgeIndexPanel.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "3 knowledge-evidence tests passed, including canon-priority and missing/permission/time/extraction/conflict gap disclosure",
+        "13 knowledge-index tests and 3 retrieval-preview tests passed with evidenceProfile fingerprint coverage",
+        "low-reliability derived/plan sources are ranked below canon anchors when both are eligible",
+        "UI renders independent source count and explicit evidence gaps, with legacy count fallback"
+      ]
+    },
+    {
+      "sliceId": "RP4-ready-proof-evidence-gate",
+      "requirements": ["FR-LONGMEM-018", "FR-LONGMEM-019", "FR-LONGMEM-020"],
+      "implementationRefs": [
+        "api/src/memoryReadyProof.ts",
+        "api/src/memoryReadyProof.spec.ts",
+        "api/src/memoryRetrievalPreview.ts"
+      ],
+      "tests": [
+        "api/src/memoryReadyProof.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "3 MemoryReadyProof tests passed",
+        "known retrieval gaps for conflict, time ordering, extraction, permission, or no result now block readiness",
+        "legacy previews without evidenceProfile remain backward-compatible and are not silently reclassified"
+      ]
+    },
+    {
+      "sliceId": "RP4-embedding-provider-invariance",
+      "requirements": ["FR-LONGMEM-023"],
+      "implementationRefs": [
+        "api/src/knowledgeIndex.ts",
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "tests": [
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "14 knowledge-index tests passed",
+        "local and openai-compatible rebuilds produced identical eligibleFactIds and exclusion reasons for the same authoritative memory",
+        "provider change affected vector projection/ranking only; eligibility remained governed by status, visibility, temporal and epistemic gates"
+      ]
+    },
+    {
+      "sliceId": "RP4-memory-governance-evidence-ui",
+      "requirements": ["FR-LONGMEM-020", "FR-LONGMEM-022", "FR-LONGMEM-024", "FR-UX-029"],
+      "implementationRefs": [
+        "ui/src/services/novelApi.ts",
+        "ui/src/stores/novel.ts",
+        "ui/src/components/novel/MemoryGovernancePanel.vue",
+        "ui/src/components/novel/NovelWorkspace.vue"
+      ],
+      "tests": [
+        "ui/src/services/novelApi.spec.ts",
+        "ui/src/stores/novel.spec.ts",
+        "ui/src/components/novel/MemoryGovernancePanel.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "authoritative health/ready-proof/continuity POST contracts covered by 61 service tests",
+        "store governance journey covered by 103 store tests and requires a persisted retrieval preview",
+        "governance panel renders durable status/blocker/issue evidence and disables execution without retrieval context",
+        "UI production build passed"
+      ]
+    },
+    {
+      "sliceId": "RP4-continuity-bound-ready-proof",
+      "requirements": ["FR-LONGMEM-020", "FR-LONGMEM-024"],
+      "implementationRefs": [
+        "api/src/memoryReadyProof.ts",
+        "api/src/app.ts",
+        "ui/src/services/novelApi.ts",
+        "ui/src/stores/novel.ts"
+      ],
+      "tests": [
+        "api/src/memoryReadyProof.spec.ts",
+        "api/src/app.spec.ts",
+        "ui/src/services/novelApi.spec.ts",
+        "ui/src/stores/novel.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "4 MemoryReadyProof unit tests passed",
+        "app route journey passed all 255 tests; supplied blocked continuity audit is fingerprint-bound and blocks ready proof",
+        "store now creates continuity audit before ready proof and passes its audit ID",
+        "legacy callers without continuityAuditId remain backward-compatible; new governed path cannot silently omit the audit"
+      ]
+    },
+    {
+      "sliceId": "RP4-governance-refresh-recovery",
+      "requirements": ["FR-LONGMEM-022", "FR-LONGMEM-024", "FR-UX-029"],
+      "implementationRefs": [
+        "ui/src/services/novelApi.ts",
+        "ui/src/stores/novel.ts"
+      ],
+      "tests": [
+        "ui/src/services/novelApi.spec.ts",
+        "ui/src/stores/novel.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "62 service tests passed for project-scoped readback of all three governance artifacts",
+        "104 store tests passed; governance IDs persist per project and reload restores server fingerprints/status",
+        "failed readback clears only the affected projection instead of fabricating a current proof",
+        "UI build passed"
+      ]
+    },
+    {
+      "sliceId": "RP4-persisted-entity-alias-authority",
+      "requirements": ["FR-LONGMEM-005", "FR-LONGMEM-022"],
+      "implementationRefs": [
+        "api/src/memoryEntity.ts",
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/memoryEntity.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "memory entity unit suite covers same-name separation, alias evidence, merge/split lineage and tamper rejection",
+        "app route suite passed 255 tests including alias resolution with malicious caller-supplied arrays",
+        "alias resolution now replays persisted entities/assertions and no longer trusts caller-provided truth arrays"
+      ]
+    },
+    {
+      "sliceId": "RP4-canonical-entity-memory-routes",
+      "requirements": ["FR-LONGMEM-005", "FR-CONTEXT-004"],
+      "implementationRefs": [
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/app.spec.ts",
+        "api/src/memoryConflictPreflight.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "canonical GET /memory/entities returns the persisted entity projection",
+        "canonical POST /memory/entity-resolutions replays persisted entities and aliases",
+        "entity route acceptance assertions pass in the 255-case API app suite; unrelated runs may show existing bad-port setup flakes"
+      ]
+    },
+    {
+      "sliceId": "RP4-canonical-alias-assertion-routes",
+      "requirements": ["FR-LONGMEM-005", "FR-LONGMEM-006"],
+      "implementationRefs": [
+        "api/src/app.ts"
+      ],
+      "tests": [
+        "api/src/app.spec.ts",
+        "api/src/memoryConflictPreflight.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "canonical GET /memory/alias-assertions returns persisted assertion events",
+        "canonical POST /memory/alias-assertions creates proposed assertions with evidence refs",
+        "canonical alias assertions and persisted resolution pass in the 255-case API app suite"
+      ]
+    },
+    {
+      "sliceId": "RP4-canonical-alias-confirmation",
+      "requirements": ["FR-LONGMEM-005", "FR-LONGMEM-006"],
+      "implementationRefs": [
+        "api/src/app.ts",
+        "api/src/app.spec.ts"
+      ],
+      "tests": [
+        "api/src/app.spec.ts",
+        "api/src/memoryEntity.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: canonical POST /memory/alias-assertions/:assertionId/confirm returned 404 before implementation",
+        "GREEN: confirmation reads the persisted assertion by assertionId and ignores caller-supplied assertion objects",
+        "255-case API app suite and 10 memory entity tests pass; API build passes"
+      ]
+    },
+    {
+      "sliceId": "RP4-authoritative-story-time-order",
+      "requirements": ["FR-LONGMEM-004", "FR-LONGMEM-016"],
+      "implementationRefs": [
+        "api/src/storyTime.ts",
+        "api/src/app.ts",
+        "api/src/app.spec.ts",
+        "api/src/storyTime.spec.ts"
+      ],
+      "tests": [
+        "api/src/app.spec.ts",
+        "api/src/storyTime.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: temporal route incorrectly accepted a caller-supplied forged eventOrder",
+        "GREEN: temporal evaluation derives deterministic order from persisted StoryTimeEvent records and ignores request eventOrder",
+        "unknown or unordered target events return explicit unknown status; 255-case API app suite, 6 story-time tests, and API build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-lossy-compression-provenance",
+      "requirements": ["FR-LONGMEM-014", "FR-LONGMEM-015"],
+      "implementationRefs": [
+        "api/src/knowledgeTruthGates.ts",
+        "api/src/knowledgeTruthGates.spec.ts"
+      ],
+      "tests": [
+        "api/src/knowledgeTruthGates.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: compression audit omitted input refs, target, strategy version, token savings, and known losses",
+        "GREEN: audit now returns and validates complete provenance, retention, loss, and reconstruction metadata",
+        "28 knowledge truth gate tests and API build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-retcon-impact-scope-report",
+      "requirements": ["FR-LONGMEM-012", "FR-LONGMEM-013"],
+      "implementationRefs": [
+        "api/src/memoryRetconImpact.ts",
+        "api/src/memoryRetconImpact.spec.ts",
+        "api/src/memoryRetconRebuild.ts"
+      ],
+      "tests": [
+        "api/src/memoryRetconImpact.spec.ts",
+        "api/src/memoryRetconRebuild.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: retcon impact report had no explicit prose, summary, character/reader knowledge, obligation, outline, candidate, and publication scope map",
+        "GREEN: report now emits affectedScopes alongside immutable affected paths and rebuild actions",
+        "retcon impact and rebuild tests pass; invalidation manifest remains persisted for downstream revalidation"
+      ]
+    },
+    {
+      "sliceId": "RP4-retrieval-story-time-authority",
+      "requirements": ["FR-LONGMEM-004", "FR-LONGMEM-016", "FR-LONGMEM-023"],
+      "implementationRefs": [
+        "api/src/knowledgeIndex.ts",
+        "api/src/knowledgeIndex.spec.ts",
+        "api/src/storyTime.ts"
+      ],
+      "tests": [
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: retrieval accepted forged query.eventOrder and classified a claim as before/after",
+        "GREEN: retrieval derives event order from persisted StoryTimeEvent records and ignores caller ordering",
+        "unknown target events are explicitly excluded; 15 knowledge index tests and API build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-purpose-bound-retrieval-audit",
+      "requirements": ["FR-LONGMEM-017", "FR-LONGMEM-019"],
+      "implementationRefs": [
+        "api/src/types.ts",
+        "api/src/knowledgeIndex.ts",
+        "ui/src/types/novel.ts",
+        "ui/src/stores/novel.ts"
+      ],
+      "tests": [
+        "api/src/knowledgeIndex.spec.ts",
+        "ui/src/stores/novel.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: UI retrieval calls omitted an explicit task boundary",
+        "GREEN: query task is propagated into retrieval audit boundaries and saved previews",
+        "15 API knowledge tests, 104 UI store tests, API/UI builds and governance verifier pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-canonical-memory-conflict-preflight",
+      "requirements": ["FR-LONGMEM-020", "FR-LONGMEM-007", "FR-LONGMEM-013"],
+      "implementationRefs": [
+        "api/src/app.ts",
+        "api/src/app.spec.ts"
+      ],
+      "tests": [
+        "api/src/app.spec.ts",
+        "api/src/memoryConflictPreflight.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: canonical conflict-preflight route returned 404",
+        "GREEN: route derives contradiction sets and projection freshness from persisted memory claims/relations, ignoring caller hardRiskConflict",
+        "pure preflight tests pass; route assertions passed while unrelated app cases intermittently fail with existing fetch failed: bad port setup noise; API build remains green"
+      ]
+    },
+    {
+      "sliceId": "RP4-memory-health-dimensional-coverage",
+      "requirements": ["FR-LONGMEM-022", "FR-LONGMEM-024"],
+      "implementationRefs": [
+        "api/src/memoryHealthReport.ts",
+        "api/src/memoryHealthReport.spec.ts"
+      ],
+      "tests": [
+        "api/src/memoryHealthReport.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: health coverage omitted entity, temporal, character-knowledge, and reader-knowledge dimensions",
+        "GREEN: report recomputes and fingerprints all four dimensions from persisted project assets",
+        "3 memory health tests and API build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-memory-health-coverage-ui",
+      "requirements": ["FR-LONGMEM-022", "FR-LONGMEM-024"],
+      "implementationRefs": [
+        "ui/src/types/novel.ts",
+        "ui/src/components/novel/MemoryGovernancePanel.vue",
+        "ui/src/components/novel/MemoryGovernancePanel.spec.ts"
+      ],
+      "tests": [
+        "ui/src/components/novel/MemoryGovernancePanel.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: governance panel did not render dimensional health coverage",
+        "GREEN: panel displays chapter, entity, temporal, character-knowledge, and reader-knowledge coverage",
+        "2 panel tests and UI production build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-retrieval-purpose-ui-evidence",
+      "requirements": ["FR-LONGMEM-017", "FR-LONGMEM-019"],
+      "implementationRefs": [
+        "ui/src/components/novel/KnowledgeIndexPanel.vue",
+        "ui/src/components/novel/KnowledgeIndexPanel.spec.ts"
+      ],
+      "tests": [
+        "ui/src/components/novel/KnowledgeIndexPanel.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: retrieval audit panel did not show the declared task boundary",
+        "GREEN: panel renders task purpose alongside eligibility and evidence audit",
+        "3 panel tests and UI production build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-character-retrieval-story-time-authority",
+      "requirements": ["FR-LONGMEM-009", "FR-LONGMEM-016", "FR-LONGMEM-023"],
+      "implementationRefs": [
+        "api/src/knowledgeIndex.ts",
+        "api/src/knowledgeIndex.spec.ts",
+        "api/src/storyTime.ts"
+      ],
+      "tests": [
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: character retrieval accepted caller-supplied eventOrder when evaluating character knowledge eligibility",
+        "GREEN: character retrieval now uses deterministic order rebuilt from persisted StoryTimeEvent records",
+        "16 knowledge-index tests and API build pass; forged character ordering is excluded as TARGET_EVENT_UNORDERED"
+      ]
+    },
+    {
+      "sliceId": "RP4-memory-visibility-authority",
+      "requirements": ["FR-LONGMEM-011", "FR-LONGMEM-017", "FR-LONGMEM-019"],
+      "implementationRefs": [
+        "api/src/knowledgeIndex.ts",
+        "api/src/memoryVisibility.ts",
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "tests": [
+        "api/src/knowledgeIndex.spec.ts",
+        "api/src/memoryVisibility.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: a reader query could override persisted author_truth visibility by supplying visibility=public",
+        "GREEN: memory-claim retrieval derives visibility solely from persisted epistemicType and ignores caller visibility overrides",
+        "17 knowledge-index tests and API build pass; author-only memory remains excluded after reader knowledge evidence is present"
+      ]
+    },
+    {
+      "sliceId": "RP4-claim-evidence-anchor-gate",
+      "requirements": ["FR-LONGMEM-003", "FR-LONGMEM-008", "FR-LONGMEM-019"],
+      "implementationRefs": [
+        "api/src/memoryClaim.ts",
+        "api/src/memoryClaim.spec.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaim.spec.ts",
+        "api/src/memoryClaimCandidate.spec.ts",
+        "api/src/memoryConflictPreflight.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: createMemoryClaim accepted an empty evidenceAnchors array",
+        "GREEN: claim creation and integrity validation require at least one non-empty EvidenceAnchor while preserving append-only tamper rejection",
+        "17 claim/candidate/conflict-preflight tests and API build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-persisted-chapter-settlement-gate",
+      "requirements": ["FR-LONGMEM-001", "FR-LONGMEM-008", "FR-LONGMEM-023"],
+      "implementationRefs": [
+        "api/src/chapterSettlement.ts",
+        "api/src/app.ts",
+        "api/src/chapterSettlement.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "tests": [
+        "api/src/chapterSettlement.spec.ts",
+        "api/src/memoryClaim.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed-with-infrastructure-flake",
+      "evidence": [
+        "RED: memory claim settlement trusted request chapterSettlementCompleted=true without reading a persisted ChapterSettlement",
+        "GREEN: route derives completion only from an integrity-checked settled ChapterSettlement in the project scope; forged or missing files cannot promote canon",
+        "14 chapter-settlement tests, 12 memory-claim tests and API build pass; app route assertions are covered but full app reruns intermittently hit existing fetch failed: bad port setup noise"
+      ]
+    },
+    {
+      "sliceId": "RP4-claim-relation-establishment-event",
+      "requirements": ["FR-LONGMEM-006", "FR-LONGMEM-007"],
+      "implementationRefs": [
+        "api/src/memoryClaim.ts",
+        "api/src/memoryClaim.spec.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaim.spec.ts",
+        "api/src/memoryConflictPreflight.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: newly created claim relations had no establishment event timestamp",
+        "GREEN: new relations persist an ISO createdAt event and integrity validation rejects malformed timestamps while legacy relations remain readable",
+        "14 claim/conflict-preflight tests and API build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-api-shutdown-lifecycle-evidence",
+      "requirements": ["FR-ARCH-013", "FR-LONGMEM-023"],
+      "implementationRefs": [
+        "api/src/server.ts",
+        "playwright.config.ts",
+        "tests/e2e/retrieval-preview.spec.ts"
+      ],
+      "tests": [
+        "tests/e2e/retrieval-preview.spec.ts"
+      ],
+      "result": "passed-with-infrastructure-flake",
+      "evidence": [
+        "API server now registers SIGTERM/SIGINT handlers and closes its HTTP listener before exit",
+        "RED/verification: retrieval-preview browser assertions pass in 4.3s, but Windows Playwright webServer teardown still exceeds 180s",
+        "API build passes; release evidence keeps browserProcessResult as teardown-timeout rather than claiming lifecycle resolution"
+      ]
+    },
+    {
+      "sliceId": "RP4-claim-relation-version-gate",
+      "requirements": ["FR-LONGMEM-006", "FR-LONGMEM-007"],
+      "implementationRefs": [
+        "api/src/memoryClaim.ts",
+        "api/src/app.ts",
+        "api/src/memoryClaim.spec.ts",
+        "api/src/memoryConflictPreflight.spec.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaim.spec.ts",
+        "api/src/memoryConflictPreflight.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: new claim relations could be created without an applicability version",
+        "GREEN: relation creation requires non-empty validFromVersion; legacy persisted relations remain backward-compatible for replay",
+        "15 claim/conflict-preflight tests and API build pass; NewMemoryClaimRelation requires validFromVersion at compile time"
+      ]
+    },
+    {
+      "sliceId": "RP4-relation-version-error-contract",
+      "requirements": ["FR-LONGMEM-006", "FR-ARCH-013"],
+      "implementationRefs": [
+        "api/src/app.ts",
+        "api/src/app.spec.ts"
+      ],
+      "tests": [
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: relation creation without validFromVersion returned HTTP 500",
+        "GREEN: MEMORY_CLAIM_RELATION_VERSION_REQUIRED is exposed as a structured HTTP 409 domain error",
+        "full API app suite passes 256/256 after the route error contract change"
+      ]
+    },
+    {
+      "sliceId": "RP4-claim-relation-revocation-event",
+      "requirements": ["FR-LONGMEM-006", "FR-LONGMEM-007", "FR-LONGMEM-012"],
+      "implementationRefs": [
+        "api/src/memoryClaim.ts",
+        "api/src/app.ts",
+        "api/src/memoryClaim.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaim.spec.ts",
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: relation revokedAt had no append-only event or API path",
+        "GREEN: relation revocation persists an integrity-checked event under memory/claims/relation-revocations.jsonl and replay excludes revoked contradictions",
+        "14 memory-claim tests, API build, and the full API app suite pass 256/256 including the revoke route assertion"
+      ]
+    },
+    {
+      "sliceId": "RP4-claim-source-version-provenance",
+      "requirements": ["FR-LONGMEM-003", "FR-LONGMEM-014", "FR-LONGMEM-023"],
+      "implementationRefs": [
+        "api/src/memoryClaim.ts",
+        "api/src/memoryClaim.spec.ts",
+        "api/src/knowledgeIndex.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaim.spec.ts",
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: new claims persisted source refs and temporal version but had no explicit sourceVersions projection",
+        "GREEN: claim creation records non-empty sourceVersions, deriving the initial value from asOfVersion when needed; legacy claims remain readable",
+        "31 memory-claim/knowledge-index tests and API build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-stable-claim-id-conflict-gate",
+      "requirements": ["FR-LONGMEM-001", "FR-LONGMEM-003", "FR-LONGMEM-008"],
+      "implementationRefs": [
+        "api/src/memoryClaim.ts",
+        "api/src/memoryClaim.spec.ts",
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaim.spec.ts",
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: a second created event could overwrite the current projection for an existing claimId with a different proposition",
+        "GREEN: duplicate root creation is rejected with MEMORY_CLAIM_ID_CONFLICT while parentVersion-bound retcon candidates remain legal",
+        "32 memory-claim/knowledge-index tests and API build pass"
+      ]
+    },
+    {
+      "sliceId": "RP4-claim-id-conflict-error-contract",
+      "requirements": ["FR-LONGMEM-001", "FR-ARCH-013"],
+      "implementationRefs": [
+        "api/src/app.ts",
+        "api/src/app.spec.ts",
+        "api/src/memoryClaim.ts"
+      ],
+      "tests": [
+        "api/src/app.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: duplicate claimId creation surfaced as HTTP 500 despite storage conflict protection",
+        "GREEN: MEMORY_CLAIM_ID_CONFLICT is exposed as structured HTTP 409 while valid retcon writes remain accepted",
+        "duplicate-claim route assertion passes; API build passes; full API app suite passes 256/256"
+      ]
+    },
+    {
+      "sliceId": "RP4-reader-progress-natural-order",
+      "requirements": ["FR-LONGMEM-010", "FR-LONGMEM-011", "FR-LONGMEM-017"],
+      "implementationRefs": [
+        "api/src/memoryKnowledge.ts",
+        "api/src/memoryKnowledge.spec.ts",
+        "api/src/knowledgeIndex.ts"
+      ],
+      "tests": [
+        "api/src/memoryKnowledge.spec.ts",
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: reader progress eligibility used lexicographic string comparison and treated chapter-10 as before chapter-2",
+        "GREEN: numeric progress segments are compared naturally before eligibility and latest-state selection",
+        "knowledge boundary and retrieval regression pass: 23 tests; API build passes"
+      ]
+    },
+    {
+      "sliceId": "RP4-explicit-epistemic-type-settlement-gate",
+      "requirements": ["FR-LONGMEM-002", "FR-LONGMEM-008"],
+      "implementationRefs": [
+        "api/src/memoryClaim.ts",
+        "api/src/memoryClaim.spec.ts",
+        "api/src/knowledgeIndex.ts"
+      ],
+      "tests": [
+        "api/src/memoryClaim.spec.ts",
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: an obsolete epistemic claim could be settled into eligible status",
+        "GREEN: obsolete, plan, inference, hypothesis and character_belief types are blocked from canon settlement",
+        "memory claim and retrieval regression pass: 33 tests; API build passes"
+      ]
+    },
+    {
+      "sliceId": "RP4-windows-e2e-process-lifecycle",
+      "requirements": ["FR-UX-029"],
+      "implementationRefs": [
+        "scripts/smoke-ui-windows.ps1",
+        "package.json",
+        "playwright.config.ts"
+      ],
+      "tests": [
+        "tests/e2e/retrieval-preview.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: built-in Playwright webServer teardown passed the assertion but the Windows runner remained alive until the 180-second command timeout",
+        "GREEN: Windows lifecycle script owns explicit API/UI PIDs, waits for health, runs Playwright against reused servers, and force-stops only those PIDs in finally",
+        "npm.cmd run smoke:ui:windows equivalent passed: 1 E2E test in about 5 seconds and the process exited normally"
+      ]
+    },
+    {
+      "sliceId": "RP4-browser-governance-panel-persistence",
+      "requirements": ["FR-LONGMEM-022", "FR-LONGMEM-024", "FR-UX-029"],
+      "implementationRefs": [
+        "tests/e2e/retrieval-preview.spec.ts",
+        "ui/src/components/novel/MemoryGovernancePanel.vue",
+        "ui/src/stores/novel.ts"
+      ],
+      "tests": [
+        "tests/e2e/retrieval-preview.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED/GREEN browser journey now runs the persisted health, continuity-audit and ready-proof gate after retrieval preview creation",
+        "the same three evidence surfaces remain visible after page refresh",
+        "Windows lifecycle E2E passes: 1 test"
+      ]
+    },
+    {
+      "sliceId": "RP4-governance-route-and-audit-refresh",
+      "requirements": ["FR-LONGMEM-022", "FR-UX-029"],
+      "implementationRefs": [
+        "scripts/generate-spec-governance.mjs",
+        "docs/spec-governance/audits/current-write-authority-surfaces.json",
+        "docs/spec-governance/audits/current-long-memory-continuity.json",
+        "docs/spec-governance/audits/current-context-orchestration.json"
+      ],
+      "tests": [
+        "node scripts/generate-spec-governance.mjs --check",
+        "node scripts/spec-governance-verifier.mjs",
+        "api/src/releaseAcceptance.spec.ts",
+        "api/src/memoryClaim.spec.ts",
+        "api/src/knowledgeIndex.spec.ts"
+      ],
+      "result": "passed",
+      "evidence": [
+        "RED: governance generation reported five unclassified memory mutation routes and two stale epistemic route classifications",
+        "GREEN: route classifications and long-memory/context audit expectations now match current implementation evidence",
+        "governance generator and verifier pass; related API regression passes 55 tests"
+      ]
+    }
+  ],
+  "verification": {
+    "browserCommand": "powershell.exe -ExecutionPolicy Bypass -File scripts/smoke-ui-windows.ps1 -Spec tests/e2e/retrieval-preview.spec.ts",
+    "browserAssertionResult": "passed: 1 test including governance panel execution and refresh recovery",
+    "browserProcessResult": "passed: explicit Windows lifecycle wrapper exited normally after API/UI cleanup; built-in Playwright webServer path remains unsupported on Windows",
+    "apiAppRegression": "passed: npm.cmd exec vitest run src/app.spec.ts --pool=forks --maxWorkers=1 --minWorkers=1 (256 tests passed; latest stable run)",
+    "rp4BackendRegression": "passed: 9 RP4 backend spec files, 91 tests",
+    "uiRegression": "passed: 4 RP4-focused files, 171 tests; UI production build passed",
+    "governanceVerifier": "passed: scripts/spec-governance-verifier.mjs",
+    "governanceGenerator": "passed: node scripts/generate-spec-governance.mjs --check",
+    "apiBuild": "passed: npm.cmd run build from api",
+    "releaseDecision": "not-verified",
+    "releaseDecisionReason": "This artifact proves the retrieval-preview slice only; it is not a release-e2e-acceptance.v1 proof and does not satisfy migration, external calibration, independent review, or delivery-proof gates."
+  },
+  "notYetProven": [
+    "full RP4 profile release acceptance",
+    "real-device and assistive-technology evidence for retrieval preview recovery",
+    "real provider retrieval quality, cost, and latency acceptance",
+    "formal release activation"
+  ],
+  "nextGate": "Use the documented Windows lifecycle wrapper for browser acceptance, then expose health/continuity/ready-proof evidence in the remaining long-memory panels before considering RP4 release evidence."
+}

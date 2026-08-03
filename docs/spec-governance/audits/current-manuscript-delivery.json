@@ -7,27 +7,27 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/editionManifest.ts",
-      "sha256": "603898e0ceb1d513d8214b9a464c2222a67a2ad5b7439dffebfc3d0f471f25e7"
+      "sha256": "13ad3562f2ce3e04f52307ad1443188ec6d2de9bd496c24d920dcb0e7696dbc0"
     },
     {
       "path": "api/src/publicationTree.ts",
-      "sha256": "5670360025ad853525f8e437f03310101bc2cb0516859b639f5d130f4b2c3541"
+      "sha256": "62281627f9fc8da2571dca6d94bad119622b810d68e574d89cb2bb151834f3ad"
     },
     {
       "path": "api/src/publicationArtifacts.ts",
-      "sha256": "8f842d060b71181f5af819c447ba244fec95bafc5baa9d081e1c71de7b592b32"
+      "sha256": "1a106c9dd8c23073fdcc3afa6fe6473f40060a74269b4f147616e98e82b913b6"
     },
     {
       "path": "api/src/deliveryProof.ts",
-      "sha256": "a9d3cb656be94b60c5ad76156001cf3e385ae51c52dc07779be8e2d826170eb5"
+      "sha256": "9376ec9de0f8e2ce426f63b6a80bb0984427922539d0c1e3e475b6971f2572c6"
     },
     {
       "path": "api/src/deliveryAccessGrant.ts",
-      "sha256": "5004e3c1bc4b29877cd461e2dc007f5a30d451e79fe67f0df484edc19e690926"
+      "sha256": "b42741e39abe336ffa4a23e5c1f472835285401ea832f1c4046bd1c17b53db86"
     },
     {
       "path": "api/src/releasePreflight.ts",
@@ -35,7 +35,7 @@
     },
     {
       "path": "api/src/closureCertificate.ts",
-      "sha256": "c69444822955e26bd7bf36e65122ec0ae9208028a43ec47a472e7a325c5085e6"
+      "sha256": "b55a598a53460aa758b1731350018d2dd292c2f7dd69af495d864de8db5a2a29"
     },
     {
       "path": "api/src/auditReport.ts",
@@ -43,15 +43,15 @@
     },
     {
       "path": "api/src/novelProject.ts",
-      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+      "sha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720"
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     },
     {
       "path": "ui/src/components/novel/AuditReportPanel.vue",
@@ -59,11 +59,11 @@
     },
     {
       "path": "ui/src/services/novelApi.ts",
-      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+      "sha256": "63b05fc817df12c8cb5e22ed42a3889f2ca62ed6a9cdf78d10e7fd3d5a9bfb5a"
     },
     {
       "path": "ui/src/types/novel.ts",
-      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+      "sha256": "8b40b4f8361cfddaee5bbc1bc946530c5391fe3045d27c4e62dfe5b62629ff24"
     }
   ],
   "privacy": {
@@ -91,15 +91,15 @@
   },
   "operationalSnapshot": {
     "totals": {
-      "projects": 8,
-      "chapters": 219,
+      "projects": 11,
+      "chapters": 222,
       "checkedChapters": 0,
-      "declaredContentPaths": 219,
-      "existingContentFiles": 213,
-      "nonemptyContentFiles": 213,
+      "declaredContentPaths": 222,
+      "existingContentFiles": 216,
+      "nonemptyContentFiles": 216,
       "substantialContentFiles": 71,
-      "utf8Bytes": 387715,
-      "characters": 152392,
+      "utf8Bytes": 387754,
+      "characters": 152419,
       "chaptersWithExplicitOrder": 198,
       "chaptersWithVolumeOrder": 198,
       "releaseArtifactFiles": 0
@@ -108,7 +108,7 @@
       {
         "projectOrdinal": 1,
         "inputFingerprints": {
-          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "project": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676",
           "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
         },
         "parseHealth": {
@@ -277,7 +277,7 @@
       {
         "projectOrdinal": 5,
         "inputFingerprints": {
-          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "project": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
         },
         "parseHealth": {
@@ -319,6 +319,128 @@
       {
         "projectOrdinal": 6,
         "inputFingerprints": {
+          "project": null,
+          "chapterContentAggregate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 0,
+          "byStatus": {},
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 0,
+          "pathsOutsideProject": 0,
+          "existingFiles": 0,
+          "nonemptyFiles": 0,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 0,
+          "utf8Bytes": 0,
+          "characters": 0
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": null,
+          "chapterContentAggregate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 0,
+          "byStatus": {},
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 0,
+          "pathsOutsideProject": 0,
+          "existingFiles": 0,
+          "nonemptyFiles": 0,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 0,
+          "utf8Bytes": 0,
+          "characters": 0
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
+          "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "byStatus": {
+            "empty": 3
+          },
+          "checked": 0,
+          "duplicateIdMembers": 0,
+          "duplicateContentPathMembers": 0
+        },
+        "content": {
+          "declaredPaths": 3,
+          "pathsOutsideProject": 0,
+          "existingFiles": 3,
+          "nonemptyFiles": 3,
+          "substantialFilesAtLeast800Characters": 0,
+          "filesStartingWithMarkdownHeading": 3,
+          "utf8Bytes": 39,
+          "characters": 27
+        },
+        "ordering": {
+          "chaptersWithExplicitOrder": 0,
+          "chaptersWithVolumeIdentity": 0,
+          "chaptersWithVolumeOrder": 0,
+          "duplicateCompositeOrderMembers": 0,
+          "note": "Array position currently remains the only universal chapter order; only some chapters expose explicit volume/order fields, and no frozen edition order exists."
+        },
+        "releaseArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "manifests": 0,
+          "deliveryProofs": 0,
+          "note": "Only files under fixed release/export/edition/publication/manuscript candidate directories are counted; ordinary chapter Markdown is not treated as a released artifact."
+        }
+      },
+      {
+        "projectOrdinal": 9,
+        "inputFingerprints": {
           "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
         },
@@ -359,7 +481,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": {
           "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
@@ -401,7 +523,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": {
           "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
           "chapterContentAggregate": "2d36728f3a770439d66fd3730878e502a4bf53f4c0dbe03aad5931804ad9d63d"
@@ -447,9 +569,9 @@
   },
   "summary": {
     "auditedStages": 10,
-    "projectsScanned": 8,
-    "chaptersInventoried": 219,
-    "existingContentFiles": 213,
+    "projectsScanned": 11,
+    "chaptersInventoried": 222,
+    "existingContentFiles": 216,
     "substantialContentFiles": 71,
     "checkedChapters": 0,
     "releaseArtifactFiles": 0,
@@ -469,12 +591,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2751,
+          "line": 8864,
           "evidence": "app.get(\"/api/novel/projects/:projectId/audit-report\""
         },
         {
           "path": "api/src/app.ts",
-          "line": 2753,
+          "line": 8866,
           "evidence": "buildProjectAuditReport(projectRoot(project.slug), project)"
         }
       ]
@@ -484,12 +606,12 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3948,
+          "line": 4606,
           "evidence": "new Blob([JSON.stringify(report, null, 2)]"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3952,
+          "line": 4610,
           "evidence": "-audit-report.json"
         }
       ]
@@ -499,12 +621,12 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 1097,
+          "line": 1222,
           "evidence": "export interface ProjectAuditReport"
         },
         {
           "path": "api/src/types.ts",
-          "line": 1100,
+          "line": 346,
           "evidence": "generatedAt: string;"
         }
       ]

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-learning-release-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Learning release persistence must reject rehashed records whose state semantics do not match their operational flags.",
+    "Rollback references must remain bound to the declared previous stable version."
+  ],
+  "implementationRefs": [
+    "api/src/learningRelease.ts:assertLearningReleaseIntegrity",
+    "api/src/learningRelease.spec.ts:inconsistent canary and rollback semantics regression"
+  ],
+  "tests": {
+    "red": "A rehashed canary record with canaryActive=false and rollbackRef=null was accepted.",
+    "green": "learningRelease.spec.ts passed 10/10 after semantic integrity checks were added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

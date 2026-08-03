@@ -6,4 +6,11 @@ describe("derived settlement after prose adoption", () => {
   it("settles derived changes only after adoption and anchor rebuild", () => { const result = settleDerivedChanges(valid); expect(result.status).toBe("settled"); expect(result.appliedChanges).toHaveLength(2); });
   it("cancels all derived patches on rejection, conflict, rollback or stale evidence", () => { for (const adoptionStatus of ["rejected", "conflict", "rolled_back"] as const) { const result = settleDerivedChanges({ ...valid, adoptionStatus }); expect(result.status).toBe("cancelled"); expect(result.appliedChanges).toEqual([]); } const stale = settleDerivedChanges({ ...valid, evidenceStatus: "stale" }); expect(stale.status).toBe("cancelled"); });
   it("requires evidence and refuses partial settlement", () => { expect(settleDerivedChanges({ ...valid, anchorRebuildStatus: "failed" }).reason).toBe("ANCHOR_REBUILD_REQUIRED"); expect(settleDerivedChanges({ ...valid, derivedChanges: [] }).reason).toBe("DERIVED_CHANGES_REQUIRED"); });
+  it("distinguishes cancellation from stale-evidence recomputation and rejects malformed changes", () => {
+    expect(settleDerivedChanges({ ...valid, evidenceStatus: "stale" }).disposition).toBe("recompute-required");
+    expect(settleDerivedChanges({ ...valid, adoptionStatus: "rejected" }).disposition).toBe("cancelled");
+    expect(settleDerivedChanges({ ...valid, sourceRefs: [" "] }).reason).toBe("DERIVED_EVIDENCE_REQUIRED");
+    expect(settleDerivedChanges({ ...valid, derivedChanges: [{ ...valid.derivedChanges[0], id: "" }] }).reason).toBe("DERIVED_CHANGE_INVALID");
+    expect(settleDerivedChanges({ ...valid, derivedChanges: [valid.derivedChanges[0], valid.derivedChanges[0]] }).reason).toBe("DERIVED_CHANGE_DUPLICATE");
+  });
 });

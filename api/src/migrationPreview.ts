@@ -33,6 +33,20 @@ function hasValidFingerprint(value: Record<string, unknown>): boolean {
   const { fingerprint: _fingerprint, ...base } = value;
   return hash(base) === value.fingerprint;
 }
+function hasValidSemantics(value: MigrationPreview, migrationId: string): boolean {
+  const counts = value.assetCounts;
+  return value.schemaVersion === "project-migration-preview.v1"
+    && value.migrationId === migrationId
+    && typeof value.projectSlug === "string" && value.projectSlug.length > 0
+    && value.status === "preview_only"
+    && value.previewOnly === true
+    && value.writeAuthority === "legacy_compatibility_only"
+    && counts !== null && typeof counts === "object"
+    && Object.values(counts).every((count) => Number.isInteger(count) && count >= 0)
+    && Array.isArray(value.conflicts) && value.conflicts.every((conflict) => typeof conflict === "string")
+    && typeof value.sourceFingerprint === "string" && /^[a-f0-9]{64}$/i.test(value.sourceFingerprint)
+    && typeof value.createdAt === "string" && Number.isFinite(Date.parse(value.createdAt));
+}
 
 function previewPath(root: string, migrationId: string): string {
   return resolveInside(root, `sessions/migrations/${migrationId}.json`);
@@ -86,7 +100,7 @@ export async function readMigrationPreview(root: string, migrationId: string): P
   try {
     const value = JSON.parse(await fs.readFile(previewPath(root, migrationId), "utf8")) as MigrationPreview;
     if (!hasValidFingerprint(value as unknown as Record<string, unknown>)) throw new Error("MIGRATION_PREVIEW_INTEGRITY_FAILED");
-    if (value.migrationId !== migrationId || value.status !== "preview_only" || value.previewOnly !== true || value.writeAuthority !== "legacy_compatibility_only") {
+    if (!hasValidSemantics(value, migrationId)) {
       throw new Error("MIGRATION_PREVIEW_SEMANTIC_MISMATCH");
     }
     return value;

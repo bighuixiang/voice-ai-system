@@ -3,8 +3,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { activateProjectMigration, readMigrationRollback, rollbackProjectMigration, validateMigrationPreview } from "./migrationValidation.js";
+import { activateProjectMigration, readMigrationActivation, readMigrationRollback, rollbackProjectMigration, validateMigrationPreview } from "./migrationValidation.js";
 import { previewProjectMigration } from "./migrationPreview.js";
+import { readProjectCapabilityManifest } from "./projectCapabilityManifest.js";
+import { assertCapabilityWriteAllowed } from "./capabilityWriteGate.js";
 
 describe("project migration validation and activation", () => {
   it("rejects stale previews and activates only with an outline dependency", async () => {
@@ -201,6 +203,50 @@ describe("project migration validation and activation", () => {
     await expect(activateProjectMigration(root, "legacy", preview.migrationId)).rejects.toThrow("MIGRATION_VALIDATION_SEMANTIC_MISMATCH");
   });
 
+  it("rejects a validly hashed validation artifact with invalid semantic fields", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "novel-migration-validation-fields-"));
+    await fs.writeFile(path.join(root, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], outlineVersion: { versionId: "outline-1" } }));
+    const preview = await previewProjectMigration(root, "legacy");
+    const validation = await validateMigrationPreview(root, "legacy", preview.migrationId);
+    const { fingerprint: _fingerprint, ...validationBase } = validation;
+    const malformedBase = { ...validationBase, conflicts: "not-an-array" };
+    const malformed = { ...malformedBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(malformedBase)).digest("hex") };
+    const validationPath = path.join(root, "sessions", "migrations", `${preview.migrationId}.validation.json`);
+    await fs.writeFile(validationPath, JSON.stringify(malformed));
+
+    await expect(activateProjectMigration(root, "legacy", preview.migrationId)).rejects.toThrow("MIGRATION_VALIDATION_SEMANTIC_MISMATCH");
+  });
+
+  it("rejects validly hashed activation and rollback artifacts with invalid semantic fields", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "novel-migration-artifact-fields-"));
+    await fs.writeFile(path.join(root, "project.json"), JSON.stringify({ slug: "legacy", chapters: [] }));
+    const preview = await previewProjectMigration(root, "legacy");
+    const migrationsDir = path.join(root, "sessions", "migrations");
+    await fs.mkdir(migrationsDir, { recursive: true });
+    const activationBase = {
+      schemaVersion: "project-migration-activation.v1",
+      migrationId: preview.migrationId,
+      projectSlug: "legacy",
+      status: "activated",
+      writeAuthority: "invalid-authority",
+      sourceFingerprint: "f".repeat(64),
+      activatedAt: new Date().toISOString()
+    };
+    await fs.writeFile(path.join(migrationsDir, `${preview.migrationId}.activation.json`), JSON.stringify({ ...activationBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(activationBase)).digest("hex") }));
+    await expect(readMigrationActivation(root, preview.migrationId)).rejects.toThrow("MIGRATION_ACTIVATION_SEMANTIC_MISMATCH");
+
+    const rollbackBase = {
+      schemaVersion: "project-migration-rollback.v1",
+      migrationId: preview.migrationId,
+      projectSlug: "legacy",
+      status: "invalid-status",
+      activationFingerprint: "f".repeat(64),
+      rolledBackAt: new Date().toISOString()
+    };
+    await fs.writeFile(path.join(migrationsDir, `${preview.migrationId}.rollback.json`), JSON.stringify({ ...rollbackBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(rollbackBase)).digest("hex") }));
+    await expect(readMigrationRollback(root, preview.migrationId)).rejects.toThrow("MIGRATION_ROLLBACK_SEMANTIC_MISMATCH");
+  });
+
   it("rejects keyed replay against a legacy activation without an idempotency key", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "novel-migration-keyed-replay-"));
     await fs.writeFile(path.join(root, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], outlineVersion: { versionId: "outline-1" } }), "utf8");
@@ -213,5 +259,21 @@ describe("project migration validation and activation", () => {
       idempotencyKey: "api-request-1",
       expectedValidationFingerprint: validation.fingerprint
     })).rejects.toThrow("MIGRATION_ACTIVATION_IDEMPOTENCY_MISSING");
+  });
+
+  it("installs a restricted capability front door on activation and removes it on rollback", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "novel-migration-capability-front-door-"));
+    await fs.writeFile(path.join(root, "project.json"), JSON.stringify({ slug: "legacy", chapters: [], outlineVersion: { versionId: "outline-1" } }), "utf8");
+    const preview = await previewProjectMigration(root, "legacy");
+    await validateMigrationPreview(root, "legacy", preview.migrationId);
+
+    const activation = await activateProjectMigration(root, "legacy", preview.migrationId);
+    const manifest = await readProjectCapabilityManifest(root, "legacy");
+    expect(manifest).toMatchObject({ migrationStatus: "verified", writable: ["runtime", "session", "delivery"], missingDependencies: ["runtime-migration-capability-proof"] });
+    expect(activation.capabilityManifestCreated).toBe(true);
+    await expect(assertCapabilityWriteAllowed(root, "legacy", "runtime")).rejects.toThrow("CAPABILITY_DEPENDENCY_BLOCKED:runtime");
+
+    await rollbackProjectMigration(root, "legacy", preview.migrationId);
+    expect(await readProjectCapabilityManifest(root, "legacy")).toBeNull();
   });
 });

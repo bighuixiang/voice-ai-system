@@ -42,6 +42,8 @@ function policyPath(root: string, projectSlug: string): string { return resolveI
 function budgetPath(root: string, budgetId: string): string { return resolveInside(root, `sessions/exploration-budgets/${budgetId}.json`); }
 async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const tmp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(tmp, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(tmp, target); }
 async function readJson<T>(target: string): Promise<T | null> { try { return JSON.parse(await fs.readFile(target, "utf8")) as T; } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
+export function assertLearningPolicyIntegrity(policy: LearningPolicy, expectedProjectSlug?: string): LearningPolicy { const { fingerprint, ...base } = policy; const valid = policy?.schemaVersion === "learning-policy.v1" && (!expectedProjectSlug || policy.projectSlug === expectedProjectSlug) && [policy.policyId, policy.projectSlug, policy.rollbackVersion, policy.createdAt].every((value) => typeof value === "string" && value.trim()) && policy.minIndependentEvidence >= 1 && Number.isFinite(policy.confidenceThreshold) && policy.confidenceThreshold >= 0 && policy.confidenceThreshold <= 1 && Number.isFinite(policy.decayRate) && policy.decayRate >= 0 && policy.decayRate <= 1 && policy.conflictStrategy === "weaken-and-split" && Number.isFinite(policy.explorationRatio) && policy.explorationRatio >= 0 && policy.explorationRatio <= 1 && policy.privacyBoundary === "project-only" && !Number.isNaN(Date.parse(policy.createdAt)) && /^[a-f0-9]{64}$/i.test(policy.fingerprint) && hash(base) === policy.fingerprint; if (!valid) throw new Error("LEARNING_POLICY_INTEGRITY_FAILED"); return policy; }
+export function assertExplorationBudgetIntegrity(budget: ExplorationBudget, expectedId?: string): ExplorationBudget { const { fingerprint, ...base } = budget; const valid = budget?.schemaVersion === "exploration-budget.v1" && (!expectedId || budget.budgetId === expectedId) && [budget.budgetId, budget.projectSlug, budget.scope, budget.maxImpact, budget.createdAt, budget.updatedAt].every((value) => typeof value === "string" && value.trim()) && Number.isInteger(budget.maxProbes) && budget.maxProbes > 0 && Number.isFinite(budget.maxCost) && budget.maxCost > 0 && Array.isArray(budget.stopConditions) && budget.stopConditions.every((value) => typeof value === "string" && value.trim()) && Number.isInteger(budget.usedProbes) && budget.usedProbes >= 0 && budget.usedProbes <= budget.maxProbes && Number.isFinite(budget.usedCost) && budget.usedCost >= 0 && budget.usedCost <= budget.maxCost && Array.isArray(budget.consumedOperationIds) && new Set(budget.consumedOperationIds).size === budget.consumedOperationIds.length && budget.consumedOperationIds.every((value) => typeof value === "string" && value.trim()) && ["active", "exhausted", "paused"].includes(budget.status) && (budget.status !== "paused" || typeof budget.pauseReason === "string" && budget.pauseReason.trim()) && (budget.status !== "exhausted" || budget.usedProbes >= budget.maxProbes || budget.usedCost >= budget.maxCost) && !Number.isNaN(Date.parse(budget.createdAt)) && !Number.isNaN(Date.parse(budget.updatedAt)) && /^[a-f0-9]{64}$/i.test(budget.fingerprint) && hash(base) === budget.fingerprint; if (!valid) throw new Error("EXPLORATION_BUDGET_INTEGRITY_FAILED"); return budget; }
 
 export async function createLearningPolicy(input: { root: string; projectSlug: string; rollbackVersion: string }): Promise<LearningPolicy> {
   if (!input.rollbackVersion.trim()) throw new Error("LEARNING_POLICY_ROLLBACK_VERSION_REQUIRED");
@@ -53,7 +55,7 @@ export async function createLearningPolicy(input: { root: string; projectSlug: s
   return policy;
 }
 
-export async function readLearningPolicy(root: string, projectSlug: string): Promise<LearningPolicy | null> { return readJson<LearningPolicy>(policyPath(root, projectSlug)); }
+export async function readLearningPolicy(root: string, projectSlug: string): Promise<LearningPolicy | null> { const policy = await readJson<LearningPolicy>(policyPath(root, projectSlug)); return policy ? assertLearningPolicyIntegrity(policy, projectSlug) : null; }
 
 export async function createExplorationBudget(input: { root: string; projectSlug: string; scope: string; maxProbes: number; maxCost: number; maxImpact: string; stopConditions: string[] }): Promise<ExplorationBudget> {
   if (input.maxProbes <= 0 || input.maxCost <= 0 || !input.scope.trim() || !input.maxImpact.trim()) throw new Error("EXPLORATION_BUDGET_INVALID");
@@ -66,7 +68,7 @@ export async function createExplorationBudget(input: { root: string; projectSlug
   return budget;
 }
 
-export async function readExplorationBudget(root: string, budgetId: string): Promise<ExplorationBudget | null> { return readJson<ExplorationBudget>(budgetPath(root, budgetId)); }
+export async function readExplorationBudget(root: string, budgetId: string): Promise<ExplorationBudget | null> { const budget = await readJson<ExplorationBudget>(budgetPath(root, budgetId)); return budget ? assertExplorationBudgetIntegrity(budget, budgetId) : null; }
 
 export async function consumeExplorationBudget(input: { root: string; budgetId: string; operationId: string; probes: number; cost: number; impact: string }): Promise<ExplorationBudget> {
   const existing = await readExplorationBudget(input.root, input.budgetId);
@@ -77,7 +79,8 @@ export async function consumeExplorationBudget(input: { root: string; budgetId: 
   if (input.probes <= 0 || input.cost < 0) throw new Error("EXPLORATION_BUDGET_USAGE_INVALID");
   if (existing.usedProbes + input.probes > existing.maxProbes) throw new Error("EXPLORATION_BUDGET_PROBES_EXCEEDED");
   if (existing.usedCost + input.cost > existing.maxCost) throw new Error("EXPLORATION_BUDGET_COST_EXCEEDED");
-  const base = { ...existing, usedProbes: existing.usedProbes + input.probes, usedCost: existing.usedCost + input.cost, consumedOperationIds: [...existing.consumedOperationIds, input.operationId], status: existing.usedProbes + input.probes >= existing.maxProbes || existing.usedCost + input.cost >= existing.maxCost ? "exhausted" as const : "active" as const, updatedAt: new Date().toISOString() };
+  const { fingerprint: _oldFingerprint, ...existingBase } = existing;
+  const base = { ...existingBase, usedProbes: existing.usedProbes + input.probes, usedCost: existing.usedCost + input.cost, consumedOperationIds: [...existing.consumedOperationIds, input.operationId], status: existing.usedProbes + input.probes >= existing.maxProbes || existing.usedCost + input.cost >= existing.maxCost ? "exhausted" as const : "active" as const, updatedAt: new Date().toISOString() };
   const budget: ExplorationBudget = { ...base, fingerprint: hash(base) };
   await writeJson(budgetPath(input.root, budget.budgetId), budget);
   return budget;
@@ -88,7 +91,8 @@ export async function pauseExplorationBudget(input: { root: string; budgetId: st
   const existing = await readExplorationBudget(input.root, input.budgetId);
   if (!existing) throw new Error("EXPLORATION_BUDGET_NOT_FOUND");
   if (existing.status === "paused") return existing;
-  const base = { ...existing, status: "paused" as const, pauseReason: input.reason, updatedAt: new Date().toISOString() };
+  const { fingerprint: _oldFingerprint, ...existingBase } = existing;
+  const base = { ...existingBase, status: "paused" as const, pauseReason: input.reason, updatedAt: new Date().toISOString() };
   const budget: ExplorationBudget = { ...base, fingerprint: hash(base) };
   await writeJson(budgetPath(input.root, budget.budgetId), budget);
   return budget;

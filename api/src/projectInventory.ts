@@ -57,7 +57,7 @@ async function existingPaths(root: string, candidates: string[]): Promise<string
 }
 
 async function governanceState(root: string, project: NovelProject): Promise<ProjectInventoryEntry["governanceState"]> {
-  const migration = (project as NovelProject & { migration?: { state?: string } }).migration;
+  const migration = (project as NovelProject & { migration?: { state?: string; writeAuthority?: string } }).migration;
   const projectMigrationId = migration?.state === "activated" && typeof (migration as { migrationId?: unknown }).migrationId === "string"
     ? (migration as { migrationId: string }).migrationId
     : undefined;
@@ -67,7 +67,8 @@ async function governanceState(root: string, project: NovelProject): Promise<Pro
   for (const name of names.filter((candidate) => candidate.endsWith(".rollback.json"))) {
     try {
       const rollback = JSON.parse(await fs.readFile(resolveInside(root, `sessions/migrations/${name}`), "utf8")) as Record<string, unknown> & { migrationId?: string; projectSlug?: string; status?: string };
-      if (rollback.projectSlug === project.slug && rollback.status === "rolled_back" && typeof rollback.migrationId === "string" && hasValidFingerprint(rollback)) {
+      const filenameMigrationId = name.slice(0, -".rollback.json".length);
+      if (rollback.projectSlug === project.slug && rollback.status === "rolled_back" && rollback.migrationId === filenameMigrationId && typeof rollback.migrationId === "string" && typeof rollback.activationFingerprint === "string" && /^[a-f0-9]{64}$/i.test(rollback.activationFingerprint) && typeof rollback.rolledBackAt === "string" && Number.isFinite(Date.parse(rollback.rolledBackAt)) && hasValidFingerprint(rollback)) {
         rolledBackMigrationIds.add(rollback.migrationId);
       }
     } catch {
@@ -78,7 +79,9 @@ async function governanceState(root: string, project: NovelProject): Promise<Pro
     try {
       const activation = JSON.parse(await fs.readFile(resolveInside(root, `sessions/migrations/${name}`), "utf8")) as Record<string, unknown> & { projectSlug?: string; status?: string };
       const migrationId = typeof activation.migrationId === "string" ? activation.migrationId : "";
-      if (activation.schemaVersion === "project-migration-activation.v1" && activation.projectSlug === project.slug && activation.status === "activated" && activation.writeAuthority === "prose-adoption" && hasValidFingerprint(activation) && !rolledBackMigrationIds.has(migrationId) && projectMigrationId === migrationId) return "migration-activated";
+      const filenameMigrationId = name.slice(0, -".activation.json".length);
+      const manifestWriteAuthority = typeof migration?.writeAuthority === "string" ? migration.writeAuthority : undefined;
+      if (activation.schemaVersion === "project-migration-activation.v1" && activation.projectSlug === project.slug && activation.status === "activated" && activation.writeAuthority === "prose-adoption" && manifestWriteAuthority === "prose-adoption" && typeof activation.sourceFingerprint === "string" && /^[a-f0-9]{64}$/i.test(activation.sourceFingerprint) && typeof activation.activatedAt === "string" && Number.isFinite(Date.parse(activation.activatedAt)) && hasValidFingerprint(activation) && !rolledBackMigrationIds.has(migrationId) && projectMigrationId === migrationId && filenameMigrationId === migrationId) return "migration-activated";
     } catch {
       // Ignore malformed or unrelated artifacts; the project remains governed by its own manifest/state.
     }
@@ -88,7 +91,9 @@ async function governanceState(root: string, project: NovelProject): Promise<Pro
   for (const name of names.filter((candidate) => candidate.endsWith(".validation.json"))) {
     try {
       const validation = JSON.parse(await fs.readFile(resolveInside(root, `sessions/migrations/${name}`), "utf8")) as Record<string, unknown> & { projectSlug?: string; status?: string };
-      if (validation.projectSlug === project.slug && validation.status === "validated" && hasValidFingerprint(validation)) return "migration-validated";
+      const filenameMigrationId = name.slice(0, -".validation.json".length);
+      const validationDependencies = validation.dependencies as { outlineVersion?: unknown } | undefined;
+      if (validation.projectSlug === project.slug && validation.status === "validated" && validation.migrationId === filenameMigrationId && Array.isArray(validation.conflicts) && validation.conflicts.every((item) => typeof item === "string") && Array.isArray(validation.resolvedConflicts) && validation.resolvedConflicts.every((item) => typeof item === "string") && (validationDependencies?.outlineVersion === "ready" || validationDependencies?.outlineVersion === "missing") && typeof validation.sourceFingerprint === "string" && /^[a-f0-9]{64}$/i.test(validation.sourceFingerprint) && typeof validation.validatedAt === "string" && Number.isFinite(Date.parse(validation.validatedAt)) && hasValidFingerprint(validation)) return "migration-validated";
     } catch {
       // Ignore malformed or unrelated artifacts; the project remains in its manifest-derived state.
     }
@@ -96,7 +101,9 @@ async function governanceState(root: string, project: NovelProject): Promise<Pro
   for (const name of names.filter((candidate) => candidate.startsWith("migration-preview-") && candidate.endsWith(".json"))) {
     try {
       const preview = JSON.parse(await fs.readFile(resolveInside(root, `sessions/migrations/${name}`), "utf8")) as Record<string, unknown> & { projectSlug?: string; status?: string };
-      if (preview.projectSlug === project.slug && preview.status === "preview_only" && hasValidFingerprint(preview)) return "migration-preview";
+      const filenameMigrationId = name.slice(0, -".json".length);
+      const assetCounts = preview.assetCounts as Record<string, unknown> | undefined;
+      if (preview.projectSlug === project.slug && preview.status === "preview_only" && preview.migrationId === filenameMigrationId && assetCounts !== null && typeof assetCounts === "object" && Object.values(assetCounts).every((count) => Number.isInteger(count) && (count as number) >= 0) && Array.isArray(preview.conflicts) && preview.conflicts.every((item) => typeof item === "string") && typeof preview.sourceFingerprint === "string" && /^[a-f0-9]{64}$/i.test(preview.sourceFingerprint) && typeof preview.createdAt === "string" && Number.isFinite(Date.parse(preview.createdAt)) && hasValidFingerprint(preview)) return "migration-preview";
     } catch {
       // Ignore malformed or unrelated artifacts.
     }
@@ -106,6 +113,9 @@ async function governanceState(root: string, project: NovelProject): Promise<Pro
 
 export async function buildProjectInventory(): Promise<ProjectInventory> {
   const root = getNovelsRoot();
+  const reservedDirectories = new Set([process.env.NOVEL_DATA_ROOT, process.env.PLATFORM_ROOT]
+    .filter((value): value is string => Boolean(value))
+    .map((value) => path.resolve(value)));
   const projects: ProjectInventoryEntry[] = [];
   const failures: Array<{ code: string; path: string }> = [];
   let entries;
@@ -125,7 +135,7 @@ export async function buildProjectInventory(): Promise<ProjectInventory> {
     throw error;
   }
 
-  for (const entry of entries.filter((item) => item.isDirectory()).sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.filter((item) => item.isDirectory() && !reservedDirectories.has(path.resolve(root, item.name))).sort((left, right) => left.name.localeCompare(right.name))) {
     const projectSlug = entry.name;
     const projectRoot = path.join(root, projectSlug);
     const fileCount = await countFiles(projectRoot);

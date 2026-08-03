@@ -17,6 +17,15 @@ void recoverUnderstandingTasksAtStartup(getNovelsRoot(), new AgentProcessRunner(
   })
   .catch((error) => console.error("Understanding startup recovery failed:", error));
 
-createApp().listen(port, "127.0.0.1", () => {
+const server = createApp().listen(port, "127.0.0.1", () => {
   console.log(`Novel Codex API listening on http://127.0.0.1:${port}`);
 });
+
+const shutdown = (signal: string) => {
+  server.close((error) => {
+    if (error) console.error(`API shutdown after ${signal} failed:`, error);
+    process.exit(error ? 1 : 0);
+  });
+};
+process.once("SIGTERM", () => shutdown("SIGTERM"));
+process.once("SIGINT", () => shutdown("SIGINT"));

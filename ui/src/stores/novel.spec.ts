@@ -59,6 +59,14 @@ const mockNovelApi = vi.hoisted(() => ({
   cancelBackgroundJob: vi.fn(),
   retryBackgroundJob: vi.fn(),
   searchKnowledgeIndex: vi.fn(),
+  createMemoryRetrievalPreview: vi.fn(),
+  readMemoryRetrievalPreview: vi.fn(),
+  createMemoryHealthReport: vi.fn(),
+  readMemoryHealthReport: vi.fn(),
+  createMemoryReadyProof: vi.fn(),
+  readMemoryReadyProof: vi.fn(),
+  createMemoryContinuityAudit: vi.fn(),
+  readMemoryContinuityAudit: vi.fn(),
   readLedgerEntries: vi.fn(),
   saveLedgerEntries: vi.fn(),
   acceptWritingRecap: vi.fn(),
@@ -657,6 +665,23 @@ describe("useNovelStore", () => {
         }
       ]
     });
+    mockNovelApi.createMemoryRetrievalPreview.mockResolvedValue({
+      schemaVersion: "memory-retrieval-preview.v1",
+      retrievalId: "retrieval-abcdef0123456789abcdef01",
+      projectSlug: "demo",
+      query: "Hero gate",
+      boundary: { query: "Hero gate", audience: "author", authorized: true },
+      eligibleFactIds: ["fact:gate"],
+      excluded: [],
+      selectedIds: ["fact:gate"],
+      truncatedIds: [],
+      evidenceSourceIds: ["fact-1"],
+      evidenceSourceCount: 1,
+      budget: { maxResults: 12 },
+      sourceResultFingerprint: "a".repeat(64),
+      resultFingerprint: "b".repeat(64)
+    });
+    mockNovelApi.readMemoryRetrievalPreview.mockImplementation(async () => mockNovelApi.createMemoryRetrievalPreview());
     mockNovelApi.readLedgerEntries.mockResolvedValue([]);
     mockNovelApi.saveLedgerEntries.mockImplementation(async (_projectId: string, _kind: LedgerEntry["kind"], entries: LedgerEntry[]) => entries);
     mockNovelApi.acceptWritingRecap.mockImplementation(async (_projectId: string, recap: WritingRecapCandidate) => ({
@@ -1648,14 +1673,60 @@ describe("useNovelStore", () => {
 
     expect(mockNovelApi.searchKnowledgeIndex).toHaveBeenCalledWith("demo", {
       query: "Hero gate",
+      task: "knowledge-index-search",
       chapterId: "chapter-002",
       limit: 12
     });
+    expect(mockNovelApi.createMemoryRetrievalPreview).toHaveBeenCalledWith("demo", {
+      query: "Hero gate",
+      task: "knowledge-index-search",
+      chapterId: "chapter-002",
+      limit: 12,
+      maxResults: 12
+    });
     expect(result?.facts).toEqual([expect.objectContaining({ id: "fact:gate", score: 2 })]);
     expect(store.knowledgeSearchResult?.chapters[0]).toEqual(expect.objectContaining({ chapterId: "chapter-001" }));
+    expect(store.knowledgeRetrievalPreview?.retrievalId).toBe("retrieval-abcdef0123456789abcdef01");
+    await store.loadKnowledgeIndex();
+    expect(mockNovelApi.readMemoryRetrievalPreview).toHaveBeenCalledWith("demo", "retrieval-abcdef0123456789abcdef01");
+    expect(store.knowledgeRetrievalPreview?.resultFingerprint).toBe("b".repeat(64));
 
     await expect(store.searchKnowledgeIndex("   ")).resolves.toBeNull();
     expect(store.knowledgeSearchResult).toBeNull();
+  });
+
+  it("runs memory governance only from a persisted retrieval preview", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.knowledgeRetrievalPreview = { retrievalId: "retrieval-abcdef0123456789abcdef01" } as never;
+    mockNovelApi.createMemoryHealthReport.mockResolvedValue({ reportId: "memory-health-1", status: "degraded" });
+    mockNovelApi.createMemoryContinuityAudit.mockResolvedValue({ auditId: "audit-1", status: "blocked", issues: ["coverage"] });
+    mockNovelApi.createMemoryReadyProof.mockResolvedValue({ proofId: "proof-1", status: "blocked", blockers: ["MEMORY_HEALTH_DEGRADED"] });
+
+    await store.runMemoryGovernance();
+
+    expect(mockNovelApi.createMemoryHealthReport).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.createMemoryContinuityAudit).toHaveBeenCalledWith("demo", { healthReportId: "memory-health-1" });
+    expect(mockNovelApi.createMemoryReadyProof).toHaveBeenCalledWith("demo", { healthReportId: "memory-health-1", retrievalId: "retrieval-abcdef0123456789abcdef01", continuityAuditId: "audit-1", targetChapterId: "chapter-001" });
+    expect(store.memoryReadyProof?.status).toBe("blocked");
+    expect(JSON.parse(window.localStorage.getItem("voice-ai-novel-memory-governance") || "{}").demo).toEqual({ healthReportId: "memory-health-1", continuityAuditId: "audit-1", readyProofId: "proof-1" });
+  });
+
+  it("restores persisted governance evidence on project reload", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.knowledgeRetrievalPreview = { retrievalId: "retrieval-abcdef0123456789abcdef01" } as never;
+    window.localStorage.setItem("voice-ai-novel-memory-governance", JSON.stringify({ demo: { healthReportId: "health-1", continuityAuditId: "audit-1", readyProofId: "proof-1" } }));
+    mockNovelApi.readKnowledgeIndex.mockResolvedValue(null);
+    mockNovelApi.readMemoryHealthReport.mockResolvedValue({ reportId: "health-1", status: "healthy" });
+    mockNovelApi.readMemoryContinuityAudit.mockResolvedValue({ auditId: "audit-1", status: "audited-consistent" });
+    mockNovelApi.readMemoryReadyProof.mockResolvedValue({ proofId: "proof-1", status: "ready" });
+
+    await store.loadKnowledgeIndex();
+
+    expect(store.memoryHealthReport?.reportId).toBe("health-1");
+    expect(store.memoryContinuityAudit?.auditId).toBe("audit-1");
+    expect(store.memoryReadyProof?.proofId).toBe("proof-1");
   });
 
   it("loads project background jobs", async () => {

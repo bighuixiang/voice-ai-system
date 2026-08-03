@@ -13,8 +13,9 @@ export function auditContextRecords(input: { authoritative: boolean; records: Co
     if (record.raw !== undefined) {
       try { payload = JSON.parse(record.raw) as ContextRecordInput["payload"]; } catch { reasons.push("MALFORMED_RECORD"); continue; }
     }
-    if (!payload?.id || !Number.isInteger(payload.sequence) || payload.sequence < 1) { reasons.push("MALFORMED_RECORD"); continue; }
-    sequences.push(payload.sequence);
+    const sequence = payload?.sequence;
+    if (!payload?.id || typeof sequence !== "number" || !Number.isInteger(sequence) || sequence < 1) { reasons.push("MALFORMED_RECORD"); continue; }
+    sequences.push(sequence);
     if (record.fingerprint !== hash(payload)) { reasons.push("HASH_MISMATCH"); continue; }
     validRecordIds.push(payload.id);
   }

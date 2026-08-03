@@ -332,6 +332,7 @@
           >
             <PlotPilotLearningPanel
               :items="store.plotPilotLearningItems"
+              :experiments="Object.values(store.craftExperiments || {})"
               @action="handleCreationLoopAction"
               @command="handleWorkbenchCommand"
             />
@@ -694,9 +695,18 @@
           :index="store.knowledgeIndex"
           :is-rebuilding="store.isRebuildingKnowledgeIndex"
           :search-result="store.knowledgeSearchResult"
+          :retrieval-preview="store.knowledgeRetrievalPreview"
           :is-searching="store.isSearchingKnowledge"
           @rebuild="store.rebuildKnowledgeIndex"
           @search="store.searchKnowledgeIndex"
+        />
+        <MemoryGovernancePanel
+          :health="store.memoryHealthReport"
+          :ready-proof="store.memoryReadyProof"
+          :continuity-audit="store.memoryContinuityAudit"
+          :retrieval-available="Boolean(store.knowledgeRetrievalPreview)"
+          :loading="store.isRunningMemoryGovernance"
+          @run="store.runMemoryGovernance"
         />
         <BackgroundJobPanel
           :jobs="store.backgroundJobs"
@@ -758,6 +768,7 @@ const StoryControlPanel = defineAsyncComponent(() => import("./StoryControlPanel
 const QuickReferencePanel = defineAsyncComponent(() => import("./QuickReferencePanel.vue"));
 const StoryGraphPanel = defineAsyncComponent(() => import("./StoryGraphPanel.vue"));
 const KnowledgeIndexPanel = defineAsyncComponent(() => import("./KnowledgeIndexPanel.vue"));
+const MemoryGovernancePanel = defineAsyncComponent(() => import("./MemoryGovernancePanel.vue"));
 const BackgroundJobPanel = defineAsyncComponent(() => import("./BackgroundJobPanel.vue"));
 const ChapterDashboardPanel = defineAsyncComponent(() => import("./ChapterDashboardPanel.vue"));
 const SceneCardPanel = defineAsyncComponent(() => import("./SceneCardPanel.vue"));

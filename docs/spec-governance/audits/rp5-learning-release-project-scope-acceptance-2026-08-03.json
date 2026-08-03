@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-learning-release-project-scope",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "A craft pattern consumed by a prose manifest must belong to the requested project.",
+    "Cross-project craft assets must fail closed before release authority is evaluated."
+  ],
+  "implementationRefs": [
+    "api/src/learningRelease.ts:assertCraftPatternReleaseRefs",
+    "api/src/learningRelease.spec.ts:foreign craft pattern regression"
+  ],
+  "tests": {
+    "red": "A persisted pattern with a foreign projectSlug reached the release-required check instead of failing on scope.",
+    "green": "learningRelease.spec.ts passed 12/12 after project scope validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

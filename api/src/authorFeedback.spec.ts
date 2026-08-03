@@ -7,7 +7,7 @@ import { appendAuthorMessage } from "./creativeSession.js";
 import { freezeContextManifest } from "./contextManifest.js";
 import { createProseCandidate } from "./proseCandidate.js";
 import { adoptProseCandidate } from "./proseAdoption.js";
-import { readAuthorFeedbackEvent, recordAuthorFeedback } from "./authorFeedback.js";
+import { assertAuthorFeedbackIntegrity, readAuthorFeedbackEvent, recordAuthorFeedback } from "./authorFeedback.js";
 
 async function fixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "author-feedback-"));
@@ -29,4 +29,23 @@ describe("author feedback events", () => {
     expect(await recordAuthorFeedback(input)).toEqual(first);
     expect(await readAuthorFeedbackEvent(root, first.eventId)).toEqual(first);
   });
+
+  it("fails closed when a persisted feedback event has an invalid decision despite a valid hash", async () => {
+    const { root, candidate, transaction } = await fixture();
+    const event = await recordAuthorFeedback({ root, projectSlug: "demo", candidateId: candidate.candidateId, adoptionTransactionId: transaction.transactionId, decision: "needs_revision", note: "Keep the tension." });
+    const target = path.join(root, "sessions", "author-feedback", `${event.eventId}.json`);
+    const tampered = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    tampered.decision = "accepted-but-unverified";
+    delete tampered.fingerprint;
+    await fs.writeFile(target, JSON.stringify({ ...tampered, fingerprint: crypto.createHash("sha256").update(JSON.stringify(tampered)).digest("hex") }), "utf8");
+    await expect(readAuthorFeedbackEvent(root, event.eventId)).rejects.toThrow("AUTHOR_FEEDBACK_INTEGRITY_FAILED");
+    await expect(recordAuthorFeedback({ root, projectSlug: "demo", candidateId: candidate.candidateId, adoptionTransactionId: transaction.transactionId, decision: "needs_revision", note: "Keep the tension." })).rejects.toThrow("AUTHOR_FEEDBACK_INTEGRITY_FAILED");
+  });
+
+  it("does not let feedback cross the candidate project boundary", async () => {
+    const { root, candidate, transaction } = await fixture();
+    await expect(recordAuthorFeedback({ root, projectSlug: "other-project", candidateId: candidate.candidateId, adoptionTransactionId: transaction.transactionId, decision: "accepted", note: "cross-project" })).rejects.toThrow("AUTHOR_FEEDBACK_PROJECT_MISMATCH");
+  });
+  it("supports direct audit of feedback integrity", async () => { const { root, candidate, transaction } = await fixture(); const event = await recordAuthorFeedback({ root, projectSlug: "demo", candidateId: candidate.candidateId, adoptionTransactionId: transaction.transactionId, decision: "accepted", note: "Good." }); expect(assertAuthorFeedbackIntegrity(event, event.eventId)).toEqual(event); });
+  it("records reason_unknown instead of inventing a rejection rationale", async () => { const { root, candidate, transaction } = await fixture(); const event = await recordAuthorFeedback({ root, projectSlug: "demo", candidateId: candidate.candidateId, adoptionTransactionId: transaction.transactionId, decision: "rejected" }); expect(event).toMatchObject({ decision: "rejected", reasonCode: "reason_unknown", note: "" }); });
 });

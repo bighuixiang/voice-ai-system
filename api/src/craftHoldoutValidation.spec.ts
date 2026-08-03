@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateCraftHoldout } from "./craftHoldoutValidation.js";
+import { assertCraftHoldoutIntegrity, validateCraftHoldout } from "./craftHoldoutValidation.js";
 
 const base = {
   experimentId: "exp-1",
@@ -30,4 +30,5 @@ describe("craft holdout validation", () => {
     expect(result.status).toBe("blocked");
     expect(result.issues).toEqual(expect.arrayContaining(["HOLDOUT_EXTRACTION_OVERLAP", "HOLDOUT_LABEL_LEAK"]));
   });
+  it("rejects malformed holdout cases and detects tampering", () => { expect(() => validateCraftHoldout({ ...base, cases: [{ ...base.cases[0], baselineScore: Number.NaN }] })).toThrow("CRAFT_HOLDOUT_CASE_INVALID"); const result = validateCraftHoldout(base); expect(() => assertCraftHoldoutIntegrity({ ...result, experimentId: "tampered" })).toThrow("CRAFT_HOLDOUT_INTEGRITY_FAILED"); });
 });

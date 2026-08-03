@@ -15,6 +15,9 @@ import { getNovelsRoot } from "./workspace.js";
 import { resolveInside } from "./pathSafety.js";
 import { deleteProjectRecord, upsertProjectRecord } from "./database.js";
 import { defaultStoryControl } from "./writingCockpit.js";
+import { createCapabilityDependencyProof, createProjectCapabilityManifest } from "./deliveryGovernance.js";
+import { writeProjectCapabilityManifest } from "./projectCapabilityManifest.js";
+import { writeCapabilityDependencyProof } from "./capabilityDependencyStore.js";
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -225,7 +228,10 @@ export async function deleteProject(projectId: string): Promise<string> {
     throw new Error(`Project not found: ${projectId}`);
   }
 
-  await fs.rm(root, { recursive: true, force: true });
+  // Windows can briefly keep recently-written snapshot directories busy while
+  // the request that created them is still releasing its file handle. Retry
+  // transient EBUSY/EPERM failures so disposable-project cleanup is reliable.
+  await fs.rm(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   deleteProjectRecord(slug);
   return slug;
 }
@@ -260,6 +266,29 @@ export async function createProjectFiles(project: NovelProject): Promise<void> {
   }
 
   await writeProject(project);
+  await writeProjectCapabilityManifest(
+    root,
+    createProjectCapabilityManifest({
+      projectId: project.slug,
+      schemaVersion: "v1",
+      enabledSlices: ["story-seed", "runtime", "session", "delivery"],
+      readable: ["story-seed", "runtime", "session", "delivery"],
+      writable: ["story-seed", "runtime", "session", "delivery"],
+      migrationStatus: "verified",
+      rollbackWindow: "24h",
+      missingDependencies: []
+    })
+  );
+  await writeCapabilityDependencyProof(
+    root,
+    createCapabilityDependencyProof({
+      projectSlug: project.slug,
+      sliceId: "runtime",
+      requiredKernels: [{ id: "K0-contract", version: "v1", verifiedBy: ["project-create"] }],
+      writeAuthority: "runtime-store",
+      unmet: []
+    })
+  );
   const defaults: Record<string, string> = {
     "style/style-guide.md": [
       "# 文风规则",

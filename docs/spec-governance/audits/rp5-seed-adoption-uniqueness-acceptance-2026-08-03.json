@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-seed-adoption-uniqueness",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-STATE-006", "FR-STATE-007"],
+  "implementationRefs": [
+    "api/src/seedAdoption.ts",
+    "api/src/seedAdoption.spec.ts"
+  ],
+  "tests": ["api/src/seedAdoption.spec.ts"],
+  "result": "passed",
+  "evidence": [
+    "RED: a validly hashed seed adoption with duplicate field names was accepted on read",
+    "GREEN: seed adoption integrity now rejects duplicate semantic fields",
+    "seed adoption regression passes 7/7"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "This closes one seed adoption ambiguity but does not prove unified canon authority or complete legacy surface cutover."
+  }
+}

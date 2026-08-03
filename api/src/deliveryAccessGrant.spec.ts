@@ -50,4 +50,26 @@ describe("delivery access grant", () => {
     await fs.writeFile(target, `${JSON.stringify(value)}\n`, "utf8");
     await expect(issueDeliveryAccessGrant(root, { editionId: "edition-1", recipientId: "reader-1", scope: "reader", expiresAt: "2099-01-01T00:00:00.000Z", actor: "author" })).rejects.toThrow("ACCESS_GRANT_INTEGRITY_FAILED");
   });
+
+  it("fails closed when a grant has a valid hash but an invalid lifecycle status", async () => {
+    const root = await fixture();
+    const grant = await issueDeliveryAccessGrant(root, { editionId: "edition-1", recipientId: "reader-1", scope: "reader", expiresAt: "2099-01-01T00:00:00.000Z", actor: "author" });
+    const target = path.join(root, "sessions", "publication-editions", "delivery-access-grants", `${grant.grantId}.json`);
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    value.status = "revoked";
+    delete value.fingerprint;
+    await fs.writeFile(target, JSON.stringify({ ...value, fingerprint: hash(value) }));
+    await expect(readDeliveryAccessGrant(root, grant.grantId)).rejects.toThrow("ACCESS_GRANT_INTEGRITY_FAILED");
+    await expect(revokeDeliveryAccessGrant(root, grant.grantId, { actor: "author", reason: "retry" })).rejects.toThrow("ACCESS_GRANT_INTEGRITY_FAILED");
+  });
+
+  it("normalizes malformed grant fields to the integrity failure code", async () => {
+    const root = await fixture();
+    const grant = await issueDeliveryAccessGrant(root, { editionId: "edition-1", recipientId: "reader-1", scope: "reader", expiresAt: "2099-01-01T00:00:00.000Z", actor: "author" });
+    const target = path.join(root, "sessions", "publication-editions", "delivery-access-grants", `${grant.grantId}.json`);
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    delete value.recipientId;
+    await fs.writeFile(target, JSON.stringify(value));
+    await expect(readDeliveryAccessGrant(root, grant.grantId)).rejects.toThrow("ACCESS_GRANT_INTEGRITY_FAILED");
+  });
 });

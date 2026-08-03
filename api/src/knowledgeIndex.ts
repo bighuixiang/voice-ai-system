@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
 import type {
   ChapterMemoryIndex,
   ChapterSummary,
@@ -18,6 +19,11 @@ import type {
 import { resolveInside } from "./pathSafety.js";
 import { readPlatformAiConfig } from "./platformAiConfig.js";
 import { readChapterSummary, readLedgerEntries, readStoryControl } from "./writingCockpit.js";
+import { evaluateMemoryClaimTemporal, listMemoryClaims } from "./memoryClaim.js";
+import { evaluateCharacterKnowledge, evaluateReaderKnowledge, listCharacterKnowledgeStates, listReaderKnowledgeStates } from "./memoryKnowledge.js";
+import { evaluateMemoryVisibility, evaluateSourceVisibility } from "./memoryVisibility.js";
+import { buildKnowledgeEvidenceProfile, evidenceQualityPriority } from "./knowledgeEvidence.js";
+import { buildStoryTimeEventOrder, listStoryTimeEvents } from "./storyTime.js";
 
 const ledgerKinds: LedgerEntry["kind"][] = ["foreshadowing", "continuity", "power", "character", "risk"];
 const localVectorDimensions = 64;
@@ -354,6 +360,13 @@ function addLedgerFacts(facts: Map<string, KnowledgeFact>, triples: Map<string, 
   }
 }
 
+function addMemoryClaimFacts(facts: Map<string, KnowledgeFact>, claims: Awaited<ReturnType<typeof listMemoryClaims>>, updatedAt: string): void {
+  for (const claim of claims) {
+    if (claim.status !== "eligible") continue;
+    addFact(facts, { id: `memory-claim:${claim.claimId}`, text: claim.proposition, chapterIds: [], relatedEntities: [], source: factSource("memory-claim", claim.claimId, `memory-claim:v${claim.version}`) }, updatedAt);
+  }
+}
+
 async function addStoryControlFacts(
   root: string,
   facts: Map<string, KnowledgeFact>,
@@ -558,10 +571,17 @@ function summarizeVectorIndex(index: KnowledgeVectorIndex): KnowledgeVectorSumma
   };
 }
 
-async function vectorizeQueryForIndex(index: KnowledgeVectorIndex, query: string, tokens: string[]): Promise<number[]> {
+function latestProjectionTimestamp(index: KnowledgeIndexProjection): number {
+  const values = [index.chapterIndex.updatedAt, ...index.facts.map((fact) => fact.updatedAt), ...index.triples.map((triple) => triple.updatedAt)]
+    .map((value) => Date.parse(value))
+    .filter(Number.isFinite);
+  return values.length ? Math.max(...values) : 0;
+}
+
+async function vectorizeQueryForIndex(index: KnowledgeVectorIndex, query: string, tokens: string[]): Promise<{ vector: number[]; fallback?: NonNullable<KnowledgeSearchResult["queryEmbeddingFallback"]> }> {
   const localQueryVector = vectorize([query, ...tokens]);
   if (index.provider === "local") {
-    return localQueryVector;
+    return { vector: localQueryVector };
   }
 
   const provider = await getEmbeddingProvider();
@@ -570,14 +590,17 @@ async function vectorizeQueryForIndex(index: KnowledgeVectorIndex, query: string
     try {
       const [queryVector] = await provider.embed([[query, ...tokens].join(" ")]);
       if (queryVector?.length === index.dimensions) {
-        return queryVector;
+        return { vector: queryVector };
       }
-    } catch {
-      return index.dimensions === localQueryVector.length ? localQueryVector : [];
+    } catch (error) {
+      return {
+        vector: index.dimensions === localQueryVector.length ? localQueryVector : [],
+        fallback: { from: "openai-compatible", to: "local", reason: errorMessage(error) }
+      };
     }
   }
 
-  return index.dimensions === localQueryVector.length ? localQueryVector : [];
+  return { vector: index.dimensions === localQueryVector.length ? localQueryVector : [] };
 }
 
 async function writeJsonl(root: string, relativePath: string, items: unknown[]): Promise<void> {
@@ -655,6 +678,7 @@ export async function buildKnowledgeIndexProjection(root: string, project: Novel
 
   const ledgers = (await Promise.all(ledgerKinds.map((kind) => readLedgerEntries(root, kind)))).flat();
   addLedgerFacts(facts, triples, ledgers, updatedAt);
+  addMemoryClaimFacts(facts, await listMemoryClaims(root), updatedAt);
   await addStoryControlFacts(root, facts, triples, updatedAt);
 
   const factList = [...facts.values()].sort((left, right) => left.id.localeCompare(right.id));
@@ -708,11 +732,68 @@ export async function searchKnowledgeIndex(
   }
 
   const index = await readKnowledgeIndex(root, project);
+  const memoryClaims = await listMemoryClaims(root);
+  const memoryClaimById = new Map(memoryClaims.map((claim) => [`memory-claim:${claim.claimId}`, claim]));
+  const canonicalClaimIds = new Set(memoryClaims.filter((claim) => claim.status === "eligible" && claim.epistemicType === "canon_fact").map((claim) => claim.claimId));
+  const factQuality = (fact: KnowledgeFact): "canon" | "derived" | "plan" | "unknown" => {
+    if (fact.source.type === "memory-claim" && canonicalClaimIds.has(fact.source.id)) return "canon";
+    if (fact.source.type === "story-control") return "plan";
+    if (fact.source.type === "chapter-summary" || fact.source.type === "ledger") return "derived";
+    return "unknown";
+  };
+  const factById = new Map(index.facts.map((fact) => [fact.id, fact]));
+  const tripleQuality = (triple: KnowledgeTriple): number => Math.max(1, ...triple.sourceFactIds.map((id) => {
+    const sourceFact = factById.get(id);
+    return sourceFact ? evidenceQualityPriority(factQuality(sourceFact)) : 1;
+  }));
+  const characterKnowledge = input.audience === "character" ? await listCharacterKnowledgeStates(root) : [];
+  const readerKnowledge = input.audience === "reader" ? await listReaderKnowledgeStates(root) : [];
+  const authoritativeEventOrder = input.targetEvent ? buildStoryTimeEventOrder(await listStoryTimeEvents(root, project.slug)) : {};
+  const excluded: Array<{ id: string; reason: string }> = [];
+  const eligibleFacts = index.facts.filter((fact) => {
+    if (fact.source.type !== "memory-claim") {
+      const visibility = evaluateSourceVisibility({
+        audience: input.audience || "author",
+        sourceType: fact.source.type,
+        sourceVisibility: fact.source.visibility || "author-only",
+        secret: fact.source.secret,
+        authorized: input.authorized !== false
+      });
+      if (!visibility.allowed) { excluded.push({ id: fact.id, reason: visibility.reason }); return false; }
+      return true;
+    }
+    const claim = memoryClaimById.get(fact.id);
+    if (!claim) { excluded.push({ id: fact.id, reason: "MEMORY_CLAIM_NOT_FOUND" }); return false; }
+    if (claim.status !== "eligible") { excluded.push({ id: fact.id, reason: `MEMORY_CLAIM_STATUS_${claim.status.toUpperCase()}` }); return false; }
+    const sourceVisibility = claim.epistemicType === "author_truth" ? "author-only" as const : claim.epistemicType === "reader_known" ? "reader-visible" as const : "public" as const;
+    const visibility = evaluateMemoryVisibility({ audience: input.audience || "author", epistemicType: claim.epistemicType, sourceVisibility, authorized: input.authorized !== false });
+    if (!visibility.allowed) { excluded.push({ id: fact.id, reason: visibility.reason }); return false; }
+    if (input.targetEvent) {
+      const temporal = evaluateMemoryClaimTemporal({ claim, targetEvent: input.targetEvent, eventOrder: authoritativeEventOrder });
+      if (temporal.status !== "active") { excluded.push({ id: fact.id, reason: temporal.reason }); return false; }
+    }
+    if (input.audience === "reader") {
+      if (!input.readerScope || !input.publicationVersion || !input.readerProgressCursor) { excluded.push({ id: fact.id, reason: "READER_QUERY_BOUNDARY_REQUIRED" }); return false; }
+      const eligibility = evaluateReaderKnowledge({ states: readerKnowledge, readerScope: input.readerScope, claimId: claim.claimId, publicationVersion: input.publicationVersion, progressCursor: input.readerProgressCursor });
+      if (!eligibility.eligible) { excluded.push({ id: fact.id, reason: "READER_KNOWLEDGE_REQUIRED" }); return false; }
+    }
+    if (input.audience === "character") {
+      if (!input.characterId || !input.targetEvent) { excluded.push({ id: fact.id, reason: "CHARACTER_QUERY_BOUNDARY_REQUIRED" }); return false; }
+      const eligibility = evaluateCharacterKnowledge({ states: characterKnowledge, characterId: input.characterId, claimId: claim.claimId, targetEvent: input.targetEvent, eventOrder: authoritativeEventOrder });
+      if (!eligibility.eligible) { excluded.push({ id: fact.id, reason: "CHARACTER_KNOWLEDGE_REQUIRED" }); return false; }
+    }
+    return true;
+  });
   const persistedVectorIndex = await readKnowledgeVectorIndex(root, project);
+  if (persistedVectorIndex.entries.length) {
+    const vectorUpdatedAt = Date.parse(persistedVectorIndex.updatedAt);
+    if (!Number.isFinite(vectorUpdatedAt) || vectorUpdatedAt < latestProjectionTimestamp(index)) throw new Error("KNOWLEDGE_VECTOR_INDEX_STALE");
+  }
   const vectorIndex = persistedVectorIndex.entries.length
     ? persistedVectorIndex
     : await buildKnowledgeVectorIndex(project, index.facts, index.triples, index.chapterIndex, index.updatedAt);
-  const queryVector = await vectorizeQueryForIndex(vectorIndex, query, tokens);
+  const queryEmbedding = await vectorizeQueryForIndex(vectorIndex, query, tokens);
+  const queryVector = queryEmbedding.vector;
   const vectorScores = vectorIndex.entries.reduce((scores, entry) => {
     scores.set(entry.id, cosineScore(queryVector, entry.vector));
     return scores;
@@ -725,7 +806,7 @@ export async function searchKnowledgeIndex(
     }
   };
 
-  const facts = index.facts
+  const facts = eligibleFacts
     .map((fact) => {
       const chapterBoost = targetChapterId && fact.chapterIds.includes(targetChapterId) ? 0.25 : 0;
       const vectorScore = vectorScores.get(fact.id) || 0;
@@ -734,7 +815,7 @@ export async function searchKnowledgeIndex(
       return { ...fact, score, vectorScore };
     })
     .filter((fact) => fact.score > 0 || (fact.vectorScore || 0) >= vectorMatchThreshold)
-    .sort((left, right) => right.score - left.score || (right.vectorScore || 0) - (left.vectorScore || 0) || left.id.localeCompare(right.id))
+    .sort((left, right) => evidenceQualityPriority(factQuality(right)) - evidenceQualityPriority(factQuality(left)) || right.score - left.score || (right.vectorScore || 0) - (left.vectorScore || 0) || left.id.localeCompare(right.id))
     .slice(0, limit);
 
   const triples = index.triples
@@ -746,7 +827,7 @@ export async function searchKnowledgeIndex(
       return { ...triple, score, vectorScore };
     })
     .filter((triple) => triple.score > 0 || (triple.vectorScore || 0) >= vectorMatchThreshold)
-    .sort((left, right) => right.score - left.score || (right.vectorScore || 0) - (left.vectorScore || 0) || left.id.localeCompare(right.id))
+    .sort((left, right) => tripleQuality(right) - tripleQuality(left) || right.score - left.score || (right.vectorScore || 0) - (left.vectorScore || 0) || left.id.localeCompare(right.id))
     .slice(0, limit);
 
   const chapters = index.chapterIndex.chapters
@@ -769,5 +850,59 @@ export async function searchKnowledgeIndex(
     )
     .slice(0, limit);
 
-  return { query, tokens, vectorSummary: summarizeVectorIndex(vectorIndex), facts, triples, chapters };
+  const selectedIds = [
+    ...facts.map((fact) => fact.id),
+    ...triples.map((triple) => triple.id),
+    ...chapters.map((chapter) => chapter.chapterId)
+  ];
+  const evidenceSourceIds = [...new Set([
+    ...facts.map((fact) => fact.source.id),
+    ...triples.flatMap((triple) => triple.sourceFactIds)
+  ])].sort();
+  const evidenceProfile = buildKnowledgeEvidenceProfile({
+    facts: index.facts,
+    triples: index.triples,
+    selectedIds,
+    excluded,
+    canonicalSourceIds: [...canonicalClaimIds]
+  });
+  const retrievalAuditBase = {
+    schemaVersion: "knowledge-retrieval-audit.v1" as const,
+    boundary: {
+      query,
+      ...(input.task ? { task: input.task } : {}),
+      ...(input.chapterId ? { chapterId: input.chapterId } : {}),
+      ...(input.targetEvent ? { targetEvent: input.targetEvent } : {}),
+      audience: input.audience || "author",
+      ...(input.visibility ? { visibility: input.visibility } : {}),
+      authorized: input.authorized !== false,
+      ...(input.readerScope ? { readerScope: input.readerScope } : {}),
+      ...(input.publicationVersion ? { publicationVersion: input.publicationVersion } : {}),
+      ...(input.readerProgressCursor ? { readerProgressCursor: input.readerProgressCursor } : {}),
+      ...(input.characterId ? { characterId: input.characterId } : {})
+    },
+    eligibleFactIds: eligibleFacts.map((fact) => fact.id),
+    excluded,
+    selectedIds,
+    evidenceSourceIds,
+    evidenceSourceCount: evidenceSourceIds.length,
+    evidenceProfile,
+    vectorSummary: summarizeVectorIndex(vectorIndex)
+  };
+  const retrievalAudit = {
+    ...retrievalAuditBase,
+    resultFingerprint: crypto.createHash("sha256").update(JSON.stringify(retrievalAuditBase)).digest("hex")
+  };
+
+  return {
+    query,
+    tokens,
+    vectorSummary: summarizeVectorIndex(vectorIndex),
+    queryEmbeddingFallback: queryEmbedding.fallback,
+    retrievalAudit,
+    facts,
+    triples,
+    chapters,
+    excluded
+  };
 }

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "slice-acceptance-audit.v1",
+  "auditId": "rp4-outline-research-slice-2026-07-31",
+  "sourceSdd": "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+  "releaseProfile": "RP4-outline",
+  "status": "partial-implementation-verified",
+  "scope": {
+    "mustRequirements": ["FR-RESEARCH-001", "FR-RESEARCH-002", "FR-RESEARCH-003", "FR-RESEARCH-004"],
+    "verifiedRequirements": [],
+    "unverifiedRequirements": "The research slice has implementation and API evidence, but does not claim full RP4 release verification: obligation extraction from every asset, source reliability adjudication, conflict/time validity, fact checking, and stale settlement still require end-to-end evidence."
+  },
+  "verifiedSlices": [
+    {
+      "sliceId": "RP4-research-source-snapshot-isolation-and-immutability",
+      "requirements": ["FR-RESEARCH-001", "FR-RESEARCH-002", "FR-RESEARCH-004"],
+      "implementationRefs": ["api/src/researchGrounding.ts", "api/src/app.ts"],
+      "tests": ["api/src/researchGrounding.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: risk/truth-boundary obligations, sanitized source snapshots, canonicalized tracking-free locators, rights rejection, immutable source/consumption persistence, read-back, conflicting rewrite rejection, API claim assessment, high-risk settlement blocking, source revocation, claim correction, affected-receipt stale propagation, publication-gate blocking, and outline/prose/chapter-settlement/derived-publication write-path enforcement"
+    },
+    {
+      "sliceId": "RP4-research-conflict-adjudication",
+      "requirements": ["FR-RESEARCH-002", "FR-RESEARCH-003", "FR-RESEARCH-004"],
+      "implementationRefs": ["api/src/researchConflict.ts", "api/src/app.ts"],
+      "tests": ["api/src/researchConflict.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: conflict cases require distinct claims/sources and traceable evidence; resolution can select only a participating claim or explicitly waive with rationale; immutable open cases remain unchanged while resolution events are persisted separately and returned by the API"
+    },
+    {
+      "sliceId": "RP4-research-source-reliability-adjudication",
+      "requirements": ["FR-RESEARCH-002", "FR-RESEARCH-003"],
+      "implementationRefs": ["api/src/researchReliability.ts", "api/src/app.ts"],
+      "tests": ["api/src/researchReliability.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: required primary reliability signals are explicit, copied content is excluded from independent corroboration, independent source IDs are deterministic, and the API returns an auditable eligible/insufficient assessment without changing source authority"
+    },
+    {
+      "sliceId": "RP4-research-fact-check-evidence-anchor",
+      "requirements": ["FR-RESEARCH-003", "FR-RESEARCH-004"],
+      "implementationRefs": ["api/src/researchFactCheck.ts", "api/src/app.ts"],
+      "tests": ["api/src/researchFactCheck.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: fact-checking requires a source-matching evidence anchor and an excerpt present in the frozen sanitized source; missing, mismatched, or unsupported excerpts are blocked and never inferred as supported"
+    },
+    {
+      "sliceId": "RP4-research-high-risk-settlement-fact-check-gate",
+      "requirements": ["FR-RESEARCH-004"],
+      "implementationRefs": ["api/src/researchGrounding.ts", "api/src/app.ts"],
+      "tests": ["api/src/researchGrounding.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: high-risk research consumption cannot settle without an explicitly supported fact-check result; missing or blocked fact checks fail closed, while current claims with supported fact checks settle normally"
+    },
+    {
+      "sliceId": "RP4-research-stale-assessment-propagation",
+      "requirements": ["FR-RESEARCH-003", "FR-RESEARCH-004"],
+      "implementationRefs": ["api/src/researchGrounding.ts", "api/src/app.ts"],
+      "tests": ["api/src/researchGrounding.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: expired/contested claim assessments propagate to all matching consumption receipts, preserve stronger prior stale decisions such as source revocation, and do not touch unrelated receipts"
+    }
+  ],
+  "verification": {
+    "targetedTests": "passed: researchGrounding 17/17; researchConflict 3/3; researchReliability 3/3; researchFactCheck 2/2; app suite 151/151 including research-source, reliability, fact-check, high-risk settlement, stale propagation, claim, conflict adjudication, consumption, correction, revocation, publication-gate and adoption enforcement tests",
+    "appSuite": "2 unrelated existing tests intermittently failed with fetch bad-port during full app-suite parallel lifecycle; the same suite has passed fully in prior runs and the new targeted tests pass",
+    "notYetProven": ["RP4 full 83-requirement release acceptance", "obligation extraction from every asset and research propagation coverage at full-project scale", "publication integration with any future write path not covered by current outline/prose/chapter-settlement/derived-publication routes"]
+  },
+  "nextGate": "Run the RP4 phase acceptance against the full 83-requirement profile; retain RP4 as unverified until complete implementation, author and release evidence exists."
+}

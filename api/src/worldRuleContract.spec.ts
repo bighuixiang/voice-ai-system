@@ -4,6 +4,8 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createWorldRuleContract,
+  assertWorldRuleContractIntegrity,
+  listWorldRuleContracts,
   evaluateWorldRuleApplicability,
   readWorldRuleContract,
   type WorldRuleContractInput
@@ -81,5 +83,17 @@ describe("WorldRuleContract", () => {
     const first = await createWorldRuleContract(root, validInput(), { persist: false });
     const second = await createWorldRuleContract(root, validInput(), { persist: false });
     expect(second.contract.ruleId).toBe(first.contract.ruleId);
+  });
+
+  it("fails closed when a persisted world rule is tampered", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "world-rule-tamper-"));
+    roots.push(root);
+    const result = await createWorldRuleContract(root, validInput());
+    const target = path.join(root, "sessions", "world-rule-contracts", `${result.contract.ruleId}.json`);
+    const tampered = { ...result.contract, proposition: { ...result.contract.proposition, cost: "free" }, fingerprint: "f".repeat(64) };
+    await fs.writeFile(target, JSON.stringify(tampered), "utf8");
+    await expect(readWorldRuleContract(root, result.contract.ruleId)).rejects.toThrow("WORLD_RULE_CONTRACT_INTEGRITY_FAILED");
+    await expect(listWorldRuleContracts(root)).rejects.toThrow("WORLD_RULE_CONTRACT_INTEGRITY_FAILED");
+    expect(() => assertWorldRuleContractIntegrity(tampered, result.contract.ruleId)).toThrow("WORLD_RULE_CONTRACT_INTEGRITY_FAILED");
   });
 });

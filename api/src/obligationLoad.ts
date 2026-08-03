@@ -10,7 +10,7 @@ export async function buildObligationLoadReport(root: string, projectSlug: strin
   for (const item of open) { byImportance[item.importance] += 1; byType[item.type] = (byType[item.type] || 0) + 1; }
   const weightedLoad = byImportance.low + byImportance.medium * 2 + byImportance.high * 3;
   const recommendations: string[] = []; if (weightedLoad >= 8) recommendations.push("spread obligations across multiple windows before adding more high-impact items"); if (byImportance.high >= 3) recommendations.push("spread high-importance obligations and assign explicit recovery windows"); if (open.length > 0 && !chapterIds.length) recommendations.push("attach open obligations to a chapter window before execution");
-  const status = weightedLoad >= 8 ? "blocked" : weightedLoad >= 4 ? "watch" : "stable";
+  const status: ObligationLoadReport["status"] = weightedLoad >= 8 ? "blocked" : weightedLoad >= 4 ? "watch" : "stable";
   const base = { schemaVersion: "obligation-load-report.v1" as const, projectSlug, windowChapterIds: [...chapterIds], openObligationCount: open.length, weightedLoad, byImportance, byType, recommendations, status, canClaimNoOpenObligations: false as const, generatedAt: new Date().toISOString() };
   return { ...base, fingerprint: hash(base) };
 }

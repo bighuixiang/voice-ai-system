@@ -14,4 +14,11 @@ describe("text integrity", () => {
     expect(verifyTextRoundTrip("plain\u0000text", profile)).toMatchObject({ status: "blocked" });
     expect(verifyTextRoundTrip("plain\u0000text", profile).diagnostics).toContain("nul-byte");
   });
+
+  it("blocks profile semantic drift even when the source bytes are unchanged", () => {
+    const content = "# Chapter\n\n```json\n{\"x\":1}\n```\n";
+    const profile = buildTextProfile(content);
+    expect(verifyTextRoundTrip(content, { ...profile, trailingNewline: false }).diagnostics).toContain("trailing-newline-profile-mismatch");
+    expect(verifyTextRoundTrip(content, { ...profile, protectedBlocks: 0 }).diagnostics).toContain("protected-block-profile-mismatch");
+  });
 });

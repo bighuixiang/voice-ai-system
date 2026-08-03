@@ -7,59 +7,275 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/executionDispatcher.ts",
-      "sha256": "a29abfa64191a58d4fe19738f33d46943e8b4382c1af006bfb53c8ec47aa55bd"
+      "sha256": "ec9abdab181b56deec4738aed1670996281c8f2d77d8b40a114fec95e589ee54"
+    },
+    {
+      "path": "api/src/executionQueue.ts",
+      "sha256": "364f80b71442239fcf8bc95fcb706782470ef2c214aa1f92200850f7665ebd7e"
+    },
+    {
+      "path": "api/src/workLease.ts",
+      "sha256": "0bbd3762c744c92617e7d67b814731f963b83488880f71101f412a6969843d07"
+    },
+    {
+      "path": "api/src/runtimeStageReceipt.ts",
+      "sha256": "75524e9cd4f7c64f67ce713f04dc7559893a33d363fead8e5c4ceeb2d6d4d034"
+    },
+    {
+      "path": "api/src/runtimeStageReceipt.spec.ts",
+      "sha256": "7834f7d470f74dbb525071dc8e11fed8670d12adb7c2906b6af9240508bf3e91"
+    },
+    {
+      "path": "api/src/runtimeStageOutput.ts",
+      "sha256": "026697426ed86de4135b3e6c885995f4e44871c9a5932d1c0547842ad4846692"
+    },
+    {
+      "path": "api/src/runtimeStageOutput.spec.ts",
+      "sha256": "81244b59db116b668a70d96583e45a010076e7b2e95bf239bd2fcaea84d245be"
+    },
+    {
+      "path": "api/src/runtime.spec.ts",
+      "sha256": "ec2a54a79fc22ec6328746d07388cc028f35e82cfc45b543211479335540293d"
     },
     {
       "path": "api/src/runtimeEngine.ts",
-      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      "sha256": "232bd54d3d76d340af9787f1ea5c522966499e7dad92da82faa24dfaa66b6572"
+    },
+    {
+      "path": "api/src/writingCockpit.ts",
+      "sha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6"
+    },
+    {
+      "path": "api/src/storyGraph.ts",
+      "sha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371"
+    },
+    {
+      "path": "api/src/runtimeRecovery.ts",
+      "sha256": "46a237b416706f7fec98bb55509dd3380ad994702b8e1c4154220dad77d4d8c4"
+    },
+    {
+      "path": "api/src/runtimeRecovery.spec.ts",
+      "sha256": "fafc06178e72484ed94a9586c0f2c7f74d313b4083a28809e888652b91e7a9e9"
+    },
+    {
+      "path": "api/src/runtimeCompensation.ts",
+      "sha256": "0b3e38f77be1d2c00580fe8fe30cde28e4aa0bec1bc1f910ef95ff218b2eca02"
+    },
+    {
+      "path": "api/src/runtimeCompensation.spec.ts",
+      "sha256": "e6e3c1af23f0b11440f24fe818b9627488381d4579a19a903202ec1ed08ba1f4"
+    },
+    {
+      "path": "api/src/chapterSettlement.ts",
+      "sha256": "b81d37cfe936d3f8db2a33ec79314833b0b72c2f28c63e64ce78e208d8b87f4d"
+    },
+    {
+      "path": "api/src/chapterSettlement.spec.ts",
+      "sha256": "868a933a2f7547c547ce2a0550200819b17452a00c87b20d5f4e686bc43d24a4"
+    },
+    {
+      "path": "api/src/chapterSettlementProjectionClosure.ts",
+      "sha256": "b3f40a67840fd35c2d3791db33e38c25743368f64160759371f6e76984dbde3a"
+    },
+    {
+      "path": "api/src/chapterSettlementProjectionClosure.spec.ts",
+      "sha256": "40cff2bb20636a9b28e63db0599fe26544434da7899d547c796873a484b627dc"
+    },
+    {
+      "path": "api/src/derivedPublication.ts",
+      "sha256": "c98d338a54807b63d0f634b83f3be3dae4032de0961c9cf413378e2ee9ef726d"
+    },
+    {
+      "path": "api/src/derivedPublication.spec.ts",
+      "sha256": "6ba615533040a239d164ee308f83e92dcf0d885d2b58f681e11cb53c4771e274"
+    },
+    {
+      "path": "api/src/bookWorkGraph.ts",
+      "sha256": "2c75e5cc4be97b81a24cc22db33fc90ac5ced5575d218f96cabbacf882c74343"
+    },
+    {
+      "path": "api/src/bookWorkGraph.spec.ts",
+      "sha256": "e7a4a0415102eab7b765794036704b4767446d5badbb3d611389624c00fd4020"
+    },
+    {
+      "path": "api/src/bookRunClosure.ts",
+      "sha256": "bcdcf4b2ba6a237bd85bdd804c503e02f6c16d8d2491765f26b1aafc03e01175"
+    },
+    {
+      "path": "api/src/bookRunClosure.spec.ts",
+      "sha256": "d7845e3eac8182111ddf0411963b0bd149f762715ea0736f9c497f188d3aa314"
+    },
+    {
+      "path": "api/src/bookRunInvalidation.ts",
+      "sha256": "37d844207b53536e8e6e7f74365aae5b287a879442c4d3ae137c69f38671e7f6"
+    },
+    {
+      "path": "api/src/bookRunInvalidation.spec.ts",
+      "sha256": "cab6557f2c1ff816a636c291a1d54bc1677c95b3d47915b88f8988d5770ccab6"
+    },
+    {
+      "path": "api/src/bookRunImpact.ts",
+      "sha256": "751765826deac6fad11ffcc7c09a33a605072a739a42e576d81daf715b3e64ca"
+    },
+    {
+      "path": "api/src/bookRunImpact.spec.ts",
+      "sha256": "7ff51975c372245c18d8b37d68eb4bf9bc71016af241f4e10003cca7c9905cbd"
+    },
+    {
+      "path": "api/src/milestoneRepairPlan.ts",
+      "sha256": "4942bd1590a5b69fda70e3a7fe68d15976e2ea4cd51927e7f693782ca30bb04c"
+    },
+    {
+      "path": "api/src/milestoneRepairPlan.spec.ts",
+      "sha256": "0b01dd76463fdbd827c525f98fb2ed1c5cabe385c0dedaa3526f498ae7f679ce"
+    },
+    {
+      "path": "api/src/milestoneRepairCompletion.ts",
+      "sha256": "69479d05bba87d6e4b06aa6d6629b856e85a55da778381efb91f12ee84867268"
+    },
+    {
+      "path": "api/src/milestoneRepairCompletion.spec.ts",
+      "sha256": "82e11ca862038c3e2d8cd181473f9cc151e72bd811c98d67ab94cf2b91b503dc"
+    },
+    {
+      "path": "api/src/milestoneAudit.ts",
+      "sha256": "9c52536058d5c82fa16bd547987ba77d8381ec5d53a5f6793103f1254d7d7467"
+    },
+    {
+      "path": "api/src/milestoneAudit.spec.ts",
+      "sha256": "c81a275732f03f4078ea35bfe9eb89b98d0b1a3d08bccf828083c69e57b9d6c0"
+    },
+    {
+      "path": "api/src/milestoneRepairPolicy.ts",
+      "sha256": "1fb0cd6e6bfe55d0cb30bf8355a843ef45e5e606ad7da0999f436bd55a9f0fa5"
+    },
+    {
+      "path": "api/src/milestoneRepairPolicy.spec.ts",
+      "sha256": "80c0a569c44472172557309db3c3869426477be68a96adf4996ee5e0cc12f84e"
+    },
+    {
+      "path": "api/src/bookWorkScheduler.ts",
+      "sha256": "b2295bfe40fd28d86f6111738ab51aabbad53b3bfe5b1a78603a569f9fffe508"
     },
     {
       "path": "api/src/runtimeSnapshot.ts",
-      "sha256": "0a2cda33d0d1fe4859b7583314a25c64b406d3a2603090232a4f2c3b6654c8b6"
+      "sha256": "e006e4dae47be7762cbe32d5e5882c7a6fcc392106dd825684a81eac071db4e2"
     },
     {
       "path": "api/src/runtimeStore.ts",
-      "sha256": "575cc0dfa899d35ade781b8c8498e6db8d81d50914433731f49beb2cac6492a5"
+      "sha256": "aee9cf825fb26f972a8e5f7bba5598b1adf8f68c203b3b6016c2cc35f6e722ad"
     },
     {
       "path": "api/src/runtimeWorker.ts",
-      "sha256": "f475c301b1bcd34add67000049015651b41ee75c89fb06fe99a410dbdeb89174"
+      "sha256": "1f13c1147e953cb860b1f505ccedc8fa5cf348a9e4a62d6d29b25159cf2a2a01"
+    },
+    {
+      "path": "api/src/runtimeWorker.spec.ts",
+      "sha256": "e622aaccb462435ae59cd2e51b05acad0d4f42fbd6449d056bff7841d3023831"
+    },
+    {
+      "path": "api/src/runtimeControlBoundary.ts",
+      "sha256": "7e63380735126865a734708b3001a2352be6371b0aadd8dfbf25bdf5bb291eba"
+    },
+    {
+      "path": "api/src/runtimeControlBoundary.spec.ts",
+      "sha256": "5d1e5e997a42438d5712196396e2771848c23f709f2eb1ea5c863af2134fc7db"
+    },
+    {
+      "path": "api/src/runtimeMutationDrain.ts",
+      "sha256": "ca174d3a9a7458c2c537a527b280f8802ac7bc6cd862480971580ab99ab85081"
+    },
+    {
+      "path": "api/src/runtimeMutationDrain.spec.ts",
+      "sha256": "22ce2f81e50985b147a5b79091f229bf709ddc7f0f890f72dc8143a7e5af8546"
+    },
+    {
+      "path": "api/src/codexRunner.ts",
+      "sha256": "978e30f08368951ed9cf0eb9f7d640cf870a950ab109cba73bfb37ee08454596"
+    },
+    {
+      "path": "api/src/frozenPublicationScope.ts",
+      "sha256": "cad281f29ed1961bfe54eaa2b8c0d5df17225d843c2e572c20344f0631f1f619"
+    },
+    {
+      "path": "api/src/frozenPublicationScope.spec.ts",
+      "sha256": "5fc86624e890f9bacedbbf68801cbd76c12246d9b59236accf036cf8ff4ea462"
+    },
+    {
+      "path": "api/src/publicationDependencyGraph.ts",
+      "sha256": "2b7431608b5ba62974f841c380a3ee8ee7c1aada507f3484a20ab52accc5c60c"
+    },
+    {
+      "path": "api/src/publicationDependencyGraph.spec.ts",
+      "sha256": "ac8e26d619f00ec6724fd4fe0e837886c55e898d70337f434bc691eb3922ae42"
     },
     {
       "path": "api/src/bookRun.ts",
-      "sha256": "d3075bb1d598f7b1cec68b28e7690ed54abf94155241072df86c08984dcc755c"
+      "sha256": "4f63d72bd45198db809f4ef52dce5e05bee43ea09d30cb02a1cd731d2a106cac"
+    },
+    {
+      "path": "api/src/bookRun.spec.ts",
+      "sha256": "6fb6582c4d171cc30a64cfd13b358df3151dcb22858e11b92e0444233b9ef166"
+    },
+    {
+      "path": "api/src/runReadiness.ts",
+      "sha256": "19785ee60b9ec51eb46179bed1c2b9a6f4e37de4f2477b927f443509302e043d"
+    },
+    {
+      "path": "api/src/runReadiness.spec.ts",
+      "sha256": "7f6c5ac395f934b59454d6d9293e791f9a2b6593a1d646e6a624883c77b9251f"
+    },
+    {
+      "path": "api/src/budgetReservation.ts",
+      "sha256": "bf7cf1b225ad86f01eb3bbe187a238756010b2359c10108995d330af55966e60"
+    },
+    {
+      "path": "api/src/modelInvocationLedger.ts",
+      "sha256": "a2d37ae1f32a07eb098a9c5c9c9467343ba0e1d433d97609678f8a6059666892"
+    },
+    {
+      "path": "api/src/modelInvocationLedger.spec.ts",
+      "sha256": "da3bbfce3bed3ee50f46879c42852627311a9a9b3f3f3f4be0be396ae3a58bcb"
+    },
+    {
+      "path": "api/src/modelInvocationAuthority.ts",
+      "sha256": "3a217e26603729abfed3ea85621d7dcda767c60d1dbb1bbc5e0c214a2d91320a"
+    },
+    {
+      "path": "api/src/modelInvocationSettlement.ts",
+      "sha256": "78dd7eeebf58ff0914f6a55b5f8e76ae376f88f9e3ad971d1bec941fbadbd5ba"
     },
     {
       "path": "api/src/quiescenceProof.ts",
-      "sha256": "afdcbb424a3151e331bfa25612c274f5299cbb7620c2278c3f6e773b3cc5bdcc"
+      "sha256": "670883742762f8186ece744be4656b2c35da873294035d3ae58e96c9a142a9b4"
     },
     {
       "path": "api/src/completionAudit.ts",
-      "sha256": "a7962c88ebe1ecc3f97c6cf414a950c6edf33abd3c6a1d481ac4ca86ba0f3f42"
+      "sha256": "25906984b25b989d551183b54c6a3213cf19e26d419ceadf46a1945d2973c771"
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
-      "sha256": "01d4ff436dbee1f27f12aef0b253e2e53f723ae417ca6b983d879328e076b31e"
+      "sha256": "bd132dfa75571bcf6ee6bdd7149441465d6e8520f4c83b0009dab9e823d85aa9"
     },
     {
       "path": "ui/src/services/novelApi.ts",
-      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+      "sha256": "63b05fc817df12c8cb5e22ed42a3889f2ca62ed6a9cdf78d10e7fd3d5a9bfb5a"
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     },
     {
       "path": "ui/src/types/novel.ts",
-      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+      "sha256": "8b40b4f8361cfddaee5bbc1bc946530c5391fe3045d27c4e62dfe5b62629ff24"
     }
   ],
   "privacy": {
@@ -87,16 +303,16 @@
     "substantialInventoryThresholdChars": 800,
     "runtimeOperationalBaselineRef": "docs/spec-governance/audits/current-q003-operational-baseline.json",
     "totals": {
-      "projects": 8,
-      "chapters": 219,
+      "projects": 11,
+      "chapters": 222,
       "chapterStatuses": {
         "drafted": 70,
-        "empty": 21,
+        "empty": 24,
         "planned": 128
       },
       "substantialChapters": 71,
       "qualityReports": 2,
-      "chapterSummariesWithSignal": 1,
+      "chapterSummariesWithSignal": 2,
       "ledgerEntries": 0,
       "bookRuns": 0,
       "workGraphs": 0,
@@ -110,7 +326,7 @@
       {
         "projectOrdinal": 1,
         "inputFingerprints": {
-          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "project": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676",
           "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af"
         },
         "parseHealth": {
@@ -227,6 +443,89 @@
       {
         "projectOrdinal": 5,
         "inputFingerprints": {
+          "project": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 1,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": null,
+          "chapterContentAggregate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 0,
+          "statuses": {},
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": null,
+          "chapterContentAggregate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "projectValid": true
+        },
+        "chapters": {
+          "total": 0,
+          "statuses": {},
+          "substantialAtLeast800Chars": 0
+        },
+        "downstreamEvidenceInventory": {
+          "qualityReports": 0,
+          "chapterSummariesWithSignal": 0,
+          "ledgerEntries": 0,
+          "bookRuns": 0,
+          "workGraphs": 0,
+          "workItems": 0,
+          "chapterSettlements": 0,
+          "completionProofs": 0,
+          "completionAudits": 0,
+          "quiescenceProofs": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
           "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
         },
@@ -254,7 +553,7 @@
         }
       },
       {
-        "projectOrdinal": 6,
+        "projectOrdinal": 9,
         "inputFingerprints": {
           "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
@@ -283,7 +582,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": {
           "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4"
@@ -312,7 +611,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": {
           "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
           "chapterContentAggregate": "2d36728f3a770439d66fd3730878e502a4bf53f4c0dbe03aad5931804ad9d63d"
@@ -345,8 +644,8 @@
   },
   "summary": {
     "auditedStages": 15,
-    "projectsScanned": 8,
-    "chaptersInventoried": 219,
+    "projectsScanned": 11,
+    "chaptersInventoried": 222,
     "chaptersMarkedChecked": 0,
     "substantialChapters": 71,
     "bookRuns": 0,
@@ -357,22 +656,817 @@
     "implementationVerified": false
   },
   "rootCause": {
-    "statement": "The platform has a durable command queue around one eager single-chapter mutation pipeline, but no durable full-book authority that freezes publication scope, materializes dependencies, distinguishes candidate/adoption/settlement, schedules from settled evidence, or proves closure and completion.",
-    "consequence": "Continuous-chapter UI cannot safely continue, resume can repeat side effects, one project can block all controls, local readiness can be falsely green, and completed can mean one accepted run rather than one auditable finished novel."
+    "statement": "The platform now bridges continuous intent into a bounded durable BookRun/work graph, but it still lacks a complete full-book authority that freezes publication scope, proves every dependency settlement, and certifies closure and completion.",
+    "consequence": "Continuous intent can schedule governed work without treating one accepted chapter as a finished novel, but full-book readiness, repair, closure, quiescence, and audited completion remain unproven."
   },
   "currentEvidence": [
     {
-      "claim": "UI and API forward autoContinue, but runtime engine never consumes it.",
+      "claim": "UI continuous intent is bridged through a bounded BookRun and immediate graph advancement; the single-chapter runtime remains the dispatched worker.",
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 2417,
+          "line": 2545,
           "evidence": "autoContinue"
         },
         {
+          "path": "api/src/app.ts",
+          "line": 3068,
+          "evidence": "if (req.body?.autoContinue === true)"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 3099,
+          "evidence": "const advancement = await advanceBookRun"
+        }
+      ]
+    },
+    {
+      "claim": "Governed BookRun advancement now requires a current RunReadinessProof; missing, stale, or blocked evidence prevents dispatch.",
+      "evidence": [
+        {
+          "path": "api/src/bookRun.ts",
+          "line": 227,
+          "evidence": "BOOK_RUN_READINESS_REQUIRED"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 1663,
+          "evidence": "requireReadiness: true"
+        },
+        {
+          "path": "api/src/runReadiness.ts",
+          "line": 9,
+          "evidence": "run-readiness-proof.v1"
+        }
+      ]
+    },
+    {
+      "claim": "RunReadinessProof carries publication dependency-graph status and records dependency-graph-blocked or missing-dependency-graph reasons; the API derives that status from the persisted graph fingerprint before allowing advancement.",
+      "evidence": [
+        {
+          "path": "api/src/runReadiness.ts",
+          "line": 16,
+          "evidence": "dependencyGraphStatus"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 475,
+          "evidence": "readPublicationDependencyGraph"
+        },
+        {
+          "path": "api/src/bookRun.spec.ts",
+          "line": 111,
+          "evidence": "dependency graph proof is blocked"
+        },
+        {
+          "path": "api/src/runReadiness.spec.ts",
+          "line": 27,
+          "evidence": "publication dependency graph is blocked"
+        }
+      ]
+    },
+    {
+      "claim": "Execution work items persist scoped leases and runtime completion is fenced by the lease token, not only the run id.",
+      "evidence": [
+        {
+          "path": "api/src/executionQueue.ts",
+          "line": 31,
+          "evidence": "fencingToken"
+        },
+        {
+          "path": "api/src/workLease.ts",
+          "line": 26,
+          "evidence": "FENCING_TOKEN_LOST"
+        },
+        {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1203,
-          "evidence": "async function processStart"
+          "line": 1823,
+          "evidence": "executionWorkItem.fencingToken"
+        }
+      ]
+    },
+    {
+      "claim": "Runtime stage receipts reject terminal state regression and preserve the input fingerprint for replay decisions.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeStageReceipt.ts",
+          "line": 110,
+          "evidence": "RUNTIME_STAGE_TERMINAL"
+        },
+        {
+          "path": "api/src/runtimeStageReceipt.ts",
+          "line": 16,
+          "evidence": "inputFingerprint"
+        },
+        {
+          "path": "api/src/runtimeStageReceipt.spec.ts",
+          "line": 33,
+          "evidence": "keeps completed and failed receipts terminal"
+        }
+      ]
+    },
+    {
+      "claim": "Runtime startup records a deterministic first-unsettled-stage decision before executing the chapter pipeline.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeStageReceipt.ts",
+          "line": 77,
+          "evidence": "selectFirstUnsettledRuntimeStage"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 803,
+          "evidence": "Runtime stage recovery decision"
+        }
+      ]
+    },
+    {
+      "claim": "Checkpoint stage completion carries a fingerprint of its persisted manifest and late output changes are rejected.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeStageReceipt.ts",
+          "line": 17,
+          "evidence": "outputFingerprint"
+        },
+        {
+          "path": "api/src/runtimeStageReceipt.ts",
+          "line": 106,
+          "evidence": "RUNTIME_STAGE_OUTPUT_STALE"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 830,
+          "evidence": "manifest: writeCheckpoint.manifest"
+        }
+      ]
+    },
+    {
+      "claim": "Recovery reuses a checkpoint or narrative snapshot only when the receipt input, output reference, and output fingerprint all match the durable artifact.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 817,
+          "evidence": "checkpointReusable"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 839,
+          "evidence": "snapshotReusable"
+        },
+        {
+          "path": "api/src/runtimeStageReceipt.ts",
+          "line": 18,
+          "evidence": "outputRef"
+        }
+      ]
+    },
+    {
+      "claim": "Knowledge-index rebuild is reusable only when the persisted projection matches the completed receipt fingerprint and fixed output reference.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1383,
+          "evidence": "knowledgeReusable"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1385,
+          "evidence": "\"knowledge-index\""
+        },
+        {
+          "path": "api/src/runtimeStageReceipt.spec.ts",
+          "line": 53,
+          "evidence": "reuses a completed output only when input, fingerprint, and reference all match"
+        }
+      ]
+    },
+    {
+      "claim": "Chapter-plan task output is persisted as an immutable stage artifact and reused only after receipt verification.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeStageOutput.ts",
+          "line": 60,
+          "evidence": "RUNTIME_STAGE_OUTPUT_IMMUTABLE"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 880,
+          "evidence": "planReusable"
+        },
+        {
+          "path": "api/src/runtimeStageOutput.spec.ts",
+          "line": 8,
+          "evidence": "persists an immutable output"
+        }
+      ]
+    },
+    {
+      "claim": "Draft task output is persisted before downstream writes and can be recovered from a started or completed receipt without bypassing the write conflict fence.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 982,
+          "evidence": "draftReusable"
+        },
+        {
+          "path": "api/src/runtimeStageReceipt.ts",
+          "line": 63,
+          "evidence": "isRuntimeStageOutputAvailable"
+        },
+        {
+          "path": "api/src/runtime.spec.ts",
+          "line": 560,
+          "evidence": "Draft output persisted for recovery"
+        }
+      ]
+    },
+    {
+      "claim": "A quality report is reused only when its persisted content evidence and score meet the runtime target; failed or stale reports continue through evaluation and repair.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1119,
+          "evidence": "qualityReusable"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1331,
+          "evidence": "Quality report reused from receipt"
+        },
+        {
+          "path": "api/src/runtime.spec.ts",
+          "line": 535,
+          "evidence": "stage: \"quality_review\", status: \"completed\""
+        }
+      ]
+    },
+    {
+      "claim": "A recap candidate is persisted as an immutable stage output, reused only after receipt verification, and appended idempotently to the recap log.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1339,
+          "evidence": "recapReusable"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 28,
+          "evidence": "appendWritingRecapIfMissing"
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 998,
+          "evidence": "appendWritingRecapIfMissing"
+        },
+        {
+          "path": "api/src/runtime.spec.ts",
+          "line": 536,
+          "evidence": "stage: \"recap_and_ledger\", status: \"completed\""
+        }
+      ]
+    },
+    {
+      "claim": "A story-graph projection is persisted as an immutable stage output and reused only when both the receipt and the durable storyline projection match.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1418,
+          "evidence": "storyGraphReusable"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1444,
+          "evidence": "Story graph projection reused from receipt"
+        },
+        {
+          "path": "api/src/storyGraph.ts",
+          "line": 486,
+          "evidence": "writeStoryGraphProjection"
+        },
+        {
+          "path": "api/src/runtime.spec.ts",
+          "line": 538,
+          "evidence": "stage: \"story_graph_update\", status: \"completed\""
+        }
+      ]
+    },
+    {
+      "claim": "Content validation persists its continuity-check result and binds quality review to the verified validation output, avoiding duplicate deterministic/task validation after restart.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1087,
+          "evidence": "validationReusable"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1107,
+          "evidence": "Content validation reused from receipt"
+        },
+        {
+          "path": "api/src/runtime.spec.ts",
+          "line": 532,
+          "evidence": "stage: \"content_validate\", status: \"completed\""
+        }
+      ]
+    },
+    {
+      "claim": "Context assembly persists its final block set and binds the recovered context fingerprint/reference into the chapter-draft payload.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 904,
+          "evidence": "contextReusable"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 970,
+          "evidence": "contextOutputRef"
+        },
+        {
+          "path": "api/src/runtime.spec.ts",
+          "line": 534,
+          "evidence": "stage: \"context_assemble\", status: \"completed\""
+        }
+      ]
+    },
+    {
+      "claim": "A same-run recovery replay reuses durable context, draft, quality, recap, and story-graph outputs without duplicating the recap log.",
+      "evidence": [
+        {
+          "path": "api/src/runtime.spec.ts",
+          "line": 566,
+          "evidence": "reuses durable stage outputs on a same-run recovery"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 94,
+          "evidence": "stableKnowledgeFingerprint"
+        },
+        {
+          "path": "api/src/writingCockpit.ts",
+          "line": 998,
+          "evidence": "appendWritingRecapIfMissing"
+        }
+      ]
+    },
+    {
+      "claim": "Runtime knowledge references use deterministic identities, so snapshot/search reference projections are idempotent across recovery replay.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeStore.ts",
+          "line": 719,
+          "evidence": "knowref-${crypto.createHash"
+        },
+        {
+          "path": "api/src/runtime.spec.ts",
+          "line": 577,
+          "evidence": "firstKnowledgeRefs"
+        }
+      ]
+    },
+    {
+      "claim": "Runtime command failures persist a bounded retry decision and stagnation incident; transient failures requeue within budget while repeated work pauses for review.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeRecovery.ts",
+          "line": 9,
+          "evidence": "runtime-retry-receipt.v1"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1890,
+          "evidence": "Runtime failure scheduled for bounded retry"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1890,
+          "evidence": "Runtime paused after stagnation detection"
+        },
+        {
+          "path": "api/src/runtimeRecovery.spec.ts",
+          "line": 8,
+          "evidence": "persists a bounded retry decision"
+        }
+      ]
+    },
+    {
+      "claim": "Runtime command failures persist an explicit compensation plan and an idempotent application receipt with per-action effect evidence.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeCompensation.ts",
+          "line": 9,
+          "evidence": "runtime-compensation.v1"
+        },
+        {
+          "path": "api/src/runtimeCompensation.ts",
+          "line": 20,
+          "evidence": "runtime-compensation-application.v1"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 1887,
+          "evidence": "compensationApplicationFingerprint"
+        },
+        {
+          "path": "api/src/runtimeCompensation.spec.ts",
+          "line": 15,
+          "evidence": "applies every planned action"
+        }
+      ]
+    },
+    {
+      "claim": "Chapter settlement persists adoption, summary, obligation, projection, feedback, and cost evidence references, discovers durable ledger evidence, and strict callers fail closed when any non-waived reference is missing.",
+      "evidence": [
+        {
+          "path": "api/src/chapterSettlement.ts",
+          "line": 21,
+          "evidence": "evidenceFingerprint"
+        },
+        {
+          "path": "api/src/chapterSettlement.ts",
+          "line": 66,
+          "evidence": "discoverDerivedProjectionRef"
+        },
+        {
+          "path": "api/src/chapterSettlement.ts",
+          "line": 150,
+          "evidence": "sessions/model-invocations.jsonl"
+        },
+        {
+          "path": "api/src/chapterSettlement.ts",
+          "line": 159,
+          "evidence": "CHAPTER_SETTLEMENT_EVIDENCE_REQUIRED"
+        },
+        {
+          "path": "api/src/chapterSettlement.spec.ts",
+          "line": 102,
+          "evidence": "satisfy strict settlement from durable obligation"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 3594,
+          "evidence": "strictEvidence"
+        }
+      ]
+    },
+    {
+      "claim": "A committed derived publication emits an immutable projection-closure receipt linked to the chapter settlement; replay recreates the receipt without duplication.",
+      "evidence": [
+        {
+          "path": "api/src/chapterSettlementProjectionClosure.ts",
+          "line": 8,
+          "evidence": "chapter-settlement-projection-closure.v1"
+        },
+        {
+          "path": "api/src/derivedPublication.ts",
+          "line": 6,
+          "evidence": "recordChapterSettlementProjectionClosure"
+        },
+        {
+          "path": "api/src/derivedPublication.spec.ts",
+          "line": 11,
+          "evidence": "readChapterSettlementProjectionClosure"
+        },
+        {
+          "path": "api/src/chapterSettlementProjectionClosure.spec.ts",
+          "line": 19,
+          "evidence": "replays idempotently"
+        }
+      ]
+    },
+    {
+      "claim": "Evidence-bound chapter work items remain blocked until the projection-closure receipt exists; legacy settlement records without an evidence bundle remain backward-compatible.",
+      "evidence": [
+        {
+          "path": "api/src/bookWorkGraph.ts",
+          "line": 94,
+          "evidence": "closureRequired"
+        },
+        {
+          "path": "api/src/bookWorkGraph.ts",
+          "line": 5,
+          "evidence": "readChapterSettlementProjectionClosure"
+        },
+        {
+          "path": "api/src/bookWorkGraph.spec.ts",
+          "line": 48,
+          "evidence": "does not unlock an evidence-bound settlement"
+        },
+        {
+          "path": "api/src/chapterSettlement.spec.ts",
+          "line": 12,
+          "evidence": "ProjectionClosure"
+        }
+      ]
+    },
+    {
+      "claim": "BookRun exposes a closure-readiness state that separates scope completion, closure blocking, closure readiness, and audited completion, and revokes stale audited proof when source or closure evidence changes.",
+      "evidence": [
+        {
+          "path": "api/src/bookRunClosure.ts",
+          "line": 11,
+          "evidence": "BookRunClosureState"
+        },
+        {
+          "path": "api/src/bookRunClosure.ts",
+          "line": 28,
+          "evidence": "COMPLETION_AUDIT_STALE"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 1602,
+          "evidence": "closure-readiness"
+        },
+        {
+          "path": "api/src/bookRunClosure.spec.ts",
+          "line": 61,
+          "evidence": "revokes audited_complete"
+        }
+      ]
+    },
+    {
+      "claim": "Stale audited completion persists an idempotent invalidation receipt before reopening the run, preserving the affected evidence references and prior run version for replayable repair intake.",
+      "evidence": [
+        {
+          "path": "api/src/bookRunInvalidation.ts",
+          "line": 8,
+          "evidence": "book-run-invalidation.v1"
+        },
+        {
+          "path": "api/src/bookRunClosure.ts",
+          "line": 8,
+          "evidence": "recordBookRunInvalidation"
+        },
+        {
+          "path": "api/src/completionAudit.ts",
+          "line": 10,
+          "evidence": "recordBookRunInvalidation"
+        },
+        {
+          "path": "api/src/bookRunInvalidation.spec.ts",
+          "line": 9,
+          "evidence": "persists an immutable, idempotent receipt"
+        }
+      ]
+    },
+    {
+      "claim": "Stale audited completion also opens an idempotent impact subgraph that records the affected work items and chapters before repair reopening, so the repair scope can be replayed instead of inferred from mutable status.",
+      "evidence": [
+        {
+          "path": "api/src/bookRunImpact.ts",
+          "line": 7,
+          "evidence": "book-run-impact-subgraph.v1"
+        },
+        {
+          "path": "api/src/bookRunClosure.ts",
+          "line": 9,
+          "evidence": "recordBookRunImpactSubgraph"
+        },
+        {
+          "path": "api/src/completionAudit.ts",
+          "line": 11,
+          "evidence": "recordBookRunImpactSubgraph"
+        },
+        {
+          "path": "api/src/bookRunImpact.spec.ts",
+          "line": 9,
+          "evidence": "persists the scoped work-item and chapter impact deterministically"
+        }
+      ]
+    },
+    {
+      "claim": "Urgent pause, stop, and direction commands are claimed ahead of queued writing commands while preserving deterministic FIFO ordering within each priority class.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeStore.ts",
+          "line": 430,
+          "evidence": "CASE WHEN type IN ('pause', 'stop', 'direction')"
+        },
+        {
+          "path": "api/src/runtimeWorker.spec.ts",
+          "line": 49,
+          "evidence": "claims urgent control commands before an older queued writing command"
+        }
+      ]
+    },
+    {
+      "claim": "When an in-flight runtime reaches a pause or stop boundary, it aborts the active model task through AbortSignal where supported and persists a fingerprinted control-boundary acknowledgement before the command is finalized.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeControlBoundary.ts",
+          "line": 8,
+          "evidence": "runtime-control-boundary.v1"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 89,
+          "evidence": "activeRuntimeAbortControllers"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 57,
+          "evidence": "recordRuntimeControlBoundary"
+        },
+        {
+          "path": "api/src/codexRunner.ts",
+          "line": 80,
+          "evidence": "options?.signal"
+        },
+        {
+          "path": "api/src/runtimeControlBoundary.spec.ts",
+          "line": 8,
+          "evidence": "persists and replays a safe-boundary acknowledgement"
+        }
+      ]
+    },
+    {
+      "claim": "The same safe-boundary path records a mutation-drain receipt, explicitly distinguishing drained from blocked and listing any remaining mutation lease instead of claiming quiescence optimistically.",
+      "evidence": [
+        {
+          "path": "api/src/runtimeMutationDrain.ts",
+          "line": 7,
+          "evidence": "runtime-mutation-drain.v1"
+        },
+        {
+          "path": "api/src/runtimeEngine.ts",
+          "line": 58,
+          "evidence": "recordRuntimeMutationDrain"
+        },
+        {
+          "path": "api/src/runtimeMutationDrain.spec.ts",
+          "line": 15,
+          "evidence": "fails closed and records blocking leases"
+        }
+      ]
+    },
+    {
+      "claim": "BookRun creation persists a versioned FrozenPublicationScope with bound or explicitly unbound StoryContract, OutlineVersion, and obligation-coverage evidence fingerprints, and governed advancement verifies its scope fingerprint and chapter membership before accepting readiness evidence.",
+      "evidence": [
+        {
+          "path": "api/src/frozenPublicationScope.ts",
+          "line": 19,
+          "evidence": "FrozenPublicationScopeEvidenceBinding"
+        },
+        {
+          "path": "api/src/bookRun.ts",
+          "line": 91,
+          "evidence": "resolveScopeEvidence"
+        },
+        {
+          "path": "api/src/bookRun.ts",
+          "line": 232,
+          "evidence": "BOOK_RUN_FROZEN_SCOPE_STALE"
+        },
+        {
+          "path": "api/src/frozenPublicationScope.spec.ts",
+          "line": 18,
+          "evidence": "accepted evidence bindings"
+        }
+      ]
+    },
+    {
+      "claim": "The frozen scope now materializes a durable publication dependency graph with contract, outline, volume milestone, chapter, causality, and obligation ownership nodes; unresolved ownership, unbound coverage, cycles, duplicate edges, and out-of-scope causality nodes remain explicit blockers rather than guessed edges.",
+      "evidence": [
+        {
+          "path": "api/src/publicationDependencyGraph.ts",
+          "line": 16,
+          "evidence": "publication-dependency-graph.v1"
+        },
+        {
+          "path": "api/src/publicationDependencyGraph.ts",
+          "line": 14,
+          "evidence": "DEPENDENCY_CYCLE"
+        },
+        {
+          "path": "api/src/publicationDependencyGraph.ts",
+          "line": 14,
+          "evidence": "OUT_OF_SCOPE_NODE"
+        },
+        {
+          "path": "api/src/publicationDependencyGraph.spec.ts",
+          "line": 68,
+          "evidence": "blocks cycles and causality nodes outside"
+        }
+      ]
+    },
+    {
+      "claim": "Milestone repair failures persist typed, evidence-backed actions with preserveScope=true; BookRun exposes idempotent repair-plan creation and readback instead of silently shrinking scope.",
+      "evidence": [
+        {
+          "path": "api/src/milestoneRepairPlan.ts",
+          "line": 9,
+          "evidence": "milestone-repair-plan.v1"
+        },
+        {
+          "path": "api/src/milestoneRepairPlan.ts",
+          "line": 16,
+          "evidence": "preserveScope"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 1610,
+          "evidence": "repair-plans"
+        },
+        {
+          "path": "api/src/milestoneRepairPlan.spec.ts",
+          "line": 8,
+          "evidence": "typed repair actions"
+        }
+      ]
+    },
+    {
+      "claim": "Planned repair actions materialize as dependency-bound BookWorkItems and use work-item-specific scheduler idempotency keys, so repair and draft work in one chapter cannot collide.",
+      "evidence": [
+        {
+          "path": "api/src/bookWorkGraph.ts",
+          "line": 125,
+          "evidence": "kind: \"repair\""
+        },
+        {
+          "path": "api/src/bookWorkGraph.spec.ts",
+          "line": 83,
+          "evidence": "materializes typed repair actions"
+        },
+        {
+          "path": "api/src/bookWorkScheduler.ts",
+          "line": 42,
+          "evidence": "item.workItemId"
+        }
+      ]
+    },
+    {
+      "claim": "Repair action completion persists an immutable evidence-backed receipt and closes the corresponding repair work item only after receipt integrity and project scope validation.",
+      "evidence": [
+        {
+          "path": "api/src/milestoneRepairCompletion.ts",
+          "line": 8,
+          "evidence": "milestone-repair-completion.v1"
+        },
+        {
+          "path": "api/src/milestoneRepairCompletion.ts",
+          "line": 48,
+          "evidence": "MILESTONE_REPAIR_COMPLETION_IMMUTABLE"
+        },
+        {
+          "path": "api/src/bookWorkGraph.ts",
+          "line": 112,
+          "evidence": "completedRepairIds"
+        },
+        {
+          "path": "api/src/milestoneRepairCompletion.spec.ts",
+          "line": 9,
+          "evidence": "immutable idempotent completion receipt"
+        }
+      ]
+    },
+    {
+      "claim": "Milestone repair closure is independently replay-audited from the plan and completion receipts; BookRun closure and completion audits block until every in-scope repair plan has a passed milestone audit.",
+      "evidence": [
+        {
+          "path": "api/src/milestoneAudit.ts",
+          "line": 11,
+          "evidence": "milestone-audit.v1"
+        },
+        {
+          "path": "api/src/milestoneAudit.ts",
+          "line": 75,
+          "evidence": "auditMilestoneRepairsForRun"
+        },
+        {
+          "path": "api/src/bookRunClosure.ts",
+          "line": 35,
+          "evidence": "MILESTONE_AUDIT_REQUIRED"
+        },
+        {
+          "path": "api/src/completionAudit.ts",
+          "line": 73,
+          "evidence": "COMPLETION_MILESTONE_AUDIT_REQUIRED"
+        },
+        {
+          "path": "api/src/milestoneAudit.spec.ts",
+          "line": 15,
+          "evidence": "replays repair evidence"
+        }
+      ]
+    },
+    {
+      "claim": "Milestone audit applies kind-specific domain evidence adapters and dereferences explicit obligation coverage, character arc, project-scoped story projection, current memory artifacts, world-state snapshots, structured continuity ledgers, and narrative-curve pacing points; generic audit references cannot satisfy those policies by themselves.",
+      "evidence": [
+        {
+          "path": "api/src/milestoneRepairPolicy.ts",
+          "line": 9,
+          "evidence": "readNarrativeCurvePoint"
+        },
+        {
+          "path": "api/src/milestoneRepairPolicy.ts",
+          "line": 93,
+          "evidence": "MILESTONE_PACING_ARTIFACT_STALE"
+        },
+        {
+          "path": "api/src/milestoneAudit.spec.ts",
+          "line": 112,
+          "evidence": "dereferences a narrative curve point"
         }
       ]
     },
@@ -381,7 +1475,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1207,
+          "line": 1601,
           "evidence": "await runSingleChapterPipeline(run)"
         }
       ]
@@ -391,7 +1485,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1220,
+          "line": 1630,
           "evidence": "command.type === \"accept\""
         }
       ]
@@ -401,23 +1495,28 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 94,
+          "line": 118,
           "evidence": "return next || orderedChapters(project)[0]"
         }
       ]
     },
     {
-      "claim": "One global FIFO command is awaited to completion before another command can be claimed.",
+      "claim": "Runtime commands are claimed deterministically, with urgent control commands ahead of queued writing work and FIFO ordering within each priority class.",
       "evidence": [
         {
           "path": "api/src/runtimeStore.ts",
-          "line": 420,
-          "evidence": "ORDER BY created_at ASC LIMIT 1"
+          "line": 430,
+          "evidence": "CASE WHEN type IN ('pause', 'stop', 'direction')"
         },
         {
           "path": "api/src/runtimeWorker.ts",
-          "line": 55,
+          "line": 77,
           "evidence": "await processRuntimeCommand(command)"
+        },
+        {
+          "path": "api/src/runtimeWorker.spec.ts",
+          "line": 49,
+          "evidence": "claims urgent control commands before an older queued writing command"
         }
       ]
     },
@@ -426,12 +1525,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeSnapshot.ts",
-          "line": 257,
+          "line": 259,
           "evidence": "status: hasLedger || hasWritingRecap ? \"done\" : \"waiting\""
         },
         {
           "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
-          "line": 269,
+          "line": 268,
           "evidence": "if (props.activeRun.status === \"completed\") return 100"
         }
       ]
@@ -446,14 +1545,14 @@
     },
     {
       "id": "scope-and-outline-compile",
-      "current": "Project chapters and outline files provide a visible chapter list.",
-      "gap": "File/status presence does not prove causal coverage, required chapter set, volume milestones, terminal arc, or obligation ownership.",
+      "current": "BookRun now persists a versioned FrozenPublicationScope and a structurally validated dependency graph; readiness rejects missing, stale, mismatched, cyclic, duplicate, or out-of-scope graph evidence.",
+      "gap": "The graph now materializes bounded contract, outline, volume, milestone, chapter, and obligation nodes, but it does not yet compile the full accepted contract, terminal arc, or obligation ownership forecast across every source family.",
       "target": "Compile accepted story/outline nodes into a dependency graph with scope membership and evidence versions."
     },
     {
       "id": "readiness-and-budget",
-      "current": "A runtime start can be queued immediately.",
-      "gap": "No full-run call, token, cost, time, failure, chapter, storage, or review-load forecast and ceiling is frozen before work begins.",
+      "current": "RunReadinessProof and BudgetReservation are persisted; the proof now carries publication dependency-graph status, and governed BookRun advancement rejects missing, stale, or blocked graph evidence.",
+      "gap": "The proof still does not compile the full contract/outline/authority forecast or bind actual model-call settlement to every work item.",
       "target": "Issue RunReadinessProof and BudgetReservation or block with explicit missing evidence."
     },
     {
@@ -464,14 +1563,14 @@
     },
     {
       "id": "fair-scheduling-and-leases",
-      "current": "A transactional global FIFO claims one command at a time.",
-      "gap": "No project fairness, priority aging, resource class, write-set exclusion, lease expiry, fencing token, or per-project concurrency limit.",
+      "current": "Execution work items now persist a scoped WorkLease with owner, expiry, heartbeat and fencing token; runtime completion and heartbeat reject a stale token.",
+      "gap": "The scheduler now applies deterministic repair priority, aging, stable ordering, explicit dispatch ceilings, and resource-class allowlists/quotas; project-wide fairness and a complete lease registry across every BookWorkItem type remain open.",
       "target": "Schedule ready work fairly with scoped leases, heartbeats, fencing, budgets, and explicit blocked reasons."
     },
     {
       "id": "chapter-plan-and-context",
-      "current": "The pipeline runs chapter.plan, then assembles draft context.",
-      "gap": "The plan result is discarded and no ExecutionReadyProof binds plan, memory, obligations, decisions, locks, and context to the work item.",
+      "current": "The pipeline runs chapter.plan, assembles draft context, and persists a fingerprinted ChapterExecutionPlan bound to the current ExecutionReadyProof, stage output, chapter, and context.",
+      "gap": "The ChapterExecutionPlan and chapter-level replayable proof now gate governed draft consumption, but they do not yet bind the full memory, obligation, decision, and author-lock projection.",
       "target": "Adopt a governed ChapterExecutionPlan and freeze its ExecutionReadyProof before prose generation."
     },
     {
@@ -482,32 +1581,32 @@
     },
     {
       "id": "chapter-settlement",
-      "current": "Accept changes RuntimeRun to completed after prose was already written.",
-      "gap": "No atomic settlement binds adoption receipt, summary/assertion/obligation deltas, projections, feedback, cost, and next-work eligibility.",
+      "current": "Chapter settlement now verifies committed adoption, current content, optional quality gate, and persists a fingerprinted evidence bundle with explicit legacy waivers.",
+      "gap": "The evidence bundle is not yet populated by every upstream projection and full multi-stage settlement recovery remains partial.",
       "target": "Emit ChapterSettlementEvent only after every mandatory output commits or records a governed waiver."
     },
     {
       "id": "next-work-scheduling",
-      "current": "autoContinue is forwarded but unused; start invokes one chapter; accept schedules nothing.",
-      "gap": "A recap candidate or any ledger signal can make the local snapshot label next as done without settlement.",
+      "current": "autoContinue now creates or reuses a bounded BookRun and advances its durable dependency graph; the underlying runtime still executes one chapter per dispatched work item.",
+      "gap": "The bridge does not by itself prove an accepted frozen publication scope, full-book closure, obligation completion, or audited terminal state.",
       "target": "The scheduler consumes settlement and graph evidence, never UI switches, file counts, recap presence, or mutable chapter status alone."
     },
     {
       "id": "live-direction-pause-and-stop",
-      "current": "Control commands share the same queue and pause/stop become visible at stage boundaries.",
-      "gap": "A long command blocks queued direction; no control-plane fence, safe-boundary acknowledgement, call cancellation, drain, or quiescence protocol exists.",
+      "current": "Control commands share the same durable queue, but pause/stop/direction now receive deterministic priority over queued writing work and direction events retain boundary status.",
+      "gap": "Priority prevents queued writing work from starving urgent control commands, safe-boundary stops emit durable acknowledgements, mutation drain records blocked leases, and active model tasks now receive AbortSignal cancellation; provider-specific cancellation and a complete quiescence protocol remain partial.",
       "target": "Separate control events from work leases and prove received, effective, superseded, drained, and quiescent states."
     },
     {
       "id": "failure-recovery-and-idempotency",
-      "current": "Stale commands requeue and stale runs move to review; checkpoints preserve files.",
-      "gap": "Resume/rewrite reruns the entire chapter pipeline, so calls, candidates, reports, writes, and costs can duplicate or overwrite without stage receipts.",
+      "current": "Runtime stages persist fingerprinted receipts, terminal completed/failed states are immutable, checkpoint, narrative-snapshot, plan, draft, quality-report, recap, and story-graph completion records output references plus fingerprints, and failures now persist bounded retry/stagnation receipts before retrying or pausing; stale execution workers are fenced separately.",
+      "gap": "Compensation actions now have idempotent application receipts and effect evidence, but applying all projection rollback and full multi-stage settlement recovery remains partial.",
       "target": "Resume the first unsettled idempotent stage from immutable receipts, with retry budgets, stuck detection, compensations, and late-worker fencing."
     },
     {
       "id": "milestone-and-obligation-repair",
-      "current": "Quality, graph, index, and ledgers can be inspected independently.",
-      "gap": "No volume/arc milestone gate opens typed repair work for continuity, memory, pacing, obligations, character/world state, or stale projections.",
+      "current": "Typed, evidence-backed MilestoneRepairPlans materialize into dependency-bound repair work items; immutable completion receipts, kind-specific evidence policies, obligation coverage, character arc, story projection, memory, world-state, continuity, and narrative-curve artifact dereferencing, and replayable MilestoneAudits now gate closure while preserving the frozen scope.",
+      "gap": "All listed repair kinds now have an artifact-level adapter, but the adapters are structural/freshness checks and do not yet run every domain's full semantic audit policy.",
       "target": "Run evidence-based milestone audits and add repair work to the same dependency graph without silently shrinking scope."
     },
     {
@@ -525,7 +1624,7 @@
     {
       "id": "post-completion-change",
       "current": "Files can still be edited or restored after any run status.",
-      "gap": "No rule invalidates a completion claim when a scoped decision, outline, prose, obligation, assertion, policy, model, or audit input changes.",
+      "gap": "Completion evidence is now revoked with a durable invalidation receipt and scoped impact subgraph, but mutation-specific dependency mapping and automatic re-settlement scheduling remain partial.",
       "target": "Any relevant mutation revokes the current proof, opens an impact subgraph, and requires re-settlement and re-audit."
     }
   ],
@@ -544,7 +1643,7 @@
     },
     {
       "option": "C-evidence-driven-book-work-graph",
-      "verdict": "recommended-not-implemented",
+      "verdict": "recommended-with-bounded-bridge-only",
       "blueCase": "A durable typed dependency graph can schedule chapters and cross-cutting repair from settlement evidence, isolate failure, support fair leases and live control, and derive completion from a frozen scope plus replayable proofs.",
       "redCase": "It requires new domain schemas, graph materialization, schedulers, idempotent stage receipts, leases/fencing, migration, observability, cost policy, projection freshness, and substantial failure-injection testing."
     }

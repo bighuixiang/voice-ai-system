@@ -14,6 +14,7 @@
         <div><h3>{{ candidate.chapterId }}</h3><p>候选正文，不是 canon · {{ candidate.status }}</p></div>
         <span>canonWritten: false</span>
       </div>
+      <p v-if="candidate.policyVersion && candidate.riskTier" data-testid="candidate-policy">policy {{ candidate.policyVersion }} · risk {{ candidate.riskTier }}</p>
       <p class="content">{{ candidate.content }}</p>
       <div class="actions">
         <button type="button" :aria-label="`验证 ${candidate.candidateId}`" :disabled="busyId === candidate.candidateId" @click="emit('validate', candidate)">验证</button>

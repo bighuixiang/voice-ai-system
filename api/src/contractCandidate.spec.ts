@@ -138,7 +138,7 @@ describe("contract candidate compiler", () => {
     const decision = await makeDecision(root, "Expose the truth.", "confirmed", "decision-branches");
     if (!decision.accepted || !decision.decision) throw new Error("decision setup failed");
     await fs.mkdir(path.join(root, "sessions"), { recursive: true });
-    await fs.writeFile(path.join(root, "sessions", "understanding-snapshot.json"), JSON.stringify({
+    const branchesSnapshotBase = {
       schemaVersion: "understanding-snapshot.v1",
       snapshotId: "snapshot-branches",
       projectSlug: "demo",
@@ -161,7 +161,8 @@ describe("contract candidate compiler", () => {
       modelCallIssued: false,
       canonWritten: false,
       createdAt: new Date().toISOString()
-    }, null, 2));
+    };
+    await fs.writeFile(path.join(root, "sessions", "understanding-snapshot.json"), JSON.stringify({ ...branchesSnapshotBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(branchesSnapshotBase)).digest("hex") }, null, 2));
 
     const revenge = await compileContractCandidate(root, decision.decision.decisionId, "branch-revenge");
     const symbiosis = await compileContractCandidate(root, decision.decision.decisionId, "branch-symbiosis");

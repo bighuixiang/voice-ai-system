@@ -30,15 +30,16 @@ export interface DeliveryAccessGrantEvent {
 }
 
 function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
-function verifyGrantIntegrity(grant: DeliveryAccessGrant): boolean {
+function assertGrantIntegrity(grant: DeliveryAccessGrant, grantId: string): DeliveryAccessGrant {
   const { fingerprint, ...base } = grant;
-  return hash(base) === fingerprint;
+  if (grant.schemaVersion !== "delivery-access-grant.v1" || grant.grantId !== grantId || typeof grant.proofId !== "string" || !grant.proofId.trim() || typeof grant.editionId !== "string" || !grant.editionId.trim() || typeof grant.projectSlug !== "string" || !grant.projectSlug.trim() || typeof grant.recipientId !== "string" || !grant.recipientId.trim() || !["reader", "archive"].includes(grant.scope) || grant.status !== "active" || typeof fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(fingerprint) || hash(base) !== fingerprint) throw new Error("ACCESS_GRANT_INTEGRITY_FAILED");
+  return grant;
 }
 function grantPath(root: string, grantId: string): string { return resolveInside(root, `sessions/publication-editions/delivery-access-grants/${grantId}.json`); }
 function eventPath(root: string, grantId: string): string { return resolveInside(root, `sessions/publication-editions/delivery-access-grants/${grantId}.event.json`); }
 
 export async function readDeliveryAccessGrant(root: string, grantId: string): Promise<DeliveryAccessGrant | null> {
-  try { return JSON.parse(await fs.readFile(grantPath(root, grantId), "utf8")) as DeliveryAccessGrant; }
+  try { return assertGrantIntegrity(JSON.parse(await fs.readFile(grantPath(root, grantId), "utf8")) as DeliveryAccessGrant, grantId); }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 
@@ -53,7 +54,6 @@ export async function issueDeliveryAccessGrant(root: string, input: { editionId:
   const grantId = `access-grant-${hash(identity).slice(0, 24)}`;
   const existing = await readDeliveryAccessGrant(root, grantId);
   if (existing) {
-    if (!verifyGrantIntegrity(existing)) throw new Error("ACCESS_GRANT_INTEGRITY_FAILED");
     return existing;
   }
   const base = { schemaVersion: "delivery-access-grant.v1" as const, grantId, proofId: verification.proof.proofId, editionId: verification.proof.editionId, projectSlug: verification.proof.projectSlug, recipientId: input.recipientId, scope: input.scope, expiresAt: input.expiresAt, status: "active" as const, issuedAt: new Date().toISOString() };
@@ -68,15 +68,11 @@ export async function issueDeliveryAccessGrant(root: string, input: { editionId:
 export async function verifyDeliveryAccessGrant(root: string, grantId: string): Promise<{ valid: boolean; reasons: string[]; grant: DeliveryAccessGrant | null }> {
   const grant = await readDeliveryAccessGrant(root, grantId);
   if (!grant) return { valid: false, reasons: ["grant-missing"], grant: null };
-  const base = { ...grant } as Record<string, unknown>; delete base.fingerprint;
   const reasons: string[] = [];
-  if (hash(base) !== grant.fingerprint) reasons.push("grant-integrity-mismatch");
   if (Date.parse(grant.expiresAt) <= Date.now()) reasons.push("grant-expired");
   const event = await readGrantEvent(root, grantId);
   if (event) {
-    const eventBase = { ...event } as Record<string, unknown>; delete eventBase.fingerprint;
-    if (hash(eventBase) !== event.fingerprint) reasons.push("grant-event-integrity-mismatch");
-    else reasons.push("grant-revoked");
+    reasons.push("grant-revoked");
   }
   const proof = await verifyDeliveryProof(root, grant.editionId);
   if (!proof.valid || proof.currentStatus !== "issued" || proof.proof?.proofId !== grant.proofId) reasons.push("grant-proof-not-current");
@@ -84,7 +80,12 @@ export async function verifyDeliveryAccessGrant(root: string, grantId: string): 
 }
 
 async function readGrantEvent(root: string, grantId: string): Promise<DeliveryAccessGrantEvent | null> {
-  try { return JSON.parse(await fs.readFile(eventPath(root, grantId), "utf8")) as DeliveryAccessGrantEvent; }
+  try {
+    const event = JSON.parse(await fs.readFile(eventPath(root, grantId), "utf8")) as DeliveryAccessGrantEvent;
+    const { fingerprint, ...base } = event;
+    if (event.schemaVersion !== "delivery-access-grant-event.v1" || event.grantId !== grantId || typeof event.eventId !== "string" || !event.eventId.trim() || event.status !== "revoked" || event.actor !== "author" || typeof event.reason !== "string" || !event.reason.trim() || typeof fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(fingerprint) || hash(base) !== fingerprint) throw new Error("ACCESS_GRANT_EVENT_INTEGRITY_FAILED");
+    return event;
+  }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 

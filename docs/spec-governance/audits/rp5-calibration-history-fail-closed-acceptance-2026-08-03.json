@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-calibration-history-fail-closed",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-EVAL-006", "FR-EVAL-010"],
+  "implementationRefs": [
+    "api/src/qualityCalibration.ts",
+    "api/src/qualityCalibration.spec.ts"
+  ],
+  "tests": ["api/src/qualityCalibration.spec.ts"],
+  "result": "passed",
+  "evidence": [
+    "RED: semantically invalid but validly hashed history entries were silently ignored",
+    "GREEN: history reads now fail closed on semantic, integrity, parse, and other malformed records",
+    "quality calibration regression passes 14/14"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "This protects calibration history integrity but does not provide real provider/human holdout evidence."
+  }
+}

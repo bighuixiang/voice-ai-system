@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP2-recovery-journey",
+  "releaseProfile": "RP2-understanding",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-UX-012", "FR-UX-013", "FR-RUN-006"],
+  "implementationRefs": [
+    "ui/src/stores/novel.ts",
+    "api/src/app.ts",
+    "api/src/creativeJourney.ts",
+    "tests/e2e/rp2-low-input-journey.spec.ts"
+  ],
+  "tests": [
+    "tests/e2e/rp2-low-input-journey.spec.ts:RP2 recovery: refresh restores the authoritative journey and answered state"
+  ],
+  "result": "passed",
+  "evidence": [
+    "A captured author message is persisted through the API before the browser is refreshed.",
+    "After refresh, the browser renders the server-authoritative review-understanding primary action.",
+    "After a governed question answer, a second refresh removes the blocking question and preserves a truthful next action.",
+    "The recovery browser test passes in 1 worker with an isolated API/UI instance.",
+    "API, UI, build, diff-check, and governance verifier checks remain green."
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "This slice proves refresh recovery for the RP2 understanding projection only; it does not prove the full rough-idea-to-book journey, external calibration, independent review, migration cutover, or delivery acceptance."
+  }
+}

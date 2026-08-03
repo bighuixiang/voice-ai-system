@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "capability-dependency-proof.v1",
+  "projectSlug": "rp2-low-input-1785760309175",
+  "sliceId": "runtime",
+  "requiredKernels": [
+    {
+      "id": "K0-contract",
+      "version": "v1",
+      "verifiedBy": [
+        "project-create"
+      ]
+    }
+  ],
+  "writeAuthority": "runtime-store",
+  "unmet": [],
+  "status": "satisfied",
+  "fingerprint": "90e5ab94fa6d37875428574f95ffc9cc590ada9c6051658afabce465f93a64c8"
+}

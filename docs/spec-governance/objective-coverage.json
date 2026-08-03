@@ -158,7 +158,9 @@
       "implementationEvidence": [
         "api/src/app.spec.ts#V1-V2-V3-vertical-slice",
         "api/src/contextManifest.spec.ts",
-        "api/src/dialogueQuestions.spec.ts"
+        "api/src/dialogueQuestions.spec.ts",
+        "api/src/decisionConsumption.spec.ts",
+        "api/src/app.spec.ts#downstream-decision-consumption"
       ],
       "implementationBoundary": "Component and selected integration evidence is verified; this does not prove the complete objective, representative end-to-end journey, or release readiness.",
       "futureDecisionDependencies": [],
@@ -321,7 +323,10 @@
       "implementationEvidence": [
         "api/src/app.spec.ts#V3-V4-vertical-slice",
         "api/src/outlineValidation.spec.ts",
-        "api/src/outlineCommit.spec.ts"
+        "api/src/outlineCommit.spec.ts",
+        "api/src/chapterExecutionPlan.spec.ts",
+        "api/src/chapterExecutionProof.spec.ts",
+        "api/src/runtime.spec.ts#governed-runtime-chapter-execution-plan"
       ],
       "implementationBoundary": "Component and selected integration evidence is verified; this does not prove the complete objective, representative end-to-end journey, or release readiness.",
       "futureDecisionDependencies": [
@@ -611,7 +616,11 @@
         "api/src/runtime.spec.ts#governed-prose-candidate",
         "api/src/proseValidation.spec.ts",
         "api/src/proseAdoption.spec.ts",
-        "api/src/chapterSettlement.spec.ts"
+        "api/src/chapterSettlement.spec.ts",
+        "api/src/researchGrounding.spec.ts",
+        "api/src/researchFactCheck.spec.ts",
+        "api/src/researchReliability.spec.ts",
+        "api/src/app.spec.ts#research-source-snapshots"
       ],
       "implementationBoundary": "Component and selected integration evidence is verified; this does not prove the complete objective, representative end-to-end journey, or release readiness.",
       "futureDecisionDependencies": [
@@ -742,7 +751,22 @@
       "implementationEvidence": [
         "api/src/qualityCalibration.spec.ts",
         "api/src/craftProfile.spec.ts",
-        "api/src/authorFeedback.spec.ts"
+        "api/src/authorFeedback.spec.ts",
+        "api/src/adaptiveEvaluationScale.spec.ts",
+        "api/src/app.spec.ts#adaptive-evaluation-scales",
+        "api/src/evaluationAccess.spec.ts",
+        "api/src/app.spec.ts#private-sample-platform-regression",
+        "api/src/evaluationRunArchive.spec.ts",
+        "api/src/evaluationCase.spec.ts",
+        "api/src/evaluationGovernance.spec.ts",
+        "api/src/evaluationArtifactStore.spec.ts",
+        "api/src/evaluationDisagreementStore.spec.ts",
+        "api/src/evaluationSamplingStore.spec.ts",
+        "api/src/evaluationRegressionStore.spec.ts",
+        "api/src/evaluationParetoStore.spec.ts",
+        "api/src/evaluationSliceStore.spec.ts",
+        "api/src/app.spec.ts#routes-evaluation-disagreements",
+        "api/src/app.spec.ts#seeded-repeat-sampling"
       ],
       "implementationBoundary": "Component and selected integration evidence is verified; this does not prove the complete objective, representative end-to-end journey, or release readiness.",
       "futureDecisionDependencies": [
@@ -905,7 +929,9 @@
       "implementationStatus": "partially-verified",
       "implementationEvidence": [
         "api/src/app.spec.ts#adaptive-question-sequence",
-        "api/src/dialogueQuestions.spec.ts"
+        "api/src/dialogueQuestions.spec.ts",
+        "api/src/decisionConsumption.spec.ts",
+        "api/src/app.spec.ts#downstream-decision-consumption"
       ],
       "implementationBoundary": "Component and selected integration evidence is verified; this does not prove the complete objective, representative end-to-end journey, or release readiness.",
       "futureDecisionDependencies": [
@@ -960,7 +986,9 @@
       "implementationEvidence": [
         "api/src/understandingReview.spec.ts",
         "api/src/qualityCalibration.spec.ts",
-        "api/src/proseReview.spec.ts"
+        "api/src/proseReview.spec.ts",
+        "api/src/adaptiveEvaluationScale.spec.ts",
+        "api/src/app.spec.ts#adaptive-evaluation-scales"
       ],
       "implementationBoundary": "Component and selected integration evidence is verified; this does not prove the complete objective, representative end-to-end journey, or release readiness.",
       "futureDecisionDependencies": [],
@@ -973,13 +1001,21 @@
       "requirementSelectors": [
         "FR-RUN-*",
         "FR-COMPLETE-*",
+        "FR-STATE-*",
+        "FR-MIGRATE-*",
+        "FR-API-*",
         "FR-LONGMEM-*",
+        "FR-MEMORY-*",
         "FR-OBL-*",
         "FR-CLOSURE-*",
         "FR-PUBLISH-*",
         "FR-DURABILITY-*"
       ],
       "requirementIds": [
+        "FR-API-001",
+        "FR-API-002",
+        "FR-API-003",
+        "FR-API-004",
         "FR-CLOSURE-001",
         "FR-CLOSURE-002",
         "FR-CLOSURE-003",
@@ -1035,6 +1071,18 @@
         "FR-LONGMEM-022",
         "FR-LONGMEM-023",
         "FR-LONGMEM-024",
+        "FR-MEMORY-001",
+        "FR-MEMORY-002",
+        "FR-MEMORY-003",
+        "FR-MIGRATE-001",
+        "FR-MIGRATE-002",
+        "FR-MIGRATE-003",
+        "FR-MIGRATE-004",
+        "FR-MIGRATE-005",
+        "FR-MIGRATE-006",
+        "FR-MIGRATE-007",
+        "FR-MIGRATE-008",
+        "FR-MIGRATE-009",
         "FR-OBL-001",
         "FR-OBL-002",
         "FR-OBL-003",
@@ -1085,13 +1133,27 @@
         "FR-RUN-021",
         "FR-RUN-022",
         "FR-RUN-023",
-        "FR-RUN-024"
+        "FR-RUN-024",
+        "FR-STATE-001",
+        "FR-STATE-002",
+        "FR-STATE-003",
+        "FR-STATE-004",
+        "FR-STATE-005",
+        "FR-STATE-006",
+        "FR-STATE-007",
+        "FR-STATE-008",
+        "FR-STATE-009"
       ],
       "acceptanceSelectors": [
         "AT-007",
+        "AT-009",
+        "AT-020",
         "AT-038..AT-040",
+        "AT-060..AT-070",
         "AT-142..AT-189",
+        "AT-310..AT-312",
         "AT-313..AT-332",
+        "AT-384..AT-385",
         "AT-439..AT-441",
         "AT-479..AT-481",
         "AT-504..AT-507",
@@ -1099,9 +1161,22 @@
       ],
       "acceptanceTestIds": [
         "AT-007",
+        "AT-009",
+        "AT-020",
         "AT-038",
         "AT-039",
         "AT-040",
+        "AT-060",
+        "AT-061",
+        "AT-062",
+        "AT-063",
+        "AT-064",
+        "AT-065",
+        "AT-066",
+        "AT-067",
+        "AT-068",
+        "AT-069",
+        "AT-070",
         "AT-142",
         "AT-143",
         "AT-144",
@@ -1150,6 +1225,9 @@
         "AT-187",
         "AT-188",
         "AT-189",
+        "AT-310",
+        "AT-311",
+        "AT-312",
         "AT-313",
         "AT-314",
         "AT-315",
@@ -1170,6 +1248,8 @@
         "AT-330",
         "AT-331",
         "AT-332",
+        "AT-384",
+        "AT-385",
         "AT-439",
         "AT-440",
         "AT-441",
@@ -1187,6 +1267,9 @@
       ],
       "firstSlices": [
         "V0-baseline",
+        "V1-conversation",
+        "V2-understanding",
+        "V3-contract",
         "V4-outline",
         "V5-drafting",
         "V6-obligations",
@@ -1197,8 +1280,22 @@
       "implementationStatus": "partially-verified",
       "implementationEvidence": [
         "api/src/bookRun.spec.ts",
+        "api/src/bookWorkScheduler.spec.ts",
         "api/src/completionAudit.spec.ts",
-        "api/src/runtimeWorker.spec.ts"
+        "api/src/runtimeWorker.spec.ts",
+        "api/src/workLeaseStore.spec.ts",
+        "api/src/stagnationDetection.spec.ts",
+        "api/src/reviewBatch.spec.ts",
+        "api/src/chapterMemoryPatch.spec.ts",
+        "api/src/mutationPlan.spec.ts",
+        "api/src/migrationPreview.spec.ts",
+        "api/src/migrationValidation.spec.ts",
+        "api/src/migrationCutover.spec.ts",
+        "api/src/app.spec.ts#chapter-memory-patch-and-asset-coverage",
+        "api/src/app.spec.ts#mutation-plan-api",
+        "api/src/app.spec.ts#persists-runtime-work-leases",
+        "api/src/app.spec.ts#pauses-a-run-when-stagnation-thresholds-are-crossed",
+        "api/src/app.spec.ts#high-risk-review-items"
       ],
       "implementationBoundary": "Component and selected integration evidence is verified; this does not prove the complete objective, representative end-to-end journey, or release readiness.",
       "futureDecisionDependencies": [

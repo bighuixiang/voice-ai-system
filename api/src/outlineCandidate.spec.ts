@@ -34,7 +34,16 @@ describe("outline candidate compiler", () => {
     expect(result.outline.chapters).toHaveLength(5);
     expect(result.outline.chapters.slice(0, 3).every((chapter) => chapter.freeze === "strong")).toBe(true);
     expect(result.outline.chapters.slice(3).every((chapter) => chapter.freeze === "tentative")).toBe(true);
+    expect(result.outline.chapters.slice(0, 3).every((chapter) => chapter.confidence === "rolling" && chapter.detailLevel === "detailed")).toBe(true);
+    expect(result.outline.chapters.slice(3).every((chapter) => chapter.confidence === "tentative" && chapter.detailLevel === "milestone")).toBe(true);
     expect(result.outline.chapters.every((chapter) => chapter.causalInputs.length > 0 && chapter.causalOutputs.length > 0)).toBe(true);
+    expect(result.outline.chapters.map((chapter) => chapter.semanticId)).toEqual([
+      "outline:contract-candidate-demo:chapter:1",
+      "outline:contract-candidate-demo:chapter:2",
+      "outline:contract-candidate-demo:chapter:3",
+      "outline:contract-candidate-demo:chapter:4",
+      "outline:contract-candidate-demo:chapter:5"
+    ]);
     expect(await readOutlineCandidate(root, result.outline.outlineId)).toEqual(result.outline);
   });
 
@@ -49,5 +58,15 @@ describe("outline candidate compiler", () => {
     await fs.writeFile(candidatePath, JSON.stringify({ ...candidate, status: "stale" }), "utf8");
     await expect(compileOutlineCandidate(root, "contract-candidate-demo-2")).rejects.toThrow("CONTRACT_CANDIDATE_NOT_FOUND");
     await expect(compileOutlineCandidate(root, "contract-candidate-demo")).rejects.toThrow("CONTRACT_CANDIDATE_STALE");
+  });
+
+  it("fails closed when a persisted outline candidate is tampered", async () => {
+    const root = await fixture();
+    const first = await compileOutlineCandidate(root, "contract-candidate-demo");
+    const target = path.join(root, "sessions", "outline-candidates", `${first.outline.outlineId}.json`);
+    const tampered = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    tampered.status = "stale";
+    await fs.writeFile(target, JSON.stringify(tampered), "utf8");
+    await expect(readOutlineCandidate(root, first.outline.outlineId)).rejects.toThrow("OUTLINE_CANDIDATE_INTEGRITY_FAILED");
   });
 });

@@ -7,7 +7,7 @@
   "sourceFiles": [
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/craftProfile.ts",
@@ -15,7 +15,7 @@
     },
     {
       "path": "api/src/contextAssembler.ts",
-      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+      "sha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963"
     },
     {
       "path": "api/src/novelSystemSkills.ts",
@@ -27,19 +27,63 @@
     },
     {
       "path": "api/src/taskService.ts",
-      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+      "sha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220"
     },
     {
       "path": "api/src/chapterQualityReview.ts",
       "sha256": "71f72a3497c4924f64ac673fadeaea2a659603614e36328b0f117b1ea5e5a0bf"
     },
     {
+      "path": "api/src/learningRelease.ts",
+      "sha256": "d5ff2dbf2ec023be84b2ac79299aa10ff7f9538e304a355cc9f365ea492e7049"
+    },
+    {
+      "path": "api/src/craftRevocationStore.ts",
+      "sha256": "aac91a07c369d9c7e67a204c7d106f4100cce11b95635f4925d42fd6401a30f1"
+    },
+    {
+      "path": "api/src/craftFeedback.ts",
+      "sha256": "8f630b58a7dfcc543fda45f2af7498f1bfccba6b53796ee98fb8d498ca2948ed"
+    },
+    {
+      "path": "api/src/craftFeedbackLearning.ts",
+      "sha256": "a8d38d8ad2b0a51dfee1631e5b01d7da2b12fcdb38bac27e4e77d2ecbf536adc"
+    },
+    {
+      "path": "api/src/feedbackLearning.ts",
+      "sha256": "998d49d7e4d03459aebf96c0c71cf6bc87646f646e955525214263c8e4910309"
+    },
+    {
+      "path": "api/src/craftHoldoutValidation.ts",
+      "sha256": "13e29eb211ce1b9434cb2e50f7df590da0860ff1ab5a69cfc861f1a89cb68026"
+    },
+    {
+      "path": "api/src/craftExperiment.ts",
+      "sha256": "a84641b75b082ff7da0f32d5534f7ff68c308895ad0b1c6eef2e6cf0712b3567"
+    },
+    {
+      "path": "api/src/app.spec.ts",
+      "sha256": "98f4b678885c539bcf4951f00d65537e452df20a7ecf2ad6775eee3882e2a0ec"
+    },
+    {
+      "path": "api/src/evaluationRegressionStore.ts",
+      "sha256": "115a357f0ceca6b843b5cd54400f8a7b75bcb0170bb3cc45ceb47e9ecaa63efb"
+    },
+    {
+      "path": "api/src/learningReleaseGate.ts",
+      "sha256": "277c6951aa31a1ee0c5a47bfb20f64373183e947c0f712e27626f6d9b5910110"
+    },
+    {
+      "path": "api/src/app.ts",
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
+    },
+    {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     },
     {
       "path": "ui/src/components/novel/PlotPilotLearningPanel.vue",
-      "sha256": "ff53476e0a7f22fae1e86bdcd890ea8e2b0920a694f3bef5955b71ccacaa8980"
+      "sha256": "1f4ae35d3bbe0e4c3aac8c987fe4506e6f8e0e51aa49a6c1714a0973c13d3354"
     },
     {
       "path": "ui/src/components/novel/PlatformLibraryPanel.vue",
@@ -114,7 +158,7 @@
     "preAndPostSimilarityGuardExists": false,
     "governedCraftExperimentExists": false,
     "governedPreferenceHypothesisExists": false,
-    "craftReleaseAndRollbackExists": false,
+    "craftReleaseAndRollbackExists": true,
     "implementationVerified": false
   },
   "strengthsToReuse": [
@@ -178,7 +222,7 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 479,
+          "line": 505,
           "evidence": "export interface StyleSample"
         }
       ],
@@ -192,12 +236,12 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 415,
+          "line": 454,
           "evidence": ".slice(0, 4)"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 421,
+          "line": 460,
           "evidence": "content: JSON.stringify(selected, null, 2)"
         }
       ],
@@ -211,7 +255,7 @@
       "evidence": [
         {
           "path": "api/src/taskService.ts",
-          "line": 281,
+          "line": 317,
           "evidence": "function preCallReview"
         }
       ],
@@ -225,17 +269,17 @@
       "evidence": [
         {
           "path": "api/src/taskService.ts",
-          "line": 164,
+          "line": 200,
           "evidence": "markInvocationPatchesAccepted"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3885,
+          "line": 4543,
           "evidence": "function rejectRewrite"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3078,
+          "line": 3238,
           "evidence": "function rejectWritingRecap"
         }
       ],
@@ -268,7 +312,7 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 1077,
+          "line": 1198,
           "evidence": "const plotPilotLearningItems"
         },
         {
@@ -283,16 +327,66 @@
     {
       "stageId": "CRAFT-LEARNING-010",
       "label": "模式发布、衰减与撤回",
-      "currentStatus": "governed-loop-absent",
+      "currentStatus": "release-rollback-and-source-to-experiment-holdout-chain-implemented",
       "evidence": [
         {
           "path": "api/src/platformLibrary.ts",
           "line": 252,
           "evidence": "export async function createPlatformAsset"
+        },
+        {
+          "path": "api/src/learningRelease.ts",
+          "line": 12,
+          "evidence": "export interface LearningRelease"
+        },
+        {
+          "path": "api/src/craftRevocationStore.ts",
+          "line": 33,
+          "evidence": "export async function listCraftRevocationRecords"
+        },
+        {
+          "path": "api/src/craftFeedback.ts",
+          "line": 8,
+          "evidence": "export interface CraftFeedbackEvent"
+        },
+        {
+          "path": "api/src/craftFeedbackLearning.ts",
+          "line": 7,
+          "evidence": "export async function createCraftFeedbackAttribution"
+        },
+        {
+          "path": "api/src/feedbackLearning.ts",
+          "line": 139,
+          "evidence": "export async function promotePreferenceHypothesis"
+        },
+        {
+          "path": "api/src/craftHoldoutValidation.ts",
+          "line": 38,
+          "evidence": "export function validateCraftHoldout"
+        },
+        {
+          "path": "api/src/craftExperiment.ts",
+          "line": 33,
+          "evidence": "holdoutValidation?: CraftHoldoutResult"
+        },
+        {
+          "path": "api/src/app.spec.ts",
+          "line": 6836,
+          "evidence": "completes source-to-experiment craft learning lifecycle through API"
+        },
+        {
+          "path": "api/src/evaluationRegressionStore.ts",
+          "line": 11,
+          "evidence": "export async function readEvaluationRegression"
+        },
+        {
+          "path": "api/src/app.ts",
+          "line": 5010,
+          "evidence": "/runtime/learning-releases"
         }
       ],
       "strength": "The platform library has reusable scoped assets and project links that can be evolved into governed references.",
-      "gap": "No governed craft entity, experiment, preference lifecycle, canary, expiry, regression case, source invalidation, or release decision exists in product code."
+      "gap": "Durable project-scoped release, rollback, source-revocation, expiry, craft-feedback, replayable same-project regression evidence linkage, scoped candidate/validated preference hypotheses, explicit author-approved active promotion, model-task context projection, evidence-bound rollback, automatic regression propagation, source-to-experiment generation lifecycle, sealed cross-scene holdout evidence persistence, and representative release-to-manifest consumption E2E now exist; real-provider breadth, reader-outcome calibration, and complete production craft-learning UX remain unproven."
     }
   ],
   "alternatives": [

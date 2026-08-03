@@ -7,31 +7,39 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/contextAssembler.ts",
-      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+      "sha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963"
     },
     {
       "path": "api/src/taskService.ts",
-      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+      "sha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220"
     },
     {
       "path": "api/src/knowledgeIndex.ts",
-      "sha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74"
+      "sha256": "75fcaf469761c159527b8e8363bb055da4dd809becb5c5d74dada7d7e6459c4a"
     },
     {
       "path": "api/src/contextManifest.ts",
-      "sha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc"
+      "sha256": "f93a0831205377002230d96151f33c2d37c6b087ba134000762b5e93a058f68b"
+    },
+    {
+      "path": "api/src/understandingWorker.ts",
+      "sha256": "6d31e406ea4b930302672cd3c4d6cb5b8d1aba0b5def9ebe9d146d9d1bcb1b52"
+    },
+    {
+      "path": "api/src/understandingReview.ts",
+      "sha256": "146bfb67b02f657dd1d23e2b96eb7ceec781729b62b63005bccc3f2148636697"
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/taskTemplates.ts",
-      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+      "sha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57"
     },
     {
       "path": "ui/src/components/novel/ContextPanel.vue",
@@ -39,7 +47,7 @@
     },
     {
       "path": "ui/src/types/novel.ts",
-      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+      "sha256": "8b40b4f8361cfddaee5bbc1bc946530c5391fe3045d27c4e62dfe5b62629ff24"
     }
   ],
   "privacy": {
@@ -271,9 +279,9 @@
       },
       {
         "projectOrdinal": 6,
-        "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputFingerprint": null,
         "invocationFile": {
-          "exists": true,
+          "exists": false,
           "bytes": 0,
           "records": 0,
           "invalidLines": 0
@@ -307,6 +315,42 @@
       },
       {
         "projectOrdinal": 7,
+        "inputFingerprint": null,
+        "invocationFile": {
+          "exists": false,
+          "bytes": 0,
+          "records": 0,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 0,
+          "blocks": 0,
+          "contextChars": 0,
+          "tierBlocks": {},
+          "truncatedBlocks": 0,
+          "t0Blocks": 0,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 0
+        },
+        "callGateEvidence": {
+          "reviews": 0,
+          "reviewStatuses": {},
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {},
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 0,
+          "maxChars": 0,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
         "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "invocationFile": {
           "exists": true,
@@ -342,7 +386,79 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 9,
+        "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "invocationFile": {
+          "exists": true,
+          "bytes": 0,
+          "records": 0,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 0,
+          "blocks": 0,
+          "contextChars": 0,
+          "tierBlocks": {},
+          "truncatedBlocks": 0,
+          "t0Blocks": 0,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 0
+        },
+        "callGateEvidence": {
+          "reviews": 0,
+          "reviewStatuses": {},
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {},
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 0,
+          "maxChars": 0,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 10,
+        "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "invocationFile": {
+          "exists": true,
+          "bytes": 0,
+          "records": 0,
+          "invalidLines": 0
+        },
+        "contextEvidence": {
+          "invocationsWithContextSnapshot": 0,
+          "blocks": 0,
+          "contextChars": 0,
+          "tierBlocks": {},
+          "truncatedBlocks": 0,
+          "t0Blocks": 0,
+          "t0TruncatedBlocks": 0,
+          "maxContextChars": 0
+        },
+        "callGateEvidence": {
+          "reviews": 0,
+          "reviewStatuses": {},
+          "warnings": {},
+          "reviewStatusToInvocationOutcome": {},
+          "invocationsWithoutReview": 0
+        },
+        "manifestAndCoverageEvidence": {
+          "contextManifests": 0,
+          "postCallEvidenceCoverageReports": 0
+        },
+        "promptEvidence": {
+          "totalChars": 0,
+          "maxChars": 0,
+          "promptsOver120kChars": 0
+        }
+      },
+      {
+        "projectOrdinal": 11,
         "inputFingerprint": "988f04eb910c93d773aa804596a77201681092a43160a0de961d67f6b7f446b8",
         "invocationFile": {
           "exists": true,
@@ -387,8 +503,8 @@
       }
     ],
     "totals": {
-      "projects": 8,
-      "invocationFiles": 6,
+      "projects": 11,
+      "invocationFiles": 7,
       "invocationFileBytes": 345511,
       "invocations": 68,
       "invalidInvocationLines": 0,
@@ -431,7 +547,7 @@
   },
   "summary": {
     "auditedStages": 12,
-    "projectsScanned": 8,
+    "projectsScanned": 11,
     "invocations": 68,
     "contextBlocks": 1378,
     "truncatedBlocks": 440,
@@ -445,7 +561,7 @@
     "implementationVerified": false
   },
   "rootCause": {
-    "statement": "Context assembly is a display-title-driven packing pipeline with fixed per-block character caps. It records volume and truncation after assembly; a session-level frozen manifest now exists, but the executor still lacks model-aware global token planning, eligibility-first authority filters, corruption/conflict receipts, manifest binding, a server-side block state and post-call evidence coverage.",
+    "statement": "Context assembly remains a display-title-driven packing pipeline with fixed per-block character caps. It records volume and truncation after assembly; session and generic task paths now bind persisted manifests, and knowledge retrieval applies eligibility and evidence-quality ordering, but the system still lacks model-aware global token planning, complete corruption/conflict receipts and complete post-call evidence coverage.",
     "consequence": "A long prompt can appear comprehensive while silently omitting a decisive middle fact, using stale or unauthorized material, flattening conflicts, starving output or letting a warning-only call generate fluent but narratively invalid prose that later contaminates memory and foreshadowing closure."
   },
   "currentEvidence": [
@@ -454,20 +570,20 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 39,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 41,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "async function readOptional"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 57,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 59,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "async function readOptionalJsonl"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 59,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 61,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "return [];"
         }
       ]
@@ -477,20 +593,20 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 73,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 91,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "function trimContext"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 78,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 96,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "function contextTierForTitle"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 105,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 144,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "function contextLimitForTier"
         }
       ]
@@ -500,55 +616,55 @@
       "evidence": [
         {
           "path": "api/src/taskService.ts",
-          "line": 236,
-          "sourceSha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47",
+          "line": 272,
+          "sourceSha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220",
           "token": "function contextSnapshot"
         },
         {
           "path": "api/src/types.ts",
-          "line": 1039,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 1148,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "export interface AiInvocationContextBlockSnapshot"
         }
       ]
     },
     {
-      "claim": "Pre-call review has pass/warn only and runner execution follows regardless of warnings.",
+      "claim": "Pre-call review has pass/warn only; generic task execution now adds a manifest status check before each provider attempt, while the broader hard-gate contract remains incomplete.",
       "evidence": [
         {
           "path": "api/src/taskService.ts",
-          "line": 281,
-          "sourceSha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47",
+          "line": 317,
+          "sourceSha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220",
           "token": "function preCallReview"
         },
         {
           "path": "api/src/types.ts",
-          "line": 1071,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 1183,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "status: \"pass\" | \"warn\""
         },
         {
           "path": "api/src/taskService.ts",
-          "line": 408,
-          "sourceSha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47",
-          "token": "const output = await runner.run"
+          "line": 53,
+          "sourceSha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220",
+          "token": "runWithCurrentTaskContextManifest"
         }
       ]
     },
     {
-      "claim": "Knowledge retrieval ranks score/vector matches and top limits without an eligibility-first canon/time/POV/reader/rights/freshness contract.",
+      "claim": "Knowledge retrieval applies eligibility before relevance and orders eligible facts by evidence quality, score and vector tie-breakers; broader context packing still lacks a global token plan.",
       "evidence": [
         {
           "path": "api/src/knowledgeIndex.ts",
-          "line": 698,
-          "sourceSha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74",
+          "line": 722,
+          "sourceSha256": "75fcaf469761c159527b8e8363bb055da4dd809becb5c5d74dada7d7e6459c4a",
           "token": "export async function searchKnowledgeIndex"
         },
         {
           "path": "api/src/knowledgeIndex.ts",
-          "line": 737,
-          "sourceSha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74",
-          "token": ".sort((left, right) => right.score - left.score"
+          "line": 818,
+          "sourceSha256": "75fcaf469761c159527b8e8363bb055da4dd809becb5c5d74dada7d7e6459c4a",
+          "token": "evidenceQualityPriority(factQuality(right))"
         }
       ]
     },
@@ -570,25 +686,60 @@
       ]
     },
     {
-      "claim": "A session-level T0 manifest freezes author message IDs, source spans and a source fingerprint, and supersedes the prior manifest when the session changes; it is not yet consumed by the executor.",
+      "claim": "A session-level T0 manifest freezes author message IDs, source spans and a source fingerprint, supersedes the prior manifest when the session changes, and is consumed by the model-understanding worker when the task declares its fingerprint; broader task-context executors remain partial.",
       "evidence": [
         {
           "path": "api/src/contextManifest.ts",
-          "line": 74,
-          "sourceSha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc",
+          "line": 104,
+          "sourceSha256": "f93a0831205377002230d96151f33c2d37c6b087ba134000762b5e93a058f68b",
           "token": "export async function freezeContextManifest"
         },
         {
           "path": "api/src/contextManifest.ts",
-          "line": 20,
-          "sourceSha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc",
+          "line": 35,
+          "sourceSha256": "f93a0831205377002230d96151f33c2d37c6b087ba134000762b5e93a058f68b",
           "token": "sourceFingerprint"
         },
         {
           "path": "api/src/app.ts",
-          "line": 981,
-          "sourceSha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55",
+          "line": 2170,
+          "sourceSha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89",
           "token": "app.post(\"/api/novel/projects/:projectId/session/context-manifest\""
+        },
+        {
+          "path": "api/src/understandingWorker.ts",
+          "line": 392,
+          "sourceSha256": "6d31e406ea4b930302672cd3c4d6cb5b8d1aba0b5def9ebe9d146d9d1bcb1b52",
+          "token": "const manifest = await readContextManifest(input.root)"
+        },
+        {
+          "path": "api/src/understandingReview.ts",
+          "line": 87,
+          "sourceSha256": "146bfb67b02f657dd1d23e2b96eb7ceec781729b62b63005bccc3f2148636697",
+          "token": "function validEvidence"
+        }
+      ]
+    },
+    {
+      "claim": "Generic task execution persists a task ContextManifest and revalidates it before the initial, retry, failover and repair provider attempts; blocked or missing manifests stop further calls.",
+      "evidence": [
+        {
+          "path": "api/src/taskService.ts",
+          "line": 590,
+          "sourceSha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220",
+          "token": "await persistTaskContextManifest(root, contextManifest)"
+        },
+        {
+          "path": "api/src/taskService.ts",
+          "line": 53,
+          "sourceSha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220",
+          "token": "async function runWithCurrentTaskContextManifest"
+        },
+        {
+          "path": "api/src/taskService.ts",
+          "line": 62,
+          "sourceSha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220",
+          "token": "TASK_CONTEXT_MANIFEST_BLOCKED"
         }
       ]
     }
@@ -653,8 +804,8 @@
     {
       "id": "CTX-TRACE-009",
       "label": "freeze-context-manifest",
-      "current": "Invocation snapshots retain block titles, character lengths, tiers and truncation flags.",
-      "gap": "The exact eligible sources, exclusions, hashes, transformations, conflicts, token plan and cache/retry fingerprint cannot be replayed or explained.",
+      "current": "The session-level ContextManifest is frozen and the model-understanding worker can consume a persisted fingerprint and source-message set before the provider call.",
+      "gap": "The broader task-context pipeline still lacks complete eligibility, exclusion, transformation, token-plan and cache/retry binding across every executor.",
       "target": "Freeze an immutable ContextManifest before execution and bind prompt, model, policy and retry/cache keys to its fingerprint."
     },
     {
@@ -674,8 +825,8 @@
     {
       "id": "CTX-TRACE-012",
       "label": "verify-post-call-evidence-coverage",
-      "current": "Structured result parsing and invocation outcome do not prove which claims used, ignored or exceeded supplied evidence.",
-      "gap": "Fluent prose can contradict T0, invent facts, leak restricted material or miss required obligations while the process succeeds.",
+      "current": "Understanding review now checks evidence spans for every model claim against existing source-message bounds.",
+      "gap": "Claim support semantics, conflict handling, restricted-material leakage and obligation coverage remain outside this deterministic span check.",
       "target": "Check claim/evidence coverage, instruction boundary, conflicts and stale dependencies before candidate adoption or canon mutation."
     }
   ],

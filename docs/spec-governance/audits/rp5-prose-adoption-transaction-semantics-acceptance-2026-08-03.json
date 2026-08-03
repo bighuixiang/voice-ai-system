@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-prose-adoption-transaction-semantics",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Persisted prose adoption transactions must prove the lock check passed.",
+    "Mature prose transactions must preserve author authority and isolated revision semantics on read."
+  ],
+  "implementationRefs": [
+    "api/src/proseAdoptionTransaction.ts:assertProseAdoptionTransactionIntegrity",
+    "api/src/proseAdoptionTransaction.spec.ts:rehashed failed-lock transaction regression"
+  ],
+  "tests": {
+    "red": "A rehashed adoption transaction with lockCheckPassed=false was accepted by integrity validation.",
+    "green": "proseAdoptionTransaction.spec.ts passed 7/7 after state-semantic checks were added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

@@ -41,7 +41,10 @@ export function verifyTextRoundTrip(content: string, profile: TextProfile): Text
   const reconstructed = content;
   if (profile.schemaVersion !== "text-profile.v1" || profile.profileId !== "plain-markdown-v1") diagnostics.push("profile-unsupported");
   if (profile.sourceFingerprint !== hash(content)) diagnostics.push("source-fingerprint-mismatch");
-  if (buildTextProfile(content).newline !== profile.newline) diagnostics.push("newline-profile-mismatch");
+  const currentProfile = buildTextProfile(content);
+  if (currentProfile.newline !== profile.newline) diagnostics.push("newline-profile-mismatch");
+  if (currentProfile.trailingNewline !== profile.trailingNewline) diagnostics.push("trailing-newline-profile-mismatch");
+  if (currentProfile.protectedBlocks !== profile.protectedBlocks) diagnostics.push("protected-block-profile-mismatch");
   const originalFingerprint = hash(content);
   const reconstructedFingerprint = hash(reconstructed);
   if (originalFingerprint !== reconstructedFingerprint) diagnostics.push("round-trip-mismatch");

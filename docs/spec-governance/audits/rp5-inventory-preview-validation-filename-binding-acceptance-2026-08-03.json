@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-inventory-preview-validation-filename-binding",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Inventory preview and validation states must bind artifacts to the migration id encoded by their filenames.",
+    "A validly hashed preview or validation artifact transplanted under another filename must not advance migration state."
+  ],
+  "implementationRefs": [
+    "api/src/projectInventory.ts:governanceState preview/validation scans",
+    "api/src/projectInventory.spec.ts:wrong migration filename regressions"
+  ],
+  "tests": {
+    "red": "Wrongly named valid preview and validation artifacts were classified as migration-preview/migration-validated.",
+    "green": "projectInventory.spec.ts passed 13/13 after filename binding was added for preview and validation artifacts."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

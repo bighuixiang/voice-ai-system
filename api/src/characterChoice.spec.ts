@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { createCharacterDramaticContract } from "./characterContract.js";
 import { recordCharacterStateSnapshot } from "./characterState.js";
 import { createCharacterChoiceEvidence, observeCharacterChoiceEvidence, readCharacterChoiceEvidence } from "./characterChoice.js";
+import crypto from "node:crypto";
 
 async function fixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "character-choice-"));
@@ -44,5 +45,25 @@ describe("character choice evidence", () => {
     await expect(createCharacterChoiceEvidence({ root, projectSlug: "demo", characterId: "hero", contractId: contract.contractId, beforeSnapshotId: before.snapshotId, choice: "invent a portal", rejectedChoices: [], immediateCost: "now", delayedCost: "later", evidenceRefs: ["chapter://1"] })).rejects.toThrow("CHARACTER_CHOICE_NOT_VISIBLE");
     const planned = await createCharacterChoiceEvidence({ root, projectSlug: "demo", characterId: "hero", contractId: contract.contractId, beforeSnapshotId: before.snapshotId, choice: "warn", rejectedChoices: ["flee"], immediateCost: "window", delayedCost: "route exposed", evidenceRefs: ["chapter://1"] });
     await expect(observeCharacterChoiceEvidence({ root, evidenceId: planned.evidenceId, afterSnapshotId: before.snapshotId, outcomeRefs: ["chapter://1"] })).rejects.toThrow("CHARACTER_CHOICE_STATE_CHANGE_REQUIRED");
+  });
+
+  it("rejects a different snapshot when the character state is unchanged", async () => {
+    const { root, contract, before } = await fixture();
+    const planned = await createCharacterChoiceEvidence({ root, projectSlug: "demo", characterId: "hero", contractId: contract.contractId, beforeSnapshotId: before.snapshotId, choice: "warn", rejectedChoices: ["flee"], immediateCost: "window", delayedCost: "route exposed", evidenceRefs: ["chapter://1"] });
+    const unchanged = await recordCharacterStateSnapshot({ root, projectSlug: "demo", characterId: "hero", contractId: contract.contractId, asOf: "chapter-1:later", currentGoal: before.currentGoal, priority: before.priority, belief: before.belief, knowledge: before.knowledge, emotion: before.emotion, injury: before.injury, resources: before.resources, abilitiesAndIdentity: before.abilitiesAndIdentity, relationshipStances: before.relationshipStances, obligations: before.obligations, availableChoices: before.availableChoices, sourceRefs: ["chapter://1#later"] });
+    await expect(observeCharacterChoiceEvidence({ root, evidenceId: planned.evidenceId, afterSnapshotId: unchanged.snapshotId, outcomeRefs: ["chapter://1#later"] })).rejects.toThrow("CHARACTER_CHOICE_STATE_CHANGE_REQUIRED");
+  });
+
+  it("fails closed when a re-signed observed choice loses its outcome evidence", async () => {
+    const { root, contract, before } = await fixture();
+    const planned = await createCharacterChoiceEvidence({ root, projectSlug: "demo", characterId: "hero", contractId: contract.contractId, beforeSnapshotId: before.snapshotId, choice: "warn", rejectedChoices: ["flee"], immediateCost: "window", delayedCost: "route exposed", evidenceRefs: ["chapter://1#scene"] });
+    const after = await recordCharacterStateSnapshot({ root, projectSlug: "demo", characterId: "hero", contractId: contract.contractId, asOf: "chapter-1:end", currentGoal: "protect ally", priority: "high", belief: "ally may trust me", knowledge: ["route exposed"], emotion: "resolved", injury: "none", resources: ["key"], abilitiesAndIdentity: ["scout"], relationshipStances: [], obligations: ["protect ally"], availableChoices: ["hide"], sourceRefs: ["chapter://1#end"] });
+    const observed = await observeCharacterChoiceEvidence({ root, evidenceId: planned.evidenceId, afterSnapshotId: after.snapshotId, outcomeRefs: ["chapter://1#end"] });
+    const target = path.join(root, "sessions", "character-choice-evidence", `${observed.evidenceId}.json`);
+    const { fingerprint: _old, ...base } = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const resigned = { ...base, outcomeRefs: [] };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readCharacterChoiceEvidence(root, observed.evidenceId)).rejects.toThrow("CHARACTER_CHOICE_EVIDENCE_INTEGRITY_FAILED");
   });
 });

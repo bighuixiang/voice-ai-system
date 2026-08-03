@@ -20,4 +20,11 @@ describe("character voice profile", () => {
     expect(() => compileCharacterVoiceVariant({ ...created, version: "voice-v2" }, { previousVersion: "voice-v1", emotion: "calm", relationshipStage: "same", powerPosition: "equal", knowledgeBoundary: ["fact"], utterance: "A long generic speech.", variantEvidenceRefs: [] })).toThrow("VOICE_PROFILE_CHANGE_EVIDENCE_REQUIRED");
     expect(() => createCharacterVoiceProfile({ ...profile, syntaxAndPauses: "", sourceRefs: [] })).toThrow("VOICE_PROFILE_FIELDS_REQUIRED");
   });
+
+  it("rejects blank state or source entries instead of treating them as evidence", () => {
+    expect(() => createCharacterVoiceProfile({ ...profile, forbiddenDrift: [""] })).toThrow("VOICE_PROFILE_FIELDS_REQUIRED");
+    const created = createCharacterVoiceProfile(profile);
+    expect(() => compileCharacterVoiceVariant(created, { emotion: "fear", relationshipStage: "trusted", powerPosition: "equal", knowledgeBoundary: [""], utterance: "I will go.", variantEvidenceRefs: ["voice://scene"] })).toThrow("VOICE_VARIANT_STATE_REQUIRED");
+    expect(() => compileCharacterVoiceVariant(created, { emotion: "fear", relationshipStage: "trusted", powerPosition: "equal", knowledgeBoundary: ["gate sealed"], utterance: "I will go.", variantEvidenceRefs: [""] })).toThrow("VOICE_VARIANT_EVIDENCE_REQUIRED");
+  });
 });

@@ -8,7 +8,8 @@ import { freezeContextManifest } from "./contextManifest.js";
 import { createProseCandidate } from "./proseCandidate.js";
 import { adoptProseCandidate } from "./proseAdoption.js";
 import { settleChapter } from "./chapterSettlement.js";
-import { publishDerivedAssets, readDerivedPublicationTransaction } from "./derivedPublication.js";
+import { readChapterSettlementProjectionClosure } from "./chapterSettlementProjectionClosure.js";
+import { invalidateDerivedPublications, publishDerivedAssets, readDerivedPublicationTransaction, revalidateDerivedPublication } from "./derivedPublication.js";
 
 async function fixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "derived-publication-"));
@@ -24,8 +25,23 @@ describe("derived publication transaction", () => {
   it("commits multiple derived assets atomically and is idempotent", async () => {
     const { root, settlement } = await fixture(); const writes = [{ relativePath: "memory/summary.json", content: "{\"summary\":\"ok\"}\n" }, { relativePath: "quality/c1.json", content: "{\"score\":90}\n" }];
     const first = await publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes });
-    expect(first.status).toBe("committed"); expect(await publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes })).toEqual(first);
+    expect(first.status).toBe("committed");
+    await expect(readChapterSettlementProjectionClosure(root, `closure-${settlement.settlementId}-${first.transactionId}`)).resolves.toMatchObject({ derivedFingerprint: first.fingerprint });
+    expect(await publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes })).toEqual(first);
     await expect(fs.readFile(path.join(root, "memory", "summary.json"), "utf8")).resolves.toBe(writes[0].content);
+  });
+  it("rejects a replay with conflicting publication scope", async () => {
+    const { root, settlement } = await fixture();
+    const writes = [{ relativePath: "memory/summary.json", content: "stable\n" }];
+    await publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes });
+    await expect(publishDerivedAssets({ root, projectSlug: "other", chapterId: "c1", settlementId: settlement.settlementId, writes })).rejects.toThrow("DERIVED_PUBLICATION_CONFLICT");
+  });
+  it("does not hide drift in committed derived outputs on replay", async () => {
+    const { root, settlement } = await fixture();
+    const writes = [{ relativePath: "memory/summary.json", content: "stable\n" }];
+    await publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes });
+    await fs.writeFile(path.join(root, "memory", "summary.json"), "drifted\n", "utf8");
+    await expect(publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes })).rejects.toThrow("DERIVED_PUBLICATION_OUTPUT_STALE");
   });
 
   it("rolls every derived asset back when a later write fails", async () => {
@@ -45,5 +61,39 @@ describe("derived publication transaction", () => {
     value.projectSlug = "tampered";
     await fs.writeFile(target, `${JSON.stringify(value)}\n`, "utf8");
     await expect(publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes })).rejects.toThrow("DERIVED_PUBLICATION_INTEGRITY_FAILED");
+  });
+
+  it("fails closed when a durable derived transaction is read after tampering", async () => {
+    const { root, settlement } = await fixture();
+    const first = await publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes: [{ relativePath: "memory/summary.json", content: "stable\n" }] });
+    const target = path.join(root, "sessions", "derived-publications", `${first.transactionId}.json`);
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    value.status = "stale";
+    await fs.writeFile(target, `${JSON.stringify(value)}\n`, "utf8");
+    await expect(readDerivedPublicationTransaction(root, first.transactionId)).rejects.toThrow("DERIVED_PUBLICATION_INTEGRITY_FAILED");
+  });
+  it("rejects a re-signed derived transaction with invalid write semantics", async () => {
+    const { root, settlement } = await fixture();
+    const first = await publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes: [{ relativePath: "memory/summary.json", content: "stable\n" }] });
+    const target = path.join(root, "sessions", "derived-publications", `${first.transactionId}.json`);
+    const { fingerprint: _old, ...base } = first;
+    const resigned = { ...base, writes: [], fingerprint: crypto.createHash("sha256").update(JSON.stringify({ ...base, writes: [] })).digest("hex") };
+    await fs.writeFile(target, `${JSON.stringify(resigned)}\n`, "utf8");
+    await expect(readDerivedPublicationTransaction(root, first.transactionId)).rejects.toThrow("DERIVED_PUBLICATION_INTEGRITY_FAILED");
+  });
+
+  it("marks committed derivatives stale after a retcon without deleting their bytes", async () => {
+    const { root, settlement } = await fixture();
+    const writes = [{ relativePath: "memory/summary.json", content: "stable\n" }];
+    const first = await publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes });
+    const invalidated = await invalidateDerivedPublications(root, "claim-retcon", "new canon evidence");
+    expect(invalidated).toEqual([first.transactionId]);
+    expect((await readDerivedPublicationTransaction(root, first.transactionId))?.status).toBe("stale");
+    await expect(fs.readFile(path.join(root, "memory", "summary.json"), "utf8")).resolves.toBe("stable\n");
+    await expect(publishDerivedAssets({ root, projectSlug: "demo", chapterId: "c1", settlementId: settlement.settlementId, writes })).rejects.toThrow("DERIVED_PUBLICATION_REVALIDATION_REQUIRED");
+    const replacement = await revalidateDerivedPublication(root, first.transactionId, [{ relativePath: "memory/summary.json", content: "revalidated\n" }]);
+    expect(replacement.status).toBe("committed");
+    expect(replacement.transactionId).not.toBe(first.transactionId);
+    await expect(fs.readFile(path.join(root, "memory", "summary.json"), "utf8")).resolves.toBe("revalidated\n");
   });
 });

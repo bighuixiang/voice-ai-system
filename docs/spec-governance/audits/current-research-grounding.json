@@ -7,7 +7,7 @@
   "sourceFiles": [
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/platformLibrary.ts",
@@ -15,15 +15,15 @@
     },
     {
       "path": "api/src/contextAssembler.ts",
-      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+      "sha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963"
     },
     {
       "path": "api/src/knowledgeIndex.ts",
-      "sha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74"
+      "sha256": "75fcaf469761c159527b8e8363bb055da4dd809becb5c5d74dada7d7e6459c4a"
     },
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/database.ts",
@@ -31,11 +31,11 @@
     },
     {
       "path": "api/src/projectBackup.ts",
-      "sha256": "807bec8d473603504aa1ee33c3d862f8a3c9ed56cbf9b32afff7feafbee93bcf"
+      "sha256": "a9b155022d899da6186f3443d36cd00339d8a091f723c0667ab142b05d81a495"
     },
     {
       "path": "ui/src/types/novel.ts",
-      "sha256": "41b44c1e1ec2e65914e62c370d515c0e33636730d606909f0f4693b2610132ce"
+      "sha256": "8b40b4f8361cfddaee5bbc1bc946530c5391fe3045d27c4e62dfe5b62629ff24"
     },
     {
       "path": "ui/src/components/novel/PlatformLibraryPanel.vue",
@@ -70,9 +70,9 @@
   },
   "operationalSnapshot": {
     "totals": {
-      "projects": 8,
-      "knowledgeFacts": 28,
-      "knowledgeTriples": 24,
+      "projects": 11,
+      "knowledgeFacts": 32,
+      "knowledgeTriples": 26,
       "externalKnowledgeSourceRecords": 0,
       "candidateResearchFiles": 0
     },
@@ -191,17 +191,20 @@
       {
         "projectOrdinal": 5,
         "inputFingerprints": {
-          "facts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          "triples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          "facts": "b82fcbda7aaf35003676fb257f64efeef32771ab1c9bb35bac17a88edc11b1f0",
+          "triples": "38c16d922a1e6fecb9e247a60ea0ea0c22813577a8bf7735e8905a392cd9dcc0"
         },
         "parseHealth": {
           "invalidFactLines": 0,
           "invalidTripleLines": 0
         },
         "internalKnowledge": {
-          "facts": 0,
-          "triples": 0,
-          "bySourceType": {},
+          "facts": 4,
+          "triples": 2,
+          "bySourceType": {
+            "chapter-summary": 2,
+            "story-control": 2
+          },
           "externalSourceRecords": 0,
           "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
         },
@@ -218,8 +221,8 @@
       {
         "projectOrdinal": 6,
         "inputFingerprints": {
-          "facts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          "triples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          "facts": null,
+          "triples": null
         },
         "parseHealth": {
           "invalidFactLines": 0,
@@ -245,6 +248,33 @@
       {
         "projectOrdinal": 7,
         "inputFingerprints": {
+          "facts": null,
+          "triples": null
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
           "facts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
           "triples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
@@ -270,7 +300,61 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 9,
+        "inputFingerprints": {
+          "facts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "triples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 10,
+        "inputFingerprints": {
+          "facts": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "triples": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "parseHealth": {
+          "invalidFactLines": 0,
+          "invalidTripleLines": 0
+        },
+        "internalKnowledge": {
+          "facts": 0,
+          "triples": 0,
+          "bySourceType": {},
+          "externalSourceRecords": 0,
+          "interpretation": "The current knowledge index derives story memory from chapter summaries, ledgers, and story control; an internal source label is not an external factual citation."
+        },
+        "researchArtifacts": {
+          "candidateDirectoryFiles": 0,
+          "obligations": 0,
+          "sourceSnapshots": 0,
+          "claims": 0,
+          "consumptionReceipts": 0,
+          "factCheckReports": 0,
+          "settlements": 0
+        }
+      },
+      {
+        "projectOrdinal": 11,
         "inputFingerprints": {
           "facts": "010f930dbf3a607e4414734bac24f8b00cf16d79b7bc7427bc4eb38ab8c68032",
           "triples": "e3f8883601e628d6ee7c1ed12d165ef3edabf9391b14294f2d81abf2b0249919"
@@ -300,7 +384,7 @@
       }
     ],
     "platformLibraryMirror": {
-      "fingerprint": "4d795c6a6e14ebcd70e431f333b17b04fda7fd4d8e58a4a480f3b308b959af52",
+      "fingerprint": "ec57f9c97c8ba106a9846f51fd29b195f198b17e761dd74e30ffde81ed1047b3",
       "assets": 0,
       "prompts": 7,
       "roles": 7,
@@ -309,7 +393,7 @@
     },
     "platformAssetDatabase": {
       "available": true,
-      "fingerprint": "44c2ddb494448ebbc8a0e5e6d077ff1b8dbc61ed3f5fcf6147bbf58a6c945358",
+      "fingerprint": "1c06e7bfa184bdcefe1df846c414a91b57aabc26d823704dffc463fc5cec46d4",
       "assets": 0,
       "links": 0,
       "byType": {},
@@ -334,9 +418,9 @@
   },
   "summary": {
     "auditedStages": 12,
-    "projectsScanned": 8,
-    "internalKnowledgeFacts": 28,
-    "internalKnowledgeTriples": 24,
+    "projectsScanned": 11,
+    "internalKnowledgeFacts": 32,
+    "internalKnowledgeTriples": 26,
     "externalKnowledgeSourceRecords": 0,
     "candidateResearchFiles": 0,
     "platformAssets": 0,
@@ -358,12 +442,12 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 1193,
+          "line": 1320,
           "evidence": "export interface PlatformAsset"
         },
         {
           "path": "api/src/types.ts",
-          "line": 1200,
+          "line": 1327,
           "evidence": "filePath?: string;"
         }
       ]
@@ -403,12 +487,12 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 795,
+          "line": 829,
           "evidence": "export type KnowledgeSourceType"
         },
         {
           "path": "api/src/knowledgeIndex.ts",
-          "line": 259,
+          "line": 265,
           "evidence": "factSource(\"chapter-summary\""
         }
       ]
@@ -418,12 +502,12 @@
       "evidence": [
         {
           "path": "api/src/knowledgeIndex.ts",
-          "line": 118,
+          "line": 124,
           "evidence": "requestOpenAiCompatibleEmbeddings"
         },
         {
           "path": "api/src/knowledgeIndex.ts",
-          "line": 183,
+          "line": 189,
           "evidence": "function cosineScore"
         }
       ]
@@ -433,12 +517,12 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 348,
+          "line": 387,
           "evidence": "async function buildPlatformSkillBlocks"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 608,
+          "line": 656,
           "evidence": "async function buildKnowledgeMemoryBlocks"
         }
       ]

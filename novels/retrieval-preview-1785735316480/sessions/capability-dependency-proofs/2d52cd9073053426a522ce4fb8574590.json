@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "capability-dependency-proof.v1",
+  "projectSlug": "retrieval-preview-1785735316480",
+  "sliceId": "runtime",
+  "requiredKernels": [
+    {
+      "id": "K0-contract",
+      "version": "v1",
+      "verifiedBy": [
+        "project-create"
+      ]
+    }
+  ],
+  "writeAuthority": "runtime-store",
+  "unmet": [],
+  "status": "satisfied",
+  "fingerprint": "39422750fcf3fdb615c03a7c191d5af681961a36d82cac7d3b6aad3e27470d7b"
+}

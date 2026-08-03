@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "project-capability-manifest.v1",
+  "projectId": "rp2-low-input-1785767924528",
+  "projectSchemaVersion": "v1",
+  "enabledSlices": [
+    "story-seed",
+    "runtime",
+    "session",
+    "delivery"
+  ],
+  "readable": [
+    "story-seed",
+    "runtime",
+    "session",
+    "delivery"
+  ],
+  "writable": [
+    "story-seed",
+    "runtime",
+    "session",
+    "delivery"
+  ],
+  "migrationStatus": "verified",
+  "rollbackWindow": "24h",
+  "missingDependencies": [],
+  "fingerprint": "1e2a28adb90210c59ef2000480ca5c0e9fd0ecd8432483a62bc9631d08f3ced5"
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-prose-manifest-pointer-scope",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "A current prose-generation pointer must resolve only to a manifest for the requested chapter intent.",
+    "A valid manifest fingerprint alone must not authorize cross-intent projection."
+  ],
+  "implementationRefs": [
+    "api/src/proseGenerationManifest.ts:readCurrentProseGenerationManifest",
+    "api/src/proseGenerationManifest.spec.ts:redirected current pointer regression"
+  ],
+  "tests": {
+    "red": "A valid pointer redirected intent-ch-1 to another chapter's manifest and was accepted.",
+    "green": "proseGenerationManifest.spec.ts passed 6/6 after chapter-intent binding was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

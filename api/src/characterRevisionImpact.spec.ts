@@ -23,4 +23,11 @@ describe("character revision impact", () => {
     expect(result.staleDependencyIds).toEqual([]);
     expect(result.issues).toContain("CROSS_SCOPE_DEPENDENCY_IGNORED");
   });
+
+  it("propagates a character change across every character-dependent product surface", () => {
+    const dependencyKinds = ["outline", "prose", "knowledge", "presence", "reader-experience", "ending"] as const;
+    const result = analyzeCharacterRevisionImpact({ ...base, dependencies: dependencyKinds.map((kind, index) => ({ dependencyId: `${kind}-${index}`, kind, characterId: "hero", references: ["falseBelief"], status: "current" as const })) });
+    expect(result.staleDependencyIds).toHaveLength(dependencyKinds.length);
+    expect(result.minimumActions).toHaveLength(dependencyKinds.length);
+  });
 });

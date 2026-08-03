@@ -19,6 +19,9 @@ describe("obligation resolution safeguards", () => {
     expect(merge.status).toBe("proposal");
     expect(merge.sourceRefs).toHaveLength(2);
   });
+  it("rejects a merge that drops one obligation's distinct payoff condition", () => {
+    expect(() => proposeObligationMerge({ obligationIds: ["obl-1", "obl-2"], sharedEntityRefs: ["mentor"], sourceRefs: ["scene://c1#s1", "scene://c2#s2"], payoffConditions: ["find body"] })).toThrow("OBLIGATION_MERGE_FIELDS_REQUIRED");
+  });
 
   it("blocks incompatible canon obligations and reports alternatives", () => {
     const conflict = detectObligationConflict({ conflictId: "conf-1", obligations: [{ obligationId: "obl-1", requirement: "door opens", window: "chapter-5", knowledge: "reader-knows" }, { obligationId: "obl-2", requirement: "door never opens", window: "chapter-5", knowledge: "reader-knows" }], alternatives: ["reinterpret clue", "split answer"] });

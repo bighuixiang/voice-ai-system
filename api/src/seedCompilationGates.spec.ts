@@ -1,0 +1,23 @@
+import { describe, expect, it } from "vitest";
+import { allowCompatibleExploration, applyPartialAdoption, applyScopedDefault, assessReadinessScope, authorizeReadinessScope, blockGenreInference, captureSeed, dedupeCandidates, describeCandidateDifference, deterministicCompile, extractSeedFields, preserveCompileFailure, preserveInterpretations, prioritizeQuestion, recommendEvidenceCandidate, recompileAffected, requireProvenance, separateProjectState, shadowLegacyCompile } from "./seedCompilationGates.js";
+describe("seed compilation gates", () => {
+  it("persists raw seed before model call", () => { expect(captureSeed({ messageId: "m1", text: "idea", persisted: true, modelStarted: false })).toMatchObject({ status: "seed_captured", modelCalls: 0 }); });
+  it("does not fill unknown fields from one sentence", () => { expect(extractSeedFields({ text: "programmer sees reset city" }).unknown).toContain("ending"); });
+  it("marks unanchored contract claims provisional", () => { expect(requireProvenance({ claim: "save sister", spans: [] }).status).toBe("provisional"); });
+  it("keeps genre conventions as proposals", () => { expect(blockGenreInference({ explicit: [], inferred: ["bloodline"] }).confirmed).toEqual([]); });
+  it("freezes ambiguous branches without choosing canon", () => { expect(preserveInterpretations({ shared: ["future self"], branches: ["time", "clone", "belief"], decided: false }).canonBranch).toBeUndefined(); });
+  it("allows near-term exploration compatible with all branches", () => { expect(allowCompatibleExploration({ branches: ["time", "clone"], candidateSupports: ["time", "clone"] }).hiddenCanon).toBe(true); });
+  it("uses product scope in readiness", () => { expect(assessReadinessScope({ product: "probe", sufficient: true, missing: [] }).status).toBe("ready_for_scope"); });
+  it("recommends evidence over fill rate", () => { expect(recommendEvidenceCandidate({ candidates: [{ id: "full", coverage: 1, evidence: .4 }, { id: "core", coverage: .5, evidence: .9 }] })).toBe("core"); });
+  it("scopes reversible defaults", () => { expect(applyScopedDefault({ scope: "probe-1", field: "POV", confirmed: ["desire"], retract: false }).scope).toBe("probe-1"); });
+  it("asks the question with greatest branch impact first", () => { expect(prioritizeQuestion({ questions: [{ id: "name", branchImpact: 1 }, { id: "relation", branchImpact: 9 }] })).toBe("relation"); });
+  it("dedupes cosmetic candidate variants and rejects hard violations", () => { expect(dedupeCandidates({ candidates: [{ id: "a", seed: "s", fingerprint: "f", hardValid: true }, { id: "b", seed: "s", fingerprint: "f", hardValid: true }, { id: "c", seed: "s", fingerprint: "x", hardValid: false }] })).toMatchObject({ kept: ["a"], dropped: ["b", "c"] }); });
+  it("shows candidate assumptions and impacts", () => { expect(describeCandidateDifference({ facts: ["f"], assumptions: ["a"], unknown: ["u"], impacts: ["ch"], hardValid: true }).selectable).toBe(true); });
+  it("applies partial adoption only", () => { expect(applyPartialAdoption({ accepted: ["symbiosis"], rejected: ["mentor"], unknown: ["ending"] })).toMatchObject({ locked: ["symbiosis"], excluded: ["mentor"], unknown: ["ending"] }); });
+  it("recompiles only affected subgraph", () => { expect(recompileAffected({ affected: ["relation"], unrelated: ["genre"] }).untouched).toEqual(["genre"]); });
+  it("separates saved project from understanding readiness", () => { expect(separateProjectState({ projectCreated: true, interpreting: true, hasCanon: false }).canGenerateCanonOutline).toBe(false); });
+  it("preserves repair-required state after compiler failure", () => { expect(preserveCompileFailure({ previousStable: "seed", repairFailed: true }).state).toBe("repair_required"); });
+  it("keeps legacy compile shadow-only", () => { expect(shadowLegacyCompile({ importedIdea: "rough", bodyEvidence: "canon", authorConfirmed: false }).writesLegacy).toBe(false); });
+  it("replays deterministic compilation from frozen fingerprints", () => { expect(deterministicCompile({ inputFingerprint: "x", outputFingerprint: "x", seed: "42" }).reproducible).toBe(true); });
+  it("limits readiness proof to declared scope", () => { expect(authorizeReadinessScope({ scope: "volume-1-outline", endUnknown: true }).fullBook).toBe(false); });
+});

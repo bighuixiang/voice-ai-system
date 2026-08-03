@@ -32,6 +32,10 @@ function verifyTree(tree: PublicationTree): boolean {
   const { fingerprint, ...base } = tree;
   return hash(base) === fingerprint;
 }
+function verifyTreeSemantics(tree: PublicationTree): boolean {
+  if (tree.schemaVersion !== "publication-tree.v1" || typeof tree.editionId !== "string" || !tree.editionId.trim() || typeof tree.projectSlug !== "string" || !tree.projectSlug.trim() || tree.readerSafe !== true || !Array.isArray(tree.chapters)) return false;
+  return tree.chapters.every((chapter) => typeof chapter.chapterId === "string" && chapter.chapterId.trim() && typeof chapter.title === "string" && chapter.title.trim() && Number.isInteger(chapter.order) && Array.isArray(chapter.blocks) && chapter.blocks.every((block) => block.kind === "scene_break" || ((block.kind === "paragraph" || block.kind === "heading") && typeof block.text === "string" && block.text.trim() && (block.kind !== "heading" || Number.isInteger(block.level) && block.level >= 1 && block.level <= 6))));
+}
 
 async function writeTree(target: string, tree: PublicationTree): Promise<void> {
   await fs.mkdir(path.dirname(target), { recursive: true });
@@ -73,6 +77,7 @@ export async function readPublicationTree(root: string, editionId: string): Prom
   try {
     const tree = JSON.parse(await fs.readFile(treePath(root, editionId), "utf8")) as PublicationTree;
     if (!verifyTree(tree)) throw new Error("PUBLICATION_TREE_INTEGRITY_FAILED");
+    if (!verifyTreeSemantics(tree)) throw new Error("PUBLICATION_TREE_SEMANTIC_INVALID");
     return tree;
   }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }

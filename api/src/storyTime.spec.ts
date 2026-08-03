@@ -2,7 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { createStoryTimeEvent, compareStoryTime, listStoryTimeEvents, readStoryTimeEvent } from "./storyTime.js";
+import { buildStoryTimeEventOrder, createStoryTimeEvent, compareStoryTime, listStoryTimeEvents, readStoryTimeEvent } from "./storyTime.js";
+import crypto from "node:crypto";
 
 const input = (root: string, eventId = "siege-start") => ({ root, projectSlug: "demo", eventId, label: "siege starts", timelineId: "main", start: "day-010", end: "day-010", duration: "1 day", category: "event" as const, uncertainty: "exact", parallelLine: "north-front", sourceRefs: ["chapter://1#event"] });
 
@@ -41,5 +42,26 @@ describe("story time event", () => {
     const cooldown = await createStoryTimeEvent({ ...input(root, "cooldown"), category: "cooldown", start: "day-009", end: "day-010", duration: "2 days" });
     expect(training.category).toBe("training");
     expect(compareStoryTime(training, cooldown)).toBe("before");
+  });
+
+  it("builds deterministic event order from persisted story-time fields", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "story-time-order-"));
+    const later = await createStoryTimeEvent({ ...input(root, "later"), start: "day-010", end: "day-010" });
+    const earlier = await createStoryTimeEvent({ ...input(root, "earlier"), start: "day-002", end: "day-002" });
+    const unknown = await createStoryTimeEvent({ ...input(root, "unknown-order"), start: "", end: "", uncertainty: "unknown" });
+    const order = buildStoryTimeEventOrder([later, unknown, earlier]);
+    expect(order).toEqual({ earlier: 0, later: 1 });
+    expect(order).not.toHaveProperty("unknown-order");
+  });
+
+  it("fails closed when a re-signed event reverses its declared time range", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "story-time-tamper-"));
+    const event = await createStoryTimeEvent(input(root));
+    const target = path.join(root, "sessions", "story-time-events", `${event.eventId}.json`);
+    const { fingerprint: _old, ...base } = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const resigned = { ...base, start: "day-020", end: "day-010" };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readStoryTimeEvent(root, event.eventId)).rejects.toThrow("STORY_TIME_INTEGRITY_FAILED");
   });
 });

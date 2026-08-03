@@ -6,4 +6,10 @@ describe("surface and mechanism separation", () => {
   it("stores surface and mechanism independently", () => { const pattern = createSeparatedPattern(valid); expect(pattern.surface.vocabulary).toEqual(["短促"]); expect(pattern.mechanism.causality).toContain("choice"); });
   it("blocks cross-project surface or identifiable combinations", () => { expect(evaluateCrossProjectTransfer({ ...valid, targetProjectSlug: "other", reuseSurface: true }).status).toBe("blocked"); expect(evaluateCrossProjectTransfer({ ...valid, targetProjectSlug: "other", identifiableSourceCombination: true }).status).toBe("blocked"); });
   it("allows only abstracted mechanism after anti-imitation guard", () => { const allowed = evaluateCrossProjectTransfer({ ...valid, targetProjectSlug: "other", reuseSurface: false, identifiableSourceCombination: false }); expect(allowed.status).toBe("allowed"); const blocked = evaluateCrossProjectTransfer({ ...valid, targetProjectSlug: "other", reuseSurface: false, identifiableSourceCombination: false, abstractionProof: "", antiImitationPassed: false }); expect(blocked.status).toBe("blocked"); });
+  it("requires complete surface/mechanism evidence and a real cross-project target", () => {
+    expect(() => createSeparatedPattern({ ...valid, surface: { ...valid.surface, vocabulary: [" "] } })).toThrow("SURFACE_MECHANISM_SURFACE_REQUIRED");
+    expect(() => createSeparatedPattern({ ...valid, mechanism: { ...valid.mechanism, payoffMethod: "" } })).toThrow("SURFACE_MECHANISM_MECHANISM_REQUIRED");
+    expect(() => createSeparatedPattern({ ...valid, sourceRefs: [" "] })).toThrow("SURFACE_MECHANISM_SOURCE_REQUIRED");
+    expect(() => evaluateCrossProjectTransfer({ ...valid, targetProjectSlug: " ", reuseSurface: false, identifiableSourceCombination: false })).toThrow("CROSS_PROJECT_TARGET_REQUIRED");
+  });
 });

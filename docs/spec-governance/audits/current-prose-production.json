@@ -7,27 +7,27 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/chapterSettlement.ts",
-      "sha256": "481906f680153a4ab6cf2f10b563b8195fa2d85aa8e9623b235892b594925ecd"
+      "sha256": "b81d37cfe936d3f8db2a33ec79314833b0b72c2f28c63e64ce78e208d8b87f4d"
     },
     {
       "path": "api/src/proseValidation.ts",
-      "sha256": "5f07efdcf14be88c59bae8614fc4758555e1923482ffa06a367efee648fffc3e"
+      "sha256": "8eef02190ba02d8f3e46814af2fcf694bf7206b887d12e4799e9ed0992f584e6"
     },
     {
       "path": "api/src/proseReview.ts",
-      "sha256": "64415f70d9a8128038ccb36c28f93db835cd190cad60f572f9c6efd021529ccc"
+      "sha256": "8a36c92e17f50eace91195e2fcda7dcf63598ca13ea6ae35b74ddb14c833bce3"
     },
     {
       "path": "api/src/authorFeedback.ts",
-      "sha256": "c78d6c10b6f8713281fba2330efc0ebdb4c0cd882f6652eff8260012fbd24139"
+      "sha256": "001ce5f57528f6c83c21801d69f47d4433427546c9e3dedd49a1802bef5e2abe"
     },
     {
       "path": "api/src/derivedPublication.ts",
-      "sha256": "e331f9f320f7d11c8d523e747fc08c99864770a8e0e3065ff3c5c8dd9378e3af"
+      "sha256": "c98d338a54807b63d0f634b83f3be3dae4032de0961c9cf413378e2ee9ef726d"
     },
     {
       "path": "api/src/fileVersions.ts",
@@ -35,47 +35,47 @@
     },
     {
       "path": "api/src/knowledgeIndex.ts",
-      "sha256": "ebf0f26f5941d42d61c02dae9875c953bb2908697d160703b97129f88e730f74"
+      "sha256": "75fcaf469761c159527b8e8363bb055da4dd809becb5c5d74dada7d7e6459c4a"
     },
     {
       "path": "api/src/contextManifest.ts",
-      "sha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc"
+      "sha256": "f93a0831205377002230d96151f33c2d37c6b087ba134000762b5e93a058f68b"
     },
     {
       "path": "api/src/runtimeEngine.ts",
-      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      "sha256": "232bd54d3d76d340af9787f1ea5c522966499e7dad92da82faa24dfaa66b6572"
     },
     {
       "path": "api/src/proseCandidate.ts",
-      "sha256": "551b4e3e996b7b237fc1572ec11c49245ec0ea22fb3101996577f03090974ab2"
+      "sha256": "8cd08fc6f402d43929f02946f66d19cf14ae1be7b68ca93dd9ec35d90faf0c40"
     },
     {
       "path": "api/src/proseAdoption.ts",
-      "sha256": "4580625cc0112d5dbe14800cf1ed967932dff1c12c2176d58785ee23f3482349"
+      "sha256": "7cfff393bdd9f036c87f880755994598ddfbdb527ceb3115163df2776d92d79a"
     },
     {
       "path": "api/src/runtimeFiles.ts",
-      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
+      "sha256": "c041b4689b107f2798788aa7effa7edfa0fb32efda1cd8ec0a6b58c0ecae75d2"
     },
     {
       "path": "api/src/taskService.ts",
-      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+      "sha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220"
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/writingCockpit.ts",
-      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+      "sha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6"
     },
     {
       "path": "ui/src/services/novelApi.ts",
-      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+      "sha256": "63b05fc817df12c8cb5e22ed42a3889f2ca62ed6a9cdf78d10e7fd3d5a9bfb5a"
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     }
   ],
   "privacy": {
@@ -105,10 +105,10 @@
   "operationalSnapshot": {
     "substantialInventoryThresholdChars": 800,
     "totals": {
-      "projects": 8,
-      "chapters": 219,
-      "contentFiles": 213,
-      "nonEmptyContentFiles": 213,
+      "projects": 11,
+      "chapters": 222,
+      "contentFiles": 216,
+      "nonEmptyContentFiles": 216,
       "substantialContentFiles": 71,
       "draftedMissingOrUnder800Chars": 0,
       "plannedWithAtLeast800Chars": 0,
@@ -126,7 +126,7 @@
       {
         "projectOrdinal": 1,
         "inputFingerprints": {
-          "project": "e1ca3b5dbbc3bf43c56669a7e50fa642bcedd689bb4a72ed2722ae1c8552c788",
+          "project": "7fad4d6326ce37e3713b75781afac7e5dfe6191b67c4f7fbc5d6ec2097e35676",
           "chapterContentAggregate": "218b89b5c5eeff0445494f344d8678f3a27d43b0f5f5f0ea4d4c2aac06ba57af",
           "taskHistory": null,
           "invocationHistory": null,
@@ -466,6 +466,239 @@
       {
         "projectOrdinal": 5,
         "inputFingerprints": {
+          "project": "644502787a97729bf9744ddc043f336703c66a6b3aa1293c4957e682b7cdf1fe",
+          "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4",
+          "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "invocationHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recapHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 3,
+          "statuses": {
+            "empty": 3
+          },
+          "contentFiles": 3,
+          "nonEmptyContentFiles": 3,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 3,
+          "contentChars": {
+            "sampleCount": 3,
+            "min": 7,
+            "p50": 7,
+            "p95": 7,
+            "max": 7,
+            "average": 7
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 0,
+          "proseTasks": 0,
+          "byType": {},
+          "byStatus": {},
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 3,
+          "summariesWithAcceptedSignal": 1,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprints": {
+          "project": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "chapterContentAggregate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "taskHistory": null,
+          "invocationHistory": null,
+          "recapHistory": null,
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 0,
+          "statuses": {},
+          "contentFiles": 0,
+          "nonEmptyContentFiles": 0,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 0,
+          "contentChars": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 0,
+          "proseTasks": 0,
+          "byType": {},
+          "byStatus": {},
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 0,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprints": {
+          "project": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "chapterContentAggregate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "taskHistory": null,
+          "invocationHistory": null,
+          "recapHistory": null,
+          "versionManifest": null
+        },
+        "parseHealth": {
+          "projectValid": true,
+          "versionManifestValid": true,
+          "invalidTaskLines": 0,
+          "invalidInvocationLines": 0,
+          "invalidRecapLines": 0
+        },
+        "chapters": {
+          "total": 0,
+          "statuses": {},
+          "contentFiles": 0,
+          "nonEmptyContentFiles": 0,
+          "substantialAtLeast800Chars": 0,
+          "uniqueContentFingerprints": 0,
+          "contentChars": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          },
+          "draftedMissingOrUnder800Chars": 0,
+          "plannedWithAtLeast800Chars": 0,
+          "emptyWithAtLeast800Chars": 0,
+          "checkedWithAtLeast800Chars": 0
+        },
+        "quality": {
+          "reportFiles": 0,
+          "parsedReports": 0,
+          "chapterCoverage": 0,
+          "overallScores": {
+            "sampleCount": 0,
+            "min": null,
+            "p50": null,
+            "p95": null,
+            "max": null,
+            "average": null
+          }
+        },
+        "taskEvidence": {
+          "totalLatestTasks": 0,
+          "proseTasks": 0,
+          "byType": {},
+          "byStatus": {},
+          "invocations": 0,
+          "invocationAdoptionDecisions": {},
+          "acceptedPatchTargets": 0
+        },
+        "versioning": {
+          "snapshots": 0,
+          "bySource": {},
+          "byReason": {},
+          "filesCovered": 0
+        },
+        "recapAndMemory": {
+          "recapCandidates": 0,
+          "summaryFiles": 0,
+          "summariesWithAcceptedSignal": 0,
+          "acceptedRecapIds": 0
+        },
+        "interpretation": {
+          "hasGovernedAdoptionReceipt": false,
+          "hasChapterSettlementProof": false,
+          "note": "Content length, status, score, snapshot, task success, or recap count is inventory evidence only and cannot prove author adoption, semantic quality, canon safety, or chapter settlement."
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprints": {
           "project": "8ccb36fcf31ebf5c76693050ce597c013ebc6cd5cf451eb65839a977fdc96917",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4",
           "taskHistory": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -543,7 +776,7 @@
         }
       },
       {
-        "projectOrdinal": 6,
+        "projectOrdinal": 9,
         "inputFingerprints": {
           "project": "4cccf6afb8baf83974b8d2bc70727367301ca7b70335e6672b52807796896700",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4",
@@ -622,7 +855,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprints": {
           "project": "72aabb0fc57d6eb5fefdd328823144da06fccedc73875b5413e2853bb862ecf7",
           "chapterContentAggregate": "5c1a33523a8f9e6fa7996c68af58f1c2d95b600b296dfa045685d02c7f7371d4",
@@ -701,7 +934,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprints": {
           "project": "a3f49a156635fec6d0cb9622671c84d9edd685f2692f0f127a3e197609cde341",
           "chapterContentAggregate": "2d36728f3a770439d66fd3730878e502a4bf53f4c0dbe03aad5931804ad9d63d",
@@ -794,8 +1027,8 @@
   },
   "summary": {
     "auditedStages": 13,
-    "projectsScanned": 8,
-    "chaptersInventoried": 219,
+    "projectsScanned": 11,
+    "chaptersInventoried": 222,
     "substantialContentFiles": 71,
     "checkedChaptersWithSubstantialContent": 0,
     "qualityReports": 2,
@@ -816,17 +1049,17 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 803,
+          "line": 1049,
           "evidence": "reason: \"chapter_draft\""
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 943,
+          "line": 1247,
           "evidence": "reason: \"quality_self_repair\""
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 780,
+          "line": 1025,
           "evidence": "status: \"review_required\""
         }
       ],
@@ -838,12 +1071,12 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3881,
+          "line": 4539,
           "evidence": "await requestWritingRecapForAcceptedDraft"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3068,
+          "line": 3228,
           "evidence": "async function acceptWritingRecap"
         }
       ],
@@ -862,12 +1095,12 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3690,
+          "line": 4348,
           "evidence": "async function saveCurrentContent"
         },
         {
           "path": "api/src/app.ts",
-          "line": 2674,
+          "line": 8769,
           "evidence": "app.put(\"/api/novel/projects/:projectId/files/*\""
         }
       ],
@@ -881,7 +1114,7 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3780,
+          "line": 4438,
           "evidence": "rewriteCandidate.value = task.result"
         }
       ],
@@ -895,7 +1128,7 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3846,
+          "line": 4504,
           "evidence": "function acceptRewrite"
         }
       ],
@@ -909,12 +1142,12 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3870,
+          "line": 4528,
           "evidence": "async function acceptFocusDraft"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3881,
+          "line": 4539,
           "evidence": "await requestWritingRecapForAcceptedDraft"
         }
       ],
@@ -928,12 +1161,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2984,
+          "line": 9129,
           "evidence": "app.post(\"/api/novel/projects/:projectId/patches\""
         },
         {
           "path": "api/src/app.ts",
-          "line": 251,
+          "line": 729,
           "evidence": "for (const patch of patches)"
         }
       ],
@@ -947,7 +1180,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 803,
+          "line": 1049,
           "evidence": "reason: \"chapter_draft\""
         }
       ],
@@ -961,12 +1194,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 838,
+          "line": 1098,
           "evidence": "runRuntimeTask(project, \"continuity.check\""
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 72,
+          "line": 88,
           "evidence": "RUNTIME_QUALITY_TARGET = 86"
         }
       ],
@@ -980,7 +1213,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 943,
+          "line": 1247,
           "evidence": "reason: \"quality_self_repair\""
         }
       ],
@@ -994,12 +1227,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1020,
+          "line": 1350,
           "evidence": "runRuntimeTask(project, \"writing.recap\""
         },
         {
           "path": "api/src/knowledgeIndex.ts",
-          "line": 644,
+          "line": 667,
           "evidence": "export async function buildKnowledgeIndexProjection"
         }
       ],
@@ -1013,7 +1246,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1074,
+          "line": 1456,
           "evidence": "status: qualityMeetsTarget(report, RUNTIME_QUALITY_TARGET) ? \"drafted\" : \"planned\""
         }
       ],
@@ -1027,12 +1260,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1220,
+          "line": 1630,
           "evidence": "command.type === \"accept\""
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1221,
+          "line": 190,
           "evidence": "status: \"completed\""
         }
       ],
@@ -1060,7 +1293,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1207,
+          "line": 1601,
           "evidence": "await runSingleChapterPipeline(run)"
         }
       ],

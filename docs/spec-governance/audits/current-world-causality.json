@@ -7,27 +7,27 @@
   "sourceFiles": [
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/novelProject.ts",
-      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+      "sha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720"
     },
     {
       "path": "api/src/contextAssembler.ts",
-      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+      "sha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963"
     },
     {
       "path": "api/src/taskTemplates.ts",
-      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+      "sha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57"
     },
     {
       "path": "api/src/writingCockpit.ts",
-      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+      "sha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6"
     },
     {
       "path": "api/src/storyGraph.ts",
-      "sha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb"
+      "sha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371"
     },
     {
       "path": "ui/src/components/novel/StoryControlPanel.vue",
@@ -69,7 +69,7 @@
     "projects": [
       {
         "projectOrdinal": 1,
-        "inputFingerprint": "9816b83cf626d618bef33c52cd07743df473ba9df55f2bb55a35c6eea2893a11",
+        "inputFingerprint": "e29ff843e21a38a24f6932b2a3bfe375f44300baa3d2f865690198b0ca455ce5",
         "sourceValidity": {
           "project": {
             "exists": true,
@@ -360,7 +360,7 @@
       },
       {
         "projectOrdinal": 4,
-        "inputFingerprint": "f41fa596c83c7e3a9ab5af9d5e27ecdb1af0c39ee887f72914d7385964056616",
+        "inputFingerprint": "15cffdf95236cbc17021527e82b938e42b8c0baa7a842058dc9ecc23f2ebbe15",
         "sourceValidity": {
           "project": {
             "exists": true,
@@ -465,7 +465,311 @@
       },
       {
         "projectOrdinal": 5,
-        "inputFingerprint": "4cb10c88dd6fa40440296bdd2d385e3c4b929c2bb629d14d7dfb5b0fc1b66811",
+        "inputFingerprint": "4bd1593fa7e456b46a60de5626942d048db1c103b4012c87d06525d2c5e1488b",
+        "sourceValidity": {
+          "project": {
+            "exists": true,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": true,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": true,
+            "valid": true
+          },
+          "sceneFiles": 3,
+          "summaryFiles": 3
+        },
+        "bibles": {
+          "world": {
+            "exists": true,
+            "bytes": 26,
+            "characters": 12,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "abb2ee23eb14a6ff6a483adb558b344be570af8daa57cc717cf617690d2412f7"
+          },
+          "power": {
+            "exists": true,
+            "bytes": 64,
+            "characters": 28,
+            "lines": 5,
+            "headings": 1,
+            "sha256": "10f70c5447576c0740034160a29d6b1105c1a52b5206d797c02aa013d73638ad"
+          },
+          "locations": {
+            "exists": true,
+            "bytes": 29,
+            "characters": 13,
+            "lines": 4,
+            "headings": 1,
+            "sha256": "6f9bdefb5dd1fe77517ad5d88c3a65c9ec792f4058ca865297524f0d193c9a8b"
+          }
+        },
+        "storyEvents": {
+          "events": 1,
+          "withTrigger": 1,
+          "withLocation": 1,
+          "withReward": 1,
+          "withCost": 1,
+          "withChapterRange": 1,
+          "byStatus": {
+            "seed": 1
+          }
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 3,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 8,
+          "byType": {
+            "arc": 1,
+            "chapter": 3,
+            "character": 1,
+            "event": 1,
+            "knowledge": 2
+          },
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 6,
+        "inputFingerprint": "b39f3dbdf2477a5905a3fd531f50d1d08b6e1acedb6b8d0457bfeed88bcc09a6",
+        "sourceValidity": {
+          "project": {
+            "exists": false,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": true,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 0,
+          "summaryFiles": 0
+        },
+        "bibles": {
+          "world": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          },
+          "power": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          },
+          "locations": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          }
+        },
+        "storyEvents": {
+          "events": 0,
+          "withTrigger": 0,
+          "withLocation": 0,
+          "withReward": 0,
+          "withCost": 0,
+          "withChapterRange": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 0,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 6,
+          "byType": {
+            "arc": 1,
+            "chapter": 3,
+            "character": 1,
+            "event": 1
+          },
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 7,
+        "inputFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sourceValidity": {
+          "project": {
+            "exists": false,
+            "valid": true
+          },
+          "storyControl": {
+            "exists": false,
+            "valid": true
+          },
+          "storyGraph": {
+            "exists": false,
+            "valid": true
+          },
+          "powerLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "continuityLedger": {
+            "exists": false,
+            "valid": true
+          },
+          "sceneFiles": 0,
+          "summaryFiles": 0
+        },
+        "bibles": {
+          "world": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          },
+          "power": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          },
+          "locations": {
+            "exists": false,
+            "bytes": 0,
+            "characters": 0,
+            "lines": 0,
+            "headings": 0,
+            "sha256": null
+          }
+        },
+        "storyEvents": {
+          "events": 0,
+          "withTrigger": 0,
+          "withLocation": 0,
+          "withReward": 0,
+          "withCost": 0,
+          "withChapterRange": 0,
+          "byStatus": {}
+        },
+        "sceneEvidence": {
+          "scenes": 0,
+          "withTime": 0,
+          "withLocation": 0,
+          "withPowerProgression": 0,
+          "withBothTimeAndLocation": 0
+        },
+        "settledEvidence": {
+          "summaries": 0,
+          "powerPatches": 0,
+          "acceptedPowerPatches": 0,
+          "powerLedgerEntries": 0,
+          "continuityLedgerEntries": 0,
+          "powerLedgerByStatus": {},
+          "continuityLedgerByStatus": {}
+        },
+        "graphProjection": {
+          "nodes": 0,
+          "byType": {},
+          "governedWorldNodes": 0
+        },
+        "governedWorldArtifacts": {
+          "ruleContracts": 0,
+          "worldStateSnapshots": 0,
+          "travelEvents": 0,
+          "abilityContracts": 0,
+          "progressionEvents": 0,
+          "resourceTransactions": 0,
+          "constraintStates": 0,
+          "institutionActionEvents": 0,
+          "ruleInteractionEvents": 0,
+          "exceptionDebts": 0,
+          "integrityCertificates": 0
+        }
+      },
+      {
+        "projectOrdinal": 8,
+        "inputFingerprint": "4e7e431ec0dd04e21d9e8b8f7b59b68bf826303a94fb609615511cd3b18bebdd",
         "sourceValidity": {
           "project": {
             "exists": true,
@@ -568,7 +872,7 @@
         }
       },
       {
-        "projectOrdinal": 6,
+        "projectOrdinal": 9,
         "inputFingerprint": "f8a9f610e3939e1a82819f7efe2ed8dd83ce9fbe57de4a2c036627d0521a7a52",
         "sourceValidity": {
           "project": {
@@ -672,7 +976,7 @@
         }
       },
       {
-        "projectOrdinal": 7,
+        "projectOrdinal": 10,
         "inputFingerprint": "33d73559c80298b1a07414c1ac4d07dace9d6c37640b482623f6d6f2df6f4b99",
         "sourceValidity": {
           "project": {
@@ -776,7 +1080,7 @@
         }
       },
       {
-        "projectOrdinal": 8,
+        "projectOrdinal": 11,
         "inputFingerprint": "5f1a1f1fe79f7dd43231f6920cfbec70bbef4a31e6c03a49261aa0247b20b2eb",
         "sourceValidity": {
           "project": {
@@ -881,53 +1185,53 @@
       }
     ],
     "totals": {
-      "projects": 8,
-      "worldBibleFiles": 6,
-      "worldBibleBytes": 450694,
-      "worldBibleHeadings": 803,
-      "powerBibleFiles": 6,
-      "powerBibleBytes": 9516,
-      "powerBibleHeadings": 40,
-      "locationBibleFiles": 6,
-      "locationBibleBytes": 180,
-      "locationBibleHeadings": 6,
-      "events": 6,
-      "eventsWithTrigger": 6,
-      "eventsWithLocation": 4,
-      "eventsWithReward": 4,
-      "eventsWithCost": 4,
-      "eventsWithChapterRange": 6,
+      "projects": 11,
+      "worldBibleFiles": 7,
+      "worldBibleBytes": 450720,
+      "worldBibleHeadings": 804,
+      "powerBibleFiles": 7,
+      "powerBibleBytes": 9580,
+      "powerBibleHeadings": 41,
+      "locationBibleFiles": 7,
+      "locationBibleBytes": 209,
+      "locationBibleHeadings": 7,
+      "events": 7,
+      "eventsWithTrigger": 7,
+      "eventsWithLocation": 5,
+      "eventsWithReward": 5,
+      "eventsWithCost": 5,
+      "eventsWithChapterRange": 7,
       "scenes": 8,
       "scenesWithTime": 7,
       "scenesWithLocation": 7,
       "scenesWithPowerProgression": 7,
-      "summaries": 13,
+      "summaries": 16,
       "powerPatches": 0,
       "acceptedPowerPatches": 0,
       "powerLedgerEntries": 0,
       "continuityLedgerEntries": 0,
-      "graphNodes": 303,
+      "graphNodes": 317,
       "governedWorldNodes": 0
     },
     "eventStatusTotals": {
       "planned": 2,
-      "seed": 4
+      "seed": 5
     },
     "graphNodeTypeTotals": {
-      "arc": 28,
-      "chapter": 210,
-      "character": 26,
-      "event": 6,
-      "knowledge": 33
+      "arc": 30,
+      "chapter": 216,
+      "character": 28,
+      "event": 8,
+      "knowledge": 35
     },
     "interpretation": "The platform preserves substantial world and power prose plus editable time/location/progression/event fields, but those surfaces remain trimmed text or generic strings and ledgers. They are useful authoring evidence, not executable proof of applicable rules, travel, capability, conservation, persistent injury, institutional agency, fair exceptions or world closure."
   },
   "summary": {
     "auditedStages": 14,
-    "projectsScanned": 8,
-    "worldBibleBytes": 450694,
-    "powerBibleBytes": 9516,
-    "events": 6,
+    "projectsScanned": 11,
+    "worldBibleBytes": 450720,
+    "powerBibleBytes": 9580,
+    "events": 7,
     "scenes": 8,
     "powerPatches": 0,
     "powerLedgerEntries": 0,
@@ -945,26 +1249,26 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 519,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 545,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "export interface SceneCard"
         },
         {
           "path": "api/src/types.ts",
-          "line": 532,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 558,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "powerProgression: string"
         },
         {
           "path": "api/src/types.ts",
-          "line": 581,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 607,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "export interface StoryEventCard"
         },
         {
           "path": "api/src/types.ts",
-          "line": 590,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 616,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "cost: string"
         }
       ]
@@ -974,8 +1278,8 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 610,
-          "sourceSha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062",
+          "line": 636,
+          "sourceSha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b",
           "token": "export type StoryGraphNodeType = \"arc\" | \"character\" | \"event\" | \"chapter\" | \"ledger\" | \"knowledge\""
         }
       ]
@@ -985,26 +1289,26 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 73,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 91,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "function trimContext"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 75,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 93,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "[...中间内容已压缩...]"
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 722,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 782,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "{ title: \"世界观\""
         },
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 723,
-          "sourceSha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075",
+          "line": 783,
+          "sourceSha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963",
           "token": "{ title: \"力量体系\""
         }
       ]
@@ -1014,26 +1318,26 @@
       "evidence": [
         {
           "path": "api/src/novelProject.ts",
-          "line": 282,
-          "sourceSha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064",
+          "line": 311,
+          "sourceSha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720",
           "token": "\"bible/world.md\""
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 283,
-          "sourceSha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064",
+          "line": 312,
+          "sourceSha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720",
           "token": "\"bible/power-system.md\""
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 284,
-          "sourceSha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064",
+          "line": 313,
+          "sourceSha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720",
           "token": "\"bible/locations.md\""
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 291,
-          "sourceSha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064",
+          "line": 320,
+          "sourceSha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720",
           "token": "\"ledger/power-progression.json\""
         }
       ]
@@ -1044,19 +1348,19 @@
         {
           "path": "api/src/writingCockpit.ts",
           "line": 33,
-          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "sourceSha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6",
           "token": "continuity: \"ledger/continuity.json\""
         },
         {
           "path": "api/src/writingCockpit.ts",
           "line": 34,
-          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "sourceSha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6",
           "token": "power: \"ledger/power-progression.json\""
         },
         {
           "path": "api/src/writingCockpit.ts",
-          "line": 1011,
-          "sourceSha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5",
+          "line": 1021,
+          "sourceSha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6",
           "token": "const powerProgressionUpdates = ledgerPatches.filter((entry) => entry.kind === \"power\")"
         }
       ]
@@ -1112,8 +1416,8 @@
       "evidence": [
         {
           "path": "api/src/storyGraph.ts",
-          "line": 541,
-          "sourceSha256": "644dffdcd3e7b58ca2ee4334ec6c9ee44017805f04468d1d20585d4500372feb",
+          "line": 559,
+          "sourceSha256": "4dd9c97973ddb962c4ad7d196bd8127c2541179979761205cfc0837caf9c8371",
           "token": "subtitle: event.location || event.chapterRange || event.type"
         }
       ]

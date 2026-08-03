@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-release-acceptance-calibration-semantics",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Release acceptance must fail closed when calibration evidence is self-hashed but semantically invalid.",
+    "Holdout case identity, calibration status, threshold bounds, and timestamp must be validated before external calibration can pass."
+  ],
+  "implementationRefs": [
+    "api/src/releaseAcceptance.ts:hasSemanticallyValidCalibration",
+    "api/src/releaseAcceptance.spec.ts:duplicate holdout cases regression"
+  ],
+  "tests": {
+    "red": "Self-hashed duplicate-case calibration was incorrectly classified as passed.",
+    "green": "releaseAcceptance.spec.ts passed 23/23 after semantic guards were added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

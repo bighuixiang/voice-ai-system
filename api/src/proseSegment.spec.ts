@@ -10,4 +10,12 @@ describe("stable prose segments", () => {
   it("creates a semantic segment with boundary anchors", async () => { const segment = await createProseSegment(input(await root())); expect(segment.semanticId).toBe("segment-scene-1-beat-1"); expect(segment.beforeBoundaryFingerprint).toMatch(/^[a-f0-9]{64}$/); expect(segment.afterBoundaryFingerprint).toMatch(/^[a-f0-9]{64}$/); expect(segment.status).toBe("candidate"); });
   it("applies patch only when both semantic ID and boundaries match", async () => { const r = await root(); const segment = await createProseSegment(input(r)); const patched = await applyProseSegmentPatch(r, segment.semanticId, { beforeBoundaryFingerprint: segment.beforeBoundaryFingerprint, afterBoundaryFingerprint: segment.afterBoundaryFingerprint, replacementText: "她用力推开门。", sourceRefs: ["prose://patch-1"] }); expect(patched.status).toBe("candidate"); expect(patched.text).toBe("她用力推开门。"); await expect(applyProseSegmentPatch(r, segment.semanticId, { beforeBoundaryFingerprint: "bad", afterBoundaryFingerprint: segment.afterBoundaryFingerprint, replacementText: "误写", sourceRefs: ["prose://patch-2"] })).rejects.toThrow("PROSE_SEGMENT_ANCHOR_MISMATCH"); });
   it("keeps identity idempotent and blocks missing evidence", async () => { const r = await root(); const one = await createProseSegment(input(r)); const two = await createProseSegment({ ...input(r), text: "不同文本" }); expect(two.fingerprint).toBe(one.fingerprint); expect(await readProseSegment(r, one.semanticId)).toEqual(one); await expect(createProseSegment({ ...input(r), sourceRefs: [] })).rejects.toThrow("PROSE_SEGMENT_SOURCE_REQUIRED"); });
+  it("fails closed when a persisted segment is tampered", async () => {
+    const r = await root();
+    const segment = await createProseSegment(input(r));
+    const target = path.join(r, "sessions", "prose-segments", `${segment.semanticId}.json`);
+    const persisted = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    await fs.writeFile(target, JSON.stringify({ ...persisted, status: "adopted" }), "utf8");
+    await expect(readProseSegment(r, segment.semanticId)).rejects.toThrow("PROSE_SEGMENT_INTEGRITY_FAILED");
+  });
 });

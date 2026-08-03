@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "slice-acceptance-audit.v1",
+  "auditId": "rp4-outline-acceptance-2026-07-31",
+  "sourceSdd": "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+  "releaseProfile": "RP4-outline",
+  "status": "not-verified",
+  "scope": {
+    "mustRequirements": 83,
+    "verifiedRequirements": 0,
+    "evidenceMapStatus": "83 partially-verified, 0 fully verified",
+    "unverifiedRequirements": "The profile-level gate requires all 83 MUST requirements, accepted RP3 dependency, explicit author acceptance and release evidence. Current implementation slices are not a release claim."
+  },
+  "verifiedSlices": [
+    {
+      "sliceId": "RP4-profile-acceptance-fail-closed",
+      "requirements": ["FR-ARCH-002", "FR-ARCH-003", "FR-DELIVERY-017", "FR-RESEARCH-001", "FR-RESEARCH-002", "FR-RESEARCH-003", "FR-RESEARCH-004"],
+      "implementationRefs": ["api/src/rp4OutlineAcceptance.ts", "api/src/app.ts", "api/src/outlineReleaseGate.ts", "api/src/researchGrounding.ts"],
+      "tests": ["api/src/rp4OutlineAcceptance.spec.ts", "api/src/outlineReleaseGate.spec.ts", "api/src/researchGrounding.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: profile route reports 83 expected requirements and do-not-activate while evidence map, RP3 dependency, author acceptance or release evidence is incomplete; outline execution gate remains bounded and never claims full-book executability"
+    }
+  ],
+  "verification": {
+    "apiTests": "passed: app 145/145; researchGrounding 14/14; rp4OutlineAcceptance 2/2",
+    "profileRoute": "passed: expectedRequirementCount=83, verifiedRequirementCount=0, status=do-not-activate",
+    "notYetProven": ["all 83 RP4 MUST implementation and E2E evidence", "RP3 accepted dependency", "explicit author acceptance", "RP4 release evidence", "full real-provider and publication evidence"]
+  },
+  "nextGate": "Do not activate RP4. Continue implementing and verifying remaining requirement slices, then rerun this profile gate with fresh evidence."
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-migration-manifest-authority-fence",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-RUN-018", "FR-RUN-019", "FR-MIGRATION-003"],
+  "implementationRefs": [
+    "api/src/projectInventory.ts",
+    "api/src/projectInventory.spec.ts"
+  ],
+  "tests": ["api/src/projectInventory.spec.ts"],
+  "result": "passed",
+  "evidence": [
+    "RED: a valid prose-adoption activation artifact was classified as migration-activated while project.json still granted legacy write authority",
+    "GREEN: inventory requires both the activation artifact and project manifest to declare prose-adoption before reporting migration-activated",
+    "project inventory regression passes 10/10"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "This slice closes one migration authority mismatch; it does not prove complete legacy surface cutover, external calibration, independent review, or release activation."
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "slice-acceptance-audit.v1",
+  "auditId": "rp4-long-memory-slice-2026-07-31",
+  "sourceSdd": "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+  "releaseProfile": "RP4-outline",
+  "status": "partial-implementation-verified",
+  "scope": {
+    "requirements": ["FR-LONGMEM-001", "FR-LONGMEM-002", "FR-LONGMEM-003", "FR-LONGMEM-004", "FR-LONGMEM-005", "FR-LONGMEM-006", "FR-LONGMEM-007", "FR-LONGMEM-008", "FR-LONGMEM-009", "FR-LONGMEM-010", "FR-LONGMEM-011", "FR-LONGMEM-012", "FR-LONGMEM-014", "FR-LONGMEM-015", "FR-LONGMEM-016", "FR-LONGMEM-017", "FR-LONGMEM-018", "FR-LONGMEM-019", "FR-LONGMEM-020", "FR-LONGMEM-021", "FR-LONGMEM-022", "FR-LONGMEM-023"],
+    "verifiedRequirements": ["FR-LONGMEM-001", "FR-LONGMEM-002", "FR-LONGMEM-003", "FR-LONGMEM-004", "FR-LONGMEM-005", "FR-LONGMEM-006", "FR-LONGMEM-007", "FR-LONGMEM-008", "FR-LONGMEM-009", "FR-LONGMEM-010", "FR-LONGMEM-011", "FR-LONGMEM-012", "FR-LONGMEM-014", "FR-LONGMEM-015", "FR-LONGMEM-016", "FR-LONGMEM-017", "FR-LONGMEM-018", "FR-LONGMEM-019", "FR-LONGMEM-020", "FR-LONGMEM-021", "FR-LONGMEM-022", "FR-LONGMEM-023"],
+    "unverifiedRequirements": "No identified requirement-level gap remains within the RP4 long-memory slice. Profile-level activation is still blocked because requirement-evidence.json has not promoted these entries to release-verified and RP3/author/release evidence gates remain unresolved."
+  },
+  "verifiedSlices": [
+    {
+      "sliceId": "memory-claim-authority-and-settlement-boundary",
+      "implementationRefs": ["api/src/memoryClaim.ts", "api/src/knowledgeIndex.ts", "api/src/types.ts", "api/src/app.ts"],
+      "tests": ["api/src/memoryClaim.spec.ts", "api/src/knowledgeIndex.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: claims have stable IDs, epistemic types, source/version/evidence metadata and append-only events; plans/beliefs remain ineligible, canon eligibility requires an explicit completed chapter settlement, multiple current claims are preserved, only eligible claims enter the rebuildable knowledge projection, temporal windows are enforced, contradictions remain explicit relation sets, and stable entities/alias assertions require evidence before confirmation"
+    },
+    {
+      "sliceId": "stable-entity-alias-projection-and-event-history",
+      "implementationRefs": ["api/src/memoryEntity.ts", "api/src/app.ts"],
+      "tests": ["api/src/memoryEntity.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: same-name identities remain separate without evidence, alias confirmation is evidence-gated, current entity/alias projections are replayable, append-only lifecycle events are recorded, duplicate writes are idempotent, and lifecycle updates require explicit non-created event types"
+    },
+    {
+      "sliceId": "character-reader-knowledge-eligibility",
+      "implementationRefs": ["api/src/memoryKnowledge.ts"],
+      "tests": ["api/src/memoryKnowledge.spec.ts"],
+      "result": "passed: character knowledge cannot be used before the acquisition event and reader visibility is scoped by publication version and progress cursor; forgotten/misbelieved/reinterpreted states do not pass the eligibility gate; character and reader state events persist append-only"
+    },
+    {
+      "sliceId": "scoped-knowledge-runtime-and-projection-boundary",
+      "implementationRefs": ["api/src/memoryKnowledge.ts", "api/src/app.ts", "api/src/contextAssembler.ts"],
+      "tests": ["api/src/app.spec.ts", "api/src/contextAssembler.spec.ts"],
+      "result": "passed: character/reader knowledge states are writable and evaluated through scoped runtime commands; summary and knowledge-index context blocks are explicitly marked projection-only and require MemoryClaim verification"
+    },
+    {
+      "sliceId": "versioned-retcon-and-stale-projection-boundary",
+      "implementationRefs": ["api/src/memoryClaim.ts", "api/src/knowledgeIndex.ts", "api/src/app.ts"],
+      "tests": ["api/src/memoryClaim.spec.ts", "api/src/knowledgeIndex.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: an eligible claim can only be retconned with confirmer, reason and replacement evidence; the obsolete version and replacement candidate are preserved as separate append-only events, current authority points to the candidate, and the knowledge projection excludes it until re-settlement"
+    },
+    {
+      "sliceId": "runtime-memory-projection-freshness-gate",
+      "implementationRefs": ["api/src/memoryProjectionGate.ts", "api/src/runtimeEngine.ts", "api/src/types.ts"],
+      "tests": ["api/src/memoryProjectionGate.spec.ts"],
+      "result": "passed: runtime snapshots carry current/replacement-pending/stale status and affected claim IDs; chapter and derivative generation throw a deterministic blocking reason unless the memory projection is current"
+    },
+    {
+      "sliceId": "publication-and-story-graph-memory-freshness",
+      "implementationRefs": ["api/src/researchGrounding.ts", "api/src/storyGraph.ts", "api/src/types.ts"],
+      "tests": ["api/src/researchGrounding.spec.ts", "api/src/storyGraph.spec.ts"],
+      "result": "passed: publication gate includes memory freshness blockers through the runtime API; story graph records freshness and omits knowledge triples while replacement or stale state is unresolved"
+    },
+    {
+      "sliceId": "eligibility-first-temporal-retrieval",
+      "implementationRefs": ["api/src/knowledgeIndex.ts", "api/src/types.ts"],
+      "tests": ["api/src/knowledgeIndex.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: target story-time eligibility is evaluated before keyword/vector relevance; claims outside their temporal window are excluded with explicit reasons rather than ranked and returned"
+    },
+    {
+      "sliceId": "pov-reader-character-retrieval-boundary",
+      "implementationRefs": ["api/src/knowledgeIndex.ts", "api/src/memoryKnowledge.ts", "api/src/types.ts"],
+      "tests": ["api/src/knowledgeIndex.spec.ts", "api/src/memoryKnowledge.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: reader retrieval requires publication/progress scope plus reader knowledge evidence; character retrieval requires character and target-event boundaries plus character knowledge evidence; exclusions are explicit and occur before relevance ranking"
+    },
+    {
+      "sliceId": "memory-visibility-policy-boundary",
+      "implementationRefs": ["api/src/memoryVisibility.ts", "api/src/knowledgeIndex.ts", "api/src/types.ts"],
+      "tests": ["api/src/memoryVisibility.spec.ts", "api/src/knowledgeIndex.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: author-only truth, unauthorized memory and secret-bearing memory are rejected for reader/character/model contexts before relevance ranking; author context remains allowed when authorized; the same firewall now applies to non-memory source classes with an explicit default-deny envelope"
+    },
+    {
+      "sliceId": "non-memory-source-model-task-visibility",
+      "implementationRefs": ["api/src/memoryVisibility.ts", "api/src/knowledgeIndex.ts", "api/src/types.ts", "api/src/app.ts"],
+      "tests": ["api/src/memoryVisibility.spec.ts", "api/src/knowledgeIndex.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: legacy chapter-summary facts without an explicit public visibility are excluded from model-task retrieval before relevance ranking, with an auditable MODEL_TASK_SOURCE_VISIBILITY_REQUIRED reason; the HTTP knowledge-search route preserves the boundary"
+    },
+    {
+      "sliceId": "legacy-projection-canon-consumer-gate",
+      "implementationRefs": ["api/src/contextSourceGate.ts", "api/src/app.ts"],
+      "tests": ["api/src/contextSourceGate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: canon-generation, publication, settlement, continuity and generation purposes reject selected summary/ledger projections before authority ranking; exclusions retain LEGACY_PROJECTION_NOT_CANON_AUTHORITY and the API route returns a blocking decision"
+    },
+    {
+      "sliceId": "entity-merge-split-semantic-replay",
+      "implementationRefs": ["api/src/memoryEntity.ts", "api/src/app.ts"],
+      "tests": ["api/src/memoryEntity.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: merge preserves source identities as merged and records evidence-backed merged-into lineage; split preserves the prior identity as split and records split-into replacements; the projection is deterministically replayable from append-only entity events and is exposed through merge/split/replay API commands"
+    },
+    {
+      "sliceId": "model-task-context-visibility-boundary",
+      "implementationRefs": ["api/src/taskService.ts", "api/src/contextAssembler.ts", "api/src/runtimeEngine.ts"],
+      "tests": ["api/src/contextAssembler.spec.ts", "api/src/taskService.spec.ts"],
+      "result": "passed: central task-service and runtime-engine model calls explicitly declare model-task visibility; direct chapter summaries, ledger projections and legacy knowledge facts are omitted, while memory retrieval continues through the visibility-filtered knowledge search path"
+    },
+    {
+      "sliceId": "runtime-snapshot-legacy-authority-signal",
+      "implementationRefs": ["api/src/runtimeSnapshot.ts", "api/src/runtimeEngine.ts", "api/src/types.ts"],
+      "tests": ["api/src/runtime.spec.ts"],
+      "result": "passed: runtime snapshots expose legacyFactCount, eligibleMemoryClaimCount and projectionAuthority; the narrative generation blocking helper emits LEGACY_PROJECTION_ONLY when only legacy facts are available"
+    },
+    {
+      "sliceId": "legacy-obligation-certificate-gate",
+      "implementationRefs": ["api/src/obligationCoverage.ts", "api/src/obligationCertificate.ts"],
+      "tests": ["api/src/obligationCoverage.spec.ts", "api/src/obligationCertificate.spec.ts"],
+      "result": "passed: closure/obligation coverage certification fails closed with OBLIGATION_COVERAGE_LEGACY_PROJECTION_UNMIGRATED while old foreshadowing ledger markers remain, even when the new obligation itself has terminal evidence"
+    },
+    {
+      "sliceId": "legacy-ledger-evidence-migration-receipt",
+      "implementationRefs": ["api/src/legacyLedgerMigration.ts", "api/src/obligationCoverage.ts", "api/src/app.ts"],
+      "tests": ["api/src/legacyLedgerMigration.spec.ts", "api/src/obligationCertificate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: an append-only, idempotent receipt maps each legacy ledger marker to an existing governed obligation with confirmer/reason/evidence; valid mappings clear the certificate block, conflicting remaps fail, and the runtime API persists the receipt"
+    },
+    {
+      "sliceId": "story-graph-source-authority-labels",
+      "implementationRefs": ["api/src/storyGraph.ts", "api/src/types.ts"],
+      "tests": ["api/src/storyGraph.spec.ts"],
+      "result": "passed: ledger nodes and edges are explicitly marked legacy-projection, while knowledge triples are labeled governed, legacy-projection or unknown from their source facts; graph consumers can no longer infer authority from node type alone"
+    },
+    {
+      "sliceId": "legacy-read-api-projection-envelope",
+      "implementationRefs": ["api/src/app.ts"],
+      "tests": ["api/src/app.spec.ts"],
+      "result": "passed: chapter-summary and ledger GET responses explicitly declare authority=projection-only, projectionType and requiresMemoryClaimVerification so compatibility readers cannot mistake them for canon authority"
+    },
+    {
+      "sliceId": "canon-sensitive-legacy-consumer-coverage",
+      "implementationRefs": ["api/src/knowledgeIndex.ts", "api/src/contextAssembler.ts", "api/src/runtimeEngine.ts", "api/src/runtimeSnapshot.ts", "api/src/storyGraph.ts", "api/src/obligationCertificate.ts", "api/src/app.ts"],
+      "tests": ["api/src/knowledgeIndex.spec.ts", "api/src/contextAssembler.spec.ts", "api/src/runtime.spec.ts", "api/src/storyGraph.spec.ts", "api/src/obligationCertificate.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: every identified canon-sensitive summary/ledger consumer is either filtered before retrieval, isolated from model-task context, blocked when legacy-only, labeled with source authority, or requires an evidence-backed migration receipt before closure certification; no identified path treats an unqualified legacy projection as canon authority"
+    },
+    {
+      "sliceId": "retcon-impact-report-and-rebuild-block",
+      "implementationRefs": ["api/src/memoryRetconImpact.ts", "api/src/app.ts"],
+      "tests": ["api/src/memoryRetconImpact.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: retcon API returns a deterministic blocked-until-rebuild impact report covering knowledge index, story graph, runtime snapshots and publication derivatives; affected existing paths are listed without mutating history"
+    },
+    {
+      "sliceId": "retcon-rebuild-and-invalidation-execution",
+      "implementationRefs": ["api/src/memoryRetconRebuild.ts", "api/src/app.ts"],
+      "tests": ["api/src/memoryRetconRebuild.spec.ts", "api/src/app.spec.ts"],
+      "result": "passed: retcon execution rebuilds knowledge index and story graph, writes an append-only invalidation manifest for runtime/publication descendants, and returns executed actions while leaving replacement candidate un-settled"
+    },
+    {
+      "sliceId": "derived-publication-stale-revalidation",
+      "implementationRefs": ["api/src/derivedPublication.ts"],
+      "tests": ["api/src/derivedPublication.spec.ts"],
+      "result": "passed: committed derivative transactions can be marked stale without deleting bytes, stale transactions fail closed, and an explicit revalidation command creates a new committed transaction while preserving the old transaction history"
+    },
+    {
+      "sliceId": "frozen-edition-memory-revalidation-gate",
+      "implementationRefs": ["api/src/deliveryProof.ts"],
+      "tests": ["api/src/deliveryProof.spec.ts"],
+      "result": "passed: a delivery proof issued before a memory retcon becomes invalid when a newer retcon invalidation manifest exists; re-issuing against an artifact set created before the retcon is rejected; a rebuilt edition is rendered after the boundary and receives a new proof that verifies successfully"
+    }
+  ],
+  "verification": {
+    "tests": "passed: memoryClaim 8/8, memoryEntity 6/6, memoryKnowledge 3/3, memoryProjectionGate 3/3, memoryVisibility 3/3, memoryRetconImpact 1/1, memoryRetconRebuild 1/1, derivedPublication 4/4, deliveryProof 7/7, knowledgeIndex 11/11, contextSourceGate 3/3, contextAssembler 16/16, taskService 13/13, runtime 20/20, obligationCoverage 2/2, obligationCertificate 4/4, legacyLedgerMigration 2/2, storyGraph 2/2, researchGrounding 15/15, app 149/149 (isolated rerun; first parallel lifecycle run had transient bad-port failures), plus new visibility/projection/entity/migration/read-envelope route assertions targeted 6/6",
+    "notYetProven": []
+  },
+  "nextGate": "Run the full RP4 integration acceptance and reconcile any newly discovered consumer paths before considering activation; this long-memory slice has no remaining identified legacy-authority gap."
+}

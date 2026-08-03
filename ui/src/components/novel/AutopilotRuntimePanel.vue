@@ -39,7 +39,7 @@
         <el-icon><VideoPlay /></el-icon>
         启动自动驾驶
       </el-button>
-      <el-switch v-model="autoContinue" active-text="连续章节" />
+      <span class="runtime-capability-note" title="连续章节调度尚未实现；每次只运行当前章节">连续章节调度：待实现</span>
       <el-button :disabled="!canPause" @click="$emit('pause')">
         <el-icon><VideoPause /></el-icon>
         暂停
@@ -220,7 +220,6 @@ const emit = defineEmits<{
 }>();
 
 const direction = ref("");
-const autoContinue = ref(false);
 const derivativeTitle = ref("");
 const derivativeType = ref<"side_story" | "branch" | "adaptation">("side_story");
 const runtimeStages: Array<{ id: NonNullable<RuntimeRun["currentStage"]>; label: string }> = [
@@ -273,7 +272,7 @@ const runtimeProgressPercent = computed(() => {
 const runtimeProgressText = computed(() => {
   if (!props.activeRun) return "未启动";
   if (props.activeRun.status === "review_required") return "等待人工审稿确认";
-  if (props.activeRun.status === "completed") return "自动驾驶已完成";
+  if (props.activeRun.status === "completed") return "本次单章运行已接受";
   if (props.activeRun.status === "failed") return "自动驾驶失败";
   if (props.activeRun.status === "cancelled") return "自动驾驶已停止";
   const stage = runtimeStages[currentStageIndex.value];
@@ -318,7 +317,7 @@ const statusLabel = computed(() => {
     running: "运行中",
     paused: "已暂停",
     review_required: "等待审稿",
-    completed: "已完成",
+    completed: "本次单章运行已接受",
     failed: "失败",
     cancelled: "已停止"
   };
@@ -467,7 +466,7 @@ function scoreLabel(score?: number) {
 
 function emitStart() {
   if (props.starting || isRunning.value) return;
-  emit("start", { direction: trimmedDirection.value, autoContinue: autoContinue.value });
+  emit("start", { direction: trimmedDirection.value, autoContinue: false });
 }
 
 function handleDirectionAction() {

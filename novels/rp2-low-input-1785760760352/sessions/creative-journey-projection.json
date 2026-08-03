@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "creative-journey-projection.v1",
+  "projectSlug": "rp2-low-input-1785760760352",
+  "sourceMessageIds": [],
+  "sessionFingerprint": "39afee21c6e2fde49026b99a76a116ef768f3b89125182f9f72f35d4acaa7068",
+  "sourceFingerprint": "39afee21c6e2fde49026b99a76a116ef768f3b89125182f9f72f35d4acaa7068",
+  "projectionVersion": "cb5ba48cdc9349c435ecdc2a",
+  "freshness": "current",
+  "unsavedState": {
+    "hasDraft": false
+  },
+  "pendingRefs": [],
+  "stage": "capture",
+  "primaryAsset": "creative-session",
+  "primaryAction": {
+    "id": "capture-idea",
+    "label": "告诉我你的想法",
+    "kind": "capture",
+    "status": "available"
+  },
+  "fingerprint": "d38e9b9499e3bc4b92fa046dda69705e9ddf1fb50c11b61488e941bcd8db9032"
+}

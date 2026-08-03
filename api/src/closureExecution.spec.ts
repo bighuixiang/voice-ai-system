@@ -8,6 +8,12 @@ describe("closure execution planning", () => {
     expect(result.risks).toEqual(expect.arrayContaining(["dependency-cycle"]));
   });
 
+  it("fails closed when a closure dependency is not present in the schedule", () => {
+    const result = createClosureSchedule({ obligations: [{ id: "obl-1", dependencies: ["missing-obligation"], window: "chapter-5" }], availableWindows: ["chapter-5"] });
+    expect(result.status).toBe("blocked");
+    expect(result.risks).toContain("missing-dependency:obl-1:missing-obligation");
+  });
+
   it("reserves scene capacity and blocks overbooked windows", () => {
     const result = reservePayoffCapacity({ window: "chapter-5", capacity: 2, reservations: [{ obligationId: "obl-1", load: 1 }, { obligationId: "obl-2", load: 2 }] });
     expect(result.status).toBe("conflict");

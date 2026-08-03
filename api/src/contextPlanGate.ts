@@ -20,12 +20,14 @@ export interface ContextPlanResult {
   availableInputTokens: number;
   inputTokens: number;
   reasons: string[];
+  tokenEstimation: "tokenizer" | "conservative-character-fallback";
+  estimationErrorAssumption: string;
   fingerprint: string;
 }
 
 const hash = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
-export function evaluateContextPlan(input: { modelContextTokens: number; outputReserveTokens: number; toolReserveTokens: number; blocks: ContextPlanBlock[] }): ContextPlanResult {
+export function evaluateContextPlan(input: { modelContextTokens: number; outputReserveTokens: number; toolReserveTokens: number; blocks: ContextPlanBlock[]; tokenEstimation?: "tokenizer" | "conservative-character-fallback"; estimationErrorAssumption?: string }): ContextPlanResult {
   if (![input.modelContextTokens, input.outputReserveTokens, input.toolReserveTokens].every((value) => Number.isFinite(value) && value >= 0)) throw new Error("CONTEXT_PLAN_LIMITS_INVALID");
   const reasons: string[] = [];
   for (const block of input.blocks) {
@@ -36,6 +38,10 @@ export function evaluateContextPlan(input: { modelContextTokens: number; outputR
   const availableInputTokens = Math.max(0, input.modelContextTokens - input.outputReserveTokens - input.toolReserveTokens);
   const inputTokens = input.blocks.filter((block) => block.selected).reduce((sum, block) => sum + block.finalTokens, 0);
   if (inputTokens > availableInputTokens) reasons.push("CONTEXT_TOKEN_BUDGET_EXCEEDED");
-  const base = { schemaVersion: "context-plan-gate.v1" as const, status: reasons.length ? "block" as const : "pass" as const, modelContextTokens: input.modelContextTokens, outputReserveTokens: input.outputReserveTokens, toolReserveTokens: input.toolReserveTokens, availableInputTokens, inputTokens, reasons };
+  if (input.outputReserveTokens + input.toolReserveTokens > input.modelContextTokens) reasons.push("CONTEXT_RESERVES_EXCEED_MODEL_WINDOW");
+  const tokenEstimation = input.tokenEstimation || "conservative-character-fallback";
+  const estimationErrorAssumption = (input.estimationErrorAssumption || (tokenEstimation === "tokenizer" ? "provider-tokenizer" : "characters-per-token conservative fallback")).trim();
+  if (!estimationErrorAssumption) throw new Error("CONTEXT_TOKEN_ESTIMATION_ASSUMPTION_REQUIRED");
+  const base = { schemaVersion: "context-plan-gate.v1" as const, status: reasons.length ? "block" as const : "pass" as const, modelContextTokens: input.modelContextTokens, outputReserveTokens: input.outputReserveTokens, toolReserveTokens: input.toolReserveTokens, availableInputTokens, inputTokens, reasons, tokenEstimation, estimationErrorAssumption };
   return { ...base, fingerprint: hash(base) };
 }

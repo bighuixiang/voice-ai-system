@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { compileOutlineCandidate } from "./outlineCandidate.js";
 import { authorizeOutlineAdoption, createOutlineAdoptionProposal, readOutlineAdoptionProposal } from "./outlineAdoption.js";
 import { validateOutlineCandidate } from "./outlineValidation.js";
+import { compareCandidates } from "./candidateComparison.js";
+import { persistCandidateComparison } from "./candidateComparisonStore.js";
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true }))); });
@@ -30,6 +32,48 @@ describe("outline adoption proposal", () => {
     const authorized = await authorizeOutlineAdoption(root, { expectedProposalFingerprint: proposal.fingerprint, authorization: { actorId: "author-1", authorizationId: "outline-auth-1" } });
     expect(authorized).toMatchObject({ status: "authorized", canonWritten: false, authorAuthorization: { actorId: "author-1" } });
     expect(await readOutlineAdoptionProposal(root)).toEqual(authorized);
+  });
+
+  it("fails closed when a persisted adoption proposal is tampered", async () => {
+    const { root, outline } = await fixture();
+    const proposal = await createOutlineAdoptionProposal(root, { outlineId: outline.outlineId, expectedOutlineFingerprint: outline.fingerprint });
+    const target = path.join(root, "sessions", "outline-adoption-proposal.json");
+    const tampered = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    tampered.status = "authorized";
+    await fs.writeFile(target, JSON.stringify(tampered), "utf8");
+    await expect(readOutlineAdoptionProposal(root)).rejects.toThrow("OUTLINE_ADOPTION_PROPOSAL_INTEGRITY_FAILED");
+    expect(proposal.status).toBe("ready_for_authorization");
+  });
+
+  it("records the adoption mode and every chapter left unadopted", async () => {
+    const { root, outline } = await fixture();
+    const proposal = await createOutlineAdoptionProposal(root, {
+      outlineId: outline.outlineId,
+      expectedOutlineFingerprint: outline.fingerprint,
+      adoptionMode: "partial",
+      selectedChapterIds: ["chapter-001", "chapter-003"],
+      unadoptedChapterIds: outline.chapters.map((chapter) => chapter.chapterId).filter((chapterId) => !["chapter-001", "chapter-003"].includes(chapterId))
+    });
+    expect(proposal).toMatchObject({ adoptionMode: "partial" });
+  });
+
+  it("binds adoption to an existing candidate comparison when supplied", async () => {
+    const { root, outline } = await fixture();
+    const comparison = await persistCandidateComparison(root, "demo", compareCandidates({ objectiveIds: ["voice"], candidates: [{ candidateId: outline.sourceCandidateId, hardConstraintFailures: [], objectiveEvidence: [{ objectiveId: "voice", gap: 0, evidenceRefs: ["evidence://voice"] }], unresolvedRisks: [] }] }));
+    const proposal = await createOutlineAdoptionProposal(root, { outlineId: outline.outlineId, expectedOutlineFingerprint: outline.fingerprint, comparisonFingerprint: comparison.comparisonId });
+    expect(proposal.comparisonFingerprint).toBe(comparison.comparisonId);
+    await expect(createOutlineAdoptionProposal(root, { outlineId: outline.outlineId, expectedOutlineFingerprint: outline.fingerprint, comparisonFingerprint: "f".repeat(64) })).rejects.toThrow("OUTLINE_COMPARISON_NOT_FOUND");
+  });
+
+  it("fails closed when unadopted parts do not match the selected subset", async () => {
+    const { root, outline } = await fixture();
+    await expect(createOutlineAdoptionProposal(root, {
+      outlineId: outline.outlineId,
+      expectedOutlineFingerprint: outline.fingerprint,
+      adoptionMode: "partial",
+      selectedChapterIds: ["chapter-001"],
+      unadoptedChapterIds: ["chapter-003"]
+    })).rejects.toThrow("OUTLINE_UNADOPTED_PARTS_MISMATCH");
   });
 
   it("blocks proposal creation when validation is absent or the outline fingerprint is stale", async () => {

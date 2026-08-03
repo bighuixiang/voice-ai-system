@@ -90,4 +90,25 @@ describe("migration conflict resolution", () => {
 
     await expect(validateMigrationPreview(root, "legacy", preview.migrationId)).rejects.toThrow("MIGRATION_RESOLUTION_SEMANTIC_MISMATCH");
   });
+
+  it("rejects a validly hashed resolution with invalid semantic fields on direct read", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "novel-migration-resolution-fields-"));
+    await fs.writeFile(path.join(root, "project.json"), JSON.stringify({ slug: "legacy", chapters: [] }));
+    const preview = await previewProjectMigration(root, "legacy");
+    const base = {
+      schemaVersion: "project-migration-resolution.v1",
+      migrationId: preview.migrationId,
+      projectSlug: "legacy",
+      status: "resolved",
+      selectedOutlineAuthority: "active",
+      resolvedConflicts: "not-an-array",
+      resolvedAt: new Date().toISOString()
+    };
+    const resolution = { ...base, fingerprint: crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") };
+    const resolutionPath = path.join(root, "sessions", "migrations", `${preview.migrationId}.resolution.json`);
+    await fs.mkdir(path.dirname(resolutionPath), { recursive: true });
+    await fs.writeFile(resolutionPath, JSON.stringify(resolution));
+
+    await expect(readMigrationResolution(root, preview.migrationId)).rejects.toThrow("MIGRATION_RESOLUTION_SEMANTIC_MISMATCH");
+  });
 });

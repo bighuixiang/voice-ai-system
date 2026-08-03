@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-legacy-open-version-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Legacy project open must fail closed for invalid or non-monotonic schema versions.",
+    "Malformed version input must not be interpreted as a successfully opened project."
+  ],
+  "implementationRefs": [
+    "api/src/legacyProjectOpenGate.ts:evaluateLegacyProjectOpen",
+    "api/src/legacyProjectOpenGate.spec.ts:invalid schema version regression"
+  ],
+  "tests": {
+    "red": "NaN schemaVersion was classified as opened with migrationRequired=false.",
+    "green": "legacyProjectOpenGate.spec.ts passed 2/2 after fail-closed version validation."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

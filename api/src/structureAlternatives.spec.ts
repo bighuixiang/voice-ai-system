@@ -28,4 +28,20 @@ describe("structure alternative set", () => {
     await expect(createStructureAlternativeSet({ ...input(root), contractFingerprint: "bad" })).rejects.toThrow("STRUCTURE_CONTRACT_FINGERPRINT_REQUIRED");
     await expect(createStructureAlternativeSet({ ...input(root), sourceRefs: [] })).rejects.toThrow("STRUCTURE_ALTERNATIVE_SOURCE_REQUIRED");
   });
+
+  it("rejects sequence-only wording changes without meaningful structural divergence", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "structure-alt-"));
+    const first = input(root).alternatives[0];
+    await expect(createStructureAlternativeSet({ ...input(root), setId: "wording-only", alternatives: [first, { ...first, alternativeId: "b", label: "Different wording", sequence: ["pressure", "choice", "payoff-v2"] }] })).rejects.toThrow("STRUCTURE_ALTERNATIVES_NOT_STRUCTURALLY_DISTINCT");
+  });
+
+  it("fails closed when an alternative set is tampered", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "structure-alt-"));
+    const set = await createStructureAlternativeSet(input(root));
+    const target = path.join(root, "sessions", "structure-alternatives", `${set.setId}.json`);
+    const persisted = JSON.parse(await fs.readFile(target, "utf8"));
+    await fs.writeFile(target, JSON.stringify({ ...persisted, contractFingerprint: "b".repeat(64) }), "utf8");
+    await expect(readStructureAlternativeSet(root, set.setId)).rejects.toThrow("STRUCTURE_ALTERNATIVE_SET_INTEGRITY_FAILED");
+    await expect(listStructureAlternativeSets(root, "demo")).rejects.toThrow("STRUCTURE_ALTERNATIVE_SET_INTEGRITY_FAILED");
+  });
 });

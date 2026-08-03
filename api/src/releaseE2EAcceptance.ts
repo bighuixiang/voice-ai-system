@@ -24,6 +24,10 @@ function verifyFingerprint(value: { fingerprint: string }): boolean {
   const { fingerprint, ...base } = value;
   return hash(base) === fingerprint;
 }
+function assertReleaseProofIntegrity(proof: ReleaseE2EAcceptance): ReleaseE2EAcceptance {
+  if (proof.schemaVersion !== "release-e2e-acceptance.v1" || proof.status !== "verified" || !proof.projectSlug.trim() || !proof.chapterId.trim() || !proof.settlementId.trim() || !proof.derivedTransactionId.trim() || !/^[a-f0-9]{64}$/i.test(proof.fingerprint) || !verifyFingerprint(proof)) throw new Error("RELEASE_E2E_PROOF_INTEGRITY_FAILED");
+  return proof;
+}
 function verifyDerivedFingerprint(value: { fingerprint: string; status: string; committedAt?: string; error?: string }): boolean {
   if (verifyFingerprint(value)) return true;
   if (value.status !== "committed" || !value.committedAt) return false;
@@ -44,8 +48,12 @@ async function writeJson(target: string, value: unknown): Promise<void> {
 export async function readReleaseE2EAcceptance(root: string): Promise<ReleaseE2EAcceptance | null> {
   try {
     const proof = JSON.parse(await fs.readFile(proofPath(root), "utf8")) as ReleaseE2EAcceptance;
-    if (!verifyFingerprint(proof)) throw new Error("RELEASE_E2E_PROOF_INTEGRITY_FAILED");
-    return proof;
+    const verified = assertReleaseProofIntegrity(proof);
+    const settlement = await readChapterSettlement(root, verified.settlementId);
+    if (!settlement || settlement.status !== "settled" || settlement.projectSlug !== verified.projectSlug || settlement.chapterId !== verified.chapterId || !verifyFingerprint(settlement) || settlement.fingerprint !== verified.settlementFingerprint) throw new Error("RELEASE_E2E_PROOF_STALE");
+    const derived = await readDerivedPublicationTransaction(root, verified.derivedTransactionId);
+    if (!derived || derived.status !== "committed" || derived.projectSlug !== verified.projectSlug || derived.chapterId !== verified.chapterId || derived.settlementId !== verified.settlementId || !verifyDerivedFingerprint(derived) || derived.fingerprint !== verified.derivedFingerprint) throw new Error("RELEASE_E2E_PROOF_STALE");
+    return verified;
   }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
@@ -54,9 +62,18 @@ export async function recordReleaseE2EAcceptance(root: string, input: { projectS
   const existing = await readReleaseE2EAcceptance(root);
   if (existing) {
     if (!verifyFingerprint(existing)) throw new Error("RELEASE_E2E_PROOF_INTEGRITY_FAILED");
+    if (existing.projectSlug !== input.projectSlug || existing.chapterId !== input.chapterId || existing.settlementId !== input.settlementId || existing.derivedTransactionId !== input.derivedTransactionId) {
+      throw new Error("RELEASE_E2E_PROOF_CONFLICT");
+    }
     return existing;
   }
-  const settlement = await readChapterSettlement(root, input.settlementId);
+  let settlement: Awaited<ReturnType<typeof readChapterSettlement>>;
+  try {
+    settlement = await readChapterSettlement(root, input.settlementId);
+  } catch (error) {
+    if (error instanceof Error && error.message === "CHAPTER_SETTLEMENT_INTEGRITY_FAILED") throw new Error("RELEASE_E2E_SETTLEMENT_INTEGRITY_FAILED");
+    throw error;
+  }
   if (!settlement || settlement.status !== "settled" || settlement.projectSlug !== input.projectSlug || settlement.chapterId !== input.chapterId) throw new Error("RELEASE_E2E_SETTLEMENT_REQUIRED");
   if (!verifyFingerprint(settlement)) throw new Error("RELEASE_E2E_SETTLEMENT_INTEGRITY_FAILED");
   const derived = await readDerivedPublicationTransaction(root, input.derivedTransactionId);

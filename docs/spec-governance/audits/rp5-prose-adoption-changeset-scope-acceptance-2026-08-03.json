@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-prose-adoption-changeset-scope",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Every adoption transaction change-set entry must target the transaction segment.",
+    "A valid transaction fingerprint must not authorize cross-segment change evidence."
+  ],
+  "implementationRefs": [
+    "api/src/proseAdoptionTransaction.ts:validChanges",
+    "api/src/proseAdoptionTransaction.spec.ts:cross-segment change-set regression"
+  ],
+  "tests": {
+    "red": "A rehashed transaction with a change-set entry for another segment was accepted.",
+    "green": "proseAdoptionTransaction.spec.ts passed 9/9 after segment binding was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Migration cutover remains incomplete.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

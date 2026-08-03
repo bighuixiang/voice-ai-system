@@ -19,7 +19,7 @@ async function fixture() {
   const probation = await promoteCraftPatternFromExperiment({ root, patternId: approved.patternId, experiment: first, actor: "author", reason: "First holdout" });
   return { root, probation };
 }
-function experiment(experimentId: string): CraftExperiment { return { schemaVersion: "craft-experiment.v1", experimentId, projectSlug: "demo", transferPlanId: `plan-${experimentId}`, baselineCandidateId: "base", treatmentCandidateId: "treatment", holdoutSceneIds: [`scene-${experimentId}`], targetMetrics: ["pressure"], budgetId: `budget-${experimentId}`, status: "judged", judgment: { evaluatorId: `reviewer-${experimentId}`, evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "Holdout improved", judgedAt: "2026-07-30T00:00:00.000Z", fingerprint: `judgment-${experimentId}` }, createdAt: "2026-07-30T00:00:00.000Z", updatedAt: "2026-07-30T00:00:00.000Z", fingerprint: `experiment-${experimentId}` }; }
+function experiment(experimentId: string, withDecision = true): CraftExperiment { return { schemaVersion: "craft-experiment.v1", experimentId, projectSlug: "demo", transferPlanId: `plan-${experimentId}`, baselineCandidateId: "base", treatmentCandidateId: "treatment", holdoutSceneIds: [`scene-${experimentId}`], targetMetrics: ["pressure"], budgetId: `budget-${experimentId}`, status: "judged", judgment: { evaluatorId: `reviewer-${experimentId}`, evaluatorKind: "independent-reviewer", winner: "treatment", hardGuardsPassed: true, authorReason: "Holdout improved", judgedAt: "2026-07-30T00:00:00.000Z", fingerprint: `judgment-${experimentId}` }, decision: withDecision ? { actor: "author", decision: "adopt", reason: "Author approved", decidedAt: "2026-07-30T00:00:00.000Z" } : undefined, createdAt: "2026-07-30T00:00:00.000Z", updatedAt: "2026-07-30T00:00:00.000Z", fingerprint: `experiment-${experimentId}` }; }
 
 describe("craft pattern validation", () => {
   it("requires a second independent experiment to validate a probation pattern", async () => {
@@ -34,5 +34,15 @@ describe("craft pattern validation", () => {
     await expect(validateCraftPatternFromExperiment({ root, patternId: probation.patternId, experiment: experiment("experiment-1"), actor: "author", reason: "duplicate" })).rejects.toThrow("CRAFT_PATTERN_VALIDATION_SECOND_EXPERIMENT_REQUIRED");
     const failed = { ...experiment("experiment-2"), status: "failed" as const, judgment: { ...experiment("experiment-2").judgment!, hardGuardsPassed: false } };
     await expect(validateCraftPatternFromExperiment({ root, patternId: probation.patternId, experiment: failed, actor: "author", reason: "failed" })).rejects.toThrow("CRAFT_PATTERN_VALIDATION_BLOCKED");
+  });
+  it("fails closed when the probation pattern is tampered", async () => {
+    const { root, probation } = await fixture();
+    const target = path.join(root, "sessions", "craft-patterns", `${probation.patternId}.json`);
+    await fs.writeFile(target, JSON.stringify({ ...probation, lifecycle: "validated" }), "utf8");
+    await expect(validateCraftPatternFromExperiment({ root, patternId: probation.patternId, experiment: experiment("experiment-2"), actor: "author", reason: "Second holdout" })).rejects.toThrow("CRAFT_PATTERN_INTEGRITY_FAILED");
+  });
+  it("requires author adoption for the independent validation experiment", async () => {
+    const { root, probation } = await fixture();
+    await expect(validateCraftPatternFromExperiment({ root, patternId: probation.patternId, experiment: experiment("experiment-2", false), actor: "author", reason: "Second holdout" })).rejects.toThrow("CRAFT_PATTERN_AUTHOR_ADOPTION_REQUIRED");
   });
 });

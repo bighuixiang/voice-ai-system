@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-migration-resolution-semantic-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Migration conflict resolution artifacts must fail closed when hashed fields have invalid semantics.",
+    "Resolution records must bind to their migration path and contain a valid authority, status, conflict list, and timestamp."
+  ],
+  "implementationRefs": [
+    "api/src/migrationResolution.ts:readMigrationResolution",
+    "api/src/migrationResolution.spec.ts:invalid semantic fields on direct read"
+  ],
+  "tests": {
+    "red": "A validly hashed resolution with resolvedConflicts as a string was accepted by direct read.",
+    "green": "migrationResolution.spec.ts passed 6/6 after semantic validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

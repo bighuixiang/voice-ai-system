@@ -21,4 +21,10 @@ describe("character agency guard", () => {
     expect(result.issues).toContain("AGENCY_CHOICE_EVIDENCE_MISSING");
     expect(result.repair).toContain("credible options");
   });
+
+  it("blocks a choice factor that is not linked to the supplied choice evidence", () => {
+    const result = evaluateCharacterAgency({ ...base, choiceEvidenceIds: ["choice-1"], causalFactors: [{ kind: "character-choice", description: "hero decides", evidenceRefs: ["choice://foreign"], choiceEvidenceIds: ["choice-foreign"] }] });
+    expect(result.status).toBe("blocked");
+    expect(result.issues).toContain("AGENCY_CHOICE_LINK_MISMATCH");
+  });
 });

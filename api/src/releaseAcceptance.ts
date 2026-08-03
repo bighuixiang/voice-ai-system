@@ -24,6 +24,8 @@ export interface ReleaseAcceptanceDecision {
   fingerprint: string;
 }
 
+function persistedAcceptancePath(root: string): string { return path.join(root, "release-acceptance.json"); }
+
 async function projectDirectories(): Promise<string[]> {
   const root = getNovelsRoot();
   const entries = await fs.readdir(root, { withFileTypes: true }).catch(() => [] as import("node:fs").Dirent[]);
@@ -80,11 +82,52 @@ function acceptanceFingerprint(base: { evaluatedAt: string; [key: string]: unkno
   return crypto.createHash("sha256").update(JSON.stringify(stableBase)).digest("hex");
 }
 
+export function assertReleaseAcceptanceIntegrity(value: ReleaseAcceptanceDecision): ReleaseAcceptanceDecision {
+  const requiredChecks = ["migration-cutover", "external-calibration", "governed-e2e", "v2-independent-review", "delivery-proof"];
+  if (value.schemaVersion !== "release-acceptance.v1" || value.releaseProfile !== "RP5-drafting" || (value.status !== "accepted" && value.status !== "do-not-activate") || !Array.isArray(value.checks) || value.checks.length !== requiredChecks.length || typeof value.evaluatedAt !== "string" || !Number.isFinite(Date.parse(value.evaluatedAt))) throw new Error("RELEASE_ACCEPTANCE_INTEGRITY_FAILED");
+  const checks = value.checks as Array<{ checkId?: unknown; status?: unknown; evidence?: unknown; reason?: unknown }>;
+  if (requiredChecks.some((checkId) => !checks.some((check) => check.checkId === checkId && (check.status === "passed" || check.status === "missing"))) || new Set(checks.map((check) => check.checkId)).size !== requiredChecks.length) throw new Error("RELEASE_ACCEPTANCE_INTEGRITY_FAILED");
+  if (checks.some((check) => !Array.isArray(check.evidence) || check.evidence.some((item) => typeof item !== "string") || typeof check.reason !== "string" || !check.reason.trim())) throw new Error("RELEASE_ACCEPTANCE_INTEGRITY_FAILED");
+  if (value.status === "accepted" && checks.some((check) => check.status !== "passed")) throw new Error("RELEASE_ACCEPTANCE_INTEGRITY_FAILED");
+  const { fingerprint: _fingerprint, ...base } = value;
+  if (!(typeof value.fingerprint === "string" && /^[a-f0-9]{64}$/i.test(value.fingerprint) && acceptanceFingerprint(base) === value.fingerprint)) throw new Error("RELEASE_ACCEPTANCE_INTEGRITY_FAILED");
+  return value;
+}
+
+async function writeAcceptanceJson(root: string, value: ReleaseAcceptanceDecision): Promise<void> {
+  await fs.mkdir(root, { recursive: true });
+  const target = persistedAcceptancePath(root);
+  const temporary = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`;
+  await fs.writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  await fs.rename(temporary, target);
+}
+
+export async function readPersistedReleaseAcceptance(root: string): Promise<ReleaseAcceptanceDecision | null> {
+  try {
+    const value = JSON.parse(await fs.readFile(persistedAcceptancePath(root), "utf8")) as ReleaseAcceptanceDecision;
+    return assertReleaseAcceptanceIntegrity(value);
+  } catch (error) {
+    if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null;
+    if (error instanceof Error && error.message === "RELEASE_ACCEPTANCE_INTEGRITY_FAILED") throw new Error("RELEASE_ACCEPTANCE_CORRUPT");
+    throw error;
+  }
+}
+
+export async function persistReleaseAcceptance(root: string, decision: ReleaseAcceptanceDecision): Promise<ReleaseAcceptanceDecision> {
+  try { assertReleaseAcceptanceIntegrity(decision); } catch { throw new Error("RELEASE_ACCEPTANCE_INVALID"); }
+  const existing = await readPersistedReleaseAcceptance(root);
+  if (existing && existing.fingerprint === decision.fingerprint) return existing;
+  await writeAcceptanceJson(root, decision);
+  return decision;
+}
+
 function hasSemanticallyValidCalibration(value: Record<string, unknown>): boolean {
   if (value.schemaVersion !== "quality-calibration-evidence.v1" || typeof value.evaluatorVersion !== "string" || !value.evaluatorVersion.trim() || typeof value.inputFingerprint !== "string" || !value.inputFingerprint.trim()) return false;
   if (value.split !== "holdout" || value.labelAccess !== "sealed-separate-from-evaluator-input" || value.canonGateEligible !== false) return false;
+  if (!Array.isArray(value.caseIds) || value.caseIds.some((caseId) => typeof caseId !== "string" || !caseId.trim()) || new Set(value.caseIds).size !== value.caseIds.length) return false;
   if (typeof value.evaluatedCount !== "number" || !Number.isInteger(value.evaluatedCount) || value.evaluatedCount <= 0 || typeof value.correctCount !== "number" || !Number.isInteger(value.correctCount) || value.correctCount < 0 || value.correctCount > value.evaluatedCount) return false;
-  if (typeof value.accuracy !== "number" || Math.abs(value.accuracy - value.correctCount / value.evaluatedCount) > 1e-9 || typeof value.minimumAccuracy !== "number" || value.accuracy < value.minimumAccuracy) return false;
+  if (typeof value.accuracy !== "number" || Math.abs(value.accuracy - value.correctCount / value.evaluatedCount) > 1e-9 || typeof value.minimumAccuracy !== "number" || value.minimumAccuracy < 0 || value.minimumAccuracy > 1 || value.accuracy < value.minimumAccuracy) return false;
+  if (value.status !== "calibrated" || typeof value.createdAt !== "string" || !Number.isFinite(Date.parse(value.createdAt))) return false;
   const attestation = value.attestation as { kind?: unknown } | undefined;
   const expectedKind = value.sourceKind === "provider" ? "provider-signed" : value.sourceKind === "human" ? "human-reviewed" : "";
   const reference = (value.attestation as { reference?: unknown } | undefined)?.reference;

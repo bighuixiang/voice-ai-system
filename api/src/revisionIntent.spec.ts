@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createRevisionIntent, listRevisionIntents } from "./revisionIntent.js";
+import { createRevisionIntent, listRevisionIntents, readRevisionIntent } from "./revisionIntent.js";
 
 describe("revision intent authority", () => {
   it("creates an immutable revision intent and forces a branch for settled prose", async () => {
@@ -27,5 +27,13 @@ describe("revision intent authority", () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "revision-intent-guards-"));
     await expect(createRevisionIntent(root, { projectSlug: "demo", authorText: "", type: "style_edit", maturity: "candidate_generated", scope: { chapterIds: ["chapter-001"] }, requestedChanges: [], protectedItems: [], mode: "branch_candidate", actor: "author" })).rejects.toThrow("REVISION_INTENT_CONTENT_REQUIRED");
     await expect(createRevisionIntent(root, { projectSlug: "demo", authorText: "change", type: "style_edit", maturity: "candidate_generated", scope: { chapterIds: ["chapter-001"] }, requestedChanges: ["change"], protectedItems: [], mode: "branch_candidate", actor: "system" })).rejects.toThrow("REVISION_AUTHOR_AUTHORITY_REQUIRED");
+  });
+  it("fails closed when an intent is tampered", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "revision-intent-tampered-"));
+    const intent = await createRevisionIntent(root, { projectSlug: "demo", authorText: "Change.", type: "style_edit", maturity: "candidate_generated", scope: { chapterIds: ["chapter-001"] }, requestedChanges: ["local"], protectedItems: [], mode: "branch_candidate", actor: "author" });
+    const target = path.join(root, "sessions", "revisions", "intents", `${intent.intentId}.json`);
+    await fs.writeFile(target, JSON.stringify({ ...intent, actor: "system" }), "utf8");
+    await expect(readRevisionIntent(root, intent.intentId)).rejects.toThrow("REVISION_INTENT_INTEGRITY_FAILED");
+    await expect(listRevisionIntents(root)).rejects.toThrow("REVISION_INTENT_INTEGRITY_FAILED");
   });
 });

@@ -27,79 +27,83 @@
     },
     {
       "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
-      "sha256": "01d4ff436dbee1f27f12aef0b253e2e53f723ae417ca6b983d879328e076b31e"
+      "sha256": "bd132dfa75571bcf6ee6bdd7149441465d6e8520f4c83b0009dab9e823d85aa9"
     },
     {
       "path": "ui/src/components/novel/NovelWorkspace.vue",
-      "sha256": "f4bc939c36c8890caec1b85518b70dc35b9ac6373366f32a730dcd468d1344bf"
+      "sha256": "04bab1641bb9a13489ca473c644b5d4013c7e7573fe98e1c6d68f7536256236c"
+    },
+    {
+      "path": "ui/src/components/novel/CreativeSessionPanel.vue",
+      "sha256": "f86206fa02a6e42bf7cc14efc79eecd194add3b8cffee307bbc7621f69917319"
     },
     {
       "path": "ui/src/services/novelApi.ts",
-      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+      "sha256": "63b05fc817df12c8cb5e22ed42a3889f2ca62ed6a9cdf78d10e7fd3d5a9bfb5a"
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     },
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
     },
     {
       "path": "api/src/novelProject.ts",
-      "sha256": "9f78fa867fc1b36e472319867ea5e45ceb8422012a5466bea3a877e1177d0064"
+      "sha256": "2b667ee1dd82c5c3bdb33bb68ee8b10d427ed4c938075dcf472d0a42b25b5720"
     },
     {
       "path": "api/src/taskTemplates.ts",
-      "sha256": "7fe2fed9fcd6bec9be5f4b62871291b972c626a584c1d988abf395923c097b7a"
+      "sha256": "5b1316c5e006f1bb29e3cae11f91cf7ea0f3e246ee3be8f30253613d06273f57"
     },
     {
       "path": "api/src/contextManifest.ts",
-      "sha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc"
+      "sha256": "f93a0831205377002230d96151f33c2d37c6b087ba134000762b5e93a058f68b"
     },
     {
       "path": "api/src/taskService.ts",
-      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+      "sha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220"
     },
     {
       "path": "api/src/creativeJourney.ts",
-      "sha256": "83726cbde2f77204c805acbbf58f23742cd65666bda54e34758b366d9b2a656b"
+      "sha256": "4e07618d37d7c6eb81441f71d2566c0e60930c5850a096557361b963be701dc6"
     },
     {
       "path": "api/src/contextAssembler.ts",
-      "sha256": "6a68af64de7a2e58b63529950cc97813fc638f58432555f5079a1c06d0ffd075"
+      "sha256": "87f5b4a7a720fd5d25aa446605863615408d03ff3e8aff1f4ea88623d2cef963"
     },
     {
       "path": "api/src/runtimeEngine.ts",
-      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      "sha256": "232bd54d3d76d340af9787f1ea5c522966499e7dad92da82faa24dfaa66b6572"
     },
     {
       "path": "api/src/proseAdoption.ts",
-      "sha256": "4580625cc0112d5dbe14800cf1ed967932dff1c12c2176d58785ee23f3482349"
+      "sha256": "7cfff393bdd9f036c87f880755994598ddfbdb527ceb3115163df2776d92d79a"
     },
     {
       "path": "api/src/types.ts",
-      "sha256": "5e208d3335da3c9b7abe2aa82594d228a710de85e8296dc5f318f78c97e27062"
+      "sha256": "4750c8d435d9f188f685544483d9c2501a0f4445569007632732a23c9e504b5b"
     },
     {
       "path": "api/src/editionManifest.ts",
-      "sha256": "603898e0ceb1d513d8214b9a464c2222a67a2ad5b7439dffebfc3d0f471f25e7"
+      "sha256": "13ad3562f2ce3e04f52307ad1443188ec6d2de9bd496c24d920dcb0e7696dbc0"
     },
     {
       "path": "api/src/publicationTree.ts",
-      "sha256": "5670360025ad853525f8e437f03310101bc2cb0516859b639f5d130f4b2c3541"
+      "sha256": "62281627f9fc8da2571dca6d94bad119622b810d68e574d89cb2bb151834f3ad"
     },
     {
       "path": "api/src/publicationArtifacts.ts",
-      "sha256": "8f842d060b71181f5af819c447ba244fec95bafc5baa9d081e1c71de7b592b32"
+      "sha256": "1a106c9dd8c23073fdcc3afa6fe6473f40060a74269b4f147616e98e82b913b6"
     },
     {
       "path": "api/src/deliveryProof.ts",
-      "sha256": "a9d3cb656be94b60c5ad76156001cf3e385ae51c52dc07779be8e2d826170eb5"
+      "sha256": "9376ec9de0f8e2ce426f63b6a80bb0984427922539d0c1e3e475b6971f2572c6"
     },
     {
       "path": "api/src/deliveryAccessGrant.ts",
-      "sha256": "5004e3c1bc4b29877cd461e2dc007f5a30d451e79fe67f0df484edc19e690926"
+      "sha256": "b42741e39abe336ffa4a23e5c1f472835285401ea832f1c4046bd1c17b53db86"
     },
     {
       "path": "api/src/releasePreflight.ts",
@@ -107,11 +111,11 @@
     },
     {
       "path": "api/src/closureCertificate.ts",
-      "sha256": "c69444822955e26bd7bf36e65122ec0ae9208028a43ec47a472e7a325c5085e6"
+      "sha256": "b55a598a53460aa758b1731350018d2dd292c2f7dd69af495d864de8db5a2a29"
     },
     {
       "path": "api/src/revisionIntent.ts",
-      "sha256": "3d93dddd8080c534544bb8e55fe86770da4eaeb6d8ee39026daadef8e69a4d82"
+      "sha256": "696bec75ae4692860262d6bf0a92e910b1f8acdfaeae0287140a6b744b8fa8b2"
     },
     {
       "path": "api/src/revisionImpact.ts",
@@ -119,28 +123,40 @@
     },
     {
       "path": "api/src/narrativeObligation.ts",
-      "sha256": "e4cb7d0e298387064803777331a28bfbede96aae59c252decf82ed226ab19b11"
+      "sha256": "b9283c512c9111454c9cf477451597e274c70082bd8d1f2c35c127af5f7cc7e4"
     },
     {
       "path": "api/src/obligationCoverage.ts",
-      "sha256": "412d8bbcefe5c3de1dbd295192cd35b3c295142e2fd79265c41882dbec6d8c31"
+      "sha256": "246cac48bd46b71b11ebef77a07a135e1b05982887caaa6720de821356ecbe27"
     },
     {
       "path": "api/src/obligationCandidates.ts",
-      "sha256": "8e1776e3a0870b5196a0f8a7a6b19fe1fcd3f30ec61e1f16be79d13f76e21d8a"
+      "sha256": "7b9bccac69013785ecf4531bbf4ec1c9146734a386e8abda04b62c10fb7f5c67"
     },
     {
       "path": "api/src/obligationCertificate.ts",
-      "sha256": "f64d56a8491eb5aeb25ec74ba3677a21157bb576d9aaf299595bc43473ad7245"
+      "sha256": "896b7365c64133782ba556685f19ce056dec17a08f2d3185f09c82279242b2a5"
     },
     {
       "path": "api/src/dialogueQuestions.ts",
-      "sha256": "ad8813eb29fc06c10686ee7aa3d3eeadbcb63d45048f9b66afc2cea40e0c6ce7"
+      "sha256": "b5ff6c8bc09f50af7d7d3b6d3c5bb96c13fc1d9c993bde212aa880f77df9d86f"
+    },
+    {
+      "path": "api/src/dialogueRedBlue.ts",
+      "sha256": "affa2ac93d508b8818e0df62ea19cd8c65d788a878c0059d62f3ad479329647a"
+    },
+    {
+      "path": "api/src/decisionImpact.ts",
+      "sha256": "75e652ae9833d9a356e4d62e3424a800a9edf2a4971b87b119622074f31e0ba2"
+    },
+    {
+      "path": "api/src/decisionProjection.ts",
+      "sha256": "7cfb91673737696076c8fc495466cf98a9b5043fc125e6ac43fa623b332cc721"
     }
   ],
   "uiQuestionSurfaceScan": {
-    "scannedVueComponentCount": 43,
-    "aggregateSha256": "6807217579fb99d874ee8f94dd7e338c3acd422f263ea01b9a40cef536a4eeec",
+    "scannedVueComponentCount": 50,
+    "aggregateSha256": "f9512e7043e705d075fe7930b7b46308cb65ae9aaa0c8e519ceb03f110fc70d9",
     "passiveQuestionRendererFiles": [
       "ui/src/components/novel/RewriteComparison.vue"
     ],
@@ -166,9 +182,9 @@
       "critical": 7,
       "high": 5
     },
-    "persistedAuthorUtteranceExists": false,
-    "interactiveSocraticDecisionExists": false,
-    "governedRedBlueContractExists": false,
+    "persistedAuthorUtteranceExists": true,
+    "interactiveSocraticDecisionExists": true,
+    "governedRedBlueContractExists": true,
     "endToEndLowInputJourneyVerified": false,
     "autoContinueExecutedByRuntimeEngine": false,
     "implementationVerified": false
@@ -196,12 +212,12 @@
         },
         {
           "path": "api/src/creativeJourney.ts",
-          "line": 40,
+          "line": 51,
           "evidence": "export function buildCreativeJourneyProjection"
         },
         {
           "path": "api/src/app.ts",
-          "line": 959,
+          "line": 1928,
           "evidence": "app.get(\"/api/novel/projects/:projectId/session/journey\""
         }
       ],
@@ -227,7 +243,7 @@
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 149,
+          "line": 152,
           "evidence": "roughIdea: input.roughIdea.trim()"
         }
       ],
@@ -249,17 +265,17 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 652,
+          "line": 1203,
           "evidence": "const project = await createUniqueProjectSkeleton"
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 162,
+          "line": 165,
           "evidence": "chapters: createDefaultChapters()"
         },
         {
           "path": "api/src/novelProject.ts",
-          "line": 285,
+          "line": 314,
           "evidence": "\"outline/volume-01.md\": \"# 第一卷大纲\\n\\n待生成。\\n\""
         }
       ],
@@ -286,12 +302,12 @@
         },
         {
           "path": "api/src/app.ts",
-          "line": 658,
+          "line": 1228,
           "evidence": "result: fallbackProjectCreateResult(project.title)"
         },
         {
           "path": "ui/src/services/novelApi.ts",
-          "line": 129,
+          "line": 174,
           "evidence": "const data = await request<{ project: NovelProject }>(\"/api/novel/projects\""
         }
       ],
@@ -313,7 +329,7 @@
       "evidence": [
         {
           "path": "api/src/contextAssembler.ts",
-          "line": 699,
+          "line": 756,
           "evidence": "if (type === \"project.create\")"
         }
       ],
@@ -334,7 +350,7 @@
       "evidence": [
         {
           "path": "api/src/types.ts",
-          "line": 1006,
+          "line": 1100,
           "evidence": "questions: string[];"
         },
         {
@@ -381,12 +397,12 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 2921,
+          "line": 3081,
           "evidence": "function generateStructureFromIdea"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 2931,
+          "line": 3091,
           "evidence": "mainConflict: \"主角必须在目标、阻力和代价之间做选择。\""
         },
         {
@@ -422,7 +438,7 @@
         },
         {
           "path": "ui/src/components/novel/NovelWorkspace.vue",
-          "line": 207,
+          "line": 276,
           "evidence": "title=\"自动驾驶运行时\""
         }
       ],
@@ -443,12 +459,12 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 2418,
+          "line": 2546,
           "evidence": "if (!currentProject.value || !currentChapter.value || isStartingRuntime.value) return null"
         },
         {
           "path": "api/src/app.ts",
-          "line": 1738,
+          "line": 3053,
           "evidence": "app.post(\"/api/novel/projects/:projectId/runtime/start\""
         }
       ],
@@ -470,16 +486,16 @@
         {
           "path": "ui/src/components/novel/AutopilotRuntimePanel.vue",
           "line": 42,
-          "evidence": "<el-switch v-model=\"autoContinue\" active-text=\"连续章节\" />"
+          "evidence": "连续章节调度：待实现"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 2417,
+          "line": 2545,
           "evidence": "autoContinue"
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1207,
+          "line": 1601,
           "evidence": "await runSingleChapterPipeline(run)"
         }
       ],
@@ -501,12 +517,12 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 780,
+          "line": 1025,
           "evidence": "status: \"review_required\""
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1220,
+          "line": 1630,
           "evidence": "command.type === \"accept\""
         }
       ],

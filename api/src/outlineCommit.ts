@@ -15,6 +15,11 @@ export interface OutlineVersion {
   outlineFingerprint: string;
   selectedChapterIds: string[];
   strongFreezeCount: number;
+  structureVersionFingerprint: string;
+  changeLevel: "L0" | "L1" | "L2";
+  adoptionAuthority: string;
+  adoptionProofFingerprint: string;
+  comparisonFingerprint?: string;
   status: "active";
   canonWritten: true;
   createdAt: string;
@@ -29,6 +34,11 @@ export interface ExecutionReadyProof {
   versionFingerprint: string;
   status: "ready" | "blocked";
   executionReady: boolean;
+  structureVersionFingerprint: string;
+  changeLevel: "L0" | "L1" | "L2";
+  adoptionAuthority: string;
+  adoptionProofFingerprint: string;
+  comparisonFingerprint?: string;
   checks: Array<{ checkId: "version-active" | "near-horizon" | "source-fresh" | "canon-pointer"; status: "passed" | "failed"; detail: string }>;
   createdAt: string;
   fingerprint: string;
@@ -77,6 +87,19 @@ async function releaseLease(root: string, handle: fs.FileHandle): Promise<void> 
 
 function fingerprint(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
 
+export function assertOutlineVersionIntegrity(version: OutlineVersion, expectedId?: string): OutlineVersion {
+  const { fingerprint: _fingerprint, ...base } = version;
+  const valid = version.schemaVersion === "outline-version.v1" && (!expectedId || version.outlineId === expectedId || version.versionId === expectedId || version.versionId === `outline-version-${expectedId}`) && Boolean(version.versionId?.trim() && version.projectSlug?.trim() && version.outlineId?.trim() && version.outlineFingerprint?.trim() && version.structureVersionFingerprint?.trim() && version.adoptionAuthority?.trim() && version.adoptionProofFingerprint?.trim()) && (version.comparisonFingerprint === undefined || /^[a-f0-9]{64}$/i.test(version.comparisonFingerprint)) && Number.isInteger(version.version) && version.version > 0 && Array.isArray(version.selectedChapterIds) && version.selectedChapterIds.length > 0 && version.selectedChapterIds.every((id) => typeof id === "string" && id.trim()) && Number.isInteger(version.strongFreezeCount) && version.strongFreezeCount >= 0 && ["L0", "L1", "L2"].includes(version.changeLevel) && version.status === "active" && version.canonWritten === true && typeof version.createdAt === "string" && Number.isFinite(Date.parse(version.createdAt)) && /^[a-f0-9]{64}$/i.test(version.fingerprint) && fingerprint(base) === version.fingerprint;
+  if (!valid) throw new Error("OUTLINE_VERSION_INTEGRITY_FAILED");
+  return version;
+}
+
+export function assertExecutionReadyProofIntegrity(proof: ExecutionReadyProof): ExecutionReadyProof {
+  const { fingerprint: _fingerprint, ...base } = proof;
+  if (proof.schemaVersion !== "execution-ready-proof.v1" || !proof.proofId.trim() || !proof.projectSlug.trim() || !proof.versionId.trim() || !proof.versionFingerprint.trim() || (proof.comparisonFingerprint !== undefined && !/^[a-f0-9]{64}$/i.test(proof.comparisonFingerprint)) || !["ready", "blocked"].includes(proof.status) || typeof proof.executionReady !== "boolean" || !Array.isArray(proof.checks) || !proof.checks.every((check) => check && typeof check.checkId === "string" && ["passed", "failed"].includes(check.status) && typeof check.detail === "string") || !/^[a-f0-9]{64}$/i.test(proof.fingerprint) || fingerprint(base) !== proof.fingerprint) throw new Error("EXECUTION_READY_PROOF_INTEGRITY_FAILED");
+  return proof;
+}
+
 function buildProof(projectSlug: string, version: OutlineVersion, outlineFingerprint: string, pointerMatches: boolean): ExecutionReadyProof {
   const checks = [
     { checkId: "version-active" as const, status: version.status === "active" ? "passed" as const : "failed" as const, detail: "OutlineVersion is active." },
@@ -84,17 +107,17 @@ function buildProof(projectSlug: string, version: OutlineVersion, outlineFingerp
     { checkId: "source-fresh" as const, status: version.outlineFingerprint === outlineFingerprint ? "passed" as const : "failed" as const, detail: "Version retains the validated outline fingerprint." },
     { checkId: "canon-pointer" as const, status: pointerMatches ? "passed" as const : "failed" as const, detail: "Project pointer references the committed version." }
   ];
-  const base = { schemaVersion: "execution-ready-proof.v1" as const, proofId: `execution-ready-${version.versionId}`, projectSlug, versionId: version.versionId, versionFingerprint: version.fingerprint, status: checks.every((check) => check.status === "passed") ? "ready" as const : "blocked" as const, executionReady: checks.every((check) => check.status === "passed"), checks, createdAt: new Date().toISOString() };
+  const base = { schemaVersion: "execution-ready-proof.v1" as const, proofId: `execution-ready-${version.versionId}`, projectSlug, versionId: version.versionId, versionFingerprint: version.fingerprint, structureVersionFingerprint: version.structureVersionFingerprint, changeLevel: version.changeLevel, adoptionAuthority: version.adoptionAuthority, adoptionProofFingerprint: version.adoptionProofFingerprint, ...(version.comparisonFingerprint ? { comparisonFingerprint: version.comparisonFingerprint } : {}), status: checks.every((check) => check.status === "passed") ? "ready" as const : "blocked" as const, executionReady: checks.every((check) => check.status === "passed"), checks, createdAt: new Date().toISOString() };
   return { ...base, fingerprint: fingerprint(base) };
 }
 
 export async function readOutlineVersion(root: string, outlineId: string): Promise<OutlineVersion | null> {
-  try { return JSON.parse(await fs.readFile(versionPath(root, outlineId), "utf8")) as OutlineVersion; }
+  try { return assertOutlineVersionIntegrity(JSON.parse(await fs.readFile(versionPath(root, outlineId), "utf8")) as OutlineVersion, outlineId); }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 
 export async function readExecutionReadyProof(root: string): Promise<ExecutionReadyProof | null> {
-  try { return JSON.parse(await fs.readFile(proofPath(root), "utf8")) as ExecutionReadyProof; }
+  try { return assertExecutionReadyProofIntegrity(JSON.parse(await fs.readFile(proofPath(root), "utf8")) as ExecutionReadyProof); }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }
 }
 
@@ -115,7 +138,7 @@ export async function commitOutlineAdoption(root: string, input: { expectedPropo
   for (const target of targets) before.set(target, await readOptional(target));
   try {
     const project = JSON.parse(before.get(projectPath(root))!.content) as Record<string, unknown>;
-    const versionBase = { schemaVersion: "outline-version.v1" as const, versionId: `outline-version-${proposal.outlineId}`, projectSlug: proposal.projectSlug, version: 1, outlineId: proposal.outlineId, outlineFingerprint: outline.fingerprint, selectedChapterIds: proposal.selectedChapterIds, strongFreezeCount: outline.horizon.strongFreezeCount, status: "active" as const, canonWritten: true as const, createdAt: new Date().toISOString() };
+    const versionBase = { schemaVersion: "outline-version.v1" as const, versionId: `outline-version-${proposal.outlineId}`, projectSlug: proposal.projectSlug, version: 1, outlineId: proposal.outlineId, outlineFingerprint: outline.fingerprint, selectedChapterIds: proposal.selectedChapterIds, strongFreezeCount: outline.horizon.strongFreezeCount, structureVersionFingerprint: outline.fingerprint, changeLevel: proposal.adoptionMode === "whole" ? "L0" as const : proposal.adoptionMode === "fusion" ? "L2" as const : "L1" as const, adoptionAuthority: proposal.authorAuthorization?.authorizationId || "author", adoptionProofFingerprint: proposal.fingerprint, ...(proposal.comparisonFingerprint ? { comparisonFingerprint: proposal.comparisonFingerprint } : {}), status: "active" as const, canonWritten: true as const, createdAt: new Date().toISOString() };
     const version: OutlineVersion = { ...versionBase, fingerprint: fingerprint(versionBase) };
     const nextProject = { ...project, outlineVersion: { versionId: version.versionId, fingerprint: version.fingerprint, outlineId: version.outlineId, selectedChapterIds: version.selectedChapterIds } };
     await writeJson(projectPath(root), nextProject);

@@ -15,103 +15,119 @@
   "sourceFiles": [
     {
       "path": "api/src/app.ts",
-      "sha256": "55bfc6cca5bd64e70befd5f99d9b2739967a7ea7a3b31c78e33cbf7ac53aec55"
+      "sha256": "d7b9ac20eecc70be09592eca4e4a1c234d065b3ef556f06b6737d68dee088a89"
+    },
+    {
+      "path": "api/src/lengthPlanning.ts",
+      "sha256": "79f2296ea512ea82d2b364200dfc571793b1aa0313ce831c56e07b2d832895a8"
+    },
+    {
+      "path": "api/src/lengthPlanning.spec.ts",
+      "sha256": "2dd78397c79b1ef5ffb3ff724543dd296b6916247f151fba3d1cdd78d099a943"
     },
     {
       "path": "api/src/runtimeEngine.ts",
-      "sha256": "052c03f1b692ffaca04bee4f271cc6427788237b2fb91676d5c7468cd216b5ad"
+      "sha256": "232bd54d3d76d340af9787f1ea5c522966499e7dad92da82faa24dfaa66b6572"
     },
     {
-      "path": "api/src/proseCandidate.ts",
-      "sha256": "551b4e3e996b7b237fc1572ec11c49245ec0ea22fb3101996577f03090974ab2"
-    },
-    {
-      "path": "api/src/proseAdoption.ts",
-      "sha256": "4580625cc0112d5dbe14800cf1ed967932dff1c12c2176d58785ee23f3482349"
-    },
-    {
-      "path": "api/src/proseValidation.ts",
-      "sha256": "5f07efdcf14be88c59bae8614fc4758555e1923482ffa06a367efee648fffc3e"
-    },
-    {
-      "path": "api/src/proseReview.ts",
-      "sha256": "64415f70d9a8128038ccb36c28f93db835cd190cad60f572f9c6efd021529ccc"
-    },
-    {
-      "path": "api/src/authorFeedback.ts",
-      "sha256": "c78d6c10b6f8713281fba2330efc0ebdb4c0cd882f6652eff8260012fbd24139"
-    },
-    {
-      "path": "api/src/derivedPublication.ts",
-      "sha256": "e331f9f320f7d11c8d523e747fc08c99864770a8e0e3065ff3c5c8dd9378e3af"
-    },
-    {
-      "path": "api/src/chapterSettlement.ts",
-      "sha256": "481906f680153a4ab6cf2f10b563b8195fa2d85aa8e9623b235892b594925ecd"
-    },
-    {
-      "path": "api/src/bookWorkGraph.ts",
-      "sha256": "080e74a325fc6a8195e98b4213cfb0e112ecbe1dcbc5a0ebbcf2fb95ba8223ea"
-    },
-    {
-      "path": "api/src/bookWorkScheduler.ts",
-      "sha256": "09f721bc89417c623f1def07c6032bb585eb9103ddf69513c4a09127621306fe"
-    },
-    {
-      "path": "api/src/bookRun.ts",
-      "sha256": "d3075bb1d598f7b1cec68b28e7690ed54abf94155241072df86c08984dcc755c"
-    },
-    {
-      "path": "api/src/quiescenceProof.ts",
-      "sha256": "afdcbb424a3151e331bfa25612c274f5299cbb7620c2278c3f6e773b3cc5bdcc"
-    },
-    {
-      "path": "api/src/completionAudit.ts",
-      "sha256": "a7962c88ebe1ecc3f97c6cf414a950c6edf33abd3c6a1d481ac4ca86ba0f3f42"
-    },
-    {
-      "path": "api/src/outlineCandidate.ts",
-      "sha256": "d8655fb0a85e754a912631cea0342257c7449e4c971d562849fc764ce0ba8497"
-    },
-    {
-      "path": "api/src/outlineValidation.ts",
-      "sha256": "aa2d8e53cc2870a13b0ff15a20b38e8f7c94bcc91236ab7576c38f23141d7110"
-    },
-    {
-      "path": "api/src/outlineAdoption.ts",
-      "sha256": "89263e3c4b6c54c5fe3e1e096794a9259c0fb63914fa9d3b58ea78263203ee18"
-    },
-    {
-      "path": "api/src/outlineCommit.ts",
-      "sha256": "888215f5df10ee14cd5d73db87eaf9e59a534444086b7b994694936a6a3a05e7"
-    },
-    {
-      "path": "api/src/executionReadiness.ts",
-      "sha256": "e86f6c1bf92ee9933ca607cc93691ccc5c281711a40c31a7405ab233f22b446c"
-    },
-    {
-      "path": "api/src/executionQueue.ts",
-      "sha256": "313674ce39d6e25eff038633d96cadc42f7438d2313a5036fbba9fcd0fe56563"
-    },
-    {
-      "path": "api/src/runtimeFiles.ts",
-      "sha256": "fcbac30715ad56ac98b25a7135e0d59db7682a4ed5d708b6e7e468c69e6662c9"
-    },
-    {
-      "path": "api/src/taskService.ts",
-      "sha256": "822f5e750b25743cbdb2ee3acc0bd9ec1302a52eaa0b1dc3e94f3221fa75ff47"
+      "path": "api/src/runtimeStore.ts",
+      "sha256": "aee9cf825fb26f972a8e5f7bba5598b1adf8f68c203b3b6016c2cc35f6e722ad"
     },
     {
       "path": "api/src/writingCockpit.ts",
-      "sha256": "71a432d8b3643c1cf5964ade87d56cd24b11e6facbe617764e24041276256fb5"
+      "sha256": "f08d436c1f0bc6047da16f848e5fe9dd0c2b5538f7d885c5d73d418251de0dd6"
+    },
+    {
+      "path": "api/src/proseCandidate.ts",
+      "sha256": "8cd08fc6f402d43929f02946f66d19cf14ae1be7b68ca93dd9ec35d90faf0c40"
+    },
+    {
+      "path": "api/src/proseAdoption.ts",
+      "sha256": "7cfff393bdd9f036c87f880755994598ddfbdb527ceb3115163df2776d92d79a"
+    },
+    {
+      "path": "api/src/proseValidation.ts",
+      "sha256": "8eef02190ba02d8f3e46814af2fcf694bf7206b887d12e4799e9ed0992f584e6"
+    },
+    {
+      "path": "api/src/proseReview.ts",
+      "sha256": "8a36c92e17f50eace91195e2fcda7dcf63598ca13ea6ae35b74ddb14c833bce3"
+    },
+    {
+      "path": "api/src/authorFeedback.ts",
+      "sha256": "001ce5f57528f6c83c21801d69f47d4433427546c9e3dedd49a1802bef5e2abe"
+    },
+    {
+      "path": "api/src/derivedPublication.ts",
+      "sha256": "c98d338a54807b63d0f634b83f3be3dae4032de0961c9cf413378e2ee9ef726d"
+    },
+    {
+      "path": "api/src/chapterSettlement.ts",
+      "sha256": "b81d37cfe936d3f8db2a33ec79314833b0b72c2f28c63e64ce78e208d8b87f4d"
+    },
+    {
+      "path": "api/src/bookWorkGraph.ts",
+      "sha256": "2c75e5cc4be97b81a24cc22db33fc90ac5ced5575d218f96cabbacf882c74343"
+    },
+    {
+      "path": "api/src/bookWorkScheduler.ts",
+      "sha256": "b2295bfe40fd28d86f6111738ab51aabbad53b3bfe5b1a78603a569f9fffe508"
+    },
+    {
+      "path": "api/src/bookRun.ts",
+      "sha256": "4f63d72bd45198db809f4ef52dce5e05bee43ea09d30cb02a1cd731d2a106cac"
+    },
+    {
+      "path": "api/src/bookRun.spec.ts",
+      "sha256": "6fb6582c4d171cc30a64cfd13b358df3151dcb22858e11b92e0444233b9ef166"
+    },
+    {
+      "path": "api/src/quiescenceProof.ts",
+      "sha256": "670883742762f8186ece744be4656b2c35da873294035d3ae58e96c9a142a9b4"
+    },
+    {
+      "path": "api/src/completionAudit.ts",
+      "sha256": "25906984b25b989d551183b54c6a3213cf19e26d419ceadf46a1945d2973c771"
+    },
+    {
+      "path": "api/src/outlineCandidate.ts",
+      "sha256": "7de442c2d962deb5f376f8bc41ebd8d129acdd389df829bc916af3567bc3f626"
+    },
+    {
+      "path": "api/src/outlineValidation.ts",
+      "sha256": "ef1d41f43442018168f46b0b245bb799b353d285afa4483813d1ffa0a6098190"
+    },
+    {
+      "path": "api/src/outlineAdoption.ts",
+      "sha256": "6b59812f6edb2cac276b2c5ba94ce2573fadf595256e5512cc12403ae74fe787"
+    },
+    {
+      "path": "api/src/outlineCommit.ts",
+      "sha256": "74fc07a18492dbae552ead08a2d0ecf317272437a2b5d9d37bf4e66082678e1e"
+    },
+    {
+      "path": "api/src/executionReadiness.ts",
+      "sha256": "deb5e6244a9d58938652d01957dcb4376e1468415251cd0990b5103fcc132117"
+    },
+    {
+      "path": "api/src/executionQueue.ts",
+      "sha256": "364f80b71442239fcf8bc95fcb706782470ef2c214aa1f92200850f7665ebd7e"
+    },
+    {
+      "path": "api/src/runtimeFiles.ts",
+      "sha256": "c041b4689b107f2798788aa7effa7edfa0fb32efda1cd8ec0a6b58c0ecae75d2"
+    },
+    {
+      "path": "api/src/taskService.ts",
+      "sha256": "22e2c5b21231e5cc5a29d20298e25dc03a1acc39dd0bdfb6ad0ff8fc10ff8220"
     },
     {
       "path": "api/src/creativeSession.ts",
-      "sha256": "db382d3da1c3569bb84852cf7738869a2dd2d67fd274fc006178064323600cf4"
+      "sha256": "5f46e55e4f2c20f0a7482df8295048add4f6f4fd1892f0d72ff97b2033ad6fad"
     },
     {
       "path": "api/src/creativeJourney.ts",
-      "sha256": "83726cbde2f77204c805acbbf58f23742cd65666bda54e34758b366d9b2a656b"
+      "sha256": "4e07618d37d7c6eb81441f71d2566c0e60930c5850a096557361b963be701dc6"
     },
     {
       "path": "api/src/understandingTask.ts",
@@ -119,7 +135,7 @@
     },
     {
       "path": "api/src/contextManifest.ts",
-      "sha256": "2d12ab1b63439fb02adc2bdd2f20994b6d9cabaef665220dd105ef1cdcee08cc"
+      "sha256": "f93a0831205377002230d96151f33c2d37c6b087ba134000762b5e93a058f68b"
     },
     {
       "path": "api/src/understandingPreflight.ts",
@@ -127,27 +143,27 @@
     },
     {
       "path": "api/src/understandingRiskProfile.ts",
-      "sha256": "f0b522fad7bafb200257e7c7a517037fba90f98b6f653e9d71d176656b0c4ecc"
+      "sha256": "554cb65294dadfd3484ebe3ff487dfdd1d5f57dd2fe484e23b402abf732fe56a"
     },
     {
       "path": "api/src/understandingBudget.ts",
-      "sha256": "c96ae3686f7b84ab195e498616974afe16f8f26b8c0768d7cb508028a678426e"
+      "sha256": "6dc6f124c1d735161028d7b31c47da65c8da7f6b0b6d11990f5b2279d7e9da12"
     },
     {
       "path": "api/src/understandingAuthorization.ts",
-      "sha256": "53ae77b14c67ee33f41dab10383e1a8a777aa9351fb576d75320a8622744a11e"
+      "sha256": "d602e5aae9e6ba42418b617683dd2f25ed384c3a7de8dec37f124d4b3a6921c3"
     },
     {
       "path": "api/src/understandingExecutor.ts",
-      "sha256": "d79b0e5463a08032776bf08fb0af80733e2fefad46a710fdd74ead16144fb6e7"
+      "sha256": "fbc9dfc221284387a8f8f9db8d8bc454018e7f902f0f93d8723075ba4aff7423"
     },
     {
       "path": "api/src/understandingWorker.ts",
-      "sha256": "abf52765f351fd8d9004c373df09ff9f75fc0940c1671f96c9246e7ff0f25e83"
+      "sha256": "6d31e406ea4b930302672cd3c4d6cb5b8d1aba0b5def9ebe9d146d9d1bcb1b52"
     },
     {
       "path": "api/src/dialogueQuestions.ts",
-      "sha256": "ad8813eb29fc06c10686ee7aa3d3eeadbcb63d45048f9b66afc2cea40e0c6ce7"
+      "sha256": "b5ff6c8bc09f50af7d7d3b6d3c5bb96c13fc1d9c993bde212aa880f77df9d86f"
     },
     {
       "path": "api/src/contractCandidate.ts",
@@ -155,7 +171,7 @@
     },
     {
       "path": "api/src/understandingReview.ts",
-      "sha256": "71495bacd26136b082c34f13b5699747676d0216ea118afd15ea2b402bf91038"
+      "sha256": "146bfb67b02f657dd1d23e2b96eb7ceec781729b62b63005bccc3f2148636697"
     },
     {
       "path": "api/src/contractAdoption.ts",
@@ -175,24 +191,24 @@
     },
     {
       "path": "api/src/worldRuleContract.ts",
-      "sha256": "0c64c916d8e2afcb39656d3ae76c53da33ea313ca6a18ce64a47da2e47c950f0"
+      "sha256": "ece88919e2d43ef64117f149d793b9381e317e41b965b29e61b6a7a1982a4355"
     },
     {
       "path": "api/src/backgroundJobs.ts",
-      "sha256": "73c13641c2ff469ab4b96c3b411b3902aafcf440f0f87f0bf9124d336d585eb6"
+      "sha256": "8d2f0ca8b6f7717c3a6c7085139a9dffeac2d94fb492d172f2622ad0249e293b"
     },
     {
       "path": "ui/src/services/novelApi.ts",
-      "sha256": "dd7a7a58008c0383a703e085f2429fbeedebb627cd85a71656d0a2d2ac2081f1"
+      "sha256": "63b05fc817df12c8cb5e22ed42a3889f2ca62ed6a9cdf78d10e7fd3d5a9bfb5a"
     },
     {
       "path": "ui/src/stores/novel.ts",
-      "sha256": "614c55d5e0cda87f3ea4d10aec8ea410af36ca6f6439aacf4490c9f781a0cb80"
+      "sha256": "26a32af107b00e2bd421d82255ad08d92813ea47b654668bf84827e70b7bcb27"
     }
   ],
   "summary": {
     "auditedSurfaceFamilies": 17,
-    "classifiedMutatingProjectRoutes": 104,
+    "classifiedMutatingProjectRoutes": 913,
     "unclassifiedMutatingProjectRoutes": 0,
     "byRisk": {
       "controlled": 4,
@@ -211,21 +227,22 @@
     },
     {
       "route": "POST /api/novel/import",
-      "disposition": "bootstrap-only",
-      "surfaceIds": [
-        "WRITE-SURFACE-013"
-      ]
+      "disposition": "import-domain-write",
+      "surfaceIds": []
     },
     {
       "route": "POST /api/novel/projects",
-      "disposition": "bootstrap-only",
-      "surfaceIds": [
-        "WRITE-SURFACE-013"
-      ]
+      "disposition": "project-domain-write",
+      "surfaceIds": []
     },
     {
       "route": "POST /api/novel/projects/:projectId/backups",
       "disposition": "local-backup-create",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/backups/:backupId/restore-drill",
+      "disposition": "isolated-restore-drill",
       "surfaceIds": []
     },
     {
@@ -244,6 +261,21 @@
       "surfaceIds": []
     },
     {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/autonomy-grant/revoke",
+      "disposition": "book-run-autonomy-revoke",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/budget-reservations",
+      "disposition": "safety-gate",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/budget-reservations/settle",
+      "disposition": "safety-gate",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/book-runs/:runId/completion-audits",
       "disposition": "book-run-completion-audit",
       "surfaceIds": []
@@ -251,6 +283,26 @@
     {
       "route": "POST /api/novel/projects/:projectId/book-runs/:runId/pause",
       "disposition": "book-run-pause",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/readiness",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/repair-plans",
+      "disposition": "book-run-repair-plan",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/repair-plans/:planId/actions/:actionId/complete",
+      "disposition": "book-run-repair-completion",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/:runId/repair-plans/:planId/audit",
+      "disposition": "book-run-milestone-audit",
       "surfaceIds": []
     },
     {
@@ -266,6 +318,11 @@
     {
       "route": "POST /api/novel/projects/:projectId/book-runs/:runId/stop",
       "disposition": "book-run-stop",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/book-runs/preflight",
+      "disposition": "runtime-domain-write",
       "surfaceIds": []
     },
     {
@@ -310,6 +367,56 @@
       "surfaceIds": []
     },
     {
+      "route": "POST /api/novel/projects/:projectId/length-contract",
+      "disposition": "project-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/length-variance-decisions",
+      "disposition": "project-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/memory/alias-assertions",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/memory/alias-assertions/:assertionId/confirm",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/memory/conflict-preflights",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/memory/continuity-audits",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/memory/entity-resolutions",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/memory/health-reports",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/memory/ready-proofs",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/memory/retrieval-previews",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/migrations",
       "disposition": "migration-preview",
       "surfaceIds": []
@@ -332,6 +439,11 @@
     {
       "route": "POST /api/novel/projects/:projectId/migrations/:migrationId/validate",
       "disposition": "migration-validation",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/obligation-candidates/:candidateId/adopt",
+      "disposition": "obligation-candidate-adoption",
       "surfaceIds": []
     },
     {
@@ -417,6 +529,11 @@
       "surfaceIds": []
     },
     {
+      "route": "POST /api/novel/projects/:projectId/quality/:chapterId/gate",
+      "disposition": "quality-gate-api-enforcement",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/recaps/accept",
       "disposition": "derived-canon-capable",
       "surfaceIds": [
@@ -424,8 +541,18 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/recovery-settlements",
+      "disposition": "recovery-settlement-authority",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/release-e2e-acceptance",
       "disposition": "evidence-ingestion",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/restore-plans",
+      "disposition": "restore-plan-preflight",
       "surfaceIds": []
     },
     {
@@ -459,6 +586,176 @@
       "surfaceIds": []
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/abstraction-transfer",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/agency-chains",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/anti-imitation-guard",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author-paragraph-locks/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/continue",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/correction",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/decision-bundle",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/delegation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/derived-answer",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/offline",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/present-choice",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/reuse-confirmed",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/author/story-cost",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/backup/disaster-recovery",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/backup/restore-isolated",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/backup/slice",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/backup/verify",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/beat-evidence-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/beat-fulfillment",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/beat-fulfillment/:ledgerId/:beatId",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/candidate-comparison",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/candidate-compositions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/candidate-convergence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/candidate-convergence/:runId/iterations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/capabilities/server-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/capability-contracts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/capability-contracts/:capabilityId/progression",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/causality-edges",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapter-continuations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapter-continuations/:runId/checkpoints",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapter-continuations/:runId/resume",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapter-continuity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapter-creation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapter-functions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/runtime/chapters/:chapterId/settle",
       "disposition": "canon-gate",
       "surfaceIds": [
@@ -473,11 +770,626 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapters/cross-layer-orphans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapters/function-review",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapters/scene-seam",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/chapters/volume-contract",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-agency/guard",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-arc-certificate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-arc-rhythm/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-arc-rhythm/events",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-arcs",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-arcs/:arcId/milestones",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-beliefs",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-beliefs/events",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-choice-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-choice-evidence/:evidenceId/observe",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-continuity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-continuity/events",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-contracts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-contracts/:contractId/confirm",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-contracts/:contractId/revise",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-documents/classify",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-identities",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-identities/admit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-presence-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-presence-plans/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-revision-impact",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-state-snapshots",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-state-snapshots/diff",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-truth/resolve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-voice-profiles",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character-voice-profiles/compile",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/agency",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/arc",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/arc-certificate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/asymmetric-relation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/belief-phases",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/change-scope",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/co-presence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/ensemble",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/function",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/identity-break",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/misunderstanding-repair",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/offscreen-action",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/opponent-independence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/relapse",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/relational-voice",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/source-classification",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/source-conflict",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/character/unknowns",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/runtime/checkpoints/:checkpointId/restore",
       "disposition": "canon-capable",
       "surfaceIds": [
         "WRITE-SURFACE-011"
       ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/adaptive-reminders",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/admission",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/answer-leak",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/certificate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/clue-claims",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/clue-independence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/coverage",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/damage",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/exposure-risk",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/fairness-bundles",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/hypothesis-graphs",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/narrative-interest",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/outcomes",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/payoff-form",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/payoff-reservations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/propagation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/reader-expectation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/reminder",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/scene-contract",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/scene-contracts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/schedule",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/schedules",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/shared-object",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/closure/window-conflict",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/cognitive-budget",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/collaboration-messages/parse",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/collaboration-progress",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/compatibility/legacy-open",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/compatibility/migration-activation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/conditions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/conditions/:conditionId/recover",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/conditions/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-attributions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-attributions/:attributionId/events",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-boundaries",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-boundaries/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-conflicts/resolve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-context-budget",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-effect-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-experiments",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/decision",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/feedback",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/feedback/attribution",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/judge",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/provider-evaluation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/reader-calibration",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-experiments/:experimentId/start",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-feedback-attributions/:attributionId/hypothesis",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-holdout/validate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-mechanism-units",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-pattern-explanations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-pattern-library",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-pattern-publication-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-patterns",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-patterns/:patternId/approve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-patterns/:patternId/promote-from-experiment",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-patterns/:patternId/validate-from-experiment",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-provenance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-provenance/project",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft-revocation/propagate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft/cognitive-budget",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft/multi-domain-validation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft/recovery",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft/red-blue",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft/rhythm-monotony",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft/segment-seam",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft/setting-actionability",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/craft/stagnation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/cross-chapter-template",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/decision-cost-preview",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/delivery/capability-manifest",
+      "disposition": "capability-manifest-governance",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/delivery/dependency-proof",
+      "disposition": "capability-dependency-proof",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/delivery/dependency-proofs",
+      "disposition": "capability-dependency-proof",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/delivery/requirement-evidence",
+      "disposition": "requirement-evidence-persistence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/delivery/write-authority",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
     },
     {
       "route": "POST /api/novel/projects/:projectId/runtime/derivatives",
@@ -494,13 +1406,1648 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/derived-publications/:transactionId/revalidate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/derived-settlement",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue-action",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/answer-application",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/answer-classification",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/coreference-repair",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/decision-consumption-receipts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/delegation-grants",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/intents",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/memory",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/memory-records",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/memory-records/forget",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/memory-records/revise",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/memory/compression-audit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/memory/forget-propagation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/misunderstanding-incidents",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/misunderstanding-incidents/resolve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/non-leading-question",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/offline-reconciliation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/preference-probes",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/preference-probes/apply-scope",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/preference-probes/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/preference-probes/select",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/provisional-assumptions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/question-ranking",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/recovery",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/runtime-interruptions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/runtime-interruptions/advance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/runtime-result-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/timeout",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/understanding-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/understanding-evidence-bundles",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/understanding-snapshots",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/dialogue/utterances",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/directed-rewrites",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/runtime/direction",
       "disposition": "runtime-control-event",
       "surfaceIds": []
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/drafting/anti-goal-guard",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/drafting/q003-profile",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/drafting/stage-weights",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/durability/backup-policy",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/durability/backup-verification",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/durability/recovery-settlements",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/durability/restore-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/emergence-candidates",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/emergence-candidates/:candidateId/adopt",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/emotion-causality",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ensemble-attention/chapters",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ensemble-attention/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/access-grants",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/access-grants/:grantId/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/adaptive-scale",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/blind-pairs",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/calibrations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/cases",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/contamination",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/disagreements",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/drift",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/evidence-anchors",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/evidence-anchors/current",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/frozen-inputs",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/multi-scale-regression",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/pareto",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/release-decisions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/runs",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/sampling",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/sampling/summary",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/shadow-canary",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/slice-budgets",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/slice-results",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/style-drift",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/evaluation/suites",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/execution-ready/gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/execution/autonomous-canon-write",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/execution/beat-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/execution/prose-input-freeze",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/execution/readiness-proof",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/execution/scene-ledger",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/execution/semantic-patch-relocation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/ambiguity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/attachment",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/cold-read",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/contract",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/curiosity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/divergence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/dossier-boundary",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/emotion-impact",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/feedback-revocation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/hypothesis",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/longitudinal",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/payoff",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/questions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/repair",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/reviewer-calibration",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/revision-invalidation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/scene-counterfactual",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/experience/surprise",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/exploration-budgets",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/exploration-budgets/:budgetId/consume",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/exploration-budgets/:budgetId/pause",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/exploratory-drafts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/fairness/bundle",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/fairness/clue-direction",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/fairness/hypothesis-graph",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/fairness/object-obligation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/fairness/reader-expectation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/fairness/source-clusters",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/confounded-probe",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/evidence-weight",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/hypothesis-update",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/learning-release-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/manual-revision-attribution",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/partial-adoption",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/project-isolation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/revocation-cause",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/safe-exploration",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/feedback/scope-proposal",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/conflicts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/false-clue-fairness",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/legacy-migration",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/publication-freeze",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/repair-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/transform",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/transformation-closure",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/transition",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/visibility",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/waivers",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/foreshadowing/windows",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/forward-read-only",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/governance/convergence-expansion",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/governance/defer-decision",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/governance/first-slice",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/governance/normative-strength",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/governance/release-vision",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/governance/semantic-lint",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/information-state",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/information-state/:traceId/events",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/intent-corrections",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/intent-corrections/propagate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/intent-drafts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/capture-convergence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/capture-crash",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/control-command",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/downgrade",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/first-input",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/first-slice-readiness",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/partner-dod",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/projection",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/read-model",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/runtime-reuse-audit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/slice-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/understanding-version",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/upstream-repair",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/journey/utterance-trace",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/candidate-unification",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/canon-authority",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/dependency-proof",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/legacy-retirement",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/legacy-samples",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/mutation-plan",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/obligation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/schema-compatibility",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernel/shadow-parser",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernels/ai-safety",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernels/candidate-boundary",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernels/long-memory",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernels/mutation-validation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernels/obligation-core",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/kernels/proof",
+      "disposition": "kernel-proof-persistence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/belief",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/body-summary",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/claim-authority",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/compression",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/conflict-preflight",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/continuity-audit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/contradiction",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/deletion-propagation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/eligibility",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/embedding-fallback",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/evidence-family",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/evidence-gap",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/evidence-status",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/health",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/identity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/k5-activation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/new-fact",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/quality-strategy",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/query-boundary",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/rank-eligible",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/reader-pov",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/rebuild",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/retcon-impact",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/supersede",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/temporal",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/transfer",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/knowledge/visibility",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/learning-policy",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/learning-releases",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/learning-releases/:releaseId/rollback",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/learning-releases/:releaseId/rollback-for-regression",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/local-repair-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/long-chapter/checkpoints",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/long-chapter/checkpoints/resume",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/alias-assertions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/alias-assertions/confirm",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/alias-resolutions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/asset-coverage",
+      "disposition": "runtime-domain-read",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/chapter-patches",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/claim-relations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/claim-relations/:relationId/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/claims",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/claims/:claimId/retcon",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/claims/:claimId/settle",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/claims/:claimId/temporal",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/contradiction-sets",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/entities",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/entities/merge",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/entities/split",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/knowledge/characters",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/knowledge/characters/eligibility",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/knowledge/readers",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/memory/knowledge/readers/eligibility",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/micro-rhythm",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/mutation-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/mutation-plans/:mutationId/commit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/mutation-plans/:mutationId/preflight",
+      "disposition": "runtime-domain-read",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/mutation-plans/:mutationId/recover",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/mutation-plans/:mutationId/rollback",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative-curve-points",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative-distance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative-trace-links",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative/agency-chain",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative/dialogue-action",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative/distance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative/emotional-aftermath",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative/pov-knowledge",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/narrative/voice-drift",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/negative-preferences",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/negative-preferences/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/notifications/plan",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objective-change-impact",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objective-contribution",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objective-drift",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objective-hierarchy",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/aesthetic-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/anti-goal-semantic",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/calibration",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/candidate-guard",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/compile-sentence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/conflict-options",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/conflicts/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/explain-candidate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/near-far-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/profile",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/q003-report",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/scope-resolve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/target-impact",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/objectives/weight-release",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligation-memory-risk",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligation-setup-fairness",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/closure-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/completion-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/conflict-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/conflicts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/editor-export",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/editor-markers",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/evidence-invalidation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/intentional-open",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/knowledge-boundary",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/legacy-ledger-migrations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/legacy-migration",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/merge-proposal",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/multi-payoff",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/open-contract-audit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/partial-payoff",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/payoff-contract",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/payoff-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/publication-freeze",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/repair-plan",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/review-disagreement",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/setup-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/source-coverage",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/transform",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/visibility",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/visibility-exit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/obligations/window",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/offpage-character-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/offpage-character-plans/events",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/author-receipt",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/failure-recovery",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/idempotency",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/journey-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/primary-action",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/project-isolation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/safety-priority",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/shell-shadow",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/surface-registry",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/task-chapter",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/view-switch",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/orchestration/workspace-reconcile",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/organizations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/organizations/:organizationId/actions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/candidate-adoption",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/emergence-settlement",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/expansion-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/impact-analyses",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/impact-subgraph",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/replan-decisions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/semantic-references",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/static-validation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/outline/structure-compare",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/pattern-transfer-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/runtime/pause",
       "disposition": "runtime-control",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/pause-policy/apply",
+      "disposition": "runtime-control",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/pause-policy/evaluate",
+      "disposition": "review-only",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/pause-policy/recaps",
+      "disposition": "operational-evidence",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/planning-nodes",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/planning-nodes/:nodeId/transition",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/planning/chapter-capacity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/planning/horizon-confidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/planning/obligation-load",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/planning/pacing-fatigue",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/pov-knowledge-gates",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/power-comparisons",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/preference-hypotheses/:hypothesisId/oppositions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/preference-hypotheses/:hypothesisId/promote",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/preference-hypotheses/:hypothesisId/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-adoption-transactions",
+      "disposition": "runtime-domain-write",
       "surfaceIds": []
     },
     {
@@ -518,6 +3065,16 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/freshness",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/repair-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/runtime/prose-candidates/:candidateId/review",
       "disposition": "review-only",
       "surfaceIds": []
@@ -528,11 +3085,356 @@
       "surfaceIds": []
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-feedback-attributions/:attributionId/hypothesis",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-feedback/:eventId/attribution",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-generation-manifests",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-generation-manifests/:manifestId/freshness",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-maturity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-maturity/advance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-regression-proof",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-repair-candidates/:repairCandidateId/regression",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-repair-plans",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-repair-plans/:planId/candidates",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-segments",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-segments/:semanticId/patch",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-specificity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/prose-validation-dossier",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/publication/completion-audit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/publication/delivery",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/publication/freeze-edition",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/publication/obligation-badges",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/publication/render",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/question-governance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/question-governance/policy",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/question-governance/register",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/question-sessions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/question-sessions/:questionId/classify",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/question-value-gates",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/cognitive-load",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/cold-read-snapshots",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/contracts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/divergence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/dossiers",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/hypotheses",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/knowledge-states",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/payoffs",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/reviewers",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/scene-necessity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/surprise-fairness",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reader/timelines",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/relationship-events",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/relationship-events/:eventId/observe",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/relationship-misreads",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/relationship-misreads/resolve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/reminder-progression",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/claims",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/claims/:claimId/correct",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/claims/:claimId/propagate-assessment",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/claims/evaluate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/conflicts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/conflicts/:conflictId/resolve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/consumption-receipts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/correction",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/evidence-minimum",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/obligations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/plan",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/quarantine",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/scope-compare",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/settlements",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/source-qualification",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/source-snapshots",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/source-snapshots/:sourceId/reliability",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/source-snapshots/:sourceId/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/research/task-gap-selection",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/resource-transactions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/runtime/resume",
       "disposition": "runtime-control",
       "surfaceIds": [
         "WRITE-SURFACE-003"
       ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review-batches",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review-batches/:batchId/items/:itemId/accept",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review-batches/:batchId/items/:itemId/withdraw",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review-compression",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review-isolation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review-isolation/:sessionId/reviews",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/review-isolation/:sessionId/synthesize",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
     },
     {
       "route": "POST /api/novel/projects/:projectId/runtime/review/accept",
@@ -549,6 +3451,341 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/revision/local-repair",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/revision/partial-commit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/revision/regression-adoption",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/revision/reject-derivatives",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/revision/settlement",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/scene-cards",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/scene-creation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/scene-execution-ledgers",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/scene-execution-ledgers/:ledgerId/evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/scene-seam",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/capture",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/compile-failure",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/dedupe",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/default",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/deterministic",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/difference",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/exploration",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/extract",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/genre",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/interpretations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/legacy-shadow",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/partial-adoption",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/project-state",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/provenance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/question",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/readiness",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/recommend",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/recompile",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/seed/scope-proof",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/semantic-nodes",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/semantic-nodes/projection",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/autonomy-receipts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/autonomy-receipts/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/command-receipts",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/command-receipts/authorize",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/continuity-token",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/continuity-token/reconcile",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/debate-decisions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/debate-decisions/accept",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/decision-bundles",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/decision-bundles/accept",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/decision-escalations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/effort-budget",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/effort-budget/consume",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/effort-budget/preference",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/independent-review-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/model-invocations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/model-invocations/:invocationId/settle",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/model-invocations/budget-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/model-route",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/primary-action",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/primary-action/advance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/primary-action/execute",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/primary-action/resolve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/primary-action/validate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/provider-evaluation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/provider-failover",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/session/provider-probe",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/similarity-guards",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/source-lineage",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/source-lineage/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/source-material",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/source-material",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/source-material/:sourceId/rights-envelope",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/stable-deep-links",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/stable-deep-links/resolve",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/stagnation-detection",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/runtime/start",
       "disposition": "candidate-orchestration",
       "surfaceIds": [
@@ -556,8 +3793,498 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/steering-events/:eventId/advance",
+      "disposition": "runtime-steering-boundary",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/runtime/stop",
       "disposition": "runtime-control",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-engine/arc-graph",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-engine/dependency-cycle",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-engine/ending-prerequisites",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-engine/fuzzy-idea",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-engine/question-separation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/adoption",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/adoption/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/branch-questions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/candidates",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/capture",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/confidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/explorations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/frame",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/interpretations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/legacy-shadow",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/readiness",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/readiness-proof",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/recompile",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/replay",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/reversible-defaults",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/runs",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/runs/:runId/advance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/runs/replay",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/runs/transition",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/state",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-seeds/state/failure",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-time-events",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/story-time-events/compare",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/structure-alternatives",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/conflict-resolution",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/craft-lineage-audit",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/craft-pattern",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/cross-project-surface",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/derived-evidence-invalidation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/generation-anti-imitation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/legacy-sample-migration",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/negative-pattern",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/pattern-applicability",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/pattern-evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/pattern-experiment",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/pattern-scope",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/style/structural-similarity",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/surface-mechanism-patterns",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/surface-mechanism-patterns/transfer-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/surfaces/authorize",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/surfaces/registry",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/task-pattern-retrieval",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/text/diagnostics",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/text/import-diagnostics",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/text/model-packaging",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/text/profiles",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/text/punctuation-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/text/round-trip",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/text/settlements",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/text/structures",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/ambiguity-impact-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/ambiguous-answer",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/answer-evidence-closure",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/bounded-delegation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/bounded-delegation/authorize",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/bounded-delegation/revoke",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/context-purpose",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/context-replay",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/correction-before-continue",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/decision-escalation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/decision-level",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/evidence",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/inference-safety",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/k4",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/late-result",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/legacy-question-import",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/multi-intent",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/question-budget",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/question-capability",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/question-reask",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/question-timeout-gate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/restart-recovery",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/reversible-assumption-repair",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/reversible-default",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/schema-compatibility",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/stale-answer-reconciliation",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/t0-coverage",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/task-recovery",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/versions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/understanding/versions/revise",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/untrusted-samples/isolate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ux/click-value",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ux/collaboration-preference",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ux/kernel-value",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ux/notifications",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ux/resume-brief",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ux/review-first-screen",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/ux/user-language",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/value-opponents",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/voice-blind-tests",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/voice-consistency",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/volume-contracts",
+      "disposition": "runtime-domain-write",
       "surfaceIds": []
     },
     {
@@ -575,11 +4302,266 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/runtime/work-leases/:workItemId/release",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/work-leases/:workItemId/renew",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/work-leases/acquire",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-impact-reports",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-integrity-certificates",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-legacy/compile",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-locations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-locations/:locationId/reachability",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/admission",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/consequence-audits",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/disclosure",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/exceptions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/exceptions/:exceptionId/settle",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/execute",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/interactions",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/interactions/replay",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-rules/knowledge",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-state-projection",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-state-snapshots",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world-travel",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/ability-prerequisites",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/body-cooldown",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/certificate",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/contextual-victory",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/deus-ex",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/health",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/institution-belief",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/institution-response",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/minimal-exposition",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/regional-rule",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/resource-balance",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/rule-boundary",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/rule-change-scope",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/rule-consequences",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/rule-exception",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/rule-interaction",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/scan",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/story-clock",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/temporary-boost",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/world/travel",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/write-authority",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/writing-candidates",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/writing-candidates/:setId/select",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/writing-context",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/writing-priority",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/runtime/writing-stop-evaluations",
+      "disposition": "runtime-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/selection/polish",
       "disposition": "candidate-only",
       "surfaceIds": [
         "WRITE-SURFACE-006"
       ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/author-execution-strategy",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/completion-evidence-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/context-conflict-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/context-evidence-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/context-integrity-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
     },
     {
       "route": "POST /api/novel/projects/:projectId/session/context-manifest",
@@ -589,11 +4571,71 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/session/context-plan-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/context-privacy-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/context-replay-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/context-source-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/cost-saving-plan",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/execution-circuit-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/execution-retry-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/executor-failover-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/session/messages",
       "disposition": "session-capture",
       "surfaceIds": [
         "WRITE-SURFACE-014"
       ]
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/model-call-fingerprint",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/model-call-replay-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/state",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
+      "route": "POST /api/novel/projects/:projectId/session/structured-output-gate",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
     },
     {
       "route": "POST /api/novel/projects/:projectId/session/understanding",
@@ -720,6 +4762,11 @@
       ]
     },
     {
+      "route": "POST /api/novel/projects/:projectId/session/understanding/questions/:questionId/red-blue",
+      "disposition": "session-domain-write",
+      "surfaceIds": []
+    },
+    {
       "route": "POST /api/novel/projects/:projectId/session/understanding/recover",
       "disposition": "safety-gate",
       "surfaceIds": [
@@ -784,6 +4831,11 @@
       "surfaceIds": []
     },
     {
+      "route": "PUT /api/novel/projects/:projectId/backup-policy",
+      "disposition": "backup-policy-durability-assessment",
+      "surfaceIds": []
+    },
+    {
       "route": "PUT /api/novel/projects/:projectId/dashboard/:chapterId",
       "disposition": "projection-mutable",
       "surfaceIds": [
@@ -810,6 +4862,11 @@
       "surfaceIds": [
         "WRITE-SURFACE-010"
       ]
+    },
+    {
+      "route": "PUT /api/novel/projects/:projectId/obligations/:obligationId",
+      "disposition": "obligation-legacy-write-rejected",
+      "surfaceIds": []
     },
     {
       "route": "PUT /api/novel/projects/:projectId/quality/:chapterId",
@@ -842,12 +4899,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2674,
+          "line": 8769,
           "evidence": "app.put(\"/api/novel/projects/:projectId/files/*\""
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3690,
+          "line": 4348,
           "evidence": "async function saveCurrentContent"
         }
       ],
@@ -872,12 +4929,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2984,
+          "line": 9129,
           "evidence": "app.post(\"/api/novel/projects/:projectId/patches\""
         },
         {
           "path": "api/src/taskService.ts",
-          "line": 328,
+          "line": 368,
           "evidence": "export async function applyPatch"
         }
       ],
@@ -903,7 +4960,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 803,
+          "line": 1049,
           "evidence": "reason: \"chapter_draft\""
         }
       ],
@@ -928,7 +4985,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 943,
+          "line": 1247,
           "evidence": "reason: \"quality_self_repair\""
         }
       ],
@@ -953,12 +5010,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2118,
+          "line": 7676,
           "evidence": "type === \"accept\""
         },
         {
           "path": "api/src/runtimeEngine.ts",
-          "line": 1220,
+          "line": 1630,
           "evidence": "command.type === \"accept\""
         }
       ],
@@ -982,12 +5039,12 @@
       "evidence": [
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3846,
+          "line": 4504,
           "evidence": "function acceptRewrite"
         },
         {
           "path": "ui/src/stores/novel.ts",
-          "line": 3870,
+          "line": 4528,
           "evidence": "async function acceptFocusDraft"
         }
       ],
@@ -1012,7 +5069,7 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2326,
+          "line": 7980,
           "evidence": "reason: \"derivative_merge\""
         }
       ],
@@ -1038,7 +5095,7 @@
       "evidence": [
         {
           "path": "api/src/writingCockpit.ts",
-          "line": 998,
+          "line": 1008,
           "evidence": "export async function acceptWritingRecapPatches"
         }
       ],
@@ -1063,7 +5120,7 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 2606,
+          "line": 8701,
           "evidence": "app.put(\"/api/novel/projects/:projectId/ledger/:kind\""
         },
         {
@@ -1092,22 +5149,22 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 1715,
+          "line": 3030,
           "evidence": "app.put(\"/api/novel/projects/:projectId/story-control\""
         },
         {
           "path": "api/src/app.ts",
-          "line": 2437,
+          "line": 8091,
           "evidence": "app.put(\"/api/novel/projects/:projectId/scenes/:chapterId\""
         },
         {
           "path": "api/src/app.ts",
-          "line": 2451,
+          "line": 8105,
           "evidence": "app.put(\"/api/novel/projects/:projectId/memory/chapter-summaries/:chapterId\""
         },
         {
           "path": "api/src/app.ts",
-          "line": 2474,
+          "line": 8140,
           "evidence": "app.put(\"/api/novel/projects/:projectId/quality/:chapterId\""
         }
       ],
@@ -1132,7 +5189,7 @@
       "evidence": [
         {
           "path": "api/src/runtimeFiles.ts",
-          "line": 144,
+          "line": 153,
           "evidence": "export async function restoreRuntimeCheckpoint"
         }
       ],
@@ -1157,7 +5214,7 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 415,
+          "line": 893,
           "evidence": "function createBackgroundJobHandler"
         }
       ],
@@ -1182,12 +5239,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 651,
+          "line": 1202,
           "evidence": "app.post(\"/api/novel/projects\""
         },
         {
           "path": "api/src/app.ts",
-          "line": 661,
+          "line": 1231,
           "evidence": "app.post(\"/api/novel/import\""
         }
       ],
@@ -1212,12 +5269,12 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 987,
+          "line": 2176,
           "evidence": "app.post(\"/api/novel/projects/:projectId/session/messages\""
         },
         {
           "path": "api/src/creativeSession.ts",
-          "line": 86,
+          "line": 143,
           "evidence": "export async function appendAuthorMessage"
         }
       ],
@@ -1242,7 +5299,7 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 998,
+          "line": 2224,
           "evidence": "app.post(\"/api/novel/projects/:projectId/session/understanding\""
         },
         {
@@ -1257,59 +5314,59 @@
         },
         {
           "path": "api/src/understandingRiskProfile.ts",
-          "line": 15,
+          "line": 21,
           "evidence": "export function buildUnderstandingRiskProfile"
         },
         {
           "path": "api/src/understandingBudget.ts",
-          "line": 59,
+          "line": 66,
           "evidence": "export async function reserveUnderstandingBudget"
         },
         {
           "path": "api/src/understandingAuthorization.ts",
-          "line": 46,
+          "line": 53,
           "evidence": "export async function authorizeUnderstandingCapability"
         },
         {
           "path": "api/src/understandingExecutor.ts",
-          "line": 80,
+          "line": 109,
           "evidence": "export async function executeShadowUnderstanding"
         },
         {
           "path": "api/src/understandingWorker.ts",
-          "line": 324,
+          "line": 387,
           "evidence": "export async function executeModelUnderstanding"
         },
         {
           "path": "api/src/understandingWorker.ts",
-          "line": 180,
+          "line": 241,
           "evidence": "export async function startModelUnderstandingTask"
         },
         {
           "path": "api/src/understandingWorker.ts",
-          "line": 216,
+          "line": 277,
           "evidence": "export async function resumeUnderstandingTask"
         },
         {
           "path": "api/src/understandingWorker.ts",
-          "line": 253,
+          "line": 315,
           "evidence": "export async function recoverUnderstandingTasks"
         },
         {
           "path": "api/src/dialogueQuestions.ts",
-          "line": 164,
+          "line": 223,
           "evidence": "export async function answerDialogueQuestion"
         },
         {
           "path": "api/src/backgroundJobs.ts",
-          "line": 72,
+          "line": 106,
           "evidence": "export async function enqueueProjectBackgroundJob"
         }
       ],
       "currentStrengths": [
         "zero model call while blocked",
         "explicit shadow/model snapshots are non-canon",
-        "model worker has persisted task state, cancellation, resume, startup recovery, active-process cancellation, source-fingerprint fencing, candidate interpretation branches, append-only answers, contract candidates, independent review, and adoption proposals"
+        "model worker has persisted task state, cancellation, resume, startup recovery, active-process cancellation, source-fingerprint fencing, ContextManifest fingerprint/message binding, candidate interpretation branches, append-only answers, contract candidates, independent review, and adoption proposals"
       ],
       "gaps": [
         "holdout calibration and independent provider/human review remain incomplete",
@@ -1326,24 +5383,36 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 981,
+          "line": 2170,
           "evidence": "app.post(\"/api/novel/projects/:projectId/session/context-manifest\""
         },
         {
           "path": "api/src/contextManifest.ts",
-          "line": 74,
+          "line": 104,
           "evidence": "export async function freezeContextManifest"
+        },
+        {
+          "path": "api/src/understandingWorker.ts",
+          "line": 392,
+          "evidence": "const manifest = await readContextManifest(input.root)"
+        },
+        {
+          "path": "api/src/understandingReview.ts",
+          "line": 87,
+          "evidence": "function validEvidence"
         }
       ],
       "currentStrengths": [
         "source fingerprint",
         "source message spans",
         "supersedes previous manifest",
-        "atomic separate write"
+        "atomic separate write",
+        "model task binds persisted manifest fingerprint and message IDs before provider call",
+        "post-call review validates every claim evidence span against source bounds"
       ],
       "gaps": [
-        "manifest is not yet consumed by a worker",
-        "risk, budget, and capability dependencies remain absent"
+        "risk, budget, and capability dependencies remain absent from this session-level worker binding",
+        "provider/human calibration and real-project release evidence remain incomplete"
       ],
       "risk": "controlled",
       "requiredDisposition": "Use only as frozen T0 evidence; never treat the manifest itself as an understanding result or canon authority."
@@ -1356,7 +5425,7 @@
       "evidence": [
         {
           "path": "api/src/app.ts",
-          "line": 1422,
+          "line": 2737,
           "evidence": "app.post(\"/api/novel/projects/:projectId/session/understanding/contract-adoption\""
         },
         {

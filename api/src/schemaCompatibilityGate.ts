@@ -1,0 +1,1 @@
+export function checkDialogueQuestionSchema(input: { apiStatuses: readonly string[]; uiKnownStatuses: readonly string[] }): { compatible: boolean; unknownStatuses: string[] } { const unknownStatuses = input.apiStatuses.filter((status) => !input.uiKnownStatuses.includes(status)); return { compatible: unknownStatuses.length === 0, unknownStatuses }; }

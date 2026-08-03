@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "RP5-release-e2e-stale-fence",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "v1.18.40",
+  "requirements": ["FR-RUN-021", "FR-PUBLISH-002", "FR-PUBLISH-003"],
+  "implementationRefs": [
+    "api/src/releaseE2EAcceptance.ts",
+    "api/src/releaseE2EAcceptance.spec.ts",
+    "api/src/app.ts",
+    "api/src/app.spec.ts"
+  ],
+  "tests": [
+    "api/src/releaseE2EAcceptance.spec.ts",
+    "api/src/app.spec.ts"
+  ],
+  "result": "passed",
+  "evidence": [
+    "RED: a valid release proof remained readable after its referenced settlement was replaced with a new valid fingerprint",
+    "GREEN: proof reads now verify current settlement and committed derived-publication fingerprints and fail with RELEASE_E2E_PROOF_STALE",
+    "GREEN: the API maps stale release proof reads to HTTP 409",
+    "release E2E unit suite passes 6/6 and the full API app suite passes 257/257",
+    "API/UI production build, governance generation check, and governance verifier pass"
+  ],
+  "releaseBoundary": {
+    "status": "not-release-approval",
+    "reason": "This slice proves stale propagation for one release proof; it does not prove RP5 external calibration, independent review, migration cutover, or complete delivery acceptance."
+  }
+}

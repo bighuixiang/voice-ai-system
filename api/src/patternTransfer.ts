@@ -12,6 +12,8 @@ export interface SimilarityGuardResult {
   targetVersion: string;
   overlapRatio: number;
   maxTokenOverlap: number;
+  semanticRisk?: "low" | "high";
+  structuralRisk?: "low" | "high";
   status: "passed" | "blocked";
   risk: "low" | "high";
   evidenceRefs: string[];
@@ -39,18 +41,32 @@ function planPath(root: string, planId: string): string { return resolveInside(r
 async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const tmp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(tmp, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(tmp, target); }
 async function readJson<T>(target: string): Promise<T | null> { try { return JSON.parse(await fs.readFile(target, "utf8")) as T; } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
 function tokens(text: string): string[] { return text.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []; }
+function bigrams(values: string[]): Set<string> { return new Set(values.slice(0, -1).map((value, index) => `${value} ${values[index + 1]}`)); }
 
+export function assertSimilarityGuardIntegrity(record: SimilarityGuardResult): SimilarityGuardResult { const { fingerprint, ...content } = record; if (hash(content) !== fingerprint) throw new Error("SIMILARITY_GUARD_INTEGRITY_FAILED"); return record; }
+export function assertPatternTransferPlanIntegrity(plan: PatternTransferPlan, expectedId?: string): PatternTransferPlan {
+  const { fingerprint, ...content } = plan;
+  const guardValid = (() => { try { assertSimilarityGuardIntegrity(plan.guard); return true; } catch { return false; } })();
+  const valid = plan.schemaVersion === "pattern-transfer-plan.v1" && (!expectedId || plan.planId === expectedId) && [plan.planId, plan.projectSlug, plan.patternId, plan.sourceEnvelopeId, plan.targetChapterId, plan.intendedEffect, plan.createdAt].every((value) => typeof value === "string" && value.trim()) && Array.isArray(plan.prohibitedActions) && plan.prohibitedActions.length > 0 && plan.prohibitedActions.every((value) => typeof value === "string" && value.trim()) && guardValid && ["candidate", "blocked", "approved"].includes(plan.status) && plan.canonWriteAllowed === false && /^[a-f0-9]{64}$/i.test(plan.fingerprint) && hash(content) === fingerprint;
+  if (!valid) throw new Error("PATTERN_TRANSFER_PLAN_INTEGRITY_FAILED");
+  return plan;
+}
 export function evaluateSimilarityGuard(input: { sourceText: string; targetText: string; maxTokenOverlap: number; sourceVersion: string; targetVersion: string }): SimilarityGuardResult {
-  if (!input.sourceVersion.trim() || !input.targetVersion.trim() || input.maxTokenOverlap < 0 || input.maxTokenOverlap > 1) throw new Error("SIMILARITY_GUARD_INPUT_INVALID");
+  if (!input.sourceVersion.trim() || !input.targetVersion.trim() || !input.sourceText.trim() || !input.targetText.trim() || input.maxTokenOverlap < 0 || input.maxTokenOverlap > 1) throw new Error("SIMILARITY_GUARD_INPUT_INVALID");
   const sourceTokens = new Set(tokens(input.sourceText));
   const targetTokens = new Set(tokens(input.targetText));
   const overlap = sourceTokens.size ? [...sourceTokens].filter((token) => targetTokens.has(token)).length / sourceTokens.size : 0;
-  const blocked = overlap > input.maxTokenOverlap;
-  const base = { schemaVersion: "similarity-guard-result.v1" as const, guardId: `guard-${hash({ sourceVersion: input.sourceVersion, targetVersion: input.targetVersion, overlap }).slice(0, 16)}`, sourceVersion: input.sourceVersion, targetVersion: input.targetVersion, overlapRatio: Number(overlap.toFixed(6)), maxTokenOverlap: input.maxTokenOverlap, status: blocked ? "blocked" as const : "passed" as const, risk: blocked ? "high" as const : "low" as const, evidenceRefs: [`similarity://${input.sourceVersion}/${input.targetVersion}`], createdAt: new Date().toISOString() };
+  const sourceBigrams = bigrams(tokens(input.sourceText));
+  const targetBigrams = bigrams(tokens(input.targetText));
+  const structuralOverlap = sourceBigrams.size ? [...sourceBigrams].filter((value) => targetBigrams.has(value)).length / sourceBigrams.size : 0;
+  const semanticRisk = overlap > input.maxTokenOverlap * 1.5 ? "high" as const : "low" as const;
+  const structuralRisk = structuralOverlap > Math.min(0.5, input.maxTokenOverlap + 0.15) ? "high" as const : "low" as const;
+  const blocked = overlap > input.maxTokenOverlap || semanticRisk === "high" || structuralRisk === "high";
+  const base = { schemaVersion: "similarity-guard-result.v1" as const, guardId: `guard-${hash({ sourceVersion: input.sourceVersion, targetVersion: input.targetVersion, overlap, structuralOverlap }).slice(0, 16)}`, sourceVersion: input.sourceVersion, targetVersion: input.targetVersion, overlapRatio: Number(overlap.toFixed(6)), maxTokenOverlap: input.maxTokenOverlap, semanticRisk, structuralRisk, status: blocked ? "blocked" as const : "passed" as const, risk: blocked ? "high" as const : "low" as const, evidenceRefs: [`similarity://${input.sourceVersion}/${input.targetVersion}`], createdAt: new Date().toISOString() };
   return { ...base, fingerprint: hash(base) };
 }
 
-export async function readPatternTransferPlan(root: string, planId: string): Promise<PatternTransferPlan | null> { return readJson<PatternTransferPlan>(planPath(root, planId)); }
+export async function readPatternTransferPlan(root: string, planId: string): Promise<PatternTransferPlan | null> { const plan = await readJson<PatternTransferPlan>(planPath(root, planId)); return plan ? assertPatternTransferPlanIntegrity(plan, planId) : null; }
 
 export async function createPatternTransferPlan(input: { root: string; projectSlug: string; pattern: CraftPattern; sourceEnvelopeId: string; guard: SimilarityGuardResult; targetChapterId: string; intendedEffect: string }): Promise<PatternTransferPlan> {
   if (input.pattern.projectSlug !== input.projectSlug || input.pattern.lifecycle !== "approved") throw new Error("PATTERN_TRANSFER_APPROVAL_REQUIRED");

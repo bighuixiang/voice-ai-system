@@ -34,6 +34,69 @@ export function createPrimaryActionDecision(input: { journeyVersion: string; sou
   return { ...base, fingerprint: hash(base) };
 }
 
+/**
+ * Build the default action set from the server-owned journey state. Callers
+ * may provide a reviewable result, but cannot replace the journey's blocking
+ * question or turn an empty state into a random model command.
+ */
+export function resolvePrimaryActionDecision(input: {
+  journeyVersion: string;
+  sourceFingerprint: string;
+  stage: "capture" | "understanding";
+  activeQuestionId?: string;
+  reviewableActionId?: string;
+  hasUnderstandingSnapshot?: boolean;
+  hasUnderstandingReviewPassed?: boolean;
+  contractDecisionId?: string;
+  contractCandidateId?: string;
+  contractAdoptionProposalId?: string;
+  contractAdoptionCommitted?: boolean;
+  outlineSourceCandidateId?: string;
+  outlineCandidateId?: string;
+  outlineValidationPassed?: boolean;
+  outlineAdoptionProposalId?: string;
+  outlineAdoptionProposalStatus?: "ready_for_authorization" | "authorized" | "committed" | "blocked" | "rejected";
+}): PrimaryActionDecision {
+  const candidates: PrimaryActionCandidate[] = [];
+  let hasPrimaryCandidate = false;
+  if (input.contractAdoptionCommitted && input.outlineAdoptionProposalId?.trim() && input.outlineAdoptionProposalStatus === "authorized") {
+    candidates.push({ actionId: `commit-outline-adoption-${input.outlineAdoptionProposalId}`, kind: "l2-decision", label: "提交大纲采纳", rationale: "大纲采纳已获明确授权，提交前仍需校验指纹并生成执行就绪证明。", preconditions: [], targetOutcome: "outline-adopted", allowedCommands: ["commit-outline-adoption"], risk: "high", lifecycle: "ready" });
+    hasPrimaryCandidate = true;
+  } else if (input.contractAdoptionCommitted && input.outlineAdoptionProposalId?.trim() && input.outlineAdoptionProposalStatus === "ready_for_authorization") {
+    candidates.push({ actionId: `authorize-outline-adoption-${input.outlineAdoptionProposalId}`, kind: "l2-decision", label: "授权采纳大纲", rationale: "大纲采纳提案已准备，必须由作者明确授权后才能写入正典。", preconditions: [], targetOutcome: "outline-adoption-authorized", allowedCommands: ["authorize-outline-adoption", "reject-outline-adoption"], risk: "high", lifecycle: "ready" });
+    hasPrimaryCandidate = true;
+  } else if (input.contractAdoptionCommitted && input.outlineCandidateId?.trim() && input.outlineValidationPassed) {
+    candidates.push({ actionId: `propose-outline-adoption-${input.outlineCandidateId}`, kind: "reviewable", label: "提出大纲采纳", rationale: "大纲候选验证通过，先生成带章节选择和验证指纹的采纳提案，不直接写入正典。", preconditions: [], targetOutcome: "outline-adoption-proposed", allowedCommands: ["propose-outline-adoption", "reject-outline-candidate"], risk: "medium", lifecycle: "ready" });
+    hasPrimaryCandidate = true;
+  } else if (input.contractAdoptionCommitted && input.outlineCandidateId?.trim()) {
+    candidates.push({ actionId: `review-outline-candidate-${input.outlineCandidateId}`, kind: "reviewable", label: "审阅大纲候选", rationale: "契约已写入正典，大纲候选已生成，先审阅结构与因果链再继续。", preconditions: [], targetOutcome: "outline-candidate-reviewed", allowedCommands: ["review-outline-candidate", "propose-outline-adoption"], risk: "medium", lifecycle: "ready" });
+    hasPrimaryCandidate = true;
+  } else if (input.contractAdoptionCommitted && input.outlineSourceCandidateId?.trim()) {
+    candidates.push({ actionId: `generate-outline-candidate-${input.outlineSourceCandidateId}`, kind: "continue", label: "生成大纲候选", rationale: "契约已写入正典，下一步生成可审阅的大纲候选，不直接写入正典。", preconditions: [], targetOutcome: "outline-candidate-created", allowedCommands: ["compile-outline-candidate", "review-outline-candidate"], risk: "medium", lifecycle: "ready" });
+    hasPrimaryCandidate = true;
+  } else if (input.hasUnderstandingReviewPassed && input.contractAdoptionProposalId?.trim() && !input.contractAdoptionCommitted) {
+    candidates.push({ actionId: `commit-contract-adoption-${input.contractAdoptionProposalId}`, kind: "l2-decision", label: "授权采纳契约", rationale: "采纳提案已准备，必须由明确授权决定是否写入正典。", preconditions: [], targetOutcome: "story-contract-adopted", allowedCommands: ["authorize-contract-adoption", "reject-contract-adoption"], risk: "high", lifecycle: "ready" });
+    hasPrimaryCandidate = true;
+  } else if (input.hasUnderstandingReviewPassed && input.contractCandidateId?.trim()) {
+    candidates.push({ actionId: `review-contract-candidate-${input.contractCandidateId}`, kind: "reviewable", label: "审阅契约候选", rationale: "候选已生成，先比较字段、假设和未决项，再决定是否提出采纳。", preconditions: [], targetOutcome: "contract-candidate-reviewed", allowedCommands: ["review-contract-candidate", "propose-contract-adoption", "reject-contract-candidate"], risk: "medium", lifecycle: "ready" });
+    hasPrimaryCandidate = true;
+  } else if (input.hasUnderstandingReviewPassed && input.contractDecisionId?.trim()) {
+    candidates.push({ actionId: `generate-contract-candidate-${input.contractDecisionId}`, kind: "continue", label: "生成契约候选", rationale: "理解审阅已通过且已有作者决策，先生成可审阅候选，不直接写入正典。", preconditions: [], targetOutcome: "story-contract-candidate-created", allowedCommands: ["compile-contract-candidate", "review-contract-candidate"], risk: "medium", lifecycle: "ready" });
+    hasPrimaryCandidate = true;
+  } else if (input.reviewableActionId?.trim() || input.hasUnderstandingSnapshot) {
+    const actionId = input.reviewableActionId?.trim() || "review-understanding";
+    candidates.push({ actionId, kind: "reviewable", label: "审阅理解结果", rationale: "理解快照已生成，应先让作者确认系统理解再继续派生资产。", preconditions: [], targetOutcome: "understanding-reviewed", allowedCommands: ["review-understanding", "accept-understanding", "correct-understanding"], risk: "medium", lifecycle: "ready" });
+  }
+  if (input.stage === "capture") {
+    candidates.push({ actionId: "capture-idea", kind: "exploration", label: "记录你的想法", rationale: "尚无原话输入，先捕获作者意图。", preconditions: [], targetOutcome: "author-utterance-captured", allowedCommands: ["capture-author-message"], risk: "low", lifecycle: "ready" });
+  } else if (input.activeQuestionId?.trim()) {
+    candidates.push({ actionId: `answer-${input.activeQuestionId}`, kind: "l2-decision", label: "回答当前唯一问题", rationale: "当前问题会改变后续故事方向，必须先完成该决定。", preconditions: [], targetOutcome: "dialogue-question-answered", allowedCommands: ["answer-dialogue-question", "delegate-dialogue-question"], risk: "high", lifecycle: "ready" });
+  } else if (!hasPrimaryCandidate) {
+    candidates.push({ actionId: "continue-understanding", kind: "continue", label: "继续推进理解", rationale: "没有待作者决定的高影响问题，继续生成下一个可审阅成果。", preconditions: [], targetOutcome: "next-understanding-result", allowedCommands: ["continue-journey"], risk: "low", lifecycle: "ready" });
+  }
+  return createPrimaryActionDecision({ journeyVersion: input.journeyVersion, sourceFingerprint: input.sourceFingerprint, candidates });
+}
+
 export function validatePrimaryActionSubmission(decision: PrimaryActionDecision, input: { actionId: string; journeyVersion: string; sourceFingerprint: string }): { accepted: boolean; reason?: "action-mismatch" | "journey-stale" | "source-stale" | "decision-blocked"; idempotencyKey?: string } {
   if (decision.actionId !== input.actionId) return { accepted: false, reason: "action-mismatch" };
   if (decision.journeyVersion !== input.journeyVersion) return { accepted: false, reason: "journey-stale" };

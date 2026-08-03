@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { confirmCharacterContract, createCharacterDramaticContract, listCharacterContracts, readCharacterDramaticContract, reviseCharacterDramaticContract } from "./characterContract.js";
+import { assertCharacterContractIntegrity, confirmCharacterContract, createCharacterDramaticContract, listCharacterContracts, readCharacterDramaticContract, reviseCharacterDramaticContract } from "./characterContract.js";
 
 const input = (root: string, characterId = "hero") => ({ root, projectSlug: "demo", characterId, displayName: "Hero", externalWant: "escape", internalNeed: "trust others", falseBelief: "trust is weakness", woundOrFear: "abandonment", valuesAndBoundaries: ["protect the innocent"], contradiction: "wants freedom but seeks control", stake: "lose the team", unacceptableChoice: "betray a child", potentialChange: "accept interdependence", unknown: ["final loyalty decision"], sources: [{ field: "externalWant", provenance: "author-confirmed" as const, sourceVersion: "author-1", evidenceRefs: ["author://brief#1"] }, { field: "falseBelief", provenance: "inference" as const, sourceVersion: "model-1", evidenceRefs: ["inference://session#2"] }] });
 
@@ -38,5 +38,16 @@ describe("character dramatic contract", () => {
     expect(revised.supersedesContractId).toBe(original.contractId);
     expect(revised.lifecycle).toBe("candidate");
     expect(await readCharacterDramaticContract(root, original.contractId)).toEqual(original);
+  });
+
+  it("fails closed when a persisted character contract is tampered", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "character-contract-tamper-"));
+    const contract = await createCharacterDramaticContract(input(root));
+    const target = path.join(root, "sessions", "character-contracts", `${contract.contractId}.json`);
+    const tampered = { ...contract, externalWant: "changed", fingerprint: "f".repeat(64) };
+    await fs.writeFile(target, JSON.stringify(tampered), "utf8");
+    await expect(readCharacterDramaticContract(root, contract.contractId)).rejects.toThrow("CHARACTER_CONTRACT_INTEGRITY_FAILED");
+    await expect(listCharacterContracts(root, "demo")).rejects.toThrow("CHARACTER_CONTRACT_INTEGRITY_FAILED");
+    expect(() => assertCharacterContractIntegrity(tampered, contract.contractId)).toThrow("CHARACTER_CONTRACT_INTEGRITY_FAILED");
   });
 });

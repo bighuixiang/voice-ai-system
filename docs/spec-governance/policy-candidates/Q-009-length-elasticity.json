@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "status": "author-delegated-policy-selected-not-implemented-not-verified",
+  "status": "author-delegated-policy-selected-runtime-slice-implemented-not-release-verified",
   "generatedOn": "2026-07-25",
   "sourceSddVersion": "v1.18.40",
   "decisionId": "Q-009",
@@ -10,7 +10,7 @@
     "authorSelection": "obligation-led-elastic-length",
     "recommendationId": "obligation-led-elastic-length",
     "evidenceBaselineRef": "docs/spec-governance/audits/current-length-planning.json",
-    "implementationStatus": "authorized-not-implemented-not-verified"
+    "implementationStatus": "authorized-runtime-slice-implemented-not-release-verified"
   },
   "alternatives": [
     {

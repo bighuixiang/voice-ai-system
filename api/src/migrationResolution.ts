@@ -23,6 +23,15 @@ function hasValidFingerprint(value: Record<string, unknown>): boolean {
   const { fingerprint: _fingerprint, ...base } = value;
   return hash(base) === value.fingerprint;
 }
+function hasValidSemantics(value: MigrationResolution, migrationId: string): boolean {
+  return value.schemaVersion === "project-migration-resolution.v1"
+    && value.migrationId === migrationId
+    && typeof value.projectSlug === "string" && value.projectSlug.length > 0
+    && value.status === "resolved"
+    && (value.selectedOutlineAuthority === "active" || value.selectedOutlineAuthority === "archived")
+    && Array.isArray(value.resolvedConflicts) && value.resolvedConflicts.every((item) => typeof item === "string")
+    && typeof value.resolvedAt === "string" && Number.isFinite(Date.parse(value.resolvedAt));
+}
 function resolutionPath(root: string, migrationId: string): string { return resolveInside(root, `sessions/migrations/${migrationId}.resolution.json`); }
 
 async function writeJson(target: string, value: unknown): Promise<void> {
@@ -36,6 +45,7 @@ export async function readMigrationResolution(root: string, migrationId: string)
   try {
     const value = JSON.parse(await fs.readFile(resolutionPath(root, migrationId), "utf8")) as MigrationResolution;
     if (!hasValidFingerprint(value as unknown as Record<string, unknown>)) throw new Error("MIGRATION_RESOLUTION_INTEGRITY_FAILED");
+    if (!hasValidSemantics(value, migrationId)) throw new Error("MIGRATION_RESOLUTION_SEMANTIC_MISMATCH");
     return value;
   }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }

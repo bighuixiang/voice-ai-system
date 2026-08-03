@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { compileAndPersistPublicationTree, compilePublicationTree, readPublicationTree } from "./publicationTree.js";
+import crypto from "node:crypto";
 
 describe("publication tree", () => {
   it("compiles deterministic reader-safe blocks from a frozen edition", async () => {
@@ -49,5 +50,22 @@ describe("publication tree", () => {
     await expect(readPublicationTree(root, manifest.editionId)).rejects.toThrow("PUBLICATION_TREE_INTEGRITY_FAILED");
     await expect(compileAndPersistPublicationTree(root, manifest)).rejects.toThrow("PUBLICATION_TREE_INTEGRITY_FAILED");
     expect(tree.fingerprint).toBe(value.fingerprint);
+  });
+
+  it("rejects a re-signed publication tree that is not reader-safe", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "publication-tree-semantic-"));
+    await fs.mkdir(path.join(root, "chapters"), { recursive: true });
+    const content = "# Chapter\n\nStable prose.\n";
+    await fs.writeFile(path.join(root, "chapters", "001.md"), content, "utf8");
+    const contentSha256 = crypto.createHash("sha256").update(content, "utf8").digest("hex");
+    const manifest = { schemaVersion: "edition-manifest.v1" as const, editionId: "edition-semantic", projectSlug: "demo", canonCommitFingerprint: "canon-1", title: "Demo", author: "Author", language: "zh-CN", status: "frozen" as const, readerSafe: true as const, chapters: [{ chapterId: "chapter-001", title: "Chapter", order: 1, contentPath: "chapters/001.md", settlementId: "settlement-1", contentSha256 }], publicationTreeFingerprint: "tree", createdAt: "now", fingerprint: "manifest" };
+    await compileAndPersistPublicationTree(root, manifest);
+    const target = path.join(root, "sessions", "publication-editions", "edition-semantic.tree.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, readerSafe: false };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readPublicationTree(root, manifest.editionId)).rejects.toThrow("PUBLICATION_TREE_SEMANTIC_INVALID");
   });
 });

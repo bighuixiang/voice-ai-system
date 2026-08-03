@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { appendObligationEvent, createNarrativeObligation, listNarrativeObligations, readNarrativeObligation } from "./narrativeObligation.js";
+import crypto from "node:crypto";
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true }))); });
@@ -18,6 +19,13 @@ describe("narrative obligation event core", () => {
     expect(planned.obligation).toMatchObject({ status: "planned", version: 2 });
     expect((await listNarrativeObligations(root))).toHaveLength(1);
     expect((await fs.readFile(path.join(root, "sessions", "obligations", `${created.obligationId}.events.jsonl`), "utf8")).trim().split(/\r?\n/)).toHaveLength(2);
+  });
+
+  it("does not parse the obligation coverage certificate as a narrative obligation", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "obligation-coverage-scan-")); roots.push(root);
+    await fs.mkdir(path.join(root, "sessions", "obligations"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "obligations", "coverage-certificate.json"), JSON.stringify({ schemaVersion: "obligation-coverage-certificate.v1", status: "issued" }), "utf8");
+    await expect(listNarrativeObligations(root)).resolves.toEqual([]);
   });
 
   it("rejects direct payoff without evidence and stale concurrent events", async () => {
@@ -40,6 +48,14 @@ describe("narrative obligation event core", () => {
     expect(paid.obligation.status).toBe("paid");
   });
 
+  it("requires type-specific payoff semantics instead of treating appearance as resolution", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "obligation-semantic-payoff-")); roots.push(root);
+    const object = await createNarrativeObligation(root, { projectSlug: "demo", type: "object", title: "The jade pendant", questionOrPromise: "What is its origin?" });
+    for (const [status, expectedVersion] of [["confirmed", 0], ["planned", 1], ["setup", 2]] as const) await appendObligationEvent(root, object.obligationId, { toStatus: status, reason: status, actor: "system", expectedVersion });
+    await expect(appendObligationEvent(root, object.obligationId, { toStatus: "paid", reason: "It appeared again", actor: "author", expectedVersion: 3, evidenceRefs: ["chapter://ch-4#pendant"] })).rejects.toThrow("OBLIGATION_PAYOFF_SEMANTIC_EVIDENCE_REQUIRED");
+    await expect(appendObligationEvent(root, object.obligationId, { toStatus: "paid", reason: "Origin revealed", actor: "author", expectedVersion: 3, evidenceRefs: ["origin://pendant/ch-4"] })).resolves.toMatchObject({ obligation: { status: "paid" } });
+  });
+
   it("replays the event log when the projection is stale and fails closed on a broken chain", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "obligation-recovery-")); roots.push(root);
     const created = await createNarrativeObligation(root, { projectSlug: "demo", type: "mystery", title: "Gate", questionOrPromise: "Who sealed it?" });
@@ -51,6 +67,28 @@ describe("narrative obligation event core", () => {
     await expect(readNarrativeObligation(root, created.obligationId)).resolves.toMatchObject({ status: "confirmed", version: 1 });
     const eventsPath = path.join(root, "sessions", "obligations", `${created.obligationId}.events.jsonl`);
     await fs.appendFile(eventsPath, `${JSON.stringify({ eventId: "corrupt", obligationId: created.obligationId, fromStatus: "planned", toStatus: "paid", expectedVersion: 9 })}\n`);
+    await expect(readNarrativeObligation(root, created.obligationId)).rejects.toThrow("OBLIGATION_EVENT_LOG_CORRUPT");
+  });
+
+  it("rejects a re-signed obligation projection with an invalid status", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "obligation-semantic-")); roots.push(root);
+    const created = await createNarrativeObligation(root, { projectSlug: "demo", type: "mystery", title: "Gate", questionOrPromise: "Who sealed it?" });
+    const target = path.join(root, "sessions", "obligations", created.obligationId + ".json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, status: "bogus" };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readNarrativeObligation(root, created.obligationId)).rejects.toThrow("OBLIGATION_SEMANTIC_INVALID");
+  });
+
+  it("fails closed when a re-signed event skips the transition graph", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "obligation-event-semantic-")); roots.push(root);
+    const created = await createNarrativeObligation(root, { projectSlug: "demo", type: "mystery", title: "Gate", questionOrPromise: "Who sealed it?" });
+    const eventsPath = path.join(root, "sessions", "obligations", `${created.obligationId}.events.jsonl`);
+    const eventBase = { schemaVersion: "obligation-event.v1", eventId: "event-forged", obligationId: created.obligationId, fromStatus: "proposed", toStatus: "paid", evidenceRefs: ["chapter://1"], reason: "skip confirmation", actor: "author", expectedVersion: 0, createdAt: new Date().toISOString() };
+    const event = { ...eventBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(eventBase)).digest("hex") };
+    await fs.writeFile(eventsPath, `${JSON.stringify(event)}\n`, "utf8");
     await expect(readNarrativeObligation(root, created.obligationId)).rejects.toThrow("OBLIGATION_EVENT_LOG_CORRUPT");
   });
 });

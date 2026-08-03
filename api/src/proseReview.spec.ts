@@ -6,7 +6,7 @@ import crypto from "node:crypto";
 import { appendAuthorMessage } from "./creativeSession.js";
 import { freezeContextManifest } from "./contextManifest.js";
 import { createProseCandidate } from "./proseCandidate.js";
-import { reviewProseCandidate } from "./proseReview.js";
+import { assertRedBlueReviewIntegrity, readRedBlueReview, reviewProseCandidate } from "./proseReview.js";
 
 async function fixture(content: string) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "prose-review-"));
@@ -36,4 +36,22 @@ describe("red blue prose review", () => {
     expect(review.verdict).toBe("blocks-adoption");
     expect(review.recommendation).toBe("repair");
   });
+
+  it("fails closed when the durable red-blue review is tampered", async () => {
+    const { root, candidate } = await fixture("A clean scene.");
+    const review = await reviewProseCandidate(root, candidate);
+    const target = path.join(root, "sessions", "prose-reviews", `${candidate.candidateId}.json`);
+    const persisted = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    persisted.verdict = "blocks-adoption";
+    await fs.writeFile(target, JSON.stringify(persisted), "utf8");
+    expect(review.verdict).toBe("supports-adoption");
+    await expect(readRedBlueReview(root, candidate.candidateId)).rejects.toThrow("PROSE_REVIEW_INTEGRITY_FAILED");
+  });
+
+  it("rejects a validation bundle that belongs to a different candidate", async () => {
+    const { root, candidate } = await fixture("A clean scene.");
+    const review = await reviewProseCandidate(root, candidate);
+    await expect(reviewProseCandidate(root, candidate, { ...({} as typeof review), candidateId: "other", candidateFingerprint: "other", validationBundleFingerprint: review.validationBundleFingerprint })).rejects.toThrow("PROSE_REVIEW_INPUT_MISMATCH");
+  });
+  it("rejects semantically invalid but re-signed review results", async () => { const { root, candidate } = await fixture("A clean scene."); const review = await reviewProseCandidate(root, candidate); const { fingerprint: _fingerprint, ...base } = review; const tampered = { ...base, recommendation: "adopt", reviewer: { kind: "independent-deterministic", id: "wrong-reviewer" }, fingerprint: crypto.createHash("sha256").update(JSON.stringify({ ...base, recommendation: "adopt", reviewer: { kind: "independent-deterministic", id: "wrong-reviewer" } })).digest("hex") }; expect(() => assertRedBlueReviewIntegrity(tampered as typeof review)).toThrow("PROSE_REVIEW_INTEGRITY_FAILED"); });
 });

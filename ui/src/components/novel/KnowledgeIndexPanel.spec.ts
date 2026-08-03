@@ -63,6 +63,24 @@ const searchResult: KnowledgeSearchResult = {
   query: "Hero gate",
   tokens: ["hero", "gate"],
   vectorSummary: index.vectorSummary,
+  retrievalAudit: {
+    schemaVersion: "knowledge-retrieval-audit.v1",
+    boundary: { query: "Hero gate", task: "chapter-context", audience: "author", authorized: true },
+    eligibleFactIds: ["fact:gate"],
+    excluded: [{ id: "fact:hidden", reason: "MEMORY_CLAIM_STATUS_OBSOLETE" }],
+    selectedIds: ["fact:gate"],
+    evidenceSourceIds: ["fact-1"],
+    evidenceSourceCount: 1,
+    evidenceProfile: {
+      sources: [],
+      independentSourceCount: 2,
+      familyCount: 2,
+      duplicateDerivedGroupCount: 1,
+      gaps: ["time-unknown"],
+      saysNoContradiction: false
+    },
+    resultFingerprint: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+  },
   facts: [{ ...index.facts[0], score: 2, vectorScore: 0.64 }],
   triples: [{ ...index.triples[0], score: 1, vectorScore: 0.22 }],
   chapters: [{ ...index.chapterIndex.chapters[0], score: 3, vectorScore: 0.51 }]
@@ -107,8 +125,41 @@ describe("KnowledgeIndexPanel", () => {
     expect(wrapper.emitted("search")).toEqual([["Hero gate"]]);
     expect(wrapper.text()).toContain("The gate opens.");
     expect(wrapper.text()).toContain("3 vectors");
+    expect(wrapper.text()).toContain("Retrieval audit");
+    expect(wrapper.text()).toContain("1 eligible / 1 excluded");
+    expect(wrapper.text()).toContain("task: chapter-context");
+    expect(wrapper.text()).toContain("2 independent sources");
+    expect(wrapper.text()).toContain("evidence gaps: time-unknown");
+    expect(wrapper.text()).toContain("fingerprint abcdef123456");
     expect(wrapper.text()).toContain("向量 0.64");
     expect(wrapper.text()).toContain("Hero · state_after · Wounded.");
     expect(wrapper.text()).toContain("Chapter 1");
+  });
+  it("renders a persisted preview after refresh without a live search result", () => {
+    const wrapper = mount(KnowledgeIndexPanel, {
+      props: {
+        isRebuilding: false,
+        index,
+        retrievalPreview: {
+          schemaVersion: "memory-retrieval-preview.v1",
+          retrievalId: "retrieval-abcdef0123456789abcdef01",
+          projectSlug: "demo",
+          query: "Hero gate",
+          boundary: { query: "Hero gate", audience: "author", authorized: true },
+          eligibleFactIds: ["fact:gate"],
+          excluded: [],
+          selectedIds: ["fact:gate"],
+          truncatedIds: [],
+          evidenceSourceIds: ["fact-1"],
+          evidenceSourceCount: 1,
+          budget: { maxResults: 12 },
+          sourceResultFingerprint: "a".repeat(64),
+          resultFingerprint: "b".repeat(64)
+        }
+      },
+      global: { stubs }
+    });
+
+    expect(wrapper.find(".retrieval-preview-recovery").text()).toContain("saved preview retrieval-abcdef0123456789abcdef01");
   });
 });

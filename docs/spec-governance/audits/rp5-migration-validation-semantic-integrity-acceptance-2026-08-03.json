@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-migration-validation-semantic-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "Migration validation artifacts must fail closed when hashed fields have invalid semantics.",
+    "Validation status, fingerprints, conflict arrays, dependency state, and timestamps must be structurally valid before activation."
+  ],
+  "implementationRefs": [
+    "api/src/migrationValidation.ts:readMigrationValidation",
+    "api/src/migrationValidation.spec.ts:validly hashed validation artifact with invalid semantic fields"
+  ],
+  "tests": {
+    "red": "A validly hashed validation artifact with conflicts as a string reached activation and returned MIGRATION_CONFLICTS_UNRESOLVED.",
+    "green": "migrationValidation.spec.ts passed 15/15 after semantic validation was added."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Complete migration cutover across all legacy-capable surfaces remains unproven.",
+    "No real provider/human holdout calibration artifact is attached.",
+    "Independent review and full V2 release acceptance remain incomplete."
+  ]
+}

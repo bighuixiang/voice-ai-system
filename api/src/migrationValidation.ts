@@ -4,6 +4,9 @@ import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
 import { previewProjectMigration, readMigrationPreview, type MigrationPreview } from "./migrationPreview.js";
 import { readMigrationResolution } from "./migrationResolution.js";
+import { createCapabilityDependencyProof, createProjectCapabilityManifest } from "./deliveryGovernance.js";
+import { readProjectCapabilityManifest, removeProjectCapabilityManifest, writeProjectCapabilityManifest } from "./projectCapabilityManifest.js";
+import { readCapabilityDependencyProof, removeCapabilityDependencyProof, writeCapabilityDependencyProof } from "./capabilityDependencyStore.js";
 
 export interface MigrationValidation {
   schemaVersion: "project-migration-validation.v1";
@@ -27,8 +30,40 @@ export interface MigrationActivation {
   sourceFingerprint: string;
   idempotencyKey?: string;
   expectedValidationFingerprint?: string;
+  capabilityManifestCreated?: boolean;
+  capabilityDependencyProofCreated?: boolean;
+  capabilityManifestFingerprint?: string;
+  capabilityDependencyProofFingerprint?: string;
   activatedAt: string;
   fingerprint: string;
+}
+
+async function installMigrationCapabilityFrontDoor(root: string, projectSlug: string, migrationId: string): Promise<{ manifestCreated: boolean; proofCreated: boolean; manifestFingerprint?: string; proofFingerprint?: string }> {
+  const existingManifest = await readProjectCapabilityManifest(root, projectSlug);
+  if (existingManifest) return { manifestCreated: false, proofCreated: false };
+  const manifest = createProjectCapabilityManifest({
+    projectId: projectSlug,
+    projectSchemaVersion: "v1",
+    enabledSlices: ["runtime", "session", "delivery"],
+    readable: ["runtime", "session", "delivery"],
+    writable: ["runtime", "session", "delivery"],
+    migrationStatus: "verified",
+    rollbackWindow: "24h",
+    missingDependencies: ["runtime-migration-capability-proof"]
+  });
+  await writeProjectCapabilityManifest(root, manifest);
+  const existingProof = await readCapabilityDependencyProof(root, "runtime", projectSlug);
+  if (!existingProof) {
+    await writeCapabilityDependencyProof(root, createCapabilityDependencyProof({
+      projectSlug,
+      sliceId: "runtime",
+      requiredKernels: [{ id: "K0-contract", version: "v1", verifiedBy: [`migration:${migrationId}`] }],
+      writeAuthority: "migration-runtime-gate",
+      unmet: ["migration-capability-proof-required"]
+    }));
+    return { manifestCreated: true, proofCreated: true, manifestFingerprint: manifest.fingerprint, proofFingerprint: (await readCapabilityDependencyProof(root, "runtime", projectSlug))?.fingerprint };
+  }
+  return { manifestCreated: true, proofCreated: false, manifestFingerprint: manifest.fingerprint };
 }
 
 export interface MigrationRollback {
@@ -46,6 +81,39 @@ function hasValidFingerprint(value: Record<string, unknown>): boolean {
   if (typeof value.fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(value.fingerprint)) return false;
   const { fingerprint: _fingerprint, ...base } = value;
   return hash(base) === value.fingerprint;
+}
+function hasValidTimestamp(value: unknown): boolean {
+  return typeof value === "string" && Number.isFinite(Date.parse(value));
+}
+function hasValidValidationSemantics(value: MigrationValidation): boolean {
+  return value.schemaVersion === "project-migration-validation.v1"
+    && typeof value.migrationId === "string" && value.migrationId.length > 0
+    && typeof value.projectSlug === "string" && value.projectSlug.length > 0
+    && value.status === "validated"
+    && typeof value.sourceFingerprint === "string" && /^[a-f0-9]{64}$/i.test(value.sourceFingerprint)
+    && Array.isArray(value.conflicts) && value.conflicts.every((item) => typeof item === "string")
+    && Array.isArray(value.resolvedConflicts) && value.resolvedConflicts.every((item) => typeof item === "string")
+    && value.dependencies && (value.dependencies.outlineVersion === "ready" || value.dependencies.outlineVersion === "missing")
+    && hasValidTimestamp(value.validatedAt);
+}
+function hasValidActivationSemantics(value: MigrationActivation, migrationId: string): boolean {
+  return value.schemaVersion === "project-migration-activation.v1"
+    && value.migrationId === migrationId
+    && typeof value.projectSlug === "string" && value.projectSlug.length > 0
+    && value.status === "activated"
+    && value.writeAuthority === "prose-adoption"
+    && typeof value.sourceFingerprint === "string" && /^[a-f0-9]{64}$/i.test(value.sourceFingerprint)
+    && (value.idempotencyKey === undefined || (typeof value.idempotencyKey === "string" && value.idempotencyKey.length > 0))
+    && (value.expectedValidationFingerprint === undefined || /^[a-f0-9]{64}$/i.test(value.expectedValidationFingerprint))
+    && hasValidTimestamp(value.activatedAt);
+}
+function hasValidRollbackSemantics(value: MigrationRollback, migrationId: string): boolean {
+  return value.schemaVersion === "project-migration-rollback.v1"
+    && value.migrationId === migrationId
+    && typeof value.projectSlug === "string" && value.projectSlug.length > 0
+    && value.status === "rolled_back"
+    && typeof value.activationFingerprint === "string" && /^[a-f0-9]{64}$/i.test(value.activationFingerprint)
+    && hasValidTimestamp(value.rolledBackAt);
 }
 function validationPath(root: string, migrationId: string): string { return resolveInside(root, `sessions/migrations/${migrationId}.validation.json`); }
 function activationPath(root: string, migrationId: string): string { return resolveInside(root, `sessions/migrations/${migrationId}.activation.json`); }
@@ -66,21 +134,21 @@ async function readJson<T>(target: string): Promise<T | null> {
 export async function readMigrationValidation(root: string, migrationId: string): Promise<MigrationValidation | null> {
   const value = await readJson<MigrationValidation>(validationPath(root, migrationId));
   if (value && !hasValidFingerprint(value as unknown as Record<string, unknown>)) throw new Error("MIGRATION_VALIDATION_INTEGRITY_FAILED");
-  if (value && value.migrationId !== migrationId) throw new Error("MIGRATION_VALIDATION_SEMANTIC_MISMATCH");
+  if (value && (!hasValidValidationSemantics(value) || value.migrationId !== migrationId)) throw new Error("MIGRATION_VALIDATION_SEMANTIC_MISMATCH");
   return value;
 }
 
 export async function readMigrationActivation(root: string, migrationId: string): Promise<MigrationActivation | null> {
   const value = await readJson<MigrationActivation>(activationPath(root, migrationId));
   if (value && !hasValidFingerprint(value as unknown as Record<string, unknown>)) throw new Error("MIGRATION_ACTIVATION_INTEGRITY_FAILED");
-  if (value && value.migrationId !== migrationId) throw new Error("MIGRATION_ACTIVATION_SEMANTIC_MISMATCH");
+  if (value && !hasValidActivationSemantics(value, migrationId)) throw new Error("MIGRATION_ACTIVATION_SEMANTIC_MISMATCH");
   return value;
 }
 
 export async function readMigrationRollback(root: string, migrationId: string): Promise<MigrationRollback | null> {
   const value = await readJson<MigrationRollback>(rollbackPath(root, migrationId));
   if (value && !hasValidFingerprint(value as unknown as Record<string, unknown>)) throw new Error("MIGRATION_ROLLBACK_INTEGRITY_FAILED");
-  if (value && value.migrationId !== migrationId) throw new Error("MIGRATION_ROLLBACK_SEMANTIC_MISMATCH");
+  if (value && !hasValidRollbackSemantics(value, migrationId)) throw new Error("MIGRATION_ROLLBACK_SEMANTIC_MISMATCH");
   return value;
 }
 
@@ -143,6 +211,7 @@ export async function activateProjectMigration(root: string, projectSlug: string
   const outlineVersion = project.outlineVersion as { versionId?: string } | undefined;
   if (!outlineVersion?.versionId) throw new Error("MIGRATION_DEPENDENCY_MISSING");
   const now = new Date().toISOString();
+  const capabilityFrontDoor = await installMigrationCapabilityFrontDoor(root, projectSlug, migrationId);
   const base = {
     schemaVersion: "project-migration-activation.v1" as const,
     migrationId,
@@ -152,6 +221,10 @@ export async function activateProjectMigration(root: string, projectSlug: string
     sourceFingerprint: validation.sourceFingerprint,
     ...(input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}),
     ...(input.expectedValidationFingerprint ? { expectedValidationFingerprint: input.expectedValidationFingerprint } : {}),
+    ...(capabilityFrontDoor.manifestCreated ? { capabilityManifestCreated: true } : {}),
+    ...(capabilityFrontDoor.proofCreated ? { capabilityDependencyProofCreated: true } : {}),
+    ...(capabilityFrontDoor.manifestFingerprint ? { capabilityManifestFingerprint: capabilityFrontDoor.manifestFingerprint } : {}),
+    ...(capabilityFrontDoor.proofFingerprint ? { capabilityDependencyProofFingerprint: capabilityFrontDoor.proofFingerprint } : {}),
     activatedAt: now
   };
   const activation: MigrationActivation = { ...base, fingerprint: hash(base) };
@@ -166,6 +239,8 @@ export async function activateProjectMigration(root: string, projectSlug: string
   } catch (error) {
     await fs.writeFile(projectPath, originalProject, "utf8");
     await fs.rm(activationPath(root, migrationId), { force: true });
+    if (capabilityFrontDoor.proofCreated) await removeCapabilityDependencyProof(root, "runtime", capabilityFrontDoor.proofFingerprint);
+    if (capabilityFrontDoor.manifestCreated) await removeProjectCapabilityManifest(root, projectSlug, capabilityFrontDoor.manifestFingerprint);
     throw error;
   }
   return activation;
@@ -187,6 +262,14 @@ export async function rollbackProjectMigration(root: string, projectSlug: string
   const project = JSON.parse(await fs.readFile(projectPath, "utf8")) as Record<string, unknown>;
   const migration = project.migration as { migrationId?: string; state?: string } | undefined;
   if (migration?.migrationId !== migrationId || migration.state !== "activated") throw new Error("MIGRATION_NOT_ACTIVE");
+  if (activation.capabilityManifestCreated) {
+    const manifest = await readProjectCapabilityManifest(root, projectSlug);
+    if (!manifest || (activation.capabilityManifestFingerprint && manifest.fingerprint !== activation.capabilityManifestFingerprint)) throw new Error("CAPABILITY_MANIFEST_STALE");
+  }
+  if (activation.capabilityDependencyProofCreated) {
+    const proof = await readCapabilityDependencyProof(root, "runtime", projectSlug);
+    if (!proof || (activation.capabilityDependencyProofFingerprint && proof.fingerprint !== activation.capabilityDependencyProofFingerprint)) throw new Error("CAPABILITY_DEPENDENCY_STALE");
+  }
   const { migration: _removed, ...projectWithoutMigration } = project;
   const base = {
     schemaVersion: "project-migration-rollback.v1" as const,
@@ -209,5 +292,7 @@ export async function rollbackProjectMigration(root: string, projectSlug: string
     await fs.rm(rollbackPath(root, migrationId), { force: true });
     throw error;
   }
+  if (activation.capabilityDependencyProofCreated) await removeCapabilityDependencyProof(root, "runtime", activation.capabilityDependencyProofFingerprint);
+  if (activation.capabilityManifestCreated) await removeProjectCapabilityManifest(root, projectSlug, activation.capabilityManifestFingerprint);
   return rollback;
 }

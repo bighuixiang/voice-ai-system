@@ -64,6 +64,17 @@ describe("quality evaluator calibration", () => {
     })).rejects.toThrow("CALIBRATION_ACCURACY_MISMATCH");
   });
 
+  it("rejects non-integral or non-finite external aggregate counts", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "quality-calibration-counts-")); roots.push(root);
+    const base = {
+      evaluatorVersion: "provider-counts-v1", sourceKind: "provider" as const, holdoutInputFingerprint: "sealed-counts",
+      evaluatedCount: 10, correctCount: 9, accuracy: 0.9, minimumAccuracy: 0.8,
+      attestation: { kind: "provider-signed" as const, reference: "attestation://provider/counts" }, evidenceRefs: ["audit://provider/counts"]
+    };
+    await expect(ingestExternalCalibrationSubmission(root, { ...base, evaluatedCount: 10.5 as never, correctCount: 9.45 as never })).rejects.toThrow("CALIBRATION_COUNTS_INVALID");
+    await expect(ingestExternalCalibrationSubmission(root, { ...base, evaluatedCount: Number.NaN, correctCount: 9, accuracy: Number.NaN })).rejects.toThrow("CALIBRATION_COUNTS_INVALID");
+  });
+
   it("rejects calibrated evidence without traceable attestation and evidence references", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "quality-calibration-")); roots.push(root);
     await expect(ingestExternalCalibrationSubmission(root, {
@@ -129,6 +140,21 @@ describe("quality evaluator calibration", () => {
     expect(evidence.status).toBe("calibrated");
   });
 
+  it("fails closed when calibration history contains a validly hashed but semantically invalid record", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "quality-calibration-history-semantic-")); roots.push(root);
+    const directory = path.join(root, "sessions", "quality-calibration");
+    await fs.mkdir(directory, { recursive: true });
+    const base = {
+      schemaVersion: "quality-calibration-evidence.v1", calibrationId: "history-invalid", evaluatorVersion: "provider-history", sourceKind: "rogue",
+      split: "holdout", caseIds: [], inputFingerprint: "sealed", evaluatedCount: 1, correctCount: 1, accuracy: 1, minimumAccuracy: 0.8,
+      status: "calibrated", canonGateEligible: false, labelAccess: "sealed-separate-from-evaluator-input",
+      attestation: { kind: "provider-signed", reference: "attestation://history-invalid" }, evidenceRefs: ["audit://history-invalid"], createdAt: new Date().toISOString()
+    };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.writeFile(path.join(directory, "history-invalid.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    await expect(readQualityCalibrationEvidenceHistory(root)).rejects.toThrow("CALIBRATION_EVIDENCE_SEMANTIC_INVALID");
+  });
+
   it("fails closed when a validly hashed calibration artifact has invalid semantics", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "quality-calibration-semantic-")); roots.push(root);
     await fs.mkdir(path.join(root, "sessions"), { recursive: true });
@@ -137,6 +163,59 @@ describe("quality evaluator calibration", () => {
       split: "holdout", caseIds: [], inputFingerprint: "sealed", evaluatedCount: 1, correctCount: 1, accuracy: 1, minimumAccuracy: 0.8,
       status: "calibrated", canonGateEligible: false, labelAccess: "sealed-separate-from-evaluator-input",
       attestation: { kind: "provider-signed", reference: "attestation://provider/invalid" }, evidenceRefs: ["audit://provider/invalid"], createdAt: new Date().toISOString()
+    };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.writeFile(path.join(root, "sessions", "quality-calibration-evidence.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    await expect(readQualityCalibrationEvidence(root)).rejects.toThrow("CALIBRATION_EVIDENCE_SEMANTIC_INVALID");
+  });
+
+  it("rejects a rehashed calibration artifact with an invalid creation timestamp", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "quality-calibration-timestamp-")); roots.push(root);
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    const base = {
+      schemaVersion: "quality-calibration-evidence.v1", calibrationId: "calibration-timestamp", evaluatorVersion: "provider-v1", sourceKind: "provider",
+      split: "holdout", caseIds: [], inputFingerprint: "sealed", evaluatedCount: 1, correctCount: 1, accuracy: 1, minimumAccuracy: 0.8,
+      status: "calibrated", canonGateEligible: false, labelAccess: "sealed-separate-from-evaluator-input",
+      attestation: { kind: "provider-signed", reference: "attestation://provider/timestamp" }, evidenceRefs: ["audit://provider/timestamp"], createdAt: "not-a-timestamp"
+    };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.writeFile(path.join(root, "sessions", "quality-calibration-evidence.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    await expect(readQualityCalibrationEvidence(root)).rejects.toThrow("CALIBRATION_EVIDENCE_SEMANTIC_INVALID");
+  });
+
+  it("fails closed when calibration history filename does not match calibration identity", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "quality-calibration-history-filename-")); roots.push(root);
+    const directory = path.join(root, "sessions", "quality-calibration");
+    await fs.mkdir(directory, { recursive: true });
+    const base = {
+      schemaVersion: "quality-calibration-evidence.v1", calibrationId: "calibration-real", evaluatorVersion: "provider-v1", sourceKind: "provider",
+      split: "holdout", caseIds: [], inputFingerprint: "sealed", evaluatedCount: 1, correctCount: 1, accuracy: 1, minimumAccuracy: 0.8,
+      status: "calibrated", canonGateEligible: false, labelAccess: "sealed-separate-from-evaluator-input",
+      attestation: { kind: "provider-signed", reference: "attestation://provider/history-filename" }, evidenceRefs: ["audit://provider/history-filename"], createdAt: new Date().toISOString()
+    };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.writeFile(path.join(directory, "calibration-other.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    await expect(readQualityCalibrationEvidenceHistory(root)).rejects.toThrow("CALIBRATION_EVIDENCE_SEMANTIC_INVALID");
+  });
+
+  it("does not grant evaluator eligibility from a forged in-memory calibrated object", () => {
+    const forged = {
+      schemaVersion: "quality-calibration-evidence.v1", calibrationId: "forged", evaluatorVersion: "provider-forged", sourceKind: "provider", split: "holdout",
+      caseIds: [], inputFingerprint: "sealed", evaluatedCount: 1, correctCount: 1, accuracy: 1, minimumAccuracy: 0.8, status: "calibrated",
+      canonGateEligible: false, labelAccess: "sealed-separate-from-evaluator-input", attestation: { kind: "provider-signed", reference: "attestation://forged" },
+      evidenceRefs: ["audit://forged"], createdAt: new Date().toISOString(), fingerprint: "f".repeat(64)
+    } as never;
+    expect(isQualityEvaluatorEligible(forged)).toBe(false);
+  });
+
+  it("rejects a rehashed artifact with missing calibration identity fields", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "quality-calibration-identity-")); roots.push(root);
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    const base = {
+      schemaVersion: "quality-calibration-evidence.v1", calibrationId: "", evaluatorVersion: "", sourceKind: "provider",
+      split: "holdout", caseIds: [], inputFingerprint: "", evaluatedCount: 1, correctCount: 1, accuracy: 1, minimumAccuracy: 0.8,
+      status: "calibrated", canonGateEligible: false, labelAccess: "sealed-separate-from-evaluator-input",
+      attestation: { kind: "provider-signed", reference: "attestation://provider/identity" }, evidenceRefs: ["audit://provider/identity"], createdAt: new Date().toISOString()
     };
     const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
     await fs.writeFile(path.join(root, "sessions", "quality-calibration-evidence.json"), JSON.stringify({ ...base, fingerprint }), "utf8");

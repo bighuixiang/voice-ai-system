@@ -9,7 +9,18 @@ function hash(value: unknown): string { return crypto.createHash("sha256").updat
 function nodePath(root: string, id: string): string { return resolveInside(root, `sessions/planning-nodes/${id}.json`); }
 async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const temp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(temp, target); }
 async function readJson<T>(target: string): Promise<T | null> { try { return JSON.parse(await fs.readFile(target, "utf8")) as T; } catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; } }
-export async function readPlanningNode(root: string, nodeId: string): Promise<PlanningNode | null> { return readJson<PlanningNode>(nodePath(root, nodeId)); }
+export function assertPlanningNodeIntegrity(node: PlanningNode, expectedId?: string): PlanningNode {
+  const { fingerprint, ...base } = node;
+  const decisionValid = node.decision === undefined || (typeof node.decision === "object" && [node.decision.actor, node.decision.reason, node.decision.decidedAt].every((value) => typeof value === "string" && value.trim()) && !Number.isNaN(Date.parse(node.decision.decidedAt)));
+  const valid = node?.schemaVersion === "narrative-planning-node.v1" && (!expectedId || node.nodeId === expectedId) &&
+    [node.nodeId, node.projectSlug, node.layer, node.title, node.createdAt, node.updatedAt].every((value) => typeof value === "string" && value.trim()) &&
+    [node.commitments, node.sourceRefs].every((values) => Array.isArray(values) && values.length > 0 && values.every((value) => typeof value === "string" && value.trim())) &&
+    ["committed", "rolling", "tentative", "exploratory"].includes(node.status) && typeof node.autoEvolutionAllowed === "boolean" && node.autoEvolutionAllowed === (node.status !== "committed") &&
+    !Number.isNaN(Date.parse(node.createdAt)) && !Number.isNaN(Date.parse(node.updatedAt)) && decisionValid && /^[a-f0-9]{64}$/i.test(node.fingerprint) && hash(base) === node.fingerprint;
+  if (!valid) throw new Error("PLANNING_NODE_INTEGRITY_FAILED");
+  return node;
+}
+export async function readPlanningNode(root: string, nodeId: string): Promise<PlanningNode | null> { const node = await readJson<PlanningNode>(nodePath(root, nodeId)); return node ? assertPlanningNodeIntegrity(node, nodeId) : null; }
 export async function createPlanningNode(input: { root: string; projectSlug: string; nodeId: string; layer: string; title: string; status: PlanningStatus; commitments: readonly string[]; sourceRefs: readonly string[] }): Promise<PlanningNode> {
   if (!input.projectSlug.trim() || !input.nodeId.trim() || !input.layer.trim() || !input.title.trim()) throw new Error("PLANNING_NODE_FIELDS_REQUIRED");
   if (!input.commitments.length) throw new Error("PLANNING_COMMITMENTS_REQUIRED"); if (!input.sourceRefs.length) throw new Error("PLANNING_NODE_SOURCE_REQUIRED");
