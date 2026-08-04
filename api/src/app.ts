@@ -1884,11 +1884,12 @@ export function createApp() {
     const project = await readProject(req.params.projectId);
     const root = projectRoot(project.slug);
     const session = await readCreativeSession(root, project.slug);
-    const [questions, decisions] = await Promise.all([readDialogueQuestions(root), readDecisionRecords(root)]);
+    const [questions, decisions, adoptionProposal] = await Promise.all([readDialogueQuestions(root), readDecisionRecords(root), readContractAdoptionProposal(root)]);
     const activeQuestion = questions.find((question) => question.status === "active");
     const current = buildCreativeJourneyProjection(session, {
-      ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, source: "deterministic-gap" as const } } : {}),
-      answeredQuestionIds: decisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId)
+      ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, impact: activeQuestion.impact, source: "deterministic-gap" as const } } : {}),
+      answeredQuestionIds: decisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId),
+      readyForOutline: adoptionProposal?.status === "committed"
     });
     const stored = await readCreativeJourneyProjection(root, project.slug);
     const journey = stored && stored.sourceFingerprint === current.sourceFingerprint && stored.projectionVersion === current.projectionVersion && stored.fingerprint === current.fingerprint ? stored : await persistCreativeJourneyProjection(root, current);
@@ -2138,7 +2139,7 @@ export function createApp() {
     const [journeyQuestions, journeyDecisions] = await Promise.all([readDialogueQuestions(journeyRoot), readDecisionRecords(journeyRoot)]);
     const journeyActiveQuestion = journeyQuestions.find((question) => question.status === "active");
     const journeyProjection = buildCreativeJourneyProjection(result.session, {
-      ...(journeyActiveQuestion ? { activeQuestion: { questionId: journeyActiveQuestion.questionId, text: journeyActiveQuestion.text, source: "deterministic-gap" as const } } : {}),
+      ...(journeyActiveQuestion ? { activeQuestion: { questionId: journeyActiveQuestion.questionId, text: journeyActiveQuestion.text, impact: journeyActiveQuestion.impact, source: "deterministic-gap" as const } } : {}),
       answeredQuestionIds: journeyDecisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId)
     });
     await persistCreativeJourneyProjection(journeyRoot, journeyProjection);
@@ -2146,7 +2147,7 @@ export function createApp() {
     const collaboration = kind ? undefined : parseCollaborationMessage(typeof req.body?.text === "string" ? req.body.text : "", journeyActiveQuestion ? { activeQuestionId: journeyActiveQuestion.questionId } : {});
     let primaryAction: ReturnType<typeof resolvePrimaryActionDecision> | undefined;
     if (collaboration?.events.some((event) => ["continue", "answer", "delegate-decision"].includes(event.type))) {
-      primaryAction = resolvePrimaryActionDecision({ journeyVersion: journeyProjection.projectionVersion, sourceFingerprint: journeyProjection.sourceFingerprint, stage: journeyProjection.stage === "capture" ? "capture" : "understanding", ...(journeyActiveQuestion ? { activeQuestionId: journeyActiveQuestion.questionId } : {}) });
+      primaryAction = resolvePrimaryActionDecision({ journeyVersion: journeyProjection.projectionVersion, sourceFingerprint: journeyProjection.sourceFingerprint, stage: journeyProjection.stage, ...(journeyActiveQuestion ? { activeQuestionId: journeyActiveQuestion.questionId } : {}) });
     }
     res.status(result.created ? 201 : 200).json({ ...result, ...(collaboration ? { collaboration } : {}), ...(primaryAction ? { primaryAction } : {}) });
   }));
@@ -2169,7 +2170,7 @@ export function createApp() {
     const [journeyQuestions, journeyDecisions] = await Promise.all([readDialogueQuestions(journeyRoot), readDecisionRecords(journeyRoot)]);
     const journeyActiveQuestion = journeyQuestions.find((question) => question.status === "active");
     await persistCreativeJourneyProjection(journeyRoot, buildCreativeJourneyProjection(result.session, {
-      ...(journeyActiveQuestion ? { activeQuestion: { questionId: journeyActiveQuestion.questionId, text: journeyActiveQuestion.text, source: "deterministic-gap" as const } } : {}),
+      ...(journeyActiveQuestion ? { activeQuestion: { questionId: journeyActiveQuestion.questionId, text: journeyActiveQuestion.text, impact: journeyActiveQuestion.impact, source: "deterministic-gap" as const } } : {}),
       answeredQuestionIds: journeyDecisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId)
     }));
     await persistCreativeTimelineProjection(projectRoot(project.slug), buildCreativeTimelineProjection(result.session));
@@ -2407,7 +2408,7 @@ export function createApp() {
     const [questions, decisions, session] = await Promise.all([readDialogueQuestions(root), readDecisionRecords(root), readCreativeSession(root, project.slug)]);
     const activeQuestion = questions.find((question) => question.status === "active");
     const journey = buildCreativeJourneyProjection(session, {
-      ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, source: "deterministic-gap" as const } } : {}),
+      ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, impact: activeQuestion.impact, source: "deterministic-gap" as const } } : {}),
       answeredQuestionIds: decisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId)
     });
     await persistCreativeJourneyProjection(root, journey);
@@ -2415,6 +2416,7 @@ export function createApp() {
       ...advanced.answer,
       ...(advanced.nextQuestion ? { nextQuestion: advanced.nextQuestion } : {}),
       ...(advanced.contractCandidate ? { contractCandidate: advanced.contractCandidate } : {}),
+      ...(advanced.consumption ? { consumption: advanced.consumption } : {}),
       completed: advanced.completed,
       journey
     });
@@ -6576,11 +6578,12 @@ export function createApp() {
     const project = await requireProject(req.params.projectId); if (!project) return;
     const root = projectRoot(project.slug);
     const session = await readCreativeSession(root, project.slug);
-    const [questions, decisionRecords] = await Promise.all([readDialogueQuestions(root), readDecisionRecords(root)]);
+    const [questions, decisionRecords, adoptionProposal] = await Promise.all([readDialogueQuestions(root), readDecisionRecords(root), readContractAdoptionProposal(root)]);
     const activeQuestion = questions.find((question) => question.status === "active");
     const journey = buildCreativeJourneyProjection(session, {
-      ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, source: "deterministic-gap" as const } } : {}),
-      answeredQuestionIds: decisionRecords.filter((record) => record.status === "recorded").map((record) => record.questionId)
+      ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, impact: activeQuestion.impact, source: "deterministic-gap" as const } } : {}),
+      answeredQuestionIds: decisionRecords.filter((record) => record.status === "recorded").map((record) => record.questionId),
+      readyForOutline: adoptionProposal?.status === "committed"
     });
     const understandingSnapshot = await readUnderstandingSnapshot(root);
     const understandingReview = await readUnderstandingReview(root);
@@ -6588,7 +6591,6 @@ export function createApp() {
       .filter((decision) => !decisionRecords.some((other) => other.supersedesDecisionId === decision.decisionId))
       .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
     const latestContractCandidate = (await listContractCandidates(root)).find((candidate) => candidate.status === "candidate");
-    const adoptionProposal = await readContractAdoptionProposal(root);
     const outlineCandidates = await listOutlineCandidates(root);
     const activeOutlineCandidate = outlineCandidates.find((outline) => outline.status === "candidate" && outline.sourceCandidateId === latestContractCandidate?.candidateId);
     const activeOutlineValidation = activeOutlineCandidate ? await readOutlineValidationReport(root, activeOutlineCandidate.outlineId) : null;
@@ -6596,7 +6598,7 @@ export function createApp() {
     const decision = resolvePrimaryActionDecision({
       journeyVersion: journey.projectionVersion,
       sourceFingerprint: journey.sourceFingerprint,
-      stage: journey.stage === "capture" ? "capture" : "understanding",
+      stage: journey.stage,
       hasUnderstandingSnapshot: Boolean(understandingSnapshot),
       hasUnderstandingReviewPassed: understandingReview?.status === "passed",
       ...(latestDecision ? { contractDecisionId: latestDecision.decisionId } : {}),
@@ -6867,11 +6869,11 @@ export function createApp() {
       const refreshedActiveQuestion = refreshedQuestions.find((candidate) => candidate.status === "active");
       const refreshedSession = await readCreativeSession(root, project.slug);
       const journey = buildCreativeJourneyProjection(refreshedSession, {
-        ...(refreshedActiveQuestion ? { activeQuestion: { questionId: refreshedActiveQuestion.questionId, text: refreshedActiveQuestion.text, source: "deterministic-gap" as const } } : {}),
+        ...(refreshedActiveQuestion ? { activeQuestion: { questionId: refreshedActiveQuestion.questionId, text: refreshedActiveQuestion.text, impact: refreshedActiveQuestion.impact, source: "deterministic-gap" as const } } : {}),
         answeredQuestionIds: refreshedDecisions.filter((record) => record.status === "recorded").map((record) => record.questionId)
       });
       await persistCreativeJourneyProjection(root, journey);
-      res.status(advanced.answer.replayed ? 200 : 201).json({ execution: { status: "completed", actionId: decision.actionId, idempotencyKey: validation.idempotencyKey, created: !advanced.answer.replayed }, question: advanced.answer.question, ...(advanced.nextQuestion ? { nextQuestion: advanced.nextQuestion } : {}), ...(advanced.contractCandidate ? { contractCandidate: advanced.contractCandidate } : {}), completed: advanced.completed, journey, decision: advanced.answer.decision });
+      res.status(advanced.answer.replayed ? 200 : 201).json({ execution: { status: "completed", actionId: decision.actionId, idempotencyKey: validation.idempotencyKey, created: !advanced.answer.replayed }, question: advanced.answer.question, ...(advanced.nextQuestion ? { nextQuestion: advanced.nextQuestion } : {}), ...(advanced.contractCandidate ? { contractCandidate: advanced.contractCandidate } : {}), ...(advanced.consumption ? { consumption: advanced.consumption } : {}), completed: advanced.completed, journey, decision: advanced.answer.decision });
       return;
     }
     res.status(202).json({ execution: { status: "accepted", actionId: decision.actionId, idempotencyKey: validation.idempotencyKey, command: decision.allowedCommands[0] } });
@@ -7114,7 +7116,7 @@ export function createApp() {
           recommendation: firstQuestion.recommendation,
           snapshotFingerprint: manifest.sourceFingerprint
         });
-    const journeyProjection = buildCreativeJourneyProjection(session, { activeQuestion: { questionId: question.question.questionId, text: question.question.text, source: "deterministic-gap" } });
+    const journeyProjection = buildCreativeJourneyProjection(session, { activeQuestion: { questionId: question.question.questionId, text: question.question.text, impact: question.question.impact, source: "deterministic-gap" } });
     await persistCreativeJourneyProjection(root, journeyProjection);
     await persistCreativeTimelineProjection(root, buildCreativeTimelineProjection(session));
     res.status(201).json({ run: advanced, understanding: result, question: question.question, questionCreated: question.created, preflight });

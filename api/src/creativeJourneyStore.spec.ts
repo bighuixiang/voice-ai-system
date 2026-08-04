@@ -31,4 +31,12 @@ describe("creative journey projection persistence", () => {
     await fs.writeFile(target, `${JSON.stringify(tampered)}\n`, "utf8");
     await expect(readCreativeJourneyProjection(root, "demo")).rejects.toThrow("CREATIVE_JOURNEY_PROJECTION_INTEGRITY_FAILED");
   });
+
+  it("persists completed blueprint-review projections", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "creative-journey-store-"));
+    const completed = ["question-primary-desire", "question-core-conflict", "question-failure-cost", "question-inner-need", "question-misbelief", "question-world-rule", "question-opposing-pressure", "question-irreversible-choice", "question-reader-promise", "question-ending-direction"];
+    const projection = buildCreativeJourneyProjection({ ...session(), messages: [{ id: "message-1", clientMessageId: "client-1", role: "author", text: "A keeper must choose.", source: { kind: "author" }, createdAt: "2026-07-30T00:01:00.000Z" }] }, { answeredQuestionIds: completed });
+    await persistCreativeJourneyProjection(root, projection);
+    await expect(readCreativeJourneyProjection(root, "demo")).resolves.toMatchObject({ stage: "blueprint-review", progress: { completed: 10, total: 10, current: 10 } });
+  });
 });

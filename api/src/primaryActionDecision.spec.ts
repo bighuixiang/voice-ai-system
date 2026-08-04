@@ -55,6 +55,13 @@ describe("primary action decision", () => {
     expect(decision).toMatchObject({ actionId: "review-contract-candidate-contract-candidate-decision-q1-1", kind: "reviewable", status: "ready" });
   });
 
+  it("arbitrates completed blueprint review and outline-ready stages", () => {
+    const review = resolvePrimaryActionDecision({ journeyVersion: "journey-blueprint", sourceFingerprint: "source-blueprint", stage: "blueprint-review", contractCandidateId: "candidate-blueprint" });
+    expect(review).toMatchObject({ actionId: "review-contract-candidate-candidate-blueprint", kind: "reviewable" });
+    const outline = resolvePrimaryActionDecision({ journeyVersion: "journey-outline", sourceFingerprint: "source-outline", stage: "ready-for-outline", outlineSourceCandidateId: "candidate-blueprint" });
+    expect(outline).toMatchObject({ actionId: "generate-outline-candidate-candidate-blueprint", kind: "continue" });
+  });
+
   it("requires explicit authorization after an adoption proposal exists", () => {
     const decision = resolvePrimaryActionDecision({ journeyVersion: "journey-6", sourceFingerprint: "source-6", stage: "understanding", hasUnderstandingReviewPassed: true, contractCandidateId: "candidate-1", contractAdoptionProposalId: "proposal-1" });
     expect(decision).toMatchObject({ actionId: "commit-contract-adoption-proposal-1", kind: "l2-decision", risk: "high" });

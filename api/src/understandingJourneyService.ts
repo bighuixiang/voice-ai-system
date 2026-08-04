@@ -1,4 +1,5 @@
 import { compileContractCandidate } from "./contractCandidate.js";
+import { createDecisionConsumptionReceipt, persistDecisionConsumptionReceipt, readDecisionConsumptionReceipt } from "./decisionConsumption.js";
 import { answerDialogueQuestion, createDialogueQuestion, readDecisionRecords, type DialogueAnswerStatus } from "./dialogueQuestions.js";
 import { nextUnansweredQuestion } from "./understandingQuestionSequence.js";
 
@@ -44,5 +45,18 @@ export async function advanceUnderstandingAfterConfirmedAnswer(input: AdvanceUnd
   }
 
   const contractCandidate = await compileContractCandidate(input.root, answer.decision.decisionId);
-  return { answer, contractCandidate, completed: true as const };
+  const receiptId = `decision-consumption-${contractCandidate.candidate.candidateId}`;
+  const existingConsumption = await readDecisionConsumptionReceipt(input.root, receiptId);
+  const consumption = existingConsumption
+    ? { created: false, receipt: existingConsumption }
+    : await persistDecisionConsumptionReceipt(input.root, createDecisionConsumptionReceipt({
+        receiptId,
+        projectSlug: input.projectSlug,
+        decisionId: answer.decision.decisionId,
+        decisionVersion: answer.decision.questionVersion,
+        consumer: "story-contract",
+        consumerRef: contractCandidate.candidate.candidateId,
+        sourceFingerprint: contractCandidate.candidate.sourceFingerprint
+      }));
+  return { answer, contractCandidate, consumption, completed: true as const };
 }

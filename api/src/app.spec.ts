@@ -2263,13 +2263,14 @@ describe.sequential("novel API routes", () => {
         ["question-reader-promise", "A costly revelation earned through trust."],
         ["question-ending-direction", "The city is acknowledged at the cost of the lens."]
       ];
+      let finalAutoAdvance: { completed: boolean; contractCandidate?: { candidate: { candidateId: string; sourceDecisionId: string } }; consumption?: { created: boolean; receipt: { receiptId: string; consumer: string; decisionId: string; consumerRef: string } } } | undefined;
       for (const [expectedQuestionId, answerText] of remainingContractAnswers) {
         const nextQuestion = await jsonFetch<{ question: { questionId: string; questionVersion: number; snapshotFingerprint: string } }>(
           `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
         );
         expect(nextQuestion.status).toBe(200);
         expect(nextQuestion.data.question.questionId).toBe(expectedQuestionId);
-        const nextAnswer = await jsonFetch<{ decision: { decisionId: string } }>(
+        const nextAnswer = await jsonFetch<{ decision: { decisionId: string }; completed: boolean; contractCandidate?: { candidate: { candidateId: string; sourceDecisionId: string } }; consumption?: { created: boolean; receipt: { receiptId: string; consumer: string; decisionId: string; consumerRef: string } } }>(
           `/api/novel/projects/${slug}/session/understanding/questions/${expectedQuestionId}/answers`,
           {
             method: "POST",
@@ -2284,7 +2285,13 @@ describe.sequential("novel API routes", () => {
           }
         );
         expect(nextAnswer.status).toBe(201);
+        if (expectedQuestionId === "question-ending-direction") finalAutoAdvance = nextAnswer.data;
       }
+      expect(finalAutoAdvance).toMatchObject({ completed: true, contractCandidate: { candidate: { sourceDecisionId: expect.any(String) } }, consumption: { created: true, receipt: { consumer: "story-contract" } } });
+      expect(finalAutoAdvance!.consumption!.receipt).toMatchObject({ decisionId: finalAutoAdvance!.contractCandidate!.candidate.sourceDecisionId, consumerRef: finalAutoAdvance!.contractCandidate!.candidate.candidateId });
+      const persistedAutoConsumption = await jsonFetch<{ receipt: { receiptId: string; consumer: string; decisionId: string; consumerRef: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/decision-consumption-receipts/${finalAutoAdvance!.consumption!.receipt.receiptId}`);
+      expect(persistedAutoConsumption.status).toBe(200);
+      expect(persistedAutoConsumption.data.receipt).toMatchObject(finalAutoAdvance!.consumption!.receipt);
       const exhaustedQuestions = await jsonFetch<{ error: { code: string } }>(
         `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
       );

@@ -53,12 +53,28 @@ describe("creative journey projection", () => {
     const input = session([{
       id: "message-2", clientMessageId: "client-2", role: "author", text: "A keeper hears a bell beneath the tide.", source: { kind: "author" }, createdAt: "2026-07-30T00:01:00.000Z"
     }]);
-    const active = buildCreativeJourneyProjection(input, { activeQuestion: { questionId: "question-core-conflict", text: "What threatens the keeper?", source: "deterministic-gap" } });
+    const active = buildCreativeJourneyProjection(input, { activeQuestion: { questionId: "question-core-conflict", text: "What threatens the keeper?", impact: "high", source: "deterministic-gap" } });
     expect(active.activeQuestion).toMatchObject({ id: "question-core-conflict", status: "active", text: "What threatens the keeper?" });
     const answered = buildCreativeJourneyProjection(input, { answeredQuestionIds: ["question-primary-desire"] });
     expect(answered.activeQuestion).toBeUndefined();
     expect(answered.progress).toEqual({ completed: 1, total: 10, current: 2 });
     expect(answered.nextInstruction).toBe("请继续确认下一个关键问题。");
     expect(answered.fingerprint).not.toBe(active.fingerprint);
+  });
+
+  it("preserves the medium impact of the ninth authoritative question", () => {
+    const projection = buildCreativeJourneyProjection(session([{
+      id: "message-3", clientMessageId: "client-3", role: "author", text: "A city waits below the sea.", source: { kind: "author" }, createdAt: "2026-07-30T00:01:00.000Z"
+    }]), { activeQuestion: { questionId: "question-reader-promise", text: "开头向读者承诺怎样的体验或答案？", impact: "medium", source: "deterministic-gap" } });
+
+    expect(projection.activeQuestion).toMatchObject({ id: "question-reader-promise", impact: "medium", status: "active" });
+  });
+
+  it("moves the completed sequence into a persisted review or outline-ready stage", () => {
+    const input = session([{ id: "message-4", clientMessageId: "client-4", role: "author", text: "A keeper must choose.", source: { kind: "author" }, createdAt: "2026-07-30T00:01:00.000Z" }]);
+    const questionIds = ["question-primary-desire", "question-core-conflict", "question-failure-cost", "question-inner-need", "question-misbelief", "question-world-rule", "question-opposing-pressure", "question-irreversible-choice", "question-reader-promise", "question-ending-direction"];
+
+    expect(buildCreativeJourneyProjection(input, { answeredQuestionIds: questionIds })).toMatchObject({ stage: "blueprint-review", primaryAction: { id: "review-understanding", kind: "review" }, progress: { completed: 10, total: 10, current: 10 } });
+    expect(buildCreativeJourneyProjection(input, { answeredQuestionIds: questionIds, readyForOutline: true })).toMatchObject({ stage: "ready-for-outline", primaryAction: { id: "generate-outline", kind: "continue" } });
   });
 });

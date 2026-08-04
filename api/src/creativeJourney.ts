@@ -7,16 +7,16 @@ interface JourneyQuestion {
   id: string;
   text: string;
   status: "candidate" | "active";
-  impact: "high";
+  impact: "low" | "medium" | "high";
   source: "deterministic-gap" | "model-gap";
 }
 
 export type CreativeJourneyStage = "capture" | "understanding" | "blueprint-review" | "ready-for-outline";
 
 export interface CreativeJourneyAction {
-  id: "capture-idea" | "review-understanding" | `answer-${string}`;
+  id: "capture-idea" | "review-understanding" | "generate-outline" | `answer-${string}`;
   label: string;
-  kind: "capture" | "review" | "answer";
+  kind: "capture" | "review" | "answer" | "continue";
   status: "available";
 }
 
@@ -41,7 +41,7 @@ export interface CreativeJourneyProjection {
 }
 
 export interface CreativeJourneyDialogueState {
-  activeQuestion?: { questionId: string; text: string; source: "deterministic-gap" | "model-gap" };
+  activeQuestion?: { questionId: string; text: string; impact?: "low" | "medium" | "high"; source: "deterministic-gap" | "model-gap" };
   answeredQuestionIds?: string[];
   readyForOutline?: boolean;
 }
@@ -84,11 +84,14 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
   const completed = answeredQuestionIds.size;
   const progress = { completed, total: UNDERSTANDING_QUESTION_SEQUENCE.length, current: Math.min(completed + 1, UNDERSTANDING_QUESTION_SEQUENCE.length) };
   if (completed === UNDERSTANDING_QUESTION_SEQUENCE.length) {
+    const stage: CreativeJourneyStage = dialogueState.readyForOutline ? "ready-for-outline" : "blueprint-review";
     const result: Omit<CreativeJourneyProjection, "fingerprint"> = {
       ...base,
-      stage: "understanding",
+      stage,
       primaryAsset: "understanding-preview",
-      primaryAction: { id: "review-understanding", label: dialogueState.readyForOutline ? "生成故事大纲" : "审阅故事设定候选", kind: "review", status: "available" },
+      primaryAction: dialogueState.readyForOutline
+        ? { id: "generate-outline", label: "生成故事大纲", kind: "continue", status: "available" }
+        : { id: "review-understanding", label: "审阅故事设定候选", kind: "review", status: "available" },
       progress,
       nextInstruction: dialogueState.readyForOutline ? "故事设定已确认，可以开始生成大纲。" : "十个关键问题已确认，请审阅故事设定候选。",
       sessionFingerprint: preview.inputFingerprint
@@ -96,7 +99,7 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
     return { ...result, fingerprint: createHash("sha256").update(JSON.stringify(result)).digest("hex") };
   }
   const activeQuestion = dialogueState.activeQuestion
-    ? { id: dialogueState.activeQuestion.questionId, text: dialogueState.activeQuestion.text, status: "active" as const, impact: "high" as const, source: dialogueState.activeQuestion.source }
+    ? { id: dialogueState.activeQuestion.questionId, text: dialogueState.activeQuestion.text, status: "active" as const, impact: dialogueState.activeQuestion.impact ?? "high", source: dialogueState.activeQuestion.source }
     : answeredQuestionIds.has("question-primary-desire")
       ? undefined
       : { id: "question-primary-desire", text: "在开头阶段，主角最想得到什么？", status: "candidate" as const, impact: "high" as const, source: "deterministic-gap" as const };

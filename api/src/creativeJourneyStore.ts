@@ -24,10 +24,10 @@ export function assertCreativeJourneyProjectionIntegrity(projection: CreativeJou
     && Boolean(projection.projectSlug?.trim() && projection.sessionFingerprint?.trim() && projection.sourceFingerprint?.trim() && projection.projectionVersion?.trim())
     && Array.isArray(projection.sourceMessageIds) && projection.sourceMessageIds.every((id) => typeof id === "string" && id.trim())
     && Array.isArray(projection.pendingRefs) && projection.pendingRefs.every((ref) => typeof ref === "string" && ref.trim())
-    && ["capture", "understanding"].includes(projection.stage)
+    && ["capture", "understanding", "blueprint-review", "ready-for-outline"].includes(projection.stage)
     && ["creative-session", "understanding-preview"].includes(projection.primaryAsset)
-    && (projection.primaryAction?.id === "capture-idea" || projection.primaryAction?.id === "review-understanding" || projection.primaryAction?.id.startsWith("answer-"))
-    && ["capture", "review", "answer"].includes(projection.primaryAction?.kind)
+    && (projection.primaryAction?.id === "capture-idea" || projection.primaryAction?.id === "review-understanding" || projection.primaryAction?.id === "generate-outline" || projection.primaryAction?.id.startsWith("answer-"))
+    && ["capture", "review", "answer", "continue"].includes(projection.primaryAction?.kind)
     && ["current", "rebuilding", "conflicted"].includes(projection.freshness)
     && typeof projection.unsavedState?.hasDraft === "boolean"
     && /^[a-f0-9]{64}$/i.test(projection.fingerprint)

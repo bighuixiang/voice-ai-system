@@ -42,7 +42,7 @@ export function createPrimaryActionDecision(input: { journeyVersion: string; sou
 export function resolvePrimaryActionDecision(input: {
   journeyVersion: string;
   sourceFingerprint: string;
-  stage: "capture" | "understanding";
+  stage: "capture" | "understanding" | "blueprint-review" | "ready-for-outline";
   activeQuestionId?: string;
   reviewableActionId?: string;
   hasUnderstandingSnapshot?: boolean;
@@ -71,13 +71,13 @@ export function resolvePrimaryActionDecision(input: {
   } else if (input.contractAdoptionCommitted && input.outlineCandidateId?.trim()) {
     candidates.push({ actionId: `review-outline-candidate-${input.outlineCandidateId}`, kind: "reviewable", label: "审阅大纲候选", rationale: "契约已写入正典，大纲候选已生成，先审阅结构与因果链再继续。", preconditions: [], targetOutcome: "outline-candidate-reviewed", allowedCommands: ["review-outline-candidate", "propose-outline-adoption"], risk: "medium", lifecycle: "ready" });
     hasPrimaryCandidate = true;
-  } else if (input.contractAdoptionCommitted && input.outlineSourceCandidateId?.trim()) {
+  } else if ((input.contractAdoptionCommitted || input.stage === "ready-for-outline") && input.outlineSourceCandidateId?.trim()) {
     candidates.push({ actionId: `generate-outline-candidate-${input.outlineSourceCandidateId}`, kind: "continue", label: "生成大纲候选", rationale: "契约已写入正典，下一步生成可审阅的大纲候选，不直接写入正典。", preconditions: [], targetOutcome: "outline-candidate-created", allowedCommands: ["compile-outline-candidate", "review-outline-candidate"], risk: "medium", lifecycle: "ready" });
     hasPrimaryCandidate = true;
   } else if (input.hasUnderstandingReviewPassed && input.contractAdoptionProposalId?.trim() && !input.contractAdoptionCommitted) {
     candidates.push({ actionId: `commit-contract-adoption-${input.contractAdoptionProposalId}`, kind: "l2-decision", label: "授权采纳契约", rationale: "采纳提案已准备，必须由明确授权决定是否写入正典。", preconditions: [], targetOutcome: "story-contract-adopted", allowedCommands: ["authorize-contract-adoption", "reject-contract-adoption"], risk: "high", lifecycle: "ready" });
     hasPrimaryCandidate = true;
-  } else if (input.hasUnderstandingReviewPassed && input.contractCandidateId?.trim()) {
+  } else if ((input.hasUnderstandingReviewPassed || input.stage === "blueprint-review") && input.contractCandidateId?.trim()) {
     candidates.push({ actionId: `review-contract-candidate-${input.contractCandidateId}`, kind: "reviewable", label: "审阅契约候选", rationale: "候选已生成，先比较字段、假设和未决项，再决定是否提出采纳。", preconditions: [], targetOutcome: "contract-candidate-reviewed", allowedCommands: ["review-contract-candidate", "propose-contract-adoption", "reject-contract-candidate"], risk: "medium", lifecycle: "ready" });
     hasPrimaryCandidate = true;
   } else if (input.hasUnderstandingReviewPassed && input.contractDecisionId?.trim()) {
