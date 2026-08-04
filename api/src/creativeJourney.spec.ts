@@ -22,6 +22,8 @@ describe("creative journey projection", () => {
     expect(projection.primaryAction).toMatchObject({ id: "capture-idea", kind: "capture", status: "available" });
     expect(projection.activeQuestion).toBeUndefined();
     expect(projection.primaryAsset).toBe("creative-session");
+    expect(projection.progress).toEqual({ completed: 0, total: 10, current: 1 });
+    expect(projection.nextInstruction).toBe("请先用自己的话描述想创作的故事。");
     expect(projection).toMatchObject({ freshness: "current", projectionVersion: expect.any(String), sourceFingerprint: expect.any(String) });
   });
 
@@ -42,6 +44,8 @@ describe("creative journey projection", () => {
     expect(projection.activeQuestion).toMatchObject({ id: "question-primary-desire", status: "candidate" });
     expect(projection.sourceMessageIds).toEqual(["message-1"]);
     expect(projection.unsavedState).toMatchObject({ hasDraft: false });
+    expect(projection.progress).toEqual({ completed: 0, total: 10, current: 1 });
+    expect(projection.nextInstruction).toBe("请确认原始输入并生成第一个关键问题。");
     expect(assessJourneyFreshness(projection, { sourceFingerprint: "different", projectionVersion: projection.projectionVersion })).toMatchObject({ freshness: "conflicted", primaryAction: "reconcile" });
   });
 
@@ -53,6 +57,8 @@ describe("creative journey projection", () => {
     expect(active.activeQuestion).toMatchObject({ id: "question-core-conflict", status: "active", text: "What threatens the keeper?" });
     const answered = buildCreativeJourneyProjection(input, { answeredQuestionIds: ["question-primary-desire"] });
     expect(answered.activeQuestion).toBeUndefined();
+    expect(answered.progress).toEqual({ completed: 1, total: 10, current: 2 });
+    expect(answered.nextInstruction).toBe("请继续确认下一个关键问题。");
     expect(answered.fingerprint).not.toBe(active.fingerprint);
   });
 });

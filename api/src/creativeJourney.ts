@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { CreativeSession } from "./creativeSession.js";
 import { buildUnderstandingPreview } from "./understandingPreview.js";
+import { UNDERSTANDING_QUESTION_SEQUENCE } from "./understandingQuestionSequence.js";
 
 interface JourneyQuestion {
   id: string;
@@ -10,7 +11,7 @@ interface JourneyQuestion {
   source: "deterministic-gap" | "model-gap";
 }
 
-export type CreativeJourneyStage = "capture" | "understanding";
+export type CreativeJourneyStage = "capture" | "understanding" | "blueprint-review" | "ready-for-outline";
 
 export interface CreativeJourneyAction {
   id: "capture-idea" | "review-understanding" | `answer-${string}`;
@@ -27,6 +28,8 @@ export interface CreativeJourneyProjection {
   blockingRef?: string;
   primaryAction: CreativeJourneyAction;
   activeQuestion?: JourneyQuestion;
+  progress: { completed: number; total: number; current: number };
+  nextInstruction: string;
   sourceMessageIds: string[];
   sessionFingerprint: string;
   sourceFingerprint: string;
@@ -40,6 +43,7 @@ export interface CreativeJourneyProjection {
 export interface CreativeJourneyDialogueState {
   activeQuestion?: { questionId: string; text: string; source: "deterministic-gap" | "model-gap" };
   answeredQuestionIds?: string[];
+  readyForOutline?: boolean;
 }
 
 function fingerprintSession(session: CreativeSession): string {
@@ -68,13 +72,29 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
       ...base,
       stage: "capture",
       primaryAsset: "creative-session",
-      primaryAction: { id: "capture-idea", label: "告诉我你的想法", kind: "capture", status: "available" }
+      primaryAction: { id: "capture-idea", label: "告诉我你的想法", kind: "capture", status: "available" },
+      progress: { completed: 0, total: UNDERSTANDING_QUESTION_SEQUENCE.length, current: 1 },
+      nextInstruction: "请先用自己的话描述想创作的故事。"
     };
     return { ...result, fingerprint: createHash("sha256").update(JSON.stringify(result)).digest("hex") };
   }
 
   const preview = buildUnderstandingPreview(session);
-  const answeredQuestionIds = new Set(dialogueState.answeredQuestionIds || []);
+  const answeredQuestionIds = new Set((dialogueState.answeredQuestionIds || []).filter((questionId) => UNDERSTANDING_QUESTION_SEQUENCE.some((question) => question.questionId === questionId)));
+  const completed = answeredQuestionIds.size;
+  const progress = { completed, total: UNDERSTANDING_QUESTION_SEQUENCE.length, current: Math.min(completed + 1, UNDERSTANDING_QUESTION_SEQUENCE.length) };
+  if (completed === UNDERSTANDING_QUESTION_SEQUENCE.length) {
+    const result: Omit<CreativeJourneyProjection, "fingerprint"> = {
+      ...base,
+      stage: "understanding",
+      primaryAsset: "understanding-preview",
+      primaryAction: { id: "review-understanding", label: dialogueState.readyForOutline ? "生成故事大纲" : "审阅故事设定候选", kind: "review", status: "available" },
+      progress,
+      nextInstruction: dialogueState.readyForOutline ? "故事设定已确认，可以开始生成大纲。" : "十个关键问题已确认，请审阅故事设定候选。",
+      sessionFingerprint: preview.inputFingerprint
+    };
+    return { ...result, fingerprint: createHash("sha256").update(JSON.stringify(result)).digest("hex") };
+  }
   const activeQuestion = dialogueState.activeQuestion
     ? { id: dialogueState.activeQuestion.questionId, text: dialogueState.activeQuestion.text, status: "active" as const, impact: "high" as const, source: dialogueState.activeQuestion.source }
     : answeredQuestionIds.has("question-primary-desire")
@@ -88,6 +108,8 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
     primaryAction: dialogueState.activeQuestion
       ? { id: `answer-${dialogueState.activeQuestion.questionId}`, label: "回答当前问题", kind: "answer", status: "available" }
       : { id: "review-understanding", label: "确认原始输入并生成问题", kind: "review", status: "available" },
+    progress,
+    nextInstruction: dialogueState.activeQuestion ? "请回答当前这个关键问题。" : completed === 0 ? "请确认原始输入并生成第一个关键问题。" : "请继续确认下一个关键问题。",
     ...(activeQuestion ? { activeQuestion } : {}),
     sessionFingerprint: preview.inputFingerprint
   };

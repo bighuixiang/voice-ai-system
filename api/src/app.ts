@@ -118,7 +118,9 @@ import { evaluateUnderstandingPreflight } from "./understandingPreflight.js";
 import { readUnderstandingBudget, reserveUnderstandingBudget } from "./understandingBudget.js";
 import { authorizeUnderstandingCapability, readUnderstandingCapabilityAuthorization } from "./understandingAuthorization.js";
 import { buildUnderstandingRiskProfile } from "./understandingRiskProfile.js";
-import { answerDialogueQuestion, createDialogueQuestion, readDecisionRecords, readDialogueQuestions } from "./dialogueQuestions.js";
+import { createDialogueQuestion, readDecisionRecords, readDialogueQuestions } from "./dialogueQuestions.js";
+import { UNDERSTANDING_QUESTION_SEQUENCE, nextUnansweredQuestion } from "./understandingQuestionSequence.js";
+import { advanceUnderstandingAfterConfirmedAnswer } from "./understandingJourneyService.js";
 import { createDialogueRedBlueCase, persistDialogueRedBlueCase, readDialogueRedBlueCase } from "./dialogueRedBlue.js";
 import { readDecisionImpactReport } from "./decisionImpact.js";
 import { projectDecisionRecords } from "./decisionProjection.js";
@@ -518,108 +520,6 @@ import {
   readWritingFileDiff
 } from "./fileVersions.js";
 
-const UNDERSTANDING_QUESTION_SEQUENCE = [
-  {
-    questionId: "question-primary-desire",
-    text: "在开头阶段，主角最想得到什么？",
-    impact: "high" as const,
-    whyNow: "这个回答决定主角第一个核心设定。",
-    errorCost: "高",
-    reversibility: "低",
-    delayCost: "中",
-    recommendation: "请作者回答，或明确委托系统代为决定。"
-  },
-  {
-    questionId: "question-core-conflict",
-    text: "什么对立压力最直接地阻碍主角实现这个愿望？",
-    impact: "high" as const,
-    whyNow: "没有对立压力，故事设定就无法约束可执行的大纲。",
-    errorCost: "高",
-    reversibility: "中",
-    delayCost: "中",
-    recommendation: "请明确能够迫使主角作出重要选择的压力。"
-  },
-  {
-    questionId: "question-failure-cost",
-    text: "如果主角失败，要付出什么具体代价？",
-    impact: "high" as const,
-    whyNow: "失败代价让大纲的风险可检验，而不只是装饰。",
-    errorCost: "高",
-    reversibility: "中",
-    delayCost: "低",
-    recommendation: "优先说明会改变主角可选道路的后果。"
-  },
-  {
-    questionId: "question-inner-need",
-    text: "在表面愿望之下，主角需要学会或接受什么？",
-    impact: "high" as const,
-    whyNow: "内在需求能区分真正的戏剧成长与单纯的外部目标。",
-    errorCost: "高",
-    reversibility: "中",
-    delayCost: "中",
-    recommendation: "说明促成改变的压力，不必预先规定每一场戏。"
-  },
-  {
-    questionId: "question-misbelief",
-    text: "主角目前被哪一种错误信念保护或限制？",
-    impact: "high" as const,
-    whyNow: "错误信念必须有来源和受压路径，后续改变才有依据。",
-    errorCost: "高",
-    reversibility: "中",
-    delayCost: "中",
-    recommendation: "请用角色此刻会坚持的方式说出这个信念。"
-  },
-  {
-    questionId: "question-world-rule",
-    text: "哪一条世界规则最能约束开头的故事承诺？",
-    impact: "high" as const,
-    whyNow: "核心规则会为后续选择提供条件、机制、代价和边界。",
-    errorCost: "高",
-    reversibility: "低",
-    delayCost: "中",
-    recommendation: "优先明确一条可观察的规则，而不是笼统的设定总览。"
-  },
-  {
-    questionId: "question-opposing-pressure",
-    text: "什么持续施加的压力让核心冲突无法立刻解决？",
-    impact: "high" as const,
-    whyNow: "在第一个核心设定确定后，对立压力仍必须能够持续推动剧情。",
-    errorCost: "高",
-    reversibility: "中",
-    delayCost: "中",
-    recommendation: "请明确一种能迫使选择并造成代价的压力。"
-  },
-  {
-    questionId: "question-irreversible-choice",
-    text: "哪一种选择一旦作出，就无法在不改变故事设定的前提下撤销？",
-    impact: "high" as const,
-    whyNow: "不可逆的选择能避免故事设定沦为一组偏好清单。",
-    errorCost: "高",
-    reversibility: "低",
-    delayCost: "低",
-    recommendation: "请说明该选择，以及它会消耗的资源、关系或信念。"
-  },
-  {
-    questionId: "question-reader-promise",
-    text: "开头向读者承诺怎样的体验或答案？",
-    impact: "medium" as const,
-    whyNow: "读者承诺能让后续结构始终连接到预期体验。",
-    errorCost: "中",
-    reversibility: "高",
-    delayCost: "中",
-    recommendation: "请用读者体验描述承诺，而不是营销标签。"
-  },
-  {
-    questionId: "question-ending-direction",
-    text: "在不预先锁死每个结局情节的前提下，故事必须保留怎样的结局方向？",
-    impact: "high" as const,
-    whyNow: "有边界的方向既支持规划，也为作者保留低风险细节上的选择。",
-    errorCost: "高",
-    reversibility: "低",
-    delayCost: "中",
-    recommendation: "请说明结局方向和不可避免的代价，而不是写完整梗概。"
-  }
-] as const;
 import type {
   AiScenarioConfig,
   BackgroundJobType,
@@ -2246,7 +2146,7 @@ export function createApp() {
     const collaboration = kind ? undefined : parseCollaborationMessage(typeof req.body?.text === "string" ? req.body.text : "", journeyActiveQuestion ? { activeQuestionId: journeyActiveQuestion.questionId } : {});
     let primaryAction: ReturnType<typeof resolvePrimaryActionDecision> | undefined;
     if (collaboration?.events.some((event) => ["continue", "answer", "delegate-decision"].includes(event.type))) {
-      primaryAction = resolvePrimaryActionDecision({ journeyVersion: journeyProjection.projectionVersion, sourceFingerprint: journeyProjection.sourceFingerprint, stage: journeyProjection.stage, ...(journeyActiveQuestion ? { activeQuestionId: journeyActiveQuestion.questionId } : {}) });
+      primaryAction = resolvePrimaryActionDecision({ journeyVersion: journeyProjection.projectionVersion, sourceFingerprint: journeyProjection.sourceFingerprint, stage: journeyProjection.stage === "capture" ? "capture" : "understanding", ...(journeyActiveQuestion ? { activeQuestionId: journeyActiveQuestion.questionId } : {}) });
     }
     res.status(result.created ? 201 : 200).json({ ...result, ...(collaboration ? { collaboration } : {}), ...(primaryAction ? { primaryAction } : {}) });
   }));
@@ -2454,7 +2354,7 @@ export function createApp() {
     }
     const existingQuestions = await readDialogueQuestions(root);
     const decisions = await readDecisionRecords(root);
-    const next = UNDERSTANDING_QUESTION_SEQUENCE.find((candidate) => !decisions.some((decision) => decision.questionId === candidate.questionId));
+    const next = nextUnansweredQuestion(decisions);
     if (!next) {
       res.status(409).json({ error: { code: "UNDERSTANDING_QUESTIONS_EXHAUSTED" } });
       return;
@@ -2487,20 +2387,37 @@ export function createApp() {
     const root = projectRoot(project.slug);
     const currentQuestion = (await readDialogueQuestions(root)).find((candidate) => candidate.questionId === req.params.questionId);
     const automaticRedBlueCaseId = currentQuestion?.options.length && currentQuestion.options.length >= 2 ? `red-blue-${currentQuestion.questionId}-${currentQuestion.questionVersion}` : undefined;
-    const result = await answerDialogueQuestion(root, {
-      questionId: req.params.questionId,
-      questionVersion: Number(req.body?.questionVersion),
-      expectedSnapshotFingerprint: typeof req.body?.expectedSnapshotFingerprint === "string" ? req.body.expectedSnapshotFingerprint : "",
-      idempotencyKey: typeof req.body?.idempotencyKey === "string" ? req.body.idempotencyKey : "",
-      answerText: typeof req.body?.answerText === "string" ? req.body.answerText : "",
-      answerStatus: req.body?.answerStatus === "tentative" || req.body?.answerStatus === "delegated" ? req.body.answerStatus : "confirmed",
-      ...(typeof req.body?.redBlueCaseId === "string" ? { redBlueCaseId: req.body.redBlueCaseId } : automaticRedBlueCaseId ? { redBlueCaseId: automaticRedBlueCaseId } : {})
+    const advanced = await advanceUnderstandingAfterConfirmedAnswer({
+      root,
+      projectSlug: project.slug,
+      answer: {
+        questionId: req.params.questionId,
+        questionVersion: Number(req.body?.questionVersion),
+        expectedSnapshotFingerprint: typeof req.body?.expectedSnapshotFingerprint === "string" ? req.body.expectedSnapshotFingerprint : "",
+        idempotencyKey: typeof req.body?.idempotencyKey === "string" ? req.body.idempotencyKey : "",
+        answerText: typeof req.body?.answerText === "string" ? req.body.answerText : "",
+        answerStatus: req.body?.answerStatus === "tentative" || req.body?.answerStatus === "delegated" ? req.body.answerStatus : "confirmed",
+        ...(typeof req.body?.redBlueCaseId === "string" ? { redBlueCaseId: req.body.redBlueCaseId } : automaticRedBlueCaseId ? { redBlueCaseId: automaticRedBlueCaseId } : {})
+      }
     });
-    if (!result.accepted) {
-      res.status(409).json({ error: result.conflict, conflict: result.conflict });
+    if (!advanced.answer.accepted) {
+      res.status(409).json({ error: advanced.answer.conflict, conflict: advanced.answer.conflict });
       return;
     }
-    res.status(result.replayed ? 200 : 201).json(result);
+    const [questions, decisions, session] = await Promise.all([readDialogueQuestions(root), readDecisionRecords(root), readCreativeSession(root, project.slug)]);
+    const activeQuestion = questions.find((question) => question.status === "active");
+    const journey = buildCreativeJourneyProjection(session, {
+      ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, source: "deterministic-gap" as const } } : {}),
+      answeredQuestionIds: decisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId)
+    });
+    await persistCreativeJourneyProjection(root, journey);
+    res.status(advanced.answer.replayed ? 200 : 201).json({
+      ...advanced.answer,
+      ...(advanced.nextQuestion ? { nextQuestion: advanced.nextQuestion } : {}),
+      ...(advanced.contractCandidate ? { contractCandidate: advanced.contractCandidate } : {}),
+      completed: advanced.completed,
+      journey
+    });
   }));
 
   app.post("/api/novel/projects/:projectId/session/understanding/contract-candidates", asyncRoute(async (req, res) => {
@@ -6679,7 +6596,7 @@ export function createApp() {
     const decision = resolvePrimaryActionDecision({
       journeyVersion: journey.projectionVersion,
       sourceFingerprint: journey.sourceFingerprint,
-      stage: journey.stage,
+      stage: journey.stage === "capture" ? "capture" : "understanding",
       hasUnderstandingSnapshot: Boolean(understandingSnapshot),
       hasUnderstandingReviewPassed: understandingReview?.status === "passed",
       ...(latestDecision ? { contractDecisionId: latestDecision.decisionId } : {}),
@@ -6928,50 +6845,33 @@ export function createApp() {
       }
       const currentQuestion = (await readDialogueQuestions(root)).find((candidate) => candidate.questionId === decision.actionId.slice("answer-".length));
       const automaticRedBlueCaseId = currentQuestion?.options.length && currentQuestion.options.length >= 2 ? `red-blue-${currentQuestion.questionId}-${currentQuestion.questionVersion}` : undefined;
-      const answer = await answerDialogueQuestion(root, {
-        questionId,
-        questionVersion: Number(req.body?.questionVersion),
-        expectedSnapshotFingerprint: typeof req.body?.expectedSnapshotFingerprint === "string" ? req.body.expectedSnapshotFingerprint : "",
-        idempotencyKey: typeof req.body?.idempotencyKey === "string" ? req.body.idempotencyKey : validation.idempotencyKey || "",
-        answerText: typeof req.body?.answerText === "string" ? req.body.answerText : "",
-        answerStatus: req.body?.answerStatus === "tentative" || req.body?.answerStatus === "delegated" ? req.body.answerStatus : "confirmed",
-        ...(typeof req.body?.redBlueCaseId === "string" ? { redBlueCaseId: req.body.redBlueCaseId } : automaticRedBlueCaseId ? { redBlueCaseId: automaticRedBlueCaseId } : {})
-      });
-      if (!answer.accepted) {
-        res.status(409).json({ error: { code: "PRIMARY_ACTION_ANSWER_REJECTED", conflict: answer.conflict }, conflict: answer.conflict });
-        return;
-      }
-      let nextQuestion: Awaited<ReturnType<typeof createDialogueQuestion>> | undefined;
-      if (answer.decision?.status === "recorded") {
-        const decisions = await readDecisionRecords(root);
-        const next = UNDERSTANDING_QUESTION_SEQUENCE.find((candidate) => !decisions.some((record) => record.questionId === candidate.questionId));
-        if (next) {
-          nextQuestion = await createDialogueQuestion(root, {
-            projectSlug: project.slug,
-            questionId: next.questionId,
-            questionVersion: 1,
-            text: next.text,
-            whyNow: next.whyNow,
-            impact: next.impact,
-            ambiguity: 0.8,
-            errorCost: next.errorCost,
-            reversibility: next.reversibility,
-            delayCost: next.delayCost,
-            options: [],
-            recommendation: next.recommendation,
-            snapshotFingerprint: answer.question.snapshotFingerprint
-          });
+      const advanced = await advanceUnderstandingAfterConfirmedAnswer({
+        root,
+        projectSlug: project.slug,
+        answer: {
+          questionId,
+          questionVersion: Number(req.body?.questionVersion),
+          expectedSnapshotFingerprint: typeof req.body?.expectedSnapshotFingerprint === "string" ? req.body.expectedSnapshotFingerprint : "",
+          idempotencyKey: typeof req.body?.idempotencyKey === "string" ? req.body.idempotencyKey : validation.idempotencyKey || "",
+          answerText: typeof req.body?.answerText === "string" ? req.body.answerText : "",
+          answerStatus: req.body?.answerStatus === "tentative" || req.body?.answerStatus === "delegated" ? req.body.answerStatus : "confirmed",
+          ...(typeof req.body?.redBlueCaseId === "string" ? { redBlueCaseId: req.body.redBlueCaseId } : automaticRedBlueCaseId ? { redBlueCaseId: automaticRedBlueCaseId } : {})
         }
+      });
+      if (!advanced.answer.accepted) {
+        res.status(409).json({ error: { code: "PRIMARY_ACTION_ANSWER_REJECTED", conflict: advanced.answer.conflict }, conflict: advanced.answer.conflict });
+        return;
       }
       const refreshedQuestions = await readDialogueQuestions(root);
       const refreshedDecisions = await readDecisionRecords(root);
       const refreshedActiveQuestion = refreshedQuestions.find((candidate) => candidate.status === "active");
       const refreshedSession = await readCreativeSession(root, project.slug);
-      await persistCreativeJourneyProjection(root, buildCreativeJourneyProjection(refreshedSession, {
+      const journey = buildCreativeJourneyProjection(refreshedSession, {
         ...(refreshedActiveQuestion ? { activeQuestion: { questionId: refreshedActiveQuestion.questionId, text: refreshedActiveQuestion.text, source: "deterministic-gap" as const } } : {}),
         answeredQuestionIds: refreshedDecisions.filter((record) => record.status === "recorded").map((record) => record.questionId)
-      }));
-      res.status(answer.replayed ? 200 : 201).json({ execution: { status: "completed", actionId: decision.actionId, idempotencyKey: validation.idempotencyKey, created: !answer.replayed }, question: answer.question, ...(nextQuestion ? { nextQuestion } : {}), decision: answer.decision });
+      });
+      await persistCreativeJourneyProjection(root, journey);
+      res.status(advanced.answer.replayed ? 200 : 201).json({ execution: { status: "completed", actionId: decision.actionId, idempotencyKey: validation.idempotencyKey, created: !advanced.answer.replayed }, question: advanced.answer.question, ...(advanced.nextQuestion ? { nextQuestion: advanced.nextQuestion } : {}), ...(advanced.contractCandidate ? { contractCandidate: advanced.contractCandidate } : {}), completed: advanced.completed, journey, decision: advanced.answer.decision });
       return;
     }
     res.status(202).json({ execution: { status: "accepted", actionId: decision.actionId, idempotencyKey: validation.idempotencyKey, command: decision.allowedCommands[0] } });

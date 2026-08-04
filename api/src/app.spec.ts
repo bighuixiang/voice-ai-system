@@ -2194,7 +2194,7 @@ describe.sequential("novel API routes", () => {
       expect(redBlue.data).toMatchObject({ created: false, redBlueCase: { status: "open", options: expect.any(Array) } });
       expect(redBlueReplay.status).toBe(200);
       expect(redBlueReplay.data.redBlueCase).toMatchObject({ caseId: redBlue.data.redBlueCase.caseId, fingerprint: expect.any(String) });
-      const answered = await jsonFetch<{ decision: { decisionId: string; sourceFingerprint: string; redBlueCaseId?: string } }>(
+      const answered = await jsonFetch<{ decision: { decisionId: string; sourceFingerprint: string; redBlueCaseId?: string }; nextQuestion?: { question: { questionId: string; status: string } }; journey: { progress: { completed: number; total: number; current: number } } }>(
         `/api/novel/projects/${slug}/session/understanding/questions/${question.data.question.questionId}/answers`,
         {
           method: "POST",
@@ -2211,20 +2211,21 @@ describe.sequential("novel API routes", () => {
       expect(answered.status).toBe(201);
       expect(answered.data.decision).toMatchObject({ sourceFingerprint: manifest.data.manifest.sourceFingerprint });
       expect(answered.data.decision.redBlueCaseId).toBe(`red-blue-${question.data.question.questionId}-${question.data.question.questionVersion}`);
-
-      const conflictQuestion = await jsonFetch<{ created: boolean; question: { questionId: string; questionVersion: number; snapshotFingerprint: string } }>(
-        `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
+      expect(answered.data.nextQuestion).toMatchObject({ question: { questionId: "question-core-conflict", status: "active" } });
+      expect(answered.data.journey.progress).toEqual({ completed: 1, total: 10, current: 2 });
+      const questionsAfterAnswer = await jsonFetch<{ questions: Array<{ questionId: string; status: string }> }>(
+        `/api/novel/projects/${slug}/session/understanding/questions`
       );
-      expect(conflictQuestion.status).toBe(201);
-      expect(conflictQuestion.data).toMatchObject({ created: true, question: { questionId: "question-core-conflict" } });
+      expect(questionsAfterAnswer.data.questions.filter((item) => item.status === "active")).toEqual([expect.objectContaining({ questionId: "question-core-conflict", status: "active" })]);
+      const conflictQuestion = { question: { questionId: "question-core-conflict", questionVersion: 1, snapshotFingerprint: question.data.question.snapshotFingerprint } };
       const conflictAnswer = await jsonFetch<{ decision: { decisionId: string; sourceFingerprint: string } }>(
-        `/api/novel/projects/${slug}/session/understanding/questions/${conflictQuestion.data.question.questionId}/answers`,
+        `/api/novel/projects/${slug}/session/understanding/questions/${conflictQuestion.question.questionId}/answers`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            questionVersion: conflictQuestion.data.question.questionVersion,
-            expectedSnapshotFingerprint: conflictQuestion.data.question.snapshotFingerprint,
+            questionVersion: conflictQuestion.question.questionVersion,
+            expectedSnapshotFingerprint: conflictQuestion.question.snapshotFingerprint,
             idempotencyKey: "vertical-slice-conflict-answer",
             answerText: "The drowned city will erase the keeper's memories if he exposes it.",
             answerStatus: "confirmed"
@@ -2236,8 +2237,8 @@ describe.sequential("novel API routes", () => {
       const failureCostQuestion = await jsonFetch<{ created: boolean; question: { questionId: string; questionVersion: number; snapshotFingerprint: string } }>(
         `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
       );
-      expect(failureCostQuestion.status).toBe(201);
-      expect(failureCostQuestion.data).toMatchObject({ created: true, question: { questionId: "question-failure-cost" } });
+      expect(failureCostQuestion.status).toBe(200);
+      expect(failureCostQuestion.data).toMatchObject({ created: false, question: { questionId: "question-failure-cost" } });
       const failureCostAnswer = await jsonFetch<{ decision: { decisionId: string } }>(
         `/api/novel/projects/${slug}/session/understanding/questions/${failureCostQuestion.data.question.questionId}/answers`,
         {
@@ -2266,7 +2267,7 @@ describe.sequential("novel API routes", () => {
         const nextQuestion = await jsonFetch<{ question: { questionId: string; questionVersion: number; snapshotFingerprint: string } }>(
           `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
         );
-        expect(nextQuestion.status).toBe(201);
+        expect(nextQuestion.status).toBe(200);
         expect(nextQuestion.data.question.questionId).toBe(expectedQuestionId);
         const nextAnswer = await jsonFetch<{ decision: { decisionId: string } }>(
           `/api/novel/projects/${slug}/session/understanding/questions/${expectedQuestionId}/answers`,
@@ -2538,7 +2539,7 @@ describe.sequential("novel API routes", () => {
     });
   });
 
-  it("removes an answered blocking question from the persisted journey projection", async () => {
+  it("replaces an answered blocking question with the next authoritative question", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Journey Question Convergence", roughIdea: "The journey must converge after an answer." })
     });
@@ -2570,7 +2571,7 @@ describe.sequential("novel API routes", () => {
     });
     expect(answered.status).toBe(201);
     const after = await jsonFetch<{ journey: { activeQuestion?: { id: string; status: string } } }>(`/api/novel/projects/${slug}/session/journey`);
-    expect(after.data.journey.activeQuestion).toBeUndefined();
+    expect(after.data.journey.activeQuestion).toMatchObject({ id: "question-core-conflict", status: "active" });
   });
 
   it("does not erase the answer primary action when a system message refreshes the journey", async () => {
@@ -3173,7 +3174,8 @@ describe.sequential("novel API routes", () => {
         `/api/novel/projects/${slug}/session/understanding/questions`,
         { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionId: "question-core-conflict" }) }
       );
-      expect(conflictQuestion.status).toBe(201);
+      expect(conflictQuestion.status).toBe(200);
+      expect(conflictQuestion.data.question).toMatchObject({ questionId: "question-core-conflict", status: "active" });
       const conflictAnswer = await jsonFetch<{ question: { status: string } }>(
         `/api/novel/projects/${slug}/session/understanding/questions/${conflictQuestion.data.question.questionId}/answers`,
         { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionVersion: conflictQuestion.data.question.questionVersion, expectedSnapshotFingerprint: authorized.data.authorization.manifestFingerprint, idempotencyKey: "answer-route-conflict-001", answerText: "A powerful institution will erase the evidence.", answerStatus: "confirmed" }) }
@@ -3181,14 +3183,26 @@ describe.sequential("novel API routes", () => {
       expect(conflictAnswer.status).toBe(201);
       expect(conflictAnswer.data.question.status).toBe("answered");
 
+      for (let index = 0; index < 8; index += 1) {
+        const active = await jsonFetch<{ questions: Array<{ questionId: string; questionVersion: number; snapshotFingerprint: string; status: string }> }>(`/api/novel/projects/${slug}/session/understanding/questions`);
+        const activeQuestion = active.data.questions.find((question) => question.status === "active");
+        expect(activeQuestion).toBeDefined();
+        const remainingAnswer = await jsonFetch<{ question: { status: string } }>(
+          `/api/novel/projects/${slug}/session/understanding/questions/${activeQuestion!.questionId}/answers`,
+          { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionVersion: activeQuestion!.questionVersion, expectedSnapshotFingerprint: activeQuestion!.snapshotFingerprint, idempotencyKey: `answer-route-remaining-${index}`, answerText: `第${index + 3}个关键答案。`, answerStatus: "confirmed" }) }
+        );
+        expect(remainingAnswer.status).toBe(201);
+      }
+
       const candidateAction = await jsonFetch<{ decision: { actionId: string; journeyVersion: string; sourceFingerprint: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
-      const candidateDecisionId = (await jsonFetch<{ decisions: Array<{ decisionId: string; questionId: string }> }>(`/api/novel/projects/${slug}/session/understanding/decisions`)).data.decisions.find((decision) => decision.questionId === "question-core-conflict")!.decisionId;
-      expect(candidateAction.data.decision.actionId).toBe(`generate-contract-candidate-${candidateDecisionId}`);
-      const candidateExecution = await jsonFetch<{ execution: { status: string; created: boolean }; candidate: { candidateId: string; status: string; canonWritten: boolean }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
+      const finalCandidate = (await jsonFetch<{ candidates: Array<{ candidateId: string; status: string; canonWritten: boolean }> }>(`/api/novel/projects/${slug}/session/understanding/contract-candidates`)).data.candidates[0];
+      const candidateDecisionId = (await jsonFetch<{ decisions: Array<{ decisionId: string; questionId: string }> }>(`/api/novel/projects/${slug}/session/understanding/decisions`)).data.decisions.find((decision) => decision.questionId === "question-ending-direction")!.decisionId;
+      expect(candidateAction.data.decision.actionId).toBe(`review-contract-candidate-${finalCandidate.candidateId}`);
+      const candidateExecution = await jsonFetch<{ execution: { status: string; created: boolean }; candidate: { candidateId: string; status: string; canonWritten: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ decision: candidateAction.data.decision })
       });
-      expect(candidateExecution.status).toBe(201);
-      expect(candidateExecution.data).toMatchObject({ execution: { status: "completed", created: true }, candidate: { status: "candidate", canonWritten: false }, consumption: { created: true, receipt: { consumer: "story-contract", decisionId: candidateDecisionId, consumerRef: candidateExecution.data.candidate.candidateId } } });
+      expect(candidateExecution.status).toBe(200);
+      expect(candidateExecution.data).toMatchObject({ execution: { status: "completed", created: false }, candidate: { candidateId: finalCandidate.candidateId, status: "candidate", canonWritten: false } });
       const candidateReviewAction = await jsonFetch<{ decision: { actionId: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
       expect(candidateReviewAction.data.decision.actionId).toBe(`review-contract-candidate-${candidateExecution.data.candidate.candidateId}`);
       const candidateReview = await jsonFetch<{ execution: { status: string }; candidate: { candidateId: string; canonWritten: boolean; fingerprint: string; fields: Array<{ fieldId: string }> } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
