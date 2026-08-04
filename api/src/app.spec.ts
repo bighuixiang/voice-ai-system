@@ -7449,4 +7449,38 @@ describe.sequential("novel API routes", () => {
     expect(incomplete.status).toBe(409);
     expect(incomplete.data.error.code).toBe("SCENE_LEDGER_EVIDENCE_REQUIRED");
   });
+
+  it("generates, versions, confirms, and reads story blueprints through the author API", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Story Blueprint API", roughIdea: "A keeper follows a bell below the tide." }) });
+    const slug = created.data.project.slug;
+    const candidate = {
+      schemaVersion: "story-contract-candidate.v1", candidateId: "contract-candidate-blueprint-api", projectSlug: slug, status: "candidate", sourceDecisionId: "decision-ending", sourceFingerprint: "a".repeat(64),
+      fields: [
+        { sourceDecisionId: "decision-desire", path: "protagonist.primaryDesire", value: "找回自己的名字" },
+        { sourceDecisionId: "decision-conflict", path: "conflict.core", value: "必须用记忆换取通行权" },
+        { sourceDecisionId: "decision-cost", path: "stakes.failureCost", value: "故乡会沉没" },
+        { sourceDecisionId: "decision-rule", path: "world.rules.primary", value: "潮门会夺走记忆" },
+        { sourceDecisionId: "decision-promise", path: "readerPromise", value: "谜团与代价并行" },
+        { sourceDecisionId: "decision-ending", path: "endingDirection", value: "保住故乡，失去名字" }
+      ],
+      contract: { protagonist: { primaryDesire: "找回自己的名字", innerNeed: null, misbelief: null }, conflict: { core: "必须用记忆换取通行权", opposingPressure: null }, stakes: { failureCost: "故乡会沉没", irreversibleChoice: null }, world: { primaryRule: "潮门会夺走记忆" }, readerPromise: "谜团与代价并行", endingDirection: "保住故乡，失去名字" },
+      fingerprint: "b".repeat(64)
+    };
+    const candidateDir = path.join(tempRoot, slug, "sessions", "contract-candidates");
+    await fs.mkdir(candidateDir, { recursive: true });
+    await fs.writeFile(path.join(candidateDir, `${candidate.candidateId}.json`), JSON.stringify(candidate), "utf8");
+
+    const generated = await jsonFetch<{ blueprint: { blueprintId: string; fingerprint: string; content: { storyPremise: string } } }>(`/api/novel/projects/${slug}/session/story-blueprints/generate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceContractCandidateId: candidate.candidateId }) });
+    expect(generated.status).toBe(201);
+    expect(generated.data.blueprint.content.storyPremise).toContain("找回自己的名字");
+    const revised = await jsonFetch<{ blueprint: { blueprintId: string; fingerprint: string } }>(`/api/novel/projects/${slug}/session/story-blueprints/${generated.data.blueprint.blueprintId}/revise`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedFingerprint: generated.data.blueprint.fingerprint, content: { storyPremise: "守门人选择记忆。", openingImage: "钟声从潮线下传来。", protagonistGoal: "找回自己的名字", coreConflict: "必须用记忆换取通行权", failureCost: "故乡会沉没", worldRules: "潮门会夺走记忆", readerPromise: "谜团与代价并行", endingDirection: "保住故乡，失去名字" } }) });
+    expect(revised.status).toBe(201);
+    expect(revised.data.blueprint.blueprintId).not.toBe(generated.data.blueprint.blueprintId);
+    const confirmed = await jsonFetch<{ confirmation: { blueprintId: string; status: string } }>(`/api/novel/projects/${slug}/session/story-blueprints/${revised.data.blueprint.blueprintId}/confirm`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedFingerprint: revised.data.blueprint.fingerprint, actorId: "author-1" }) });
+    expect(confirmed.status).toBe(201);
+    expect(confirmed.data.confirmation).toMatchObject({ blueprintId: revised.data.blueprint.blueprintId, status: "confirmed" });
+    const latest = await jsonFetch<{ blueprint: { blueprintId: string } }>(`/api/novel/projects/${slug}/session/story-blueprints/latest`);
+    expect(latest.status).toBe(200);
+    expect(latest.data.blueprint.blueprintId).toBe(revised.data.blueprint.blueprintId);
+  });
 });
