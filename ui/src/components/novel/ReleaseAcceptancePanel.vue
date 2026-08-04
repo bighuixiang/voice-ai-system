@@ -1,10 +1,10 @@
 <template>
   <section class="release-panel" data-testid="release-acceptance-panel" aria-labelledby="release-acceptance-title">
-    <header><div><p class="eyebrow">RP5 release gate</p><h2 id="release-acceptance-title">发布验收证据</h2><p>这是只读权威决策；任一门禁缺失时不得激活。</p></div><button data-testid="refresh-release-acceptance" type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? "评估中…" : "刷新验收" }}</button></header>
-    <div v-if="decision" class="decision" :class="decision.status"><strong>{{ decision.status }}</strong><span>评估于 {{ decision.evaluatedAt }}</span><code data-testid="release-acceptance-fingerprint">fingerprint: {{ decision.fingerprint }}</code></div>
+    <header><div><p class="eyebrow">发布门禁</p><h2 id="release-acceptance-title">发布验收证据</h2><p>这是只读权威决策；任一门禁缺失时不得激活。</p></div><button data-testid="refresh-release-acceptance" type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? "评估中…" : "刷新验收" }}</button></header>
+    <div v-if="decision" class="decision" :class="decision.status"><strong>{{ decision.status }}</strong><span>评估于 {{ decision.evaluatedAt }}</span><code data-testid="release-acceptance-fingerprint">指纹：{{ decision.fingerprint }}</code></div>
     <div v-else class="empty">尚未读取发布验收决策。</div>
     <div v-if="activation" class="activation" data-testid="release-activation">
-      <strong>active</strong><span>已激活 {{ activation.activatedAt }}</span><code>fingerprint: {{ activation.fingerprint }}</code>
+      <strong>已激活</strong><span>已激活 {{ activation.activatedAt }}</span><code>指纹：{{ activation.fingerprint }}</code>
     </div>
     <div v-else-if="decision?.status === 'accepted'" class="activation-action">
       <button data-testid="activate-release" type="button" :disabled="activating" @click="emit('activate')">{{ activating ? "激活中…" : "激活发布" }}</button>

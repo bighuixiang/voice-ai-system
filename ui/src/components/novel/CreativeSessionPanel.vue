@@ -17,7 +17,7 @@
     <div v-if="journey" class="journey-primary-action" data-testid="journey-primary-action">
       <span class="journey-stage">{{ stageLabel(journey.stage) }}</span>
       <strong>{{ journey.primaryAction.label }}</strong>
-      <span v-if="journey.activeQuestion" class="journey-question">{{ journey.activeQuestion.text }}</span>
+      <span v-if="journey.activeQuestion" class="journey-question">{{ questionText(journey.activeQuestion.id, journey.activeQuestion.text) }}</span>
       <button type="button" class="journey-action-button" @click="emit('primary-action', journey.primaryAction.id)">
         {{ journey.primaryAction.label }}
       </button>
@@ -26,8 +26,8 @@
       </button>
     </div>
     <form v-if="question?.status === 'active'" class="dialogue-question" data-testid="dialogue-answer-form" @submit.prevent="submitAnswer">
-      <strong>{{ question.text }}</strong>
-      <small>{{ question.whyNow }}</small>
+      <strong>{{ questionText(question.questionId, question.text) }}</strong>
+      <small>{{ questionWhyNow(question.questionId, question.whyNow) }}</small>
       <textarea v-model="answerDraft" data-testid="dialogue-answer" rows="2" placeholder="用一句话回答这个问题..." />
       <div v-if="question.redBlueCase" class="red-blue-case" data-testid="red-blue-case">
         <strong>红蓝证据对照</strong>
@@ -103,6 +103,27 @@ withDefaults(
 const emit = defineEmits<{ submit: [text: string]; freeze: []; "primary-action": [id: "capture-idea" | "review-understanding"]; "prepare-question": []; answer: [text: string, status: "confirmed" | "tentative" | "delegated"]; "retry-contract": [] }>();
 const draft = ref("");
 const answerDraft = ref("");
+
+const builtInQuestionCopy: Record<string, { text: string; whyNow: string }> = {
+  "question-primary-desire": { text: "在开头阶段，主角最想得到什么？", whyNow: "这个回答决定主角第一个核心设定。" },
+  "question-core-conflict": { text: "什么对立压力最直接地阻碍主角实现这个愿望？", whyNow: "这个回答决定故事的主要冲突。" },
+  "question-failure-cost": { text: "如果主角失败，要付出什么具体代价？", whyNow: "这个回答明确失败的代价。" },
+  "question-inner-need": { text: "在表面愿望之下，主角需要学会或接受什么？", whyNow: "这个回答决定主角的内在成长方向。" },
+  "question-misbelief": { text: "主角目前被哪一种错误信念保护或限制？", whyNow: "这个回答决定主角为何暂时无法改变。" },
+  "question-world-rule": { text: "哪一条世界规则最能约束开头的故事承诺？", whyNow: "这个回答决定世界观如何影响故事。" },
+  "question-opposing-pressure": { text: "什么持续施加的压力让核心冲突无法立刻解决？", whyNow: "这个回答决定冲突如何持续推进。" },
+  "question-irreversible-choice": { text: "哪一种选择一旦作出，就无法在不改变故事设定的前提下撤销？", whyNow: "这个回答决定故事的关键转折点。" },
+  "question-reader-promise": { text: "开头向读者承诺怎样的体验或答案？", whyNow: "这个回答决定读者继续阅读的期待。" },
+  "question-ending-direction": { text: "在不预先锁死每个结局情节的前提下，故事必须保留怎样的结局方向？", whyNow: "这个回答决定故事的最终指向。" }
+};
+
+function questionText(questionId: string, fallback: string) {
+  return builtInQuestionCopy[questionId]?.text ?? fallback;
+}
+
+function questionWhyNow(questionId: string, fallback: string) {
+  return builtInQuestionCopy[questionId]?.whyNow ?? fallback;
+}
 
 function submitMessage() {
   const text = draft.value.trim();

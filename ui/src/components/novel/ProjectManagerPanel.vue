@@ -45,7 +45,7 @@
     <el-form class="import-form" label-position="top" @submit.prevent="handleImport">
       <el-form-item label="导入本地目录">
         <div class="path-picker">
-          <el-input :model-value="sourcePath" placeholder="D:\\novels\\my-story" @update:model-value="handleSourcePathInput" />
+          <el-input :model-value="sourcePath" placeholder="D:\\novels\\我的小说" @update:model-value="handleSourcePathInput" />
           <div class="path-actions">
             <el-button native-type="button" @click="openDirectoryPicker">
               <el-icon><FolderOpened /></el-icon>

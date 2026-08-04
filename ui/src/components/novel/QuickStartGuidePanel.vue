@@ -2,7 +2,7 @@
   <section class="quick-start-guide" :class="`variant-${variant}`" aria-labelledby="quick-start-title">
     <header class="guide-header">
       <div>
-        <p class="eyebrow">Quick Start</p>
+        <p class="eyebrow">快速开始</p>
         <h2 id="quick-start-title">{{ copy.title }}</h2>
         <p>{{ copy.subtitle }}</p>
       </div>

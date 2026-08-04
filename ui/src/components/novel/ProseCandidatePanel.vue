@@ -2,7 +2,7 @@
   <section class="prose-candidate-panel" data-testid="prose-candidate-panel" aria-labelledby="prose-candidate-title">
     <header class="panel-header">
       <div>
-        <p class="eyebrow">RP5 prose review</p>
+        <p class="eyebrow">正文评审</p>
         <h2 id="prose-candidate-title">正文候选</h2>
         <p>候选正文、不变 canon 和采纳事务分开显示。</p>
       </div>
@@ -12,9 +12,9 @@
     <article v-for="candidate in candidates" :key="candidate.candidateId" class="candidate-card">
       <div class="heading">
         <div><h3>{{ candidate.chapterId }}</h3><p>候选正文，不是 canon · {{ candidate.status }}</p></div>
-        <span>canonWritten: false</span>
+        <span>未写入正式设定</span>
       </div>
-      <p v-if="candidate.policyVersion && candidate.riskTier" data-testid="candidate-policy">policy {{ candidate.policyVersion }} · risk {{ candidate.riskTier }}</p>
+      <p v-if="candidate.policyVersion && candidate.riskTier" data-testid="candidate-policy">策略版本 {{ candidate.policyVersion }} · 风险等级 {{ candidate.riskTier }}</p>
       <p class="content">{{ candidate.content }}</p>
       <div class="actions">
         <button type="button" :aria-label="`验证 ${candidate.candidateId}`" :disabled="busyId === candidate.candidateId" @click="emit('validate', candidate)">验证</button>

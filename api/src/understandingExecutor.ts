@@ -125,7 +125,7 @@ async function persistShadowSnapshot(input: {
     unknowns: preview.unknowns,
     question: {
       id: "question-primary-desire",
-      text: "What must the protagonist want most in the opening movement?",
+      text: "在开头阶段，主角最想得到什么？",
       status: "candidate",
       impact: "high",
       source: "deterministic-gap"

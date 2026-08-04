@@ -92,6 +92,7 @@ describe("CreativeSessionPanel", () => {
 
     expect(wrapper.get('[data-testid="journey-primary-action"]').text()).toContain("确认原始输入并生成问题");
     expect(wrapper.get('.journey-stage').text()).toBe("理解");
+    expect(wrapper.get('.journey-question').text()).toBe("在开头阶段，主角最想得到什么？");
   });
 
   it("emits the primary journey action when the author activates it", async () => {

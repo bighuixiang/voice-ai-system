@@ -2,7 +2,7 @@
   <section class="contract-candidate-panel" data-testid="contract-candidate-panel" aria-labelledby="contract-candidate-title">
     <header class="panel-header">
       <div>
-        <p class="eyebrow">V3 contract review</p>
+        <p class="eyebrow">故事设定评审</p>
         <h2 id="contract-candidate-title">故事契约候选</h2>
         <p>候选可比较、可追溯；在作者采纳前不会写入 canon。</p>
       </div>
@@ -37,7 +37,7 @@
           <strong>暂定假设</strong>
           <ul><li v-for="assumption in candidate.assumptions" :key="assumption">{{ assumption }}</li></ul>
         </div>
-        <p class="candidate-integrity">canonWritten: {{ String(candidate.canonWritten) }} · fingerprint: {{ candidate.fingerprint.slice(0, 12) }}…</p>
+        <p class="candidate-integrity">已写入正式设定：{{ String(candidate.canonWritten) }} · 指纹：{{ candidate.fingerprint.slice(0, 12) }}…</p>
         <button v-if="candidate.status === 'candidate'" type="button" class="outline-button" :aria-label="`生成大纲候选 ${candidate.candidateId}`" @click="emit('compile-outline', { sourceCandidateId: candidate.candidateId })">生成大纲候选</button>
       </article>
     </div>
@@ -60,7 +60,7 @@
     </section>
     <section v-if="proposal" class="proposal-status" aria-label="采纳提案状态">
       <strong>提案状态：{{ proposal.status }}</strong>
-      <span>canonWritten: {{ String(proposal.canonWritten) }}</span>
+      <span>已写入正式设定：{{ String(proposal.canonWritten) }}</span>
       <p v-if="proposal.status === 'ready_for_authorization'">提交前需要作者明确填写授权人和授权编号。</p>
       <div v-if="proposal.status === 'ready_for_authorization'" class="authorization-form">
         <label>授权人<input aria-label="授权人" v-model="actorId" /></label>

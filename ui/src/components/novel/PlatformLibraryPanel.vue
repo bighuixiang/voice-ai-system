@@ -3,7 +3,7 @@
     <header class="panel-header">
       <div>
         <h2 id="platform-library-title">平台资料库</h2>
-        <p>共享素材、提示词、专家角色和 Skills</p>
+        <p>共享素材、提示词、专家角色和技能</p>
       </div>
       <el-button circle :loading="loading" aria-label="刷新平台资料库" @click="$emit('refresh')">
         <el-icon><Refresh /></el-icon>

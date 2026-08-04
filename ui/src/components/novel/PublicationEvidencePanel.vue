@@ -1,6 +1,6 @@
 <template>
   <section class="publication-evidence-panel" data-testid="publication-evidence-panel" aria-labelledby="publication-evidence-title">
-    <header class="panel-header"><div><p class="eyebrow">RP8 delivery evidence</p><h2 id="publication-evidence-title">成稿交付证据</h2><p>版次、出版树、制品、交付证明和发布预检必须来自同一版次。</p></div><button type="button" data-testid="load-publication-evidence" :disabled="loading || !editionId.trim()" @click="emit('load', editionId.trim())">读取版次证据</button></header>
+    <header class="panel-header"><div><p class="eyebrow">交付证据</p><h2 id="publication-evidence-title">成稿交付证据</h2><p>版次、出版树、制品、交付证明和发布预检必须来自同一版次。</p></div><button type="button" data-testid="load-publication-evidence" :disabled="loading || !editionId.trim()" @click="emit('load', editionId.trim())">读取版次证据</button></header>
     <label>版次 ID<input data-testid="publication-edition-id" v-model="editionId" placeholder="输入 editionId" /></label>
     <p v-if="error" class="error" role="alert">{{ error }}</p>
     <div v-if="!manifest" class="create-form">
@@ -12,11 +12,11 @@
       <button type="button" data-testid="create-publication-edition" :disabled="loading || !canonCommitFingerprint.trim() || !title.trim() || !author.trim() || !language.trim()" @click="emit('create', { canonCommitFingerprint: canonCommitFingerprint.trim(), title: title.trim(), author: author.trim(), language: language.trim(), chapters: [] })">创建版次</button>
     </div>
     <div v-if="manifest || tree || artifacts || proof || preflight" class="evidence-grid">
-      <span>manifest: {{ manifest?.editionId || "缺失" }}</span>
-      <span>tree: {{ tree?.fingerprint || "缺失" }}</span>
-      <span>artifacts: {{ artifacts?.fingerprint || "缺失" }}</span>
-      <span>delivery proof: {{ proof?.valid ? "valid" : "missing/invalid" }}</span>
-      <span>preflight: {{ preflight?.status || "缺失" }}</span>
+      <span>清单：{{ manifest?.editionId || "缺失" }}</span>
+      <span>出版树：{{ tree?.fingerprint || "缺失" }}</span>
+      <span>制品：{{ artifacts?.fingerprint || "缺失" }}</span>
+      <span>交付证明：{{ proof?.valid ? "有效" : "缺失或无效" }}</span>
+      <span>发布预检：{{ preflight?.status || "缺失" }}</span>
       <button v-if="manifest && !tree" type="button" data-testid="compile-publication-tree" :disabled="loading" @click="emit('compile-tree')">编译出版树</button>
       <button v-if="tree && !artifacts" type="button" data-testid="render-publication-artifacts" :disabled="loading" @click="emit('render-artifacts')">渲染制品</button>
       <div v-if="preflight?.status === 'ready' && artifacts?.fingerprint && !deliveryProof && proof?.valid !== true" class="approval-form">

@@ -521,103 +521,103 @@ import {
 const UNDERSTANDING_QUESTION_SEQUENCE = [
   {
     questionId: "question-primary-desire",
-    text: "What must the protagonist want most in the opening movement?",
+    text: "在开头阶段，主角最想得到什么？",
     impact: "high" as const,
-    whyNow: "This answer anchors the protagonist's first contract field.",
-    errorCost: "high",
-    reversibility: "low",
-    delayCost: "medium",
-    recommendation: "Ask the author or delegate this single decision."
+    whyNow: "这个回答决定主角第一个核心设定。",
+    errorCost: "高",
+    reversibility: "低",
+    delayCost: "中",
+    recommendation: "请作者回答，或明确委托系统代为决定。"
   },
   {
     questionId: "question-core-conflict",
-    text: "What opposing pressure most directly prevents that desire?",
+    text: "什么对立压力最直接地阻碍主角实现这个愿望？",
     impact: "high" as const,
-    whyNow: "A contract without an opposing pressure cannot constrain an executable outline.",
-    errorCost: "high",
-    reversibility: "medium",
-    delayCost: "medium",
-    recommendation: "Name the pressure that can force a meaningful choice."
+    whyNow: "没有对立压力，故事设定就无法约束可执行的大纲。",
+    errorCost: "高",
+    reversibility: "中",
+    delayCost: "中",
+    recommendation: "请明确能够迫使主角作出重要选择的压力。"
   },
   {
     questionId: "question-failure-cost",
-    text: "What is the concrete cost if the protagonist fails?",
+    text: "如果主角失败，要付出什么具体代价？",
     impact: "high" as const,
-    whyNow: "Failure cost makes outline stakes testable rather than decorative.",
-    errorCost: "high",
-    reversibility: "medium",
-    delayCost: "low",
-    recommendation: "Prefer a consequence that changes the protagonist's available choices."
+    whyNow: "失败代价让大纲的风险可检验，而不只是装饰。",
+    errorCost: "高",
+    reversibility: "中",
+    delayCost: "低",
+    recommendation: "优先说明会改变主角可选道路的后果。"
   },
   {
     questionId: "question-inner-need",
-    text: "What does the protagonist need to learn or accept beneath the visible desire?",
+    text: "在表面愿望之下，主角需要学会或接受什么？",
     impact: "high" as const,
-    whyNow: "The inner need distinguishes a dramatic change from a purely external objective.",
-    errorCost: "high",
-    reversibility: "medium",
-    delayCost: "medium",
-    recommendation: "Name the change pressure without prescribing every scene."
+    whyNow: "内在需求能区分真正的戏剧成长与单纯的外部目标。",
+    errorCost: "高",
+    reversibility: "中",
+    delayCost: "中",
+    recommendation: "说明促成改变的压力，不必预先规定每一场戏。"
   },
   {
     questionId: "question-misbelief",
-    text: "What mistaken belief currently protects or limits the protagonist?",
+    text: "主角目前被哪一种错误信念保护或限制？",
     impact: "high" as const,
-    whyNow: "A misbelief needs a source and a pressure path before later change can be evidenced.",
-    errorCost: "high",
-    reversibility: "medium",
-    delayCost: "medium",
-    recommendation: "State the belief as the character would defend it now."
+    whyNow: "错误信念必须有来源和受压路径，后续改变才有依据。",
+    errorCost: "高",
+    reversibility: "中",
+    delayCost: "中",
+    recommendation: "请用角色此刻会坚持的方式说出这个信念。"
   },
   {
     questionId: "question-world-rule",
-    text: "Which world rule most constrains the opening promise?",
+    text: "哪一条世界规则最能约束开头的故事承诺？",
     impact: "high" as const,
-    whyNow: "The primary rule gives later choices a condition, mechanism, cost, and limit.",
-    errorCost: "high",
-    reversibility: "low",
-    delayCost: "medium",
-    recommendation: "Prefer one observable rule over a broad encyclopedia summary."
+    whyNow: "核心规则会为后续选择提供条件、机制、代价和边界。",
+    errorCost: "高",
+    reversibility: "低",
+    delayCost: "中",
+    recommendation: "优先明确一条可观察的规则，而不是笼统的设定总览。"
   },
   {
     questionId: "question-opposing-pressure",
-    text: "What active pressure keeps the core conflict from resolving immediately?",
+    text: "什么持续施加的压力让核心冲突无法立刻解决？",
     impact: "high" as const,
-    whyNow: "The opposing pressure must remain actionable after the first contract field is adopted.",
-    errorCost: "high",
-    reversibility: "medium",
-    delayCost: "medium",
-    recommendation: "Identify a pressure that can force a choice and impose a cost."
+    whyNow: "在第一个核心设定确定后，对立压力仍必须能够持续推动剧情。",
+    errorCost: "高",
+    reversibility: "中",
+    delayCost: "中",
+    recommendation: "请明确一种能迫使选择并造成代价的压力。"
   },
   {
     questionId: "question-irreversible-choice",
-    text: "Which choice cannot be undone without changing the story contract?",
+    text: "哪一种选择一旦作出，就无法在不改变故事设定的前提下撤销？",
     impact: "high" as const,
-    whyNow: "An irreversible choice prevents the contract from collapsing into a list of preferences.",
-    errorCost: "high",
-    reversibility: "low",
-    delayCost: "low",
-    recommendation: "Name the choice and the resource, relationship, or belief it spends."
+    whyNow: "不可逆的选择能避免故事设定沦为一组偏好清单。",
+    errorCost: "高",
+    reversibility: "低",
+    delayCost: "低",
+    recommendation: "请说明该选择，以及它会消耗的资源、关系或信念。"
   },
   {
     questionId: "question-reader-promise",
-    text: "What experience or answer does the opening promise the reader?",
+    text: "开头向读者承诺怎样的体验或答案？",
     impact: "medium" as const,
-    whyNow: "The reader promise keeps later structure connected to the intended experience.",
-    errorCost: "medium",
-    reversibility: "high",
-    delayCost: "medium",
-    recommendation: "Describe the promise as an experience, not a marketing label."
+    whyNow: "读者承诺能让后续结构始终连接到预期体验。",
+    errorCost: "中",
+    reversibility: "高",
+    delayCost: "中",
+    recommendation: "请用读者体验描述承诺，而不是营销标签。"
   },
   {
     questionId: "question-ending-direction",
-    text: "What ending direction must remain possible without fixing every ending beat?",
+    text: "在不预先锁死每个结局情节的前提下，故事必须保留怎样的结局方向？",
     impact: "high" as const,
-    whyNow: "A bounded direction supports planning while preserving author choice at lower-risk detail.",
-    errorCost: "high",
-    reversibility: "low",
-    delayCost: "medium",
-    recommendation: "State the direction and its unavoidable cost, not a finished synopsis."
+    whyNow: "有边界的方向既支持规划，也为作者保留低风险细节上的选择。",
+    errorCost: "高",
+    reversibility: "低",
+    delayCost: "中",
+    recommendation: "请说明结局方向和不可避免的代价，而不是写完整梗概。"
   }
 ] as const;
 import type {
@@ -2331,10 +2331,10 @@ export function createApp() {
     if ((req.body?.mode === "model" || req.body?.mode === undefined) && preflight.modelCallAllowed && contextManifest && budgetReservation && capabilityAuthorization) {
       const profile = resolveAgentProfile({ profileId: capabilityAuthorization.profileId, modelId: capabilityAuthorization.modelId });
       const prompt = [
-        "Interpret the author's creative session without writing canon.",
-        "Return JSON only with coreExplicit, inferred, unknowns, question, and interpretationSet when two materially different explanations remain.",
-        "Every claim must include id, text, epistemic status, and evidence spans referencing the supplied message IDs.",
-        "If interpretationSet is present it must contain at least two candidate interpretations, their differences, support/counter evidence, downstream impacts, and activeQuestionId equal to question-primary-desire.",
+        "请理解作者的创作输入，但不得写入正式设定。",
+        "只返回 JSON；当存在两种实质不同的解释时，需包含 coreExplicit、inferred、unknowns、question 和 interpretationSet 字段。",
+        "每条主张必须包含 id、text、认识状态，以及指向所给消息 ID 的证据位置。",
+        "如包含 interpretationSet，至少给出两种候选解释、它们的差异、支持/反证、后续影响，并将 activeQuestionId 设为 question-primary-desire。",
         JSON.stringify({ sourceMessageIds: session.messages.map((message) => message.id), messages: session.messages })
       ].join("\n");
       const task = await startModelUnderstandingTask(

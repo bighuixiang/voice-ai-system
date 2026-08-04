@@ -2453,13 +2453,14 @@ describe.sequential("novel API routes", () => {
     });
     await jsonFetch(`/api/novel/projects/${slug}/session/context-manifest`, { method: "POST" });
 
-    const response = await jsonFetch<{ snapshot: { mode: string; modelCallIssued: boolean; canonWritten: boolean } }>(
+    const response = await jsonFetch<{ snapshot: { mode: string; modelCallIssued: boolean; canonWritten: boolean; question: { text: string } } }>(
       `/api/novel/projects/${slug}/session/understanding`,
       { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "shadow" }) }
     );
 
     expect(response.status).toBe(201);
     expect(response.data.snapshot).toMatchObject({ mode: "shadow", modelCallIssued: false, canonWritten: false });
+    expect(response.data.snapshot.question.text).toBe("在开头阶段，主角最想得到什么？");
   });
 
   it("exposes a read-only understanding preview with explicit source spans", async () => {

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "story-contract-candidate.v1",
+  "candidateId": "contract-candidate-decision-question-primary-desire-1-answer-1785828488345",
+  "projectSlug": "novel-1780911338197",
+  "status": "candidate",
+  "sourceDecisionId": "decision-question-primary-desire-1-answer-1785828488345",
+  "sourceFingerprint": "ae98ded965a6fb3a6a821cc07346d8682eb985c40bd6cd7e3741f0c9e7b708d0",
+  "recompile": {
+    "mode": "initial",
+    "affectedPaths": [
+      "protagonist.primaryDesire"
+    ],
+    "preservedPaths": [],
+    "preservedFingerprints": {}
+  },
+  "fields": [
+    {
+      "fieldId": "field-decision-question-primary-desire-1-answer-1785828488345-protagonist-primaryDesire",
+      "path": "protagonist.primaryDesire",
+      "value": "想帮助师傅分担压力，封印将臣",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-primary-desire"
+        }
+      ],
+      "sourceDecisionId": "decision-question-primary-desire-1-answer-1785828488345",
+      "lock": "unlocked"
+    }
+  ],
+  "contract": {
+    "protagonist": {
+      "primaryDesire": "想帮助师傅分担压力，封印将臣",
+      "innerNeed": null,
+      "misbelief": null
+    },
+    "conflict": {
+      "core": null,
+      "opposingPressure": null
+    },
+    "stakes": {
+      "failureCost": null,
+      "irreversibleChoice": null
+    },
+    "world": {
+      "primaryRule": null
+    },
+    "readerPromise": null,
+    "endingDirection": null
+  },
+  "assumptions": [],
+  "impactSummary": [],
+  "unknowns": [
+    "core conflict",
+    "failure cost",
+    "ending direction",
+    "near-term consequence",
+    "primary world rule"
+  ],
+  "canonWritten": false,
+  "createdAt": "2026-08-04T07:28:09.037Z",
+  "fingerprint": "4c3a638e187f70e65fb79fbe97cdd90ebe059ebc4b5aaf8f08eea5c65caca535"
+}

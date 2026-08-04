@@ -94,7 +94,7 @@
               </el-select>
             </label>
             <label>
-              <span>Base URL</span>
+              <span>服务地址</span>
               <el-input
                 :model-value="embeddingConfig.baseUrl || ''"
                 :disabled="!isExternalEmbedding"
@@ -112,7 +112,7 @@
               />
             </label>
             <label>
-              <span>API Key</span>
+              <span>接口密钥</span>
               <el-input
                 :model-value="embeddingConfig.apiKey || ''"
                 :disabled="!isExternalEmbedding"

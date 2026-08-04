@@ -1,15 +1,15 @@
 <template>
   <section class="outline-candidate-panel" data-testid="outline-candidate-panel" aria-labelledby="outline-candidate-title">
     <header class="panel-header">
-      <div><p class="eyebrow">V4 outline review</p><h2 id="outline-candidate-title">可执行大纲候选</h2><p>验证只证明候选结构，不能把大纲写入 canon 或宣称可执行。</p></div>
+      <div><p class="eyebrow">大纲评审</p><h2 id="outline-candidate-title">可执行大纲候选</h2><p>验证只证明候选结构，不能把大纲写入正式设定或宣称可执行。</p></div>
       <button type="button" aria-label="刷新大纲候选" :disabled="loading" @click="emit('refresh')">{{ loading ? "刷新中…" : "刷新" }}</button>
     </header>
     <p v-if="error" class="error" role="alert">{{ error }}</p>
     <p v-else-if="!candidates.length" class="empty">暂无大纲候选。</p>
     <div v-else class="candidate-list">
       <article v-for="outline in candidates" :key="outline.outlineId" class="candidate-card" :class="{ stale: outline.status === 'stale' }">
-        <div class="candidate-heading"><div><h3>{{ outline.outlineId }}</h3><p>{{ outline.status === "candidate" ? "候选，不是 canon" : "已过期候选，不是 canon" }}</p></div><button type="button" :aria-label="`验证大纲 ${outline.outlineId}`" :disabled="validatingId === outline.outlineId" @click="emit('validate', outline)">{{ validatingId === outline.outlineId ? "验证中…" : "验证" }}</button></div>
-        <p>近端冻结 {{ outline.horizon.strongFreezeCount }} / {{ outline.horizon.totalChapterCount }} 章 · canonWritten: {{ String(outline.canonWritten) }}</p>
+        <div class="candidate-heading"><div><h3>{{ outline.outlineId }}</h3><p>{{ outline.status === "candidate" ? "候选，尚未成为正式设定" : "已过期候选，尚未成为正式设定" }}</p></div><button type="button" :aria-label="`验证大纲 ${outline.outlineId}`" :disabled="validatingId === outline.outlineId" @click="emit('validate', outline)">{{ validatingId === outline.outlineId ? "验证中…" : "验证" }}</button></div>
+        <p>近端冻结 {{ outline.horizon.strongFreezeCount }} / {{ outline.horizon.totalChapterCount }} 章 · 已写入正式设定：{{ String(outline.canonWritten) }}</p>
         <ul class="chapter-list">
           <li v-for="chapter in outline.chapters" :key="chapter.chapterId"><label><input type="checkbox" :aria-label="`选择 ${chapter.chapterId}`" :checked="selectedChapterIds(outline).includes(chapter.chapterId)" @change="toggleChapter(outline, chapter.chapterId, ($event.target as HTMLInputElement).checked)" />{{ chapter.order }}. {{ chapter.title }} <small>{{ chapter.function }} · {{ chapter.freeze }}</small></label></li>
         </ul>

@@ -1,16 +1,16 @@
 <template>
   <section class="calibration-panel" data-testid="quality-calibration-panel" aria-labelledby="quality-calibration-title">
-    <header><div><p class="eyebrow">RP5 release evidence</p><h2 id="quality-calibration-title">外部校准证据</h2><p>只接收 provider/human 的密封 holdout 证明；平台不生成或展示 holdout 标签。</p></div><button type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? "读取中…" : "刷新" }}</button></header>
+    <header><div><p class="eyebrow">发布校准证据</p><h2 id="quality-calibration-title">外部校准证据</h2><p>只接收人工或服务商提供的密封留出集证明；平台不生成或展示留出集标签。</p></div><button type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? "读取中…" : "刷新" }}</button></header>
     <div v-if="evidence" class="evidence" data-testid="calibration-evidence"><strong>{{ evidence.status === "calibrated" ? "已校准" : "阻断" }} · {{ evidence.sourceKind }}</strong><p>评审器 {{ evidence.evaluatorVersion }} · holdout {{ evidence.inputFingerprint }}</p><p>准确率 {{ evidence.accuracy }} / 门槛 {{ evidence.minimumAccuracy }} · {{ evidence.labelAccess === "sealed-separate-from-evaluator-input" ? "标签与评审输入隔离" : "标签边界异常" }}</p><p>证明 {{ evidence.attestation.reference }}</p></div>
-    <div v-else class="empty">尚无外部校准证据；提交前需取得独立 provider/human 证明。</div>
+    <div v-else class="empty">尚无外部校准证据；提交前需取得独立人工或服务商证明。</div>
     <form class="submission" @submit.prevent="submit">
-      <label>来源<select v-model="sourceKind"><option value="human">human</option><option value="provider">provider</option></select></label>
+      <label>来源<select v-model="sourceKind"><option value="human">人工</option><option value="provider">服务商</option></select></label>
       <label>评审器版本<input data-testid="calibration-evaluator" v-model="evaluatorVersion" required /></label>
-      <label>密封 holdout 指纹<input data-testid="calibration-holdout" v-model="holdoutInputFingerprint" required /></label>
+      <label>密封留出集指纹<input data-testid="calibration-holdout" v-model="holdoutInputFingerprint" required /></label>
       <label>评估数<input data-testid="calibration-evaluated" v-model.number="evaluatedCount" type="number" min="1" required /></label>
       <label>正确数<input data-testid="calibration-correct" v-model.number="correctCount" type="number" min="0" required /></label>
       <label>最低准确率<input v-model.number="minimumAccuracy" type="number" min="0" max="1" step="0.01" required /></label>
-      <label>外部证明引用<input data-testid="calibration-attestation" v-model="attestationReference" placeholder="provider://… 或 human://…" required /></label>
+      <label>外部证明引用<input data-testid="calibration-attestation" v-model="attestationReference" placeholder="服务商://… 或 人工://…" required /></label>
       <label>审计引用<input data-testid="calibration-evidence-ref" v-model="evidenceReference" placeholder="audit://…" required /></label>
       <button data-testid="submit-calibration" type="submit" :disabled="loading || !canSubmit">提交外部证据</button>
     </form>

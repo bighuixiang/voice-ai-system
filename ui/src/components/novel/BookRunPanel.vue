@@ -1,7 +1,7 @@
 <template>
   <section class="book-run-panel" data-testid="book-run-panel" aria-labelledby="book-run-title">
     <header class="panel-header">
-      <div><p class="eyebrow">RP8 book orchestration</p><h2 id="book-run-title">整书工作流</h2><p>工作范围、自治等级和运行状态由服务端持久化；推进不会绕过章节执行门禁。</p></div>
+      <div><p class="eyebrow">整书编排</p><h2 id="book-run-title">整书工作流</h2><p>工作范围、自治等级和运行状态由服务端持久化；推进不会绕过章节执行门禁。</p></div>
       <button type="button" data-testid="start-book-run" :disabled="loading || Boolean(run)" @click="emit('start')">启动工作流</button>
     </header>
     <p v-if="error" class="error" role="alert">{{ error }}</p>

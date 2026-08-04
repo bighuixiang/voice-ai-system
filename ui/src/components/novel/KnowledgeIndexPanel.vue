@@ -40,17 +40,17 @@
       <div v-if="searchResult" class="search-results">
         <div class="result-header">
           <span>“{{ searchResult.query }}”</span>
-          <em>{{ searchResult.facts.length }} facts / {{ searchResult.triples.length }} triples / {{ vectorHitCount }} vectors</em>
+          <em>{{ searchResult.facts.length }} 条事实 / {{ searchResult.triples.length }} 条关系 / {{ vectorHitCount }} 条向量命中</em>
         </div>
-        <div v-if="searchResult.retrievalAudit" class="retrieval-audit" aria-label="retrieval audit">
-          <strong>Retrieval audit</strong>
-          <span>{{ searchResult.retrievalAudit.eligibleFactIds.length }} eligible / {{ searchResult.retrievalAudit.excluded.length }} excluded</span>
-          <span v-if="searchResult.retrievalAudit.boundary.task">task: {{ searchResult.retrievalAudit.boundary.task }}</span>
-          <span>{{ searchResult.retrievalAudit.evidenceProfile?.independentSourceCount ?? searchResult.retrievalAudit.evidenceSourceCount }} independent sources</span>
-          <small v-if="searchResult.retrievalAudit.evidenceProfile?.gaps.length">evidence gaps: {{ searchResult.retrievalAudit.evidenceProfile.gaps.join(", ") }}</small>
-          <small>fingerprint {{ searchResult.retrievalAudit.resultFingerprint.slice(0, 12) }}</small>
-          <small v-if="searchResult.queryEmbeddingFallback">query embedding fallback: {{ searchResult.queryEmbeddingFallback.reason }}</small>
-          <small v-if="retrievalPreviewId">saved preview {{ retrievalPreviewId }}</small>
+        <div v-if="searchResult.retrievalAudit" class="retrieval-audit" aria-label="检索审计">
+          <strong>检索审计</strong>
+          <span>可用 {{ searchResult.retrievalAudit.eligibleFactIds.length }} 条 / 已排除 {{ searchResult.retrievalAudit.excluded.length }} 条</span>
+          <span v-if="searchResult.retrievalAudit.boundary.task">任务：{{ searchResult.retrievalAudit.boundary.task }}</span>
+          <span>独立来源 {{ searchResult.retrievalAudit.evidenceProfile?.independentSourceCount ?? searchResult.retrievalAudit.evidenceSourceCount }} 个</span>
+          <small v-if="searchResult.retrievalAudit.evidenceProfile?.gaps.length">证据缺口：{{ searchResult.retrievalAudit.evidenceProfile.gaps.join(", ") }}</small>
+          <small>指纹 {{ searchResult.retrievalAudit.resultFingerprint.slice(0, 12) }}</small>
+          <small v-if="searchResult.queryEmbeddingFallback">查询向量降级：{{ searchResult.queryEmbeddingFallback.reason }}</small>
+          <small v-if="retrievalPreviewId">已保存预览：{{ retrievalPreviewId }}</small>
         </div>
         <div v-if="searchResult.facts.length" class="result-list">
           <article v-for="fact in searchResult.facts.slice(0, 5)" :key="fact.id">
@@ -69,11 +69,11 @@
         <p v-if="!searchResult.facts.length && !searchResult.triples.length" class="empty-state">没有命中事实或关系。</p>
       </div>
 
-      <div v-if="retrievalPreview && !searchResult" class="retrieval-audit retrieval-preview-recovery" aria-label="saved retrieval preview">
-        <strong>Saved retrieval preview</strong>
-        <span>saved preview {{ retrievalPreview.retrievalId }}</span>
-        <span>{{ retrievalPreview.selectedIds.length }} selected / {{ retrievalPreview.truncatedIds.length }} truncated</span>
-        <small>fingerprint {{ retrievalPreview.resultFingerprint.slice(0, 12) }}</small>
+      <div v-if="retrievalPreview && !searchResult" class="retrieval-audit retrieval-preview-recovery" aria-label="已保存的检索预览">
+        <strong>已保存的检索预览</strong>
+        <span>预览 {{ retrievalPreview.retrievalId }}</span>
+        <span>已选择 {{ retrievalPreview.selectedIds.length }} 条 / 已截断 {{ retrievalPreview.truncatedIds.length }} 条</span>
+        <small>指纹 {{ retrievalPreview.resultFingerprint.slice(0, 12) }}</small>
       </div>
 
       <div class="keyword-strip" v-if="visibleKeywords.length">
@@ -83,7 +83,7 @@
       <div class="chapter-list">
         <div v-for="chapter in visibleChapters" :key="chapter.chapterId" class="chapter-row">
           <span>{{ chapter.title }}</span>
-          <em>{{ chapter.factIds.length }} facts</em>
+          <em>{{ chapter.factIds.length }} 条事实</em>
         </div>
         <p v-if="!visibleChapters.length" class="empty-state">暂无章节索引。</p>
       </div>
@@ -123,17 +123,17 @@ const vectorSummary = computed(() => props.index?.vectorSummary || props.searchR
 const vectorProviderText = computed(() => {
   if (!vectorSummary.value) return "";
   const model = vectorSummary.value.model ? ` / ${vectorSummary.value.model}` : "";
-  return `Vector: ${vectorSummary.value.provider}${model}`;
+  return `向量检索：${vectorSummary.value.provider}${model}`;
 });
 
 const vectorDetailText = computed(() => {
   if (!vectorSummary.value) return "";
-  return `${vectorSummary.value.entryCount} entries / ${vectorSummary.value.dimensions} dims`;
+  return `${vectorSummary.value.entryCount} 条记录 / ${vectorSummary.value.dimensions} 维`;
 });
 
 const vectorFallbackText = computed(() => {
   if (!vectorSummary.value?.fallbackFrom) return "";
-  return `fallback from ${vectorSummary.value.fallbackFrom}: ${vectorSummary.value.fallbackReason || "provider unavailable"}`;
+  return `已从 ${vectorSummary.value.fallbackFrom} 降级：${vectorSummary.value.fallbackReason || "服务不可用"}`;
 });
 
 const vectorHitCount = computed(() => {

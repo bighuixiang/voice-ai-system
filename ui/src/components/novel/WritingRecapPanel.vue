@@ -78,7 +78,7 @@
       </div>
 
       <div v-if="candidate.craftBeatPatches?.length" class="recap-section">
-        <h3>Craft beat patches</h3>
+        <h3>创作节拍补丁</h3>
         <ul>
           <li v-for="beat in candidate.craftBeatPatches" :key="beat.id">
             <strong>{{ beat.label }}</strong>

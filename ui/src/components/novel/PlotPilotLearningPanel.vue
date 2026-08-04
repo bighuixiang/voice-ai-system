@@ -39,8 +39,8 @@
         <span data-testid="craft-release-status">{{ craftReleaseStatus }}</span>
       </div>
       <div class="craft-evidence-flags">
-        <span :class="flagClass(hasHoldout)">Holdout {{ hasHoldout ? "已验证" : "待验证" }}</span>
-        <span :class="flagClass(hasProvider)" >Provider {{ hasProvider ? "有实际用量" : "待补证据" }}</span>
+        <span :class="flagClass(hasHoldout)">留出集 {{ hasHoldout ? "已验证" : "待验证" }}</span>
+        <span :class="flagClass(hasProvider)" >服务商 {{ hasProvider ? "有实际用量" : "待补证据" }}</span>
         <span :class="flagClass(hasReaderCalibration)">读者校准 {{ hasReaderCalibration ? "已校准" : "未校准" }}</span>
       </div>
       <p class="craft-evidence-note">{{ craftEvidenceNote }}</p>

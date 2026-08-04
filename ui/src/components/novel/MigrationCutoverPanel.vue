@@ -1,8 +1,8 @@
 <template>
   <section class="migration-panel" data-testid="migration-cutover-panel" aria-labelledby="migration-cutover-title">
-    <header><div><p class="eyebrow">RP5 migration gate</p><h2 id="migration-cutover-title">migration cutover</h2><p>只读显示项目迁移状态；重新验证不会激活迁移。</p></div><button data-testid="validate-migrations" type="button" :disabled="loading" @click="emit('validate')">{{ loading ? "验证中…" : "重新验证迁移" }}</button></header>
-    <div v-if="report" class="summary"><strong>{{ report.status }}</strong><span>{{ report.projectCount }} 个项目 · {{ report.blockers.length }} 个 blocker</span><code data-testid="migration-cutover-fingerprint">fingerprint: {{ report.fingerprint }}</code></div>
-    <div v-else class="empty">尚未读取迁移 cutover 状态。</div>
+    <header><div><p class="eyebrow">迁移门禁</p><h2 id="migration-cutover-title">迁移切换</h2><p>只读显示项目迁移状态；重新验证不会激活迁移。</p></div><button data-testid="validate-migrations" type="button" :disabled="loading" @click="emit('validate')">{{ loading ? "验证中…" : "重新验证迁移" }}</button></header>
+    <div v-if="report" class="summary"><strong>{{ report.status }}</strong><span>{{ report.projectCount }} 个项目 · {{ report.blockers.length }} 个阻断项</span><code data-testid="migration-cutover-fingerprint">指纹：{{ report.fingerprint }}</code></div>
+    <div v-else class="empty">尚未读取迁移切换状态。</div>
     <ul v-if="report" class="projects"><li v-for="project in report.projects" :key="project.projectSlug" :class="project.status"><div><strong>{{ project.projectSlug }}</strong><span>{{ project.classification }} · {{ project.governanceState }}</span></div><strong>{{ project.status }}</strong><small v-for="blocker in project.blockers" :key="blocker">{{ blocker }}</small></li></ul>
   </section>
 </template>

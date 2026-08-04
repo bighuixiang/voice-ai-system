@@ -207,7 +207,7 @@
       </div>
 
       <div v-if="visibleCraftCoverageSignals.length" class="signal-block">
-        <strong>Craft coverage</strong>
+        <strong>创作技法覆盖率</strong>
         <div class="signal-list">
           <div v-for="signal in visibleCraftCoverageSignals" :key="signal.chapterId" class="signal-row">
             <span>{{ signal.chapterTitle }}</span>

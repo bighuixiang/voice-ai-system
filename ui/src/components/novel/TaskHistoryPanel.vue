@@ -23,7 +23,7 @@
             <span>阶段 {{ stageLabel(item.invocation) }}</span>
             <span>{{ item.invocation.stageKey }}</span>
             <span>上下文 {{ item.invocation.contextSnapshot.blockCount }} 块 / {{ formatCount(item.invocation.contextSnapshot.totalChars) }} 字</span>
-            <span>Prompt {{ formatCount(item.invocation.promptSnapshot.length) }} 字</span>
+            <span>提示词 {{ formatCount(item.invocation.promptSnapshot.length) }} 字</span>
             <span>耗时 {{ formatDuration(item.invocation.attempt.durationMs) }}</span>
             <span>{{ decisionLabel(item.invocation.adoptionDecision) }}</span>
             <span v-if="item.invocation.promptVersion">版本 {{ item.invocation.promptVersion }}</span>

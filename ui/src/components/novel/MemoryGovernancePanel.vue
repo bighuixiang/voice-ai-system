@@ -1,33 +1,33 @@
 <template>
-  <section class="memory-governance-panel" aria-label="memory governance evidence">
+  <section class="memory-governance-panel" aria-label="记忆治理证据">
     <header>
       <div>
-        <strong>Memory governance</strong>
-        <p>健康、连续性和生成前 ready proof 的持久证据</p>
+        <strong>记忆治理</strong>
+        <p>健康、连续性和生成前就绪证明的持久证据</p>
       </div>
       <button type="button" :disabled="loading || !retrievalAvailable" @click="$emit('run')">
         {{ loading ? "运行中" : "运行门禁" }}
       </button>
     </header>
 
-    <p v-if="!retrievalAvailable" class="governance-hint">请先创建检索预览，才能生成 ready proof。</p>
+    <p v-if="!retrievalAvailable" class="governance-hint">请先创建检索预览，才能生成就绪证明。</p>
 
     <div class="governance-evidence">
       <article>
-        <span>Health</span>
+        <span>健康状态</span>
         <strong>{{ health?.status || "未运行" }}</strong>
         <small v-if="health?.reportId">{{ health.reportId }}</small>
-        <small v-if="health?.coverage">chapters {{ health.coverage.settledChapters }}/{{ health.coverage.totalChapters }} · entities {{ health.coverage.entityCount }} · time-bound {{ health.coverage.timeBoundClaims }}</small>
-        <small v-if="health?.coverage">character knowledge {{ health.coverage.characterKnowledgeEntries }} · reader knowledge {{ health.coverage.readerKnowledgeEntries }}</small>
-        <small v-for="risk in health?.risks || []" :key="risk">risk: {{ risk }}</small>
+        <small v-if="health?.coverage">已结算章节 {{ health.coverage.settledChapters }}/{{ health.coverage.totalChapters }} · 实体 {{ health.coverage.entityCount }} · 时效性事实 {{ health.coverage.timeBoundClaims }}</small>
+        <small v-if="health?.coverage">角色知识 {{ health.coverage.characterKnowledgeEntries }} · 读者知识 {{ health.coverage.readerKnowledgeEntries }}</small>
+        <small v-for="risk in health?.risks || []" :key="risk">风险：{{ risk }}</small>
       </article>
       <article>
-        <span>Ready proof</span>
+        <span>就绪证明</span>
         <strong>{{ readyProof?.status || "未运行" }}</strong>
         <small v-for="blocker in readyProof?.blockers || []" :key="blocker">{{ blocker }}</small>
       </article>
       <article>
-        <span>Continuity audit</span>
+        <span>连续性审计</span>
         <strong>{{ continuityAudit?.status || "未运行" }}</strong>
         <small v-for="issue in continuityAudit?.issues || []" :key="issue">{{ issue }}</small>
       </article>

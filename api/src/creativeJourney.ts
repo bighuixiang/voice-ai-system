@@ -79,7 +79,7 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
     ? { id: dialogueState.activeQuestion.questionId, text: dialogueState.activeQuestion.text, status: "active" as const, impact: "high" as const, source: dialogueState.activeQuestion.source }
     : answeredQuestionIds.has("question-primary-desire")
       ? undefined
-      : { id: "question-primary-desire", text: "What must the protagonist want most in the opening movement?", status: "candidate" as const, impact: "high" as const, source: "deterministic-gap" as const };
+      : { id: "question-primary-desire", text: "在开头阶段，主角最想得到什么？", status: "candidate" as const, impact: "high" as const, source: "deterministic-gap" as const };
   const result: Omit<CreativeJourneyProjection, "fingerprint"> = {
     ...base,
     stage: "understanding",

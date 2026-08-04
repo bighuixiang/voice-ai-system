@@ -235,7 +235,7 @@
                 />
               </label>
               <label class="wide-field">
-                <span>Core wound</span>
+                <span>核心创伤</span>
                 <el-input
                   :model-value="selectedCharacter.coreWound || ''"
                   type="textarea"
@@ -244,7 +244,7 @@
                 />
               </label>
               <label class="wide-field">
-                <span>Desire</span>
+                <span>内在欲望</span>
                 <el-input
                   :model-value="selectedCharacter.desire || ''"
                   type="textarea"
@@ -253,7 +253,7 @@
                 />
               </label>
               <label class="wide-field">
-                <span>Misbelief</span>
+                <span>错误信念</span>
                 <el-input
                   :model-value="selectedCharacter.misbelief || ''"
                   type="textarea"
@@ -289,7 +289,7 @@
                 />
               </label>
               <label class="wide-field">
-                <span>Redemption arc</span>
+                <span>救赎弧线</span>
                 <el-input
                   :model-value="selectedCharacter.redemptionArc || ''"
                   type="textarea"
@@ -298,7 +298,7 @@
                 />
               </label>
               <label class="wide-field">
-                <span>Sublimation goal</span>
+                <span>升华目标</span>
                 <el-input
                   :model-value="selectedCharacter.sublimationGoal || ''"
                   type="textarea"
@@ -307,7 +307,7 @@
                 />
               </label>
               <label class="wide-field">
-                <span>Small-person highlight</span>
+                <span>小人物高光</span>
                 <el-input
                   :model-value="selectedCharacter.smallPersonHighlight || ''"
                   type="textarea"
@@ -316,14 +316,14 @@
                 />
               </label>
               <label>
-                <span>Relationship pressure</span>
+                <span>关系压力</span>
                 <el-input
                   :model-value="selectedCharacter.relationshipPressure || ''"
                   @update:model-value="updateCharacter(selectedCharacter.id, 'relationshipPressure', String($event))"
                 />
               </label>
               <label>
-                <span>Growth stage</span>
+                <span>成长阶段</span>
                 <el-input
                   :model-value="selectedCharacter.growthStage || ''"
                   @update:model-value="updateCharacter(selectedCharacter.id, 'growthStage', String($event))"

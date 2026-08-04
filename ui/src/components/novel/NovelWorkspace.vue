@@ -51,7 +51,7 @@
 
     <main v-if="!isProjectRoute" class="project-hub">
       <section class="hub-copy" aria-labelledby="hub-title">
-        <p class="eyebrow">Creative Production Platform</p>
+        <p class="eyebrow">创作生产平台</p>
         <h2 id="hub-title">先选项目，再进入工作台</h2>
         <p>MVP 先把小说创作跑通；项目结构已经为素材、剧本、图片生成和视频生成预留模块。</p>
         <div class="module-strip" aria-label="平台模块">

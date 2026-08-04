@@ -10,7 +10,7 @@
       <dd>{{ chapter?.title || "未选择" }}</dd>
       <dt>场景</dt>
       <dd>小说创作</dd>
-      <dt>Agent</dt>
+      <dt>执行器</dt>
       <dd>{{ aiSummary || "Codex CLI / 默认配置" }}</dd>
     </dl>
     <div class="agent-status" :class="{ available: aiAvailable, unavailable: aiAvailable === false }">

@@ -1,7 +1,7 @@
 <template>
   <section id="project-create-panel" class="project-create" aria-labelledby="project-create-title">
     <div class="intro">
-      <p class="eyebrow">Novel MVP</p>
+      <p class="eyebrow">小说创作平台</p>
       <h2 id="project-create-title">创建小说项目</h2>
       <p>先建立故事骨架；素材、剧本、图片和视频模块会跟随项目一起扩展。</p>
     </div>
