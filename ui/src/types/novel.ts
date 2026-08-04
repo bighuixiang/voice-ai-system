@@ -1185,6 +1185,42 @@ export interface CreativeJourneyProjection {
   sessionFingerprint: string;
 }
 
+export interface StoryBlueprintContent {
+  storyPremise: string;
+  openingImage: string;
+  protagonistGoal: string;
+  coreConflict: string;
+  failureCost: string;
+  worldRules: string;
+  readerPromise: string;
+  endingDirection: string;
+}
+
+export interface StoryBlueprint {
+  schemaVersion: "story-blueprint.v1";
+  blueprintId: string;
+  projectSlug: string;
+  sourceContractCandidateId: string;
+  sourceFingerprint: string;
+  decisionIds: string[];
+  content: StoryBlueprintContent;
+  revisedFrom?: string;
+  createdAt: string;
+  fingerprint: string;
+}
+
+export interface StoryBlueprintConfirmation {
+  schemaVersion: "story-blueprint-confirmation.v1";
+  confirmationId: string;
+  projectSlug: string;
+  blueprintId: string;
+  blueprintFingerprint: string;
+  actorId: string;
+  status: "confirmed";
+  confirmedAt: string;
+  fingerprint: string;
+}
+
 export interface UnderstandingSourceSpan {
   messageId: string;
   start: number;

@@ -43,7 +43,7 @@ export interface CreativeJourneyProjection {
 export interface CreativeJourneyDialogueState {
   activeQuestion?: { questionId: string; text: string; impact?: "low" | "medium" | "high"; source: "deterministic-gap" | "model-gap" };
   answeredQuestionIds?: string[];
-  readyForOutline?: boolean;
+  blueprintConfirmed?: boolean;
 }
 
 function fingerprintSession(session: CreativeSession): string {
@@ -84,16 +84,16 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
   const completed = answeredQuestionIds.size;
   const progress = { completed, total: UNDERSTANDING_QUESTION_SEQUENCE.length, current: Math.min(completed + 1, UNDERSTANDING_QUESTION_SEQUENCE.length) };
   if (completed === UNDERSTANDING_QUESTION_SEQUENCE.length) {
-    const stage: CreativeJourneyStage = dialogueState.readyForOutline ? "ready-for-outline" : "blueprint-review";
+    const stage: CreativeJourneyStage = dialogueState.blueprintConfirmed ? "ready-for-outline" : "blueprint-review";
     const result: Omit<CreativeJourneyProjection, "fingerprint"> = {
       ...base,
       stage,
       primaryAsset: "understanding-preview",
-      primaryAction: dialogueState.readyForOutline
+      primaryAction: dialogueState.blueprintConfirmed
         ? { id: "generate-outline", label: "生成故事大纲", kind: "continue", status: "available" }
-        : { id: "review-understanding", label: "审阅故事设定候选", kind: "review", status: "available" },
+        : { id: "review-understanding", label: "审阅故事蓝图", kind: "review", status: "available" },
       progress,
-      nextInstruction: dialogueState.readyForOutline ? "故事设定已确认，可以开始生成大纲。" : "十个关键问题已确认，请审阅故事设定候选。",
+      nextInstruction: dialogueState.blueprintConfirmed ? "故事蓝图已确认，可以开始生成大纲。" : "十个关键问题已确认，请审阅故事蓝图。",
       sessionFingerprint: preview.inputFingerprint
     };
     return { ...result, fingerprint: createHash("sha256").update(JSON.stringify(result)).digest("hex") };

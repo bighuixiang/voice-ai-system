@@ -75,6 +75,6 @@ describe("creative journey projection", () => {
     const questionIds = ["question-primary-desire", "question-core-conflict", "question-failure-cost", "question-inner-need", "question-misbelief", "question-world-rule", "question-opposing-pressure", "question-irreversible-choice", "question-reader-promise", "question-ending-direction"];
 
     expect(buildCreativeJourneyProjection(input, { answeredQuestionIds: questionIds })).toMatchObject({ stage: "blueprint-review", primaryAction: { id: "review-understanding", kind: "review" }, progress: { completed: 10, total: 10, current: 10 } });
-    expect(buildCreativeJourneyProjection(input, { answeredQuestionIds: questionIds, readyForOutline: true })).toMatchObject({ stage: "ready-for-outline", primaryAction: { id: "generate-outline", kind: "continue" } });
+    expect(buildCreativeJourneyProjection(input, { answeredQuestionIds: questionIds, blueprintConfirmed: true })).toMatchObject({ stage: "ready-for-outline", primaryAction: { id: "generate-outline", kind: "continue" } });
   });
 });

@@ -2263,7 +2263,7 @@ describe.sequential("novel API routes", () => {
         ["question-reader-promise", "A costly revelation earned through trust."],
         ["question-ending-direction", "The city is acknowledged at the cost of the lens."]
       ];
-      let finalAutoAdvance: { completed: boolean; contractCandidate?: { candidate: { candidateId: string; sourceDecisionId: string } }; consumption?: { created: boolean; receipt: { receiptId: string; consumer: string; decisionId: string; consumerRef: string } } } | undefined;
+      let finalAutoAdvance: { completed: boolean; contractCandidate?: { candidate: { candidateId: string; sourceDecisionId: string } }; storyBlueprint?: { blueprintId: string; fingerprint: string; sourceContractCandidateId: string; content: { storyPremise: string; openingImage: string; protagonistGoal: string; coreConflict: string; failureCost: string; worldRules: string; readerPromise: string; endingDirection: string } }; journey: { stage: string }; consumption?: { created: boolean; receipt: { receiptId: string; consumer: string; decisionId: string; consumerRef: string } } } | undefined;
       for (const [expectedQuestionId, answerText] of remainingContractAnswers) {
         const nextQuestion = await jsonFetch<{ question: { questionId: string; questionVersion: number; snapshotFingerprint: string } }>(
           `/api/novel/projects/${slug}/session/understanding/questions`, { method: "POST" }
@@ -2287,8 +2287,13 @@ describe.sequential("novel API routes", () => {
         expect(nextAnswer.status).toBe(201);
         if (expectedQuestionId === "question-ending-direction") finalAutoAdvance = nextAnswer.data;
       }
-      expect(finalAutoAdvance).toMatchObject({ completed: true, contractCandidate: { candidate: { sourceDecisionId: expect.any(String) } }, consumption: { created: true, receipt: { consumer: "story-contract" } } });
+      expect(finalAutoAdvance).toMatchObject({ completed: true, contractCandidate: { candidate: { sourceDecisionId: expect.any(String) } }, storyBlueprint: { sourceContractCandidateId: expect.any(String), content: { storyPremise: expect.any(String), openingImage: expect.any(String), protagonistGoal: expect.any(String), coreConflict: expect.any(String), failureCost: expect.any(String), worldRules: expect.any(String), readerPromise: expect.any(String), endingDirection: expect.any(String) } }, journey: { stage: "blueprint-review" }, consumption: { created: true, receipt: { consumer: "story-contract" } } });
       expect(finalAutoAdvance!.consumption!.receipt).toMatchObject({ decisionId: finalAutoAdvance!.contractCandidate!.candidate.sourceDecisionId, consumerRef: finalAutoAdvance!.contractCandidate!.candidate.candidateId });
+      const confirmation = await jsonFetch<{ confirmation: { blueprintId: string; status: string } }>(`/api/novel/projects/${slug}/session/story-blueprints/${finalAutoAdvance!.storyBlueprint!.blueprintId}/confirm`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedFingerprint: finalAutoAdvance!.storyBlueprint!.fingerprint, actorId: "author-vertical-slice" }) });
+      expect(confirmation.status).toBe(201);
+      expect(confirmation.data.confirmation).toMatchObject({ blueprintId: finalAutoAdvance!.storyBlueprint!.blueprintId, status: "confirmed" });
+      const confirmedJourney = await jsonFetch<{ journey: { stage: string } }>(`/api/novel/projects/${slug}/session/journey`);
+      expect(confirmedJourney.data.journey.stage).toBe("ready-for-outline");
       const persistedAutoConsumption = await jsonFetch<{ receipt: { receiptId: string; consumer: string; decisionId: string; consumerRef: string } }>(`/api/novel/projects/${slug}/runtime/dialogue/decision-consumption-receipts/${finalAutoAdvance!.consumption!.receipt.receiptId}`);
       expect(persistedAutoConsumption.status).toBe(200);
       expect(persistedAutoConsumption.data.receipt).toMatchObject(finalAutoAdvance!.consumption!.receipt);
