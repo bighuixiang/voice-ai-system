@@ -55,13 +55,14 @@ export async function runBookCompletionAudit(root: string, bookRunId: string, in
     const currentMilestoneAuditFingerprints = milestoneAudits.audits.filter((audit) => audit.status === "passed").map((audit) => audit.fingerprint).sort();
     // markBookRunAudited increments the run version after persisting the audit;
     // the audit therefore belongs to the immediately preceding run version.
-    if (previous && currentClosure && currentQuiescence && milestoneAudits.issues.length === 0 && JSON.stringify(previous.milestoneAuditFingerprints) === JSON.stringify(currentMilestoneAuditFingerprints) && previous.sourceFingerprint === input.sourceFingerprint.trim() && previous.runVersion === run.version - 1 && previous.workGraphFingerprint === currentGraph.fingerprint && previous.closureCertificateFingerprint === currentClosure.certificate.fingerprint && previous.quiescenceProofFingerprint === currentQuiescence.fingerprint) return previous;
+    if (previous && previous.bookRunId === run.bookRunId && currentClosure && currentQuiescence && milestoneAudits.issues.length === 0 && JSON.stringify(previous.milestoneAuditFingerprints) === JSON.stringify(currentMilestoneAuditFingerprints) && previous.sourceFingerprint === input.sourceFingerprint.trim() && previous.runVersion === run.version - 1 && previous.workGraphFingerprint === currentGraph.fingerprint && previous.closureCertificateFingerprint === currentClosure.certificate.fingerprint && previous.quiescenceProofFingerprint === currentQuiescence.fingerprint) return previous;
     const invalidation = await recordBookRunInvalidation({ root, bookRunId, projectSlug: run.projectSlug, priorRunVersion: run.version, reason: "completion-evidence-stale", sourceFingerprint: input.sourceFingerprint, affectedArtifactRefs: ["sessions/completion", "sessions/book-work-graph.json", "sessions/closure", "sessions/quiescence", "sessions/milestone-audits"] });
     await recordBookRunImpactSubgraph({ root, invalidationId: invalidation.invalidationId, bookRunId, projectSlug: run.projectSlug, priorRunVersion: run.version, reason: "completion-evidence-stale", sourceFingerprint: input.sourceFingerprint, workItems: currentGraph.workItems.map((item) => ({ workItemId: item.workItemId, chapterId: item.chapterId })) });
     await markBookRunRepairRequired(root, bookRunId);
     throw new Error("COMPLETION_AUDIT_STALE");
   }
   const graph = await refreshBookWorkGraph(root);
+  if (run.workGraphFingerprint !== graph.fingerprint) throw new Error("COMPLETION_WORK_GRAPH_STALE");
   if (run.status !== "scope_complete") throw new Error("COMPLETION_SCOPE_REQUIRED");
   if (graph.workItems.some((item) => item.status !== "completed")) throw new Error("COMPLETION_WORK_GRAPH_INCOMPLETE");
   const closure = await assertClosureCertificateCurrent(root, input.sourceFingerprint).catch(() => { throw new Error("COMPLETION_CLOSURE_REQUIRED"); });

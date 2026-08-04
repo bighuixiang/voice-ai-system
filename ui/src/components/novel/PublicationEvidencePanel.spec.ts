@@ -26,6 +26,11 @@ describe("PublicationEvidencePanel", () => {
     expect(wrapper.emitted("issue-proof")?.[0]).toEqual(["approval-1"]);
   });
 
+  it("does not offer duplicate proof issuance when the server already verifies delivery", () => {
+    const wrapper = mount(PublicationEvidencePanel, { props: { manifest: { editionId: "edition-1" } as any, artifacts: { fingerprint: "artifacts" } as any, proof: { valid: true } as any, preflight: { status: "ready" } as any } });
+    expect(wrapper.find("[data-testid='issue-delivery-proof']").exists()).toBe(false);
+  });
+
   it("exposes explicit frozen-edition and artifact pipeline commands", async () => {
     const wrapper = mount(PublicationEvidencePanel);
     await wrapper.get("[data-testid='canon-commit-fingerprint']").setValue("canon-1");

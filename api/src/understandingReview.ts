@@ -24,6 +24,7 @@ export interface UnderstandingReview {
   checks: UnderstandingReviewCheck[];
   canonWritten: false;
   createdAt: string;
+  evidenceRefs?: string[];
   fingerprint: string;
 }
 
@@ -58,6 +59,9 @@ function hasValidReviewSemantics(value: Record<string, unknown>): boolean {
   if (reviewer.kind === "independent-deterministic") {
     if (reviewer.attestationReference !== undefined) return false;
   } else if ((reviewer.kind !== "human" && reviewer.kind !== "provider") || !isTraceableEvidenceReference(String(reviewer.attestationReference ?? ""))) return false;
+  if (reviewer.kind === "human" || reviewer.kind === "provider") {
+    if (!Array.isArray(value.evidenceRefs) || value.evidenceRefs.length === 0 || value.evidenceRefs.some((reference) => typeof reference !== "string" || !isTraceableEvidenceReference(reference))) return false;
+  }
   const requiredChecks = ["source-fingerprint", "evidence-spans", "branch-separation", "question-gate", "canon-isolation"];
   if (!Array.isArray(value.checks) || value.checks.length !== requiredChecks.length) return false;
   const checks = value.checks as Array<{ checkId?: unknown; status?: unknown; detail?: unknown }>;
@@ -160,6 +164,15 @@ export async function reviewUnderstandingSnapshot(root: string, reviewerId = "in
 }
 
 export async function ingestExternalUnderstandingReview(root: string, input: ExternalUnderstandingReviewInput): Promise<UnderstandingReview> {
+  if (!input || typeof input !== "object"
+    || (input.reviewerKind !== "human" && input.reviewerKind !== "provider")
+    || typeof input.reviewerId !== "string"
+    || typeof input.attestationReference !== "string"
+    || typeof input.snapshotFingerprint !== "string"
+    || !Array.isArray(input.checks)
+    || !Array.isArray(input.evidenceRefs)) {
+    throw new Error("UNDERSTANDING_REVIEW_INPUT_INVALID");
+  }
   if (!input.reviewerId.trim()) throw new Error("UNDERSTANDING_REVIEWER_REQUIRED");
   if (!input.attestationReference.trim()) throw new Error("UNDERSTANDING_REVIEW_ATTESTATION_REQUIRED");
   if (!isTraceableEvidenceReference(input.attestationReference)) throw new Error("UNDERSTANDING_REVIEW_ATTESTATION_INVALID");
@@ -171,6 +184,9 @@ export async function ingestExternalUnderstandingReview(root: string, input: Ext
   if (snapshot.sourceFingerprint !== input.snapshotFingerprint) throw new Error("UNDERSTANDING_REVIEW_SNAPSHOT_FINGERPRINT_MISMATCH");
   if (snapshot.canonWritten !== false) throw new Error("UNDERSTANDING_REVIEW_CANON_ISOLATION_FAILED");
   const requiredChecks: UnderstandingReviewCheck["checkId"][] = ["source-fingerprint", "evidence-spans", "branch-separation", "question-gate", "canon-isolation"];
+  if (input.checks.some((check) => !check || typeof check !== "object" || typeof check.checkId !== "string" || typeof check.detail !== "string" || !check.detail.trim())) {
+    throw new Error("UNDERSTANDING_REVIEW_INPUT_INVALID");
+  }
   const checks = input.checks.map((check) => ({ checkId: check.checkId, status: "passed" as const, detail: check.detail }));
   if (checks.length !== requiredChecks.length || requiredChecks.some((checkId) => !checks.some((check) => check.checkId === checkId))) {
     throw new Error("UNDERSTANDING_REVIEW_CHECKS_INCOMPLETE");

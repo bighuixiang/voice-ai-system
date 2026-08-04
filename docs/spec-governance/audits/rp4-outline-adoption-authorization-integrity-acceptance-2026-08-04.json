@@ -1,0 +1,15 @@
+{
+  "auditId": "rp4-outline-adoption-authorization-integrity-acceptance-2026-08-04",
+  "scope": "Outline candidate adoption authorization input boundary",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "rejects empty author authorization before persisting an authorized proposal",
+    "beforeFix": "empty actorId and authorizationId were persisted as status=authorized"
+  },
+  "greenEvidence": {
+    "command": "node_modules\\.bin\\vitest.cmd --run --pool=forks --maxWorkers=1 --minWorkers=1 src/outlineAdoption.spec.ts --reporter=verbose",
+    "result": "7 tests passed"
+  },
+  "guardedFields": ["expectedProposalFingerprint", "actorId", "authorizationId", "status", "canonWritten"],
+  "boundary": "An outline remains non-canon until a non-empty author authorization is supplied; this does not itself establish ExecutionReady or release readiness."
+}

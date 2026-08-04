@@ -111,6 +111,7 @@ export async function authorizeOutlineAdoption(root: string, input: { expectedPr
   if (!proposal) throw new Error("OUTLINE_ADOPTION_PROPOSAL_NOT_FOUND");
   if (proposal.fingerprint !== input.expectedProposalFingerprint) throw new Error("OUTLINE_ADOPTION_FINGERPRINT_STALE");
   if (proposal.status !== "ready_for_authorization") throw new Error("OUTLINE_ADOPTION_NOT_READY");
+  if (!input.authorization?.actorId?.trim() || !input.authorization?.authorizationId?.trim()) throw new Error("OUTLINE_ADOPTION_AUTHORIZATION_REQUIRED");
   const base = { ...proposal, status: "authorized" as const, authorAuthorization: input.authorization, createdAt: proposal.createdAt };
   const { fingerprint: _oldFingerprint, ...nextBase } = base;
   const next: OutlineAdoptionProposal = { ...nextBase, fingerprint: proposalFingerprint(nextBase) };

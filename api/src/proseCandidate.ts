@@ -63,6 +63,10 @@ function hasValidPolicyBinding(candidate: ProseCandidate): boolean {
   return candidate.policyVersion === "tiered-quality.v1" && ["ordinary", "elevated", "key"].includes(candidate.riskTier || "");
 }
 
+function hasValidLifecycle(candidate: ProseCandidate): boolean {
+  return ["generated", "validated", "adopted", "rejected"].includes(candidate.status);
+}
+
 async function writeJson(target: string, value: unknown): Promise<void> {
   await fs.mkdir(path.dirname(target), { recursive: true });
   const temp = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`;
@@ -78,7 +82,7 @@ export function proseCandidateId(chapterId: string, sourceFingerprint: string): 
 export async function readProseCandidate(root: string, candidateId: string): Promise<ProseCandidate | null> {
   try {
     const candidate = JSON.parse(await fs.readFile(candidatePath(root, candidateId), "utf8")) as ProseCandidate;
-    if (candidate.schemaVersion !== "prose-candidate.v1" || candidate.candidateId !== candidateId || !hasValidPolicyBinding(candidate) || !hasValidFingerprint(candidate)) throw new Error("PROSE_CANDIDATE_INTEGRITY_FAILED");
+    if (candidate.schemaVersion !== "prose-candidate.v1" || candidate.candidateId !== candidateId || !hasValidLifecycle(candidate) || !hasValidPolicyBinding(candidate) || !hasValidFingerprint(candidate)) throw new Error("PROSE_CANDIDATE_INTEGRITY_FAILED");
     return candidate;
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null;

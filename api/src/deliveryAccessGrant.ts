@@ -32,7 +32,7 @@ export interface DeliveryAccessGrantEvent {
 function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
 function assertGrantIntegrity(grant: DeliveryAccessGrant, grantId: string): DeliveryAccessGrant {
   const { fingerprint, ...base } = grant;
-  if (grant.schemaVersion !== "delivery-access-grant.v1" || grant.grantId !== grantId || typeof grant.proofId !== "string" || !grant.proofId.trim() || typeof grant.editionId !== "string" || !grant.editionId.trim() || typeof grant.projectSlug !== "string" || !grant.projectSlug.trim() || typeof grant.recipientId !== "string" || !grant.recipientId.trim() || !["reader", "archive"].includes(grant.scope) || grant.status !== "active" || typeof fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(fingerprint) || hash(base) !== fingerprint) throw new Error("ACCESS_GRANT_INTEGRITY_FAILED");
+  if (grant.schemaVersion !== "delivery-access-grant.v1" || grant.grantId !== grantId || typeof grant.proofId !== "string" || !grant.proofId.trim() || typeof grant.editionId !== "string" || !grant.editionId.trim() || typeof grant.projectSlug !== "string" || !grant.projectSlug.trim() || typeof grant.recipientId !== "string" || !grant.recipientId.trim() || !["reader", "archive"].includes(grant.scope) || grant.status !== "active" || typeof grant.issuedAt !== "string" || !Number.isFinite(Date.parse(grant.issuedAt)) || typeof grant.expiresAt !== "string" || !Number.isFinite(Date.parse(grant.expiresAt)) || typeof fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(fingerprint) || hash(base) !== fingerprint) throw new Error("ACCESS_GRANT_INTEGRITY_FAILED");
   return grant;
 }
 function grantPath(root: string, grantId: string): string { return resolveInside(root, `sessions/publication-editions/delivery-access-grants/${grantId}.json`); }
@@ -83,7 +83,7 @@ async function readGrantEvent(root: string, grantId: string): Promise<DeliveryAc
   try {
     const event = JSON.parse(await fs.readFile(eventPath(root, grantId), "utf8")) as DeliveryAccessGrantEvent;
     const { fingerprint, ...base } = event;
-    if (event.schemaVersion !== "delivery-access-grant-event.v1" || event.grantId !== grantId || typeof event.eventId !== "string" || !event.eventId.trim() || event.status !== "revoked" || event.actor !== "author" || typeof event.reason !== "string" || !event.reason.trim() || typeof fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(fingerprint) || hash(base) !== fingerprint) throw new Error("ACCESS_GRANT_EVENT_INTEGRITY_FAILED");
+    if (event.schemaVersion !== "delivery-access-grant-event.v1" || event.grantId !== grantId || typeof event.eventId !== "string" || !event.eventId.trim() || event.status !== "revoked" || event.actor !== "author" || typeof event.reason !== "string" || !event.reason.trim() || typeof event.createdAt !== "string" || !Number.isFinite(Date.parse(event.createdAt)) || typeof fingerprint !== "string" || !/^[a-f0-9]{64}$/i.test(fingerprint) || hash(base) !== fingerprint) throw new Error("ACCESS_GRANT_EVENT_INTEGRITY_FAILED");
     return event;
   }
   catch (error) { if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null; throw error; }

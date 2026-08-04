@@ -1,0 +1,12 @@
+{
+  "auditId": "rp8-delivery-proof-manifest-freshness-acceptance-2026-08-04",
+  "scope": "Delivery proofs must remain bound to the current persisted EditionManifest identity",
+  "status": "accepted",
+  "evidence": {
+    "red": "invalidates a proof when the persisted edition manifest is replaced",
+    "command": "npm.cmd --prefix api test -- src/deliveryProof.spec.ts src/editionManifest.spec.ts src/releasePreflight.spec.ts",
+    "result": "25 tests passed"
+  },
+  "guardedFields": ["DeliveryProof.manifestFingerprint", "EditionManifest.fingerprint", "PublicationArtifactSet.manifestFingerprint"],
+  "boundary": "A proof whose persisted manifest is missing, replaced, or cross-bound is invalid and cannot be used as delivery evidence."
+}

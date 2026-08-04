@@ -1,0 +1,15 @@
+{
+  "auditId": "rp8-canon-mutation-target-freshness-acceptance-2026-08-04",
+  "scope": "CanonCommit acceptance revalidates committed MutationPlan target bytes before edition freeze",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "rejects a committed canon plan whose target bytes have drifted",
+    "beforeFix": "A committed plan remained acceptable even when a declared target byte hash no longer matched the working tree."
+  },
+  "greenEvidence": {
+    "command": "npm.cmd --prefix api run test -- src/editionManifest.spec.ts src/contractCanonAdoption.spec.ts --reporter=dot",
+    "result": "16 tests passed"
+  },
+  "guardedFields": ["MutationPlan.targets", "afterSha256", "CanonCommit freshness", "EditionManifest freeze"],
+  "boundary": "Target freshness is checked before creating a new edition; already frozen historical editions remain immutable and downstream settlement/closure/delivery gates still apply."
+}

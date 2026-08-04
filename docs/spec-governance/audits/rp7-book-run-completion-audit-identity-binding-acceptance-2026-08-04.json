@@ -1,0 +1,12 @@
+{
+  "auditId": "rp7-book-run-completion-audit-identity-binding-acceptance-2026-08-04",
+  "scope": "CompletionAudit and audited BookRun closure must bind to the same BookRun identity",
+  "status": "accepted",
+  "evidence": {
+    "red": "does not reuse a completion audit bound to a different BookRun",
+    "command": "npm.cmd --prefix api test -- src/completionAudit.spec.ts src/bookRunClosure.spec.ts",
+    "result": "7 tests passed"
+  },
+  "guardedFields": ["CompletionAudit.bookRunId", "BookRun.completionAuditRef", "BookRunClosureReadiness"],
+  "boundary": "Matching fingerprints and versions are insufficient when the completion evidence belongs to another BookRun; the run must enter repair_required and completion must remain blocked."
+}

@@ -7,6 +7,8 @@ import { verifyDeliveryProof } from "./deliveryProof.js";
 import { buildReleasePreflight } from "./releasePreflight.js";
 import { readChapterSettlement } from "./chapterSettlement.js";
 import { readDerivedPublicationTransaction } from "./derivedPublication.js";
+import { readEditionManifest } from "./editionManifest.js";
+import { readLatestCanonCommit } from "./canonCommit.js";
 
 export interface ReleaseAcceptanceCheck {
   checkId: "migration-cutover" | "external-calibration" | "governed-e2e" | "v2-independent-review" | "delivery-proof";
@@ -184,7 +186,15 @@ export async function evaluateReleaseAcceptance(): Promise<ReleaseAcceptanceDeci
     const proofEntries = await fs.readdir(path.join(root, "sessions", "publication-editions"), { withFileTypes: true }).catch(() => [] as import("node:fs").Dirent[]);
     for (const entry of proofEntries.filter((candidate) => candidate.isFile() && candidate.name.endsWith(".delivery-proof.json"))) {
       const editionId = entry.name.slice(0, -".delivery-proof.json".length);
-      if ((await verifyDeliveryProof(root, editionId)).valid && (await buildReleasePreflight(root, editionId)).status === "ready") deliveryProofRoots.push(root);
+      try {
+        const verification = await verifyDeliveryProof(root, editionId);
+        const preflight = await buildReleasePreflight(root, editionId);
+        const manifest = await readEditionManifest(root, editionId);
+        const canonCommit = manifest ? await readLatestCanonCommit(root, manifest.projectSlug) : null;
+        if (verification.valid && preflight.status === "ready" && manifest && canonCommit?.canonCommitFingerprint === manifest.canonCommitFingerprint) deliveryProofRoots.push(root);
+      } catch {
+        // A malformed candidate must not abort evaluation or make unrelated evidence authoritative.
+      }
     }
   }
   const checks: ReleaseAcceptanceCheck[] = [

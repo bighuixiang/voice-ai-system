@@ -340,4 +340,46 @@ describe("release acceptance gate", () => {
 
     expect(decision.checks.find((check) => check.checkId === "governed-e2e")).toMatchObject({ status: "missing" });
   });
+
+  it("does not accept a byte-valid delivery proof when its edition has no current CanonCommit", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "release-acceptance-canon-binding-"));
+    roots.push(root);
+    const projectRoot = path.join(root, "demo");
+    const publicationRoot = path.join(projectRoot, "sessions", "publication-editions");
+    await fs.mkdir(publicationRoot, { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "demo", chapters: [] }), "utf8");
+    const manifestBase = { schemaVersion: "edition-manifest.v1", editionId: "edition-canon-binding", projectSlug: "demo", canonCommitFingerprint: "a".repeat(64), title: "Demo", author: "Author", language: "zh-CN", status: "frozen", readerSafe: true, chapters: [], publicationTreeFingerprint: "tree-fingerprint", createdAt: "2026-08-04T00:00:00.000Z" };
+    const manifestFingerprint = crypto.createHash("sha256").update(JSON.stringify(manifestBase)).digest("hex");
+    await fs.writeFile(path.join(publicationRoot, "edition-canon-binding.json"), JSON.stringify({ ...manifestBase, fingerprint: manifestFingerprint }));
+    const treeBase = { schemaVersion: "publication-tree.v1", editionId: "edition-canon-binding", projectSlug: "demo", readerSafe: true, chapters: [] };
+    const treeFingerprint = crypto.createHash("sha256").update(JSON.stringify(treeBase)).digest("hex");
+    await fs.writeFile(path.join(publicationRoot, "edition-canon-binding.tree.json"), JSON.stringify({ ...treeBase, fingerprint: treeFingerprint }));
+    const artifactBase = { schemaVersion: "publication-artifact-set.v1", artifactSetId: "artifacts-canon-binding", editionId: "edition-canon-binding", projectSlug: "demo", manifestFingerprint, treeFingerprint, status: "validated", artifacts: [], createdAt: "2026-08-04T00:00:00.000Z" };
+    const artifactFingerprint = crypto.createHash("sha256").update(JSON.stringify(artifactBase)).digest("hex");
+    await fs.writeFile(path.join(publicationRoot, "edition-canon-binding.artifacts.json"), JSON.stringify({ ...artifactBase, fingerprint: artifactFingerprint }));
+    const proofBase = { schemaVersion: "delivery-proof.v1", proofId: "proof-canon-binding", editionId: "edition-canon-binding", projectSlug: "demo", manifestFingerprint, treeFingerprint, artifactSetFingerprint: artifactFingerprint, artifactHashes: [], approvalId: "author-release", approverKind: "author", status: "issued", issuedAt: "2026-08-04T00:00:00.000Z" };
+    const proofFingerprint = crypto.createHash("sha256").update(JSON.stringify(proofBase)).digest("hex");
+    await fs.writeFile(path.join(publicationRoot, "edition-canon-binding.delivery-proof.json"), JSON.stringify({ ...proofBase, fingerprint: proofFingerprint }));
+    process.env.NOVELS_ROOT = root;
+
+    const decision = await evaluateReleaseAcceptance();
+
+    expect(decision.checks.find((check) => check.checkId === "delivery-proof")).toMatchObject({ status: "missing" });
+  });
+
+  it("fails closed and continues when a candidate edition manifest is malformed", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "release-acceptance-malformed-edition-"));
+    roots.push(root);
+    const projectRoot = path.join(root, "demo");
+    const publicationRoot = path.join(projectRoot, "sessions", "publication-editions");
+    await fs.mkdir(publicationRoot, { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "project.json"), JSON.stringify({ slug: "demo", chapters: [] }), "utf8");
+    await fs.writeFile(path.join(publicationRoot, "broken.json"), "{\"schemaVersion\":\"edition-manifest.v1\",\"fingerprint\":\"forged\"}", "utf8");
+    await fs.writeFile(path.join(publicationRoot, "broken.delivery-proof.json"), JSON.stringify({ schemaVersion: "delivery-proof.v1" }), "utf8");
+    process.env.NOVELS_ROOT = root;
+
+    const decision = await evaluateReleaseAcceptance();
+
+    expect(decision.checks.find((check) => check.checkId === "delivery-proof")).toMatchObject({ status: "missing" });
+  });
 });

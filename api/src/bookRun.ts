@@ -71,6 +71,7 @@ async function releaseActiveRunReservations(root: string, bookRunId: string): Pr
 }
 
 function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
+function validTimestamp(value: unknown): value is string { return typeof value === "string" && value.trim().length > 0 && Number.isFinite(Date.parse(value)); }
 function runPath(root: string, id: string): string { return resolveInside(root, `sessions/book-runs/${id}.json`); }
 function eventPath(root: string, id: string): string { return resolveInside(root, `sessions/book-runs/${id}.events.jsonl`); }
 async function writeJson(target: string, value: unknown): Promise<void> { await fs.mkdir(path.dirname(target), { recursive: true }); const temporary = `${target}.${process.pid}.${crypto.randomUUID()}.tmp`; await fs.writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, "utf8"); await fs.rename(temporary, target); }
@@ -83,7 +84,8 @@ export function assertBookRunIntegrity(run: BookRun, expectedId?: string): BookR
   const progressValid = run.progress && Number.isInteger(run.progress.totalWorkItems) && run.progress.totalWorkItems >= 0 && Number.isInteger(run.progress.completedWorkItems) && run.progress.completedWorkItems >= 0 && run.progress.completedWorkItems <= run.progress.totalWorkItems && Number.isInteger(run.progress.queuedWorkItems) && run.progress.queuedWorkItems >= 0 && run.progress.denominator === "frozen-work-graph";
   const scopeValid = run.scope && Array.isArray(run.scope.chapterIds) && run.scope.chapterIds.length > 0 && run.scope.chapterIds.every((id) => typeof id === "string" && id.trim()) && typeof run.scope.scopeFingerprint === "string" && run.scope.scopeFingerprint.trim();
   const gateConsistent = run.status === "scope_complete" ? run.currentGate === "completion_audit" : run.status === "audited_complete" ? run.currentGate === "none" : (run.status === "stopping" || run.status === "pausing") ? run.currentGate === "quiescence_required" : run.status === "stopped" ? run.currentGate === "none" : true;
-  const valid = run.schemaVersion === "book-run.v1" && (!expectedId || run.bookRunId === expectedId) && Boolean(run.bookRunId?.trim() && run.projectSlug?.trim() && run.objective?.trim() && run.workGraphRef?.trim() && run.workGraphFingerprint?.trim() && run.autonomyGrantRef?.trim() && run.createdAt?.trim() && run.startedAt?.trim()) && scopeValid && typeof run.autoContinue === "boolean" && ["L0", "L1", "L2"].includes(run.autonomyLevel) && statuses.includes(run.status) && gates.includes(run.currentGate) && progressValid && gateConsistent && Number.isInteger(run.version) && run.version > 0 && /^[a-f0-9]{64}$/i.test(run.fingerprint) && hash(base) === run.fingerprint;
+  const timestampsValid = validTimestamp(run.createdAt) && validTimestamp(run.startedAt) && (run.pausedAt === undefined || validTimestamp(run.pausedAt)) && (run.finishedAt === undefined || validTimestamp(run.finishedAt)) && (run.limits?.deadlineAt === undefined || validTimestamp(run.limits.deadlineAt));
+  const valid = run.schemaVersion === "book-run.v1" && (!expectedId || run.bookRunId === expectedId) && Boolean(run.bookRunId?.trim() && run.projectSlug?.trim() && run.objective?.trim() && run.workGraphRef?.trim() && run.workGraphFingerprint?.trim() && run.autonomyGrantRef?.trim()) && timestampsValid && scopeValid && typeof run.autoContinue === "boolean" && ["L0", "L1", "L2"].includes(run.autonomyLevel) && statuses.includes(run.status) && gates.includes(run.currentGate) && progressValid && gateConsistent && Number.isInteger(run.version) && run.version > 0 && /^[a-f0-9]{64}$/i.test(run.fingerprint) && hash(base) === run.fingerprint;
   if (!valid) throw new Error("BOOK_RUN_INTEGRITY_FAILED");
   return run;
 }
@@ -383,6 +385,27 @@ export async function retryBookRun(root: string, bookRunId: string, input: { exp
 }
 
 export function bookRunGraph(graph: BookWorkGraph): Pick<BookRun, "workGraphRef" | "workGraphFingerprint"> { return { workGraphRef: "sessions/book-work-graph.json", workGraphFingerprint: graph.fingerprint }; }
+
+export async function refreshBookRunWorkGraphPointer(root: string, bookRunId: string): Promise<BookRun> {
+  const current = await readBookRun(root, bookRunId);
+  if (!current) throw new Error("BOOK_RUN_NOT_FOUND");
+  const graph = await refreshBookWorkGraph(root);
+  if (current.workGraphFingerprint === graph.fingerprint) return current;
+  const base = {
+    ...current,
+    workGraphFingerprint: graph.fingerprint,
+    progress: {
+      ...current.progress,
+      totalWorkItems: graph.workItems.length,
+      completedWorkItems: graph.workItems.filter((item) => item.status === "completed").length
+    },
+    version: current.version + 1
+  };
+  const { fingerprint: _old, ...withoutFingerprint } = base;
+  const next: BookRun = { ...withoutFingerprint, fingerprint: hash(withoutFingerprint) };
+  await writeJson(runPath(root, bookRunId), next);
+  return next;
+}
 
 export async function refreshBookRunDependencyGraph(root: string, bookRunId: string, fingerprint: string): Promise<BookRun> {
   const current = await readBookRun(root, bookRunId);

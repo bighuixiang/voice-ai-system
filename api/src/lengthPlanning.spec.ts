@@ -108,4 +108,13 @@ describe("length planning", () => {
     await expect(decideLengthVariance(root, contract, { ...forecast, fingerprint: "f".repeat(64) }, { authority: "author", choice: "pause-and-review" })).rejects.toThrow("LENGTH_FORECAST_INTEGRITY_MISMATCH");
   });
   it("rejects a re-signed contract with invalid dimensions or hard locks", async () => { const root = await makeRoot(); const contract = await createLengthContract(root, project.slug, { dimensions: { totalWords: { mode: "soft", min: 100, max: 200 }, totalChapters: { mode: "unknown" }, totalVolumes: { mode: "unknown" }, chapterWords: { mode: "soft", min: 50, max: 100 } }, hardLocks: [] }); const { fingerprint: _fingerprint, ...base } = contract; const invalidBase = { ...base, hardLocks: ["totalWords"], dimensions: { ...base.dimensions, totalWords: { mode: "soft", min: 100, max: 200 } } }; const invalid = { ...invalidBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(invalidBase)).digest("hex") }; expect(() => assertLengthContractIntegrity(invalid as typeof contract)).toThrow("LENGTH_CONTRACT_INTEGRITY_FAILED"); });
+
+  it("fails closed with the contract error for malformed dimensions and timestamps", async () => {
+    const root = await makeRoot();
+    const contract = await createLengthContract(root, project.slug, { dimensions: { totalWords: { mode: "soft", min: 100, max: 200 } }, hardLocks: [] });
+    const { fingerprint: _fingerprint, ...base } = contract;
+    const malformedBase = { ...base, dimensions: undefined, createdAt: "not-a-timestamp" };
+    const malformed = { ...malformedBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(malformedBase)).digest("hex") };
+    expect(() => assertLengthContractIntegrity(malformed as typeof contract)).toThrow("LENGTH_CONTRACT_INTEGRITY_FAILED");
+  });
 });

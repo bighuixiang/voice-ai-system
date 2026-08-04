@@ -1,0 +1,11 @@
+{
+  "auditId": "rp8-reader-artifact-leak-preflight-acceptance-2026-08-04",
+  "scope": "Reader artifact control-character and private-source/secret canary fail-closed scan",
+  "requirements": ["FR-PUBLISH-003"],
+  "red": ["A reader artifact containing an author-truth canary could still be marked ready."],
+  "green": ["Release preflight blocks forbidden control characters and private-source/secret canary markers."],
+  "command": "npm.cmd --prefix api test -- src/releasePreflight.spec.ts",
+  "result": "3 tests passed",
+  "evidence": ["api/src/releasePreflight.ts", "api/src/releasePreflight.spec.ts"],
+  "boundary": "Marker scan is deterministic and local; it is not a substitute for a production secret scanner or human rights review."
+}

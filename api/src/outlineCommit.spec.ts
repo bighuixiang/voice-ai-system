@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -77,6 +78,18 @@ describe("outline version commit", () => {
     const target = path.join(root, "sessions", "outline-versions", `${outline.outlineId}.json`);
     const version = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
     version.status = "invalid";
+    await fs.writeFile(target, JSON.stringify(version), "utf8");
+    await expect(readOutlineVersion(root, outline.outlineId)).rejects.toThrow("OUTLINE_VERSION_INTEGRITY_FAILED");
+  });
+
+  it("fails closed when a persisted outline version freezes more chapters than it selects", async () => {
+    const { root, outline, authorized } = await fixture();
+    await commitOutlineAdoption(root, { expectedProposalFingerprint: authorized.fingerprint });
+    const target = path.join(root, "sessions", "outline-versions", `${outline.outlineId}.json`);
+    const version = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown> & { selectedChapterIds: string[]; strongFreezeCount: number; fingerprint: string };
+    version.strongFreezeCount = version.selectedChapterIds.length + 1;
+    const { fingerprint: _fingerprint, ...base } = version;
+    version.fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
     await fs.writeFile(target, JSON.stringify(version), "utf8");
     await expect(readOutlineVersion(root, outline.outlineId)).rejects.toThrow("OUTLINE_VERSION_INTEGRITY_FAILED");
   });

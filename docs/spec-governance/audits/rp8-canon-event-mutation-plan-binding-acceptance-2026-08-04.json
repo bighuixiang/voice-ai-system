@@ -1,0 +1,15 @@
+{
+  "auditId": "rp8-canon-event-mutation-plan-binding-acceptance-2026-08-04",
+  "scope": "CanonCommit event acceptance requires a matching committed MutationPlan",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "rejects a forged canon event that has no committed mutation plan",
+    "beforeFix": "A correctly shaped deterministic canon event could be accepted without a persisted committed mutation plan."
+  },
+  "greenEvidence": {
+    "command": "npm.cmd --prefix api run test -- src/editionManifest.spec.ts src/bookRunReadiness.e2e.spec.ts src/contractCanonAdoption.spec.ts --reporter=dot",
+    "result": "16 tests passed"
+  },
+  "guardedFields": ["canon-commit-events.jsonl", "sessions/mutations/<mutationId>.json", "status", "proposalId", "projectSlug", "authorizationId", "actorId"],
+  "boundary": "Edition creation accepts only an event whose identity matches a committed MutationPlan; downstream settlement, closure, artifact, and delivery gates remain required."
+}

@@ -3650,11 +3650,15 @@ export const useNovelStore = defineStore("novel", () => {
     isLoadingPublicationEvidence.value = true;
     publicationEvidenceError.value = "";
     try {
+      const proofPromise = novelApi.verifyDeliveryProof(projectSlug, editionId).catch((cause) => {
+        if (cause instanceof Error && /(?:^|\s)404(?:$|\s)/.test(cause.message)) return null;
+        throw cause;
+      });
       const [manifest, tree, artifacts, proof, preflight] = await Promise.all([
         novelApi.readEditionManifest(projectSlug, editionId),
         novelApi.readPublicationTree(projectSlug, editionId),
         novelApi.readPublicationArtifacts(projectSlug, editionId),
-        novelApi.verifyDeliveryProof(projectSlug, editionId),
+        proofPromise,
         novelApi.preflightPublicationEdition(projectSlug, editionId)
       ]);
       publicationEdition.value = manifest;

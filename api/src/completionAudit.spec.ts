@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { startBookRun, advanceBookRun, readBookRun } from "./bookRun.js";
+import { startBookRun, advanceBookRun, readBookRun, refreshBookRunWorkGraphPointer } from "./bookRun.js";
 import { issueClosureCertificate } from "./closureCertificate.js";
 import { issueQuiescenceProof } from "./quiescenceProof.js";
 import { runBookCompletionAudit } from "./completionAudit.js";
@@ -54,5 +54,40 @@ describe("completion audit", () => {
     const impactFiles = await fs.readdir(path.join(root, "sessions/book-run-impact"));
     expect(impactFiles).toHaveLength(1);
     expect((await readBookRunImpactSubgraph(root, impactFiles[0].replace(/\.json$/, "")))?.affectedWorkItemIds).toHaveLength(1);
+  });
+
+  it("does not reuse a completion audit bound to a different BookRun", async () => {
+    const root = await fixture();
+    await settledFixture(root);
+    const run = await startBookRun(root, { projectSlug: "demo", chapterIds: ["c1"], autonomyLevel: "L1", limits: { maxWorkItems: 1 } });
+    const scoped = await advanceBookRun(root, run.bookRunId);
+    await issueQuiescenceProof(root, { bookRunId: run.bookRunId, runVersion: scoped.run.version });
+    const audit = await runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-1" });
+    const current = await readBookRun(root, run.bookRunId);
+    const auditPath = path.join(root, current!.completionAuditRef!.replaceAll("/", path.sep));
+    const forgedBase = { ...audit, bookRunId: "book-run-forged" };
+    const { fingerprint: _oldFingerprint, ...withoutFingerprint } = forgedBase;
+    await fs.writeFile(auditPath, JSON.stringify({ ...forgedBase, fingerprint: hash(withoutFingerprint) }), "utf8");
+
+    await expect(runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-1" })).rejects.toThrow("COMPLETION_AUDIT_STALE");
+    expect((await readBookRun(root, run.bookRunId))?.status).toBe("repair_required");
+  });
+
+  it("requires the BookRun work-graph pointer to match the current graph", async () => {
+    const root = await fixture();
+    await settledFixture(root);
+    const run = await startBookRun(root, { projectSlug: "demo", chapterIds: ["c1"], autonomyLevel: "L1", limits: { maxWorkItems: 1 } });
+    const scoped = await advanceBookRun(root, run.bookRunId);
+    const runPath = path.join(root, "sessions/book-runs", `${run.bookRunId}.json`);
+    const persisted = JSON.parse(await fs.readFile(runPath, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _oldFingerprint, ...withoutFingerprint } = persisted;
+    const forged = { ...withoutFingerprint, workGraphFingerprint: "a".repeat(64) };
+    await fs.writeFile(runPath, JSON.stringify({ ...forged, fingerprint: hash(forged) }), "utf8");
+    await issueQuiescenceProof(root, { bookRunId: run.bookRunId, runVersion: scoped.run.version });
+
+    await expect(runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-1" })).rejects.toThrow("COMPLETION_WORK_GRAPH_STALE");
+    const refreshed = await refreshBookRunWorkGraphPointer(root, run.bookRunId);
+    await issueQuiescenceProof(root, { bookRunId: run.bookRunId, runVersion: refreshed.version });
+    await expect(runBookCompletionAudit(root, run.bookRunId, { sourceFingerprint: "canon-1" })).resolves.toMatchObject({ status: "audited_complete" });
   });
 });

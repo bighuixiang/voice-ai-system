@@ -19,7 +19,7 @@
       <span>preflight: {{ preflight?.status || "缺失" }}</span>
       <button v-if="manifest && !tree" type="button" data-testid="compile-publication-tree" :disabled="loading" @click="emit('compile-tree')">编译出版树</button>
       <button v-if="tree && !artifacts" type="button" data-testid="render-publication-artifacts" :disabled="loading" @click="emit('render-artifacts')">渲染制品</button>
-      <div v-if="preflight?.status === 'ready' && artifacts?.fingerprint && !deliveryProof" class="approval-form">
+      <div v-if="preflight?.status === 'ready' && artifacts?.fingerprint && !deliveryProof && proof?.valid !== true" class="approval-form">
         <label for="delivery-approval-id">作者批准 ID</label>
         <input id="delivery-approval-id" data-testid="delivery-approval-id" v-model="approvalId" placeholder="输入作者批准 ID" />
         <button type="button" data-testid="issue-delivery-proof" :disabled="loading || !approvalId.trim()" @click="emit('issue-proof', approvalId.trim())">签发交付证明</button>

@@ -91,4 +91,17 @@ describe("narrative obligation event core", () => {
     await fs.writeFile(eventsPath, `${JSON.stringify(event)}\n`, "utf8");
     await expect(readNarrativeObligation(root, created.obligationId)).rejects.toThrow("OBLIGATION_EVENT_LOG_CORRUPT");
   });
+
+  it("fails closed when a re-signed payoff event uses an untraceable evidence label", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "obligation-event-evidence-")); roots.push(root);
+    const created = await createNarrativeObligation(root, { projectSlug: "demo", type: "mystery", title: "Gate", questionOrPromise: "Who sealed it?" });
+    await appendObligationEvent(root, created.obligationId, { toStatus: "confirmed", reason: "Confirm", actor: "author", expectedVersion: 0 });
+    await appendObligationEvent(root, created.obligationId, { toStatus: "planned", reason: "Plan", actor: "system", expectedVersion: 1 });
+    await appendObligationEvent(root, created.obligationId, { toStatus: "setup", reason: "Setup", actor: "system", expectedVersion: 2 });
+    const eventsPath = path.join(root, "sessions", "obligations", `${created.obligationId}.events.jsonl`);
+    const eventBase = { schemaVersion: "obligation-event.v1", eventId: "event-forged-payoff", obligationId: created.obligationId, fromStatus: "setup", toStatus: "paid", evidenceRefs: ["caller-label"], reason: "Pretend payoff", actor: "author", expectedVersion: 3, createdAt: new Date().toISOString() };
+    const event = { ...eventBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(eventBase)).digest("hex") };
+    await fs.appendFile(eventsPath, `${JSON.stringify(event)}\n`);
+    await expect(readNarrativeObligation(root, created.obligationId)).rejects.toThrow("OBLIGATION_EVENT_LOG_CORRUPT");
+  });
 });

@@ -1,0 +1,20 @@
+{
+  "auditId": "rp8-manuscript-release-state-machine-acceptance-2026-08-04",
+  "scope": "ManuscriptRelease edition binding, explicit lifecycle transitions and DeliveryProof-gated delivery",
+  "requirements": ["FR-PUBLISH-003"],
+  "red": [
+    "A download or file presence could be mistaken for a delivered release.",
+    "A release could skip directly from draft to delivered without author approval or current proof."
+  ],
+  "green": [
+    "ManuscriptRelease is immutable and bound to EditionManifest and CanonCommit fingerprint.",
+    "Linear lifecycle transitions reject skipped states.",
+    "frozen and delivered require explicit author approval; delivered additionally requires current DeliveryProof."
+  ],
+  "domainCommand": "npm.cmd --prefix api test -- src/manuscriptRelease.spec.ts",
+  "domainResult": "4 tests passed",
+  "apiCommand": "npm.cmd --prefix api test -- src/app.spec.ts -t \"freezes and reads a publication edition\"",
+  "apiResult": "1 integration test passed",
+  "evidence": ["api/src/manuscriptRelease.ts", "api/src/manuscriptRelease.spec.ts", "api/src/app.ts", "api/src/app.spec.ts"],
+  "boundary": "State machine and API evidence are local; production rollout approval and external delivery remain separate gates."
+}

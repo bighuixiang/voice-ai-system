@@ -1,0 +1,28 @@
+{
+  "auditId": "rp8-local-first-slice-completion-2026-08-04",
+  "scope": "Repository-local RP8 first-slice implementation evidence across completion, publication, delivery, access, leak preflight and recovery drill",
+  "profile": "RP8-completion",
+  "status": "implementation-evidence-collected-human-review-required",
+  "requirementsCovered": ["FR-COMPLETE-001", "FR-COMPLETE-002", "FR-COMPLETE-003", "FR-COMPLETE-004", "FR-COMPLETE-005", "FR-COMPLETE-006", "FR-COMPLETE-007", "FR-PUBLISH-001", "FR-PUBLISH-002", "FR-PUBLISH-003"],
+  "localEvidence": {
+    "apiTests": "2491 passed, 1 skipped",
+    "uiTests": "350 passed",
+    "build": "npm.cmd run build passed",
+    "governanceVerifier": "node scripts/spec-governance-verifier.mjs passed",
+    "diffCheck": "git diff --check passed"
+  },
+  "sliceAudits": [
+    "rp7-rp8-book-run-to-delivery-e2e-acceptance-2026-08-04",
+    "rp8-delivery-access-receipt-acceptance-2026-08-04",
+    "rp8-reader-artifact-leak-preflight-acceptance-2026-08-04",
+    "rp8-manuscript-release-state-machine-acceptance-2026-08-04",
+    "rp8-restore-drill-evidence-acceptance-2026-08-04"
+  ],
+  "remainingGates": [
+    "real provider and recipient exercise",
+    "production secret/privacy scanner execution",
+    "external fault-domain backup and disaster failover drill",
+    "human release approval"
+  ],
+  "decision": "Do not mark RP8 production acceptance complete from repository-local evidence alone."
+}

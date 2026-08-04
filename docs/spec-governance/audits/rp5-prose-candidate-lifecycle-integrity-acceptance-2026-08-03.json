@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-prose-candidate-lifecycle-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "A durable prose candidate may only use a governed lifecycle status before adoption or settlement.",
+    "A rehashed candidate with an unsupported lifecycle must fail before validation or adoption consumes it."
+  ],
+  "implementationRefs": [
+    "api/src/proseCandidate.ts:hasValidLifecycle",
+    "api/src/proseCandidate.spec.ts:fails closed when a rehashed durable candidate has an unsupported lifecycle status"
+  ],
+  "tests": {
+    "red": "A rehashed candidate with status=published was accepted by readProseCandidate.",
+    "green": "proseCandidate.spec.ts passed 11/11 after restricting lifecycle values to generated, validated, adopted, or rejected."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "This is a candidate persistence gate, not proof of prose quality or author adoption.",
+    "Chapter settlement, obligation closure, external calibration, and delivery proof remain incomplete."
+  ]
+}

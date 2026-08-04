@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
 import { readChapterSettlement } from "./chapterSettlement.js";
+import { readLatestCanonCommit } from "./canonCommit.js";
 
 export interface EditionChapter {
   chapterId: string;
@@ -16,6 +17,7 @@ export interface EditionChapter {
 export interface EditionManifest {
   schemaVersion: "edition-manifest.v1";
   editionId: string;
+  supersedesEditionId?: string;
   projectSlug: string;
   canonCommitFingerprint: string;
   title: string;
@@ -36,6 +38,7 @@ interface EditionInput {
   title: string;
   author: string;
   language: string;
+  supersedesEditionId?: string;
   chapters: Array<Omit<EditionChapter, "contentSha256">>;
 }
 
@@ -47,7 +50,7 @@ function verifyManifest(manifest: EditionManifest): boolean {
   return hash(base) === fingerprint;
 }
 function verifyManifestSemantics(manifest: EditionManifest): boolean {
-  if (manifest.schemaVersion !== "edition-manifest.v1" || typeof manifest.editionId !== "string" || !manifest.editionId.trim() || typeof manifest.projectSlug !== "string" || !manifest.projectSlug.trim() || typeof manifest.canonCommitFingerprint !== "string" || !manifest.canonCommitFingerprint.trim() || typeof manifest.title !== "string" || !manifest.title.trim() || typeof manifest.author !== "string" || !manifest.author.trim() || typeof manifest.language !== "string" || !manifest.language.trim() || manifest.status !== "frozen" || manifest.readerSafe !== true || typeof manifest.createdAt !== "string" || !manifest.createdAt.trim() || !Array.isArray(manifest.chapters)) return false;
+  if (manifest.schemaVersion !== "edition-manifest.v1" || typeof manifest.editionId !== "string" || !manifest.editionId.trim() || (manifest.supersedesEditionId !== undefined && (typeof manifest.supersedesEditionId !== "string" || !manifest.supersedesEditionId.trim() || manifest.supersedesEditionId === manifest.editionId)) || typeof manifest.projectSlug !== "string" || !manifest.projectSlug.trim() || typeof manifest.canonCommitFingerprint !== "string" || !manifest.canonCommitFingerprint.trim() || typeof manifest.title !== "string" || !manifest.title.trim() || typeof manifest.author !== "string" || !manifest.author.trim() || typeof manifest.language !== "string" || !manifest.language.trim() || manifest.status !== "frozen" || manifest.readerSafe !== true || typeof manifest.createdAt !== "string" || !manifest.createdAt.trim() || !Array.isArray(manifest.chapters)) return false;
   const ids = new Set<string>();
   const orders = new Set<number>();
   return manifest.chapters.every((chapter) => typeof chapter.chapterId === "string" && chapter.chapterId.trim() && !ids.has(chapter.chapterId) && (ids.add(chapter.chapterId), typeof chapter.title === "string" && chapter.title.trim() && Number.isInteger(chapter.order) && chapter.order >= 1 && !orders.has(chapter.order) && (orders.add(chapter.order), typeof chapter.contentPath === "string" && chapter.contentPath.trim() && typeof chapter.settlementId === "string" && chapter.settlementId.trim() && typeof chapter.contentSha256 === "string" && /^[a-f0-9]{64}$/i.test(chapter.contentSha256))));
@@ -75,7 +78,16 @@ export async function readEditionManifest(root: string, editionId: string): Prom
 
 export async function createEditionManifest(input: EditionInput): Promise<EditionManifest> {
   if (!input.projectSlug.trim() || !input.canonCommitFingerprint.trim()) throw new Error("EDITION_IDENTITY_REQUIRED");
+  const canonCommit = await readLatestCanonCommit(input.root, input.projectSlug);
+  if (!canonCommit || canonCommit.canonCommitFingerprint !== input.canonCommitFingerprint) throw new Error("EDITION_CANON_COMMIT_REQUIRED");
   if (!input.title.trim() || !input.author.trim() || !input.language.trim()) throw new Error("EDITION_METADATA_REQUIRED");
+  let supersedesEditionId: string | undefined;
+  if (input.supersedesEditionId !== undefined) {
+    if (!input.supersedesEditionId.trim()) throw new Error("EDITION_SUPERSEDES_TARGET_REQUIRED");
+    const previous = await readEditionManifest(input.root, input.supersedesEditionId);
+    if (!previous || previous.projectSlug !== input.projectSlug) throw new Error("EDITION_SUPERSEDES_TARGET_REQUIRED");
+    supersedesEditionId = previous.editionId;
+  }
   if (!input.chapters.length) throw new Error("EDITION_CHAPTERS_REQUIRED");
   const ids = new Set<string>();
   const orders = new Set<number>();
@@ -97,13 +109,14 @@ export async function createEditionManifest(input: EditionInput): Promise<Editio
   chapters.sort((a, b) => a.order - b.order);
   const treeBase = { projectSlug: input.projectSlug, canonCommitFingerprint: input.canonCommitFingerprint, chapters };
   const publicationTreeFingerprint = hash(treeBase);
-  const identityBase = { ...treeBase, title: input.title, author: input.author, language: input.language, publicationTreeFingerprint };
+  const identityBase = { ...treeBase, title: input.title, author: input.author, language: input.language, publicationTreeFingerprint, ...(supersedesEditionId ? { supersedesEditionId } : {}) };
   const editionId = `edition-${hash(identityBase).slice(0, 24)}`;
   const existing = await readEditionManifest(input.root, editionId);
   if (existing) return existing;
   const base = {
     schemaVersion: "edition-manifest.v1" as const,
     editionId,
+    ...(supersedesEditionId ? { supersedesEditionId } : {}),
     projectSlug: input.projectSlug,
     canonCommitFingerprint: input.canonCommitFingerprint,
     title: input.title,

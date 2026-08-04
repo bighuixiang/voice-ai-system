@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -97,6 +98,18 @@ describe("prose candidate isolation", () => {
     const target = path.join(root, "sessions", "prose-candidates", `${candidate.candidateId}.json`);
     const persisted = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
     persisted.content = "tampered canon candidate";
+    await fs.writeFile(target, JSON.stringify(persisted), "utf8");
+    await expect(readProseCandidate(root, candidate.candidateId)).rejects.toThrow("PROSE_CANDIDATE_INTEGRITY_FAILED");
+  });
+
+  it("fails closed when a rehashed durable candidate has an unsupported lifecycle status", async () => {
+    const root = await fixture();
+    const candidate = await createProseCandidate({ root, projectSlug: "demo", chapterId: "c1", content: "A candidate scene.", outlineVersionId: "outline-v1", executionProofFingerprint: "proof-1", sourceFingerprint: "source-status" });
+    const target = path.join(root, "sessions", "prose-candidates", `${candidate.candidateId}.json`);
+    const persisted = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown> & { fingerprint: string };
+    persisted.status = "published";
+    const { fingerprint: _fingerprint, ...base } = persisted;
+    persisted.fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
     await fs.writeFile(target, JSON.stringify(persisted), "utf8");
     await expect(readProseCandidate(root, candidate.candidateId)).rejects.toThrow("PROSE_CANDIDATE_INTEGRITY_FAILED");
   });

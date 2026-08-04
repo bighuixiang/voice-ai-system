@@ -1,0 +1,18 @@
+{
+  "auditId": "rp8-edition-canon-commit-binding-acceptance-2026-08-04",
+  "scope": "EditionManifest creation is bound to a verifiable committed CanonCommit event for the same project",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "rejects an edition when the requested canon fingerprint has no committed adoption",
+    "beforeFix": "Edition creation accepted an arbitrary non-empty canonCommitFingerprint without a persisted adoption event."
+  },
+  "greenEvidence": {
+    "commands": [
+      "npm.cmd --prefix api run test -- src/editionManifest.spec.ts src/bookRunReadiness.e2e.spec.ts --reporter=dot",
+      "npm.cmd --prefix api run test -- src/contractCanonAdoption.spec.ts src/app.spec.ts -t \"atomically commits an explicitly authorized proposal|freezes and reads a publication edition only from an integrity-checked settlement\" --reporter=dot"
+    ],
+    "result": "8 targeted tests passed"
+  },
+  "guardedFields": ["canonCommitFingerprint", "projectSlug", "canon-commit-events.jsonl", "EditionManifest creation"],
+  "boundary": "The first binding slice verifies the signed deterministic adoption-event identity and project scope; chapter settlement/content freshness and closure/delivery gates remain separate downstream checks."
+}

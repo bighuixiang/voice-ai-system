@@ -63,4 +63,20 @@ describe("publication artifacts", () => {
     await fs.writeFile(target, JSON.stringify(resigned), "utf8");
     await expect(readPublicationArtifactSet(root, "edition-1")).rejects.toThrow("PUBLICATION_ARTIFACT_SET_SEMANTIC_INVALID");
   });
+
+  it("rejects re-signed artifact sets with duplicate or mismatched artifact identities", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "publication-artifacts-semantic-"));
+    await renderPublicationArtifacts(root, manifest, tree, ["markdown", "txt"]);
+    const target = path.join(root, "sessions", "publication-editions", "edition-1.artifacts.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown> & { artifacts: Array<Record<string, unknown>> };
+    const { fingerprint: _fingerprint, ...base } = value;
+    const artifacts = [
+      { ...base.artifacts[0] },
+      { ...base.artifacts[0], format: "txt", mime: "text/markdown; charset=utf-8" }
+    ];
+    const resigned = { ...base, artifacts };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readPublicationArtifactSet(root, "edition-1")).rejects.toThrow("PUBLICATION_ARTIFACT_SET_SEMANTIC_INVALID");
+  });
 });

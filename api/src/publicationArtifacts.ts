@@ -37,7 +37,15 @@ function verifyArtifactSet(set: PublicationArtifactSet): boolean {
 }
 function verifyArtifactSetSemantics(set: PublicationArtifactSet): boolean {
   if (set.schemaVersion !== "publication-artifact-set.v1" || typeof set.artifactSetId !== "string" || !set.artifactSetId.trim() || typeof set.editionId !== "string" || !set.editionId.trim() || typeof set.projectSlug !== "string" || !set.projectSlug.trim() || set.status !== "validated" || typeof set.createdAt !== "string" || !set.createdAt.trim() || !Array.isArray(set.artifacts)) return false;
-  return set.artifacts.every((artifact) => artifact && (artifact.format === "markdown" || artifact.format === "txt") && typeof artifact.relativePath === "string" && artifact.relativePath.trim().length > 0 && typeof artifact.sha256 === "string" && /^[a-f0-9]{64}$/i.test(artifact.sha256) && Number.isInteger(artifact.size) && artifact.size > 0 && artifact.rendererVersion === "publication-renderer.v1");
+  const formats = new Set<string>();
+  const paths = new Set<string>();
+  return set.artifacts.length > 0 && set.artifacts.every((artifact) => {
+    if (!artifact || (artifact.format !== "markdown" && artifact.format !== "txt") || formats.has(artifact.format) || typeof artifact.relativePath !== "string" || paths.has(artifact.relativePath) || typeof artifact.sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(artifact.sha256) || !Number.isInteger(artifact.size) || artifact.size <= 0 || artifact.rendererVersion !== "publication-renderer.v1") return false;
+    const expectedMime = artifact.format === "markdown" ? "text/markdown; charset=utf-8" : "text/plain; charset=utf-8";
+    const expectedPath = `sessions/publication-editions/${set.editionId}.${artifact.format === "markdown" ? "md" : "txt"}`;
+    if (artifact.mime !== expectedMime || artifact.relativePath !== expectedPath || artifact.relativePath.includes("..")) return false;
+    formats.add(artifact.format); paths.add(artifact.relativePath); return true;
+  });
 }
 
 function renderMarkdown(manifest: ManifestIdentity, tree: PublicationTree): string {

@@ -1,0 +1,15 @@
+{
+  "auditId": "rp8-publication-ui-proof-authority-acceptance-2026-08-04",
+  "scope": "PublicationEvidencePanel server-authoritative DeliveryProof state",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "does not offer duplicate proof issuance when the server already verifies delivery",
+    "beforeFix": "proof.valid=true with a missing local deliveryProof still rendered the issuance form"
+  },
+  "greenEvidence": {
+    "command": "npm.cmd --prefix ui run test -- src/components/novel/PublicationEvidencePanel.spec.ts --reporter=dot",
+    "result": "5 tests passed"
+  },
+  "guardedFields": ["preflight.status", "artifacts.fingerprint", "proof.valid", "deliveryProof"],
+  "boundary": "The UI cannot offer duplicate DeliveryProof issuance after the server verifies the proof; this does not replace server-side authorization."
+}

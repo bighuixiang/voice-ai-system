@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { advanceBookRun, readBookRun, startBookRun } from "./bookRun.js";
+import { advanceBookRun, readBookRun, startBookRun, refreshBookRunWorkGraphPointer } from "./bookRun.js";
 import { evaluateBookRunClosure } from "./bookRunClosure.js";
 import { issueClosureCertificate } from "./closureCertificate.js";
 import { issueQuiescenceProof } from "./quiescenceProof.js";
@@ -55,6 +55,9 @@ describe("book run closure readiness", () => {
     await recordMilestoneRepairCompletion({ root: fixture.root, planId: plan.planId, actionId: plan.actions[0].actionId, projectSlug: "demo", bookRunId: fixture.bookRunId, runVersion: fixture.version, workItemId: `book-repair-${plan.actions[0].actionId}`, evidenceRefs: ["repair://obl-1"] });
     await expect(evaluateBookRunClosure(fixture.root, fixture.bookRunId, "canon-1")).resolves.toMatchObject({ state: "closure_blocked", reasons: expect.arrayContaining(["MILESTONE_AUDIT_REQUIRED"]) });
     await auditMilestoneRepair({ root: fixture.root, planId: plan.planId, sourceFingerprint: "canon-1" });
+    await expect(evaluateBookRunClosure(fixture.root, fixture.bookRunId, "canon-1")).resolves.toMatchObject({ state: "closure_blocked", reasons: expect.arrayContaining(["WORK_GRAPH_STALE"]) });
+    const refreshed = await refreshBookRunWorkGraphPointer(fixture.root, fixture.bookRunId);
+    await issueQuiescenceProof(fixture.root, { bookRunId: fixture.bookRunId, runVersion: refreshed.version });
     await expect(evaluateBookRunClosure(fixture.root, fixture.bookRunId, "canon-1")).resolves.toMatchObject({ state: "closure_ready", reasons: [] });
   });
 

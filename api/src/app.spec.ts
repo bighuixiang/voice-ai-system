@@ -15,6 +15,7 @@ import { readCreativeJourneyProjection } from "./creativeJourneyStore.js";
 import { createChapterExecutionProof } from "./chapterExecutionProof.js";
 import { createBookWorkGraph } from "./bookWorkGraph.js";
 import { createDecisionConsumptionReceipt, persistDecisionConsumptionReceipt } from "./decisionConsumption.js";
+import { computeCanonCommitFingerprint } from "./canonCommit.js";
 
 let server: http.Server;
 let baseUrl = "";
@@ -5969,17 +5970,28 @@ describe.sequential("novel API routes", () => {
     }));
     await fs.mkdir(path.join(tempRoot, project.slug, "sessions", "chapter-settlements"), { recursive: true });
     await Promise.all(settlementInputs.map((settlement) => fs.writeFile(path.join(tempRoot, project.slug, "sessions", "chapter-settlements", `${settlement.settlementId}.json`), JSON.stringify(settlement))));
-    const coverageBase = { schemaVersion: "obligation-coverage-certificate.v1", status: "issued", sourceFingerprint: "canon-edition-1", chapterIds: chapters.map((entry) => entry.id), plannedIds: [], obligationCount: 0, terminalObligationIds: [], generatedAt: "2026-07-30T00:00:00.000Z" };
+    const commitIdentity = { mutationId: "mutation-app-edition-1", proposalId: "proposal-app-edition-1", projectSlug: project.slug, authorizationId: "author-app-edition-1", actorId: "author-1", candidateId: "candidate-app-edition-1" };
+    const canonCommitFingerprint = computeCanonCommitFingerprint(commitIdentity);
+    const coverageBase = { schemaVersion: "obligation-coverage-certificate.v1", status: "issued", sourceFingerprint: canonCommitFingerprint, chapterIds: chapters.map((entry) => entry.id), plannedIds: [], obligationCount: 0, terminalObligationIds: [], generatedAt: "2026-07-30T00:00:00.000Z" };
     await fs.mkdir(path.join(tempRoot, project.slug, "sessions", "obligations"), { recursive: true });
     await fs.writeFile(path.join(tempRoot, project.slug, "sessions", "obligations", "coverage-certificate.json"), JSON.stringify({ ...coverageBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(coverageBase)).digest("hex") }));
-    const frozen = await jsonFetch<{ manifest: { status: string; editionId: string; readerSafe: boolean } }>(`/api/novel/projects/${project.slug}/publication-editions`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ canonCommitFingerprint: "canon-edition-1", author: "Author", language: "zh-CN", chapters: chapters.map((entry, index) => ({ chapterId: entry.id, title: entry.title, order: index + 1, contentPath: entry.contentPath, settlementId: settlementInputs[index].settlementId })) })
+    await fs.writeFile(path.join(tempRoot, project.slug, "sessions", "canon-commit-events.jsonl"), `${JSON.stringify({ schemaVersion: "canon-commit-event.v1", eventId: "canon-commit-mutation-app-edition-1", ...commitIdentity, canonCommitFingerprint, createdAt: "2026-07-30T00:00:00.000Z" })}\n`, "utf8");
+    await fs.mkdir(path.join(tempRoot, project.slug, "sessions", "mutations"), { recursive: true });
+    await fs.writeFile(path.join(tempRoot, project.slug, "sessions", "mutations", `${commitIdentity.mutationId}.json`), JSON.stringify({ schemaVersion: "mutation-plan.v1", ...commitIdentity, fencingToken: "fence-app-edition-1", status: "committed", targets: [], createdAt: "2026-07-30T00:00:00.000Z", updatedAt: "2026-07-30T00:00:00.000Z" }), "utf8");
+    const frozen = await jsonFetch<{ manifest: { status: string; editionId: string; readerSafe: boolean; canonCommitFingerprint: string } }>(`/api/novel/projects/${project.slug}/publication-editions`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ canonCommitFingerprint, author: "Author", language: "zh-CN", chapters: chapters.map((entry, index) => ({ chapterId: entry.id, title: entry.title, order: index + 1, contentPath: entry.contentPath, settlementId: settlementInputs[index].settlementId })) })
     });
     expect(frozen.status).toBe(201);
     expect(frozen.data.manifest).toMatchObject({ status: "frozen", readerSafe: true });
     const readBack = await jsonFetch<{ manifest: { editionId: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}`);
     expect(readBack.status).toBe(200);
     expect(readBack.data.manifest.editionId).toBe(frozen.data.manifest.editionId);
+    const replacement = await jsonFetch<{ manifest: { editionId: string; supersedesEditionId: string } }>(`/api/novel/projects/${project.slug}/publication-editions`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ canonCommitFingerprint, title: "Revised Edition", author: "Author", language: "zh-CN", supersedesEditionId: frozen.data.manifest.editionId, chapters: chapters.map((entry, index) => ({ chapterId: entry.id, title: entry.title, order: index + 1, contentPath: entry.contentPath, settlementId: settlementInputs[index].settlementId })) })
+    });
+    expect(replacement.status).toBe(201);
+    expect(replacement.data.manifest.supersedesEditionId).toBe(frozen.data.manifest.editionId);
+    await expect(jsonFetch<{ manifest: { editionId: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}`)).resolves.toMatchObject({ status: 200, data: { manifest: { editionId: frozen.data.manifest.editionId } } });
     const tree = await jsonFetch<{ tree: { schemaVersion: string; readerSafe: boolean; fingerprint: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/tree`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
     expect(tree.status).toBe(201);
     expect(tree.data.tree).toMatchObject({ schemaVersion: "publication-tree.v1", readerSafe: true });
@@ -6002,6 +6014,14 @@ describe.sequential("novel API routes", () => {
     const proof = await jsonFetch<{ proof: { status: string; approvalId: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/delivery-proof`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approvalId: "author-edition-release", approverKind: "author", expectedArtifactSetFingerprint: artifacts.data.artifacts.fingerprint }) });
     expect(proof.status).toBe(201);
     expect(proof.data.proof).toMatchObject({ status: "issued", approvalId: "author-edition-release" });
+    const manuscriptRelease = await jsonFetch<{ release: { releaseId: string; status: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/manuscript-release`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ releaseId: "manuscript-release-api-1", canonCommitFingerprint: frozen.data.manifest.canonCommitFingerprint }) });
+    expect(manuscriptRelease.status).toBe(201);
+    expect(manuscriptRelease.data.release.status).toBe("draft_release");
+    for (const target of ["preflight", "frozen", "rendering", "validating", "ready", "delivered"] as const) {
+      const transitioned = await jsonFetch<{ release: { status: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/manuscript-release/${manuscriptRelease.data.release.releaseId}/transition`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ target, authorApprovalId: target === "frozen" || target === "delivered" ? "author-release-approval" : undefined }) });
+      expect(transitioned.status).toBe(201);
+      expect(transitioned.data.release.status).toBe(target);
+    }
     const proofReadBack = await jsonFetch<{ verification: { valid: boolean } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/delivery-proof`);
     expect(proofReadBack.status).toBe(200);
     expect(proofReadBack.data.verification.valid).toBe(true);
@@ -6013,9 +6033,23 @@ describe.sequential("novel API routes", () => {
     expect(grant.data.grant).toMatchObject({ scope: "reader" });
     const grantVerification = await jsonFetch<{ verification: { valid: boolean } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/access-grants/${grant.data.grant.grantId}/verify`);
     expect(grantVerification.data.verification.valid).toBe(true);
+    const receipt = await jsonFetch<{ receipt: { receiptId: string; grantId: string; artifactSetFingerprint: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/access-grants/${grant.data.grant.grantId}/receipts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ receiptId: "receipt-api-1", accessedAt: "2026-08-04T01:00:00.000Z" }) });
+    expect(receipt.status).toBe(201);
+    expect(receipt.data.receipt).toMatchObject({ receiptId: "receipt-api-1", grantId: grant.data.grant.grantId, artifactSetFingerprint: artifacts.data.artifacts.fingerprint });
+    const receiptReadBack = await jsonFetch<{ receipt: { receiptId: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/access-grants/${grant.data.grant.grantId}/receipts/receipt-api-1`);
+    expect(receiptReadBack.status).toBe(200);
+    expect(receiptReadBack.data.receipt.receiptId).toBe("receipt-api-1");
+    const download = await fetch(`${baseUrl}/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/access-grants/${grant.data.grant.grantId}/download/markdown`);
+    expect(download.status).toBe(200);
+    expect(download.headers.get("content-type")).toContain("text/markdown");
+    expect(download.headers.get("x-delivery-receipt-id")).toBeTruthy();
+    expect(await download.text()).toContain("Demo");
     const grantRevoked = await jsonFetch<{ event: { status: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/access-grants/${grant.data.grant.grantId}/revoke`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: "reader request" }) });
     expect(grantRevoked.status).toBe(201);
     expect(grantRevoked.data.event.status).toBe("revoked");
+    const revokedDownload = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/access-grants/${grant.data.grant.grantId}/download/markdown`);
+    expect(revokedDownload.status).toBe(409);
+    expect(revokedDownload.data.error.code).toBe("ACCESS_DOWNLOAD_GRANT_INVALID");
     const revokedGrantVerification = await jsonFetch<{ verification: { valid: boolean; reasons: string[] } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/access-grants/${grant.data.grant.grantId}/verify`);
     expect(revokedGrantVerification.data.verification).toMatchObject({ valid: false, reasons: ["grant-revoked"] });
     const revoked = await jsonFetch<{ event: { status: string } }>(`/api/novel/projects/${project.slug}/publication-editions/${frozen.data.manifest.editionId}/delivery-proof/revoke`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: "author withdrew release" }) });

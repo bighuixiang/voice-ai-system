@@ -9,6 +9,7 @@ import { issueClosureCertificate } from "./closureCertificate.js";
 import { issueQuiescenceProof } from "./quiescenceProof.js";
 import { persistBudgetReservation, readBudgetReservation, releaseBudgetReservation } from "./budgetReservation.js";
 import { cancelExecutionWorkItem, finishExecutionWorkItem, listExecutionWorkItems } from "./executionQueue.js";
+import { computeCanonCommitFingerprint } from "./canonCommit.js";
 
 let server: http.Server;
 let baseUrl = "";
@@ -74,10 +75,14 @@ describe("BookRun readiness dependency closure", () => {
       }
     }
     await issueQuiescenceProof(projectRoot, { bookRunId: started.data.run.bookRunId, runVersion: completed.data.run.version });
-    const coverage = { schemaVersion: "obligation-coverage-certificate.v1", status: "issued", sourceFingerprint: "canon-1", chapterIds: scopedChapters.map((entry) => entry.id), plannedIds: [], obligationCount: 0, terminalObligationIds: [], generatedAt: new Date().toISOString() };
+    const commitIdentity = { mutationId: "mutation-readiness-e2e", proposalId: "proposal-readiness-e2e", projectSlug: slug, authorizationId: "author-readiness-e2e", actorId: "author-e2e", candidateId: "candidate-readiness-e2e" };
+    const canonCommitFingerprint = computeCanonCommitFingerprint(commitIdentity);
+    await writeJson(path.join(projectRoot, "sessions", "canon-commit-events.jsonl"), { schemaVersion: "canon-commit-event.v1", eventId: "canon-commit-mutation-readiness-e2e", ...commitIdentity, canonCommitFingerprint, createdAt: new Date().toISOString() });
+    await writeJson(path.join(projectRoot, "sessions", "mutations", `${commitIdentity.mutationId}.json`), { schemaVersion: "mutation-plan.v1", ...commitIdentity, fencingToken: "fence-readiness-e2e", status: "committed", targets: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    const coverage = { schemaVersion: "obligation-coverage-certificate.v1", status: "issued", sourceFingerprint: canonCommitFingerprint, chapterIds: scopedChapters.map((entry) => entry.id), plannedIds: [], obligationCount: 0, terminalObligationIds: [], generatedAt: new Date().toISOString() };
     await writeJson(path.join(projectRoot, "sessions", "obligations", "coverage-certificate.json"), { ...coverage, fingerprint: crypto.createHash("sha256").update(JSON.stringify(coverage)).digest("hex") });
-    await issueClosureCertificate(projectRoot, { projectSlug: slug, chapterIds: scopedChapters.map((entry) => entry.id), sourceFingerprint: "canon-1" });
-    const audit = await json<{ audit: { status: string } }>(`/api/novel/projects/${slug}/book-runs/${started.data.run.bookRunId}/completion-audits`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceFingerprint: "canon-1" }) });
+    await issueClosureCertificate(projectRoot, { projectSlug: slug, chapterIds: scopedChapters.map((entry) => entry.id), sourceFingerprint: canonCommitFingerprint });
+    const audit = await json<{ audit: { status: string } }>(`/api/novel/projects/${slug}/book-runs/${started.data.run.bookRunId}/completion-audits`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceFingerprint: canonCommitFingerprint }) });
     expect(audit.status).toBe(201);
     const derived = await json<{ transaction: { transactionId: string; status: string } }>(`/api/novel/projects/${slug}/runtime/chapters/${chapter.id}/settlements/${settlementBase.settlementId}/derived`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ writes: [{ relativePath: "derived/e2e-summary.json", content: "{\"bookRun\":\"scope_complete\"}\n" }] }) });
     expect(derived.status).toBe(201);
@@ -85,13 +90,17 @@ describe("BookRun readiness dependency closure", () => {
     const releaseE2e = await json<{ proof: { status: string; settlementId: string; derivedTransactionId: string } }>(`/api/novel/projects/${slug}/release-e2e-acceptance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chapterId: chapter.id, settlementId: settlementBase.settlementId, derivedTransactionId: derived.data.transaction.transactionId }) });
     expect(releaseE2e.status).toBe(201);
     expect(releaseE2e.data.proof).toMatchObject({ status: "verified", settlementId: settlementBase.settlementId, derivedTransactionId: derived.data.transaction.transactionId });
-    const edition = await json<{ manifest: { editionId: string; status: string; readerSafe: boolean } }>(`/api/novel/projects/${slug}/publication-editions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ canonCommitFingerprint: "canon-1", author: "e2e-author", language: "zh-CN", chapters: scopedChapters.map((entry, index) => ({ chapterId: entry.id, title: entry.title, order: index + 1, contentPath: entry.contentPath, settlementId: settlementBases[index].settlementId })) }) });
+    const edition = await json<{ manifest: { editionId: string; status: string; readerSafe: boolean } }>(`/api/novel/projects/${slug}/publication-editions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ canonCommitFingerprint, author: "e2e-author", language: "zh-CN", chapters: scopedChapters.map((entry, index) => ({ chapterId: entry.id, title: entry.title, order: index + 1, contentPath: entry.contentPath, settlementId: settlementBases[index].settlementId })) }) });
     expect(edition.status).toBe(201);
     expect(edition.data.manifest).toMatchObject({ status: "frozen", readerSafe: true });
     const tree = await json<{ tree: { status: string; readerSafe: boolean } }>(`/api/novel/projects/${slug}/publication-editions/${edition.data.manifest.editionId}/tree`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
     expect(tree.status).toBe(201);
-    const artifacts = await json<{ artifacts: { status: string; fingerprint: string } }>(`/api/novel/projects/${slug}/publication-editions/${edition.data.manifest.editionId}/artifacts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ formats: ["markdown"] }) });
+    const artifacts = await json<{ artifacts: { status: string; fingerprint: string; artifacts: Array<{ format: string; relativePath: string }> } }>(`/api/novel/projects/${slug}/publication-editions/${edition.data.manifest.editionId}/artifacts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ formats: ["markdown", "txt"] }) });
     expect(artifacts.status).toBe(201);
+    expect(artifacts.data.artifacts.artifacts).toEqual(expect.arrayContaining([
+      expect.objectContaining({ format: "markdown", relativePath: `sessions/publication-editions/${edition.data.manifest.editionId}.md` }),
+      expect.objectContaining({ format: "txt", relativePath: `sessions/publication-editions/${edition.data.manifest.editionId}.txt` })
+    ]));
     const delivery = await json<{ proof: { status: string } }>(`/api/novel/projects/${slug}/publication-editions/${edition.data.manifest.editionId}/delivery-proof`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approvalId: "e2e-author-release", approverKind: "author", expectedArtifactSetFingerprint: artifacts.data.artifacts.fingerprint }) });
     expect(delivery.status).toBe(201);
     expect(delivery.data.proof.status).toBe("issued");

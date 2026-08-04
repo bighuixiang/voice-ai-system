@@ -1,0 +1,12 @@
+{
+  "auditId": "rp8-release-acceptance-canon-binding-acceptance-2026-08-04",
+  "scope": "ReleaseAcceptance delivery-proof gate requires a current CanonCommit for the edition",
+  "status": "accepted",
+  "evidence": {
+    "test": "does not accept a byte-valid delivery proof when its edition has no current CanonCommit",
+    "command": "npm.cmd --prefix api run test -- src/releaseAcceptance.spec.ts src/editionManifest.spec.ts src/deliveryProof.spec.ts src/contractCanonAdoption.spec.ts --reporter=dot",
+    "result": "53 tests passed"
+  },
+  "guardedFields": ["EditionManifest.canonCommitFingerprint", "CanonCommit event", "DeliveryProof", "release-acceptance.delivery-proof"],
+  "boundary": "A valid DeliveryProof is insufficient without the edition's current committed CanonCommit; migration, calibration, governed E2E, independent review, preflight, and byte checks remain separate gates."
+}

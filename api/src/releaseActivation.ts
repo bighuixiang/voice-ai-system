@@ -22,7 +22,7 @@ function activationPath(root: string): string { return resolveInside(root, "rele
 function hash(value: unknown): string { return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
 function isValidActivation(value: ReleaseActivation): boolean {
   const { fingerprint, ...base } = value;
-  return value.schemaVersion === "release-activation.v1" && value.status === "active" && value.releaseProfile === "RP5-drafting" && hash(base) === fingerprint;
+  return value.schemaVersion === "release-activation.v1" && value.status === "active" && value.releaseProfile === "RP5-drafting" && typeof value.acceptanceFingerprint === "string" && /^[a-f0-9]{64}$/i.test(value.acceptanceFingerprint) && typeof value.activatedAt === "string" && value.activatedAt.trim() !== "" && Number.isFinite(Date.parse(value.activatedAt)) && /^[a-f0-9]{64}$/i.test(fingerprint) && hash(base) === fingerprint;
 }
 
 async function writeJson(target: string, value: unknown): Promise<void> {

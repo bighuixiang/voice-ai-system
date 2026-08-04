@@ -1,0 +1,17 @@
+{
+  "auditId": "q009-length-contract-integrity-acceptance-2026-08-04",
+  "scope": "Q-009 LengthContract fail-closed persistence and input integrity",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "fails closed with the contract error for malformed dimensions and timestamps",
+    "beforeFix": "re-signed malformed dimensions raised the native TypeError 'Cannot convert undefined or null to object' instead of the governed contract error"
+  },
+  "greenEvidence": {
+    "command": "npm.cmd --prefix api run test -- src/lengthPlanning.spec.ts --reporter=verbose",
+    "result": "7 tests passed",
+    "relatedRegression": "api/src/app.spec.ts: 257 tests passed; api/src/lengthPlanning.spec.ts: 7 tests passed",
+    "fullApiRegression": "516 test files passed, 2464 tests passed, 1 skipped"
+  },
+  "guardedFields": ["dimensions", "projectSlug", "pauseThresholdRatio", "hardLocks", "source", "effectiveScope", "revisionLineage", "createdAt", "fingerprint"],
+  "boundary": "This proves the Q-009 contract read path fails closed and does not authorize automatic length changes, re-planning, execution, or release."
+}

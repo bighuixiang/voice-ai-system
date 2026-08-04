@@ -14,6 +14,19 @@ afterEach(async () => {
 });
 
 describe("understanding independent review", () => {
+  it("fails closed with a stable error when external review input is malformed at runtime", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-review-malformed-"));
+    roots.push(root);
+    await expect(ingestExternalUnderstandingReview(root, {
+      reviewerKind: "provider",
+      reviewerId: undefined as never,
+      attestationReference: undefined as never,
+      snapshotFingerprint: undefined as never,
+      checks: undefined as never,
+      evidenceRefs: undefined as never
+    })).rejects.toThrow("UNDERSTANDING_REVIEW_INPUT_INVALID");
+  });
+
   it("rejects an external review that is not bound to a persisted understanding snapshot", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-review-external-"));
     roots.push(root);
@@ -51,6 +64,23 @@ describe("understanding independent review", () => {
     const base = {
       schemaVersion: "understanding-review.v1", reviewId: "review-1", projectSlug: "demo", snapshotId: "snapshot-1", snapshotFingerprint: "b".repeat(64), calibrationVersion: "understanding-calibration.v1",
       reviewer: { kind: "rogue", id: "" }, status: "passed", checks: [], canonWritten: false, createdAt: new Date().toISOString()
+    };
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.writeFile(path.join(root, "sessions", "understanding-review.json"), JSON.stringify({ ...base, fingerprint }), "utf8");
+    await expect(readUnderstandingReview(root)).rejects.toThrow("UNDERSTANDING_REVIEW_SEMANTIC_INVALID");
+  });
+
+  it("rejects a rehashed external review that omits traceable evidence references", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "understanding-review-evidence-semantic-"));
+    roots.push(root);
+    await fs.mkdir(path.join(root, "sessions"), { recursive: true });
+    const base = {
+      schemaVersion: "understanding-review.v1", reviewId: "review-external-1", projectSlug: "demo", snapshotId: "external-attested", snapshotFingerprint: "b".repeat(64), calibrationVersion: "understanding-calibration.v1",
+      reviewer: { kind: "provider", id: "provider-1", attestationReference: "attestation://provider/review-1" }, status: "passed", checks: [
+        { checkId: "source-fingerprint", status: "passed", detail: "verified" }, { checkId: "evidence-spans", status: "passed", detail: "verified" },
+        { checkId: "branch-separation", status: "passed", detail: "verified" }, { checkId: "question-gate", status: "passed", detail: "verified" },
+        { checkId: "canon-isolation", status: "passed", detail: "verified" }
+      ], canonWritten: false, createdAt: new Date().toISOString()
     };
     const fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
     await fs.writeFile(path.join(root, "sessions", "understanding-review.json"), JSON.stringify({ ...base, fingerprint }), "utf8");

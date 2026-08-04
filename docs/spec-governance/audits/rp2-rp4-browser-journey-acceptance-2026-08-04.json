@@ -1,0 +1,20 @@
+{
+  "auditId": "rp2-rp4-browser-journey-acceptance-2026-08-04",
+  "scope": "Representative browser evidence for low-input capture, recovery, answered understanding, and outline candidate journey",
+  "status": "accepted",
+  "evidence": {
+    "rp2Command": "powershell.exe -ExecutionPolicy Bypass -File scripts/smoke-ui-windows.ps1 -Spec tests/e2e/rp2-low-input-journey.spec.ts -TimeoutSeconds 60",
+    "rp2Result": "2 tests passed",
+    "rp4Command": "powershell.exe -ExecutionPolicy Bypass -File scripts/smoke-ui-windows.ps1 -Spec tests/e2e/rp4-outline-journey.spec.ts -TimeoutSeconds 60",
+    "rp4Result": "1 test passed"
+  },
+  "guardedJourney": [
+    "short idea capture",
+    "T0 freeze",
+    "answerable question",
+    "authoritative answered projection",
+    "refresh recovery",
+    "blocked near-horizon outline candidate"
+  ],
+  "boundary": "This proves representative RP2/RP4 browser slices only; it does not prove full-book completion, production release, or DeliveryProof acceptance."
+}

@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { activateRelease, readReleaseActivation } from "./releaseActivation.js";
+import crypto from "node:crypto";
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true }))); });
@@ -39,6 +40,19 @@ describe("release activation", () => {
     value.fingerprint = "f".repeat(64);
     await fs.writeFile(target, `${JSON.stringify(value)}\n`, "utf8");
     await expect(activateRelease(root, decision)).rejects.toThrow("RELEASE_ACTIVATION_CORRUPT");
+    await expect(readReleaseActivation(root)).rejects.toThrow("RELEASE_ACTIVATION_CORRUPT");
+  });
+
+  it("fails closed when a re-signed activation has an invalid activatedAt timestamp", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "release-activation-")); roots.push(root);
+    const decision = { status: "accepted" as const, releaseProfile: "RP5-drafting" as const, fingerprint: "a".repeat(64) };
+    await activateRelease(root, decision);
+    const target = path.join(root, "release-activation.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, activatedAt: "not-a-timestamp" };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
     await expect(readReleaseActivation(root)).rejects.toThrow("RELEASE_ACTIVATION_CORRUPT");
   });
 });

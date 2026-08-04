@@ -4,6 +4,8 @@ import { readPublicationTree } from "./publicationTree.js";
 import { readPublicationArtifactSet } from "./publicationArtifacts.js";
 import { verifyDeliveryProof } from "./deliveryProof.js";
 import { assertClosureCertificateCurrent } from "./closureCertificate.js";
+import fs from "node:fs/promises";
+import { resolveInside } from "./pathSafety.js";
 
 export interface ReleasePreflightFinding { code: string; message: string; evidence: string[]; }
 export interface ReleasePreflightReport {
@@ -40,6 +42,13 @@ export async function buildReleasePreflight(root: string, editionId: string): Pr
     if (hash(withoutFingerprint(artifacts as unknown as Record<string, unknown>)) !== artifacts.fingerprint) findings.push({ code: "artifact-set-integrity-mismatch", message: "Artifact set fingerprint does not match its content.", evidence: [artifacts.fingerprint] });
     if (manifest && artifacts.manifestFingerprint !== manifest.fingerprint) findings.push({ code: "artifact-manifest-stale", message: "Artifact set references a different EditionManifest.", evidence: [artifacts.manifestFingerprint, manifest.fingerprint] });
     if (tree && artifacts.treeFingerprint !== tree.fingerprint) findings.push({ code: "artifact-tree-stale", message: "Artifact set references a different PublicationTree.", evidence: [artifacts.treeFingerprint, tree.fingerprint] });
+    for (const artifact of artifacts.artifacts) {
+      try {
+        const body = await fs.readFile(resolveInside(root, artifact.relativePath), "utf8");
+        if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(body)) findings.push({ code: "artifact-control-character", message: "Reader artifact contains forbidden control characters.", evidence: [artifact.relativePath] });
+        if (/(?:__PRIVATE__|AUTHOR_TRUTH|SECRET_CANARY|source:\/\/|file:\/\/)/i.test(body)) findings.push({ code: "artifact-reader-leak", message: "Reader artifact contains a private-source or secret canary marker.", evidence: [artifact.relativePath] });
+      } catch { findings.push({ code: "artifact-bytes-missing", message: "Reader artifact bytes cannot be read for leak scanning.", evidence: [artifact.relativePath] }); }
+    }
   }
   const proof = await verifyDeliveryProof(root, editionId);
   if (!proof.proof) findings.push({ code: "delivery-proof-missing", message: "Current DeliveryProof is missing.", evidence: [] });

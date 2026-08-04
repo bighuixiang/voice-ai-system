@@ -1,0 +1,20 @@
+{
+  "auditId": "rp4-browser-outline-journey-acceptance-2026-08-04",
+  "scope": "RP4 representative browser journey from low-input capture to outline candidate validation",
+  "status": "accepted_with_gate_blocked",
+  "evidence": {
+    "command": "npx.cmd playwright test tests/e2e/rp4-outline-journey.spec.ts --workers=1 --reporter=dot",
+    "businessResult": "1 browser test passed (dot reporter emitted a pass); Playwright process remains subject to the known Windows webServer teardown hang and the shell command timed out during teardown.",
+    "journey": [
+      "project creation and UI navigation",
+      "author input capture and T0 freeze",
+      "understanding budget and capability authorization",
+      "shadow understanding and question answer",
+      "contract candidate creation",
+      "near-horizon outline candidate creation",
+      "outline validation returns blocked with executionReady=false and at least one failed check"
+    ]
+  },
+  "guardedFields": ["questionVersion", "expectedSnapshotFingerprint", "idempotencyKey", "sourceCandidateId", "strongFreezeCount", "totalChapterCount", "validation.status", "validation.executionReady"],
+  "boundary": "This slice proves the browser can reach a governed outline candidate and that incomplete understanding remains blocked; it does not authorize execution or claim release readiness."
+}

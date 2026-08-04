@@ -139,6 +139,16 @@ describe("book run orchestration", () => {
     await expect(readBookRun(root, run.bookRunId)).rejects.toThrow("BOOK_RUN_INTEGRITY_FAILED");
   });
 
+  it("rejects a re-signed run with invalid lifecycle timestamps", async () => {
+    const root = await fixture();
+    const run = await startBookRun(root, { projectSlug: "demo", chapterIds: ["c1"], autonomyLevel: "L1", limits: { maxWorkItems: 1 } });
+    const target = path.join(root, "sessions/book-runs", `${run.bookRunId}.json`);
+    const { fingerprint: _old, ...base } = run;
+    const invalidBase = { ...base, startedAt: "not-a-timestamp" };
+    await fs.writeFile(target, JSON.stringify({ ...invalidBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(invalidBase)).digest("hex") }), "utf8");
+    await expect(readBookRun(root, run.bookRunId)).rejects.toThrow("BOOK_RUN_INTEGRITY_FAILED");
+  });
+
   it("does not claim paused until queued/running work is quiescent", async () => {
     const root = await fixture();
     const run = await startBookRun(root, { projectSlug: "demo", chapterIds: ["c1"], autonomyLevel: "L1", limits: { maxWorkItems: 1 } });

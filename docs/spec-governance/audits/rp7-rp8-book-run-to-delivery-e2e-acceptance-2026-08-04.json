@@ -1,0 +1,21 @@
+{
+  "auditId": "rp7-rp8-book-run-to-delivery-e2e-acceptance-2026-08-04",
+  "scope": "Representative API journey from BookRun readiness and chapter settlement through CompletionAudit, EditionManifest, multi-format PublicationArtifactSet, DeliveryProof, and ReleaseAcceptance",
+  "status": "accepted",
+  "evidence": {
+    "test": "moves a minimally evidenced run from blocked dependency graph to ready",
+    "command": "npm.cmd --prefix api test -- src/bookRunReadiness.e2e.spec.ts",
+    "result": "1 test passed; Markdown and TXT artifact identities and paths asserted",
+    "fullRegression": "516 test files passed; 2478 tests passed; 1 skipped"
+  },
+  "guardedJourney": [
+    "BookRun readiness and bounded advancement",
+    "chapter settlement and quiescence",
+    "CompletionAudit",
+    "CanonCommit-bound EditionManifest",
+    "PublicationTree and Markdown/TXT artifact set",
+    "author-approved DeliveryProof",
+    "ReleaseAcceptance delivery-proof gate"
+  ],
+  "boundary": "This is a representative two-chapter API fixture, not proof of arbitrary full-book production quality, real-model behavior, or production deployment readiness."
+}

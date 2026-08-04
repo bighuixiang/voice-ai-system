@@ -82,4 +82,11 @@ describe("outline adoption proposal", () => {
     await expect(createOutlineAdoptionProposal(root, { outlineId: outline.outlineId, expectedOutlineFingerprint: outline.fingerprint })).rejects.toThrow("OUTLINE_VALIDATION_REQUIRED");
     await expect(createOutlineAdoptionProposal(root, { outlineId: outline.outlineId, expectedOutlineFingerprint: "stale" })).rejects.toThrow("OUTLINE_FINGERPRINT_STALE");
   });
+
+  it("rejects empty author authorization before persisting an authorized proposal", async () => {
+    const { root, outline } = await fixture();
+    const proposal = await createOutlineAdoptionProposal(root, { outlineId: outline.outlineId, expectedOutlineFingerprint: outline.fingerprint });
+    await expect(authorizeOutlineAdoption(root, { expectedProposalFingerprint: proposal.fingerprint, authorization: { actorId: "", authorizationId: "" } })).rejects.toThrow("OUTLINE_ADOPTION_AUTHORIZATION_REQUIRED");
+    expect((await readOutlineAdoptionProposal(root))?.status).toBe("ready_for_authorization");
+  });
 });

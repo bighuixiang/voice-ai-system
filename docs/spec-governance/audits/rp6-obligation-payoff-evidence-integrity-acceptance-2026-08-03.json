@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp6-obligation-payoff-evidence-integrity",
+  "releaseProfile": "RP6-obligations",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "A paid obligation event must retain traceable payoff evidence when replayed from the append-only event log.",
+    "Re-signed or malformed payoff events must fail closed as corrupt event history."
+  ],
+  "implementationRefs": [
+    "api/src/narrativeObligation.ts:verifyEvent",
+    "api/src/narrativeObligation.spec.ts:fails closed when a re-signed payoff event uses an untraceable evidence label"
+  ],
+  "tests": {
+    "red": "A re-signed setup→paid event with evidenceRefs=[caller-label] replayed as a valid paid obligation.",
+    "green": "narrativeObligation.spec.ts passed 9/9 after requiring traceable evidence for paid events and defensive malformed-input handling."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "This protects event-log semantics but does not prove exhaustive source coverage or full-book closure.",
+    "Revision invalidation, migration, external calibration, independent review, and delivery proof remain incomplete."
+  ]
+}

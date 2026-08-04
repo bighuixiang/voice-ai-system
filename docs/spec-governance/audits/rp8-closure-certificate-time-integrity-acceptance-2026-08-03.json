@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp8-closure-certificate-time-integrity",
+  "releaseProfile": "RP8-completion",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "An audited-complete closure certificate must carry a parseable generation timestamp.",
+    "A re-signed certificate with an invalid timestamp must fail before closure replay or release checks consume it."
+  ],
+  "implementationRefs": [
+    "api/src/closureCertificate.ts:verifySemantics",
+    "api/src/closureCertificate.spec.ts:rejects a re-signed certificate with an invalid generation timestamp"
+  ],
+  "tests": {
+    "red": "A re-signed audited_complete certificate with generatedAt=not-a-timestamp was accepted.",
+    "green": "closureCertificate.spec.ts passed 7/7 after requiring Date.parse-valid generatedAt."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "This validates one terminal certificate invariant, not full cross-domain closure or delivery.",
+    "Migration cutover, external calibration, independent review, and production delivery proof remain incomplete."
+  ]
+}

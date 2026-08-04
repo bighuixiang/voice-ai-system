@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
 import { readPublicationArtifactSet, type PublicationArtifactSet } from "./publicationArtifacts.js";
+import { readEditionManifest } from "./editionManifest.js";
 
 export interface DeliveryProof {
   schemaVersion: "delivery-proof.v1";
@@ -41,10 +42,10 @@ function verifyProofIntegrity(proof: DeliveryProof): boolean {
   return hash(base) === fingerprint;
 }
 function verifyProofSemantics(proof: DeliveryProof): boolean {
-  return proof.schemaVersion === "delivery-proof.v1" && proof.status === "issued" && proof.approverKind === "author" && typeof proof.proofId === "string" && proof.proofId.trim().length > 0 && typeof proof.editionId === "string" && proof.editionId.trim().length > 0 && typeof proof.projectSlug === "string" && proof.projectSlug.trim().length > 0 && typeof proof.approvalId === "string" && proof.approvalId.trim().length > 0 && Array.isArray(proof.artifactHashes);
+  return proof.schemaVersion === "delivery-proof.v1" && proof.status === "issued" && proof.approverKind === "author" && typeof proof.proofId === "string" && proof.proofId.trim().length > 0 && typeof proof.editionId === "string" && proof.editionId.trim().length > 0 && typeof proof.projectSlug === "string" && proof.projectSlug.trim().length > 0 && typeof proof.approvalId === "string" && proof.approvalId.trim().length > 0 && typeof proof.issuedAt === "string" && Number.isFinite(Date.parse(proof.issuedAt)) && Array.isArray(proof.artifactHashes);
 }
 function verifyEventSemantics(event: DeliveryProofEvent): boolean {
-  return event.schemaVersion === "delivery-proof-event.v1" && typeof event.eventId === "string" && event.eventId.trim().length > 0 && typeof event.proofId === "string" && event.proofId.trim().length > 0 && (event.status === "revoked" || event.status === "superseded") && event.actor === "author" && typeof event.reason === "string" && event.reason.trim().length > 0 && (event.status !== "superseded" || typeof event.replacementEditionId === "string" && event.replacementEditionId.trim().length > 0) && (event.status !== "revoked" || event.replacementEditionId === undefined);
+  return event.schemaVersion === "delivery-proof-event.v1" && typeof event.eventId === "string" && event.eventId.trim().length > 0 && typeof event.proofId === "string" && event.proofId.trim().length > 0 && (event.status === "revoked" || event.status === "superseded") && event.actor === "author" && typeof event.reason === "string" && event.reason.trim().length > 0 && typeof event.createdAt === "string" && Number.isFinite(Date.parse(event.createdAt)) && (event.status !== "superseded" || typeof event.replacementEditionId === "string" && event.replacementEditionId.trim().length > 0) && (event.status !== "revoked" || event.replacementEditionId === undefined);
 }
 function proofPath(root: string, editionId: string): string { return resolveInside(root, `sessions/publication-editions/${editionId}.delivery-proof.json`); }
 function eventPath(root: string, proofId: string): string { return resolveInside(root, `sessions/publication-editions/delivery-proof-events/${proofId}.json`); }
@@ -88,6 +89,8 @@ export async function issueDeliveryProof(root: string, input: DeliveryInput): Pr
   const latestRetcon = await latestMemoryRetconAt(root);
   if (latestRetcon && latestRetcon > set.createdAt) throw new Error("DELIVERY_MEMORY_REVALIDATION_REQUIRED");
   if (set.fingerprint !== input.expectedArtifactSetFingerprint) throw new Error("DELIVERY_ARTIFACT_SET_STALE");
+  const manifest = await readEditionManifest(root, input.editionId);
+  if (!manifest || manifest.editionId !== set.editionId || manifest.projectSlug !== set.projectSlug || manifest.fingerprint !== set.manifestFingerprint) throw new Error("DELIVERY_MANIFEST_STALE");
   const byteReasons = await verifyArtifactSetBytes(root, set);
   if (byteReasons.length) throw new Error(`DELIVERY_ARTIFACT_INVALID:${byteReasons.join(",")}`);
   const identity = { editionId: set.editionId, artifactSetFingerprint: set.fingerprint, approvalId: input.approvalId };
@@ -143,6 +146,9 @@ export async function verifyDeliveryProof(root: string, editionId: string): Prom
     if (JSON.stringify(proof.artifactHashes) !== JSON.stringify(expectedArtifactHashes)) reasons.push("proof-artifact-hashes-mismatch");
     reasons.push(...await verifyArtifactSetBytes(root, set));
   }
+  const manifest = await readEditionManifest(root, editionId);
+  if (!manifest) reasons.push("proof-manifest-missing");
+  else if (manifest.editionId !== proof.editionId || manifest.projectSlug !== proof.projectSlug || manifest.fingerprint !== proof.manifestFingerprint) reasons.push("proof-manifest-stale");
   const event = await readEvent(root, proof.proofId);
   let currentStatus: VerificationResult["currentStatus"] = "issued";
   if (event) {
@@ -161,6 +167,10 @@ async function recordProofEvent(root: string, editionId: string, input: { actor:
   const proof = await readProof(root, editionId);
   if (!proof) throw new Error("DELIVERY_PROOF_REQUIRED");
   if (!verifyProofIntegrity(proof)) throw new Error("DELIVERY_PROOF_INTEGRITY_FAILED");
+  if (input.status === "superseded") {
+    const replacement = await readEditionManifest(root, input.replacementEditionId!);
+    if (!replacement || replacement.projectSlug !== proof.projectSlug || replacement.supersedesEditionId !== editionId) throw new Error("DELIVERY_REPLACEMENT_EDITION_INVALID");
+  }
   const existing = await readEvent(root, proof.proofId);
   const identity = { proofId: proof.proofId, status: input.status, replacementEditionId: input.replacementEditionId ?? "" };
   const eventId = `delivery-event-${hash(identity).slice(0, 24)}`;

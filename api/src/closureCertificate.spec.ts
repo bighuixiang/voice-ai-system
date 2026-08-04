@@ -97,4 +97,17 @@ describe("closure certificate", () => {
     await expect(readClosureCertificate(root)).rejects.toThrow("CLOSURE_CERTIFICATE_SEMANTIC_INVALID");
     expect(certificate.status).toBe("audited_complete");
   });
+
+  it("rejects a re-signed certificate with an invalid generation timestamp", async () => {
+    const root = await fixture();
+    await seed(root);
+    await issueClosureCertificate(root, { projectSlug: "demo", chapterIds: ["c1"], sourceFingerprint: "source-1" });
+    const target = path.join(root, "sessions/closure/closure-certificate.json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, generatedAt: "not-a-timestamp" };
+    resigned.fingerprint = hash(resigned);
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readClosureCertificate(root)).rejects.toThrow("CLOSURE_CERTIFICATE_SEMANTIC_INVALID");
+  });
 });

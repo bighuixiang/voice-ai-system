@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "slice-acceptance-audit.v1",
+  "auditId": "rp7-book-run-timestamp-integrity-2026-08-03",
+  "sourceSdd": "docs/plans/2026-07-24-novel-creative-partner-sdd.md",
+  "releaseProfile": "RP7-revision",
+  "status": "implementation-slice-verified",
+  "scope": {
+    "slice": "BookRun lifecycle timestamp integrity",
+    "invariant": "A persisted BookRun must reject re-signed records whose lifecycle or deadline timestamps are not finite ISO dates.",
+    "productionRefs": ["api/src/bookRun.ts"],
+    "testRefs": ["api/src/bookRun.spec.ts"]
+  },
+  "redEvidence": {
+    "test": "rejects a re-signed run with invalid lifecycle timestamps",
+    "beforeFix": "failed: promise resolved instead of rejecting BOOK_RUN_INTEGRITY_FAILED"
+  },
+  "greenEvidence": {
+    "command": "vitest run src/bookRun.spec.ts --pool=threads --maxWorkers=1 --minWorkers=1",
+    "result": "passed: 22 tests",
+    "guardedFields": ["createdAt", "startedAt", "pausedAt", "finishedAt", "limits.deadlineAt"]
+  },
+  "boundary": "This proves persisted BookRun temporal integrity only; it does not prove RP7 release acceptance or real provider quality/cost/latency."
+}

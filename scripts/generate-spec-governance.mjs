@@ -2585,6 +2585,8 @@ const lowInputJourneySourcePaths = [
   "api/src/publicationArtifacts.ts",
   "api/src/deliveryProof.ts",
   "api/src/deliveryAccessGrant.ts",
+  "api/src/deliveryAccessReceipt.ts",
+  "api/src/manuscriptRelease.ts",
   "api/src/releasePreflight.ts",
   "api/src/closureCertificate.ts",
   "api/src/revisionIntent.ts",
@@ -7404,6 +7406,8 @@ const partialPublicationTree = manuscriptProductSource.includes("compilePublicat
 const partialPublicationArtifacts = manuscriptProductSource.includes("renderPublicationArtifacts") && manuscriptProductSource.includes('schemaVersion: "publication-artifact-set.v1"');
 const partialDeliveryProof = manuscriptProductSource.includes("issueDeliveryProof") && manuscriptProductSource.includes('schemaVersion: "delivery-proof.v1"');
 const partialDeliveryAccessGrant = manuscriptProductSource.includes("issueDeliveryAccessGrant") && manuscriptProductSource.includes('schemaVersion: "delivery-access-grant.v1"');
+const partialDeliveryAccessReceipt = manuscriptProductSource.includes("recordDeliveryAccessReceipt") && manuscriptProductSource.includes('schemaVersion: "delivery-access-receipt.v1"');
+const partialManuscriptRelease = manuscriptProductSource.includes("createManuscriptRelease") && manuscriptProductSource.includes('schemaVersion: "manuscript-release.v1"');
 
 if (!manuscriptAuditRouteSlice.includes("buildProjectAuditReport") || !manuscriptAuditRouteSlice.includes("res.json({ report })")) {
   throw new Error("Manuscript-delivery audit drift: the project audit-report route changed and must be reclassified.");
@@ -7428,7 +7432,7 @@ const implementedManuscriptEntities = [
   "ArtifactValidationReport",
   "DeliveryProof",
   "DeliveryAccessGrant",
-].filter((entity) => manuscriptProductSource.includes(entity) && !(partialEditionManifest && entity === "EditionManifest") && !(partialPublicationTree && entity === "PublicationTree") && !(partialPublicationArtifacts && entity === "ExportArtifact") && !(partialDeliveryProof && entity === "DeliveryProof") && !(partialDeliveryAccessGrant && entity === "DeliveryAccessGrant"));
+].filter((entity) => manuscriptProductSource.includes(entity) && !(partialEditionManifest && entity === "EditionManifest") && !(partialPublicationTree && entity === "PublicationTree") && !(partialPublicationArtifacts && entity === "ExportArtifact") && !(partialDeliveryProof && entity === "DeliveryProof") && !(partialDeliveryAccessGrant && entity === "DeliveryAccessGrant") && !(partialDeliveryAccessReceipt && entity === "DeliveryAccessReceipt") && !(partialManuscriptRelease && entity === "ManuscriptRelease"));
 if (implementedManuscriptEntities.length) {
   throw new Error(`Manuscript-delivery audit drift: governed release entities now exist and must be audited: ${implementedManuscriptEntities.join(", ")}`);
 }

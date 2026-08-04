@@ -1,0 +1,18 @@
+{
+  "auditId": "rp8-delivery-proof-timestamp-integrity-acceptance-2026-08-04",
+  "scope": "DeliveryProof and immutable lifecycle events reject re-signed non-parseable timestamps",
+  "status": "accepted",
+  "redEvidence": {
+    "tests": [
+      "rejects a re-signed proof with an invalid issued timestamp",
+      "rejects a re-signed proof event with an invalid created timestamp"
+    ],
+    "beforeFix": "Both re-signed records were accepted as semantically valid; an invalid event timestamp was treated as a valid revocation."
+  },
+  "greenEvidence": {
+    "command": "npm.cmd --prefix api run test -- src/deliveryProof.spec.ts --reporter=dot",
+    "result": "13 tests passed"
+  },
+  "guardedFields": ["issuedAt", "createdAt", "proof-semantics", "proof-event-semantics"],
+  "boundary": "The timestamp guard is semantic and fail-closed; fingerprint integrity, artifact byte verification, revocation, and supersession checks remain independently enforced."
+}

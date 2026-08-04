@@ -1,0 +1,17 @@
+{
+  "auditId": "rp8-edition-supersedes-lineage-acceptance-2026-08-04",
+  "scope": "Replacement manuscript editions carry an immutable, existing-project supersedes lineage",
+  "status": "accepted",
+  "evidence": {
+    "red": "rejects a replacement edition whose supersedes target is absent",
+    "green": "records an immutable supersedes link when publishing a replacement edition",
+    "command": "npm.cmd --prefix api test -- src/editionManifest.spec.ts",
+    "result": "9 tests passed",
+    "apiRouteCommand": "npm.cmd --prefix api test -- src/app.spec.ts -t \"freezes and reads a publication edition\"",
+    "apiRouteResult": "1 test passed; old edition remains readable",
+    "deliveryProofCommand": "npm.cmd --prefix api test -- src/deliveryProof.spec.ts src/editionManifest.spec.ts",
+    "deliveryProofResult": "25 tests passed; unlinked supersession is rejected"
+  },
+  "guardedFields": ["EditionManifest.editionId", "EditionManifest.supersedesEditionId", "EditionManifest.fingerprint"],
+  "boundary": "A replacement cannot silently overwrite or claim lineage from a missing or cross-project edition; old edition files remain independently addressable."
+}

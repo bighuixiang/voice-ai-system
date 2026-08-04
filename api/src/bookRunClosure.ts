@@ -20,7 +20,7 @@ export async function evaluateBookRunClosure(root: string, bookRunId: string, so
     const currentClosure = await assertClosureCertificateCurrent(root, sourceFingerprint).catch(() => null);
     const currentQuiescence = await readQuiescenceProof(root, bookRunId, run.version - 1);
     const milestoneAudits = await auditMilestoneRepairsForRun({ root, projectSlug: run.projectSlug, bookRunId, sourceFingerprint }).catch(() => ({ audits: [], issues: [{ code: "REPAIR_ACTION_COMPLETION_REQUIRED" as const, actionId: "unknown" }] }));
-    const current = Boolean(previous && currentClosure && currentQuiescence && milestoneAudits.issues.length === 0 && previous.sourceFingerprint === sourceFingerprint.trim() && previous.runVersion === run.version - 1 && previous.workGraphFingerprint === currentGraph.fingerprint && previous.closureCertificateFingerprint === currentClosure.certificate.fingerprint && previous.quiescenceProofFingerprint === currentQuiescence.fingerprint);
+    const current = Boolean(previous && previous.bookRunId === run.bookRunId && run.workGraphFingerprint === currentGraph.fingerprint && currentClosure && currentQuiescence && milestoneAudits.issues.length === 0 && previous.sourceFingerprint === sourceFingerprint.trim() && previous.runVersion === run.version - 1 && previous.workGraphFingerprint === currentGraph.fingerprint && previous.closureCertificateFingerprint === currentClosure.certificate.fingerprint && previous.quiescenceProofFingerprint === currentQuiescence.fingerprint);
     if (current) return { state: "audited_complete", bookRunId, runVersion: run.version, reasons: [], evidence: { workGraphFingerprint: currentGraph.fingerprint, quiescenceProofFingerprint: currentQuiescence!.fingerprint, closureCertificateFingerprint: currentClosure!.certificate.fingerprint } };
     const invalidation = await recordBookRunInvalidation({ root, bookRunId, projectSlug: run.projectSlug, priorRunVersion: run.version, reason: "completion-evidence-stale", sourceFingerprint, affectedArtifactRefs: ["sessions/completion", "sessions/book-work-graph.json", "sessions/closure", "sessions/quiescence", "sessions/milestone-audits"] });
     await recordBookRunImpactSubgraph({ root, invalidationId: invalidation.invalidationId, bookRunId, projectSlug: run.projectSlug, priorRunVersion: run.version, reason: "completion-evidence-stale", sourceFingerprint, workItems: currentGraph.workItems.map((item) => ({ workItemId: item.workItemId, chapterId: item.chapterId })) });
@@ -30,6 +30,7 @@ export async function evaluateBookRunClosure(root: string, bookRunId: string, so
   if (run.status !== "scope_complete") return { state: "scope_complete", bookRunId, runVersion: run.version, reasons: ["SCOPE_NOT_COMPLETE"], evidence: {} };
   const graph = await refreshBookWorkGraph(root);
   const reasons: string[] = [];
+  if (run.workGraphFingerprint !== graph.fingerprint) reasons.push("WORK_GRAPH_STALE");
   if (graph.workItems.some((item) => item.status !== "completed")) reasons.push("SCOPE_WORK_INCOMPLETE");
   const milestoneAudits = await auditMilestoneRepairsForRun({ root, projectSlug: run.projectSlug, bookRunId, sourceFingerprint });
   if (milestoneAudits.issues.length) reasons.push("MILESTONE_AUDIT_REQUIRED");

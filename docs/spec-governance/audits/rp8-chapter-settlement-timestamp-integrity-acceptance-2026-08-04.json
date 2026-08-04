@@ -1,0 +1,15 @@
+{
+  "auditId": "rp8-chapter-settlement-timestamp-integrity-acceptance-2026-08-04",
+  "scope": "ChapterSettlement timestamp integrity before release and delivery evidence",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "rejects a re-signed settlement with an invalid createdAt timestamp",
+    "beforeFix": "a validly re-signed settled record with createdAt=not-a-timestamp was accepted"
+  },
+  "greenEvidence": {
+    "command": "node_modules\\.bin\\vitest.cmd --run --pool=forks --maxWorkers=1 --minWorkers=1 src/chapterSettlement.spec.ts --reporter=dot",
+    "result": "15 tests passed"
+  },
+  "guardedFields": ["settlementId", "projectSlug", "chapterId", "adoptedContentSha256", "status", "nextAction", "createdAt", "fingerprint"],
+  "boundary": "Invalid settlement timestamps cannot satisfy downstream release or delivery gates; this does not itself certify a complete edition."
+}

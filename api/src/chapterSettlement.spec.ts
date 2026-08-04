@@ -159,5 +159,16 @@ describe("chapter settlement", () => {
     await fs.writeFile(target, JSON.stringify(resigned), "utf8");
     await expect(readChapterSettlement(root, settlement.settlementId)).rejects.toThrow("CHAPTER_SETTLEMENT_SEMANTIC_INVALID");
   });
+  it("rejects a re-signed settlement with an invalid createdAt timestamp", async () => {
+    const { root, transaction } = await fixture();
+    const settlement = await settleChapter({ root, projectSlug: "demo", chapterId: "c1", adoptionTransactionId: transaction.transactionId, targetPath: "chapters/c1.md" });
+    const target = path.join(root, "sessions", "chapter-settlements", settlement.settlementId + ".json");
+    const value = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    const { fingerprint: _fingerprint, ...base } = value;
+    const resigned = { ...base, createdAt: "not-a-timestamp" };
+    resigned.fingerprint = crypto.createHash("sha256").update(JSON.stringify(resigned)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(resigned), "utf8");
+    await expect(readChapterSettlement(root, settlement.settlementId)).rejects.toThrow("CHAPTER_SETTLEMENT_SEMANTIC_INVALID");
+  });
   it("exposes the same integrity boundary for direct settlement audits", async () => { const { root, transaction } = await fixture(); const settlement = await settleChapter({ root, projectSlug: "demo", chapterId: "c1", adoptionTransactionId: transaction.transactionId, targetPath: "chapters/c1.md" }); expect(assertChapterSettlementIntegrity(settlement, settlement.settlementId)).toEqual(settlement); });
 });

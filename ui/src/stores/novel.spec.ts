@@ -949,6 +949,24 @@ describe("useNovelStore", () => {
     expect(store.publicationPreflight).toEqual(preflight);
   });
 
+  it("keeps the edition evidence visible when delivery proof has not been issued", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    const manifest = { editionId: "edition-missing-proof", status: "frozen" };
+    const tree = { editionId: "edition-missing-proof", fingerprint: "tree" };
+    const artifacts = { editionId: "edition-missing-proof", fingerprint: "artifacts" };
+    const preflight = { status: "blocked", blockers: [{ code: "delivery-proof-missing" }] };
+    mockNovelApi.readEditionManifest.mockResolvedValueOnce(manifest);
+    mockNovelApi.readPublicationTree.mockResolvedValueOnce(tree);
+    mockNovelApi.readPublicationArtifacts.mockResolvedValueOnce(artifacts);
+    mockNovelApi.verifyDeliveryProof.mockRejectedValueOnce(new Error("Request failed: 404"));
+    mockNovelApi.preflightPublicationEdition.mockResolvedValueOnce(preflight);
+
+    await expect(store.loadPublicationEvidence("edition-missing-proof")).resolves.toMatchObject({ manifest, tree, artifacts, proof: null, preflight });
+    expect(store.publicationEvidenceError).toBe("");
+    expect(store.publicationPreflight).toEqual(preflight);
+  });
+
   it("issues delivery proof only after ready preflight and artifact fingerprint", async () => {
     const store = useNovelStore();
     store.currentProject = project;

@@ -1,0 +1,18 @@
+{
+  "auditId": "rp8-delivery-access-grant-timestamp-integrity-acceptance-2026-08-04",
+  "scope": "DeliveryAccessGrant and revoke events reject re-signed non-parseable lifecycle timestamps",
+  "status": "accepted",
+  "redEvidence": {
+    "tests": [
+      "rejects a re-signed grant with invalid lifecycle timestamps",
+      "rejects a re-signed revoke event with an invalid created timestamp"
+    ],
+    "beforeFix": "Re-signed grants and revoke events with invalid timestamps were accepted or treated as valid revocations."
+  },
+  "greenEvidence": {
+    "command": "npm.cmd --prefix api run test -- src/deliveryAccessGrant.spec.ts --reporter=dot",
+    "result": "8 tests passed"
+  },
+  "guardedFields": ["issuedAt", "expiresAt", "createdAt", "grant-integrity", "grant-event-integrity"],
+  "boundary": "Timestamp validation is additive to fingerprint, current-proof, expiry, and immutable-event checks; it does not weaken access scope or proof binding."
+}

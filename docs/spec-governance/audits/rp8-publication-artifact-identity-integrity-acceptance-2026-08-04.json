@@ -1,0 +1,12 @@
+{
+  "auditId": "rp8-publication-artifact-identity-integrity-acceptance-2026-08-04",
+  "scope": "Validated publication artifact sets must contain unambiguous, edition-bound format identities",
+  "status": "accepted",
+  "evidence": {
+    "red": "rejects re-signed artifact sets with duplicate or mismatched artifact identities",
+    "command": "npm.cmd --prefix api test -- src/publicationArtifacts.spec.ts src/deliveryProof.spec.ts src/releasePreflight.spec.ts",
+    "result": "21 tests passed"
+  },
+  "guardedFields": ["PublicationArtifactSet.artifacts", "ExportArtifact.format", "ExportArtifact.relativePath", "ExportArtifact.mime", "DeliveryProof.artifactHashes"],
+  "boundary": "A byte-valid but ambiguous or cross-edition artifact manifest is non-authoritative and cannot reach preflight or delivery proof."
+}

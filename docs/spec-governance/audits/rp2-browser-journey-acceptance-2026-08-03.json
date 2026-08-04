@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp2-browser-journey",
+  "releaseProfile": "RP2-understanding",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "A low-input author journey must persist the idea, freeze the V2 source, ask one governed question, accept an answer, and expose the authoritative projection.",
+    "A browser refresh must restore the same journey state and remove the answer blocker after the answer is persisted."
+  ],
+  "implementationRefs": [
+    "tests/e2e/rp2-low-input-journey.spec.ts",
+    "tests/e2e/rp2-understanding-profile.spec.ts",
+    "ui/src/components/novel/CreativeSessionPanel.vue",
+    "api/src/app.ts:/api/novel/projects/:projectId/session/journey"
+  ],
+  "tests": {
+    "browser": "Three Playwright tests passed: low-input capture/answer, refresh recovery, and full understanding profile.",
+    "environment": "Playwright webServer teardown exceeded the 180s command timeout after all three tests passed; no assertion failed and no listening test ports remained."
+  },
+  "result": "passed-with-environment-teardown-warning",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "The journey stops at RP2 understanding and does not prove outline, prose, completion, or delivery.",
+    "Full RP5 external calibration and independent evidence remain required.",
+    "A frozen production build and operational release acceptance remain unproven."
+  ]
+}

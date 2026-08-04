@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-prose-adoption-timing-integrity",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "A committed prose adoption transaction must carry a valid commit timestamp.",
+    "Prepared, rolled-back, and blocked transactions must not masquerade as committed records."
+  ],
+  "implementationRefs": [
+    "api/src/proseAdoption.ts:assertTransactionIntegrity",
+    "api/src/proseAdoption.spec.ts:fails closed when a committed adoption transaction omits its commit timestamp"
+  ],
+  "tests": {
+    "red": "A re-signed committed transaction without committedAt was accepted.",
+    "green": "proseAdoption.spec.ts passed 5/5 after binding committed status to a finite committedAt timestamp."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "Chapter settlement and obligation closure still require representative end-to-end evidence.",
+    "External calibration, independent review, migration cutover, and delivery proof remain incomplete."
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp5-understanding-review-input-fail-closed",
+  "releaseProfile": "RP5-drafting",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "External independent-review ingestion must fail closed on malformed runtime payloads.",
+    "Malformed external evidence must produce a stable auditable error code rather than a runtime TypeError.",
+    "Persisted human/provider reviews must include traceable evidence references at the storage boundary."
+  ],
+  "implementationRefs": [
+    "api/src/understandingReview.ts:ingestExternalUnderstandingReview",
+    "api/src/understandingReview.ts:hasValidReviewSemantics",
+    "api/src/understandingReview.spec.ts:fails closed with a stable error when external review input is malformed at runtime",
+    "api/src/app.ts:POST /api/novel/projects/:projectId/session/understanding/review/external"
+  ],
+  "tests": {
+    "red": "Undefined reviewerId, attestationReference, checks, and evidenceRefs caused a runtime TypeError; a rehashed external review without evidenceRefs was accepted by storage semantics.",
+    "green": "understandingReview.spec.ts passed 13/13; API full suite passed 516 files, 2456 tests with 1 skipped; TypeScript build passed."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "A genuine human/provider attestation artifact is still required for release acceptance.",
+    "Full RP5 independent-review and delivery-proof evidence remain incomplete.",
+    "Product release approval remains blocked by migration-cutover, external-calibration, governed-E2E, and delivery-proof gates."
+  ]
+}

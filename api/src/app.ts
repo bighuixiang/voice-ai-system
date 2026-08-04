@@ -496,6 +496,8 @@ import { compileAndPersistPublicationTree, readPublicationTree } from "./publica
 import { readPublicationArtifactSet, renderPublicationArtifacts, type PublicationFormat } from "./publicationArtifacts.js";
 import { issueDeliveryProof, revokeDeliveryProof, supersedeDeliveryProof, verifyDeliveryProof } from "./deliveryProof.js";
 import { issueDeliveryAccessGrant, revokeDeliveryAccessGrant, verifyDeliveryAccessGrant } from "./deliveryAccessGrant.js";
+import { readAuthorizedPublicationArtifact, readDeliveryAccessReceipt, recordDeliveryAccessReceipt } from "./deliveryAccessReceipt.js";
+import { createManuscriptRelease, readManuscriptRelease, transitionManuscriptRelease } from "./manuscriptRelease.js";
 import { buildReleasePreflight } from "./releasePreflight.js";
 import { assertClosureCertificateCurrent, issueClosureCertificate, readClosureCertificate } from "./closureCertificate.js";
 import { buildStoryContractReadinessProof, readStoryContractReadinessProof } from "./contractReadiness.js";
@@ -1731,6 +1733,7 @@ export function createApp() {
         title: typeof req.body?.title === "string" ? req.body.title : project.title,
         author: typeof req.body?.author === "string" ? req.body.author : "",
         language: typeof req.body?.language === "string" ? req.body.language : "",
+        supersedesEditionId: typeof req.body?.supersedesEditionId === "string" ? req.body.supersedesEditionId : undefined,
         chapters: Array.isArray(req.body?.chapters) ? req.body.chapters : []
       });
       res.status(201).json({ manifest });
@@ -1871,6 +1874,58 @@ export function createApp() {
       const event = await revokeDeliveryAccessGrant(projectRoot(project.slug), req.params.grantId, { actor: "author", reason: typeof req.body?.reason === "string" ? req.body.reason : "" });
       res.status(201).json({ event });
     } catch (error) { res.status(409).json({ error: { code: error instanceof Error ? error.message : "ACCESS_GRANT_REVOKE_INVALID" } }); }
+  }));
+
+  app.post("/api/novel/projects/:projectId/publication-editions/:editionId/access-grants/:grantId/receipts", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const verification = await verifyDeliveryAccessGrant(projectRoot(project.slug), req.params.grantId);
+    if (!verification.grant || verification.grant.editionId !== req.params.editionId || verification.grant.projectSlug !== project.slug) { res.status(404).json({ error: { code: "ACCESS_RECEIPT_GRANT_NOT_FOUND" } }); return; }
+    try {
+      const receipt = await recordDeliveryAccessReceipt(projectRoot(project.slug), req.params.grantId, { receiptId: typeof req.body?.receiptId === "string" ? req.body.receiptId : undefined, accessedAt: typeof req.body?.accessedAt === "string" ? req.body.accessedAt : undefined });
+      res.status(201).json({ receipt });
+    } catch (error) { res.status(409).json({ error: { code: error instanceof Error ? error.message : "ACCESS_RECEIPT_INVALID" } }); }
+  }));
+
+  app.get("/api/novel/projects/:projectId/publication-editions/:editionId/access-grants/:grantId/receipts/:receiptId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const receipt = await readDeliveryAccessReceipt(projectRoot(project.slug), req.params.receiptId);
+    if (!receipt || receipt.projectSlug !== project.slug || receipt.editionId !== req.params.editionId || receipt.grantId !== req.params.grantId) { res.status(404).json({ error: { code: "ACCESS_RECEIPT_NOT_FOUND" } }); return; }
+    res.json({ receipt });
+  }));
+
+  app.get("/api/novel/projects/:projectId/publication-editions/:editionId/access-grants/:grantId/download/:format", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    const verification = await verifyDeliveryAccessGrant(projectRoot(project.slug), req.params.grantId);
+    if (!verification.grant || verification.grant.editionId !== req.params.editionId || verification.grant.projectSlug !== project.slug) { res.status(404).json({ error: { code: "ACCESS_DOWNLOAD_GRANT_NOT_FOUND" } }); return; }
+    if (req.params.format !== "markdown" && req.params.format !== "txt") { res.status(404).json({ error: { code: "ACCESS_DOWNLOAD_FORMAT_NOT_FOUND" } }); return; }
+    try {
+      const artifact = await readAuthorizedPublicationArtifact(projectRoot(project.slug), req.params.grantId, req.params.format);
+      res.type(artifact.mime).setHeader("X-Delivery-Receipt-Id", artifact.receipt.receiptId).send(artifact.bytes);
+    } catch (error) { res.status(409).json({ error: { code: error instanceof Error ? error.message : "ACCESS_DOWNLOAD_INVALID" } }); }
+  }));
+
+  app.post("/api/novel/projects/:projectId/publication-editions/:editionId/manuscript-release", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    try {
+      const release = await createManuscriptRelease(projectRoot(project.slug), { releaseId: typeof req.body?.releaseId === "string" ? req.body.releaseId : "", editionId: req.params.editionId, projectSlug: project.slug, canonCommitFingerprint: typeof req.body?.canonCommitFingerprint === "string" ? req.body.canonCommitFingerprint : "", parentReleaseId: typeof req.body?.parentReleaseId === "string" ? req.body.parentReleaseId : undefined, supersedesEditionId: typeof req.body?.supersedesEditionId === "string" ? req.body.supersedesEditionId : undefined });
+      res.status(201).json({ release });
+    } catch (error) { res.status(409).json({ error: { code: error instanceof Error ? error.message : "MANUSCRIPT_RELEASE_INVALID" } }); }
+  }));
+
+  app.get("/api/novel/projects/:projectId/publication-editions/:editionId/manuscript-release/:releaseId", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId); const release = await readManuscriptRelease(projectRoot(project.slug), req.params.releaseId);
+    if (!release || release.projectSlug !== project.slug || release.editionId !== req.params.editionId) { res.status(404).json({ error: { code: "MANUSCRIPT_RELEASE_NOT_FOUND" } }); return; }
+    res.json({ release });
+  }));
+
+  app.post("/api/novel/projects/:projectId/publication-editions/:editionId/manuscript-release/:releaseId/transition", asyncRoute(async (req, res) => {
+    const project = await readProject(req.params.projectId);
+    try {
+      const current = await readManuscriptRelease(projectRoot(project.slug), req.params.releaseId);
+      if (!current || current.editionId !== req.params.editionId || current.projectSlug !== project.slug) { res.status(404).json({ error: { code: "MANUSCRIPT_RELEASE_NOT_FOUND" } }); return; }
+      const release = await transitionManuscriptRelease(projectRoot(project.slug), req.params.releaseId, { target: req.body?.target, actor: "author", authorApprovalId: typeof req.body?.authorApprovalId === "string" ? req.body.authorApprovalId : undefined, reason: typeof req.body?.reason === "string" ? req.body.reason : undefined, deliveryProofEditionId: typeof req.body?.deliveryProofEditionId === "string" ? req.body.deliveryProofEditionId : undefined });
+      res.status(201).json({ release });
+    } catch (error) { res.status(409).json({ error: { code: error instanceof Error ? error.message : "MANUSCRIPT_RELEASE_TRANSITION_INVALID" } }); }
   }));
 
   app.post("/api/novel/projects/:projectId/release-e2e-acceptance", asyncRoute(async (req, res) => {

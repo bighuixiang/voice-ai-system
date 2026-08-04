@@ -12,7 +12,7 @@
     "worker:runtime": "tsx src/runtimeWorker.ts",
     "worker:runtime:built": "node dist/runtimeWorker.js",
     "build": "tsc -p tsconfig.json",
-    "test": "vitest --run --pool=threads --maxWorkers=1 --minWorkers=1",
+    "test": "vitest --run --pool=forks --maxWorkers=1 --minWorkers=1",
     "test:real-codex": "node scripts/run-real-codex-test.mjs"
   },
   "dependencies": {

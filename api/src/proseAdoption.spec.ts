@@ -78,4 +78,17 @@ describe("prose adoption transaction", () => {
     await expect(readProseAdoptionTransaction(root, committed.transactionId)).rejects.toThrow("PROSE_ADOPTION_INTEGRITY_FAILED");
     await expect(adoptProseCandidate(input)).rejects.toThrow("PROSE_ADOPTION_INTEGRITY_FAILED");
   });
+
+  it("fails closed when a committed adoption transaction omits its commit timestamp", async () => {
+    const { root, candidate } = await fixture();
+    const expected = crypto.createHash("sha256").update("old canon\n").digest("hex");
+    const committed = await adoptProseCandidate({ root, candidateId: candidate.candidateId, targetPath: "chapters/c1.md", expectedCanonSha256: expected, authorizationId: "author-1" });
+    const target = path.join(root, "sessions", "prose-adoptions", `${committed.transactionId}.json`);
+    const persisted = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown> & { fingerprint: string };
+    delete persisted.committedAt;
+    const { fingerprint: _fingerprint, ...base } = persisted;
+    persisted.fingerprint = crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex");
+    await fs.writeFile(target, JSON.stringify(persisted), "utf8");
+    await expect(readProseAdoptionTransaction(root, committed.transactionId)).rejects.toThrow("PROSE_ADOPTION_INTEGRITY_FAILED");
+  });
 });

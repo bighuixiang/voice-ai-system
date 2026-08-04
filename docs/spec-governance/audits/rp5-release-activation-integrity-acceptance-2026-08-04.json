@@ -1,0 +1,15 @@
+{
+  "auditId": "rp5-release-activation-integrity-acceptance-2026-08-04",
+  "scope": "ReleaseActivation persisted evidence integrity",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "fails closed when a re-signed activation has an invalid activatedAt timestamp",
+    "beforeFix": "a re-signed active activation with activatedAt=not-a-timestamp was accepted"
+  },
+  "greenEvidence": {
+    "command": "node_modules\\.bin\\vitest.cmd --run --pool=forks --maxWorkers=1 --minWorkers=1 src/releaseActivation.spec.ts --reporter=dot",
+    "result": "5 tests passed"
+  },
+  "guardedFields": ["acceptanceFingerprint", "activatedAt", "releaseProfile", "status", "fingerprint"],
+  "boundary": "An activation record cannot be treated as current release authority unless its acceptance binding and timestamp are structurally valid."
+}

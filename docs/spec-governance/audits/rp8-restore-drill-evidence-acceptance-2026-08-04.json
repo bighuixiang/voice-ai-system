@@ -1,0 +1,18 @@
+{
+  "auditId": "rp8-restore-drill-evidence-acceptance-2026-08-04",
+  "scope": "Isolated backup verification and restore drill evidence for release rollback readiness",
+  "requirements": ["FR-PUBLISH-003"],
+  "red": [
+    "A corrupted backup could be restored into the active source tree.",
+    "A successful restore command could be treated as production recovery without author confirmation."
+  ],
+  "green": [
+    "Corrupted backup objects fail the isolated drill without modifying the source tree.",
+    "Restore evidence records workerStarted=false and externalMessagesSent=false.",
+    "Recovery settlement requires verified drill evidence and explicit author confirmation."
+  ],
+  "command": "npm.cmd --prefix api test -- src/projectBackup.spec.ts",
+  "result": "project backup and restore drill tests passed",
+  "evidence": ["api/src/projectBackup.ts", "api/src/restoreDrill.ts", "api/src/projectBackup.spec.ts"],
+  "boundary": "The drill is local and isolated; it does not prove an external object-store copy or a production disaster failover."
+}

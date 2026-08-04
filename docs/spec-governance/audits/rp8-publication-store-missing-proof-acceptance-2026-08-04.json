@@ -1,0 +1,22 @@
+{
+  "auditId": "rp8-publication-store-missing-proof-acceptance-2026-08-04",
+  "scope": "Publication evidence loader tolerates absent DeliveryProof while preserving server-authoritative preflight",
+  "status": "accepted",
+  "redEvidence": {
+    "test": "keeps the edition evidence visible when delivery proof has not been issued",
+    "beforeFix": "A 404 proof read rejected the entire evidence bundle and returned null"
+  },
+  "greenEvidence": {
+    "command": "npm.cmd --prefix ui run test -- src/stores/novel.spec.ts --reporter=dot",
+    "result": "105 tests passed"
+  },
+  "guardedFields": [
+    "manifest",
+    "tree",
+    "artifacts",
+    "proof",
+    "preflight",
+    "publicationEvidenceError"
+  ],
+  "boundary": "Only a missing proof (HTTP 404) is optional; other proof read failures still fail the evidence load, and preflight remains authoritative."
+}

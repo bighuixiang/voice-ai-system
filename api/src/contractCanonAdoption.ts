@@ -4,6 +4,7 @@ import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
 import { readContractAdoptionProposal, type ContractAdoptionProposal } from "./contractAdoption.js";
 import { readWorldRuleContract, type WorldRuleContract } from "./worldRuleContract.js";
+import { computeCanonCommitFingerprint } from "./canonCommit.js";
 
 type MutationStatus = "prepared" | "committing" | "committed" | "rolling_back" | "rolled_back" | "failed";
 
@@ -274,7 +275,8 @@ export async function commitContractAdoption(root: string, input: AdoptionInput)
   const targets = ["project.json", "story-control/story-control.json", "bible/characters.md", "bible/world.md", "sessions/story-contract-adoption-proposal.json", "sessions/canon-commit-events.jsonl", "sessions/projection-invalidation-events.jsonl"];
   const before = new Map<string, { existed: boolean; content: string }>();
   for (const target of targets) before.set(target, await readOptional(root, target));
-  const event = JSON.stringify({ schemaVersion: "canon-commit-event.v1", eventId: `canon-commit-${mutationId}`, mutationId, proposalId: proposal.proposalId, authorizationId: input.authorization.authorizationId, actorId: input.authorization.actorId, candidateId: proposal.candidateId, createdAt: new Date().toISOString() }) + "\n";
+  const canonCommitFingerprint = computeCanonCommitFingerprint({ mutationId, proposalId: proposal.proposalId, projectSlug: proposal.projectSlug, authorizationId: input.authorization.authorizationId, actorId: input.authorization.actorId, candidateId: proposal.candidateId });
+  const event = JSON.stringify({ schemaVersion: "canon-commit-event.v1", eventId: `canon-commit-${mutationId}`, mutationId, proposalId: proposal.proposalId, projectSlug: proposal.projectSlug, authorizationId: input.authorization.authorizationId, actorId: input.authorization.actorId, candidateId: proposal.candidateId, canonCommitFingerprint, createdAt: new Date().toISOString() }) + "\n";
   const invalidation = JSON.stringify({ schemaVersion: "projection-invalidation-event.v1", eventId: `projection-invalidation-${mutationId}`, mutationId, candidateId: proposal.candidateId, reviewId: proposal.reviewId, affectedProjections: ["understanding-review", "contract-candidate", "story-graph", "knowledge-index"], createdAt: new Date().toISOString() }) + "\n";
   const committedProposal = `${JSON.stringify({ ...proposal, status: "committed", canonWritten: true, committedMutationId: mutationId, committedAt: new Date().toISOString() }, null, 2)}\n`;
   const after = new Map<string, string>([

@@ -63,7 +63,10 @@ function assertTransactionIntegrity(transaction: ProseAdoptionTransaction, trans
     Array.isArray(audit.derivedCandidates) && audit.derivedCandidates.every((value) => typeof value === "string" && value.trim()) &&
     Array.isArray(audit.changeSet) && audit.changeSet.length > 0 && audit.changeSet.every((change) => change.segmentId.trim() && Number.isInteger(change.startOffset) && Number.isInteger(change.endOffset) && change.startOffset >= 0 && change.endOffset >= change.startOffset && /^[a-f0-9]{64}$/i.test(change.beforeFingerprint) && /^[a-f0-9]{64}$/i.test(change.afterFingerprint))
   );
-  if (transaction.schemaVersion !== "prose-adoption-transaction.v1" || transaction.transactionId !== transactionId || !transaction.candidateId.trim() || !transaction.targetPath.trim() || !transaction.authorizationId.trim() || !["supports-adoption", "blocks-adoption", "evidence-insufficient"].includes(transaction.reviewVerdict) || !["prepared", "committed", "rolled_back", "blocked"].includes(transaction.status) || !validAudit || !/^[a-f0-9]{64}$/i.test(transaction.fingerprint) || hashValue(base) !== transaction.fingerprint) throw new Error("PROSE_ADOPTION_INTEGRITY_FAILED");
+  const validCommitTiming = transaction.status === "committed"
+    ? typeof transaction.committedAt === "string" && Number.isFinite(Date.parse(transaction.committedAt))
+    : transaction.committedAt === undefined;
+  if (transaction.schemaVersion !== "prose-adoption-transaction.v1" || transaction.transactionId !== transactionId || !transaction.candidateId.trim() || !transaction.targetPath.trim() || !transaction.authorizationId.trim() || !["supports-adoption", "blocks-adoption", "evidence-insufficient"].includes(transaction.reviewVerdict) || !["prepared", "committed", "rolled_back", "blocked"].includes(transaction.status) || !validCommitTiming || !validAudit || !/^[a-f0-9]{64}$/i.test(transaction.fingerprint) || hashValue(base) !== transaction.fingerprint) throw new Error("PROSE_ADOPTION_INTEGRITY_FAILED");
   return transaction;
 }
 

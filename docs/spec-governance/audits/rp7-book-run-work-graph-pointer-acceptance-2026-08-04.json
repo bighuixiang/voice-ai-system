@@ -1,0 +1,12 @@
+{
+  "auditId": "rp7-book-run-work-graph-pointer-acceptance-2026-08-04",
+  "scope": "BookRun completion cannot be audited against a graph different from its frozen work-graph pointer",
+  "status": "accepted",
+  "evidence": {
+    "red": "requires the BookRun work-graph pointer to match the current graph",
+    "command": "npm.cmd --prefix api test -- src/completionAudit.spec.ts src/bookRunClosure.spec.ts",
+    "result": "8 tests passed"
+  },
+  "guardedFields": ["BookRun.workGraphFingerprint", "BookWorkGraph.fingerprint", "CompletionAudit", "BookRunClosureReadiness"],
+  "boundary": "A stale pointer blocks closure and completion; an explicit pointer refresh creates a new run version and requires fresh quiescence evidence before auditing."
+}

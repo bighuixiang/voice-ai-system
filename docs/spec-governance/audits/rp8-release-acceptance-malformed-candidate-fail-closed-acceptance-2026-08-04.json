@@ -1,0 +1,12 @@
+{
+  "auditId": "rp8-release-acceptance-malformed-candidate-fail-closed-acceptance-2026-08-04",
+  "scope": "ReleaseAcceptance ignores malformed publication candidates without aborting evaluation",
+  "status": "accepted",
+  "evidence": {
+    "red": "fails closed and continues when a candidate edition manifest is malformed",
+    "command": "npm.cmd --prefix api test -- src/releaseAcceptance.spec.ts",
+    "result": "25 tests passed"
+  },
+  "guardedFields": ["EditionManifest", "ReleasePreflight", "CanonCommit", "release-acceptance.delivery-proof"],
+  "boundary": "Malformed candidate evidence is non-authoritative and cannot abort evaluation or turn an unrelated candidate into accepted delivery evidence."
+}

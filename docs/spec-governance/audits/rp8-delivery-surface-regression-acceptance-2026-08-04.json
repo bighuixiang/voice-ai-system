@@ -1,0 +1,15 @@
+{
+  "auditId": "rp8-delivery-surface-regression-acceptance-2026-08-04",
+  "scope": "API and UI delivery surfaces remain regression-safe after BookRun, publication, manifest, proof, and access-grant integrity slices",
+  "status": "accepted",
+  "evidence": {
+    "apiCommand": "npm.cmd --prefix api test (Vitest forks pool)",
+    "apiResult": "2491 tests passed, 1 skipped",
+    "uiCommand": "npm.cmd --prefix ui test",
+    "uiResult": "350 tests passed",
+    "buildCommand": "npm.cmd run build",
+    "buildResult": "API TypeScript build and UI production build passed",
+    "governanceVerifier": "node scripts/spec-governance-verifier.mjs passed"
+  },
+  "boundary": "This proves repository-level regression and production-build integrity after ManuscriptRelease, download receipt, and leak-preflight slices; it does not claim a deployed production environment or real-provider/reader-outcome acceptance."
+}

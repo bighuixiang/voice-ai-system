@@ -1,0 +1,23 @@
+{
+  "auditId": "rp8-delivery-access-receipt-acceptance-2026-08-04",
+  "scope": "FR-PUBLISH-003 DeliveryAccessGrant download receipt identity, idempotency and revoke fail-closed behavior",
+  "requirements": ["FR-PUBLISH-003"],
+  "red": [
+    "A receipt could be recorded after grant revocation.",
+    "A repeated receipt request could mutate the original access timestamp.",
+    "An authorized download could bypass byte verification or fail to leave a receipt."
+  ],
+  "green": [
+    "Receipts require a currently valid, non-revoked grant.",
+    "Receipts freeze artifact-set fingerprint and per-artifact byte identities.",
+    "The same receipt identity is immutable and idempotent.",
+    "Each download is byte-verified, returns the artifact MIME, and exposes a receipt identity; revoked grants fail closed."
+  ],
+  "command": "npm.cmd --prefix api test -- src/deliveryAccessReceipt.spec.ts; npm.cmd --prefix api test -- src/app.spec.ts -t \"freezes and reads a publication edition\"",
+  "result": "3 domain tests passed; 1 API integration test passed",
+  "evidence": [
+    "api/src/deliveryAccessReceipt.ts",
+    "api/src/deliveryAccessReceipt.spec.ts"
+  ],
+  "boundary": "Domain and HTTP download evidence is covered; production leak-scan, real recipient exercise and rollback drill remain open."
+}

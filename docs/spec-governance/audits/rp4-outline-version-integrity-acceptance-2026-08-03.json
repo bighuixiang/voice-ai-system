@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "slice-acceptance.v1",
+  "sliceId": "rp4-outline-version-integrity",
+  "releaseProfile": "RP4-outline",
+  "sourceSddVersion": "2026-07-24-novel-creative-partner-sdd",
+  "requirements": [
+    "An adopted outline version must not claim more strongly frozen chapters than it selects.",
+    "Malformed or rehashed persisted outline versions must fail closed before execution readiness can consume them."
+  ],
+  "implementationRefs": [
+    "api/src/outlineCommit.ts:assertOutlineVersionIntegrity",
+    "api/src/outlineCommit.spec.ts:fails closed when a persisted outline version freezes more chapters than it selects"
+  ],
+  "tests": {
+    "red": "A rehashed persisted version with strongFreezeCount greater than selectedChapterIds.length was accepted.",
+    "green": "outlineCommit.spec.ts passed 6/6 after enforcing strongFreezeCount <= selectedChapterIds.length."
+  },
+  "result": "passed",
+  "releaseBoundary": "not-release-approval",
+  "notYetProven": [
+    "This validates one RP4 persistence invariant, not the full outline-to-prose journey.",
+    "Execution-ready proof still requires representative chapter execution and fresh context evidence.",
+    "Full release migration, external calibration, independent review, and delivery proof remain incomplete."
+  ]
+}
