@@ -2,11 +2,11 @@
   <section class="creative-session-panel" data-testid="creative-session-panel" aria-labelledby="creative-session-title">
     <header class="creative-session-header">
       <div>
-        <p class="eyebrow">Author workspace</p>
-        <h2 id="creative-session-title">Main creative input</h2>
-        <p>Capture the author's words first. Interpretation and generation stay downstream.</p>
+        <p class="eyebrow">作者工作台</p>
+        <h2 id="creative-session-title">创作输入</h2>
+        <p>先记录作者的原话，理解与生成将在后续环节进行。</p>
       </div>
-      <span class="session-status" :class="{ loading }">{{ loading ? "Loading" : "Durable" }}</span>
+      <span class="session-status" :class="{ loading }">{{ loading ? "加载中" : "已持久化" }}</span>
     </header>
 
     <div v-if="error" class="session-error" role="alert">{{ error }}</div>
@@ -15,13 +15,13 @@
       <button type="button" data-testid="retry-contract-candidate" @click="emit('retry-contract')">重试生成契约候选</button>
     </div>
     <div v-if="journey" class="journey-primary-action" data-testid="journey-primary-action">
-      <span class="journey-stage">{{ journey.stage }}</span>
+      <span class="journey-stage">{{ stageLabel(journey.stage) }}</span>
       <strong>{{ journey.primaryAction.label }}</strong>
       <span v-if="journey.activeQuestion" class="journey-question">{{ journey.activeQuestion.text }}</span>
       <button type="button" class="journey-action-button" @click="emit('primary-action', journey.primaryAction.id)">
         {{ journey.primaryAction.label }}
       </button>
-      <button v-if="journey.stage === 'understanding' && !question" type="button" class="prepare-question-button" data-testid="prepare-question" @click="emit('prepare-question')">
+      <button v-if="journey.stage === 'understanding' && contextManifest && !question" type="button" class="prepare-question-button" data-testid="prepare-question" @click="emit('prepare-question')">
         生成唯一问题
       </button>
     </div>
@@ -43,38 +43,38 @@
       </div>
       <button type="submit" :disabled="!answerDraft.trim()">确认回答</button>
     </form>
-    <ol v-if="session?.messages.length" class="session-messages" aria-label="Captured messages">
+    <ol v-if="session?.messages.length" class="session-messages" aria-label="已记录的消息">
       <li v-for="message in session.messages" :key="message.id" class="session-message">
-        <span class="message-role">Author</span>
+        <span class="message-role">作者</span>
         <p>{{ message.text }}</p>
       </li>
     </ol>
-    <p v-else class="session-empty">No author words captured yet.</p>
+    <p v-else class="session-empty">还没有记录作者原话。</p>
 
     <div v-if="preview" class="understanding-preview" data-testid="understanding-preview">
-      <div class="preview-heading">Read-only understanding preview</div>
+      <div class="preview-heading">只读理解预览</div>
       <ul v-if="preview.coreExplicit.length" class="preview-claims">
         <li v-for="claim in preview.coreExplicit" :key="claim.id">{{ claim.text }}</li>
       </ul>
-      <p v-for="unknown in preview.unknowns" :key="unknown.id" class="preview-unknown">Unknown: {{ unknown.text }}</p>
+      <p v-for="unknown in preview.unknowns" :key="unknown.id" class="preview-unknown">待确认：{{ unknown.text }}</p>
       <button v-if="!contextManifest" type="button" class="freeze-button" :disabled="freezing || !session?.messages.length" @click="emit('freeze')">
-        {{ freezing ? "Freezing input" : "Freeze exact input for V2" }}
+        {{ freezing ? "正在冻结输入" : "冻结 V2 的完整原始输入" }}
       </button>
-      <p v-else class="manifest-state">T0 frozen: {{ contextManifest.manifestId }}</p>
+      <p v-else class="manifest-state">T0 已冻结：{{ contextManifest.manifestId }}</p>
     </div>
 
     <form class="session-input" @submit.prevent="submitMessage">
-      <label for="creative-session-input">Author input</label>
+      <label for="creative-session-input">作者输入</label>
       <textarea
         id="creative-session-input"
         v-model="draft"
-        aria-label="Author input"
+        aria-label="作者输入"
         rows="3"
-        placeholder="Write the idea, scene, question, or constraint in your own words..."
+        placeholder="请用自己的话写下想法、场景、问题或约束……"
         :disabled="submitting"
       />
       <button type="submit" :disabled="submitting || !draft.trim()">
-        {{ submitting ? "Saving" : "Capture words" }}
+        {{ submitting ? "保存中" : "记录原话" }}
       </button>
     </form>
   </section>
@@ -120,6 +120,10 @@ function submitAnswer() {
 
 function selectRedBlueOption(label: string) {
   answerDraft.value = label;
+}
+
+function stageLabel(stage: CreativeJourneyProjection["stage"]) {
+  return stage === "capture" ? "记录" : stage === "understanding" ? "理解" : stage;
 }
 </script>
 

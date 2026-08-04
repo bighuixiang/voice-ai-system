@@ -4240,7 +4240,9 @@ export const useNovelStore = defineStore("novel", () => {
     const currentAction = creativeJourney.value?.primaryAction.id;
     if (actionId && actionId !== currentAction) return null;
     if (currentAction === "review-understanding") {
-      return freezeCurrentContextManifest();
+      const frozen = await freezeCurrentContextManifest();
+      if (!frozen) return null;
+      return prepareUnderstandingQuestion();
     }
     return null;
   }

@@ -501,7 +501,7 @@ import { createManuscriptRelease, readManuscriptRelease, transitionManuscriptRel
 import { buildReleasePreflight } from "./releasePreflight.js";
 import { assertClosureCertificateCurrent, issueClosureCertificate, readClosureCertificate } from "./closureCertificate.js";
 import { buildStoryContractReadinessProof, readStoryContractReadinessProof } from "./contractReadiness.js";
-import { executeShadowUnderstanding, readUnderstandingSnapshot } from "./understandingExecutor.js";
+import { executeDeterministicUnderstanding, executeShadowUnderstanding, readUnderstandingSnapshot } from "./understandingExecutor.js";
 import { AgentProcessRunner } from "./codexRunner.js";
 import {
   cancelUnderstandingTask,
@@ -2294,16 +2294,18 @@ export function createApp() {
       capabilityAuthorization,
       fingerprintCreativeSession(session)
     );
-    if (req.body?.mode === "shadow" && preflight.modelCallAllowed && contextManifest && budgetReservation && capabilityAuthorization) {
-      const result = await executeShadowUnderstanding({
-        root,
-        projectSlug: project.slug,
-        session,
-        manifest: contextManifest,
-        riskProfile: buildUnderstandingRiskProfile(),
-        budget: budgetReservation,
-        capability: capabilityAuthorization
-      });
+    if (req.body?.mode === "shadow" && contextManifest && contextManifest.sourceFingerprint === fingerprintCreativeSession(session)) {
+      const result = preflight.modelCallAllowed && budgetReservation && capabilityAuthorization
+        ? await executeShadowUnderstanding({
+          root,
+          projectSlug: project.slug,
+          session,
+          manifest: contextManifest,
+          riskProfile: buildUnderstandingRiskProfile(),
+          budget: budgetReservation,
+          capability: capabilityAuthorization
+        })
+        : await executeDeterministicUnderstanding({ root, projectSlug: project.slug, session, manifest: contextManifest });
       res.status(201).json(result);
       return;
     }

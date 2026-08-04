@@ -155,11 +155,21 @@ import type {
 
 const jsonHeaders = { "Content-Type": "application/json" };
 
+function errorMessage(error: unknown, fallback: string): string {
+  if (typeof error === "string" && error.trim()) return error;
+  if (error && typeof error === "object") {
+    const value = error as { message?: unknown; code?: unknown };
+    if (typeof value.message === "string" && value.message.trim()) return value.message;
+    if (typeof value.code === "string" && value.code.trim()) return value.code;
+  }
+  return fallback;
+}
+
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, options);
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.error || `Request failed: ${response.status}`);
+    throw new Error(errorMessage(data.error, `Request failed: ${response.status}`));
   }
   return data as T;
 }

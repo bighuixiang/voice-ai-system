@@ -106,26 +106,16 @@ async function writeJson(root: string, relativePath: string, value: unknown): Pr
   await fs.rename(temp, target);
 }
 
-export async function executeShadowUnderstanding(input: {
+async function persistShadowSnapshot(input: {
   root: string;
   projectSlug: string;
   session: CreativeSession;
   manifest: ContextManifest;
-  riskProfile: UnderstandingRiskProfile;
-  budget: UnderstandingBudgetReservation;
-  capability: UnderstandingCapabilityAuthorization;
-}): Promise<{ run: UnderstandingRun; snapshot: UnderstandingSnapshot }> {
-  if (!input.budget) throw new Error("UNDERSTANDING_BUDGET_REQUIRED");
-  if (input.budget.manifestFingerprint !== input.manifest.sourceFingerprint) throw new Error("UNDERSTANDING_BUDGET_STALE");
-  if (!input.capability || input.capability.status !== "authorized" || !input.capability.modelCallAllowed) throw new Error("UNDERSTANDING_CAPABILITY_REQUIRED");
-  if (input.capability.manifestFingerprint !== input.manifest.sourceFingerprint || input.capability.budgetReservationId !== input.budget.reservationId) throw new Error("UNDERSTANDING_CAPABILITY_STALE");
-  if (input.capability.riskProfileFingerprint !== input.riskProfile.fingerprint) throw new Error("UNDERSTANDING_RISK_PROFILE_STALE");
+}): Promise<UnderstandingSnapshot> {
   const preview = buildUnderstandingPreview(input.session);
-  const now = new Date().toISOString();
-  const snapshotId = `understanding-shadow-${input.manifest.sourceFingerprint.slice(0, 16)}`;
   const snapshotBase: Omit<UnderstandingSnapshot, "fingerprint"> = {
     schemaVersion: "understanding-snapshot.v1" as const,
-    snapshotId,
+    snapshotId: `understanding-shadow-${input.manifest.sourceFingerprint.slice(0, 16)}`,
     projectSlug: input.projectSlug,
     mode: "shadow" as const,
     sourceFingerprint: input.manifest.sourceFingerprint,
@@ -142,10 +132,39 @@ export async function executeShadowUnderstanding(input: {
     },
     modelCallIssued: false,
     canonWritten: false,
-    createdAt: now
+    createdAt: new Date().toISOString()
   };
-  const snapshot: UnderstandingSnapshot = { ...snapshotBase, fingerprint: crypto.createHash("sha256").update(JSON.stringify(snapshotBase)).digest("hex") };
+  const snapshot: UnderstandingSnapshot = { ...snapshotBase, fingerprint: hash(snapshotBase) };
   await writeJson(input.root, "sessions/understanding-snapshot.json", snapshot);
+  return snapshot;
+}
+
+/** Builds the non-AI, non-canon understanding baseline from a frozen author input. */
+export async function executeDeterministicUnderstanding(input: {
+  root: string;
+  projectSlug: string;
+  session: CreativeSession;
+  manifest: ContextManifest;
+}): Promise<{ snapshot: UnderstandingSnapshot }> {
+  return { snapshot: await persistShadowSnapshot(input) };
+}
+
+export async function executeShadowUnderstanding(input: {
+  root: string;
+  projectSlug: string;
+  session: CreativeSession;
+  manifest: ContextManifest;
+  riskProfile: UnderstandingRiskProfile;
+  budget: UnderstandingBudgetReservation;
+  capability: UnderstandingCapabilityAuthorization;
+}): Promise<{ run: UnderstandingRun; snapshot: UnderstandingSnapshot }> {
+  if (!input.budget) throw new Error("UNDERSTANDING_BUDGET_REQUIRED");
+  if (input.budget.manifestFingerprint !== input.manifest.sourceFingerprint) throw new Error("UNDERSTANDING_BUDGET_STALE");
+  if (!input.capability || input.capability.status !== "authorized" || !input.capability.modelCallAllowed) throw new Error("UNDERSTANDING_CAPABILITY_REQUIRED");
+  if (input.capability.manifestFingerprint !== input.manifest.sourceFingerprint || input.capability.budgetReservationId !== input.budget.reservationId) throw new Error("UNDERSTANDING_CAPABILITY_STALE");
+  if (input.capability.riskProfileFingerprint !== input.riskProfile.fingerprint) throw new Error("UNDERSTANDING_RISK_PROFILE_STALE");
+  const now = new Date().toISOString();
+  const { snapshot } = await executeDeterministicUnderstanding(input);
   const runId = `understanding-run-${input.manifest.sourceFingerprint.slice(0, 16)}`;
   const run: UnderstandingRun = {
     schemaVersion: "understanding-run.v1",
@@ -157,7 +176,7 @@ export async function executeShadowUnderstanding(input: {
     riskProfileFingerprint: input.riskProfile.fingerprint,
     budgetReservationId: input.budget.reservationId,
     capabilityAuthorizationFingerprint: input.capability.fingerprint,
-    snapshotId,
+    snapshotId: snapshot.snapshotId,
     modelCallIssued: false,
     canonWritten: false,
     createdAt: now,

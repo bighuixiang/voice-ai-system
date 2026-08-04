@@ -87,7 +87,7 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
     blockingRef: "question-primary-desire",
     primaryAction: dialogueState.activeQuestion
       ? { id: `answer-${dialogueState.activeQuestion.questionId}`, label: "回答当前问题", kind: "answer", status: "available" }
-      : { id: "review-understanding", label: "确认当前理解", kind: "review", status: "available" },
+      : { id: "review-understanding", label: "确认原始输入并生成问题", kind: "review", status: "available" },
     ...(activeQuestion ? { activeQuestion } : {}),
     sessionFingerprint: preview.inputFingerprint
   };

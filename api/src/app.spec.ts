@@ -2439,6 +2439,29 @@ describe.sequential("novel API routes", () => {
     expect(response.data.error).toEqual({ code: "UNDERSTANDING_MODE_INVALID" });
   });
 
+  it("creates a deterministic understanding snapshot after T0 is frozen without reserving model access", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Deterministic Understanding", roughIdea: "A frozen input should yield the first question." })
+    });
+    const slug = created.data.project.slug;
+    await jsonFetch(`/api/novel/projects/${slug}/session/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientMessageId: "deterministic-001", text: "A sealed gate opens at midnight." })
+    });
+    await jsonFetch(`/api/novel/projects/${slug}/session/context-manifest`, { method: "POST" });
+
+    const response = await jsonFetch<{ snapshot: { mode: string; modelCallIssued: boolean; canonWritten: boolean } }>(
+      `/api/novel/projects/${slug}/session/understanding`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "shadow" }) }
+    );
+
+    expect(response.status).toBe(201);
+    expect(response.data.snapshot).toMatchObject({ mode: "shadow", modelCallIssued: false, canonWritten: false });
+  });
+
   it("exposes a read-only understanding preview with explicit source spans", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
       method: "POST",
@@ -2457,7 +2480,7 @@ describe.sequential("novel API routes", () => {
         inputFingerprint: string;
         coreExplicit: Array<{ status: string; text: string; evidence: Array<{ messageId: string; start: number; end: number }> }>;
         inferred: unknown[];
-        unknowns: Array<{ status: string }>;
+        unknowns: Array<{ status: string; text: string }>;
         modelCallIssued: boolean;
         canonWritten: boolean;
       };
@@ -2478,7 +2501,7 @@ describe.sequential("novel API routes", () => {
       })
     ]);
     expect(preview.data.preview.inferred).toEqual([]);
-    expect(preview.data.preview.unknowns).toEqual([expect.objectContaining({ status: "unknown" })]);
+    expect(preview.data.preview.unknowns).toEqual([expect.objectContaining({ status: "unknown", text: "故事意图和下一项作者决策尚未明确。" })]);
   });
 
   it("exposes one journey projection instead of requiring clients to infer the next action", async () => {

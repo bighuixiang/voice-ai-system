@@ -51,7 +51,7 @@ export function buildUnderstandingPreview(session: CreativeSession): Understandi
     unknowns: [
       {
         id: "unknown-story-intent",
-        text: "Story intent and the next author decision are not yet understood.",
+        text: "故事意图和下一项作者决策尚未明确。",
         status: "unknown",
         evidence: []
       }
@@ -61,4 +61,3 @@ export function buildUnderstandingPreview(session: CreativeSession): Understandi
     canonWritten: false
   };
 }
-

@@ -1,22 +1,32 @@
 {
   "schemaVersion": "creative-journey-projection.v1",
   "projectSlug": "novel-1780911338197",
-  "sourceMessageIds": [],
-  "sessionFingerprint": "229a6b20eeaf783b6b0544928dd4ae165a6d778e7750ae63a0f542de002886ae",
-  "sourceFingerprint": "229a6b20eeaf783b6b0544928dd4ae165a6d778e7750ae63a0f542de002886ae",
-  "projectionVersion": "c47e38a01e623762a8afc15f",
+  "sourceMessageIds": [
+    "message-9892b930-c7a6-4839-b4fb-cd5d2c3e73b9"
+  ],
+  "sessionFingerprint": "ae98ded965a6fb3a6a821cc07346d8682eb985c40bd6cd7e3741f0c9e7b708d0",
+  "sourceFingerprint": "363a3c15396341dbc5a7d384ba591ffb8a554572411eeef25a6c2e14062d92e1",
+  "projectionVersion": "ed440683c9bbfad8c4815197",
   "freshness": "current",
   "unsavedState": {
     "hasDraft": false
   },
   "pendingRefs": [],
-  "stage": "capture",
-  "primaryAsset": "creative-session",
+  "stage": "understanding",
+  "primaryAsset": "understanding-preview",
+  "blockingRef": "question-primary-desire",
   "primaryAction": {
-    "id": "capture-idea",
-    "label": "告诉我你的想法",
-    "kind": "capture",
+    "id": "answer-question-primary-desire",
+    "label": "回答当前问题",
+    "kind": "answer",
     "status": "available"
   },
-  "fingerprint": "98f0ed54d9bdcc1cc3b9570938e1bc495f3ec4e30ce7c27e533803c2cc0b46b5"
+  "activeQuestion": {
+    "id": "question-primary-desire",
+    "text": "What must the protagonist want most in the opening movement?",
+    "status": "active",
+    "impact": "high",
+    "source": "deterministic-gap"
+  },
+  "fingerprint": "dcf2029ef6d7aa95522891d42cf2e500740eb4c712ea605914bbca752ab67323"
 }

@@ -27,6 +27,12 @@ describe("novelApi", () => {
     expect(fetch).toHaveBeenCalledWith("/api/novel/projects", {});
   });
 
+  it("surfaces a structured API error by its actionable code", async () => {
+    mockJson({ error: { code: "V2_DEPENDENCY_MISSING", message: "Freeze the author input first." } }, false, 409);
+
+    await expect(novelApi.startUnderstanding("demo", "shadow")).rejects.toThrow("Freeze the author input first.");
+  });
+
   it("creates a project from a rough idea", async () => {
     mockJson({
       project: {

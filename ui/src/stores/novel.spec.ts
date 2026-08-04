@@ -1250,6 +1250,47 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.freezeContextManifest).toHaveBeenCalledWith("demo");
   });
 
+  it("turns the confirmed understanding action into an active question", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.creativeJourney = {
+      schemaVersion: "creative-journey-projection.v1",
+      projectSlug: "demo",
+      stage: "understanding",
+      primaryAsset: "understanding-preview",
+      primaryAction: { id: "review-understanding", label: "确认当前理解", kind: "review", status: "available" },
+      sourceMessageIds: ["message-1"],
+      sessionFingerprint: "a".repeat(64)
+    };
+    const question = {
+      schemaVersion: "dialogue-question.v1" as const,
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      projectSlug: "demo",
+      status: "active" as const,
+      text: "What must the protagonist want most?",
+      whyNow: "The opening depends on this.",
+      impact: "high" as const,
+      ambiguity: 0.8,
+      errorCost: "Wrong opening",
+      reversibility: "Reversible",
+      delayCost: "Blocks progress",
+      options: [],
+      recommendation: "Choose a concrete desire.",
+      snapshotFingerprint: "b".repeat(64)
+    };
+    mockNovelApi.freezeContextManifest.mockResolvedValue({ created: true, manifest: { schemaVersion: "context-manifest.v1", manifestId: "manifest-1", projectSlug: "demo", sourceFingerprint: "b".repeat(64), sourceMessages: [], createdAt: "now" } });
+    mockNovelApi.startUnderstanding.mockResolvedValue({ snapshot: { mode: "shadow" } });
+    mockNovelApi.ensurePrimaryDialogueQuestion.mockResolvedValue({ created: true, question });
+    mockNovelApi.listDialogueQuestions.mockResolvedValue([question]);
+    mockNovelApi.readCreativeJourney.mockResolvedValue(store.creativeJourney);
+
+    await store.executeCreativeJourneyAction();
+
+    expect(mockNovelApi.startUnderstanding).toHaveBeenCalledWith("demo", "shadow");
+    expect(store.activeDialogueQuestion?.questionId).toBe("question-primary-desire");
+  });
+
   it("loads and answers the active dialogue question through the idempotent API", async () => {
     const store = useNovelStore();
     store.currentProject = project;

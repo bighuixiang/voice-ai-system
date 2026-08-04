@@ -25,7 +25,7 @@ describe("CreativeSessionPanel", () => {
     });
 
     expect(wrapper.get('[data-testid="creative-session-panel"]')).toBeTruthy();
-    expect(wrapper.get('textarea[aria-label="Author input"]').exists()).toBe(true);
+    expect(wrapper.get('textarea[aria-label="作者输入"]').exists()).toBe(true);
     expect(wrapper.text()).toContain("A storm arrives at the city gate.");
   });
 
@@ -38,7 +38,7 @@ describe("CreativeSessionPanel", () => {
 
   it("keeps the low-input author field writable while the session hydrates", async () => {
     const wrapper = mount(CreativeSessionPanel, { props: { session: null, loading: true } });
-    const input = wrapper.get('textarea[aria-label="Author input"]');
+    const input = wrapper.get('textarea[aria-label="作者输入"]');
 
     expect((input.element as HTMLTextAreaElement).disabled).toBe(false);
     await input.setValue("A short idea while the workspace is loading.");
@@ -82,7 +82,7 @@ describe("CreativeSessionPanel", () => {
           projectSlug: "demo",
           stage: "understanding",
           primaryAsset: "understanding-preview",
-          primaryAction: { id: "review-understanding", label: "确认当前理解", kind: "review", status: "available" },
+          primaryAction: { id: "review-understanding", label: "确认原始输入并生成问题", kind: "review", status: "available" },
           activeQuestion: { id: "question-primary-desire", text: "What must the protagonist want most?", status: "candidate", impact: "high", source: "deterministic-gap" },
           sourceMessageIds: ["m1"],
           sessionFingerprint: "a".repeat(64)
@@ -90,7 +90,8 @@ describe("CreativeSessionPanel", () => {
       }
     });
 
-    expect(wrapper.get('[data-testid="journey-primary-action"]').text()).toContain("确认当前理解");
+    expect(wrapper.get('[data-testid="journey-primary-action"]').text()).toContain("确认原始输入并生成问题");
+    expect(wrapper.get('.journey-stage').text()).toBe("理解");
   });
 
   it("emits the primary journey action when the author activates it", async () => {
@@ -112,6 +113,25 @@ describe("CreativeSessionPanel", () => {
     await wrapper.get('[data-testid="journey-primary-action"] button').trigger("click");
 
     expect(wrapper.emitted("primary-action")).toEqual([["review-understanding"]]);
+  });
+
+  it("does not offer question generation before the author confirms the frozen input", () => {
+    const wrapper = mount(CreativeSessionPanel, {
+      props: {
+        session: null,
+        journey: {
+          schemaVersion: "creative-journey-projection.v1",
+          projectSlug: "demo",
+          stage: "understanding",
+          primaryAsset: "understanding-preview",
+          primaryAction: { id: "review-understanding", label: "Review", kind: "review", status: "available" },
+          sourceMessageIds: ["m1"],
+          sessionFingerprint: "a".repeat(64)
+        }
+      }
+    });
+
+    expect(wrapper.find('[data-testid="prepare-question"]').exists()).toBe(false);
   });
 
   it("submits an answer for the active dialogue question", async () => {
@@ -185,7 +205,8 @@ describe("CreativeSessionPanel", () => {
           primaryAction: { id: "review-understanding", label: "确认当前理解", kind: "review", status: "available" },
           sourceMessageIds: ["m1"],
           sessionFingerprint: "a".repeat(64)
-        }
+        },
+        contextManifest: { schemaVersion: "context-manifest.v1", manifestId: "manifest-1", projectSlug: "demo", purpose: "understanding", sourceSessionId: "session-1", sourceFingerprint: "a".repeat(64), sourceMessages: [], frozenAt: "now" }
       }
     });
 
