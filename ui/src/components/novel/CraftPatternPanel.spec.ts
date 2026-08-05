@@ -9,9 +9,9 @@ const experiment: CraftExperiment = { schemaVersion: "craft-experiment.v1", expe
 describe("CraftPatternPanel", () => {
   it("shows lifecycle, evidence, and explicit canon boundary", () => {
     const wrapper = mount(CraftPatternPanel, { props: { patterns: [pattern], experiments: { [experiment.experimentId]: experiment } } });
-    expect(wrapper.text()).toContain("probation");
+    expect(wrapper.text()).toContain("试验中");
     expect(wrapper.text()).toContain("source://notes#1");
-    expect(wrapper.text()).toContain("不会自动写入 canon");
+    expect(wrapper.text()).toContain("不会自动写入正式设定");
   });
 
   it("emits validation only from a judged treatment experiment", async () => {

@@ -16,17 +16,16 @@
   "primaryAsset": "understanding-preview",
   "blockingRef": "question-primary-desire",
   "primaryAction": {
-    "id": "answer-question-primary-desire",
-    "label": "回答当前问题",
-    "kind": "answer",
+    "id": "review-understanding",
+    "label": "确认原始输入并生成问题",
+    "kind": "review",
     "status": "available"
   },
-  "activeQuestion": {
-    "id": "question-primary-desire",
-    "text": "What must the protagonist want most in the opening movement?",
-    "status": "active",
-    "impact": "high",
-    "source": "deterministic-gap"
+  "progress": {
+    "completed": 1,
+    "total": 10,
+    "current": 2
   },
-  "fingerprint": "dcf2029ef6d7aa95522891d42cf2e500740eb4c712ea605914bbca752ab67323"
+  "nextInstruction": "请继续确认下一个关键问题。",
+  "fingerprint": "0004af8a3fa073196e62405d0a29ad8ded0c919efaccf30db9e4b98b262cba90"
 }

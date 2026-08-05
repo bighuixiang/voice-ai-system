@@ -5,9 +5,11 @@ import { describe, expect, it } from "vitest";
 import {
   confirmStoryBlueprint,
   generateStoryBlueprint,
+  isStoryBlueprintConfirmationCurrent,
   readLatestStoryBlueprint,
   reviseStoryBlueprint
 } from "./storyBlueprint.js";
+import { appendAuthorMessage, readCreativeSession } from "./creativeSession.js";
 
 async function writeContractCandidate(root: string): Promise<void> {
   const candidate = {
@@ -95,7 +97,29 @@ describe("story blueprint candidates", () => {
 
     const confirmation = await confirmStoryBlueprint({ root, projectSlug: "blueprint-demo", blueprintId: revised.blueprintId, expectedFingerprint: revised.fingerprint, actorId: "author-1" });
 
-    expect(confirmation.confirmation).toMatchObject({ blueprintId: revised.blueprintId, blueprintFingerprint: revised.fingerprint, actorId: "author-1", status: "confirmed" });
+    expect(confirmation.confirmation).toMatchObject({ blueprintId: revised.blueprintId, blueprintFingerprint: revised.fingerprint, actorId: "author-1", status: "confirmed", authorMessageFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
     await expect(fs.access(path.join(root, "sessions", "story-blueprint-confirmations", `${original.blueprintId}.json`))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("作者输入版本变化后必须重新确认，即使时间戳相同", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "story-blueprint-"));
+    await writeContractCandidate(root);
+    const blueprint = (await generateStoryBlueprint({ root, projectSlug: "blueprint-demo", sourceContractCandidateId: "contract-candidate-final" })).blueprint;
+    const confirmation = (await confirmStoryBlueprint({ root, projectSlug: "blueprint-demo", blueprintId: blueprint.blueprintId, expectedFingerprint: blueprint.fingerprint, actorId: "author-1" })).confirmation;
+
+    expect(isStoryBlueprintConfirmationCurrent(await readCreativeSession(root, "blueprint-demo"), confirmation)).toBe(true);
+    expect(isStoryBlueprintConfirmationCurrent({
+      messages: [{
+        id: "message-same-millisecond",
+        clientMessageId: "same-millisecond",
+        role: "author",
+        text: "补充一个要求",
+        source: { kind: "author" },
+        createdAt: confirmation.confirmedAt
+      }]
+    } as any, confirmation)).toBe(false);
+
+    await appendAuthorMessage({ root, projectSlug: "blueprint-demo", clientMessageId: "later-author-input", text: "补充一个新的要求" });
+    expect(isStoryBlueprintConfirmationCurrent(await readCreativeSession(root, "blueprint-demo"), confirmation)).toBe(false);
   });
 });

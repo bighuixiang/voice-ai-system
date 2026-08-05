@@ -81,7 +81,7 @@ describe("BackgroundJobPanel", () => {
     expect(wrapper.text()).toContain("全书质量重建");
     expect(wrapper.text()).toContain("失败");
     expect(wrapper.text()).toContain("已取消");
-    expect(wrapper.text()).toContain("1 facts / 0 relations");
+    expect(wrapper.text()).toContain("1 条事实 / 0 条关系");
     expect(wrapper.text()).toContain("1.2s");
 
     await wrapper.findAll(".job-button")[0].trigger("click");

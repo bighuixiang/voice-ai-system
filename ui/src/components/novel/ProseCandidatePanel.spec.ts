@@ -16,7 +16,7 @@ const regression: ProseRepairRegression = { schemaVersion: "prose-repair-regress
 describe("ProseCandidatePanel", () => {
   it("keeps candidate prose visibly separate from canon", () => {
     const wrapper = mount(ProseCandidatePanel, { props: { candidates: [candidate] } });
-    expect(wrapper.text()).toContain("候选正文，不是 canon");
+    expect(wrapper.text()).toContain("候选正文，尚未成为正式设定");
     expect(wrapper.text()).toContain("Candidate prose only.");
     expect(wrapper.get("[data-testid='candidate-policy']").text()).toContain("tiered-quality.v1");
   });
@@ -31,7 +31,7 @@ describe("ProseCandidatePanel", () => {
 
   it("renders independent validation and red-blue evidence", () => {
     const wrapper = mount(ProseCandidatePanel, { props: { candidates: [candidate], validations: { [candidate.candidateId]: validation }, reviews: { [candidate.candidateId]: review } } });
-    expect(wrapper.text()).toContain("context: passed");
+    expect(wrapper.text()).toContain("上下文：验证通过");
     expect(wrapper.text()).toContain("Maintains POV.");
     expect(wrapper.text()).toContain("验证通过");
   });
@@ -46,7 +46,7 @@ describe("ProseCandidatePanel", () => {
     const wrapper = mount(ProseCandidatePanel, { props: { candidates: [candidate], reviews: { [candidate.candidateId]: blockedReview }, repairPlans: { [candidate.candidateId]: repairPlan }, repairCandidates: { [candidate.candidateId]: repairCandidate }, repairRegressions: { [candidate.candidateId]: regression } } });
     await wrapper.get("[data-testid='evaluate-repair-prose-1']").trigger("click");
     expect(wrapper.emitted("evaluate-repair")?.[0]).toEqual([candidate]);
-    expect(wrapper.text()).toContain("passed");
+    expect(wrapper.text()).toContain("验证通过");
   });
 
   it("requires author authorization before emitting adoption and supports chapter settlement", async () => {
@@ -59,5 +59,7 @@ describe("ProseCandidatePanel", () => {
     expect(wrapper.emitted("adopt")?.[0]).toEqual([candidate, { expectedCanonSha256: "canon-before", authorizationId: "author-1" }]);
     await wrapper.get("button[data-testid='settle-prose-1']").trigger("click");
     expect(wrapper.emitted("settle")?.[0]).toEqual([candidate, adoption]);
+    expect(wrapper.text()).toContain("正文已采纳");
+    expect(wrapper.text()).toContain("下一步：结算章节");
   });
 });

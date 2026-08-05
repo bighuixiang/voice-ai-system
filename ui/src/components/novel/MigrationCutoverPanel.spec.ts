@@ -11,7 +11,7 @@ const report: MigrationCutoverReport = { schemaVersion: "project-migration-cutov
 describe("MigrationCutoverPanel", () => {
   it("shows project-level migration blockers without activating anything", () => {
     const wrapper = mount(MigrationCutoverPanel, { props: { report } });
-    expect(wrapper.text()).toContain("migration cutover");
+    expect(wrapper.text()).toContain("迁移切换");
     expect(wrapper.text()).toContain("demo");
     expect(wrapper.text()).toContain("migration-cutover-not-activated");
     expect(wrapper.get("[data-testid='migration-cutover-fingerprint']").text()).toContain("f");

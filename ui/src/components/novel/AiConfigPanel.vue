@@ -3,7 +3,7 @@
     <header class="config-header">
       <div>
         <div class="panel-title">全局 AI 配置</div>
-        <p>按创作场景选择执行器和模型；当前默认使用 Codex CLI，后续可以在这里接入在线 API。</p>
+        <p>按创作场景选择执行器和模型；当前默认使用 Codex CLI，后续可以在这里接入在线接口。</p>
       </div>
       <div class="panel-actions">
         <el-button :loading="checking" @click="checkActiveScenario">
@@ -127,7 +127,7 @@
 
         <div class="future-note">
           <span>预留能力</span>
-          <p>在线 API、图片生成服务、视频生成服务后续可以作为新的执行器加入同一套场景配置，不需要塞回项目上下文。</p>
+          <p>在线接口、图片生成服务、视频生成服务后续可以作为新的执行器加入同一套场景配置，不需要塞回项目上下文。</p>
         </div>
       </section>
     </div>
@@ -138,6 +138,7 @@
 import { computed, ref, watch } from "vue";
 import { Connection, DocumentChecked } from "@element-plus/icons-vue";
 import type { AiAgentCheckResult, AiAgentProfile, AiUsageScenarioKey, PlatformAiConfig } from "@/types/novel";
+import { errorText } from "@/utils/novelLabels";
 
 const props = defineProps<{
   config: PlatformAiConfig;
@@ -177,12 +178,12 @@ const providerLabel = computed(() => {
 const agentStatusLabel = computed(() => {
   if (!activeCheck.value) return "尚未测试";
   if (activeCheck.value.available) return activeCheck.value.version || "连接正常";
-  return activeCheck.value.error || "连接失败";
+  return errorText(activeCheck.value.error, "连接失败");
 });
 const embeddingStatusLabel = computed(() => {
-  if (!isExternalEmbedding.value) return "本地向量，无需 API Key";
-  if (embeddingConfig.value.apiKey || embeddingConfig.value.apiKeyConfigured) return "API Key 已配置";
-  return "尚未配置 API Key";
+  if (!isExternalEmbedding.value) return "本地向量，无需接口密钥";
+  if (embeddingConfig.value.apiKey || embeddingConfig.value.apiKeyConfigured) return "接口密钥已配置";
+  return "尚未配置接口密钥";
 });
 const isDirty = computed(() => JSON.stringify(localConfig.value) !== JSON.stringify(props.config));
 

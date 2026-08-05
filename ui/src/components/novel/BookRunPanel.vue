@@ -7,13 +7,13 @@
     <p v-if="error" class="error" role="alert">{{ error }}</p>
     <p v-if="!run" class="empty">尚未启动书籍工作流。</p>
     <div v-else class="run-summary">
-      <strong>{{ run.status }}</strong>
-      <span>{{ run.bookRunId }} · {{ run.autonomyLevel }} · {{ run.progress.completedWorkItems }}/{{ run.progress.totalWorkItems }}</span>
-      <span>当前门禁：{{ run.currentGate }}</span>
+      <strong>{{ statusLabel(run.status) }}</strong>
+      <span>{{ run.bookRunId }} · {{ autonomyLevelLabel(run.autonomyLevel) }} · {{ run.progress.completedWorkItems }}/{{ run.progress.totalWorkItems }}</span>
+      <span>当前门禁：{{ gateLabel(run.currentGate) }}</span>
       <button v-if="['ready', 'queued', 'running', 'gate_required'].includes(run.status)" type="button" data-testid="advance-book-run" :disabled="loading" @click="emit('advance')">推进工作流</button>
       <div v-if="run.status === 'scope_complete'" class="audit-form">
         <label for="completion-source-fingerprint">完成审计来源指纹</label>
-        <input id="completion-source-fingerprint" data-testid="completion-source-fingerprint" v-model="sourceFingerprint" placeholder="输入已验证的 closure source fingerprint" />
+        <input id="completion-source-fingerprint" data-testid="completion-source-fingerprint" v-model="sourceFingerprint" placeholder="输入已验证的完成审计来源指纹" />
         <button type="button" data-testid="run-completion-audit" :disabled="loading || !sourceFingerprint.trim()" @click="emit('completion-audit', sourceFingerprint.trim())">执行完成审计</button>
       </div>
     </div>
@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import type { BookRun } from "@/types/novel";
 import { ref } from "vue";
+import { autonomyLevelLabel, gateLabel, statusLabel } from "@/utils/novelLabels";
 withDefaults(defineProps<{ run?: BookRun | null; loading?: boolean; error?: string }>(), { run: null, loading: false, error: "" });
 const emit = defineEmits<{ start: []; advance: []; "completion-audit": [sourceFingerprint: string] }>();
 const sourceFingerprint = ref("");

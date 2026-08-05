@@ -12,7 +12,7 @@
       <article v-for="job in visibleJobs" :key="job.id" class="job-row" :class="job.status">
         <div class="job-main">
           <strong>{{ typeLabel(job.type) }}</strong>
-          <span>{{ job.outputSummary || job.error || job.inputSummary || "等待执行" }}</span>
+          <span>{{ userFacingText(job.outputSummary || job.error || job.inputSummary, "等待执行") }}</span>
         </div>
         <div class="job-meta">
           <el-tag size="small" :type="tagType(job.status)">{{ statusLabel(job.status) }}</el-tag>
@@ -36,6 +36,7 @@
 import { computed } from "vue";
 import { CircleClose, Refresh, RefreshRight } from "@element-plus/icons-vue";
 import type { BackgroundJob, BackgroundJobStatus, BackgroundJobType } from "@/types/novel";
+import { userFacingText } from "@/utils/novelLabels";
 
 const props = defineProps<{
   jobs: BackgroundJob[];

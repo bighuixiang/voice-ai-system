@@ -98,8 +98,8 @@ describe("KnowledgeIndexPanel", () => {
 
     expect(wrapper.text()).toContain("检索记忆层");
     expect(wrapper.text()).toContain("1 个事实 / 1 条关系");
-    expect(wrapper.text()).toContain("Vector: local");
-    expect(wrapper.text()).toContain("3 entries / 64 dims");
+    expect(wrapper.text()).toContain("向量检索：local");
+    expect(wrapper.text()).toContain("3 条记录 / 64 维");
     expect(wrapper.text()).toContain("gate");
     expect(wrapper.text()).toContain("Chapter 1");
 
@@ -124,13 +124,13 @@ describe("KnowledgeIndexPanel", () => {
 
     expect(wrapper.emitted("search")).toEqual([["Hero gate"]]);
     expect(wrapper.text()).toContain("The gate opens.");
-    expect(wrapper.text()).toContain("3 vectors");
-    expect(wrapper.text()).toContain("Retrieval audit");
-    expect(wrapper.text()).toContain("1 eligible / 1 excluded");
-    expect(wrapper.text()).toContain("task: chapter-context");
-    expect(wrapper.text()).toContain("2 independent sources");
-    expect(wrapper.text()).toContain("evidence gaps: time-unknown");
-    expect(wrapper.text()).toContain("fingerprint abcdef123456");
+    expect(wrapper.text()).toContain("3 条向量命中");
+    expect(wrapper.text()).toContain("检索审计");
+    expect(wrapper.text()).toContain("可用 1 条 / 已排除 1 条");
+    expect(wrapper.text()).toContain("任务：chapter-context");
+    expect(wrapper.text()).toContain("独立来源 2 个");
+    expect(wrapper.text()).toContain("证据缺口：time-unknown");
+    expect(wrapper.text()).toContain("指纹 abcdef123456");
     expect(wrapper.text()).toContain("向量 0.64");
     expect(wrapper.text()).toContain("Hero · state_after · Wounded.");
     expect(wrapper.text()).toContain("Chapter 1");
@@ -160,6 +160,6 @@ describe("KnowledgeIndexPanel", () => {
       global: { stubs }
     });
 
-    expect(wrapper.find(".retrieval-preview-recovery").text()).toContain("saved preview retrieval-abcdef0123456789abcdef01");
+    expect(wrapper.find(".retrieval-preview-recovery").text()).toContain("预览 retrieval-abcdef0123456789abcdef01");
   });
 });

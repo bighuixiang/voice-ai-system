@@ -1,11 +1,11 @@
 <template>
   <section class="review-panel" data-testid="independent-review-panel" aria-labelledby="independent-review-title">
     <header><div><p class="eyebrow">独立评审门禁</p><h2 id="independent-review-title">独立评审证据</h2><p>仅接受外部人工或服务商评审；评审通过也不会写入正式设定。</p></div><button type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? "读取中…" : "刷新" }}</button></header>
-    <div v-if="review" class="evidence"><strong>{{ review.status }} · {{ review.reviewer.kind }}</strong><p>评审者 {{ review.reviewer.id }} · {{ review.reviewer.kind === "independent-deterministic" ? "本地确定性" : review.reviewer.attestationReference }}</p><p>理解快照 {{ review.snapshotFingerprint }}</p><p>已写入正式设定：{{ review.canonWritten }}</p><ul><li v-for="check in review.checks" :key="check.checkId">{{ check.checkId }}: {{ check.status }} · {{ check.detail }}</li></ul></div>
+    <div v-if="review" class="evidence"><strong>{{ statusLabel(review.status) }} · {{ reviewerKindLabel(review.reviewer.kind) }}</strong><p>评审者 {{ review.reviewer.id }} · {{ review.reviewer.kind === "independent-deterministic" ? "本地确定性" : review.reviewer.attestationReference }}</p><p>理解快照 {{ review.snapshotFingerprint }}</p><p>已写入正式设定：{{ booleanLabel(review.canonWritten) }}</p><ul><li v-for="check in review.checks" :key="check.checkId">{{ checkIdLabel(check.checkId) }}：{{ statusLabel(check.status) }} · {{ check.detail }}</li></ul></div>
     <div v-else class="empty">尚无独立评审证据。</div>
     <form class="submission" @submit.prevent="submit">
       <label>评审者类型<select v-model="reviewerKind"><option value="human">人工</option><option value="provider">服务商</option></select></label>
-      <label>评审者 ID<input data-testid="reviewer-id" v-model="reviewerId" required /></label>
+      <label>评审者标识<input data-testid="reviewer-id" v-model="reviewerId" required /></label>
       <label>外部证明引用<input data-testid="review-attestation" v-model="attestationReference" required /></label>
       <label>理解快照指纹<input data-testid="review-snapshot" v-model="snapshotFingerprint" minlength="64" required /></label>
       <label>审计引用<input data-testid="review-evidence" v-model="evidenceReference" required /></label>
@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import type { UnderstandingReview } from "@/types/novel";
+import { booleanLabel, checkIdLabel, reviewerKindLabel, statusLabel } from "@/utils/novelLabels";
 type ReviewerKind = "human" | "provider";
 const requiredChecks = ["source-fingerprint", "evidence-spans", "branch-separation", "question-gate", "canon-isolation"] as const;
 withDefaults(defineProps<{ review?: UnderstandingReview | null; loading?: boolean }>(), { review: null, loading: false });

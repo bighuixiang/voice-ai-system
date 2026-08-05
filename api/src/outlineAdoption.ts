@@ -5,6 +5,7 @@ import { resolveInside } from "./pathSafety.js";
 import { readOutlineCandidate } from "./outlineCandidate.js";
 import { readOutlineValidationReport } from "./outlineValidation.js";
 import { readCandidateComparison } from "./candidateComparisonStore.js";
+import { readContractAdoptionProposal } from "./contractAdoption.js";
 
 export interface OutlineAdoptionProposal {
   schemaVersion: "outline-adoption-proposal.v1";
@@ -62,10 +63,24 @@ export async function readOutlineAdoptionProposal(root: string): Promise<Outline
   }
 }
 
+export async function assertOutlineSourceContractAdopted(root: string, sourceCandidateId: string): Promise<void> {
+  let contractAdoption;
+  try {
+    contractAdoption = await readContractAdoptionProposal(root);
+  } catch (error) {
+    if (error instanceof Error && error.message === "CONTRACT_ADOPTION_PROPOSAL_INTEGRITY_FAILED") throw new Error("OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED");
+    throw error;
+  }
+  if (contractAdoption?.status !== "committed" || contractAdoption.canonWritten !== true || contractAdoption.candidateId !== sourceCandidateId) {
+    throw new Error("OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED");
+  }
+}
+
 export async function createOutlineAdoptionProposal(root: string, input: { outlineId: string; expectedOutlineFingerprint: string; adoptionMode?: "whole" | "partial" | "fusion" | "reject"; selectedChapterIds?: string[]; unadoptedChapterIds?: string[]; sourceCandidateIds?: string[]; comparisonFingerprint?: string }): Promise<OutlineAdoptionProposal> {
   const outline = await readOutlineCandidate(root, input.outlineId);
   if (!outline) throw new Error("OUTLINE_CANDIDATE_NOT_FOUND");
   if (outline.fingerprint !== input.expectedOutlineFingerprint) throw new Error("OUTLINE_FINGERPRINT_STALE");
+  await assertOutlineSourceContractAdopted(root, outline.sourceCandidateId);
   const validation = await readOutlineValidationReport(root, input.outlineId);
   if (!validation || validation.status !== "passed" || validation.outlineFingerprint !== outline.fingerprint) throw new Error("OUTLINE_VALIDATION_REQUIRED");
   const selectedInput = input.selectedChapterIds?.length ? [...new Set(input.selectedChapterIds)] : outline.chapters.map((chapter) => chapter.chapterId);
@@ -111,6 +126,9 @@ export async function authorizeOutlineAdoption(root: string, input: { expectedPr
   if (!proposal) throw new Error("OUTLINE_ADOPTION_PROPOSAL_NOT_FOUND");
   if (proposal.fingerprint !== input.expectedProposalFingerprint) throw new Error("OUTLINE_ADOPTION_FINGERPRINT_STALE");
   if (proposal.status !== "ready_for_authorization") throw new Error("OUTLINE_ADOPTION_NOT_READY");
+  const outline = await readOutlineCandidate(root, proposal.outlineId);
+  if (!outline) throw new Error("OUTLINE_CANDIDATE_NOT_FOUND");
+  await assertOutlineSourceContractAdopted(root, outline.sourceCandidateId);
   if (!input.authorization?.actorId?.trim() || !input.authorization?.authorizationId?.trim()) throw new Error("OUTLINE_ADOPTION_AUTHORIZATION_REQUIRED");
   const base = { ...proposal, status: "authorized" as const, authorAuthorization: input.authorization, createdAt: proposal.createdAt };
   const { fingerprint: _oldFingerprint, ...nextBase } = base;

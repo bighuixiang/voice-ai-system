@@ -4,7 +4,7 @@
       <div>
         <p class="eyebrow">故事设定评审</p>
         <h2 id="contract-candidate-title">故事契约候选</h2>
-        <p>候选可比较、可追溯；在作者采纳前不会写入 canon。</p>
+        <p>候选可比较、可追溯；在作者采纳前不会写入正式设定。</p>
       </div>
       <button type="button" aria-label="刷新故事契约候选" :disabled="loading" @click="emit('refresh')">
         {{ loading ? "刷新中…" : "刷新" }}
@@ -18,7 +18,7 @@
         <div class="candidate-heading">
           <div>
             <h3>{{ candidate.variant?.label || candidate.candidateId }}</h3>
-            <p class="candidate-meta">{{ candidate.status === "candidate" ? "候选，不是 canon" : "已过期候选，不是 canon" }}</p>
+            <p class="candidate-meta">{{ candidate.status === "candidate" ? "候选，尚未成为正式设定" : "已过期候选，尚未成为正式设定" }}</p>
           </div>
           <button type="button" :aria-label="`查看候选 ${candidate.candidateId}`" @click="selectCandidate(candidate)">查看</button>
         </div>
@@ -26,7 +26,7 @@
         <dl class="candidate-fields">
           <template v-for="field in candidate.fields" :key="field.fieldId">
             <dt>{{ field.path }}</dt>
-            <dd>{{ field.value }} <small>· {{ field.epistemicStatus }} · {{ field.evidenceRefs.map((ref) => ref.refId).join(", ") || "无证据" }}</small></dd>
+            <dd>{{ field.value }} <small>· {{ epistemicStatusLabel(field.epistemicStatus) }} · {{ field.evidenceRefs.map((ref) => ref.refId).join(", ") || "无证据" }}</small></dd>
           </template>
         </dl>
         <div v-if="candidate.unknowns.length" class="candidate-section">
@@ -37,13 +37,14 @@
           <strong>暂定假设</strong>
           <ul><li v-for="assumption in candidate.assumptions" :key="assumption">{{ assumption }}</li></ul>
         </div>
-        <p class="candidate-integrity">已写入正式设定：{{ String(candidate.canonWritten) }} · 指纹：{{ candidate.fingerprint.slice(0, 12) }}…</p>
-        <button v-if="candidate.status === 'candidate'" type="button" class="outline-button" :aria-label="`生成大纲候选 ${candidate.candidateId}`" @click="emit('compile-outline', { sourceCandidateId: candidate.candidateId })">生成大纲候选</button>
+        <p class="candidate-integrity">已写入正式设定：{{ booleanLabel(candidate.canonWritten) }} · 指纹：{{ candidate.fingerprint.slice(0, 12) }}…</p>
+        <button v-if="candidate.status === 'candidate' && candidate.candidateId === outlineSourceCandidateId" type="button" class="outline-button" :aria-label="`生成大纲候选 ${candidate.candidateId}`" :disabled="outlineLoading" @click="emit('compile-outline', { sourceCandidateId: candidate.candidateId })">{{ outlineLoading ? "正在同步蓝图" : "生成大纲候选" }}</button>
+        <p v-else-if="candidate.status === 'candidate'" class="outline-guide">{{ outlineSourceCandidateId ? "此设定不是已确认蓝图的来源，请按蓝图对应设定继续。" : "请先确认上方故事蓝图，再开始制定大纲。" }}</p>
       </article>
     </div>
     <section v-if="selectedCandidate" class="adoption-review" aria-label="逐项采纳审阅">
       <h3>逐项采纳：{{ selectedCandidate.candidateId }}</h3>
-      <p>每个字段都必须有明确结果；生成提案不会直接写入 canon。</p>
+      <p>每个字段都必须有明确结果；生成提案不会直接写入正式设定。</p>
       <label v-for="field in selectedCandidate.fields" :key="field.fieldId" class="decision-row">
         <span>{{ field.path }}</span>
         <select :aria-label="`决定 ${field.path}`" v-model="fieldDecisions[field.fieldId]">
@@ -59,16 +60,17 @@
       <p v-if="adoptionError" class="panel-error" role="alert">{{ adoptionError }}</p>
     </section>
     <section v-if="proposal" class="proposal-status" aria-label="采纳提案状态">
-      <strong>提案状态：{{ proposal.status }}</strong>
-      <span>已写入正式设定：{{ String(proposal.canonWritten) }}</span>
+      <strong>提案状态：{{ statusLabel(proposal.status) }}</strong>
+      <span>已写入正式设定：{{ booleanLabel(proposal.canonWritten) }}</span>
       <p v-if="proposal.status === 'ready_for_authorization'">提交前需要作者明确填写授权人和授权编号。</p>
       <div v-if="proposal.status === 'ready_for_authorization'" class="authorization-form">
         <label>授权人<input aria-label="授权人" v-model="actorId" /></label>
         <label>授权编号<input aria-label="授权编号" v-model="authorizationId" /></label>
-        <button type="button" aria-label="提交 canon 采纳" :disabled="adoptionLoading || !actorId.trim() || !authorizationId.trim()" @click="submitCommit">
-          {{ adoptionLoading ? "提交中…" : "提交 canon 采纳" }}
+        <button type="button" aria-label="提交正式设定采纳" :disabled="adoptionLoading || !actorId.trim() || !authorizationId.trim()" @click="submitCommit">
+          {{ adoptionLoading ? "提交中…" : "提交正式设定采纳" }}
         </button>
       </div>
+      <p v-else-if="proposal.status === 'committed'" class="next-step">故事设定已采纳。下一步：回到大纲候选，选择并验证章节结构。</p>
       <p v-if="adoptionError" class="panel-error" role="alert">{{ adoptionError }}</p>
     </section>
   </section>
@@ -77,8 +79,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import type { ContractAdoptionProposal, StoryContractCandidate } from "@/types/novel";
+import { booleanLabel, epistemicStatusLabel, statusLabel } from "@/utils/novelLabels";
 
-const props = withDefaults(defineProps<{ candidates: StoryContractCandidate[]; loading?: boolean; error?: string; adoptionLoading?: boolean; adoptionError?: string; proposal?: ContractAdoptionProposal | null }>(), { loading: false, error: "", adoptionLoading: false, adoptionError: "", proposal: null });
+const props = withDefaults(defineProps<{ candidates: StoryContractCandidate[]; outlineSourceCandidateId?: string; outlineLoading?: boolean; loading?: boolean; error?: string; adoptionLoading?: boolean; adoptionError?: string; proposal?: ContractAdoptionProposal | null }>(), { outlineSourceCandidateId: "", outlineLoading: false, loading: false, error: "", adoptionLoading: false, adoptionError: "", proposal: null });
 const emit = defineEmits<{
   refresh: [];
   select: [candidate: StoryContractCandidate];
@@ -133,6 +136,8 @@ function submitCommit() {
 .candidate-section ul { margin: 4px 0 0; padding-left: 20px; }
 .candidate-integrity { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; }
 .outline-button { justify-self: start; padding: 7px 10px; border: 0; border-radius: 7px; background: var(--el-color-primary); color: white; cursor: pointer; }
+.outline-button:disabled { opacity: .55; cursor: not-allowed; }
+.outline-guide { margin: 0; color: var(--el-text-color-secondary); font-size: 13px; }
 .panel-error { color: var(--el-color-danger); }
 .adoption-review { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--el-color-primary); border-radius: 10px; }
 .adoption-review h3, .adoption-review p { margin: 0; }

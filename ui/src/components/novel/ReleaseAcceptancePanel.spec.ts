@@ -15,8 +15,8 @@ const acceptedDecision: ReleaseAcceptanceDecision = { ...decision, status: "acce
 describe("ReleaseAcceptancePanel", () => {
   it("shows every release gate and never implies activation when blocked", () => {
     const wrapper = mount(ReleaseAcceptancePanel, { props: { decision } });
-    expect(wrapper.text()).toContain("do-not-activate");
-    expect(wrapper.text()).toContain("external-calibration");
+    expect(wrapper.text()).toContain("不得激活");
+    expect(wrapper.text()).toContain("外部校准");
     expect(wrapper.text()).toContain("No independent review");
     expect(wrapper.get("[data-testid='release-acceptance-fingerprint']").text()).toContain("f");
     expect(wrapper.text()).toContain("不得激活");

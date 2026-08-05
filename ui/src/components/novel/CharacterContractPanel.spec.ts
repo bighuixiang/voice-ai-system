@@ -9,7 +9,9 @@ describe("CharacterContractPanel", () => {
   it("shows unknown and provenance, and requires explicit confirmation", async () => {
     const wrapper = mount(CharacterContractPanel, { props: { contracts: [contract] } });
     expect(wrapper.text()).toContain("final loyalty");
-    expect(wrapper.text()).toContain("inference");
+    expect(wrapper.text()).toContain("推断来源");
+    expect(wrapper.text()).toContain("候选");
+    expect(wrapper.text()).not.toContain("candidate");
     await wrapper.get(`[data-testid='confirm-character-${contract.contractId}']`).trigger("click");
     expect(wrapper.emitted("confirm")?.[0]).toEqual([contract]);
   });

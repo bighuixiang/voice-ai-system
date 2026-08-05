@@ -1,7 +1,7 @@
 <template>
   <section class="release-panel" data-testid="release-acceptance-panel" aria-labelledby="release-acceptance-title">
     <header><div><p class="eyebrow">发布门禁</p><h2 id="release-acceptance-title">发布验收证据</h2><p>这是只读权威决策；任一门禁缺失时不得激活。</p></div><button data-testid="refresh-release-acceptance" type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? "评估中…" : "刷新验收" }}</button></header>
-    <div v-if="decision" class="decision" :class="decision.status"><strong>{{ decision.status }}</strong><span>评估于 {{ decision.evaluatedAt }}</span><code data-testid="release-acceptance-fingerprint">指纹：{{ decision.fingerprint }}</code></div>
+    <div v-if="decision" class="decision" :class="decision.status"><strong>{{ statusLabel(decision.status) }}</strong><span>评估于 {{ decision.evaluatedAt }}</span><code data-testid="release-acceptance-fingerprint">指纹：{{ decision.fingerprint }}</code></div>
     <div v-else class="empty">尚未读取发布验收决策。</div>
     <div v-if="activation" class="activation" data-testid="release-activation">
       <strong>已激活</strong><span>已激活 {{ activation.activatedAt }}</span><code>指纹：{{ activation.fingerprint }}</code>
@@ -10,13 +10,14 @@
       <button data-testid="activate-release" type="button" :disabled="activating" @click="emit('activate')">{{ activating ? "激活中…" : "激活发布" }}</button>
     </div>
     <p v-if="activationError" class="blocked">{{ activationError }}</p>
-    <ul v-if="decision" class="checks"><li v-for="check in decision.checks" :key="check.checkId" :class="check.status"><span>{{ check.checkId }}</span><strong>{{ check.status }}</strong><small>{{ check.reason }}</small><small v-if="check.evidence.length">证据：{{ check.evidence.join(", ") }}</small></li></ul>
+    <ul v-if="decision" class="checks"><li v-for="check in decision.checks" :key="check.checkId" :class="check.status"><span>{{ checkIdLabel(check.checkId) }}</span><strong>{{ statusLabel(check.status) }}</strong><small>{{ check.reason }}</small><small v-if="check.evidence.length">证据：{{ check.evidence.join(", ") }}</small></li></ul>
     <p v-if="decision?.status === 'do-not-activate'" class="blocked">不得激活：先补齐缺失门禁并重新评估。</p>
   </section>
 </template>
 
 <script setup lang="ts">
 import type { ReleaseAcceptanceDecision, ReleaseActivation } from "@/types/novel";
+import { checkIdLabel, statusLabel } from "@/utils/novelLabels";
 const props = withDefaults(defineProps<{
   decision?: ReleaseAcceptanceDecision | null;
   activation?: ReleaseActivation | null;

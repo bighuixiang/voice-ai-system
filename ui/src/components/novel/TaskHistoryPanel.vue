@@ -16,7 +16,7 @@
             {{ statusLabel(item.task.status) }}
           </el-tag>
         </div>
-        <p>{{ item.task.outputSummary || item.task.inputSummary || item.task.error }}</p>
+        <p>{{ userFacingText(item.task.outputSummary || item.task.inputSummary || item.task.error, "暂无任务摘要") }}</p>
         <details v-if="item.invocation" class="audit-detail">
           <summary>{{ auditSummary(item.invocation) }}</summary>
           <div class="audit-grid">
@@ -58,6 +58,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { AiInvocationSession, AiStageDefinition, CodexTaskType, NovelTask } from "@/types/novel";
+import { userFacingText } from "@/utils/novelLabels";
 
 const props = defineProps<{
   tasks: NovelTask[];
@@ -89,6 +90,22 @@ const labels: Partial<Record<CodexTaskType, string>> = {
   "assistant.free": "自由指令"
 };
 
+const stageLabelMap: Record<string, string> = {
+  "pipeline.project.create": "创建项目",
+  "pipeline.outline.generate": "生成大纲",
+  "pipeline.structure.reverse": "反推结构",
+  "pipeline.chapter.plan": "规划章节",
+  "pipeline.chapter.prose": "起草正文",
+  "pipeline.selection.polish": "选区润色",
+  "pipeline.quality.review": "质量评审",
+  "pipeline.quality.rewrite": "质量改造",
+  "pipeline.chapter.validate": "章节验证",
+  "pipeline.idea.suggest": "创意建议",
+  "pipeline.writing.briefing": "写前简报",
+  "autopilot.post_chapter.recap": "章后复盘",
+  "assistant.free": "自由指令"
+};
+
 const visibleHistory = computed(() =>
   props.tasks.slice(0, 10).map((task) => ({
     task,
@@ -100,7 +117,7 @@ const stageLabels = computed(() =>
   (props.stages || []).reduce(
     (mapping, stage) => ({
       ...mapping,
-      [stage.key]: stage.label
+      [stage.key]: stageLabelMap[stage.key] || stage.label
     }),
     {} as Record<string, string>
   )
@@ -161,7 +178,7 @@ function formatDuration(value?: number) {
 }
 
 function stageLabel(invocation: AiInvocationSession) {
-  return stageLabels.value[invocation.stageKey] || invocation.stageKey;
+  return stageLabels.value[invocation.stageKey] || stageLabelMap[invocation.stageKey] || invocation.stageKey;
 }
 
 function tierSummary(invocation: AiInvocationSession) {
@@ -174,8 +191,8 @@ function tierSummary(invocation: AiInvocationSession) {
 
 function auditSummary(invocation: AiInvocationSession) {
   const agent = [invocation.agentProvider, invocation.modelId].filter(Boolean).join("/");
-  const patches = invocation.proposedPatchTargets.length ? ` · patches ${invocation.proposedPatchTargets.length}` : "";
-  return `${stageLabel(invocation)} (${invocation.stageKey}) · ${agent || "agent"} · ctx ${invocation.contextSnapshot.blockCount} · prompt ${formatCount(
+  const patches = invocation.proposedPatchTargets.length ? ` · 补丁 ${invocation.proposedPatchTargets.length}` : "";
+  return `${stageLabel(invocation)}（${invocation.stageKey}）· ${agent || "执行代理未提供"} · 上下文 ${invocation.contextSnapshot.blockCount} · 提示词 ${formatCount(
     invocation.promptSnapshot.length
   )}${patches} · ${decisionLabel(invocation.adoptionDecision)}`;
 }

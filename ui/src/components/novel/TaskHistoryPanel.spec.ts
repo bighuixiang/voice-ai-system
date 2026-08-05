@@ -74,11 +74,11 @@ describe("TaskHistoryPanel", () => {
       global: { stubs }
     });
 
-    expect(wrapper.text()).toContain("Chapter prose drafting");
+    expect(wrapper.text()).toContain("起草正文");
     expect(wrapper.text()).toContain("pipeline.chapter.prose");
     expect(wrapper.text()).toContain("codex/gpt-5");
     expect(wrapper.text()).toContain("2.4k");
-    expect(wrapper.text()).toContain("Prompt 1.2k");
+    expect(wrapper.text()).toContain("提示词 1.2k");
     expect(wrapper.text()).toContain("版本 task-template:chapter.draft:v2");
     expect(wrapper.text()).toContain("预检 需关注");
     expect(wrapper.text()).toContain("目标 chapter-001");

@@ -4,7 +4,7 @@
     <p v-if="policy">策略：至少 {{ policy.minIndependentEvidence }} 条独立证据；置信度阈值 {{ policy.confidenceThreshold }}；范围 {{ policy.privacyBoundary }}。</p>
     <p v-else class="muted">尚未加载学习策略。</p>
     <article v-for="budget in Object.values(budgets)" :key="budget.budgetId" class="budget-card">
-      <strong>{{ budget.scope }} · {{ budget.status }}</strong>
+      <strong>{{ budget.scope }} · {{ statusLabel(budget.status) }}</strong>
       <p>探索次数 {{ budget.usedProbes }} / {{ budget.maxProbes }}；成本 {{ budget.usedCost }} / {{ budget.maxCost }}</p>
       <small>影响范围：{{ budget.maxImpact }}；停止条件：{{ budget.stopConditions.join("、") || "无" }}</small>
       <button v-if="budget.status === 'active'" type="button" :data-testid="`pause-budget-${budget.budgetId}`" :disabled="loading" @click="emit('pause', budget)">暂停探索</button>
@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 import type { ExplorationBudget, LearningPolicy } from "@/types/novel";
+import { statusLabel } from "@/utils/novelLabels";
 
 withDefaults(defineProps<{ policy?: LearningPolicy | null; budgets?: Record<string, ExplorationBudget>; loading?: boolean }>(), { policy: null, budgets: () => ({}), loading: false });
 const emit = defineEmits<{ refresh: []; pause: [budget: ExplorationBudget] }>();

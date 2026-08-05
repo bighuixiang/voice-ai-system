@@ -74,11 +74,11 @@ import { advanceSteeringEvent, createSteeringEvent, readSteeringEvent } from "./
 import { assertRuntimeControlFreshness } from "./runtimeControlFence.js";
 import { createRestorePlan, readRestorePlan } from "./restorePlan.js";
 import { readBackupPolicy, saveBackupPolicy } from "./backupPolicy.js";
-import { appendAuthorMessage, appendSessionMessage, readCreativeSession, updateCreativeSessionState } from "./creativeSession.js";
+import { appendAuthorMessage, appendSessionMessage, readCreativeSession, updateCreativeSessionState, withCreativeSessionLock } from "./creativeSession.js";
 import { buildAuthorResumeBrief } from "./authorResumeBrief.js";
 import { buildCreativeJourneyProjection } from "./creativeJourney.js";
 import { persistCreativeJourneyProjection, readCreativeJourneyProjection } from "./creativeJourneyStore.js";
-import { confirmStoryBlueprint, generateStoryBlueprint, readLatestStoryBlueprint, readStoryBlueprintConfirmation, reviseStoryBlueprint } from "./storyBlueprint.js";
+import { confirmStoryBlueprint, generateStoryBlueprint, isStoryBlueprintConfirmationCurrent, readLatestStoryBlueprint, readStoryBlueprintConfirmation, reviseStoryBlueprint } from "./storyBlueprint.js";
 import { buildUnderstandingPreview } from "./understandingPreview.js";
 import { buildCreativeTimelineProjection } from "./creativeTimeline.js";
 import { persistCreativeTimelineProjection, readCreativeTimelineProjection } from "./creativeTimelineStore.js";
@@ -610,6 +610,22 @@ function isLedgerKind(kind: string): kind is LedgerEntry["kind"] {
   return ledgerKinds.has(kind as LedgerEntry["kind"]);
 }
 
+async function assertConfirmedStoryBlueprintForOutline(root: string, projectSlug: string, sourceContractCandidateId: string): Promise<void> {
+  const [blueprint, session] = await Promise.all([
+    readLatestStoryBlueprint(root, projectSlug),
+    readCreativeSession(root, projectSlug)
+  ]);
+  if (!blueprint) throw new Error("STORY_BLUEPRINT_CONFIRMATION_REQUIRED");
+  if (blueprint.sourceContractCandidateId !== sourceContractCandidateId) throw new Error("STORY_BLUEPRINT_SOURCE_MISMATCH");
+  const confirmation = await readStoryBlueprintConfirmation(root, blueprint.blueprintId, projectSlug);
+  if (!confirmation || !isStoryBlueprintConfirmationCurrent(session, confirmation)) throw new Error("STORY_BLUEPRINT_CONFIRMATION_REQUIRED");
+}
+
+function storyBlueprintOutlineError(code: string): { code: string; message: string } {
+  if (code === "STORY_BLUEPRINT_SOURCE_MISMATCH") return { code, message: "当前故事蓝图与所选故事设定不一致，请重新生成并确认蓝图后再制定大纲。" };
+  return { code, message: "请先确认最新故事蓝图，再开始制定大纲。" };
+}
+
 function isBackgroundJobType(type: string): type is BackgroundJobType {
   return backgroundJobTypes.has(type as BackgroundJobType);
 }
@@ -904,8 +920,21 @@ async function buildAiBackedEditorSuggestion(
   }
 }
 
+function errorMessage(error: unknown): string {
+  if (error instanceof Error && error.message.trim()) return error.message;
+  if (typeof error === "string" && error.trim()) return error;
+  if (error && typeof error === "object") {
+    const value = error as Record<string, unknown>;
+    for (const key of ["message", "detail", "error", "code"]) {
+      const nested = errorMessage(value[key]);
+      if (nested) return nested;
+    }
+  }
+  return "服务器处理失败，请稍后重试。";
+}
+
 const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
-  const message = error instanceof Error ? error.message : String(error);
+  const message = errorMessage(error);
   let status = 500;
   if (message.includes("Protected project metadata") || message.includes("Origin is not allowed")) {
     status = 403;
@@ -942,6 +971,10 @@ const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   }
   if (message === "RELEASE_E2E_PROOF_STALE") {
     res.status(409).json({ error: { code: message } });
+    return;
+  }
+  if (message === "OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED") {
+    res.status(409).json({ error: { code: message, message: "请先确认并采纳该大纲对应的故事设定。" } });
     return;
   }
   if (["CALIBRATION_EVIDENCE_INTEGRITY_FAILED", "CALIBRATION_EVIDENCE_SEMANTIC_INVALID", "CALIBRATION_EVIDENCE_HISTORY_INVALID"].includes(message)) {
@@ -1888,10 +1921,13 @@ export function createApp() {
     const [questions, decisions, latestBlueprint] = await Promise.all([readDialogueQuestions(root), readDecisionRecords(root), readLatestStoryBlueprint(root, project.slug)]);
     const activeQuestion = questions.find((question) => question.status === "active");
     const blueprintConfirmation = latestBlueprint ? await readStoryBlueprintConfirmation(root, latestBlueprint.blueprintId, project.slug) : null;
+    const blueprintNeedsRefresh = Boolean(blueprintConfirmation && !isStoryBlueprintConfirmationCurrent(session, blueprintConfirmation));
+    const blueprintConfirmed = Boolean(blueprintConfirmation) && !blueprintNeedsRefresh;
     const current = buildCreativeJourneyProjection(session, {
       ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, impact: activeQuestion.impact, source: "deterministic-gap" as const } } : {}),
       answeredQuestionIds: decisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId),
-      blueprintConfirmed: Boolean(blueprintConfirmation)
+      blueprintConfirmed,
+      blueprintNeedsRefresh
     });
     const stored = await readCreativeJourneyProjection(root, project.slug);
     const journey = stored && stored.sourceFingerprint === current.sourceFingerprint && stored.projectionVersion === current.projectionVersion && stored.fingerprint === current.fingerprint ? stored : await persistCreativeJourneyProjection(root, current);
@@ -2180,11 +2216,15 @@ export function createApp() {
       ? await appendSessionMessage({ root: projectRoot(project.slug), projectSlug: project.slug, clientMessageId: typeof req.body?.clientMessageId === "string" ? req.body.clientMessageId : "", text: typeof req.body?.text === "string" ? req.body.text : "", kind })
       : await appendAuthorMessage({ root: projectRoot(project.slug), projectSlug: project.slug, clientMessageId: typeof req.body?.clientMessageId === "string" ? req.body.clientMessageId : "", text: typeof req.body?.text === "string" ? req.body.text : "" });
     const journeyRoot = projectRoot(project.slug);
-    const [journeyQuestions, journeyDecisions] = await Promise.all([readDialogueQuestions(journeyRoot), readDecisionRecords(journeyRoot)]);
+    const [journeyQuestions, journeyDecisions, latestBlueprint] = await Promise.all([readDialogueQuestions(journeyRoot), readDecisionRecords(journeyRoot), readLatestStoryBlueprint(journeyRoot, project.slug)]);
     const journeyActiveQuestion = journeyQuestions.find((question) => question.status === "active");
+    const blueprintConfirmation = latestBlueprint ? await readStoryBlueprintConfirmation(journeyRoot, latestBlueprint.blueprintId, project.slug) : null;
+    const blueprintNeedsRefresh = Boolean(blueprintConfirmation && !isStoryBlueprintConfirmationCurrent(result.session, blueprintConfirmation));
     const journeyProjection = buildCreativeJourneyProjection(result.session, {
       ...(journeyActiveQuestion ? { activeQuestion: { questionId: journeyActiveQuestion.questionId, text: journeyActiveQuestion.text, impact: journeyActiveQuestion.impact, source: "deterministic-gap" as const } } : {}),
-      answeredQuestionIds: journeyDecisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId)
+      answeredQuestionIds: journeyDecisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId),
+      blueprintConfirmed: Boolean(blueprintConfirmation) && !blueprintNeedsRefresh,
+      blueprintNeedsRefresh
     });
     await persistCreativeJourneyProjection(journeyRoot, journeyProjection);
     await persistCreativeTimelineProjection(projectRoot(project.slug), buildCreativeTimelineProjection(result.session));
@@ -2211,11 +2251,15 @@ export function createApp() {
       pendingPatchRefs: Array.isArray(body.pendingPatchRefs) ? body.pendingPatchRefs.map(String) : []
     });
     const journeyRoot = projectRoot(project.slug);
-    const [journeyQuestions, journeyDecisions] = await Promise.all([readDialogueQuestions(journeyRoot), readDecisionRecords(journeyRoot)]);
+    const [journeyQuestions, journeyDecisions, latestBlueprint] = await Promise.all([readDialogueQuestions(journeyRoot), readDecisionRecords(journeyRoot), readLatestStoryBlueprint(journeyRoot, project.slug)]);
     const journeyActiveQuestion = journeyQuestions.find((question) => question.status === "active");
+    const blueprintConfirmation = latestBlueprint ? await readStoryBlueprintConfirmation(journeyRoot, latestBlueprint.blueprintId, project.slug) : null;
+    const blueprintNeedsRefresh = Boolean(blueprintConfirmation && !isStoryBlueprintConfirmationCurrent(result.session, blueprintConfirmation));
     await persistCreativeJourneyProjection(journeyRoot, buildCreativeJourneyProjection(result.session, {
       ...(journeyActiveQuestion ? { activeQuestion: { questionId: journeyActiveQuestion.questionId, text: journeyActiveQuestion.text, impact: journeyActiveQuestion.impact, source: "deterministic-gap" as const } } : {}),
-      answeredQuestionIds: journeyDecisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId)
+      answeredQuestionIds: journeyDecisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId),
+      blueprintConfirmed: Boolean(blueprintConfirmation) && !blueprintNeedsRefresh,
+      blueprintNeedsRefresh
     }));
     await persistCreativeTimelineProjection(projectRoot(project.slug), buildCreativeTimelineProjection(result.session));
     res.json(result);
@@ -2456,10 +2500,12 @@ export function createApp() {
     const activeQuestion = questions.find((question) => question.status === "active");
     const latestBlueprint = storyBlueprint?.blueprint || await readLatestStoryBlueprint(root, project.slug);
     const blueprintConfirmation = latestBlueprint ? await readStoryBlueprintConfirmation(root, latestBlueprint.blueprintId, project.slug) : null;
+    const blueprintNeedsRefresh = Boolean(blueprintConfirmation && !isStoryBlueprintConfirmationCurrent(session, blueprintConfirmation));
     const journey = buildCreativeJourneyProjection(session, {
       ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, impact: activeQuestion.impact, source: "deterministic-gap" as const } } : {}),
       answeredQuestionIds: decisions.filter((decision) => decision.status === "recorded").map((decision) => decision.questionId),
-      blueprintConfirmed: Boolean(blueprintConfirmation)
+      blueprintConfirmed: Boolean(blueprintConfirmation) && !blueprintNeedsRefresh,
+      blueprintNeedsRefresh
     });
     await persistCreativeJourneyProjection(root, journey);
     res.status(advanced.answer.replayed ? 200 : 201).json({
@@ -2527,18 +2573,22 @@ export function createApp() {
 
   app.post("/api/novel/projects/:projectId/session/understanding/outline-candidates", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
+    const root = projectRoot(project.slug);
     const sourceCandidateId = typeof req.body?.sourceCandidateId === "string" ? req.body.sourceCandidateId : "";
     if (!sourceCandidateId) {
       res.status(400).json({ error: { code: "SOURCE_CANDIDATE_ID_REQUIRED" } });
       return;
     }
     try {
-      const result = await compileOutlineCandidate(projectRoot(project.slug), sourceCandidateId, {
-        ...(Number.isInteger(req.body?.strongFreezeCount) ? { strongFreezeCount: req.body.strongFreezeCount } : {}),
-        ...(Number.isInteger(req.body?.totalChapterCount) ? { totalChapterCount: req.body.totalChapterCount } : {})
+      const result = await withCreativeSessionLock(project.slug, async () => {
+        await assertConfirmedStoryBlueprintForOutline(root, project.slug, sourceCandidateId);
+        return compileOutlineCandidate(root, sourceCandidateId, {
+          ...(Number.isInteger(req.body?.strongFreezeCount) ? { strongFreezeCount: req.body.strongFreezeCount } : {}),
+          ...(Number.isInteger(req.body?.totalChapterCount) ? { totalChapterCount: req.body.totalChapterCount } : {})
+        });
       });
-      const sourceCandidate = await readContractCandidate(projectRoot(project.slug), result.outline.sourceCandidateId);
-      const decision = sourceCandidate ? (await readDecisionRecords(projectRoot(project.slug))).find((record) => record.decisionId === sourceCandidate.sourceDecisionId) : undefined;
+      const sourceCandidate = await readContractCandidate(root, result.outline.sourceCandidateId);
+      const decision = sourceCandidate ? (await readDecisionRecords(root)).find((record) => record.decisionId === sourceCandidate.sourceDecisionId) : undefined;
       if (!sourceCandidate || !decision) {
         res.status(409).json({ error: { code: "DECISION_NOT_FOUND" } });
         return;
@@ -2557,6 +2607,10 @@ export function createApp() {
       res.status(result.created ? 201 : 200).json({ ...result, consumption });
     } catch (error) {
       const code = error instanceof Error ? error.message : String(error);
+      if (code === "STORY_BLUEPRINT_CONFIRMATION_REQUIRED" || code === "STORY_BLUEPRINT_SOURCE_MISMATCH") {
+        res.status(409).json({ error: storyBlueprintOutlineError(code) });
+        return;
+      }
       const status = code === "CONTRACT_CANDIDATE_NOT_FOUND" ? 404 : 409;
       res.status(status).json({ error: { code } });
     }
@@ -6632,10 +6686,13 @@ export function createApp() {
     const [questions, decisionRecords, latestBlueprint] = await Promise.all([readDialogueQuestions(root), readDecisionRecords(root), readLatestStoryBlueprint(root, project.slug)]);
     const activeQuestion = questions.find((question) => question.status === "active");
     const blueprintConfirmation = latestBlueprint ? await readStoryBlueprintConfirmation(root, latestBlueprint.blueprintId, project.slug) : null;
+    const blueprintNeedsRefresh = Boolean(blueprintConfirmation && !isStoryBlueprintConfirmationCurrent(session, blueprintConfirmation));
+    const blueprintConfirmed = Boolean(blueprintConfirmation) && !blueprintNeedsRefresh;
     const journey = buildCreativeJourneyProjection(session, {
       ...(activeQuestion ? { activeQuestion: { questionId: activeQuestion.questionId, text: activeQuestion.text, impact: activeQuestion.impact, source: "deterministic-gap" as const } } : {}),
       answeredQuestionIds: decisionRecords.filter((record) => record.status === "recorded").map((record) => record.questionId),
-      blueprintConfirmed: Boolean(blueprintConfirmation)
+      blueprintConfirmed,
+      blueprintNeedsRefresh
     });
     const understandingSnapshot = await readUnderstandingSnapshot(root);
     const understandingReview = await readUnderstandingReview(root);
@@ -6644,9 +6701,23 @@ export function createApp() {
       .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
     const latestContractCandidate = (await listContractCandidates(root)).find((candidate) => candidate.status === "candidate");
     const outlineCandidates = await listOutlineCandidates(root);
-    const activeOutlineCandidate = outlineCandidates.find((outline) => outline.status === "candidate" && outline.sourceCandidateId === latestContractCandidate?.candidateId);
+    const [contractAdoptionProposal, outlineAdoptionProposal] = await Promise.all([
+      readContractAdoptionProposal(root),
+      readOutlineAdoptionProposal(root)
+    ]);
+    const contractAdoptionCommitted = Boolean(
+      contractAdoptionProposal?.status === "committed"
+      && (!latestBlueprint || contractAdoptionProposal.candidateId === latestBlueprint.sourceContractCandidateId)
+    );
+    const outlineSourceCandidateId = blueprintConfirmed
+      ? latestBlueprint?.sourceContractCandidateId
+      : contractAdoptionCommitted
+        ? contractAdoptionProposal?.candidateId
+        : undefined;
+    const activeOutlineCandidate = outlineSourceCandidateId
+      ? outlineCandidates.find((outline) => outline.status === "candidate" && outline.sourceCandidateId === outlineSourceCandidateId)
+      : undefined;
     const activeOutlineValidation = activeOutlineCandidate ? await readOutlineValidationReport(root, activeOutlineCandidate.outlineId) : null;
-    const outlineAdoptionProposal = await readOutlineAdoptionProposal(root);
     const decision = resolvePrimaryActionDecision({
       journeyVersion: journey.projectionVersion,
       sourceFingerprint: journey.sourceFingerprint,
@@ -6655,7 +6726,10 @@ export function createApp() {
       hasUnderstandingReviewPassed: understandingReview?.status === "passed",
       ...(latestDecision ? { contractDecisionId: latestDecision.decisionId } : {}),
       ...(latestContractCandidate ? { contractCandidateId: latestContractCandidate.candidateId } : {}),
-      ...(latestBlueprint && blueprintConfirmation ? { contractAdoptionCommitted: true, outlineSourceCandidateId: latestBlueprint.sourceContractCandidateId } : {}),
+      ...(contractAdoptionProposal ? { contractAdoptionProposalId: contractAdoptionProposal.proposalId, contractAdoptionProposalStatus: contractAdoptionProposal.status } : {}),
+      blueprintConfirmed,
+      ...(contractAdoptionCommitted ? { contractAdoptionCommitted: true } : {}),
+      ...(outlineSourceCandidateId ? { outlineSourceCandidateId } : {}),
       ...(activeOutlineCandidate ? { outlineCandidateId: activeOutlineCandidate.outlineId } : {}),
       ...(activeOutlineValidation?.status === "passed" ? { outlineValidationPassed: true } : {}),
       ...(outlineAdoptionProposal ? { outlineAdoptionProposalId: outlineAdoptionProposal.proposalId, outlineAdoptionProposalStatus: outlineAdoptionProposal.status } : {}),
@@ -6738,9 +6812,12 @@ export function createApp() {
         return;
       }
       try {
-        const result = await compileOutlineCandidate(projectRoot(project.slug), sourceCandidateId, {
-          ...(Number.isInteger(req.body?.strongFreezeCount) ? { strongFreezeCount: req.body.strongFreezeCount } : {}),
-          ...(Number.isInteger(req.body?.totalChapterCount) ? { totalChapterCount: req.body.totalChapterCount } : {})
+        const result = await withCreativeSessionLock(project.slug, async () => {
+          await assertConfirmedStoryBlueprintForOutline(root, project.slug, sourceCandidateId);
+          return compileOutlineCandidate(projectRoot(project.slug), sourceCandidateId, {
+            ...(Number.isInteger(req.body?.strongFreezeCount) ? { strongFreezeCount: req.body.strongFreezeCount } : {}),
+            ...(Number.isInteger(req.body?.totalChapterCount) ? { totalChapterCount: req.body.totalChapterCount } : {})
+          });
         });
         const sourceCandidate = await readContractCandidate(root, result.outline.sourceCandidateId);
         const sourceDecision = sourceCandidate ? (await readDecisionRecords(root)).find((record) => record.decisionId === sourceCandidate.sourceDecisionId) : undefined;
@@ -6762,6 +6839,10 @@ export function createApp() {
         res.status(result.created ? 201 : 200).json({ execution: { status: "completed", actionId: decision.actionId, idempotencyKey: validation.idempotencyKey, created: result.created }, outline: result.outline, consumption });
       } catch (error) {
         const code = error instanceof Error ? error.message : "OUTLINE_CANDIDATE_COMPILATION_BLOCKED";
+        if (code === "STORY_BLUEPRINT_CONFIRMATION_REQUIRED" || code === "STORY_BLUEPRINT_SOURCE_MISMATCH") {
+          res.status(409).json({ error: storyBlueprintOutlineError(code) });
+          return;
+        }
         res.status(code === "CONTRACT_CANDIDATE_NOT_FOUND" ? 404 : 409).json({ error: { code } });
       }
       return;
@@ -6923,10 +7004,12 @@ export function createApp() {
       const refreshedSession = await readCreativeSession(root, project.slug);
       const latestBlueprint = storyBlueprint?.blueprint || await readLatestStoryBlueprint(root, project.slug);
       const blueprintConfirmation = latestBlueprint ? await readStoryBlueprintConfirmation(root, latestBlueprint.blueprintId, project.slug) : null;
+      const blueprintNeedsRefresh = Boolean(blueprintConfirmation && !isStoryBlueprintConfirmationCurrent(refreshedSession, blueprintConfirmation));
       const journey = buildCreativeJourneyProjection(refreshedSession, {
         ...(refreshedActiveQuestion ? { activeQuestion: { questionId: refreshedActiveQuestion.questionId, text: refreshedActiveQuestion.text, impact: refreshedActiveQuestion.impact, source: "deterministic-gap" as const } } : {}),
         answeredQuestionIds: refreshedDecisions.filter((record) => record.status === "recorded").map((record) => record.questionId),
-        blueprintConfirmed: Boolean(blueprintConfirmation)
+        blueprintConfirmed: Boolean(blueprintConfirmation) && !blueprintNeedsRefresh,
+        blueprintNeedsRefresh
       });
       await persistCreativeJourneyProjection(root, journey);
       res.status(advanced.answer.replayed ? 200 : 201).json({ execution: { status: "completed", actionId: decision.actionId, idempotencyKey: validation.idempotencyKey, created: !advanced.answer.replayed }, question: advanced.answer.question, ...(advanced.nextQuestion ? { nextQuestion: advanced.nextQuestion } : {}), ...(advanced.contractCandidate ? { contractCandidate: advanced.contractCandidate } : {}), ...(advanced.consumption ? { consumption: advanced.consumption } : {}), ...(advanced.completed && latestBlueprint ? { storyBlueprint: latestBlueprint } : {}), completed: advanced.completed, journey, decision: advanced.answer.decision });

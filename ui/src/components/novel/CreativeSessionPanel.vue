@@ -1,5 +1,6 @@
 <template>
   <section class="creative-session-panel" data-testid="creative-session-panel" aria-labelledby="creative-session-title">
+    <AuthorJourneyProgress :journey="journey" :processing="submitting || freezing || advancing" />
     <header class="creative-session-header">
       <div>
         <p class="eyebrow">作者工作台</p>
@@ -14,16 +15,18 @@
       {{ contractError }}
       <button type="button" data-testid="retry-contract-candidate" @click="emit('retry-contract')">重试生成契约候选</button>
     </div>
-    <div v-if="journey" class="journey-primary-action" data-testid="journey-primary-action">
+    <div v-if="journey && !question && !journey.activeQuestion && journey.stage === 'understanding'" class="journey-primary-action" data-testid="journey-primary-action">
       <span class="journey-stage">{{ stageLabel(journey.stage) }}</span>
       <strong>{{ journey.primaryAction.label }}</strong>
-      <span v-if="journey.activeQuestion" class="journey-question">{{ questionText(journey.activeQuestion.id, journey.activeQuestion.text) }}</span>
+      <span class="journey-question">{{ journey.nextInstruction || "请点击主操作继续" }}</span>
       <button type="button" class="journey-action-button" @click="emit('primary-action', journey.primaryAction.id)">
         {{ journey.primaryAction.label }}
       </button>
-      <button v-if="journey.stage === 'understanding' && contextManifest && !question" type="button" class="prepare-question-button" data-testid="prepare-question" @click="emit('prepare-question')">
-        生成唯一问题
-      </button>
+    </div>
+    <div v-else-if="journey?.activeQuestion && !question" class="journey-question-pending" :role="questionError ? 'alert' : 'status'">
+      <strong>{{ questionError ? "关键问题加载失败" : questionLoading ? "正在加载关键问题" : "关键问题暂未同步" }}</strong>
+      <p>{{ questionError || "请稍候；如未出现，可重新加载后继续回答。" }}</p>
+      <button type="button" data-testid="retry-dialogue-question" :disabled="questionLoading" @click="emit('retry-question')">重新加载问题</button>
     </div>
     <form v-if="question?.status === 'active'" class="dialogue-question" data-testid="dialogue-answer-form" @submit.prevent="submitAnswer">
       <strong>{{ questionText(question.questionId, question.text) }}</strong>
@@ -39,9 +42,9 @@
             <small>最佳情形：{{ option.bestCase }}；风险：{{ option.failureModes.join("、") }}</small>
           </li>
         </ul>
-        <small>当前推荐：{{ question.redBlueCase.recommendation }}。{{ question.redBlueCase.recommendationReason }}</small>
+        <small>当前推荐：{{ reviewVerdictLabel(question.redBlueCase.recommendation) }}。{{ question.redBlueCase.recommendationReason }}</small>
       </div>
-      <button type="submit" :disabled="!answerDraft.trim()">确认回答</button>
+      <button type="submit" :disabled="advancing || !answerDraft.trim()">{{ advancing ? "正在保存并准备下一步" : "确认回答并继续" }}</button>
     </form>
     <ol v-if="session?.messages.length" class="session-messages" aria-label="已记录的消息">
       <li v-for="message in session.messages" :key="message.id" class="session-message">
@@ -57,14 +60,14 @@
         <li v-for="claim in preview.coreExplicit" :key="claim.id">{{ claim.text }}</li>
       </ul>
       <p v-for="unknown in preview.unknowns" :key="unknown.id" class="preview-unknown">待确认：{{ unknown.text }}</p>
-      <button v-if="!contextManifest" type="button" class="freeze-button" :disabled="freezing || !session?.messages.length" @click="emit('freeze')">
+      <button v-if="!contextManifest && !journey" type="button" class="freeze-button" :disabled="freezing || !session?.messages.length" @click="emit('freeze')">
         {{ freezing ? "正在冻结输入" : "冻结 V2 的完整原始输入" }}
       </button>
-      <p v-else class="manifest-state">T0 已冻结：{{ contextManifest.manifestId }}</p>
+      <p v-else-if="contextManifest" class="manifest-state">T0 已冻结：{{ contextManifest.manifestId }}</p>
     </div>
 
     <form class="session-input" @submit.prevent="submitMessage">
-      <label for="creative-session-input">作者输入</label>
+      <label for="creative-session-input">{{ journey?.stage === 'understanding' ? '补充想法（可选）' : '作者输入' }}</label>
       <textarea
         id="creative-session-input"
         v-model="draft"
@@ -76,6 +79,7 @@
       <button type="submit" :disabled="submitting || !draft.trim()">
         {{ submitting ? "保存中" : "记录原话" }}
       </button>
+      <small v-if="journey?.stage === 'understanding'" class="supplement-hint">补充后系统会重新整理故事蓝图，已确认的回答会保留。</small>
     </form>
   </section>
 </template>
@@ -83,24 +87,29 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import type { CreativeJourneyProjection, CreativeSession, DialogueQuestion } from "@/types/novel";
+import { reviewVerdictLabel } from "@/utils/novelLabels";
+import AuthorJourneyProgress from "./AuthorJourneyProgress.vue";
 
 withDefaults(
   defineProps<{
     session: CreativeSession | null;
     journey?: CreativeJourneyProjection | null;
     question?: DialogueQuestion | null;
+    questionLoading?: boolean;
+    questionError?: string;
     preview?: import("@/types/novel").UnderstandingPreview | null;
     contextManifest?: import("@/types/novel").ContextManifest | null;
     freezing?: boolean;
+    advancing?: boolean;
     loading?: boolean;
     submitting?: boolean;
     error?: string;
     contractError?: string;
   }>(),
-  { session: null, journey: null, question: null, preview: null, contextManifest: null, freezing: false, loading: false, submitting: false, error: "", contractError: "" }
+  { session: null, journey: null, question: null, questionLoading: false, questionError: "", preview: null, contextManifest: null, freezing: false, advancing: false, loading: false, submitting: false, error: "", contractError: "" }
 );
 
-const emit = defineEmits<{ submit: [text: string]; freeze: []; "primary-action": [id: "capture-idea" | "review-understanding"]; "prepare-question": []; answer: [text: string, status: "confirmed" | "tentative" | "delegated"]; "retry-contract": [] }>();
+const emit = defineEmits<{ submit: [text: string]; freeze: []; "primary-action": [id: CreativeJourneyProjection["primaryAction"]["id"]]; "prepare-question": []; answer: [text: string, status: "confirmed" | "tentative" | "delegated"]; "retry-contract": []; "retry-question": [] }>();
 const draft = ref("");
 const answerDraft = ref("");
 
@@ -144,7 +153,7 @@ function selectRedBlueOption(label: string) {
 }
 
 function stageLabel(stage: CreativeJourneyProjection["stage"]) {
-  return stage === "capture" ? "记录" : stage === "understanding" ? "理解" : stage;
+  return stage === "capture" ? "记录想法" : stage === "understanding" ? "补全设定" : stage === "blueprint-review" ? "故事蓝图" : "制定大纲";
 }
 </script>
 
@@ -179,9 +188,11 @@ function stageLabel(stage: CreativeJourneyProjection["stage"]) {
 .session-input textarea { width: 100%; resize: vertical; box-sizing: border-box; padding: 10px; border: 1px solid var(--el-border-color); border-radius: 8px; font: inherit; background: var(--el-bg-color); color: var(--el-text-color-primary); }
 .session-input button { justify-self: start; padding: 8px 14px; border: 0; border-radius: 8px; background: var(--el-color-primary); color: white; cursor: pointer; }
 .session-input button:disabled { opacity: .5; cursor: not-allowed; }
+.supplement-hint { color: var(--el-text-color-secondary); }
 .session-error { color: var(--el-color-danger); }
 .session-error button { margin-left: 8px; padding: 4px 8px; border: 1px solid currentColor; border-radius: 6px; background: transparent; color: inherit; cursor: pointer; }
 .journey-primary-action { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--el-color-primary-light-5); border-radius: 10px; background: var(--el-color-primary-light-9); }
+.journey-question-pending { margin: 0; padding: 12px; border: 1px solid var(--el-color-warning-light-5); border-radius: 10px; color: var(--el-text-color-secondary); background: var(--el-color-warning-light-9); }
 .journey-stage { color: var(--el-color-primary); font-size: 12px; text-transform: uppercase; }
 .journey-question { color: var(--el-text-color-secondary); font-size: 13px; }
 .journey-action-button { justify-self: start; padding: 7px 11px; border: 0; border-radius: 7px; background: var(--el-color-primary); color: white; cursor: pointer; }

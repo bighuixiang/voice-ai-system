@@ -63,8 +63,14 @@ describe("primary action decision", () => {
   });
 
   it("requires explicit authorization after an adoption proposal exists", () => {
-    const decision = resolvePrimaryActionDecision({ journeyVersion: "journey-6", sourceFingerprint: "source-6", stage: "understanding", hasUnderstandingReviewPassed: true, contractCandidateId: "candidate-1", contractAdoptionProposalId: "proposal-1" });
+    const decision = resolvePrimaryActionDecision({ journeyVersion: "journey-6", sourceFingerprint: "source-6", stage: "understanding", hasUnderstandingReviewPassed: true, contractCandidateId: "candidate-1", contractAdoptionProposalId: "proposal-1", contractAdoptionProposalStatus: "ready_for_authorization" });
     expect(decision).toMatchObject({ actionId: "commit-contract-adoption-proposal-1", kind: "l2-decision", risk: "high" });
+  });
+
+  it("returns to candidate review when the adoption proposal is blocked", () => {
+    const decision = resolvePrimaryActionDecision({ journeyVersion: "journey-blocked-proposal", sourceFingerprint: "source-blocked-proposal", stage: "understanding", hasUnderstandingReviewPassed: true, contractCandidateId: "candidate-1", contractAdoptionProposalId: "proposal-1", contractAdoptionProposalStatus: "blocked" });
+
+    expect(decision).toMatchObject({ actionId: "review-contract-candidate-candidate-1", kind: "reviewable" });
   });
 
   it("moves to outline generation after contract adoption is committed", () => {
@@ -76,9 +82,55 @@ describe("primary action decision", () => {
       contractCandidateId: "candidate-1",
       contractAdoptionProposalId: "proposal-1",
       contractAdoptionCommitted: true,
+      blueprintConfirmed: true,
       outlineSourceCandidateId: "candidate-1"
     });
     expect(decision).toMatchObject({ actionId: "generate-outline-candidate-candidate-1", kind: "continue", targetOutcome: "outline-candidate-created" });
+  });
+
+  it("allows a confirmed blueprint to create a reviewable outline without claiming the contract is canon", () => {
+    const decision = resolvePrimaryActionDecision({
+      journeyVersion: "journey-blueprint-outline",
+      sourceFingerprint: "source-blueprint-outline",
+      stage: "ready-for-outline",
+      blueprintConfirmed: true,
+      outlineSourceCandidateId: "candidate-blueprint"
+    });
+
+    expect(decision).toMatchObject({ actionId: "generate-outline-candidate-candidate-blueprint", kind: "continue" });
+    expect(decision.rationale).toContain("故事蓝图已确认");
+  });
+
+  it("prioritizes contract adoption instead of regenerating an existing outline", () => {
+    const decision = resolvePrimaryActionDecision({
+      journeyVersion: "journey-contract-before-outline",
+      sourceFingerprint: "source-contract-before-outline",
+      stage: "ready-for-outline",
+      hasUnderstandingReviewPassed: true,
+      contractCandidateId: "candidate-blueprint",
+      contractAdoptionProposalId: "contract-proposal-1",
+      contractAdoptionProposalStatus: "ready_for_authorization",
+      blueprintConfirmed: true,
+      outlineSourceCandidateId: "candidate-blueprint",
+      outlineCandidateId: "outline-candidate-blueprint"
+    });
+
+    expect(decision).toMatchObject({ actionId: "commit-contract-adoption-contract-proposal-1", kind: "l2-decision", risk: "high" });
+  });
+
+  it("does not advance into outline work when the blueprint confirmation is missing or stale", () => {
+    const decision = resolvePrimaryActionDecision({
+      journeyVersion: "journey-blueprint-stale",
+      sourceFingerprint: "source-blueprint-stale",
+      stage: "blueprint-review",
+      hasUnderstandingReviewPassed: true,
+      contractCandidateId: "candidate-1",
+      contractAdoptionCommitted: true,
+      blueprintConfirmed: false,
+      outlineSourceCandidateId: "candidate-1"
+    });
+
+    expect(decision).toMatchObject({ actionId: "review-contract-candidate-candidate-1", kind: "reviewable" });
   });
 
   it("requires outline review before proposing adoption", () => {
@@ -87,6 +139,7 @@ describe("primary action decision", () => {
       sourceFingerprint: "source-8",
       stage: "understanding",
       contractAdoptionCommitted: true,
+      blueprintConfirmed: true,
       outlineCandidateId: "outline-1",
       outlineValidationPassed: true
     });
@@ -94,9 +147,9 @@ describe("primary action decision", () => {
   });
 
   it("keeps outline authorization separate from canon commit", () => {
-    const ready = resolvePrimaryActionDecision({ journeyVersion: "journey-9", sourceFingerprint: "source-9", stage: "understanding", contractAdoptionCommitted: true, outlineCandidateId: "outline-1", outlineAdoptionProposalId: "proposal-1", outlineAdoptionProposalStatus: "ready_for_authorization" });
+    const ready = resolvePrimaryActionDecision({ journeyVersion: "journey-9", sourceFingerprint: "source-9", stage: "understanding", contractAdoptionCommitted: true, blueprintConfirmed: true, outlineCandidateId: "outline-1", outlineAdoptionProposalId: "proposal-1", outlineAdoptionProposalStatus: "ready_for_authorization" });
     expect(ready).toMatchObject({ actionId: "authorize-outline-adoption-proposal-1", kind: "l2-decision", risk: "high" });
-    const authorized = resolvePrimaryActionDecision({ journeyVersion: "journey-10", sourceFingerprint: "source-10", stage: "understanding", contractAdoptionCommitted: true, outlineCandidateId: "outline-1", outlineAdoptionProposalId: "proposal-1", outlineAdoptionProposalStatus: "authorized" });
+    const authorized = resolvePrimaryActionDecision({ journeyVersion: "journey-10", sourceFingerprint: "source-10", stage: "understanding", contractAdoptionCommitted: true, blueprintConfirmed: true, outlineCandidateId: "outline-1", outlineAdoptionProposalId: "proposal-1", outlineAdoptionProposalStatus: "authorized" });
     expect(authorized).toMatchObject({ actionId: "commit-outline-adoption-proposal-1", kind: "l2-decision", risk: "high" });
   });
 });

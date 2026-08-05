@@ -53,7 +53,7 @@
       <section class="hub-copy" aria-labelledby="hub-title">
         <p class="eyebrow">创作生产平台</p>
         <h2 id="hub-title">先选项目，再进入工作台</h2>
-        <p>MVP 先把小说创作跑通；项目结构已经为素材、剧本、图片生成和视频生成预留模块。</p>
+        <p>最小可用版本先把小说创作跑通；项目结构已经为素材、剧本、图片生成和视频生成预留模块。</p>
         <div class="module-strip" aria-label="平台模块">
           <span>小说创作</span>
           <span>素材管理</span>
@@ -108,9 +108,12 @@
           :session="store.creativeSession"
           :journey="store.creativeJourney"
           :question="store.activeDialogueQuestion"
+          :question-loading="store.isLoadingDialogueQuestions"
+          :question-error="store.dialogueQuestionsError"
           :preview="store.understandingPreview"
           :context-manifest="store.contextManifest"
           :freezing="store.isFreezingContextManifest"
+          :advancing="store.isAdvancingAuthorJourney"
           :loading="store.isLoadingCreativeSession"
           :submitting="store.isSubmittingCreativeMessage"
           :error="store.creativeSessionError"
@@ -120,7 +123,21 @@
           @primary-action="store.executeCreativeJourneyAction"
           @prepare-question="store.prepareUnderstandingQuestion"
           @answer="store.answerDialogueQuestion"
+          @retry-question="store.loadDialogueQuestions"
           @retry-contract="store.retryContractCandidateCompilation"
+        />
+        <StoryBlueprintPanel
+          :blueprint="store.activeStoryBlueprint || null"
+          :confirmed="store.creativeJourney?.stage === 'ready-for-outline'"
+          :busy="store.isAdvancingAuthorJourney"
+          :error="store.authorJourneyError"
+          :load-error="store.storyBlueprintLoadError"
+          :loading="store.isLoadingStoryBlueprint"
+          @revise="store.reviseStoryBlueprint"
+          @regenerate="store.regenerateStoryBlueprint"
+          @confirm="store.confirmStoryBlueprint"
+          @start-outline="store.executeCreativeJourneyAction('generate-outline')"
+          @reload="store.loadLatestStoryBlueprint"
         />
         <LearningGovernancePanel
           :policy="store.learningPolicy || null"
@@ -143,6 +160,8 @@
         />
         <ContractCandidatePanel
           :candidates="store.contractCandidates || []"
+          :outline-source-candidate-id="store.creativeJourney?.stage === 'ready-for-outline' ? store.activeStoryBlueprint?.sourceContractCandidateId : ''"
+          :outline-loading="store.isLoadingStoryBlueprint || Boolean(store.storyBlueprintLoadError)"
           :loading="store.isLoadingContractCandidates || false"
           :error="store.contractCandidatesError || ''"
           :adoption-loading="store.isCreatingContractAdoptionProposal || false"
@@ -162,6 +181,7 @@
           :proposal="store.outlineAdoptionProposal"
           :adoption-loading="store.isAdoptingOutline || false"
           :adoption-error="store.outlineAdoptionError || ''"
+          :adopted-contract-candidate-id="store.contractAdoptionProposal?.status === 'committed' && store.contractAdoptionProposal?.canonWritten === true ? store.contractAdoptionProposal.candidateId : ''"
           @refresh="store.loadOutlineCandidates?.()"
           @validate="store.validateOutlineCandidate?.($event)"
           @select-chapters="store.setOutlineChapterSelection?.($event)"
@@ -276,8 +296,8 @@
             title="自动驾驶运行时"
             :subtitle="
               store.activeRuntimeRun
-                ? `${store.activeRuntimeRun.status} · ${store.activeRuntimeChapterLabel || store.activeRuntimeRun.chapterId || 'unknown'}`
-                : 'idle'
+                ? `${statusLabel(store.activeRuntimeRun.status)} · ${store.activeRuntimeChapterLabel || store.activeRuntimeRun.chapterId || '未选择章节'}`
+                : '未启动'
             "
             hide-toggle-test-hook
             :collapsed="panelCollapsed('runtime-autopilot', store.writingMode !== 'focus')"
@@ -609,7 +629,7 @@
             :project="store.currentProject"
             :chapter="store.currentChapter"
             :ai-summary="store.activeNovelAiSummary"
-            :ai-status="store.activeNovelAgentCheck?.available ? store.activeNovelAgentCheck.version || '连接正常' : store.activeNovelAgentCheck?.error"
+            :ai-status="store.activeNovelAgentCheck?.available ? store.activeNovelAgentCheck.version || '连接正常' : errorText(store.activeNovelAgentCheck?.error, '连接失败')"
             :ai-available="store.activeNovelAgentCheck?.available"
             :active-skills="activeNovelSkills"
           />
@@ -705,7 +725,7 @@
           :ready-proof="store.memoryReadyProof"
           :continuity-audit="store.memoryContinuityAudit"
           :retrieval-available="Boolean(store.knowledgeRetrievalPreview)"
-          :loading="store.isRunningMemoryGovernance"
+          :loading="store.isRunningMemoryGovernance || false"
           @run="store.runMemoryGovernance"
         />
         <BackgroundJobPanel
@@ -754,6 +774,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useNovelStore } from "@/stores/novel";
 import { useThemeStore } from "@/stores/theme";
 import type { CreationLoopAction, NovelProject, PlatformAiConfig, StoryGraphFocus, WorkbenchCommand } from "@/types/novel";
+import { errorText, statusLabel } from "@/utils/novelLabels";
 import { useWorkspacePanelState } from "./useWorkspacePanelState";
 import WritingModeSwitcher from "./WritingModeSwitcher.vue";
 import CollapsiblePanel from "./CollapsiblePanel.vue";
@@ -791,6 +812,7 @@ const PlotPilotLearningPanel = defineAsyncComponent(() => import("./PlotPilotLea
 const SavePipelinePanel = defineAsyncComponent(() => import("./SavePipelinePanel.vue"));
 const AutopilotRuntimePanel = defineAsyncComponent(() => import("./AutopilotRuntimePanel.vue"));
 const CreativeSessionPanel = defineAsyncComponent(() => import("./CreativeSessionPanel.vue"));
+const StoryBlueprintPanel = defineAsyncComponent(() => import("./StoryBlueprintPanel.vue"));
 const ContractCandidatePanel = defineAsyncComponent(() => import("./ContractCandidatePanel.vue"));
 const BookRunPanel = defineAsyncComponent(() => import("./BookRunPanel.vue"));
 const LengthPlanningPanel = defineAsyncComponent(() => import("./LengthPlanningPanel.vue"));
@@ -1011,7 +1033,7 @@ async function confirmDeleteProject(project: NovelProject) {
     ElMessage.success(`已删除项目：${projectTitle}`);
   } catch (err) {
     if (err === "cancel" || err === "close") return;
-    ElMessage.error(err instanceof Error ? err.message : "删除项目失败");
+    ElMessage.error(errorText(err, "删除项目失败"));
   }
 }
 
@@ -1032,7 +1054,7 @@ async function handleSaveCurrentContent() {
     await store.saveCurrentContent();
     ElMessage.success(hadChanges ? "当前文档已保存" : "当前文档已是最新");
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "保存失败");
+    ElMessage.error(errorText(err, "保存失败"));
   }
 }
 
@@ -1084,7 +1106,7 @@ async function handleSaveCurrentStructure() {
     await store.saveCurrentStructure();
     ElMessage.success("章节结构已保存");
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "保存结构失败");
+    ElMessage.error(errorText(err, "保存结构失败"));
   }
 }
 
@@ -1093,7 +1115,7 @@ async function handleSaveStoryControl() {
     await store.saveStoryControl();
     ElMessage.success("故事总控台已保存");
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "保存故事总控台失败");
+    ElMessage.error(errorText(err, "保存故事总控台失败"));
   }
 }
 
@@ -1102,7 +1124,7 @@ async function handleSaveAiConfig(config: PlatformAiConfig) {
     await store.savePlatformAiConfig(config);
     ElMessage.success("AI 配置已保存");
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "AI 配置保存失败");
+    ElMessage.error(errorText(err, "AI 配置保存失败"));
   }
 }
 
@@ -1116,7 +1138,7 @@ async function handleCheckAgent(config: { profileId: string; modelId?: string })
     }
     ElMessage.error(result.error || `${result.label} 不可用`);
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "AI 执行器测试失败");
+    ElMessage.error(errorText(err, "AI 执行器测试失败"));
   } finally {
     store.isLoading = false;
   }

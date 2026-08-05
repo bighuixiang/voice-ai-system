@@ -96,6 +96,7 @@ const mockNovelApi = vi.hoisted(() => ({
   restoreRuntimeCheckpoint: vi.fn()
   ,readCreativeSession: vi.fn()
   ,readCreativeJourney: vi.fn()
+  ,readLatestStoryBlueprint: vi.fn()
   ,captureAuthorMessage: vi.fn()
   ,readUnderstandingPreview: vi.fn()
   ,startUnderstanding: vi.fn()
@@ -886,6 +887,15 @@ describe("useNovelStore", () => {
     expect(store.outlineAdoptionProposal).toMatchObject({ status: "committed", canonWritten: true });
   });
 
+  it("shows a Chinese next-step guide when outline submission finds an unadopted source contract", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    mockNovelApi.commitOutlineAdoption.mockResolvedValue({ status: "blocked", canonWritten: false, reason: "OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED" });
+
+    await expect(store.commitOutlineAdoption("p".repeat(64))).resolves.toMatchObject({ status: "blocked" });
+    expect(store.outlineAdoptionError).toBe("请先确认并采纳该大纲对应的故事设定。");
+  });
+
   it("keeps chapter execution behind the persisted proof and readiness decision", async () => {
     const proof = { proofId: "proof-1", status: "ready", executionReady: true, versionId: "version-1" };
     const readiness = { allowed: true, checks: [{ checkId: "chapter-in-window", status: "passed" }] };
@@ -1291,6 +1301,38 @@ describe("useNovelStore", () => {
     expect(store.activeDialogueQuestion?.questionId).toBe("question-primary-desire");
   });
 
+  it("creates an outline from the confirmed story blueprint", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.creativeJourney = {
+      schemaVersion: "creative-journey-projection.v1",
+      projectSlug: "demo",
+      stage: "ready-for-outline",
+      primaryAsset: "understanding-preview",
+      primaryAction: { id: "generate-outline", label: "开始制定大纲", kind: "continue", status: "available" },
+      sourceMessageIds: ["message-1"],
+      sessionFingerprint: "a".repeat(64)
+    };
+    store.activeStoryBlueprint = {
+      schemaVersion: "story-blueprint.v1",
+      blueprintId: "blueprint-1",
+      projectSlug: "demo",
+      sourceContractCandidateId: "candidate-blueprint-1",
+      sourceFingerprint: "a".repeat(64),
+      decisionIds: ["decision-1"],
+      content: { storyPremise: "前提", openingImage: "画面", protagonistGoal: "目标", coreConflict: "冲突", failureCost: "代价", worldRules: "规则", readerPromise: "期待", endingDirection: "方向" },
+      createdAt: "now",
+      fingerprint: "b".repeat(64)
+    };
+    mockNovelApi.compileOutlineCandidate.mockResolvedValue({ created: true, outline: { outlineId: "outline-1", status: "candidate", canonWritten: false } });
+    mockNovelApi.listOutlineCandidates.mockResolvedValue([{ outlineId: "outline-1", status: "candidate", canonWritten: false }]);
+    mockNovelApi.readCreativeJourney.mockResolvedValue(store.creativeJourney);
+
+    await store.executeCreativeJourneyAction("generate-outline");
+
+    expect(mockNovelApi.compileOutlineCandidate).toHaveBeenCalledWith("demo", "candidate-blueprint-1", {});
+  });
+
   it("loads and answers the active dialogue question through the idempotent API", async () => {
     const store = useNovelStore();
     store.currentProject = project;
@@ -1328,6 +1370,53 @@ describe("useNovelStore", () => {
     expect(answered?.question.status).toBe("answered");
   });
 
+  it("keeps a visible, retryable error when dialogue questions fail to load", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    mockNovelApi.listDialogueQuestions.mockRejectedValueOnce(new Error("network unavailable"));
+
+    await expect(store.loadDialogueQuestions()).resolves.toEqual([]);
+
+    expect(store.isLoadingDialogueQuestions).toBe(false);
+    expect(store.dialogueQuestionsError).toBe("关键问题加载失败，请重新加载后继续。");
+  });
+
+  it("ignores an older failed dialogue-question request after a newer request succeeds", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    let rejectOlderRequest!: (reason?: unknown) => void;
+    const olderRequest = new Promise<never>((_resolve, reject) => { rejectOlderRequest = reject; });
+    const latestQuestion = {
+      schemaVersion: "dialogue-question.v1" as const,
+      questionId: "question-primary-desire",
+      questionVersion: 1,
+      projectSlug: "demo",
+      status: "active" as const,
+      text: "主角最想得到什么？",
+      whyNow: "这会决定开场方向。",
+      impact: "high" as const,
+      ambiguity: 0.8,
+      errorCost: "方向偏离",
+      reversibility: "可在写入正典前修改",
+      delayCost: "阻塞后续生成",
+      options: [],
+      recommendation: "先明确主角目标。",
+      snapshotFingerprint: "b".repeat(64)
+    };
+    mockNovelApi.listDialogueQuestions
+      .mockReturnValueOnce(olderRequest)
+      .mockResolvedValueOnce([latestQuestion]);
+
+    const olderLoad = store.loadDialogueQuestions();
+    await store.loadDialogueQuestions();
+    rejectOlderRequest(new Error("network unavailable"));
+    await olderLoad;
+
+    expect(store.activeDialogueQuestion?.questionId).toBe("question-primary-desire");
+    expect(store.dialogueQuestionsError).toBe("");
+    expect(store.isLoadingDialogueQuestions).toBe(false);
+  });
+
   it("refreshes the journey projection after capturing a new author message", async () => {
     const store = useNovelStore();
     store.currentProject = project;
@@ -1349,6 +1438,58 @@ describe("useNovelStore", () => {
 
     expect(mockNovelApi.readCreativeJourney).toHaveBeenCalledWith("demo");
     expect(store.creativeJourney?.stage).toBe("understanding");
+  });
+
+  it("keeps the visible blueprint when loading it fails temporarily", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    store.activeStoryBlueprint = {
+      schemaVersion: "story-blueprint.v1",
+      blueprintId: "blueprint-1",
+      projectSlug: "demo",
+      sourceContractCandidateId: "candidate-1",
+      sourceFingerprint: "a".repeat(64),
+      decisionIds: ["decision-1"],
+      content: { storyPremise: "前提", openingImage: "画面", protagonistGoal: "目标", coreConflict: "冲突", failureCost: "代价", worldRules: "规则", readerPromise: "期待", endingDirection: "方向" },
+      createdAt: "now",
+      fingerprint: "b".repeat(64)
+    };
+    mockNovelApi.readLatestStoryBlueprint.mockRejectedValue(new Error("网络异常"));
+
+    await store.loadLatestStoryBlueprint();
+
+    expect(store.activeStoryBlueprint?.blueprintId).toBe("blueprint-1");
+    expect(store.storyBlueprintLoadError).toContain("已保留当前内容");
+  });
+
+  it("ignores an older failed blueprint request after a newer request succeeds", async () => {
+    const store = useNovelStore();
+    store.currentProject = project;
+    let rejectOlderRequest!: (reason?: unknown) => void;
+    const olderRequest = new Promise<never>((_resolve, reject) => { rejectOlderRequest = reject; });
+    const latestBlueprint = {
+      schemaVersion: "story-blueprint.v1" as const,
+      blueprintId: "blueprint-latest",
+      projectSlug: "demo",
+      sourceContractCandidateId: "candidate-1",
+      sourceFingerprint: "a".repeat(64),
+      decisionIds: ["decision-1"],
+      content: { storyPremise: "前提", openingImage: "画面", protagonistGoal: "目标", coreConflict: "冲突", failureCost: "代价", worldRules: "规则", readerPromise: "期待", endingDirection: "方向" },
+      createdAt: "now",
+      fingerprint: "b".repeat(64)
+    };
+    mockNovelApi.readLatestStoryBlueprint
+      .mockReturnValueOnce(olderRequest)
+      .mockResolvedValueOnce({ blueprint: latestBlueprint });
+
+    const olderLoad = store.loadLatestStoryBlueprint();
+    await store.loadLatestStoryBlueprint();
+    rejectOlderRequest(new Error("network unavailable"));
+    await olderLoad;
+
+    expect(store.activeStoryBlueprint?.blueprintId).toBe("blueprint-latest");
+    expect(store.storyBlueprintLoadError).toBe("");
+    expect(store.isLoadingStoryBlueprint).toBe(false);
   });
 
   it("prepares the durable primary question through shadow understanding", async () => {
@@ -1383,7 +1524,7 @@ describe("useNovelStore", () => {
     expect(store.activeDialogueQuestion?.questionId).toBe("question-primary-desire");
   });
 
-  it("compiles a reviewable contract candidate after a confirmed answer", async () => {
+  it("refreshes the reviewable contract candidate after a confirmed answer", async () => {
     const store = useNovelStore();
     store.currentProject = project;
     store.dialogueQuestions = [{
@@ -1404,16 +1545,15 @@ describe("useNovelStore", () => {
       snapshotFingerprint: "b".repeat(64)
     }];
     mockNovelApi.answerDialogueQuestion.mockResolvedValue({ question: { ...store.dialogueQuestions[0], status: "answered", answerText: "Find the lost name", answerStatus: "confirmed" }, decision: { decisionId: "decision-1" } });
-    mockNovelApi.compileContractCandidate.mockResolvedValue({ created: true, candidate: { candidateId: "candidate-1" } });
     mockNovelApi.listContractCandidates.mockResolvedValue([{ candidateId: "candidate-1" }]);
 
     await store.answerDialogueQuestion("Find the lost name", "confirmed", "answer-2");
 
-    expect(mockNovelApi.compileContractCandidate).toHaveBeenCalledWith("demo", "decision-1");
+    expect(mockNovelApi.compileContractCandidate).not.toHaveBeenCalled();
     expect(store.contractCandidates[0].candidateId).toBe("candidate-1");
   });
 
-  it("keeps a confirmed answer when contract compilation is blocked", async () => {
+  it("keeps a confirmed answer when the next candidate is not ready yet", async () => {
     const store = useNovelStore();
     store.currentProject = project;
     store.dialogueQuestions = [{
@@ -1434,12 +1574,12 @@ describe("useNovelStore", () => {
       snapshotFingerprint: "b".repeat(64)
     }];
     mockNovelApi.answerDialogueQuestion.mockResolvedValue({ question: { ...store.dialogueQuestions[0], status: "answered", answerText: "Find the lost name", answerStatus: "confirmed" }, decision: { decisionId: "decision-blocked" } });
-    mockNovelApi.compileContractCandidate.mockRejectedValue(new Error("NO_CONTRACT_FIELDS"));
+    mockNovelApi.listContractCandidates.mockResolvedValue([]);
 
     const result = await store.answerDialogueQuestion("Find the lost name", "confirmed", "answer-blocked");
 
     expect(result?.question.status).toBe("answered");
-    expect(store.contractCandidatesError).toContain("NO_CONTRACT_FIELDS");
+    expect(store.contractCandidatesError).toBe("");
   });
 
   it("retries blocked contract compilation from the saved decision id", async () => {
@@ -3061,7 +3201,7 @@ describe("useNovelStore", () => {
         maxScore: 100,
         currentChapterTitle: "Chapter 1",
         currentWordCount: 48,
-        instruction: expect.stringContaining("Generate a reviewable full-chapter replacement patch"),
+        instruction: expect.stringContaining("请生成可供评审的整章替换补丁"),
         currentQualityReport: expect.objectContaining({
           chapterId: "chapter-001",
           overallScore: 82

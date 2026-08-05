@@ -131,7 +131,7 @@ describe("AiConfigPanel", () => {
       global: { stubs }
     });
 
-    expect(wrapper.text()).toContain("API Key 已配置");
+    expect(wrapper.text()).toContain("接口密钥已配置");
     expect(wrapper.html()).not.toContain("raw-secret");
   });
 });

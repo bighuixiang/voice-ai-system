@@ -56,7 +56,7 @@ describe("ContractCandidatePanel", () => {
   it("clearly separates candidates from canon and exposes evidence fields", () => {
     const wrapper = mount(ContractCandidatePanel, { props: { candidates: [candidate] } });
 
-    expect(wrapper.get("[data-testid='contract-candidate-panel']").text()).toContain("候选，不是 canon");
+    expect(wrapper.get("[data-testid='contract-candidate-panel']").text()).toContain("候选，尚未成为正式设定");
     expect(wrapper.text()).toContain("The order exploits reincarnation.");
     expect(wrapper.text()).toContain("question-1");
     expect(wrapper.text()).toContain("What the protagonist will sacrifice.");
@@ -87,18 +87,46 @@ describe("ContractCandidatePanel", () => {
   });
 
   it("exposes the next-stage outline compilation action without adopting canon", async () => {
-    const wrapper = mount(ContractCandidatePanel, { props: { candidates: [candidate] } });
+    const wrapper = mount(ContractCandidatePanel, { props: { candidates: [candidate], outlineSourceCandidateId: candidate.candidateId } });
     await wrapper.get("button[aria-label='生成大纲候选 candidate-1']").trigger("click");
 
     expect(wrapper.emitted("compile-outline")?.[0]).toEqual([{ sourceCandidateId: candidate.candidateId }]);
+  });
+
+  it("guides the author to confirm the story blueprint before showing outline generation", () => {
+    const wrapper = mount(ContractCandidatePanel, { props: { candidates: [candidate] } });
+
+    expect(wrapper.find("button[aria-label='生成大纲候选 candidate-1']").exists()).toBe(false);
+    expect(wrapper.text()).toContain("请先确认上方故事蓝图");
+  });
+
+  it("disables outline generation while the confirmed blueprint is refreshing", () => {
+    const wrapper = mount(ContractCandidatePanel, { props: { candidates: [candidate], outlineSourceCandidateId: candidate.candidateId, outlineLoading: true } });
+
+    const button = wrapper.get("button[aria-label='生成大纲候选 candidate-1']");
+    expect((button.element as HTMLButtonElement).disabled).toBe(true);
+    expect(button.text()).toContain("正在同步蓝图");
   });
 
   it("requires explicit author authorization before committing canon", async () => {
     const wrapper = mount(ContractCandidatePanel, { props: { candidates: [candidate], proposal } });
     await wrapper.get("input[aria-label='授权人']").setValue("author-1");
     await wrapper.get("input[aria-label='授权编号']").setValue("auth-1");
-    await wrapper.get("button[aria-label='提交 canon 采纳']").trigger("click");
+    await wrapper.get("button[aria-label='提交正式设定采纳']").trigger("click");
 
     expect(wrapper.emitted("commit")?.[0]).toEqual([{ expectedProposalFingerprint: proposal.fingerprint, actorId: "author-1", authorizationId: "auth-1" }]);
+  });
+
+  it("shows the completed state and the next outline action after contract adoption", () => {
+    const wrapper = mount(ContractCandidatePanel, {
+      props: {
+        candidates: [{ ...candidate, status: "candidate", canonWritten: true }],
+        proposal: { ...proposal, status: "committed", canonWritten: true }
+      }
+    });
+
+    expect(wrapper.text()).toContain("故事设定已采纳");
+    expect(wrapper.text()).toContain("下一步：回到大纲候选，选择并验证章节结构");
+    expect(wrapper.text()).not.toContain("ready_for_authorization");
   });
 });

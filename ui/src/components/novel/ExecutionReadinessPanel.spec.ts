@@ -10,9 +10,9 @@ describe("ExecutionReadinessPanel", () => {
   it("shows proof status separately from chapter execution permission", () => {
     const wrapper = mount(ExecutionReadinessPanel, { props: { proof, readiness, chapterId: "chapter-001" } });
     expect(wrapper.text()).toContain("执行就绪证明");
-    expect(wrapper.text()).toContain("证明 ready");
+    expect(wrapper.text()).toContain("证明 已准备");
     expect(wrapper.text()).toContain("允许执行");
-    expect(wrapper.text()).toContain("chapter-in-window");
+    expect(wrapper.text()).toContain("章节窗口");
   });
 
   it("emits proof refresh and chapter readiness checks", async () => {

@@ -83,7 +83,7 @@ describe("CreativeSessionPanel", () => {
           stage: "understanding",
           primaryAsset: "understanding-preview",
           primaryAction: { id: "review-understanding", label: "确认原始输入并生成问题", kind: "review", status: "available" },
-          activeQuestion: { id: "question-primary-desire", text: "What must the protagonist want most?", status: "candidate", impact: "high", source: "deterministic-gap" },
+          nextInstruction: "在开头阶段，主角最想得到什么？",
           sourceMessageIds: ["m1"],
           sessionFingerprint: "a".repeat(64)
         }
@@ -91,7 +91,7 @@ describe("CreativeSessionPanel", () => {
     });
 
     expect(wrapper.get('[data-testid="journey-primary-action"]').text()).toContain("确认原始输入并生成问题");
-    expect(wrapper.get('.journey-stage').text()).toBe("理解");
+    expect(wrapper.get('.journey-stage').text()).toBe("补全设定");
     expect(wrapper.get('.journey-question').text()).toBe("在开头阶段，主角最想得到什么？");
   });
 
@@ -114,6 +114,51 @@ describe("CreativeSessionPanel", () => {
     await wrapper.get('[data-testid="journey-primary-action"] button').trigger("click");
 
     expect(wrapper.emitted("primary-action")).toEqual([["review-understanding"]]);
+  });
+
+  it("shows a reload action instead of a no-op action while an active question is hydrating", async () => {
+    const wrapper = mount(CreativeSessionPanel, {
+      props: {
+        session: null,
+        journey: {
+          schemaVersion: "creative-journey-projection.v1",
+          projectSlug: "demo",
+          stage: "understanding",
+          primaryAsset: "understanding-preview",
+          primaryAction: { id: "answer-question-primary-desire", label: "回答当前问题", kind: "answer", status: "available" },
+          activeQuestion: { id: "question-primary-desire", text: "主角最想得到什么？", status: "active", impact: "high", source: "deterministic-gap" },
+          sourceMessageIds: ["m1"],
+          sessionFingerprint: "a".repeat(64)
+        }
+      }
+    });
+
+    expect(wrapper.find('[data-testid="journey-primary-action"]').exists()).toBe(false);
+    expect(wrapper.get(".journey-question-pending").text()).toContain("暂未同步");
+    await wrapper.get('[data-testid="retry-dialogue-question"]').trigger("click");
+    expect(wrapper.emitted("retry-question")).toEqual([[]]);
+  });
+
+  it("shows a retryable error when the active question cannot be loaded", () => {
+    const wrapper = mount(CreativeSessionPanel, {
+      props: {
+        session: null,
+        questionError: "关键问题加载失败，请重新加载后继续。",
+        journey: {
+          schemaVersion: "creative-journey-projection.v1",
+          projectSlug: "demo",
+          stage: "understanding",
+          primaryAsset: "understanding-preview",
+          primaryAction: { id: "answer-question-primary-desire", label: "回答当前问题", kind: "answer", status: "available" },
+          activeQuestion: { id: "question-primary-desire", text: "主角最想得到什么？", status: "active", impact: "high", source: "deterministic-gap" },
+          sourceMessageIds: ["m1"],
+          sessionFingerprint: "a".repeat(64)
+        }
+      }
+    });
+
+    expect(wrapper.get(".journey-question-pending").attributes("role")).toBe("alert");
+    expect(wrapper.get(".journey-question-pending").text()).toContain("关键问题加载失败");
   });
 
   it("does not offer question generation before the author confirms the frozen input", () => {
@@ -194,7 +239,7 @@ describe("CreativeSessionPanel", () => {
     expect(wrapper.emitted("answer")).toBeUndefined();
   });
 
-  it("offers question preparation when understanding has no durable question yet", async () => {
+  it("uses the single primary action instead of a second question-generation button", () => {
     const wrapper = mount(CreativeSessionPanel, {
       props: {
         session: null,
@@ -211,9 +256,8 @@ describe("CreativeSessionPanel", () => {
       }
     });
 
-    await wrapper.get('[data-testid="prepare-question"]').trigger("click");
-
-    expect(wrapper.emitted("prepare-question")).toEqual([[]]);
+    expect(wrapper.find('[data-testid="prepare-question"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="journey-primary-action"] button').text()).toBe("确认当前理解");
   });
 
   it("offers retry when contract candidate compilation is blocked", async () => {

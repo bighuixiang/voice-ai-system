@@ -94,7 +94,7 @@ const documentOptions = [
   {
     value: "outline",
     label: "章纲设定",
-    description: "目标、POV、伏笔",
+    description: "目标、叙事视角、伏笔",
     icon: Notebook,
     tone: "emerald" as const
   }

@@ -43,6 +43,23 @@ describe("contract adoption proposal", () => {
     await expect(fs.stat(path.join(root, "project.json"))).rejects.toThrow();
   });
 
+  it("fails closed when a persisted proposal was altered after it was fingerprinted", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "contract-adoption-"));
+    roots.push(root);
+    const candidate = await setup(root);
+    await createContractAdoptionProposal(root, {
+      candidateId: candidate.candidateId,
+      expectedCandidateFingerprint: candidate.fingerprint,
+      fieldDecisions: [{ fieldId: "field-1", status: "accept" }]
+    });
+    const target = path.join(root, "sessions", "story-contract-adoption-proposal.json");
+    const persisted = JSON.parse(await fs.readFile(target, "utf8")) as Record<string, unknown>;
+    persisted.candidateId = "contract-candidate-replaced";
+    await fs.writeFile(target, JSON.stringify(persisted), "utf8");
+
+    await expect(readContractAdoptionProposal(root)).rejects.toThrow("CONTRACT_ADOPTION_PROPOSAL_INTEGRITY_FAILED");
+  });
+
   it("fails closed when review is blocked or a field decision is missing", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "contract-adoption-"));
     roots.push(root);

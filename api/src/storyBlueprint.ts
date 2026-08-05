@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
 import { readContractCandidate, type StoryContractCandidate } from "./contractCandidate.js";
+import { readCreativeSession, withCreativeSessionLock, type CreativeSession } from "./creativeSession.js";
 
 export interface StoryBlueprintContent {
   storyPremise: string;
@@ -37,11 +38,18 @@ export interface StoryBlueprintConfirmation {
   actorId: string;
   status: "confirmed";
   confirmedAt: string;
+  authorMessageFingerprint?: string;
   fingerprint: string;
 }
 
 function hash(value: unknown): string {
   return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+function authorMessageFingerprint(session: Pick<CreativeSession, "messages">): string {
+  return hash(session.messages
+    .filter((message) => message.role === "author")
+    .map(({ id, clientMessageId, text, createdAt }) => ({ id, clientMessageId, text, createdAt })));
 }
 
 function blueprintPath(root: string, blueprintId: string): string {
@@ -128,43 +136,47 @@ export async function readLatestStoryBlueprint(root: string, projectSlug: string
 }
 
 export async function generateStoryBlueprint(input: { root: string; projectSlug: string; sourceContractCandidateId: string }): Promise<{ blueprint: StoryBlueprint; created: true }> {
-  const candidate = await readContractCandidate(input.root, input.sourceContractCandidateId);
-  if (!candidate || candidate.projectSlug !== input.projectSlug) throw new Error("STORY_CONTRACT_CANDIDATE_NOT_FOUND");
-  if (candidate.status !== "candidate") throw new Error("STORY_CONTRACT_CANDIDATE_STALE");
-  const base: Omit<StoryBlueprint, "fingerprint"> = {
-    schemaVersion: "story-blueprint.v1",
-    blueprintId: createBlueprintId(),
-    projectSlug: input.projectSlug,
-    sourceContractCandidateId: candidate.candidateId,
-    sourceFingerprint: candidate.fingerprint,
-    decisionIds: [...new Set(candidate.fields.map((field) => field.sourceDecisionId).filter(Boolean))],
-    content: buildContent(candidate),
-    createdAt: new Date().toISOString()
-  };
-  const blueprint = signBlueprint(base);
-  await writeJson(blueprintPath(input.root, blueprint.blueprintId), blueprint);
-  return { blueprint, created: true };
+  return withCreativeSessionLock(input.projectSlug, async () => {
+    const candidate = await readContractCandidate(input.root, input.sourceContractCandidateId);
+    if (!candidate || candidate.projectSlug !== input.projectSlug) throw new Error("STORY_CONTRACT_CANDIDATE_NOT_FOUND");
+    if (candidate.status !== "candidate") throw new Error("STORY_CONTRACT_CANDIDATE_STALE");
+    const base: Omit<StoryBlueprint, "fingerprint"> = {
+      schemaVersion: "story-blueprint.v1",
+      blueprintId: createBlueprintId(),
+      projectSlug: input.projectSlug,
+      sourceContractCandidateId: candidate.candidateId,
+      sourceFingerprint: candidate.fingerprint,
+      decisionIds: [...new Set(candidate.fields.map((field) => field.sourceDecisionId).filter(Boolean))],
+      content: buildContent(candidate),
+      createdAt: new Date().toISOString()
+    };
+    const blueprint = signBlueprint(base);
+    await writeJson(blueprintPath(input.root, blueprint.blueprintId), blueprint);
+    return { blueprint, created: true };
+  });
 }
 
 export async function reviseStoryBlueprint(input: { root: string; projectSlug: string; blueprintId: string; expectedFingerprint: string; content: StoryBlueprintContent }): Promise<{ blueprint: StoryBlueprint; created: true }> {
-  const previous = await readStoryBlueprint(input.root, input.blueprintId, input.projectSlug);
-  if (!previous) throw new Error("STORY_BLUEPRINT_NOT_FOUND");
-  if (previous.fingerprint !== input.expectedFingerprint) throw new Error("STORY_BLUEPRINT_FINGERPRINT_STALE");
-  const base: Omit<StoryBlueprint, "fingerprint"> = {
-    schemaVersion: "story-blueprint.v1",
-    blueprintId: createBlueprintId(),
-    projectSlug: previous.projectSlug,
-    sourceContractCandidateId: previous.sourceContractCandidateId,
-    sourceFingerprint: previous.sourceFingerprint,
-    decisionIds: previous.decisionIds,
-    content: input.content,
-    revisedFrom: previous.blueprintId,
-    createdAt: new Date().toISOString()
-  };
-  const blueprint = signBlueprint(base);
-  assertBlueprintIntegrity(blueprint, input.projectSlug);
-  await writeJson(blueprintPath(input.root, blueprint.blueprintId), blueprint);
-  return { blueprint, created: true };
+  return withCreativeSessionLock(input.projectSlug, async () => {
+    const previous = await readStoryBlueprint(input.root, input.blueprintId, input.projectSlug);
+    if (!previous) throw new Error("STORY_BLUEPRINT_NOT_FOUND");
+    if (previous.fingerprint !== input.expectedFingerprint) throw new Error("STORY_BLUEPRINT_FINGERPRINT_STALE");
+    const base: Omit<StoryBlueprint, "fingerprint"> = {
+      schemaVersion: "story-blueprint.v1",
+      blueprintId: createBlueprintId(),
+      projectSlug: previous.projectSlug,
+      sourceContractCandidateId: previous.sourceContractCandidateId,
+      sourceFingerprint: previous.sourceFingerprint,
+      decisionIds: previous.decisionIds,
+      content: input.content,
+      revisedFrom: previous.blueprintId,
+      createdAt: new Date().toISOString()
+    };
+    const blueprint = signBlueprint(base);
+    assertBlueprintIntegrity(blueprint, input.projectSlug);
+    await writeJson(blueprintPath(input.root, blueprint.blueprintId), blueprint);
+    return { blueprint, created: true };
+  });
 }
 
 export async function readStoryBlueprintConfirmation(root: string, blueprintId: string, projectSlug?: string): Promise<StoryBlueprintConfirmation | null> {
@@ -177,6 +189,7 @@ export async function readStoryBlueprintConfirmation(root: string, blueprintId: 
       && confirmation.status === "confirmed"
       && Boolean(confirmation.confirmationId?.trim() && confirmation.actorId?.trim())
       && /^[a-f0-9]{64}$/i.test(confirmation.blueprintFingerprint)
+      && (confirmation.authorMessageFingerprint === undefined || /^[a-f0-9]{64}$/i.test(confirmation.authorMessageFingerprint))
       && /^[a-f0-9]{64}$/i.test(confirmation.fingerprint)
       && hash(base) === confirmation.fingerprint;
     if (!valid) throw new Error("STORY_BLUEPRINT_CONFIRMATION_INTEGRITY_FAILED");
@@ -187,24 +200,36 @@ export async function readStoryBlueprintConfirmation(root: string, blueprintId: 
   }
 }
 
+/** A later author utterance changes the brief and requires a fresh blueprint review. */
+export function isStoryBlueprintConfirmationCurrent(session: Pick<CreativeSession, "messages">, confirmation: StoryBlueprintConfirmation): boolean {
+  return typeof confirmation.authorMessageFingerprint === "string"
+    && confirmation.authorMessageFingerprint === authorMessageFingerprint(session);
+}
+
 export async function confirmStoryBlueprint(input: { root: string; projectSlug: string; blueprintId: string; expectedFingerprint: string; actorId: string }): Promise<{ confirmation: StoryBlueprintConfirmation; created: boolean }> {
-  const blueprint = await readStoryBlueprint(input.root, input.blueprintId, input.projectSlug);
-  if (!blueprint) throw new Error("STORY_BLUEPRINT_NOT_FOUND");
-  if (blueprint.fingerprint !== input.expectedFingerprint) throw new Error("STORY_BLUEPRINT_FINGERPRINT_STALE");
   if (!input.actorId.trim()) throw new Error("STORY_BLUEPRINT_CONFIRMATION_ACTOR_REQUIRED");
-  const existing = await readStoryBlueprintConfirmation(input.root, blueprint.blueprintId, input.projectSlug);
-  if (existing) return { confirmation: existing, created: false };
-  const base: Omit<StoryBlueprintConfirmation, "fingerprint"> = {
-    schemaVersion: "story-blueprint-confirmation.v1",
-    confirmationId: `story-blueprint-confirmation-${blueprint.blueprintId}`,
-    projectSlug: input.projectSlug,
-    blueprintId: blueprint.blueprintId,
-    blueprintFingerprint: blueprint.fingerprint,
-    actorId: input.actorId,
-    status: "confirmed",
-    confirmedAt: new Date().toISOString()
-  };
-  const confirmation: StoryBlueprintConfirmation = { ...base, fingerprint: hash(base) };
-  await writeJson(confirmationPath(input.root, blueprint.blueprintId), confirmation);
-  return { confirmation, created: true };
+  return withCreativeSessionLock(input.projectSlug, async () => {
+    const blueprint = await readStoryBlueprint(input.root, input.blueprintId, input.projectSlug);
+    if (!blueprint) throw new Error("STORY_BLUEPRINT_NOT_FOUND");
+    if (blueprint.fingerprint !== input.expectedFingerprint) throw new Error("STORY_BLUEPRINT_FINGERPRINT_STALE");
+
+    const session = await readCreativeSession(input.root, input.projectSlug);
+    const existing = await readStoryBlueprintConfirmation(input.root, blueprint.blueprintId, input.projectSlug);
+    if (existing && isStoryBlueprintConfirmationCurrent(session, existing)) return { confirmation: existing, created: false };
+
+    const base: Omit<StoryBlueprintConfirmation, "fingerprint"> = {
+      schemaVersion: "story-blueprint-confirmation.v1",
+      confirmationId: `story-blueprint-confirmation-${blueprint.blueprintId}`,
+      projectSlug: input.projectSlug,
+      blueprintId: blueprint.blueprintId,
+      blueprintFingerprint: blueprint.fingerprint,
+      actorId: input.actorId,
+      status: "confirmed",
+      confirmedAt: new Date().toISOString(),
+      authorMessageFingerprint: authorMessageFingerprint(session)
+    };
+    const confirmation: StoryBlueprintConfirmation = { ...base, fingerprint: hash(base) };
+    await writeJson(confirmationPath(input.root, blueprint.blueprintId), confirmation);
+    return { confirmation, created: true };
+  });
 }

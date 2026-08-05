@@ -14,8 +14,8 @@ describe("PublicationEvidencePanel", () => {
   it("shows each evidence layer without implying release activation", () => {
     const wrapper = mount(PublicationEvidencePanel, { props: { manifest: { editionId: "edition-1" } as any, tree: { fingerprint: "tree" } as any, artifacts: { fingerprint: "artifacts" } as any, proof: { valid: true } as any, preflight: { status: "passed" } as any } });
     expect(wrapper.text()).toContain("edition-1");
-    expect(wrapper.text()).toContain("valid");
-    expect(wrapper.text()).toContain("passed");
+    expect(wrapper.text()).toContain("有效");
+    expect(wrapper.text()).toContain("验证通过");
     expect(wrapper.text()).not.toContain("已激活");
   });
 

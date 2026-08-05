@@ -10,6 +10,7 @@ import { validateOutlineCandidate } from "./outlineValidation.js";
 import { compareCandidates } from "./candidateComparison.js";
 import { persistCandidateComparison } from "./candidateComparisonStore.js";
 import { checkExecutionReadiness } from "./executionReadiness.js";
+import { contractAdoptionProposalFingerprint, type ContractAdoptionProposal } from "./contractAdoption.js";
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true }))); });
@@ -20,9 +21,27 @@ async function fixture(withComparison = false) {
   await fs.writeFile(path.join(root, "project.json"), JSON.stringify({ slug: "demo", title: "Demo" }), "utf8");
   const candidate = {
     schemaVersion: "story-contract-candidate.v1", candidateId: "contract-candidate-demo", projectSlug: "demo", status: "candidate", sourceDecisionId: "decision-1", sourceFingerprint: "source-1", fields: [],
-    contract: { protagonist: { primaryDesire: "open the sealed gate", innerNeed: null, misbelief: null }, conflict: { core: "The gate demands a sacrifice.", opposingPressure: null }, stakes: { failureCost: "The valley loses its memory.", irreversibleChoice: null }, world: { primaryRule: null }, readerPromise: null, endingDirection: "Truth costs the protagonist their old identity." }, assumptions: [], impactSummary: [], unknowns: [], canonWritten: false, createdAt: new Date().toISOString(), fingerprint: "candidate-1"
+    contract: { protagonist: { primaryDesire: "open the sealed gate", innerNeed: null, misbelief: null }, conflict: { core: "The gate demands a sacrifice.", opposingPressure: null }, stakes: { failureCost: "The valley loses its memory.", irreversibleChoice: null }, world: { primaryRule: null }, readerPromise: null, endingDirection: "Truth costs the protagonist their old identity." }, assumptions: [], impactSummary: [], unknowns: [], canonWritten: false, createdAt: new Date().toISOString(), fingerprint: "c".repeat(64)
   };
   await fs.writeFile(path.join(root, "sessions", "contract-candidates", "contract-candidate-demo.json"), JSON.stringify(candidate), "utf8");
+  const contractBase = {
+    schemaVersion: "story-contract-adoption-proposal.v1" as const,
+    proposalId: `contract-adoption-${candidate.candidateId}`,
+    candidateId: candidate.candidateId,
+    candidateFingerprint: candidate.fingerprint,
+    projectSlug: candidate.projectSlug,
+    status: "committed" as const,
+    fieldDecisions: [{ fieldId: "field-1", status: "accept" as const }],
+    acceptedFields: [{ fieldId: "field-1", path: "protagonist.primaryDesire", value: "open the sealed gate", epistemicStatus: "explicit" as const, evidenceRefs: [{ kind: "dialogue-question", refId: "question-primary-desire" }], sourceDecisionId: candidate.sourceDecisionId, lock: "unlocked" as const }],
+    unresolvedFieldIds: [],
+    reviewId: "review-1",
+    canonWritten: true as const,
+    createdAt: new Date().toISOString(),
+    committedMutationId: "mutation-contract-1",
+    committedAt: new Date().toISOString()
+  };
+  const contractAdoption: ContractAdoptionProposal = { ...contractBase, fingerprint: contractAdoptionProposalFingerprint(contractBase) };
+  await fs.writeFile(path.join(root, "sessions", "story-contract-adoption-proposal.json"), JSON.stringify(contractAdoption), "utf8");
   const { outline } = await compileOutlineCandidate(root, candidate.candidateId);
   await validateOutlineCandidate(root, outline.outlineId);
   const comparison = withComparison ? await persistCandidateComparison(root, "demo", compareCandidates({ objectiveIds: ["contract"], candidates: [{ candidateId: candidate.candidateId, hardConstraintFailures: [], objectiveEvidence: [{ objectiveId: "contract", gap: 0, evidenceRefs: ["decision://1"] }], unresolvedRisks: [] }]})) : undefined;

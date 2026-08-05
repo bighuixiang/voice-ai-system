@@ -82,7 +82,7 @@
         <ul>
           <li v-for="beat in candidate.craftBeatPatches" :key="beat.id">
             <strong>{{ beat.label }}</strong>
-            <span> - {{ beat.type }} / {{ beat.status }}</span>
+            <span> - {{ beatTypeLabel(beat.type) }} / {{ statusLabel(beat.status) }}</span>
             <small v-if="beat.payoff || beat.cost">{{ beat.payoff || beat.cost }}</small>
           </li>
         </ul>
@@ -93,7 +93,7 @@
         <ul>
           <li v-for="entry in ledgerPatchItems" :key="entry.id">
             <strong>{{ entry.title }}</strong>
-            <span> - {{ entry.kind }} / {{ entry.status }} / {{ entry.severity }}</span>
+            <span> - {{ ledgerKindLabel(entry.kind) }} / {{ statusLabel(entry.status) }} / {{ severityLabel(entry.severity) }}</span>
             <small>{{ entry.note }}</small>
           </li>
         </ul>
@@ -110,6 +110,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { LedgerEntry, WritingRecapCandidate } from "@/types/novel";
+import { beatTypeLabel, ledgerKindLabel, severityLabel, statusLabel } from "@/utils/novelLabels";
 
 const props = withDefaults(defineProps<{
   candidate: WritingRecapCandidate | null;

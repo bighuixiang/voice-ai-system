@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { commitContractAdoption, readMutationPlan, recoverContractMutations } from "./contractCanonAdoption.js";
+import { contractAdoptionProposalFingerprint, type ContractAdoptionProposal } from "./contractAdoption.js";
 
 const roots: string[] = [];
 
@@ -19,7 +20,8 @@ async function setup(root: string) {
   await fs.writeFile(path.join(root, "story-control", "story-control.json"), JSON.stringify({ version: 1, premise: "", currentArcId: "arc-main-01", arcs: [], characters: [{ id: "char-protagonist", name: "Protagonist", desire: "old desire", goal: "", currentState: "", knownSecrets: "", relationshipNotes: "", powerLevel: "", signatureTraits: [], coreWound: "", misbelief: "", redemptionArc: "", sublimationGoal: "", smallPersonHighlight: "", relationshipPressure: "", growthStage: "seed", status: "seed", updatedAt: "old" }], events: [], orchestrationNotes: "", updatedAt: "old" }), "utf8");
   await fs.writeFile(path.join(root, "bible", "characters.md"), "# Characters\n\nOriginal canon.\n", "utf8");
   await fs.writeFile(path.join(root, "bible", "world.md"), "# World\n\nOriginal rules.\n", "utf8");
-  const proposal = { schemaVersion: "story-contract-adoption-proposal.v1", proposalId: "contract-adoption-contract-candidate-decision-1", candidateId: "contract-candidate-decision-1", candidateFingerprint: "c".repeat(64), projectSlug: "demo", status: "ready_for_authorization", fieldDecisions: [{ fieldId: "field-1", status: "accept", reason: "confirmed" }], acceptedFields: [{ fieldId: "field-1", path: "protagonist.primaryDesire", value: "Expose the truth.", epistemicStatus: "explicit", evidenceRefs: [{ kind: "dialogue-question", refId: "question-primary-desire" }], sourceDecisionId: "decision-1", lock: "unlocked" }], unresolvedFieldIds: [], reviewId: "review-1", canonWritten: false, createdAt: new Date().toISOString(), fingerprint: "p".repeat(64) };
+  const base = { schemaVersion: "story-contract-adoption-proposal.v1" as const, proposalId: "contract-adoption-contract-candidate-decision-1", candidateId: "contract-candidate-decision-1", candidateFingerprint: "c".repeat(64), projectSlug: "demo", status: "ready_for_authorization" as const, fieldDecisions: [{ fieldId: "field-1", status: "accept" as const, reason: "confirmed" }], acceptedFields: [{ fieldId: "field-1", path: "protagonist.primaryDesire", value: "Expose the truth.", epistemicStatus: "explicit" as const, evidenceRefs: [{ kind: "dialogue-question", refId: "question-primary-desire" }], sourceDecisionId: "decision-1", lock: "unlocked" as const }], unresolvedFieldIds: [], reviewId: "review-1", canonWritten: false as const, createdAt: new Date().toISOString() };
+  const proposal: ContractAdoptionProposal = { ...base, fingerprint: contractAdoptionProposalFingerprint(base) };
   await fs.writeFile(path.join(root, "sessions", "story-contract-adoption-proposal.json"), JSON.stringify(proposal), "utf8");
   return proposal;
 }
@@ -99,10 +101,12 @@ describe("contract canon adoption transaction", () => {
     roots.push(root);
     const proposal = await setup(root);
     const conflictField = { fieldId: "field-conflict", path: "conflict.core", value: "A costly symbiosis", epistemicStatus: "explicit", evidenceRefs: [{ kind: "dialogue-question", refId: "question-conflict" }], sourceDecisionId: "decision-1", lock: "unlocked" };
-    const partialProposal = { ...proposal, acceptedFields: [conflictField], unresolvedFieldIds: ["field-1"] };
+    const partialProposalBase = { ...proposal, acceptedFields: [conflictField], unresolvedFieldIds: ["field-1"] };
+    const { fingerprint: _partialFingerprint, ...partialBase } = partialProposalBase;
+    const partialProposal: ContractAdoptionProposal = { ...partialBase, fingerprint: contractAdoptionProposalFingerprint(partialBase) };
     await fs.writeFile(path.join(root, "sessions", "story-contract-adoption-proposal.json"), JSON.stringify(partialProposal), "utf8");
     const beforeCharacters = await fs.readFile(path.join(root, "bible", "characters.md"), "utf8");
-    const result = await commitContractAdoption(root, { expectedProposalFingerprint: proposal.fingerprint, authorization: { actorId: "author-partial", authorizationId: "auth-partial" } });
+    const result = await commitContractAdoption(root, { expectedProposalFingerprint: partialProposal.fingerprint, authorization: { actorId: "author-partial", authorizationId: "auth-partial" } });
     expect(result.status).toBe("committed");
     expect(JSON.parse(await fs.readFile(path.join(root, "project.json"), "utf8"))).toMatchObject({ storyContract: { fieldPaths: ["conflict.core"] } });
     expect(await fs.readFile(path.join(root, "bible", "characters.md"), "utf8")).toBe(beforeCharacters);
@@ -133,7 +137,7 @@ describe("contract canon adoption transaction", () => {
     worldRule.fingerprint = crypto.createHash("sha256").update(JSON.stringify(worldRuleBase)).digest("hex");
     await fs.mkdir(path.join(root, "sessions", "world-rule-contracts"), { recursive: true });
     await fs.writeFile(path.join(root, "sessions", "world-rule-contracts", "world-rule-1.json"), JSON.stringify(worldRule), "utf8");
-    const expanded = {
+    const expandedBase = {
       ...proposal,
       worldRuleContractId: "world-rule-1",
       acceptedFields: [
@@ -152,8 +156,10 @@ describe("contract canon adoption transaction", () => {
       ],
       unresolvedFieldIds: []
     };
+    const { fingerprint: _expandedFingerprint, ...expandedWithoutFingerprint } = expandedBase;
+    const expanded: ContractAdoptionProposal = { ...expandedWithoutFingerprint, fingerprint: contractAdoptionProposalFingerprint(expandedWithoutFingerprint) };
     await fs.writeFile(path.join(root, "sessions", "story-contract-adoption-proposal.json"), JSON.stringify(expanded), "utf8");
-    const result = await commitContractAdoption(root, { expectedProposalFingerprint: proposal.fingerprint, authorization: { actorId: "author-full", authorizationId: "auth-full" } });
+    const result = await commitContractAdoption(root, { expectedProposalFingerprint: expanded.fingerprint, authorization: { actorId: "author-full", authorizationId: "auth-full" } });
     expect(result.status).toBe("committed");
     const project = JSON.parse(await fs.readFile(path.join(root, "project.json"), "utf8"));
     expect(project.storyContract.contract).toMatchObject({ conflict: { core: "The order erases evidence." }, stakes: { failureCost: "The last ally is lost." }, endingDirection: "Truth at irreversible cost." });

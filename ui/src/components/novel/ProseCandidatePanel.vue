@@ -4,14 +4,14 @@
       <div>
         <p class="eyebrow">正文评审</p>
         <h2 id="prose-candidate-title">正文候选</h2>
-        <p>候选正文、不变 canon 和采纳事务分开显示。</p>
+        <p>候选正文、正式设定和采纳事务分开显示。</p>
       </div>
       <button type="button" aria-label="刷新正文候选" :disabled="loading" @click="emit('refresh')">{{ loading ? "刷新中…" : "刷新" }}</button>
     </header>
     <p v-if="!candidates.length" class="empty">暂无正文候选。</p>
     <article v-for="candidate in candidates" :key="candidate.candidateId" class="candidate-card">
       <div class="heading">
-        <div><h3>{{ candidate.chapterId }}</h3><p>候选正文，不是 canon · {{ candidate.status }}</p></div>
+        <div><h3>{{ candidate.chapterId }}</h3><p>候选正文，尚未成为正式设定 · {{ statusLabel(candidate.status) }}</p></div>
         <span>未写入正式设定</span>
       </div>
       <p v-if="candidate.policyVersion && candidate.riskTier" data-testid="candidate-policy">策略版本 {{ candidate.policyVersion }} · 风险等级 {{ candidate.riskTier }}</p>
@@ -25,17 +25,18 @@
       <div v-if="readiness[candidate.candidateId]" class="evidence adoption-readiness">
         <strong>采纳前置：必须作者授权</strong>
         <p>基线 {{ readiness[candidate.candidateId].expectedCanonSha256 }} · {{ readiness[candidate.candidateId].targetPath }}</p>
-        <p v-if="adoptions[candidate.candidateId]">采纳绑定红蓝结论：{{ adoptions[candidate.candidateId].reviewVerdict }}</p>
-        <label :for="`authorization-${candidate.candidateId}`">授权 ID</label>
-        <input :id="`authorization-${candidate.candidateId}`" :data-testid="`authorization-${candidate.candidateId}`" :value="authorizationIds[candidate.candidateId] || ''" placeholder="输入作者授权 ID" @input="onAuthorizationInput(candidate.candidateId, $event)" />
+        <p v-if="adoptions[candidate.candidateId]">采纳绑定红蓝结论：{{ reviewVerdictLabel(adoptions[candidate.candidateId].reviewVerdict) }}</p>
+        <label :for="`authorization-${candidate.candidateId}`">授权标识</label>
+        <input :id="`authorization-${candidate.candidateId}`" :data-testid="`authorization-${candidate.candidateId}`" :value="authorizationIds[candidate.candidateId] || ''" placeholder="输入作者授权标识" @input="onAuthorizationInput(candidate.candidateId, $event)" />
         <div class="actions">
           <button type="button" :data-testid="`adopt-${candidate.candidateId}`" :disabled="busyId === candidate.candidateId || !authorizationIds[candidate.candidateId] || readiness[candidate.candidateId].validationStatus !== 'passed'" @click="emit('adopt', candidate, { expectedCanonSha256: readiness[candidate.candidateId].expectedCanonSha256, authorizationId: authorizationIds[candidate.candidateId] })">作者授权并采纳</button>
           <button v-if="adoptions[candidate.candidateId]?.status === 'committed'" type="button" :data-testid="`settle-${candidate.candidateId}`" :disabled="busyId === candidate.candidateId" @click="emit('settle', candidate, adoptions[candidate.candidateId]!)">结算章节</button>
         </div>
       </div>
-      <div v-if="validations[candidate.candidateId]" class="evidence"><strong>验证{{ validations[candidate.candidateId].status === 'passed' ? '通过' : '阻断' }}</strong><ul><li v-for="check in validations[candidate.candidateId].checks" :key="check.checkId">{{ check.checkId }}: {{ check.status }} · {{ check.detail }}</li></ul></div>
-      <div v-if="reviews[candidate.candidateId]" class="evidence"><strong>红蓝审阅：{{ reviews[candidate.candidateId].status }} / {{ reviews[candidate.candidateId].verdict }}</strong><p>建议：{{ reviews[candidate.candidateId].recommendation }}；共同前提 {{ reviews[candidate.candidateId].commonGround.length }} 条</p><ul><li v-for="strength in reviews[candidate.candidateId].blueStrengths" :key="strength.strengthId">蓝方：{{ strength.detail }}</li><li v-for="finding in reviews[candidate.candidateId].redFindings" :key="finding.findingId">红方：{{ finding.detail }}</li><li v-for="falsifier in reviews[candidate.candidateId].redArgument.falsifiers" :key="falsifier">可证伪：{{ falsifier }}</li></ul></div>
-      <div v-if="repairPlans[candidate.candidateId]" class="evidence repair-plan"><strong>局部修复计划：{{ repairPlans[candidate.candidateId].status }}</strong><p>目标问题 {{ repairPlans[candidate.candidateId].targetFindings.length }} 个；最多修改 {{ repairPlans[candidate.candidateId].scope.maxChangedParagraphs }} 段。</p><small>禁止：{{ repairPlans[candidate.candidateId].prohibitedActions.join("、") }}</small><textarea :data-testid="`repair-content-${candidate.candidateId}`" :value="repairContents[candidate.candidateId] || candidate.content" @input="onRepairInput(candidate.candidateId, $event)" /><button type="button" :data-testid="`create-repair-candidate-${candidate.candidateId}`" :disabled="busyId === candidate.candidateId" @click="emit('create-repair-candidate', candidate, repairContents[candidate.candidateId] || candidate.content)">生成非 canon 修复候选</button><button v-if="repairCandidates[candidate.candidateId]" type="button" :data-testid="`evaluate-repair-${candidate.candidateId}`" :disabled="busyId === candidate.candidateId" @click="emit('evaluate-repair', candidate)">重新验证修复回归</button><p v-if="repairRegressions[candidate.candidateId]">修复回归：{{ repairRegressions[candidate.candidateId].status }}；改善 {{ repairRegressions[candidate.candidateId].improvements.length }} 项；回归 {{ repairRegressions[candidate.candidateId].regressions.length }} 项。</p></div>
+      <div v-if="validations[candidate.candidateId]" class="evidence"><strong>验证{{ validations[candidate.candidateId].status === 'passed' ? '通过' : '阻断' }}</strong><ul><li v-for="check in validations[candidate.candidateId].checks" :key="check.checkId">{{ checkIdLabel(check.checkId) }}：{{ statusLabel(check.status) }} · {{ check.detail }}</li></ul></div>
+      <div v-if="reviews[candidate.candidateId]" class="evidence"><strong>红蓝审阅：{{ statusLabel(reviews[candidate.candidateId].status) }} / {{ reviewVerdictLabel(reviews[candidate.candidateId].verdict) }}</strong><p>建议：{{ reviewVerdictLabel(reviews[candidate.candidateId].recommendation) }}；共同前提 {{ reviews[candidate.candidateId].commonGround.length }} 条</p><ul><li v-for="strength in reviews[candidate.candidateId].blueStrengths" :key="strength.strengthId">蓝方：{{ strength.detail }}</li><li v-for="finding in reviews[candidate.candidateId].redFindings" :key="finding.findingId">红方：{{ finding.detail }}</li><li v-for="falsifier in reviews[candidate.candidateId].redArgument.falsifiers" :key="falsifier">可证伪：{{ falsifier }}</li></ul></div>
+      <div v-if="repairPlans[candidate.candidateId]" class="evidence repair-plan"><strong>局部修复计划：{{ statusLabel(repairPlans[candidate.candidateId].status) }}</strong><p>目标问题 {{ repairPlans[candidate.candidateId].targetFindings.length }} 个；最多修改 {{ repairPlans[candidate.candidateId].scope.maxChangedParagraphs }} 段。</p><small>禁止：{{ repairPlans[candidate.candidateId].prohibitedActions.join("、") }}</small><textarea :data-testid="`repair-content-${candidate.candidateId}`" :value="repairContents[candidate.candidateId] || candidate.content" @input="onRepairInput(candidate.candidateId, $event)" /><button type="button" :data-testid="`create-repair-candidate-${candidate.candidateId}`" :disabled="busyId === candidate.candidateId" @click="emit('create-repair-candidate', candidate, repairContents[candidate.candidateId] || candidate.content)">生成非正式设定修复候选</button><button v-if="repairCandidates[candidate.candidateId]" type="button" :data-testid="`evaluate-repair-${candidate.candidateId}`" :disabled="busyId === candidate.candidateId" @click="emit('evaluate-repair', candidate)">重新验证修复回归</button><p v-if="repairRegressions[candidate.candidateId]">修复回归：{{ statusLabel(repairRegressions[candidate.candidateId].status) }}；改善 {{ repairRegressions[candidate.candidateId].improvements.length }} 项；回归 {{ repairRegressions[candidate.candidateId].regressions.length }} 项。</p></div>
+      <p v-if="adoptions[candidate.candidateId]?.status === 'committed'" class="next-step">正文已采纳。下一步：结算章节，确认本章结果进入后续故事状态。</p>
     </article>
   </section>
 </template>
@@ -43,6 +44,7 @@
 <script setup lang="ts">
 import { reactive } from "vue";
 import type { ProseAdoptionReadiness, ProseAdoptionTransaction, ProseCandidate, ProseValidationBundle, RedBlueReview, ProseRepairPlan, ProseRepairCandidate, ProseRepairRegression } from "@/types/novel";
+import { checkIdLabel, reviewVerdictLabel, statusLabel } from "@/utils/novelLabels";
 
 withDefaults(defineProps<{ candidates: ProseCandidate[]; validations?: Record<string, ProseValidationBundle>; reviews?: Record<string, RedBlueReview>; repairPlans?: Record<string, ProseRepairPlan>; repairCandidates?: Record<string, ProseRepairCandidate>; repairRegressions?: Record<string, ProseRepairRegression>; readiness?: Record<string, ProseAdoptionReadiness>; adoptions?: Record<string, ProseAdoptionTransaction>; loading?: boolean; busyId?: string }>(), { validations: () => ({}), reviews: () => ({}), repairPlans: () => ({}), repairCandidates: () => ({}), repairRegressions: () => ({}), readiness: () => ({}), adoptions: () => ({}), loading: false, busyId: "" });
 const emit = defineEmits<{

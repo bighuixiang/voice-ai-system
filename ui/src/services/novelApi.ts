@@ -155,21 +155,40 @@ import type {
 
 const jsonHeaders = { "Content-Type": "application/json" };
 
+const apiErrorLabels: Record<string, string> = {
+  OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED: "请先确认并采纳对应的故事设定。",
+  CONTRACT_CANDIDATE_NOT_FOUND: "找不到对应的故事设定候选，请先刷新候选列表。",
+  OUTLINE_CANDIDATE_NOT_FOUND: "找不到对应的大纲候选，请先刷新候选列表。",
+  V2_DEPENDENCY_MISSING: "当前步骤的前置内容尚未完成。"
+};
+
 function errorMessage(error: unknown, fallback: string): string {
   if (typeof error === "string" && error.trim()) return error;
   if (error && typeof error === "object") {
-    const value = error as { message?: unknown; code?: unknown };
-    if (typeof value.message === "string" && value.message.trim()) return value.message;
-    if (typeof value.code === "string" && value.code.trim()) return value.code;
+    const value = error as Record<string, unknown>;
+    for (const key of ["message", "detail", "error"]) {
+      const nested = value[key];
+      if (typeof nested === "string" && nested.trim()) return nested;
+      if (nested && typeof nested === "object") {
+        const message = errorMessage(nested, "");
+        if (message) return message;
+      }
+    }
+    if (typeof value.code === "string" && apiErrorLabels[value.code]) return apiErrorLabels[value.code];
   }
   return fallback;
 }
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(url, options);
+  let response: Response;
+  try {
+    response = await fetch(url, options);
+  } catch {
+    throw new Error("网络请求失败，请检查服务是否可用后重试。");
+  }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(errorMessage(data.error, `Request failed: ${response.status}`));
+    throw new Error(errorMessage(data, `请求失败（状态码 ${response.status}）`));
   }
   return data as T;
 }
@@ -570,11 +589,31 @@ export const novelApi = {
     );
   },
 
-  async answerDialogueQuestion(projectId: string, questionId: string, input: { questionVersion: number; expectedSnapshotFingerprint: string; idempotencyKey: string; answerText: string; answerStatus: "confirmed" | "tentative" | "delegated" }): Promise<{ question: DialogueQuestion; decision?: import("@/types/novel").DecisionRecord; replayed?: boolean }> {
-    return request<{ question: DialogueQuestion; decision?: import("@/types/novel").DecisionRecord; replayed?: boolean }>(
+  async answerDialogueQuestion(projectId: string, questionId: string, input: { questionVersion: number; expectedSnapshotFingerprint: string; idempotencyKey: string; answerText: string; answerStatus: "confirmed" | "tentative" | "delegated" }): Promise<{ question: DialogueQuestion; decision?: import("@/types/novel").DecisionRecord; replayed?: boolean; nextQuestion?: DialogueQuestion; storyBlueprint?: import("@/types/novel").StoryBlueprint; journey?: CreativeJourneyProjection }> {
+    return request<{ question: DialogueQuestion; decision?: import("@/types/novel").DecisionRecord; replayed?: boolean; nextQuestion?: DialogueQuestion; storyBlueprint?: import("@/types/novel").StoryBlueprint; journey?: CreativeJourneyProjection }>(
       `/api/novel/projects/${encodeURIComponent(projectId)}/session/understanding/questions/${encodeURIComponent(questionId)}/answers`,
       { method: "POST", headers: jsonHeaders, body: JSON.stringify(input) }
     );
+  },
+
+  async readLatestStoryBlueprint(projectId: string): Promise<{ blueprint: import("@/types/novel").StoryBlueprint; confirmation?: import("@/types/novel").StoryBlueprintConfirmation } | null> {
+    const response = await fetch(`/api/novel/projects/${encodeURIComponent(projectId)}/session/story-blueprints/latest`, {});
+    if (response.status === 404) return null;
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(errorMessage(data.error, `请求失败：${response.status}`));
+    return data as { blueprint: import("@/types/novel").StoryBlueprint; confirmation?: import("@/types/novel").StoryBlueprintConfirmation };
+  },
+
+  async generateStoryBlueprint(projectId: string, sourceContractCandidateId: string): Promise<{ blueprint: import("@/types/novel").StoryBlueprint; created: boolean }> {
+    return request(`/api/novel/projects/${encodeURIComponent(projectId)}/session/story-blueprints/generate`, { method: "POST", headers: jsonHeaders, body: JSON.stringify({ sourceContractCandidateId }) });
+  },
+
+  async reviseStoryBlueprint(projectId: string, blueprintId: string, input: { expectedFingerprint: string; content: import("@/types/novel").StoryBlueprintContent }): Promise<{ blueprint: import("@/types/novel").StoryBlueprint }> {
+    return request(`/api/novel/projects/${encodeURIComponent(projectId)}/session/story-blueprints/${encodeURIComponent(blueprintId)}/revise`, { method: "POST", headers: jsonHeaders, body: JSON.stringify(input) });
+  },
+
+  async confirmStoryBlueprint(projectId: string, blueprintId: string, input: { expectedFingerprint: string; actorId: string }): Promise<{ confirmation: import("@/types/novel").StoryBlueprintConfirmation }> {
+    return request(`/api/novel/projects/${encodeURIComponent(projectId)}/session/story-blueprints/${encodeURIComponent(blueprintId)}/confirm`, { method: "POST", headers: jsonHeaders, body: JSON.stringify(input) });
   },
 
   async compileContractCandidate(projectId: string, decisionId: string, interpretationId?: string): Promise<{ candidate: StoryContractCandidate; created: boolean }> {
@@ -657,8 +696,8 @@ export const novelApi = {
     return data.proposal;
   },
 
-  async commitOutlineAdoption(projectId: string, expectedProposalFingerprint: string): Promise<{ status: string; canonWritten: boolean; reason?: string; version?: OutlineVersion; proof?: ExecutionReadyProof }> {
-    return request<{ status: string; canonWritten: boolean; reason?: string; version?: OutlineVersion; proof?: ExecutionReadyProof }>(
+  async commitOutlineAdoption(projectId: string, expectedProposalFingerprint: string): Promise<{ status: string; canonWritten: boolean; reason?: string; message?: string; version?: OutlineVersion; proof?: ExecutionReadyProof }> {
+    return request<{ status: string; canonWritten: boolean; reason?: string; message?: string; version?: OutlineVersion; proof?: ExecutionReadyProof }>(
       `/api/novel/projects/${encodeURIComponent(projectId)}/session/understanding/outline-adoption`,
       { method: "POST", headers: jsonHeaders, body: JSON.stringify({ expectedProposalFingerprint }) }
     );
@@ -824,8 +863,8 @@ export const novelApi = {
   async readReleaseActivation(): Promise<ReleaseActivation | null> {
     const response = await fetch("/api/novel/release-activation", {});
     if (response.status === 404) return null;
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-    const data = await response.json() as { activation: ReleaseActivation | null };
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(errorMessage(data, `请求失败（状态码 ${response.status}）`));
     return data.activation;
   },
 
@@ -837,8 +876,8 @@ export const novelApi = {
   async readLengthContract(projectId: string): Promise<LengthContract | null> {
     const response = await fetch(`/api/novel/projects/${encodeURIComponent(projectId)}/length-contract`, {});
     if (response.status === 404) return null;
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-    const data = await response.json() as { contract: LengthContract };
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(errorMessage(data, `请求失败（状态码 ${response.status}）`));
     return data.contract;
   },
 
@@ -1062,8 +1101,8 @@ export const novelApi = {
   async readProseRepairPlan(projectId: string, planId: string): Promise<ProseRepairPlan | null> {
     const response = await fetch(`/api/novel/projects/${encodeURIComponent(projectId)}/runtime/prose-repair-plans/${encodeURIComponent(planId)}`, {});
     if (response.status === 404) return null;
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-    const data = await response.json() as { plan: ProseRepairPlan };
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(errorMessage(data, `请求失败（状态码 ${response.status}）`));
     return data.plan;
   },
 

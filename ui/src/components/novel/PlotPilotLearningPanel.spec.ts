@@ -82,6 +82,8 @@ describe("PlotPilotLearningPanel", () => {
     });
 
     expect(wrapper.get('[data-testid="craft-release-status"]').text()).toContain("仅实验");
+    expect(wrapper.text()).toContain("留出集");
+    expect(wrapper.text()).not.toContain("holdout");
     expect(wrapper.text()).toContain("不会进入默认创作");
   });
 

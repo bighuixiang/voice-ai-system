@@ -57,10 +57,10 @@
       </ol>
     </div>
 
-    <div v-if="task?.error" class="task-error" role="alert">{{ task.error }}</div>
+    <div v-if="task?.error" class="task-error" role="alert">{{ userFacingText(task.error, "任务执行失败") }}</div>
 
     <div v-if="task?.result" class="task-result">
-      <strong>{{ task.result.summary }}</strong>
+      <strong>{{ userFacingText(task.result.summary, "已生成结果") }}</strong>
       <p>{{ task.result.content }}</p>
       <el-button v-if="task.result.patches.length" size="small" type="success" @click="$emit('apply-patches')">
         应用 {{ task.result.patches.length }} 个补丁
@@ -74,6 +74,7 @@ import { computed, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { CircleClose, Collection, DataAnalysis, Edit, Finished, MagicStick } from "@element-plus/icons-vue";
 import type { AiStageDefinition, CodexTaskType, NovelTask, TaskProgressStep } from "@/types/novel";
+import { operationTypeLabel, userFacingText } from "@/utils/novelLabels";
 
 const props = defineProps<{
   task: NovelTask | null;
@@ -159,7 +160,7 @@ function submitFreeTask() {
 
 function stageLabel(stage?: AiStageDefinition) {
   if (!stage) return "";
-  return stageLabels[stage.key] || stage.label;
+  return stageLabels[stage.key] || operationTypeLabel(stage.taskTypes[0]);
 }
 
 function taskStatusLabel(status: NovelTask["status"]) {

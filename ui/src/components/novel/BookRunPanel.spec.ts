@@ -27,7 +27,8 @@ describe("BookRunPanel", () => {
   it("keeps the book run visibly separate from canon and exposes explicit controls", async () => {
     const wrapper = mount(BookRunPanel, { props: { run } });
     expect(wrapper.text()).toContain("整书工作流");
-    expect(wrapper.text()).toContain("ready");
+    expect(wrapper.text()).toContain("已准备");
+    expect(wrapper.text()).toContain("辅助推进（L1）");
     await wrapper.get("[data-testid='advance-book-run']").trigger("click");
     expect(wrapper.emitted("advance")).toHaveLength(1);
   });

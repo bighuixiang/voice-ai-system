@@ -120,7 +120,7 @@ async function writeSession(root: string, session: CreativeSession): Promise<voi
   await fs.rename(temp, target);
 }
 
-async function withProjectLock<T>(projectSlug: string, operation: () => Promise<T>): Promise<T> {
+export async function withCreativeSessionLock<T>(projectSlug: string, operation: () => Promise<T>): Promise<T> {
   const previous = projectLocks.get(projectSlug) || Promise.resolve();
   let release!: () => void;
   const current = new Promise<void>((resolve) => {
@@ -151,7 +151,7 @@ export async function appendAuthorMessage(input: {
   if (!clientMessageId || clientMessageId.length > 200) throw new Error("clientMessageId is required and must be at most 200 characters");
   if (!text || text.length > 50_000) throw new Error("text is required and must be at most 50000 characters");
 
-  return withProjectLock(input.projectSlug, async () => {
+  return withCreativeSessionLock(input.projectSlug, async () => {
     const session = await readSession(input.root, input.projectSlug);
     const existing = session.messages.find((message) => message.clientMessageId === clientMessageId);
     if (existing) return { session, created: false };
@@ -177,7 +177,7 @@ export async function appendSessionMessage(input: { root: string; projectSlug: s
   const text = input.text.trim();
   if (!clientMessageId || clientMessageId.length > 200) throw new Error("clientMessageId is required and must be at most 200 characters");
   if (!text || text.length > 50_000) throw new Error("text is required and must be at most 50000 characters");
-  return withProjectLock(input.projectSlug, async () => appendMessageLocked(input.root, await readSession(input.root, input.projectSlug), clientMessageId, text, input.kind));
+  return withCreativeSessionLock(input.projectSlug, async () => appendMessageLocked(input.root, await readSession(input.root, input.projectSlug), clientMessageId, text, input.kind));
 }
 
 export async function updateCreativeSessionState(input: {
@@ -185,7 +185,7 @@ export async function updateCreativeSessionState(input: {
   phase: CreativeSession["phase"]; collaborationMode: CreativeSession["collaborationMode"]; activeQuestionId?: string;
   latestDirection: string; unconfirmedAssumptions: string[]; decisionRefs: string[]; pendingPatchRefs: string[];
 }): Promise<{ session: CreativeSession }> {
-  return withProjectLock(input.projectSlug, async () => {
+  return withCreativeSessionLock(input.projectSlug, async () => {
     const current = await readSession(input.root, input.projectSlug);
     if (current.fingerprint !== input.expectedFingerprint) throw new Error("CREATIVE_SESSION_VERSION_CONFLICT");
     const next = {

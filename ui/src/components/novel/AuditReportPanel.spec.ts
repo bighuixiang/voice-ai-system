@@ -136,7 +136,7 @@ describe("AuditReportPanel", () => {
     expect(wrapper.text()).toContain("任务健康");
     expect(wrapper.text()).toContain("失败 / 已取消");
     expect(wrapper.text()).toContain("设置超时预算");
-    expect(wrapper.text()).toContain("Codex timed out");
+    expect(wrapper.text()).toContain("Codex 调用超时");
     expect(wrapper.text()).toContain("已请求取消");
     expect(wrapper.text()).toContain("2 次调用");
     expect(wrapper.text()).toContain("AI 调用控制面板");
@@ -152,7 +152,7 @@ describe("AuditReportPanel", () => {
     expect(wrapper.text()).toContain("1 个阻塞");
     expect(wrapper.text()).toContain("review 1");
     expect(wrapper.text()).toContain("2 个任务");
-    expect(wrapper.text()).toContain("4 facts / 2 relations");
+    expect(wrapper.text()).toContain("4 条事实 / 2 条关系");
 
     const buttons = wrapper.findAll("button");
     await buttons[0].trigger("click");

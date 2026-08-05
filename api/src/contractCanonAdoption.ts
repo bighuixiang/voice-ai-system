@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
-import { readContractAdoptionProposal, type ContractAdoptionProposal } from "./contractAdoption.js";
+import { contractAdoptionProposalFingerprint, readContractAdoptionProposal, type ContractAdoptionProposal } from "./contractAdoption.js";
 import { readWorldRuleContract, type WorldRuleContract } from "./worldRuleContract.js";
 import { computeCanonCommitFingerprint } from "./canonCommit.js";
 
@@ -278,7 +278,9 @@ export async function commitContractAdoption(root: string, input: AdoptionInput)
   const canonCommitFingerprint = computeCanonCommitFingerprint({ mutationId, proposalId: proposal.proposalId, projectSlug: proposal.projectSlug, authorizationId: input.authorization.authorizationId, actorId: input.authorization.actorId, candidateId: proposal.candidateId });
   const event = JSON.stringify({ schemaVersion: "canon-commit-event.v1", eventId: `canon-commit-${mutationId}`, mutationId, proposalId: proposal.proposalId, projectSlug: proposal.projectSlug, authorizationId: input.authorization.authorizationId, actorId: input.authorization.actorId, candidateId: proposal.candidateId, canonCommitFingerprint, createdAt: new Date().toISOString() }) + "\n";
   const invalidation = JSON.stringify({ schemaVersion: "projection-invalidation-event.v1", eventId: `projection-invalidation-${mutationId}`, mutationId, candidateId: proposal.candidateId, reviewId: proposal.reviewId, affectedProjections: ["understanding-review", "contract-candidate", "story-graph", "knowledge-index"], createdAt: new Date().toISOString() }) + "\n";
-  const committedProposal = `${JSON.stringify({ ...proposal, status: "committed", canonWritten: true, committedMutationId: mutationId, committedAt: new Date().toISOString() }, null, 2)}\n`;
+  const committedProposalBase = { ...proposal, status: "committed" as const, canonWritten: true as const, committedMutationId: mutationId, committedAt: new Date().toISOString() };
+  const { fingerprint: _proposalFingerprint, ...committedBase } = committedProposalBase;
+  const committedProposal = `${JSON.stringify({ ...committedBase, fingerprint: contractAdoptionProposalFingerprint(committedBase) }, null, 2)}\n`;
   const after = new Map<string, string>([
     ["project.json", buildProject(before.get("project.json")!.content, proposal)],
     ["story-control/story-control.json", buildStoryControl(before.get("story-control/story-control.json")!.content, desire)],

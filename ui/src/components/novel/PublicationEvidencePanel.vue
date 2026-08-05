@@ -1,11 +1,11 @@
 <template>
   <section class="publication-evidence-panel" data-testid="publication-evidence-panel" aria-labelledby="publication-evidence-title">
     <header class="panel-header"><div><p class="eyebrow">交付证据</p><h2 id="publication-evidence-title">成稿交付证据</h2><p>版次、出版树、制品、交付证明和发布预检必须来自同一版次。</p></div><button type="button" data-testid="load-publication-evidence" :disabled="loading || !editionId.trim()" @click="emit('load', editionId.trim())">读取版次证据</button></header>
-    <label>版次 ID<input data-testid="publication-edition-id" v-model="editionId" placeholder="输入 editionId" /></label>
+    <label>版次标识<input data-testid="publication-edition-id" v-model="editionId" placeholder="输入版次标识" /></label>
     <p v-if="error" class="error" role="alert">{{ error }}</p>
     <div v-if="!manifest" class="create-form">
       <strong>创建冻结版次</strong>
-      <input data-testid="canon-commit-fingerprint" v-model="canonCommitFingerprint" placeholder="canon commit fingerprint" />
+      <input data-testid="canon-commit-fingerprint" v-model="canonCommitFingerprint" placeholder="输入正式设定提交指纹" />
       <input data-testid="edition-title" v-model="title" placeholder="标题" />
       <input data-testid="edition-author" v-model="author" placeholder="作者" />
       <input data-testid="edition-language" v-model="language" placeholder="语言" />
@@ -16,12 +16,12 @@
       <span>出版树：{{ tree?.fingerprint || "缺失" }}</span>
       <span>制品：{{ artifacts?.fingerprint || "缺失" }}</span>
       <span>交付证明：{{ proof?.valid ? "有效" : "缺失或无效" }}</span>
-      <span>发布预检：{{ preflight?.status || "缺失" }}</span>
+      <span>发布预检：{{ preflight ? statusLabel(preflight.status) : "缺失" }}</span>
       <button v-if="manifest && !tree" type="button" data-testid="compile-publication-tree" :disabled="loading" @click="emit('compile-tree')">编译出版树</button>
       <button v-if="tree && !artifacts" type="button" data-testid="render-publication-artifacts" :disabled="loading" @click="emit('render-artifacts')">渲染制品</button>
       <div v-if="preflight?.status === 'ready' && artifacts?.fingerprint && !deliveryProof && proof?.valid !== true" class="approval-form">
-        <label for="delivery-approval-id">作者批准 ID</label>
-        <input id="delivery-approval-id" data-testid="delivery-approval-id" v-model="approvalId" placeholder="输入作者批准 ID" />
+        <label for="delivery-approval-id">作者批准标识</label>
+        <input id="delivery-approval-id" data-testid="delivery-approval-id" v-model="approvalId" placeholder="输入作者批准标识" />
         <button type="button" data-testid="issue-delivery-proof" :disabled="loading || !approvalId.trim()" @click="emit('issue-proof', approvalId.trim())">签发交付证明</button>
       </div>
     </div>
@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import type { DeliveryProof, DeliveryProofVerification, EditionManifest, PublicationArtifactSet, PublicationTree, ReleasePreflightReport } from "@/types/novel";
+import { statusLabel } from "@/utils/novelLabels";
 withDefaults(defineProps<{ manifest?: EditionManifest | null; tree?: PublicationTree | null; artifacts?: PublicationArtifactSet | null; proof?: DeliveryProofVerification | null; deliveryProof?: DeliveryProof | null; preflight?: ReleasePreflightReport | null; loading?: boolean; error?: string }>(), { manifest: null, tree: null, artifacts: null, proof: null, deliveryProof: null, preflight: null, loading: false, error: "" });
 const emit = defineEmits<{ load: [editionId: string]; create: [input: { canonCommitFingerprint: string; title: string; author: string; language: string; chapters: [] }]; "compile-tree": []; "render-artifacts": []; "issue-proof": [approvalId: string] }>();
 const editionId = ref("");

@@ -16,6 +16,8 @@ import { createChapterExecutionProof } from "./chapterExecutionProof.js";
 import { createBookWorkGraph } from "./bookWorkGraph.js";
 import { createDecisionConsumptionReceipt, persistDecisionConsumptionReceipt } from "./decisionConsumption.js";
 import { computeCanonCommitFingerprint } from "./canonCommit.js";
+import { compileOutlineCandidate } from "./outlineCandidate.js";
+import { validateOutlineCandidate } from "./outlineValidation.js";
 
 let server: http.Server;
 let baseUrl = "";
@@ -204,6 +206,31 @@ describe.sequential("novel API routes", () => {
 
     const readAfter = await jsonFetch<{ content: string }>(`/api/novel/projects/demo-novel/files/${filePath}`);
     expect(readAfter.data.content).toBe("manual draft");
+  });
+
+  it("returns a guided conflict when an outline source contract is not canon", async () => {
+    const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Outline Contract Gate", genre: "fantasy" })
+    });
+    const root = path.join(tempRoot, created.data.project.slug);
+    const candidate = {
+      schemaVersion: "story-contract-candidate.v1", candidateId: "contract-candidate-gate", projectSlug: created.data.project.slug, status: "candidate", sourceDecisionId: "decision-gate", sourceFingerprint: "source-gate", fields: [],
+      contract: { protagonist: { primaryDesire: "protect the archive", innerNeed: null, misbelief: null }, conflict: { core: "The archive burns at dawn.", opposingPressure: null }, stakes: { failureCost: "The city loses its memory.", irreversibleChoice: null }, world: { primaryRule: null }, readerPromise: null, endingDirection: "The keeper chooses what to save." }, assumptions: [], impactSummary: [], unknowns: [], canonWritten: false, createdAt: new Date().toISOString(), fingerprint: "candidate-gate"
+    };
+    await fs.mkdir(path.join(root, "sessions", "contract-candidates"), { recursive: true });
+    await fs.writeFile(path.join(root, "sessions", "contract-candidates", `${candidate.candidateId}.json`), JSON.stringify(candidate), "utf8");
+    const { outline } = await compileOutlineCandidate(root, candidate.candidateId);
+    await validateOutlineCandidate(root, outline.outlineId);
+
+    const response = await jsonFetch<{ error: { code: string; message: string } }>(
+      `/api/novel/projects/${created.data.project.slug}/session/understanding/outline-adoption-proposals`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ outlineId: outline.outlineId, expectedOutlineFingerprint: outline.fingerprint }) }
+    );
+
+    expect(response.status).toBe(409);
+    expect(response.data.error).toEqual({ code: "OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED", message: "请先确认并采纳该大纲对应的故事设定。" });
   });
 
   it("captures the original idea in the creative session during project creation", async () => {
@@ -2303,7 +2330,7 @@ describe.sequential("novel API routes", () => {
       expect(exhaustedQuestions.status).toBe(409);
       expect(exhaustedQuestions.data.error.code).toBe("UNDERSTANDING_QUESTIONS_EXHAUSTED");
 
-      const candidate = await jsonFetch<{ candidate: { candidateId: string; fingerprint: string; status: string; canonWritten: boolean; fields: Array<{ path: string; value: string }> }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(
+      const candidate = await jsonFetch<{ candidate: { candidateId: string; fingerprint: string; status: string; canonWritten: boolean; fields: Array<{ fieldId: string; path: string; value: string }> }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(
         `/api/novel/projects/${slug}/session/understanding/contract-candidates`,
         {
           method: "POST",
@@ -2334,7 +2361,7 @@ describe.sequential("novel API routes", () => {
       ]));
       expect(candidate.data.candidate.fields).toHaveLength(10);
 
-      const outline = await jsonFetch<{ outline: { outlineId: string; sourceCandidateFingerprint: string; status: string; canonWritten: boolean; horizon: { strongFreezeCount: number; totalChapterCount: number }; chapters: Array<{ chapterId: string; order: number; freeze: string }> }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(
+      const mismatchedOutline = await jsonFetch<{ error: { code: string; message: string } }>(
         `/api/novel/projects/${slug}/session/understanding/outline-candidates`,
         {
           method: "POST",
@@ -2342,10 +2369,21 @@ describe.sequential("novel API routes", () => {
           body: JSON.stringify({ sourceCandidateId: candidate.data.candidate.candidateId, strongFreezeCount: 3, totalChapterCount: 3 })
         }
       );
+      expect(mismatchedOutline.status).toBe(409);
+      expect(mismatchedOutline.data.error).toMatchObject({ code: "STORY_BLUEPRINT_SOURCE_MISMATCH", message: "当前故事蓝图与所选故事设定不一致，请重新生成并确认蓝图后再制定大纲。" });
+
+      const outline = await jsonFetch<{ outline: { outlineId: string; sourceCandidateFingerprint: string; status: string; canonWritten: boolean; horizon: { strongFreezeCount: number; totalChapterCount: number }; chapters: Array<{ chapterId: string; order: number; freeze: string }> }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(
+        `/api/novel/projects/${slug}/session/understanding/outline-candidates`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sourceCandidateId: finalAutoAdvance!.contractCandidate!.candidate.candidateId, strongFreezeCount: 3, totalChapterCount: 3 })
+        }
+      );
       expect(outline.status).toBe(201);
-      expect(outline.data.consumption).toMatchObject({ created: true, receipt: { consumer: "outline", decisionId: conflictAnswer.data.decision.decisionId, consumerRef: outline.data.outline.outlineId } });
+      expect(outline.data.consumption).toMatchObject({ created: true, receipt: { consumer: "outline", decisionId: finalAutoAdvance!.contractCandidate!.candidate.sourceDecisionId, consumerRef: outline.data.outline.outlineId } });
       expect(outline.data.outline).toMatchObject({
-        sourceCandidateFingerprint: candidate.data.candidate.fingerprint,
+        sourceCandidateFingerprint: expect.any(String),
         status: "candidate",
         canonWritten: false,
         horizon: { strongFreezeCount: 3, totalChapterCount: 3 },
@@ -2368,6 +2406,42 @@ describe.sequential("novel API routes", () => {
         { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ objectiveIds: ["contract"], candidates: [{ candidateId: candidate.data.candidate.candidateId, hardConstraintFailures: [], objectiveEvidence: [{ objectiveId: "contract", gap: 0, evidenceRefs: [`decision://${conflictAnswer.data.decision.decisionId}`] }], unresolvedRisks: [] }] }) }
       );
       expect(comparison.status).toBe(200);
+      const finalContractCandidate = await jsonFetch<{ candidate: { candidateId: string; fingerprint: string; fields: Array<{ fieldId: string }> } }>(
+        `/api/novel/projects/${slug}/session/understanding/contract-candidates/${finalAutoAdvance!.contractCandidate!.candidate.candidateId}`
+      );
+      expect(finalContractCandidate.status).toBe(200);
+      const refreshedReview = await jsonFetch<{ review: { status: string } }>(
+        `/api/novel/projects/${slug}/session/understanding/review`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reviewerId: "vertical-slice-review" }) }
+      );
+      expect(refreshedReview.status).toBe(201);
+      expect(refreshedReview.data.review.status).toBe("passed");
+      const contractProposal = await jsonFetch<{ proposal: { fingerprint: string; status: string } }>(
+        `/api/novel/projects/${slug}/session/understanding/contract-adoption-proposals`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            candidateId: finalContractCandidate.data.candidate.candidateId,
+            expectedCandidateFingerprint: finalContractCandidate.data.candidate.fingerprint,
+            fieldDecisions: finalContractCandidate.data.candidate.fields.map((field) => ({ fieldId: field.fieldId, status: "accept" }))
+          })
+        }
+      );
+      expect(contractProposal.status).toBe(201);
+      const contractCommit = await jsonFetch<{ status: string; canonWritten: boolean }>(
+        `/api/novel/projects/${slug}/session/understanding/contract-adoption`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            expectedProposalFingerprint: contractProposal.data.proposal.fingerprint,
+            authorization: { actorId: "author-vertical-slice", authorizationId: "contract-vertical-slice-1" }
+          })
+        }
+      );
+      expect(contractCommit.status).toBe(201);
+      expect(contractCommit.data).toMatchObject({ status: "committed", canonWritten: true });
 
       const proposal = await jsonFetch<{ proposal: { fingerprint: string } }>(
         `/api/novel/projects/${slug}/session/understanding/outline-adoption-proposals`,
@@ -3244,6 +3318,15 @@ describe.sequential("novel API routes", () => {
       expect(committed.status).toBe(200);
       expect(committed.data).toMatchObject({ execution: { status: "completed" }, result: { status: "committed", canonWritten: true } });
 
+      const latestBlueprint = await jsonFetch<{ blueprint: { blueprintId: string; fingerprint: string } }>(`/api/novel/projects/${slug}/session/story-blueprints/latest`);
+      expect(latestBlueprint.status).toBe(200);
+      const confirmedBlueprint = await jsonFetch<{ confirmation: { blueprintId: string; status: string } }>(`/api/novel/projects/${slug}/session/story-blueprints/${latestBlueprint.data.blueprint.blueprintId}/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expectedFingerprint: latestBlueprint.data.blueprint.fingerprint, actorId: "author-primary-action-1" })
+      });
+      expect(confirmedBlueprint.status).toBe(201);
+
       const outlineAction = await jsonFetch<{ decision: { actionId: string; journeyVersion: string; sourceFingerprint: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
       expect(outlineAction.data.decision.actionId).toBe(`generate-outline-candidate-${candidateExecution.data.candidate.candidateId}`);
       const outlineExecution = await jsonFetch<{ execution: { status: string; created: boolean }; outline: { outlineId: string; status: string; canonWritten: boolean }; consumption: { created: boolean; receipt: { consumer: string; decisionId: string; consumerRef: string } } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
@@ -3251,6 +3334,11 @@ describe.sequential("novel API routes", () => {
       });
       expect(outlineExecution.status).toBe(201);
       expect(outlineExecution.data).toMatchObject({ execution: { status: "completed", created: true }, outline: { status: "candidate", canonWritten: false }, consumption: { created: true, receipt: { consumer: "outline", decisionId: candidateDecisionId, consumerRef: outlineExecution.data.outline.outlineId } } });
+      await fs.writeFile(
+        path.join(tempRoot, slug, "sessions", "contract-candidates", "contract-candidate-newer.json"),
+        JSON.stringify({ candidateId: "contract-candidate-newer", status: "candidate", createdAt: "2099-01-01T00:00:00.000Z" }),
+        "utf8"
+      );
       const outlineReviewAction = await jsonFetch<{ decision: { actionId: string } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/resolve`, { method: "POST" });
       expect(outlineReviewAction.data.decision.actionId).toBe(`review-outline-candidate-${outlineExecution.data.outline.outlineId}`);
       const outlineReview = await jsonFetch<{ validation: { status: string; executionReady: boolean } }>(`/api/novel/projects/${slug}/runtime/session/primary-action/execute`, {
@@ -6468,13 +6556,13 @@ describe.sequential("novel API routes", () => {
     expect(response.data.error).toEqual({ code: "DECISION_NOT_FOUND" });
   });
 
-  it("returns a typed not-found error when compiling an outline from an unknown contract", async () => {
+  it("requires a confirmed story blueprint before compiling an outline", async () => {
     await jsonFetch("/api/novel/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: "Outline Candidate Error", roughIdea: "Unknown contracts must not become a 500." })
     });
-    const response = await jsonFetch<{ error: { code: string } }>(
+    const response = await jsonFetch<{ error: { code: string; message: string } }>(
       "/api/novel/projects/outline-candidate-error/session/understanding/outline-candidates",
       {
         method: "POST",
@@ -6482,8 +6570,8 @@ describe.sequential("novel API routes", () => {
         body: JSON.stringify({ sourceCandidateId: "contract-does-not-exist" })
       }
     );
-    expect(response.status).toBe(404);
-    expect(response.data.error).toEqual({ code: "CONTRACT_CANDIDATE_NOT_FOUND" });
+    expect(response.status).toBe(409);
+    expect(response.data.error).toMatchObject({ code: "STORY_BLUEPRINT_CONFIRMATION_REQUIRED", message: "请先确认最新故事蓝图，再开始制定大纲。" });
   });
 
   it("lists contract candidates for a project", async () => {
@@ -7484,6 +7572,11 @@ describe.sequential("novel API routes", () => {
     const confirmed = await jsonFetch<{ confirmation: { blueprintId: string; status: string } }>(`/api/novel/projects/${slug}/session/story-blueprints/${revised.data.blueprint.blueprintId}/confirm`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedFingerprint: revised.data.blueprint.fingerprint, actorId: "author-1" }) });
     expect(confirmed.status).toBe(201);
     expect(confirmed.data.confirmation).toMatchObject({ blueprintId: revised.data.blueprint.blueprintId, status: "confirmed" });
+    const additionalAuthorInput = await jsonFetch<{ created: boolean }>(`/api/novel/projects/${slug}/session/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientMessageId: "blueprint-change", text: "补充：结局要保留主角的名字。" }) });
+    expect(additionalAuthorInput.status).toBe(201);
+    const blockedOutline = await jsonFetch<{ error: { code: string } }>(`/api/novel/projects/${slug}/session/understanding/outline-candidates`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceCandidateId: candidate.candidateId }) });
+    expect(blockedOutline.status).toBe(409);
+    expect(blockedOutline.data.error.code).toBe("STORY_BLUEPRINT_CONFIRMATION_REQUIRED");
     const latest = await jsonFetch<{ blueprint: { blueprintId: string } }>(`/api/novel/projects/${slug}/session/story-blueprints/latest`);
     expect(latest.status).toBe(200);
     expect(latest.data.blueprint.blueprintId).toBe(revised.data.blueprint.blueprintId);

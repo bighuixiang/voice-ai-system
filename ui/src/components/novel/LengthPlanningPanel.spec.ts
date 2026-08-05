@@ -9,7 +9,7 @@ const forecast = { schemaVersion: "length-forecast.v1", projectSlug: "demo", con
 describe("LengthPlanningPanel", () => {
   it("shows pause evidence and records an explicit decision", async () => {
     const wrapper = mount(LengthPlanningPanel, { props: { contract, forecast } });
-    expect(wrapper.text()).toContain("pause-required");
+    expect(wrapper.text()).toContain("需要暂停复核");
     await wrapper.get("[data-testid='record-length-variance']").trigger("click");
     expect(wrapper.emitted("decide")).toHaveLength(1);
   });

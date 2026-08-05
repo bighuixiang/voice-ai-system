@@ -1165,24 +1165,33 @@ export interface CreativeSession {
 export interface CreativeJourneyProjection {
   schemaVersion: "creative-journey-projection.v1";
   projectSlug: string;
-  stage: "capture" | "understanding";
+  stage: "capture" | "understanding" | "blueprint-review" | "ready-for-outline";
   primaryAsset: "creative-session" | "understanding-preview";
   blockingRef?: string;
   primaryAction: {
-    id: "capture-idea" | "review-understanding";
+    id: "capture-idea" | "review-understanding" | "generate-outline" | `answer-${string}`;
     label: string;
-    kind: "capture" | "review";
+    kind: "capture" | "review" | "answer" | "continue";
     status: "available";
   };
   activeQuestion?: {
-    id: "question-primary-desire";
+    id: string;
     text: string;
-    status: "candidate";
-    impact: "high";
+    status: "candidate" | "active";
+    impact: "low" | "medium" | "high";
     source: "deterministic-gap" | "model-gap";
   };
+  progress: { completed: number; total: number; current: number };
+  nextInstruction: string;
+  blueprintNeedsRefresh?: boolean;
   sourceMessageIds: string[];
   sessionFingerprint: string;
+  sourceFingerprint: string;
+  projectionVersion: string;
+  freshness: "current" | "rebuilding" | "conflicted";
+  unsavedState: { hasDraft: boolean; fingerprint?: string };
+  pendingRefs: string[];
+  fingerprint: string;
 }
 
 export interface StoryBlueprintContent {

@@ -12,6 +12,8 @@ describe("QualityCalibrationPanel", () => {
     const wrapper = mount(QualityCalibrationPanel, { props: { evidence } });
     expect(wrapper.text()).toContain("外部校准证据");
     expect(wrapper.text()).toContain("sealed-holdout-v4");
+    expect(wrapper.text()).toContain("服务商");
+    expect(wrapper.text()).toContain("留出集");
     expect(wrapper.text()).toContain("标签与评审输入隔离");
     expect(wrapper.text()).not.toContain("case-1");
   });

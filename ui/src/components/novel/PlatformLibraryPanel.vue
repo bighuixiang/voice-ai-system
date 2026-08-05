@@ -31,7 +31,7 @@
           <article v-for="asset in visibleAssets" :key="asset.id" class="asset-item" role="listitem">
             <div>
               <strong>{{ asset.name }}</strong>
-              <p>{{ asset.type }} · {{ asset.scope }}</p>
+              <p>{{ assetTypeLabel(asset.type) }} · {{ asset.scope === "shared" ? "平台共享" : "项目专属" }}</p>
             </div>
             <div class="asset-actions">
               <el-tag v-if="projectSlug && asset.linkedProjects.includes(projectSlug)" size="small" type="success">
@@ -67,7 +67,7 @@
         </article>
       </el-tab-pane>
 
-      <el-tab-pane label="Skills" name="skills">
+      <el-tab-pane label="技能" name="skills">
         <article v-for="skill in library?.skills || []" :key="skill.id" class="skill-item">
           <div>
             <strong>{{ skill.name }}</strong>
@@ -84,6 +84,7 @@
 import { computed, ref } from "vue";
 import { Connection, Plus, Refresh } from "@element-plus/icons-vue";
 import type { PlatformAsset, PlatformAssetType, PlatformLibrary } from "@/types/novel";
+import { assetTypeLabel } from "@/utils/novelLabels";
 import {
   promptText,
   promptTitle,

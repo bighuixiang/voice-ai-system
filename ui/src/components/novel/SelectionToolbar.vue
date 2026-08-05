@@ -42,7 +42,7 @@ const modes = [
   { value: "compress", label: "压缩", icon: Fold },
   { value: "reduce-exaggeration", label: "降浮夸", icon: Warning },
   { value: "strengthen-tension", label: "压迫感", icon: TrendCharts },
-  { value: "pov-check", label: "POV", icon: Reading }
+  { value: "pov-check", label: "叙事视角检查", icon: Reading }
 ];
 </script>
 

@@ -49,13 +49,13 @@
           <span>独立来源 {{ searchResult.retrievalAudit.evidenceProfile?.independentSourceCount ?? searchResult.retrievalAudit.evidenceSourceCount }} 个</span>
           <small v-if="searchResult.retrievalAudit.evidenceProfile?.gaps.length">证据缺口：{{ searchResult.retrievalAudit.evidenceProfile.gaps.join(", ") }}</small>
           <small>指纹 {{ searchResult.retrievalAudit.resultFingerprint.slice(0, 12) }}</small>
-          <small v-if="searchResult.queryEmbeddingFallback">查询向量降级：{{ searchResult.queryEmbeddingFallback.reason }}</small>
+          <small v-if="searchResult.queryEmbeddingFallback">查询向量降级：{{ userFacingText(searchResult.queryEmbeddingFallback.reason, "未说明原因") }}</small>
           <small v-if="retrievalPreviewId">已保存预览：{{ retrievalPreviewId }}</small>
         </div>
         <div v-if="searchResult.facts.length" class="result-list">
           <article v-for="fact in searchResult.facts.slice(0, 5)" :key="fact.id">
             <strong>{{ fact.text }}</strong>
-            <span>{{ fact.relatedEntities.join(" / ") || fact.source.type }} · 向量 {{ formatScore(fact.vectorScore) }}</span>
+            <span>{{ fact.relatedEntities.join(" / ") || sourceTypeLabel(fact.source.type) }} · 向量 {{ formatScore(fact.vectorScore) }}</span>
           </article>
         </div>
         <div v-if="searchResult.triples.length" class="triple-list">
@@ -96,6 +96,7 @@
 import { computed, ref } from "vue";
 import { Refresh } from "@element-plus/icons-vue";
 import type { KnowledgeIndexProjection, KnowledgeSearchResult, MemoryRetrievalPreview } from "@/types/novel";
+import { sourceTypeLabel, userFacingText } from "@/utils/novelLabels";
 
 const props = defineProps<{
   index: KnowledgeIndexProjection | null;

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { appendSessionMessage, appendAuthorMessage, readCreativeSession, updateCreativeSessionState } from "./creativeSession.js";
+import { appendSessionMessage, appendAuthorMessage, readCreativeSession, updateCreativeSessionState, withCreativeSessionLock } from "./creativeSession.js";
 
 const roots: string[] = [];
 async function makeRoot() {
@@ -52,5 +52,31 @@ describe("creative session RP1 state and provenance", () => {
     const persisted = JSON.parse(await fs.readFile(sessionPath, "utf8")) as Record<string, unknown>;
     await fs.writeFile(sessionPath, JSON.stringify({ ...persisted, latestDirection: "tampered" }), "utf8");
     await expect(readCreativeSession(root, "p1")).rejects.toThrow("CREATIVE_SESSION_INTEGRITY_FAILED");
+  });
+
+  it("serializes operations for the same project through the shared session lock", async () => {
+    let releaseFirst!: () => void;
+    let markFirstEntered!: () => void;
+    const firstEntered = new Promise<void>((resolve) => {
+      markFirstEntered = resolve;
+    });
+    const first = withCreativeSessionLock("p1", async () => {
+      markFirstEntered();
+      await new Promise<void>((resolve) => {
+        releaseFirst = resolve;
+      });
+    });
+    await firstEntered;
+
+    let secondEntered = false;
+    const second = withCreativeSessionLock("p1", async () => {
+      secondEntered = true;
+    });
+    await Promise.resolve();
+    expect(secondEntered).toBe(false);
+
+    releaseFirst();
+    await Promise.all([first, second]);
+    expect(secondEntered).toBe(true);
   });
 });

@@ -1,7 +1,7 @@
 <template>
   <section class="calibration-panel" data-testid="quality-calibration-panel" aria-labelledby="quality-calibration-title">
     <header><div><p class="eyebrow">发布校准证据</p><h2 id="quality-calibration-title">外部校准证据</h2><p>只接收人工或服务商提供的密封留出集证明；平台不生成或展示留出集标签。</p></div><button type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? "读取中…" : "刷新" }}</button></header>
-    <div v-if="evidence" class="evidence" data-testid="calibration-evidence"><strong>{{ evidence.status === "calibrated" ? "已校准" : "阻断" }} · {{ evidence.sourceKind }}</strong><p>评审器 {{ evidence.evaluatorVersion }} · holdout {{ evidence.inputFingerprint }}</p><p>准确率 {{ evidence.accuracy }} / 门槛 {{ evidence.minimumAccuracy }} · {{ evidence.labelAccess === "sealed-separate-from-evaluator-input" ? "标签与评审输入隔离" : "标签边界异常" }}</p><p>证明 {{ evidence.attestation.reference }}</p></div>
+    <div v-if="evidence" class="evidence" data-testid="calibration-evidence"><strong>{{ evidence.status === "calibrated" ? "已校准" : "阻断" }} · {{ reviewerKindLabel(evidence.sourceKind) }}</strong><p>评审器 {{ evidence.evaluatorVersion }} · 留出集 {{ evidence.inputFingerprint }}</p><p>准确率 {{ evidence.accuracy }} / 门槛 {{ evidence.minimumAccuracy }} · {{ evidence.labelAccess === "sealed-separate-from-evaluator-input" ? "标签与评审输入隔离" : "标签边界异常" }}</p><p>证明 {{ evidence.attestation.reference }}</p></div>
     <div v-else class="empty">尚无外部校准证据；提交前需取得独立人工或服务商证明。</div>
     <form class="submission" @submit.prevent="submit">
       <label>来源<select v-model="sourceKind"><option value="human">人工</option><option value="provider">服务商</option></select></label>
@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import type { QualityCalibrationEvidence } from "@/types/novel";
+import { reviewerKindLabel } from "@/utils/novelLabels";
 
 withDefaults(defineProps<{ evidence?: QualityCalibrationEvidence | null; history?: QualityCalibrationEvidence[]; loading?: boolean; error?: string }>(), { evidence: null, history: () => [], loading: false, error: "" });
 const emit = defineEmits<{ refresh: []; submit: [input: { evaluatorVersion: string; sourceKind: "provider" | "human"; holdoutInputFingerprint: string; evaluatedCount: number; correctCount: number; accuracy: number; minimumAccuracy: number; attestation: { kind: "provider-signed" | "human-reviewed"; reference: string }; evidenceRefs: string[] }] }>();

@@ -75,7 +75,7 @@
               @click="selectNode(node.id)"
             >
               <span>{{ node.label }}</span>
-              <small>{{ node.subtitle || node.status || "未备注" }}</small>
+              <small>{{ node.subtitle || statusLabel(node.status, "未备注") }}</small>
             </button>
             <p v-if="!column.nodes.length" class="compact-empty">暂无节点</p>
           </div>
@@ -86,7 +86,7 @@
             <span>{{ nodeTypeLabels[selectedNode.type] }}</span>
             <strong>{{ selectedNode.label }}</strong>
           </div>
-          <p>{{ selectedNode.subtitle || selectedNode.status || "暂无节点说明" }}</p>
+          <p>{{ selectedNode.subtitle || statusLabel(selectedNode.status, "暂无节点说明") }}</p>
 
           <div class="relation-list">
             <div v-for="row in selectedRelationRows" :key="row.id" class="relation-row">
@@ -221,6 +221,7 @@ import type {
   StoryGraphNodeType,
   StoryGraphProjection
 } from "@/types/novel";
+import { statusLabel } from "@/utils/novelLabels";
 
 const props = defineProps<{
   graph: StoryGraphProjection | null;

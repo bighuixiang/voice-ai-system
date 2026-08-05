@@ -14,10 +14,10 @@ describe("MemoryGovernancePanel", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("degraded");
-    expect(wrapper.text()).toContain("entities 3");
-    expect(wrapper.text()).toContain("MEMORY_HEALTH_DEGRADED");
-    expect(wrapper.text()).toContain("CONTRADICTION_SETS_OPEN");
+    expect(wrapper.text()).toContain("降级");
+    expect(wrapper.text()).toContain("实体 3");
+    expect(wrapper.text()).toContain("记忆健康度不足");
+    expect(wrapper.text()).toContain("存在未关闭的矛盾集合");
     await wrapper.find("button").trigger("click");
     expect(wrapper.emitted("run")).toHaveLength(1);
   });

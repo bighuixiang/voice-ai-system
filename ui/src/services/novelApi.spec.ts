@@ -33,6 +33,22 @@ describe("novelApi", () => {
     await expect(novelApi.startUnderstanding("demo", "shadow")).rejects.toThrow("Freeze the author input first.");
   });
 
+  it("turns nested error payloads into a readable Chinese message instead of object stringification", async () => {
+    mockJson({ error: { detail: { code: "OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED", context: { candidateId: "contract-1" } } } }, false, 409);
+
+    await expect(novelApi.startUnderstanding("demo", "shadow")).rejects.toThrow("请先确认并采纳对应的故事设定");
+    await expect(novelApi.startUnderstanding("demo", "shadow")).rejects.not.toThrow("[object Object]");
+  });
+
+  it("reads top-level structured errors from legacy read endpoints without leaking English or objects", async () => {
+    mockJson({ message: { code: "V2_DEPENDENCY_MISSING", context: { stage: "release" } } }, false, 409);
+
+    const error = await novelApi.readReleaseActivation().catch((value) => value as Error);
+    expect(error.message).toContain("当前步骤的前置内容尚未完成");
+    expect(error.message).not.toContain("Request failed");
+    expect(error.message).not.toContain("[object Object]");
+  });
+
   it("creates a project from a rough idea", async () => {
     mockJson({
       project: {
@@ -799,6 +815,12 @@ describe("novelApi", () => {
       answerText: "Truth",
       answerStatus: "confirmed"
     })).resolves.toMatchObject({ question: { status: "answered" } });
+  });
+
+  it("treats a missing story blueprint as an empty state, not a request failure", async () => {
+    mockJson({ error: { code: "STORY_BLUEPRINT_NOT_FOUND" } }, false, 404);
+
+    await expect(novelApi.readLatestStoryBlueprint("demo")).resolves.toBeNull();
   });
 
   it("reads file versions, diffs, and editor suggestions", async () => {

@@ -28,7 +28,46 @@ export interface ContractAdoptionProposal {
   reviewId: string;
   canonWritten: false | true;
   createdAt: string;
+  committedMutationId?: string;
+  committedAt?: string;
   fingerprint: string;
+}
+
+export function contractAdoptionProposalFingerprint(value: Omit<ContractAdoptionProposal, "fingerprint">): string {
+  return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+export function assertContractAdoptionProposalIntegrity(proposal: ContractAdoptionProposal): ContractAdoptionProposal {
+  const { fingerprint: _fingerprint, ...base } = proposal;
+  const statuses: ContractFieldDecisionStatus[] = ["accept", "keep-provisional", "reject", "delegate"];
+  const fieldsValid = Array.isArray(proposal.acceptedFields) && proposal.acceptedFields.every((field) => Boolean(
+    field && typeof field.fieldId === "string" && field.fieldId.trim() && typeof field.path === "string" && field.path.trim()
+      && typeof field.value === "string" && typeof field.epistemicStatus === "string" && Array.isArray(field.evidenceRefs)
+      && field.evidenceRefs.length > 0 && field.evidenceRefs.every((ref) => typeof ref?.kind === "string" && ref.kind.trim() && typeof ref.refId === "string" && ref.refId.trim())
+      && typeof field.sourceDecisionId === "string" && field.sourceDecisionId.trim() && typeof field.lock === "string" && field.lock.trim()
+  ));
+  const decisionsValid = Array.isArray(proposal.fieldDecisions) && proposal.fieldDecisions.length > 0 && proposal.fieldDecisions.every((decision) =>
+    Boolean(decision && typeof decision.fieldId === "string" && decision.fieldId.trim() && statuses.includes(decision.status)
+      && (decision.reason === undefined || typeof decision.reason === "string"))
+  );
+  const unresolvedValid = Array.isArray(proposal.unresolvedFieldIds) && proposal.unresolvedFieldIds.every((fieldId) => typeof fieldId === "string" && fieldId.trim()) && new Set(proposal.unresolvedFieldIds).size === proposal.unresolvedFieldIds.length;
+  const committed = proposal.status === "committed";
+  const commitmentValid = committed
+    ? proposal.canonWritten === true && typeof proposal.committedMutationId === "string" && proposal.committedMutationId.trim() && typeof proposal.committedAt === "string" && Number.isFinite(Date.parse(proposal.committedAt))
+    : proposal.canonWritten === false && proposal.committedMutationId === undefined && proposal.committedAt === undefined;
+  const valid = proposal.schemaVersion === "story-contract-adoption-proposal.v1"
+    && [proposal.proposalId, proposal.candidateId, proposal.projectSlug, proposal.reviewId].every((value) => typeof value === "string" && value.trim())
+    && typeof proposal.candidateFingerprint === "string" && /^[a-f0-9]{64}$/i.test(proposal.candidateFingerprint)
+    && (proposal.worldRuleContractId === undefined || (typeof proposal.worldRuleContractId === "string" && Boolean(proposal.worldRuleContractId.trim())))
+    && ["ready_for_authorization", "blocked", "committed"].includes(proposal.status)
+    && decisionsValid && fieldsValid && unresolvedValid
+    && (proposal.status === "blocked" || proposal.acceptedFields.length > 0)
+    && typeof proposal.createdAt === "string" && Number.isFinite(Date.parse(proposal.createdAt))
+    && /^[a-f0-9]{64}$/i.test(proposal.fingerprint)
+    && commitmentValid
+    && contractAdoptionProposalFingerprint(base) === proposal.fingerprint;
+  if (!valid) throw new Error("CONTRACT_ADOPTION_PROPOSAL_INTEGRITY_FAILED");
+  return proposal;
 }
 
 function proposalPath(root: string): string {
@@ -45,7 +84,7 @@ async function writeProposal(root: string, proposal: ContractAdoptionProposal): 
 
 export async function readContractAdoptionProposal(root: string): Promise<ContractAdoptionProposal | null> {
   try {
-    return JSON.parse(await fs.readFile(proposalPath(root), "utf8")) as ContractAdoptionProposal;
+    return assertContractAdoptionProposalIntegrity(JSON.parse(await fs.readFile(proposalPath(root), "utf8")) as ContractAdoptionProposal);
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "ENOENT") return null;
     throw error;
@@ -86,7 +125,7 @@ export async function createContractAdoptionProposal(
     canonWritten: false as const,
     createdAt: new Date().toISOString()
   };
-  const proposal: ContractAdoptionProposal = { ...base, fingerprint: crypto.createHash("sha256").update(JSON.stringify(base)).digest("hex") };
+  const proposal: ContractAdoptionProposal = { ...base, fingerprint: contractAdoptionProposalFingerprint(base) };
   await writeProposal(root, proposal);
   return { proposal };
 }

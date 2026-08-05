@@ -4,7 +4,7 @@ import path from "node:path";
 import { resolveInside } from "./pathSafety.js";
 import { readOutlineCandidate } from "./outlineCandidate.js";
 import { readOutlineValidationReport } from "./outlineValidation.js";
-import { readOutlineAdoptionProposal, type OutlineAdoptionProposal } from "./outlineAdoption.js";
+import { assertOutlineSourceContractAdopted, readOutlineAdoptionProposal, type OutlineAdoptionProposal } from "./outlineAdoption.js";
 
 export interface OutlineVersion {
   schemaVersion: "outline-version.v1";
@@ -49,7 +49,8 @@ export interface OutlineCommitResult {
   canonWritten: boolean;
   version?: OutlineVersion;
   proof?: ExecutionReadyProof;
-  reason?: "PROPOSAL_NOT_FOUND" | "PROPOSAL_NOT_AUTHORIZED" | "PROPOSAL_FINGERPRINT_STALE" | "OUTLINE_VALIDATION_STALE" | "OUTLINE_LEASE_UNAVAILABLE" | "INJECTED_FAULT";
+  reason?: "PROPOSAL_NOT_FOUND" | "PROPOSAL_NOT_AUTHORIZED" | "PROPOSAL_FINGERPRINT_STALE" | "OUTLINE_VALIDATION_STALE" | "OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED" | "OUTLINE_LEASE_UNAVAILABLE" | "INJECTED_FAULT";
+  message?: string;
 }
 
 function versionPath(root: string, outlineId: string): string { return resolveInside(root, `sessions/outline-versions/${outlineId}.json`); }
@@ -129,6 +130,12 @@ export async function commitOutlineAdoption(root: string, input: { expectedPropo
   const outline = await readOutlineCandidate(root, proposal.outlineId);
   const validation = await readOutlineValidationReport(root, proposal.outlineId);
   if (!outline || !validation || validation.status !== "passed" || validation.outlineFingerprint !== outline.fingerprint || proposal.outlineFingerprint !== outline.fingerprint || proposal.validationFingerprint !== validation.fingerprint) return { status: "blocked", canonWritten: false, reason: "OUTLINE_VALIDATION_STALE" };
+  try {
+    await assertOutlineSourceContractAdopted(root, outline.sourceCandidateId);
+  } catch (error) {
+    if (error instanceof Error && error.message === "OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED") return { status: "blocked", canonWritten: false, reason: "OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED", message: "请先确认并采纳该大纲对应的故事设定。" };
+    throw error;
+  }
   const existing = await readOutlineVersion(root, proposal.outlineId);
   if (existing) return { status: "committed", canonWritten: true, version: existing, proof: await readExecutionReadyProof(root) || undefined };
   const lease = await acquireLease(root);

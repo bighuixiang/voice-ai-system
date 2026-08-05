@@ -10,7 +10,8 @@ describe("IndependentReviewPanel", () => {
     const wrapper = mount(IndependentReviewPanel, { props: { review } });
     expect(wrapper.text()).toContain("独立评审证据");
     expect(wrapper.text()).toContain("human://review/1");
-    expect(wrapper.text()).toContain("canonWritten: false");
+    expect(wrapper.text()).toContain("已写入正式设定：否");
+    expect(wrapper.text()).toContain("验证通过");
   });
 
   it("submits all required external review checks", async () => {

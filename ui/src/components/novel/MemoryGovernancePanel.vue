@@ -15,27 +15,28 @@
     <div class="governance-evidence">
       <article>
         <span>健康状态</span>
-        <strong>{{ health?.status || "未运行" }}</strong>
+        <strong>{{ health ? statusLabel(health.status) : "未运行" }}</strong>
         <small v-if="health?.reportId">{{ health.reportId }}</small>
         <small v-if="health?.coverage">已结算章节 {{ health.coverage.settledChapters }}/{{ health.coverage.totalChapters }} · 实体 {{ health.coverage.entityCount }} · 时效性事实 {{ health.coverage.timeBoundClaims }}</small>
         <small v-if="health?.coverage">角色知识 {{ health.coverage.characterKnowledgeEntries }} · 读者知识 {{ health.coverage.readerKnowledgeEntries }}</small>
-        <small v-for="risk in health?.risks || []" :key="risk">风险：{{ risk }}</small>
+        <small v-for="risk in health?.risks || []" :key="risk">风险：{{ userFacingText(risk, "未说明") }}</small>
       </article>
       <article>
         <span>就绪证明</span>
-        <strong>{{ readyProof?.status || "未运行" }}</strong>
-        <small v-for="blocker in readyProof?.blockers || []" :key="blocker">{{ blocker }}</small>
+        <strong>{{ readyProof ? statusLabel(readyProof.status) : "未运行" }}</strong>
+        <small v-for="blocker in readyProof?.blockers || []" :key="blocker">{{ userFacingText(blocker, "记忆门禁未通过") }}</small>
       </article>
       <article>
         <span>连续性审计</span>
-        <strong>{{ continuityAudit?.status || "未运行" }}</strong>
-        <small v-for="issue in continuityAudit?.issues || []" :key="issue">{{ issue }}</small>
+        <strong>{{ continuityAudit ? statusLabel(continuityAudit.status) : "未运行" }}</strong>
+        <small v-for="issue in continuityAudit?.issues || []" :key="issue">{{ userFacingText(issue, "连续性问题待处理") }}</small>
       </article>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { statusLabel, userFacingText } from "@/utils/novelLabels";
 defineProps<{
   health?: { reportId: string; status: string; risks?: string[]; coverage?: { totalChapters: number; settledChapters: number; eligibleClaims: number; candidateClaims?: number; entityCount: number; timeBoundClaims: number; characterKnowledgeEntries: number; readerKnowledgeEntries: number } } | null;
   readyProof?: { proofId: string; status: string; blockers?: string[] } | null;

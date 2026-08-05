@@ -33,7 +33,7 @@
       </article>
     </div>
 
-    <div v-if="experiments.length" class="craft-evidence-summary" aria-label="craft experiment evidence">
+    <div v-if="experiments.length" class="craft-evidence-summary" aria-label="工艺实验依据">
       <div class="craft-evidence-header">
         <strong>工艺实验证据</strong>
         <span data-testid="craft-release-status">{{ craftReleaseStatus }}</span>
@@ -65,7 +65,7 @@ const hasProvider = computed(() => judgedExperiments.value.some((experiment) => 
 const hasReaderCalibration = computed(() => judgedExperiments.value.some((experiment) => experiment.readerCalibration?.status === "calibrated" && experiment.readerCalibration.blind));
 const craftReleaseReady = computed(() => hasHoldout.value && hasProvider.value && hasReaderCalibration.value);
 const craftReleaseStatus = computed(() => craftReleaseReady.value ? "可进入发布审阅" : "仅实验，不进入默认创作");
-const craftEvidenceNote = computed(() => craftReleaseReady.value ? "三类证据已齐全，仍需作者确认发布范围。" : "缺少 holdout、实际 provider 用量或盲评校准时，模式不会进入默认创作。" );
+const craftEvidenceNote = computed(() => craftReleaseReady.value ? "三类证据已齐全，仍需作者确认发布范围。" : "缺少留出集、服务商实际用量或盲评校准时，模式不会进入默认创作。" );
 
 const emit = defineEmits<{
   action: [action: CreationLoopAction];

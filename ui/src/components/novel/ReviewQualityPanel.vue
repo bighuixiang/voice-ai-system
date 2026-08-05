@@ -79,7 +79,7 @@
             <p v-else>从低分项生成候选稿、确认改动、应用后复检并打开版本对比。</p>
           </div>
           <div class="quality-improvement-status">
-            <el-tag size="small" :type="qualityImprovementTagType">{{ qualityImprovement?.status }}</el-tag>
+            <el-tag size="small" :type="qualityImprovementTagType">{{ statusLabel(qualityImprovement?.status) }}</el-tag>
             <b v-if="qualityScoreDelta">{{ qualityScoreDelta }}</b>
           </div>
         </div>
@@ -107,7 +107,7 @@
           </ul>
         </div>
 
-        <p v-if="qualityImprovement?.error" class="quality-improvement-error">{{ qualityImprovement.error }}</p>
+        <p v-if="qualityImprovement?.error" class="quality-improvement-error">{{ userFacingText(qualityImprovement.error, "质量改造失败") }}</p>
         <el-button
           v-if="qualityImprovement?.diffVersionId"
           size="small"
@@ -262,6 +262,7 @@
 import { computed } from "vue";
 import { DataAnalysis, MagicStick, Refresh } from "@element-plus/icons-vue";
 import type { ChapterQualityReport, QualityImprovementState, QualityMetricKey, SeriesQualityMetrics, StyleToneKey, TaskProgressStep } from "@/types/novel";
+import { statusLabel, userFacingText } from "@/utils/novelLabels";
 
 const props = withDefaults(defineProps<{
   report: ChapterQualityReport | null;

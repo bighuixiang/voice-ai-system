@@ -30,6 +30,7 @@ export interface CreativeJourneyProjection {
   activeQuestion?: JourneyQuestion;
   progress: { completed: number; total: number; current: number };
   nextInstruction: string;
+  blueprintNeedsRefresh?: boolean;
   sourceMessageIds: string[];
   sessionFingerprint: string;
   sourceFingerprint: string;
@@ -44,6 +45,7 @@ export interface CreativeJourneyDialogueState {
   activeQuestion?: { questionId: string; text: string; impact?: "low" | "medium" | "high"; source: "deterministic-gap" | "model-gap" };
   answeredQuestionIds?: string[];
   blueprintConfirmed?: boolean;
+  blueprintNeedsRefresh?: boolean;
 }
 
 function fingerprintSession(session: CreativeSession): string {
@@ -84,7 +86,8 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
   const completed = answeredQuestionIds.size;
   const progress = { completed, total: UNDERSTANDING_QUESTION_SEQUENCE.length, current: Math.min(completed + 1, UNDERSTANDING_QUESTION_SEQUENCE.length) };
   if (completed === UNDERSTANDING_QUESTION_SEQUENCE.length) {
-    const stage: CreativeJourneyStage = dialogueState.blueprintConfirmed ? "ready-for-outline" : "blueprint-review";
+    const blueprintNeedsRefresh = dialogueState.blueprintNeedsRefresh === true;
+    const stage: CreativeJourneyStage = dialogueState.blueprintConfirmed && !blueprintNeedsRefresh ? "ready-for-outline" : "blueprint-review";
     const result: Omit<CreativeJourneyProjection, "fingerprint"> = {
       ...base,
       stage,
@@ -93,7 +96,8 @@ export function buildCreativeJourneyProjection(session: CreativeSession, dialogu
         ? { id: "generate-outline", label: "生成故事大纲", kind: "continue", status: "available" }
         : { id: "review-understanding", label: "审阅故事蓝图", kind: "review", status: "available" },
       progress,
-      nextInstruction: dialogueState.blueprintConfirmed ? "故事蓝图已确认，可以开始生成大纲。" : "十个关键问题已确认，请审阅故事蓝图。",
+      nextInstruction: blueprintNeedsRefresh ? "你刚补充了创作想法，请先修改或重新生成故事蓝图并再次确认。" : dialogueState.blueprintConfirmed ? "故事蓝图已确认，可以开始生成大纲。" : "十个关键问题已确认，请审阅故事蓝图。",
+      ...(blueprintNeedsRefresh ? { blueprintNeedsRefresh: true } : {}),
       sessionFingerprint: preview.inputFingerprint
     };
     return { ...result, fingerprint: createHash("sha256").update(JSON.stringify(result)).digest("hex") };

@@ -20,7 +20,7 @@
     <section class="method-card">
       <div class="section-title">质量优先级</div>
       <ul class="priority-list">
-        <li>先保因果、动机与 POV 诚实，再谈文采润色。</li>
+        <li>先保证因果、动机与叙事视角诚实，再谈文采润色。</li>
         <li>每章都要落下一个明确变化、一个可见代价、一个向前钩子。</li>
         <li>用 AI 强化场景推进和选择压力，不用它灌水补空白。</li>
       </ul>

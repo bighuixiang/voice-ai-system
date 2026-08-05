@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import { novelApi } from "@/services/novelApi";
+import { errorText } from "@/utils/novelLabels";
 import {
   analyzeChapterQuality as analyzeChapterQualityHelper,
   chapterOrdinal as chapterOrdinalHelper
@@ -24,6 +25,8 @@ import type {
   ChapterQualityReport,
   CreativeSession,
   CreativeJourneyProjection,
+  StoryBlueprint,
+  StoryBlueprintContent,
   ContractAdoptionProposal,
   StoryContractCandidate,
   OutlineCandidate,
@@ -323,9 +326,18 @@ export const useNovelStore = defineStore("novel", () => {
   const currentProject = ref<NovelProject | null>(null);
   const creativeSession = ref<CreativeSession | null>(null);
   const creativeJourney = ref<CreativeJourneyProjection | null>(null);
+  const activeStoryBlueprint = ref<StoryBlueprint | null>(null);
+  const storyBlueprintLoadError = ref("");
+  const isLoadingStoryBlueprint = ref(false);
+  let storyBlueprintLoadVersion = 0;
+  const isAdvancingAuthorJourney = ref(false);
+  const authorJourneyError = ref("");
   const understandingPreview = ref<UnderstandingPreview | null>(null);
   const dialogueQuestions = ref<DialogueQuestion[]>([]);
   const activeDialogueQuestion = computed(() => dialogueQuestions.value.find((question) => question.status === "active") || null);
+  const isLoadingDialogueQuestions = ref(false);
+  const dialogueQuestionsError = ref("");
+  let dialogueQuestionLoadVersion = 0;
   const contextManifest = ref<ContextManifest | null>(null);
   const isFreezingContextManifest = ref(false);
   const isLoadingCreativeSession = ref(false);
@@ -1857,7 +1869,7 @@ export const useNovelStore = defineStore("novel", () => {
         currentChapterTitle: currentChapter.value.title,
         currentWordCount: countDraftWords(currentContent.value),
         instruction:
-          "Generate a reviewable full-chapter replacement patch. Preserve canon and POV. Improve only the metrics below target unless a local bridge is required."
+          "请生成可供评审的整章替换补丁。保留正式设定与叙事视角；只改善低于目标的指标，除非确有必要补写局部过渡。"
       });
 
       const normalizedRewrite = normalizeCurrentChapterQualityRewrite(task?.result || null);
@@ -1885,7 +1897,7 @@ export const useNovelStore = defineStore("novel", () => {
     } catch (err) {
       setQualityImprovementState({
         status: "error",
-        error: err instanceof Error ? err.message : String(err)
+        error: errorText(err)
       });
       throw err;
     } finally {
@@ -1943,7 +1955,7 @@ export const useNovelStore = defineStore("novel", () => {
       content: tuneText(selectionAnchor.selectedText, tone),
       changes: [`调整为${styleToneLabels[tone]}`, "压低空泛判断，强化画面、动作或压力"],
       risks: [],
-      questions: ["接受前建议确认：这段是否仍然符合当前 POV 和角色性格。"],
+      questions: ["接受前建议确认：这段是否仍然符合当前叙事视角和角色性格。"],
       patches: []
     };
     rewriteSelection.value = cloneSelection(selectionAnchor);
@@ -2123,6 +2135,12 @@ export const useNovelStore = defineStore("novel", () => {
     understandingPreview.value = null;
     contextManifest.value = null;
     creativeSessionError.value = "";
+    activeStoryBlueprint.value = null;
+    storyBlueprintLoadVersion += 1;
+    storyBlueprintLoadError.value = "";
+    isLoadingStoryBlueprint.value = false;
+    isAdvancingAuthorJourney.value = false;
+    authorJourneyError.value = "";
     currentChapter.value = null;
     currentDocumentKind.value = "content";
     currentFilePath.value = "";
@@ -2341,7 +2359,7 @@ export const useNovelStore = defineStore("novel", () => {
       await openProject(project);
       return project;
     } catch (err) {
-      error.value = err instanceof Error ? err.message : String(err);
+      error.value = errorText(err);
       throw err;
     } finally {
       isLoading.value = false;
@@ -2365,7 +2383,7 @@ export const useNovelStore = defineStore("novel", () => {
       await openProject(project);
       return project;
     } catch (err) {
-      error.value = err instanceof Error ? err.message : String(err);
+      error.value = errorText(err);
       throw err;
     } finally {
       isLoading.value = false;
@@ -2387,7 +2405,7 @@ export const useNovelStore = defineStore("novel", () => {
       }
       return true;
     } catch (err) {
-      error.value = err instanceof Error ? err.message : String(err);
+      error.value = errorText(err);
       throw err;
     } finally {
       isLoading.value = false;
@@ -2741,7 +2759,7 @@ export const useNovelStore = defineStore("novel", () => {
 
   async function enqueueCurrentProjectBackgroundJob(type: BackgroundJobType, payload: Record<string, unknown>): Promise<BackgroundJob> {
     if (!currentProject.value) {
-      throw new Error("鏈墦寮€椤圭洰");
+      throw new Error("未打开项目");
     }
     const startedJob = await novelApi.startBackgroundJob(currentProject.value.slug, type, payload);
     upsertBackgroundJob(startedJob);
@@ -2794,7 +2812,7 @@ export const useNovelStore = defineStore("novel", () => {
       }
       await wait(500);
     }
-    throw new Error("AI 浠诲姟杞瓒呮椂");
+    throw new Error("AI 任务轮询超时");
   }
 
   const savePipelineStepLabels: Record<SavePipelineStepId, string> = {
@@ -2832,7 +2850,7 @@ export const useNovelStore = defineStore("novel", () => {
   }
 
   function pipelineErrorMessage(err: unknown) {
-    return err instanceof Error ? err.message : String(err);
+    return errorText(err);
   }
 
   async function enqueueSavePipelineBackgroundJob(stepId: SavePipelineStepId, type: BackgroundJobType, payload: Record<string, unknown>) {
@@ -2881,7 +2899,7 @@ export const useNovelStore = defineStore("novel", () => {
       updateSavePipelineStep("recap", "done", recapCandidate.value ? "已生成待确认回顾" : "任务完成，未解析到回顾候选");
 
       if (!recapTask || recapTask.status === "error" || recapTask.status === "cancelled") {
-        throw new Error(recapTask?.error || (recapTask?.status === "cancelled" ? "AI 浠诲姟宸插彇娑?" : "绔犲悗鍥為【澶辫触"));
+        throw new Error(recapTask?.error || (recapTask?.status === "cancelled" ? "AI 任务已取消" : "章后回顾失败"));
       }
 
       activeStep = "runtime";
@@ -3069,7 +3087,7 @@ export const useNovelStore = defineStore("novel", () => {
       setTaskProgress("parse", generated ? "done" : "error");
       return generated;
     } catch (err) {
-      error.value = `AI 反写失败，已使用本地兜底：${err instanceof Error ? err.message : String(err)}`;
+      error.value = `AI 反写失败，已使用本地兜底：${errorText(err)}`;
       finishTaskProgress(false);
       return applyLocalReverseStructure(content, chapterId);
     } finally {
@@ -3137,7 +3155,7 @@ export const useNovelStore = defineStore("novel", () => {
         "",
         "请只生成可以直接接在当前正文后面的一段或数段候选正文。",
         "不要重写已有正文，不要输出整章，不要解释写作方法。",
-        "候选正文需要自然承接当前章尾，优先推进下一笔，不要提前泄露 POV 角色不知道的信息。"
+        "候选正文需要自然承接当前章尾，优先推进下一笔，不要提前泄露叙事视角角色不知道的信息。"
       ].join("\n"),
       focusGuide: guide,
       authorInstruction,
@@ -3218,7 +3236,7 @@ export const useNovelStore = defineStore("novel", () => {
       feedback: [
         "请基于故事总控台、当前章节、角色状态、事件池、升级节奏和未回收伏笔，编排未来 3-8 章路线。",
         "输出需要说明：每章目标、参与角色、触发事件或秘境、冲突、收益、代价、升级是否可信、需要提前埋的伏笔。",
-        "优先让事件由角色动机和代价触发，不要让主角无因刷副本，不要跳级，不要泄露 POV 角色尚不知道的信息。",
+        "优先让事件由角色动机和代价触发，不要让主角无因刷副本，不要跳级，不要泄露叙事视角角色尚不知道的信息。",
         "如果某个事件池条目不适合当前阶段，请明确说明原因并给出替代安排。"
       ].join("\n"),
       storyControl: storyControl.value
@@ -3253,6 +3271,7 @@ export const useNovelStore = defineStore("novel", () => {
       await loadRuntimeStatus().catch(() => undefined);
       await loadCreativeSession();
       await loadCreativeJourney();
+      await loadLatestStoryBlueprint();
       await loadContractCandidates();
       await loadContractAdoptionProposal();
       await loadOutlineCandidates();
@@ -3280,8 +3299,17 @@ export const useNovelStore = defineStore("novel", () => {
     creativeJourney.value = null;
     understandingPreview.value = null;
     dialogueQuestions.value = [];
+    dialogueQuestionLoadVersion += 1;
+    isLoadingDialogueQuestions.value = false;
+    dialogueQuestionsError.value = "";
     contextManifest.value = null;
     creativeSessionError.value = "";
+    activeStoryBlueprint.value = null;
+    storyBlueprintLoadVersion += 1;
+    storyBlueprintLoadError.value = "";
+    isLoadingStoryBlueprint.value = false;
+    isAdvancingAuthorJourney.value = false;
+    authorJourneyError.value = "";
     contractCandidates.value = [];
     contractCandidatesError.value = "";
     const storedPreference = readStoredWorkspacePreference(project.slug);
@@ -3305,6 +3333,7 @@ export const useNovelStore = defineStore("novel", () => {
     ]);
     await loadCreativeSession();
     await loadCreativeJourney();
+    await loadLatestStoryBlueprint();
     await loadContractCandidates();
     await loadContractAdoptionProposal();
     await loadOutlineCandidates();
@@ -3360,7 +3389,7 @@ export const useNovelStore = defineStore("novel", () => {
       creativeSession.value = await novelApi.readCreativeSession(projectSlug);
       return creativeSession.value;
     } catch (cause) {
-      creativeSessionError.value = cause instanceof Error ? cause.message : "Failed to load creative session";
+      creativeSessionError.value = cause instanceof Error ? cause.message : "创作会话加载失败，请重新加载。";
       return null;
     } finally {
       isLoadingCreativeSession.value = false;
@@ -3382,12 +3411,23 @@ export const useNovelStore = defineStore("novel", () => {
   async function loadDialogueQuestions() {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.listDialogueQuestions !== "function") return [];
+    const requestVersion = ++dialogueQuestionLoadVersion;
+    isLoadingDialogueQuestions.value = true;
+    dialogueQuestionsError.value = "";
     try {
-      dialogueQuestions.value = await novelApi.listDialogueQuestions(projectSlug);
-      return dialogueQuestions.value;
+      const questions = await novelApi.listDialogueQuestions(projectSlug);
+      if (requestVersion !== dialogueQuestionLoadVersion || currentProject.value?.slug !== projectSlug) return questions;
+      dialogueQuestions.value = questions;
+      return questions;
     } catch {
+      if (requestVersion !== dialogueQuestionLoadVersion || currentProject.value?.slug !== projectSlug) return [];
       dialogueQuestions.value = [];
+      dialogueQuestionsError.value = "关键问题加载失败，请重新加载后继续。";
       return [];
+    } finally {
+      if (requestVersion === dialogueQuestionLoadVersion && currentProject.value?.slug === projectSlug) {
+        isLoadingDialogueQuestions.value = false;
+      }
     }
   }
 
@@ -3395,24 +3435,106 @@ export const useNovelStore = defineStore("novel", () => {
     const projectSlug = currentProject.value?.slug;
     const question = dialogueQuestions.value.find((candidate) => candidate.status === "active");
     if (!projectSlug || !question || typeof novelApi.answerDialogueQuestion !== "function") return null;
-    const result = await novelApi.answerDialogueQuestion(projectSlug, question.questionId, {
-      questionVersion: question.questionVersion,
-      expectedSnapshotFingerprint: question.snapshotFingerprint,
-      idempotencyKey,
-      answerText: answerText.trim(),
-      answerStatus
-    });
-    dialogueQuestions.value = dialogueQuestions.value.map((candidate) => candidate.questionId === result.question.questionId ? result.question : candidate);
-    if (answerStatus === "confirmed" && result.decision?.decisionId && typeof novelApi.compileContractCandidate === "function") {
-      lastContractDecisionId.value = result.decision.decisionId;
-      try {
-        await novelApi.compileContractCandidate(projectSlug, result.decision.decisionId);
-        await loadContractCandidates();
-      } catch (cause) {
-        contractCandidatesError.value = cause instanceof Error ? cause.message : "Contract candidate compilation is blocked";
+    isAdvancingAuthorJourney.value = true;
+    authorJourneyError.value = "";
+    try {
+      const result = await novelApi.answerDialogueQuestion(projectSlug, question.questionId, {
+        questionVersion: question.questionVersion,
+        expectedSnapshotFingerprint: question.snapshotFingerprint,
+        idempotencyKey,
+        answerText: answerText.trim(),
+        answerStatus
+      });
+      if (result.storyBlueprint) activeStoryBlueprint.value = result.storyBlueprint;
+      if (answerStatus === "confirmed" && result.decision?.decisionId && typeof novelApi.compileContractCandidate === "function") {
+        lastContractDecisionId.value = result.decision.decisionId;
+      }
+      await Promise.all([loadDialogueQuestions(), loadCreativeJourney(), loadLatestStoryBlueprint(), loadContractCandidates()]);
+      return result;
+    } catch {
+      authorJourneyError.value = "当前回答尚未保存，请重试确认回答。";
+      return null;
+    } finally {
+      isAdvancingAuthorJourney.value = false;
+    }
+  }
+
+  async function loadLatestStoryBlueprint() {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || typeof novelApi.readLatestStoryBlueprint !== "function") return null;
+    const requestVersion = ++storyBlueprintLoadVersion;
+    isLoadingStoryBlueprint.value = true;
+    storyBlueprintLoadError.value = "";
+    try {
+      const result = await novelApi.readLatestStoryBlueprint(projectSlug);
+      if (requestVersion !== storyBlueprintLoadVersion || currentProject.value?.slug !== projectSlug) return result;
+      activeStoryBlueprint.value = result?.blueprint ?? null;
+      return result;
+    } catch {
+      if (requestVersion !== storyBlueprintLoadVersion || currentProject.value?.slug !== projectSlug) return null;
+      storyBlueprintLoadError.value = activeStoryBlueprint.value ? "故事蓝图暂时无法加载，已保留当前内容，请重新加载。" : "故事蓝图暂时无法加载，请重新加载。";
+      return null;
+    } finally {
+      if (requestVersion === storyBlueprintLoadVersion && currentProject.value?.slug === projectSlug) {
+        isLoadingStoryBlueprint.value = false;
       }
     }
-    return result;
+  }
+
+  async function reviseStoryBlueprint(content: StoryBlueprintContent) {
+    const projectSlug = currentProject.value?.slug;
+    const blueprint = activeStoryBlueprint.value;
+    if (!projectSlug || !blueprint) return null;
+    isAdvancingAuthorJourney.value = true;
+    authorJourneyError.value = "";
+    try {
+      const result = await novelApi.reviseStoryBlueprint(projectSlug, blueprint.blueprintId, { expectedFingerprint: blueprint.fingerprint, content });
+      activeStoryBlueprint.value = result.blueprint;
+      await loadCreativeJourney();
+      return result;
+    } catch {
+      authorJourneyError.value = "蓝图修改尚未保存，请检查内容后重试。";
+      return null;
+    } finally {
+      isAdvancingAuthorJourney.value = false;
+    }
+  }
+
+  async function regenerateStoryBlueprint() {
+    const projectSlug = currentProject.value?.slug;
+    const sourceContractCandidateId = activeStoryBlueprint.value?.sourceContractCandidateId || contractCandidates.value[0]?.candidateId;
+    if (!projectSlug || !sourceContractCandidateId) return null;
+    isAdvancingAuthorJourney.value = true;
+    authorJourneyError.value = "";
+    try {
+      const result = await novelApi.generateStoryBlueprint(projectSlug, sourceContractCandidateId);
+      activeStoryBlueprint.value = result.blueprint;
+      await loadCreativeJourney();
+      return result;
+    } catch {
+      authorJourneyError.value = "蓝图尚未重新生成，已保留当前版本。";
+      return null;
+    } finally {
+      isAdvancingAuthorJourney.value = false;
+    }
+  }
+
+  async function confirmStoryBlueprint() {
+    const projectSlug = currentProject.value?.slug;
+    const blueprint = activeStoryBlueprint.value;
+    if (!projectSlug || !blueprint) return null;
+    isAdvancingAuthorJourney.value = true;
+    authorJourneyError.value = "";
+    try {
+      const result = await novelApi.confirmStoryBlueprint(projectSlug, blueprint.blueprintId, { expectedFingerprint: blueprint.fingerprint, actorId: "author" });
+      await loadCreativeJourney();
+      return result;
+    } catch {
+      authorJourneyError.value = "蓝图尚未确认，请重试确认。";
+      return null;
+    } finally {
+      isAdvancingAuthorJourney.value = false;
+    }
   }
 
   async function retryContractCandidateCompilation() {
@@ -3424,7 +3546,7 @@ export const useNovelStore = defineStore("novel", () => {
       contractCandidatesError.value = "";
       return result;
     } catch (cause) {
-      contractCandidatesError.value = cause instanceof Error ? cause.message : "Contract candidate compilation is blocked";
+      contractCandidatesError.value = cause instanceof Error ? cause.message : "故事设定候选生成已阻断，请先完成当前理解步骤。";
       return null;
     }
   }
@@ -3439,7 +3561,7 @@ export const useNovelStore = defineStore("novel", () => {
       await loadCreativeJourney();
       return result;
     } catch (cause) {
-      creativeSessionError.value = cause instanceof Error ? cause.message : "Failed to prepare understanding question";
+      creativeSessionError.value = cause instanceof Error ? cause.message : "关键问题准备失败，请重试。";
       return null;
     }
   }
@@ -3453,7 +3575,7 @@ export const useNovelStore = defineStore("novel", () => {
       contractCandidates.value = await novelApi.listContractCandidates(projectSlug);
       return contractCandidates.value;
     } catch (cause) {
-      contractCandidatesError.value = cause instanceof Error ? cause.message : "Failed to load contract candidates";
+      contractCandidatesError.value = cause instanceof Error ? cause.message : "故事设定候选加载失败，请重新加载。";
       contractCandidates.value = [];
       return [];
     } finally {
@@ -3482,7 +3604,7 @@ export const useNovelStore = defineStore("novel", () => {
       outlineCandidates.value = await novelApi.listOutlineCandidates(projectSlug);
       return outlineCandidates.value;
     } catch (cause) {
-      outlineCandidatesError.value = cause instanceof Error ? cause.message : "Failed to load outline candidates";
+      outlineCandidatesError.value = cause instanceof Error ? cause.message : "大纲候选加载失败，请重新加载。";
       outlineCandidates.value = [];
       return [];
     } finally {
@@ -3499,7 +3621,7 @@ export const useNovelStore = defineStore("novel", () => {
       await loadOutlineCandidates();
       return result;
     } catch (cause) {
-      outlineCandidatesError.value = cause instanceof Error ? cause.message : "Failed to compile outline candidate";
+      outlineCandidatesError.value = cause instanceof Error ? cause.message : "大纲候选生成失败，请检查故事蓝图后重试。";
       return null;
     }
   }
@@ -3514,7 +3636,7 @@ export const useNovelStore = defineStore("novel", () => {
       outlineValidationReports.value = { ...outlineValidationReports.value, [outline.outlineId]: report };
       return report;
     } catch (cause) {
-      outlineCandidatesError.value = cause instanceof Error ? cause.message : "Failed to validate outline candidate";
+      outlineCandidatesError.value = cause instanceof Error ? cause.message : "大纲候选验证失败，请重试。";
       return null;
     } finally {
       validatingOutlineId.value = "";
@@ -3554,7 +3676,7 @@ export const useNovelStore = defineStore("novel", () => {
       executionReadiness.value = await novelApi.checkExecutionReadiness(projectSlug, chapterId);
       return executionReadiness.value;
     } catch (cause) {
-      executionReadinessError.value = cause instanceof Error ? cause.message : "Failed to check execution readiness";
+      executionReadinessError.value = cause instanceof Error ? cause.message : "执行就绪检查失败，请先确认大纲和章节选择。";
       executionReadiness.value = null;
       return null;
     } finally { isLoadingExecutionReadiness.value = false; }
@@ -3583,7 +3705,7 @@ export const useNovelStore = defineStore("novel", () => {
       activeBookRun.value = bookRuns.value.find((run) => ["ready", "queued", "running", "gate_required", "pausing"].includes(run.status)) || bookRuns.value.at(-1) || null;
       return bookRuns.value;
     } catch (cause) {
-      bookRunError.value = cause instanceof Error ? cause.message : "Failed to load book runs";
+      bookRunError.value = cause instanceof Error ? cause.message : "整书工作流加载失败，请重新加载。";
       bookRuns.value = [];
       activeBookRun.value = null;
       return [];
@@ -3606,7 +3728,7 @@ export const useNovelStore = defineStore("novel", () => {
       bookRuns.value = [run, ...bookRuns.value.filter((item) => item.bookRunId !== run.bookRunId)];
       return run;
     } catch (cause) {
-      bookRunError.value = cause instanceof Error ? cause.message : "Failed to start book run";
+      bookRunError.value = cause instanceof Error ? cause.message : "整书工作流启动失败，请检查执行门禁。";
       return null;
     } finally { isLoadingBookRun.value = false; }
   }
@@ -3623,7 +3745,7 @@ export const useNovelStore = defineStore("novel", () => {
       await Promise.all([loadExecutionWorkItems(), loadRuntimeStatus()]);
       return result;
     } catch (cause) {
-      bookRunError.value = cause instanceof Error ? cause.message : "Failed to advance book run";
+      bookRunError.value = cause instanceof Error ? cause.message : "整书工作流推进失败，请检查当前门禁。";
       return null;
     } finally { isLoadingBookRun.value = false; }
   }
@@ -3639,7 +3761,7 @@ export const useNovelStore = defineStore("novel", () => {
       await loadBookRuns();
       return audit;
     } catch (cause) {
-      bookRunError.value = cause instanceof Error ? cause.message : "Failed to run completion audit";
+      bookRunError.value = cause instanceof Error ? cause.message : "完成审计失败，请确认来源指纹后重试。";
       return null;
     } finally { isLoadingBookRun.value = false; }
   }
@@ -3668,7 +3790,7 @@ export const useNovelStore = defineStore("novel", () => {
       publicationPreflight.value = preflight;
       return { manifest, tree, artifacts, proof, preflight };
     } catch (cause) {
-      publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to load publication evidence";
+      publicationEvidenceError.value = cause instanceof Error ? cause.message : "发布证据加载失败，请重新加载。";
       return null;
     } finally { isLoadingPublicationEvidence.value = false; }
   }
@@ -3685,7 +3807,7 @@ export const useNovelStore = defineStore("novel", () => {
       deliveryProofVerification.value = await novelApi.verifyDeliveryProof(projectSlug, editionId);
       return deliveryProof.value;
     } catch (cause) {
-      publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to issue delivery proof";
+      publicationEvidenceError.value = cause instanceof Error ? cause.message : "交付证明签发失败，请检查发布验收。";
       return null;
     } finally { isLoadingPublicationEvidence.value = false; }
   }
@@ -3704,7 +3826,7 @@ export const useNovelStore = defineStore("novel", () => {
       publicationPreflight.value = null;
       return publicationEdition.value;
     } catch (cause) {
-      publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to create publication edition";
+      publicationEvidenceError.value = cause instanceof Error ? cause.message : "出版版本创建失败，请检查输入。";
       return null;
     } finally { isLoadingPublicationEvidence.value = false; }
   }
@@ -3714,7 +3836,7 @@ export const useNovelStore = defineStore("novel", () => {
     const editionId = publicationEdition.value?.editionId;
     if (!projectSlug || !editionId || typeof novelApi.compilePublicationTree !== "function") return null;
     try { publicationTree.value = await novelApi.compilePublicationTree(projectSlug, editionId); return publicationTree.value; }
-    catch (cause) { publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to compile publication tree"; return null; }
+    catch (cause) { publicationEvidenceError.value = cause instanceof Error ? cause.message : "出版树编译失败，请重试。"; return null; }
   }
 
   async function renderPublicationEditionArtifacts(formats: Array<"markdown" | "txt"> = ["markdown", "txt"]) {
@@ -3722,7 +3844,7 @@ export const useNovelStore = defineStore("novel", () => {
     const editionId = publicationEdition.value?.editionId;
     if (!projectSlug || !editionId || typeof novelApi.renderPublicationArtifacts !== "function") return null;
     try { publicationArtifacts.value = await novelApi.renderPublicationArtifacts(projectSlug, editionId, formats); return publicationArtifacts.value; }
-    catch (cause) { publicationEvidenceError.value = cause instanceof Error ? cause.message : "Failed to render publication artifacts"; return null; }
+    catch (cause) { publicationEvidenceError.value = cause instanceof Error ? cause.message : "出版制品渲染失败，请重试。"; return null; }
   }
 
   async function loadProseCandidates() {
@@ -3766,7 +3888,7 @@ export const useNovelStore = defineStore("novel", () => {
       qualityCalibrationHistory.value = [evidence, ...qualityCalibrationHistory.value.filter((item) => item.calibrationId !== evidence.calibrationId)];
       return evidence;
     } catch (cause) {
-      qualityCalibrationError.value = cause instanceof Error ? cause.message : "Failed to submit calibration evidence";
+      qualityCalibrationError.value = cause instanceof Error ? cause.message : "校准证据提交失败，请重试。";
       return null;
     } finally { isLoadingQualityCalibration.value = false; }
   }
@@ -3790,7 +3912,7 @@ export const useNovelStore = defineStore("novel", () => {
     isActivatingRelease.value = true;
     releaseActivationError.value = "";
     try { releaseActivation.value = await novelApi.activateRelease(); return releaseActivation.value; }
-    catch (cause) { releaseActivationError.value = cause instanceof Error ? cause.message : "Failed to activate release"; return null; }
+    catch (cause) { releaseActivationError.value = cause instanceof Error ? cause.message : "发布激活失败，请先补齐发布门禁。"; return null; }
     finally { isActivatingRelease.value = false; }
   }
 
@@ -3804,7 +3926,7 @@ export const useNovelStore = defineStore("novel", () => {
       if (lengthContract.value && typeof novelApi.readLengthForecast === "function") lengthForecast.value = await novelApi.readLengthForecast(projectSlug);
       return lengthForecast.value;
     } catch (cause) {
-      lengthPlanningError.value = cause instanceof Error ? cause.message : "Failed to load length planning";
+      lengthPlanningError.value = cause instanceof Error ? cause.message : "篇幅规划加载失败，请重新加载。";
       return null;
     } finally { isLoadingLengthPlanning.value = false; }
   }
@@ -3819,7 +3941,7 @@ export const useNovelStore = defineStore("novel", () => {
       lengthForecast.value = typeof novelApi.readLengthForecast === "function" ? await novelApi.readLengthForecast(projectSlug) : null;
       return lengthContract.value;
     } catch (cause) {
-      lengthPlanningError.value = cause instanceof Error ? cause.message : "Failed to create length contract";
+      lengthPlanningError.value = cause instanceof Error ? cause.message : "篇幅契约创建失败，请重试。";
       return null;
     } finally { isLoadingLengthPlanning.value = false; }
   }
@@ -3833,7 +3955,7 @@ export const useNovelStore = defineStore("novel", () => {
       lengthVarianceDecision.value = await novelApi.decideLengthVariance(projectSlug, choice);
       return lengthVarianceDecision.value;
     } catch (cause) {
-      lengthPlanningError.value = cause instanceof Error ? cause.message : "Failed to record length variance";
+      lengthPlanningError.value = cause instanceof Error ? cause.message : "篇幅偏差记录失败，请重试。";
       return null;
     } finally { isLoadingLengthPlanning.value = false; }
   }
@@ -3876,7 +3998,7 @@ export const useNovelStore = defineStore("novel", () => {
     proseCandidateBusyId.value = candidate.candidateId;
     proseCandidateError.value = "";
     try { const bundle = await novelApi.validateProseCandidate(projectSlug, candidate.candidateId); proseValidations.value = { ...proseValidations.value, [candidate.candidateId]: bundle }; return bundle; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to validate prose candidate"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "正文候选验证失败，请重试。"; return null; }
     finally { proseCandidateBusyId.value = ""; }
   }
 
@@ -3886,7 +4008,7 @@ export const useNovelStore = defineStore("novel", () => {
     proseCandidateBusyId.value = candidate.candidateId;
     proseCandidateError.value = "";
     try { const review = await novelApi.reviewProseCandidate(projectSlug, candidate.candidateId); proseReviews.value = { ...proseReviews.value, [candidate.candidateId]: review }; return review; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to review prose candidate"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "正文候选评审失败，请重试。"; return null; }
     finally { proseCandidateBusyId.value = ""; }
   }
 
@@ -3896,7 +4018,7 @@ export const useNovelStore = defineStore("novel", () => {
     proseCandidateBusyId.value = candidate.candidateId;
     proseCandidateError.value = "";
     try { const plan = await novelApi.createProseRepairPlan(projectSlug, candidate.candidateId); proseRepairPlans.value = { ...proseRepairPlans.value, [candidate.candidateId]: plan }; return plan; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to create prose repair plan"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "正文局部修复计划创建失败，请重试。"; return null; }
     finally { proseCandidateBusyId.value = ""; }
   }
 
@@ -3907,7 +4029,7 @@ export const useNovelStore = defineStore("novel", () => {
     proseCandidateBusyId.value = candidate.candidateId;
     proseCandidateError.value = "";
     try { const result = await novelApi.createProseRepairCandidate(projectSlug, plan.planId, content); proseRepairCandidates.value = { ...proseRepairCandidates.value, [candidate.candidateId]: result.metadata }; proseCandidates.value = [result.candidate, ...proseCandidates.value.filter((item) => item.candidateId !== result.candidate.candidateId)]; return result; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to create repair candidate"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "修复候选生成失败，请重试。"; return null; }
     finally { proseCandidateBusyId.value = ""; }
   }
 
@@ -3918,7 +4040,7 @@ export const useNovelStore = defineStore("novel", () => {
     proseCandidateBusyId.value = candidate.candidateId;
     proseCandidateError.value = "";
     try { const dossier = await novelApi.evaluateProseRepairRegression(projectSlug, metadata.repairCandidateId); proseRepairRegressions.value = { ...proseRepairRegressions.value, [candidate.candidateId]: dossier }; return dossier; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to evaluate repair regression"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "修复回归评估失败，请重试。"; return null; }
     finally { proseCandidateBusyId.value = ""; }
   }
 
@@ -3926,7 +4048,7 @@ export const useNovelStore = defineStore("novel", () => {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.readProseAdoptionReadiness !== "function") return null;
     try { const readiness = await novelApi.readProseAdoptionReadiness(projectSlug, candidate.candidateId); proseAdoptionReadiness.value = { ...proseAdoptionReadiness.value, [candidate.candidateId]: readiness }; return readiness; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to load prose adoption readiness"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "正文采纳门禁加载失败，请重新加载。"; return null; }
   }
 
   async function adoptProseCandidate(candidate: ProseCandidate, input: { expectedCanonSha256: string; authorizationId: string }) {
@@ -3935,7 +4057,7 @@ export const useNovelStore = defineStore("novel", () => {
     proseCandidateBusyId.value = candidate.candidateId;
     proseCandidateError.value = "";
     try { const transaction = await novelApi.adoptProseCandidate(projectSlug, candidate.candidateId, input); proseAdoptions.value = { ...proseAdoptions.value, [candidate.candidateId]: transaction }; await loadProseCandidates(); return transaction; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to adopt prose candidate"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "正文候选采纳失败，请检查授权和验证结果。"; return null; }
     finally { proseCandidateBusyId.value = ""; }
   }
 
@@ -3960,7 +4082,7 @@ export const useNovelStore = defineStore("novel", () => {
       }
       return settlement;
     }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to settle chapter"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "章节结算失败，请重试。"; return null; }
     finally { proseCandidateBusyId.value = ""; }
   }
 
@@ -3968,35 +4090,35 @@ export const useNovelStore = defineStore("novel", () => {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.createFeedbackAttribution !== "function") return null;
     try { const attribution = await novelApi.createFeedbackAttribution(projectSlug, event.eventId, input); feedbackAttributions.value = { ...feedbackAttributions.value, [event.eventId]: attribution }; return attribution; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to attribute author feedback"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "作者反馈归因失败，请重试。"; return null; }
   }
 
   async function derivePreferenceHypothesis(attribution: FeedbackAttribution) {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.derivePreferenceHypothesis !== "function") return null;
     try { const hypothesis = await novelApi.derivePreferenceHypothesis(projectSlug, attribution.attributionId); preferenceHypotheses.value = { ...preferenceHypotheses.value, [hypothesis.hypothesisId]: hypothesis }; return hypothesis; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to derive preference hypothesis"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "偏好假设推导失败，请重试。"; return null; }
   }
 
   async function revokePreferenceHypothesis(hypothesis: PreferenceHypothesis, reason: string, actor = "author") {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.revokePreferenceHypothesis !== "function") return null;
     try { const result = await novelApi.revokePreferenceHypothesis(projectSlug, hypothesis.hypothesisId, { actor, reason }); preferenceHypotheses.value = { ...preferenceHypotheses.value, [result.hypothesisId]: result }; return result; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to revoke preference hypothesis"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "偏好假设撤销失败，请重试。"; return null; }
   }
 
   async function recordPreferenceOpposition(hypothesis: PreferenceHypothesis, oppositionEventId: string, reason: string) {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.recordPreferenceOpposition !== "function") return null;
     try { const result = await novelApi.recordPreferenceOpposition(projectSlug, hypothesis.hypothesisId, { oppositionEventId, reason }); preferenceHypotheses.value = { ...preferenceHypotheses.value, [result.hypothesisId]: result }; return result; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to record preference opposition"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "偏好反例记录失败，请重试。"; return null; }
   }
 
   async function createLearningPolicy(rollbackVersion: string) {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.createLearningPolicy !== "function") return null;
     try { learningPolicy.value = await novelApi.createLearningPolicy(projectSlug, rollbackVersion); return learningPolicy.value; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to create learning policy"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "学习策略创建失败，请重试。"; return null; }
   }
 
   async function loadLearningPolicy() {
@@ -4009,14 +4131,14 @@ export const useNovelStore = defineStore("novel", () => {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.createExplorationBudget !== "function") return null;
     try { const budget = await novelApi.createExplorationBudget(projectSlug, input); explorationBudgets.value = { ...explorationBudgets.value, [budget.budgetId]: budget }; return budget; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to create exploration budget"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "探索预算创建失败，请重试。"; return null; }
   }
 
   async function consumeExplorationBudget(budget: ExplorationBudget, input: { operationId: string; probes: number; cost: number; impact: string }) {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.consumeExplorationBudget !== "function") return null;
     try { const result = await novelApi.consumeExplorationBudget(projectSlug, budget.budgetId, input); explorationBudgets.value = { ...explorationBudgets.value, [result.budgetId]: result }; return result; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to consume exploration budget"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "探索预算扣减失败，请重试。"; return null; }
   }
 
   async function loadExplorationBudget(budgetId: string) {
@@ -4029,14 +4151,14 @@ export const useNovelStore = defineStore("novel", () => {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.pauseExplorationBudget !== "function") return null;
     try { const result = await novelApi.pauseExplorationBudget(projectSlug, budget.budgetId, reason); explorationBudgets.value = { ...explorationBudgets.value, [result.budgetId]: result }; return result; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to pause exploration budget"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "探索预算暂停失败，请重试。"; return null; }
   }
 
   async function promoteCraftPatternFromExperiment(pattern: CraftPattern, experiment?: CraftExperiment) {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || !experiment || typeof novelApi.promoteCraftPatternFromExperiment !== "function") return null;
     try { const result = await novelApi.promoteCraftPatternFromExperiment(projectSlug, pattern.patternId, { experiment, actor: "author", reason: "作者确认实验结果" }); craftPatterns.value = craftPatterns.value.map((item) => item.patternId === result.patternId ? result : item); return result; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to promote craft pattern"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "工艺模式提升失败，请重试。"; return null; }
   }
 
   async function loadCraftPatterns() {
@@ -4068,7 +4190,7 @@ export const useNovelStore = defineStore("novel", () => {
       const result = await novelApi.confirmCharacterDramaticContract(projectSlug, contract.contractId, { actor: "author", reason });
       characterContracts.value = characterContracts.value.map((item) => item.contractId === result.contractId ? result : item);
       return result;
-    } catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to confirm character contract"; return null; }
+    } catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "人物契约确认失败，请重试。"; return null; }
   }
 
   async function loadCharacterStateSnapshots(characterId: string) {
@@ -4081,12 +4203,17 @@ export const useNovelStore = defineStore("novel", () => {
     const projectSlug = currentProject.value?.slug;
     if (!projectSlug || typeof novelApi.validateCraftPatternFromExperiment !== "function") return null;
     try { const result = await novelApi.validateCraftPatternFromExperiment(projectSlug, pattern.patternId, { experiment, actor: "author", reason: "作者确认第二次 holdout" }); craftPatterns.value = craftPatterns.value.map((item) => item.patternId === result.patternId ? result : item); return result; }
-    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "Failed to validate craft pattern"; return null; }
+    catch (cause) { proseCandidateError.value = cause instanceof Error ? cause.message : "工艺模式验证失败，请重试。"; return null; }
   }
 
   function setOutlineChapterSelection(input: { outline: OutlineCandidate; chapterIds: string[] }) {
     outlineChapterSelections.value = { ...outlineChapterSelections.value, [input.outline.outlineId]: [...input.chapterIds] };
     return outlineChapterSelections.value[input.outline.outlineId];
+  }
+
+  function outlineAdoptionGuidance(reason?: string): string {
+    if (reason === "OUTLINE_SOURCE_CONTRACT_NOT_ADOPTED") return "请先确认并采纳该大纲对应的故事设定。";
+    return "大纲采纳暂时无法完成，请刷新后重试。";
   }
 
   async function createOutlineAdoptionProposal(input: { outline: OutlineCandidate; chapterIds: string[] }) {
@@ -4098,8 +4225,8 @@ export const useNovelStore = defineStore("novel", () => {
     try {
       outlineAdoptionProposal.value = await novelApi.createOutlineAdoptionProposal(projectSlug, { outlineId: input.outline.outlineId, expectedOutlineFingerprint: input.outline.fingerprint, selectedChapterIds: input.chapterIds });
       return outlineAdoptionProposal.value;
-    } catch (cause) {
-      outlineAdoptionError.value = cause instanceof Error ? cause.message : "Failed to create outline adoption proposal";
+    } catch {
+      outlineAdoptionError.value = "暂时无法生成大纲采纳提案，请刷新后重试。";
       return null;
     } finally { isAdoptingOutline.value = false; }
   }
@@ -4112,8 +4239,8 @@ export const useNovelStore = defineStore("novel", () => {
     try {
       outlineAdoptionProposal.value = await novelApi.authorizeOutlineAdoption(projectSlug, input);
       return outlineAdoptionProposal.value;
-    } catch (cause) {
-      outlineAdoptionError.value = cause instanceof Error ? cause.message : "Failed to authorize outline adoption";
+    } catch {
+      outlineAdoptionError.value = "暂时无法授权大纲采纳，请刷新后重试。";
       return null;
     } finally { isAdoptingOutline.value = false; }
   }
@@ -4126,10 +4253,10 @@ export const useNovelStore = defineStore("novel", () => {
     try {
       const result = await novelApi.commitOutlineAdoption(projectSlug, expectedProposalFingerprint);
       if (result.status === "committed" && outlineAdoptionProposal.value) outlineAdoptionProposal.value = { ...outlineAdoptionProposal.value, status: "committed", canonWritten: true };
-      if (result.status !== "committed") outlineAdoptionError.value = result.reason || "Outline adoption was blocked";
+      if (result.status !== "committed") outlineAdoptionError.value = outlineAdoptionGuidance(result.reason);
       return result;
     } catch (cause) {
-      outlineAdoptionError.value = cause instanceof Error ? cause.message : "Failed to commit outline adoption";
+      outlineAdoptionError.value = outlineAdoptionGuidance(cause instanceof Error ? cause.message : undefined);
       return null;
     } finally { isAdoptingOutline.value = false; }
   }
@@ -4147,7 +4274,7 @@ export const useNovelStore = defineStore("novel", () => {
       contractAdoptionProposal.value = await novelApi.createContractAdoptionProposal(projectSlug, input);
       return contractAdoptionProposal.value;
     } catch (cause) {
-      contractAdoptionError.value = cause instanceof Error ? cause.message : "Failed to create contract adoption proposal";
+      contractAdoptionError.value = cause instanceof Error ? cause.message : "故事设定采纳提案创建失败，请检查字段决定。";
       return null;
     } finally {
       isCreatingContractAdoptionProposal.value = false;
@@ -4167,10 +4294,10 @@ export const useNovelStore = defineStore("novel", () => {
       if (result.status === "committed" && contractAdoptionProposal.value) {
         contractAdoptionProposal.value = { ...contractAdoptionProposal.value, status: "committed", canonWritten: true };
       }
-      if (result.status !== "committed") contractAdoptionError.value = result.reason || "Contract adoption was blocked";
+      if (result.status !== "committed") contractAdoptionError.value = result.reason || "故事设定采纳已阻断，请检查授权和字段决定。";
       return result;
     } catch (cause) {
-      contractAdoptionError.value = cause instanceof Error ? cause.message : "Failed to commit contract adoption";
+      contractAdoptionError.value = cause instanceof Error ? cause.message : "故事设定采纳提交失败，请重试。";
       return null;
     } finally {
       isCreatingContractAdoptionProposal.value = false;
@@ -4187,12 +4314,10 @@ export const useNovelStore = defineStore("novel", () => {
       const clientMessageId = globalThis.crypto?.randomUUID?.() || `author-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const result = await novelApi.captureAuthorMessage(projectSlug, { clientMessageId, text: normalized });
       creativeSession.value = result.session;
-      await loadUnderstandingPreview();
-      await loadCreativeJourney();
-      await loadDialogueQuestions();
+      await Promise.all([loadUnderstandingPreview(), loadCreativeJourney(), loadDialogueQuestions(), loadLatestStoryBlueprint()]);
       return result;
     } catch (cause) {
-      creativeSessionError.value = cause instanceof Error ? cause.message : "Failed to capture author message";
+      creativeSessionError.value = cause instanceof Error ? cause.message : "作者原话记录失败，请重试。";
       return null;
     } finally {
       isSubmittingCreativeMessage.value = false;
@@ -4236,13 +4361,30 @@ export const useNovelStore = defineStore("novel", () => {
     }
   }
 
-  async function executeCreativeJourneyAction(actionId?: "capture-idea" | "review-understanding") {
+  async function executeCreativeJourneyAction(actionId?: CreativeJourneyProjection["primaryAction"]["id"]) {
     const currentAction = creativeJourney.value?.primaryAction.id;
     if (actionId && actionId !== currentAction) return null;
     if (currentAction === "review-understanding") {
       const frozen = await freezeCurrentContextManifest();
       if (!frozen) return null;
       return prepareUnderstandingQuestion();
+    }
+    if (currentAction === "generate-outline") {
+      const sourceCandidateId = activeStoryBlueprint.value?.sourceContractCandidateId || contractCandidates.value[0]?.candidateId;
+      if (!sourceCandidateId) {
+        authorJourneyError.value = "故事蓝图已确认，但暂未找到对应的故事设定。请刷新项目后重试。";
+        return null;
+      }
+      isAdvancingAuthorJourney.value = true;
+      authorJourneyError.value = "";
+      try {
+        const result = await compileOutlineCandidate(sourceCandidateId);
+        if (result) await loadCreativeJourney();
+        if (!result && !authorJourneyError.value) authorJourneyError.value = "大纲暂时未生成，请稍后重试。";
+        return result;
+      } finally {
+        isAdvancingAuthorJourney.value = false;
+      }
     }
     return null;
   }
@@ -4373,7 +4515,7 @@ export const useNovelStore = defineStore("novel", () => {
         await runPostSavePipeline(previousContent);
       }
     } catch (err) {
-      error.value = err instanceof Error ? err.message : String(err);
+      error.value = errorText(err);
       throw err;
     } finally {
       isSavingContent.value = false;
@@ -4447,11 +4589,11 @@ export const useNovelStore = defineStore("novel", () => {
       }
       setTaskProgress("parse", task.status === "error" || task.status === "cancelled" ? "error" : "done");
       if (task.status === "error" || task.status === "cancelled") {
-        error.value = task.error || (task.status === "cancelled" ? "AI 浠诲姟宸插彇娑?" : "");
+        error.value = task.error || (task.status === "cancelled" ? "AI 任务已取消" : "AI 任务执行失败");
       }
       return task;
     } catch (err) {
-      error.value = err instanceof Error ? err.message : String(err);
+      error.value = errorText(err);
       finishTaskProgress(false);
       throw err;
     } finally {
@@ -4468,7 +4610,7 @@ export const useNovelStore = defineStore("novel", () => {
     currentTask.value = task;
     upsertTaskHistory(task);
     if (task.status === "cancelled" || task.status === "error") {
-      error.value = task.error || "AI 浠诲姟宸插彇娑?";
+      error.value = task.error || "AI 任务已取消";
       finishTaskProgress(false);
       activeAsyncTaskId.value = null;
       isLoading.value = false;
@@ -4499,7 +4641,7 @@ export const useNovelStore = defineStore("novel", () => {
       rewriteSelection.value = task.result ? selectionAnchor : null;
       setTaskProgress("parse", task.status === "error" ? "error" : "done");
     } catch (err) {
-      error.value = err instanceof Error ? err.message : String(err);
+      error.value = errorText(err);
       finishTaskProgress(false);
       throw err;
     } finally {
@@ -4597,7 +4739,7 @@ export const useNovelStore = defineStore("novel", () => {
       if (applyingQualityRewrite) {
         setQualityImprovementState({
           status: "error",
-          error: err instanceof Error ? err.message : String(err)
+          error: errorText(err)
         });
       }
       throw err;
@@ -4620,7 +4762,7 @@ export const useNovelStore = defineStore("novel", () => {
       URL.revokeObjectURL(url);
       return true;
     } catch (err) {
-      error.value = `导出审计报告失败：${err instanceof Error ? err.message : String(err)}`;
+      error.value = `导出审计报告失败：${errorText(err)}`;
       return false;
     } finally {
       isExportingAuditReport.value = false;
@@ -4635,7 +4777,7 @@ export const useNovelStore = defineStore("novel", () => {
       auditReportPreview.value = report;
       return report;
     } catch (err) {
-      error.value = `读取审计报告失败：${err instanceof Error ? err.message : String(err)}`;
+      error.value = `读取审计报告失败：${errorText(err)}`;
       return null;
     } finally {
       isLoadingAuditReportPreview.value = false;
@@ -4656,7 +4798,7 @@ export const useNovelStore = defineStore("novel", () => {
       fileVersions.value = await novelApi.readFileVersions(currentProject.value.slug, currentFilePath.value);
       return fileVersions.value;
     } catch (err) {
-      error.value = `读取版本快照失败：${err instanceof Error ? err.message : String(err)}`;
+      error.value = `读取版本快照失败：${errorText(err)}`;
       return [];
     } finally {
       isLoadingFileVersions.value = false;
@@ -4670,7 +4812,7 @@ export const useNovelStore = defineStore("novel", () => {
       currentFileDiff.value = await novelApi.readFileDiff(currentProject.value.slug, currentFilePath.value, versionId);
       return currentFileDiff.value;
     } catch (err) {
-      error.value = `读取版本差异失败：${err instanceof Error ? err.message : String(err)}`;
+      error.value = `读取版本差异失败：${errorText(err)}`;
       return null;
     } finally {
       isLoadingFileDiff.value = false;
@@ -4704,6 +4846,11 @@ export const useNovelStore = defineStore("novel", () => {
     currentProject,
     creativeSession,
     creativeJourney,
+    activeStoryBlueprint,
+    storyBlueprintLoadError,
+    isLoadingStoryBlueprint,
+    isAdvancingAuthorJourney,
+    authorJourneyError,
     contractCandidates,
     isLoadingContractCandidates,
     contractCandidatesError,
@@ -4801,12 +4948,18 @@ export const useNovelStore = defineStore("novel", () => {
     understandingPreview,
     dialogueQuestions,
     activeDialogueQuestion,
+    isLoadingDialogueQuestions,
+    dialogueQuestionsError,
     isLoadingCreativeSession,
     isSubmittingCreativeMessage,
     creativeSessionError,
     loadCreativeJourney,
     loadDialogueQuestions,
     answerDialogueQuestion,
+    loadLatestStoryBlueprint,
+    reviseStoryBlueprint,
+    regenerateStoryBlueprint,
+    confirmStoryBlueprint,
     prepareUnderstandingQuestion,
     retryContractCandidateCompilation,
     currentChapter,

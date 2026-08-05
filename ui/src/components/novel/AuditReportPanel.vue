@@ -85,8 +85,8 @@
           </div>
           <div class="job-list">
             <div v-for="job in report.backgroundJobSummary.latestJobs.slice(0, 4)" :key="job.id">
-              <span>{{ job.type }}</span>
-              <strong>{{ job.outputSummary || job.error || job.status }}</strong>
+              <span>{{ operationTypeLabel(job.type) }}</span>
+              <strong>{{ userFacingText(job.outputSummary || job.error, statusLabel(job.status)) }}</strong>
             </div>
           </div>
         </article>
@@ -103,7 +103,7 @@
           </div>
           <div class="job-list">
             <div v-for="task in unhealthyTasks.slice(0, 4)" :key="task.id">
-              <span>{{ task.type }}</span>
+              <span>{{ operationTypeLabel(task.type) }}</span>
               <strong>{{ taskHealthLabel(task) }}</strong>
             </div>
           </div>
@@ -156,6 +156,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from "vue";
 import type { NovelTask, ProjectAuditReport } from "@/types/novel";
+import { operationTypeLabel, statusLabel, userFacingText } from "@/utils/novelLabels";
 
 const props = defineProps<{
   report: ProjectAuditReport | null;
@@ -250,7 +251,7 @@ function taskHealthLabel(task: Pick<NovelTask, "status" | "error" | "durationMs"
   if (duration) parts.push(duration);
   if (task.timeoutMs) parts.push(`超时预算 ${formatDuration(task.timeoutMs)}`);
   if (task.cancelRequestedAt) parts.push("已请求取消");
-  if (task.error) parts.push(task.error);
+  if (task.error) parts.push(userFacingText(task.error));
   return parts.join(" · ");
 }
 

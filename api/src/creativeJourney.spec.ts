@@ -76,5 +76,6 @@ describe("creative journey projection", () => {
 
     expect(buildCreativeJourneyProjection(input, { answeredQuestionIds: questionIds })).toMatchObject({ stage: "blueprint-review", primaryAction: { id: "review-understanding", kind: "review" }, progress: { completed: 10, total: 10, current: 10 } });
     expect(buildCreativeJourneyProjection(input, { answeredQuestionIds: questionIds, blueprintConfirmed: true })).toMatchObject({ stage: "ready-for-outline", primaryAction: { id: "generate-outline", kind: "continue" } });
+    expect(buildCreativeJourneyProjection(input, { answeredQuestionIds: questionIds, blueprintConfirmed: true, blueprintNeedsRefresh: true })).toMatchObject({ stage: "blueprint-review", blueprintNeedsRefresh: true, nextInstruction: "你刚补充了创作想法，请先修改或重新生成故事蓝图并再次确认。" });
   });
 });

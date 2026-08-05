@@ -2,11 +2,11 @@
   <section class="character-contract-panel">
     <header><strong>人物戏剧契约</strong><button type="button" data-testid="refresh-character-contracts" @click="emit('refresh')">刷新</button></header>
     <article v-for="contract in contracts" :key="contract.contractId" class="contract-card">
-      <div class="title"><strong>{{ contract.displayName }}</strong><span>{{ contract.lifecycle }}</span></div>
+      <div class="title"><strong>{{ contract.displayName }}</strong><span>{{ statusLabel(contract.lifecycle) }}</span></div>
       <p>外在欲望：{{ contract.externalWant }}；内在需要：{{ contract.internalNeed }}</p>
       <p>错误信念：{{ contract.falseBelief }}；代价：{{ contract.stake }}</p>
-      <small>未决 unknown：{{ contract.unknown.join("、") }}</small>
-      <small>来源：{{ contract.sources.map((source) => `${source.field}:${source.provenance}`).join("；") }}</small>
+      <small>未决内容：{{ contract.unknown.join("、") }}</small>
+      <small>来源：{{ contract.sources.map((source) => `${source.field}：${provenanceLabel(source.provenance)}`).join("；") }}</small>
       <button v-if="contract.lifecycle === 'candidate'" type="button" :data-testid="`confirm-character-${contract.contractId}`" @click="emit('confirm', contract)">作者确认契约</button>
     </article>
     <p v-if="!contracts.length" class="muted">暂无人物契约。</p>
@@ -15,6 +15,7 @@
 
 <script setup lang="ts">
 import type { CharacterDramaticContract } from "@/types/novel";
+import { provenanceLabel, statusLabel } from "@/utils/novelLabels";
 withDefaults(defineProps<{ contracts?: CharacterDramaticContract[] }>(), { contracts: () => [] });
 const emit = defineEmits<{ refresh: []; confirm: [contract: CharacterDramaticContract] }>();
 </script>

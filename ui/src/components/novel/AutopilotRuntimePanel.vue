@@ -161,7 +161,7 @@
         @click="$emit('mergeDerivative', branch.id)"
       >
         <span>{{ branch.title }}</span>
-        <small>{{ branch.status }}</small>
+        <small>{{ branchStatusLabel(branch.status) }}</small>
       </button>
     </div>
   </div>
@@ -180,6 +180,7 @@ import type {
   RuntimeSnapshotRecord,
   RuntimeWorkerHealth
 } from "@/types/novel";
+import { userFacingText } from "@/utils/novelLabels";
 
 defineOptions({
   name: "AutopilotRuntimePanel"
@@ -326,6 +327,11 @@ const statusLabel = computed(() => {
 const stageLabel = computed(() => props.activeRun?.currentStage || props.activeRun?.chapterId || "等待指令");
 const runtimeTargetLabel = computed(() => props.activeChapterLabel || props.activeRun?.chapterId || "未指定章节");
 
+function branchStatusLabel(status: string) {
+  const labels: Record<string, string> = { candidate: "候选", merged: "已合并", rejected: "已拒绝", pending: "等待中", accepted: "已接受" };
+  return labels[status] || "未提供";
+}
+
 const workerHealthLabel = computed(() => {
   const labels: Record<RuntimeWorkerHealth["status"], string> = {
     online: "执行引擎在线",
@@ -442,7 +448,7 @@ function formatRuntimeEventMessage(event: RuntimeEvent) {
     return `自动驾驶${runtimeCommandLabel(appliedCommandMatch[1])}指令已执行`;
   }
 
-  return event.message;
+  return userFacingText(event.message, event.message);
 }
 
 function kindLabel(kind: RuntimeKnowledgeRef["kind"]) {
