@@ -3104,7 +3104,7 @@ export function createApp() {
 
   app.get("/api/novel/projects/:projectId/story-graph", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
-    const graph = await buildStoryGraphProjection(projectRoot(project.slug), project);
+    const graph = await buildStoryGraphProjection(projectRoot(project.slug), project, { persist: false });
     res.json({ graph });
   }));
 
@@ -8908,7 +8908,10 @@ export function createApp() {
 
   app.get("/api/novel/projects/:projectId/tasks", asyncRoute(async (req, res) => {
     const project = await readProject(req.params.projectId);
-    res.json({ tasks: await readTaskHistory(projectRoot(project.slug)) });
+    const requestedLimit = Number(req.query.limit);
+    const limit = Number.isFinite(requestedLimit) && requestedLimit > 0 ? Math.min(Math.floor(requestedLimit), 100) : undefined;
+    const tasks = await readTaskHistory(projectRoot(project.slug));
+    res.json({ tasks: limit ? tasks.slice(0, limit) : tasks });
   }));
 
   app.post("/api/novel/projects/:projectId/tasks/async", asyncRoute(async (req, res) => {

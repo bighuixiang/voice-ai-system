@@ -103,6 +103,7 @@ const mockNovelApi = vi.hoisted(() => ({
   ,ensurePrimaryDialogueQuestion: vi.fn()
   ,compileContractCandidate: vi.fn()
   ,freezeContextManifest: vi.fn()
+  ,readContextManifest: vi.fn()
   ,listDialogueQuestions: vi.fn()
   ,answerDialogueQuestion: vi.fn()
   ,listContractCandidates: vi.fn(),
@@ -1204,7 +1205,7 @@ describe("useNovelStore", () => {
     expect(store.currentProjectAssets.map((asset) => asset.id)).toEqual(["asset-1"]);
   });
 
-  it("opens a project workspace and restores the last active chapter plus support file", async () => {
+  it("opens a project workspace and defers support file content until it is requested", async () => {
     const store = useNovelStore();
     store.projects = [project];
 
@@ -1214,6 +1215,8 @@ describe("useNovelStore", () => {
     expect(store.openWorkspaceProjects.map((item) => item.slug)).toEqual(["demo"]);
     expect(store.currentChapter?.id).toBe("chapter-002");
     expect(store.currentContent).toBe("draft:chapters/chapter-002.md");
+    expect(store.supportContent).toBe("");
+    await store.openSupportFile("bible/characters.md");
     expect(store.supportContent).toBe("support:bible/characters.md");
     expect(store.hasUnsavedChanges).toBe(false);
   });
@@ -1648,6 +1651,11 @@ describe("useNovelStore", () => {
     const store = useNovelStore();
     store.projects = [project];
     await store.openProject(project);
+    await store.loadChapterStructure();
+    await store.loadChapterReview();
+    await store.loadChapterRuntime();
+    await store.loadStoryGovernance();
+    await store.loadLedger();
 
     expect(mockNovelApi.readChapterDashboard).toHaveBeenCalledWith("demo", "chapter-002");
     expect(mockNovelApi.readSceneCards).toHaveBeenCalledWith("demo", "chapter-002");
@@ -1670,7 +1678,78 @@ describe("useNovelStore", () => {
     expect(store.activeLedgerKind).toBe("foreshadowing");
   });
 
-  it("starts workspace support loaders in parallel after opening a project", async () => {
+  it("opens a chapter with the author journey while deferring unrelated governance and audit data", async () => {
+    const store = useNovelStore();
+    store.projects = [project];
+
+    await store.openProject(project);
+
+    expect(mockNovelApi.readFile).toHaveBeenCalledWith("demo", "chapters/chapter-002.md");
+    expect(mockNovelApi.readChapterDashboard).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readCreativeSession).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readCreativeJourney).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readUnderstandingPreview).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.listDialogueQuestions).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readContextManifest).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readStoryControl).not.toHaveBeenCalled();
+    expect(mockNovelApi.readStoryGraph).not.toHaveBeenCalled();
+    expect(mockNovelApi.readKnowledgeIndex).not.toHaveBeenCalled();
+    expect(mockNovelApi.listTasks).not.toHaveBeenCalled();
+    expect(mockNovelApi.readAiInvocations).not.toHaveBeenCalled();
+    expect(mockNovelApi.readRuntimeStatus).not.toHaveBeenCalled();
+    expect(mockNovelApi.readSceneCards).not.toHaveBeenCalled();
+    expect(mockNovelApi.readChapterSummary).not.toHaveBeenCalled();
+    expect(mockNovelApi.readChapterQualityReport).not.toHaveBeenCalled();
+    expect(mockNovelApi.readSeriesQualityMetrics).not.toHaveBeenCalled();
+  });
+
+  it("loads review data when the author switches into review mode", async () => {
+    const store = useNovelStore();
+    store.projects = [project];
+
+    await store.openProject(project);
+    vi.clearAllMocks();
+
+    store.setWritingMode("review");
+    await vi.waitFor(() => {
+      expect(mockNovelApi.readChapterSummary).toHaveBeenCalledWith("demo", "chapter-002");
+    });
+
+    expect(mockNovelApi.readChapterQualityReport).toHaveBeenCalledWith("demo", "chapter-002");
+    expect(mockNovelApi.readSeriesQualityMetrics).toHaveBeenCalledWith("demo");
+  });
+
+  it("loads runtime data when the author switches into focus mode", async () => {
+    const store = useNovelStore();
+    store.projects = [project];
+
+    await store.openProject(project);
+    vi.clearAllMocks();
+
+    store.setWritingMode("focus");
+    await vi.waitFor(() => {
+      expect(mockNovelApi.readCreationRuntimeSnapshot).toHaveBeenCalledWith("demo", "chapter-002");
+    });
+
+    expect(mockNovelApi.readRuntimeStatus).toHaveBeenCalledWith("demo");
+  });
+
+  it("coalesces concurrent requests to open the same project", async () => {
+    const chapterContent = deferred<string>();
+    mockNovelApi.readFile.mockReturnValueOnce(chapterContent.promise);
+    const store = useNovelStore();
+    store.projects = [project];
+
+    const firstOpen = store.openProject(project);
+    const secondOpen = store.openProject(project);
+    chapterContent.resolve("draft:chapters/chapter-002.md");
+    await Promise.all([firstOpen, secondOpen]);
+
+    expect(mockNovelApi.readFile).toHaveBeenCalledTimes(1);
+    expect(mockNovelApi.readChapterDashboard).toHaveBeenCalledTimes(1);
+  });
+
+  it("starts workspace support loaders in parallel only after governance is requested", async () => {
     const storyGraph = {
       projectSlug: "demo",
       nodes: [{ id: "chapter:chapter-001", type: "chapter", label: "Chapter 1" }],
@@ -1709,7 +1788,8 @@ describe("useNovelStore", () => {
 
     const store = useNovelStore();
     store.projects = [project];
-    const openPromise = store.openProject(project);
+    await store.openProject(project);
+    const supportPromise = Promise.all([store.loadStoryGovernance(), store.loadLedger(), store.loadTaskAudit()]);
 
     await vi.waitFor(() => {
       expect(mockNovelApi.readStoryControl).toHaveBeenCalledWith("demo");
@@ -1718,8 +1798,9 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readStoryGraph).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readKnowledgeIndex).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readLedgerEntries).toHaveBeenCalledWith("demo", "foreshadowing");
-    expect(mockNovelApi.listTasks).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.listTasks).toHaveBeenCalledWith("demo", 10);
     expect(mockNovelApi.readAiInvocations).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readAiStages).toHaveBeenCalled();
     expect(mockNovelApi.listBackgroundJobs).toHaveBeenCalledWith("demo");
 
     gates.storyControl.resolve(storyControl);
@@ -1730,7 +1811,7 @@ describe("useNovelStore", () => {
     gates.aiInvocations.resolve([]);
     gates.backgroundJobs.resolve([]);
 
-    await openPromise;
+    await supportPromise;
   });
 
   it("ignores stale project loads when a newer project switch finishes first", async () => {
@@ -1834,9 +1915,8 @@ describe("useNovelStore", () => {
 
     expect(store.currentProject?.slug).toBe("other");
     expect(store.currentContent).toBe("other:chapters/chapter-001.md");
-    expect(store.supportContent).toBe("other:bible/characters.md");
+    expect(store.supportContent).toBe("");
     expect(store.currentDashboard?.goal).toBe("goal:other:chapter-001");
-    expect(store.storyControl?.premise).toBe("premise:other");
 
     demoChapterGate.resolve("demo:chapters/chapter-002.md");
     demoSupportGate.resolve("demo:bible/characters.md");
@@ -1849,9 +1929,8 @@ describe("useNovelStore", () => {
 
     expect(store.currentProject?.slug).toBe("other");
     expect(store.currentContent).toBe("other:chapters/chapter-001.md");
-    expect(store.supportContent).toBe("other:bible/characters.md");
+    expect(store.supportContent).toBe("");
     expect(store.currentDashboard?.goal).toBe("goal:other:chapter-001");
-    expect(store.storyControl?.premise).toBe("premise:other");
   });
 
   it("loads shared AI stage definitions", async () => {
@@ -1984,6 +2063,7 @@ describe("useNovelStore", () => {
     store.projects = [project];
 
     await store.openProject(project);
+    await store.loadStoryGovernance();
 
     expect(mockNovelApi.readStoryControl).toHaveBeenCalledWith("demo");
     expect(store.storyControl?.premise).toBe("A careful hero opens a sealed gate.");

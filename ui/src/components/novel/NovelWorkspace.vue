@@ -14,11 +14,11 @@
             </el-icon>
           </el-button>
         </el-tooltip>
-        <el-button @click="aiConfigDialogOpen = true">
+        <el-button @click="openAiConfigDialog">
           <el-icon><Setting /></el-icon>
           AI 配置
         </el-button>
-        <el-button v-if="isProjectRoute && store.hasProject" @click="storyControlDialogOpen = true">
+        <el-button v-if="isProjectRoute && store.hasProject" @click="openStoryControlDialog">
           <el-icon><Collection /></el-icon>
           故事总控
         </el-button>
@@ -126,6 +126,13 @@
           @retry-question="store.loadDialogueQuestions"
           @retry-contract="store.retryContractCandidateCompilation"
         />
+        <CollapsiblePanel
+          title="创作规划与全书治理"
+          subtitle="按需加载"
+          :collapsed="!workspaceGovernanceOpen"
+          @update:collapsed="setWorkspaceGovernanceOpen"
+        >
+          <div v-if="workspaceGovernanceOpen" class="workspace-governance-stack">
         <StoryBlueprintPanel
           :blueprint="store.activeStoryBlueprint || null"
           :confirmed="store.creativeJourney?.stage === 'ready-for-outline'"
@@ -281,6 +288,8 @@
           :loading="store.isLoadingMigrationCutover || false"
           @validate="store.validateAllProjectMigrations?.()"
         />
+          </div>
+        </CollapsiblePanel>
         <div class="autopilot-zone">
           <div class="autopilot-toolbar">
             <WritingModeSwitcher :mode="store.writingMode" @update:mode="store.setWritingMode" />
@@ -886,6 +895,7 @@ const starterIdea = ref("");
 const aiConfigDialogOpen = ref(false);
 const storyControlDialogOpen = ref(false);
 const auditReportDialogOpen = ref(false);
+const workspaceGovernanceOpen = ref(false);
 const storyGraphFocus = ref<StoryGraphFocus | null>(null);
 const auditReportFocusSection = ref<"ai-control-plane" | null>(null);
 const isProjectRoute = computed(() => route.name === "project-workspace");
@@ -902,7 +912,23 @@ const { panelCollapsed, setPanelCollapsed } = useWorkspacePanelState({
   storageKey: collapseStorageKey,
   onExpand(key) {
     if (key === "file-diff") {
-      store.loadCurrentFileVersions();
+      void store.loadCurrentFileVersions();
+    } else if (key === "support-files") {
+      void store.openSupportFile(store.currentSupportPath, { skipLeaveCheck: true });
+    } else if (key === "task-history") {
+      void store.loadTaskAudit();
+    } else if (key === "ai-operation") {
+      void store.loadAiStages();
+    } else if (key === "platform-library") {
+      void store.loadPlatformLibrary();
+    } else if (key === "ledger-panel") {
+      void store.loadLedger();
+    } else if (key === "chapter-dashboard" || key === "scene-cards") {
+      void store.loadChapterStructure();
+    } else if (key === "review-quality") {
+      void store.loadChapterReview();
+    } else if (key === "runtime-autopilot") {
+      void store.loadChapterRuntime();
     }
   }
 });
@@ -968,9 +994,9 @@ async function syncWorkspaceFromRoute() {
   if (!store.projects.length) {
     await store.loadProjects();
   }
-  await ensureGlobalWorkspaceDataLoaded();
 
   if (!isProjectRoute.value) {
+    await ensureGlobalWorkspaceDataLoaded();
     store.showProjectHub({ skipLeaveCheck: true });
     return;
   }
@@ -984,6 +1010,23 @@ async function syncWorkspaceFromRoute() {
   }
 
   await store.openProject(project, { skipLeaveCheck: true });
+}
+
+async function setWorkspaceGovernanceOpen(open: boolean) {
+  workspaceGovernanceOpen.value = open;
+  if (open) {
+    await store.loadWorkspaceGovernance();
+  }
+}
+
+async function openStoryControlDialog() {
+  storyControlDialogOpen.value = true;
+  await store.loadStoryGovernance();
+}
+
+async function openAiConfigDialog() {
+  aiConfigDialogOpen.value = true;
+  await Promise.all([store.loadAgentProfiles(), store.loadPlatformAiConfig(), store.loadAiStages()]);
 }
 
 function goProjectHub() {
@@ -1440,6 +1483,11 @@ watch(
 
 .center-stage > .collapsible-panel {
   order: 4;
+}
+
+.workspace-governance-stack {
+  display: grid;
+  gap: 12px;
 }
 
 .autopilot-zone :deep(.collapsible-panel) {

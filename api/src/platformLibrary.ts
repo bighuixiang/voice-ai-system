@@ -219,9 +219,7 @@ export async function readPlatformLibrarySnapshot(): Promise<PlatformLibrary> {
 }
 
 export async function readPlatformLibrary(): Promise<PlatformLibrary> {
-  const library = await resolvePlatformLibrary();
-  await writePlatformLibrary(library);
-  return library;
+  return resolvePlatformLibrary();
 }
 
 export async function writePlatformLibrary(library: PlatformLibrary): Promise<void> {

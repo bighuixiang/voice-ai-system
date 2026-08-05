@@ -1843,8 +1843,9 @@ export const novelApi = {
     return data.task;
   },
 
-  async listTasks(projectId: string): Promise<NovelTask[]> {
-    const data = await request<{ tasks: NovelTask[] }>(`/api/novel/projects/${projectId}/tasks`);
+  async listTasks(projectId: string, limit?: number): Promise<NovelTask[]> {
+    const query = typeof limit === "number" && Number.isFinite(limit) ? `?limit=${Math.max(1, Math.floor(limit))}` : "";
+    const data = await request<{ tasks: NovelTask[] }>(`/api/novel/projects/${projectId}/tasks${query}`);
     return data.tasks;
   },
 

@@ -2028,7 +2028,7 @@ export const useNovelStore = defineStore("novel", () => {
   async function loadTaskHistory() {
     if (!currentProject.value) return;
     try {
-      taskHistory.value = await novelApi.listTasks(currentProject.value.slug);
+      taskHistory.value = await novelApi.listTasks(currentProject.value.slug, 10);
     } catch {
       taskHistory.value = [];
     }
@@ -2041,6 +2041,10 @@ export const useNovelStore = defineStore("novel", () => {
     } catch {
       aiInvocations.value = [];
     }
+  }
+
+  async function loadTaskAudit() {
+    await Promise.all([loadTaskHistory(), loadAiInvocations(), loadAiStages()]);
   }
 
   async function loadBackgroundJobs() {
@@ -2444,24 +2448,49 @@ export const useNovelStore = defineStore("novel", () => {
   async function loadChapterCockpit(chapterId: string, loadState?: ChapterLoadState) {
     const projectSlug = loadState?.projectSlug || currentProject.value?.slug;
     if (!projectSlug) return;
-    const [dashboard, cards, summary, qualityReport, runtimeSnapshot, seriesQualityMetrics] = await Promise.all([
-      novelApi.readChapterDashboard(projectSlug, chapterId),
-      novelApi.readSceneCards(projectSlug, chapterId),
-      novelApi.readChapterSummary(projectSlug, chapterId),
-      novelApi.readChapterQualityReport(projectSlug, chapterId),
-      novelApi.readCreationRuntimeSnapshot(projectSlug, chapterId),
-      novelApi.readSeriesQualityMetrics(projectSlug)
-    ]);
+    const dashboard = await novelApi.readChapterDashboard(projectSlug, chapterId);
     if (loadState && !isChapterLoadCurrent(loadState)) return;
     currentDashboard.value = {
       ...dashboard,
       wordCount: countDraftWords(currentContent.value)
     };
+  }
+
+  async function loadChapterStructure(chapterId = currentChapter.value?.id) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !chapterId) return;
+    const [dashboard, cards] = await Promise.all([
+      novelApi.readChapterDashboard(projectSlug, chapterId),
+      novelApi.readSceneCards(projectSlug, chapterId)
+    ]);
+    if (currentChapter.value?.id !== chapterId) return;
+    currentDashboard.value = {
+      ...dashboard,
+      wordCount: countDraftWords(currentContent.value)
+    };
     sceneCards.value = cards;
+  }
+
+  async function loadChapterReview(chapterId = currentChapter.value?.id) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !chapterId) return;
+    const [summary, qualityReport, seriesQualityMetrics] = await Promise.all([
+      novelApi.readChapterSummary(projectSlug, chapterId),
+      novelApi.readChapterQualityReport(projectSlug, chapterId),
+      novelApi.readSeriesQualityMetrics(projectSlug)
+    ]);
+    if (currentChapter.value?.id !== chapterId) return;
     currentChapterSummary.value = summary;
     currentQualityReport.value = qualityReport;
-    currentRuntimeSnapshot.value = runtimeSnapshot;
     currentSeriesQualityMetrics.value = seriesQualityMetrics;
+  }
+
+  async function loadChapterRuntime(chapterId = currentChapter.value?.id) {
+    const projectSlug = currentProject.value?.slug;
+    if (!projectSlug || !chapterId) return;
+    const [runtimeSnapshot] = await Promise.all([novelApi.readCreationRuntimeSnapshot(projectSlug, chapterId), loadRuntimeStatus()]);
+    if (currentChapter.value?.id !== chapterId) return;
+    currentRuntimeSnapshot.value = runtimeSnapshot;
   }
 
   async function loadSeriesQualityMetrics() {
@@ -3132,6 +3161,11 @@ export const useNovelStore = defineStore("novel", () => {
 
   function setWritingMode(mode: WritingMode) {
     writingMode.value = mode;
+    if (mode === "review") {
+      void loadChapterReview();
+    } else if (mode === "focus") {
+      void loadChapterRuntime();
+    }
   }
 
   function updateFocusTargetWords(value: number) {
@@ -3253,6 +3287,51 @@ export const useNovelStore = defineStore("novel", () => {
     recapCandidate.value = null;
   }
 
+  async function loadStoryGovernance() {
+    if (!currentProject.value) return;
+    await Promise.all([loadStoryControl(), loadStoryGraph(), loadKnowledgeIndex(), loadBackgroundJobs()]);
+  }
+
+  async function loadAuthorJourneyCore() {
+    if (!currentProject.value) return;
+    // The journey read can advance the server-side state to an active question.
+    // Keep it ahead of the dependent question read so the author never sees a
+    // stale "question not synchronized" placeholder after opening a project.
+    await loadCreativeSession();
+    await loadCreativeJourney();
+    await Promise.all([
+      loadUnderstandingPreview(),
+      loadDialogueQuestions(),
+      loadContextManifest()
+    ]);
+  }
+
+  async function loadWorkspaceGovernance() {
+    if (!currentProject.value) return;
+    await Promise.all([
+      loadCreativeSession(),
+      loadCreativeJourney(),
+      loadLatestStoryBlueprint(),
+      loadContractCandidates(),
+      loadContractAdoptionProposal(),
+      loadOutlineCandidates(),
+      loadOutlineAdoptionProposal(),
+      loadExecutionReadyProof(),
+      loadExecutionWorkItems(),
+      loadBookRuns(),
+      loadProseCandidates(),
+      loadQualityCalibrationEvidence(),
+      loadReleaseAcceptance(),
+      loadReleaseActivation(),
+      loadLengthPlanning(),
+      loadUnderstandingReview(),
+      loadMigrationCutover(),
+      loadUnderstandingPreview(),
+      loadDialogueQuestions(),
+      loadContextManifest()
+    ]);
+  }
+
   function rejectWritingRecap() {
     recapCandidate.value = null;
   }
@@ -3268,29 +3347,8 @@ export const useNovelStore = defineStore("novel", () => {
 
     if (restoreCachedWorkspace(project)) {
       if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
-      await loadRuntimeStatus().catch(() => undefined);
-      await loadCreativeSession();
-      await loadCreativeJourney();
-      await loadLatestStoryBlueprint();
-      await loadContractCandidates();
-      await loadContractAdoptionProposal();
-      await loadOutlineCandidates();
-      await loadOutlineAdoptionProposal();
-      await loadExecutionReadyProof();
-      await loadExecutionWorkItems();
-      await loadBookRuns();
-      await loadProseCandidates();
-      await loadQualityCalibrationEvidence();
-      await loadReleaseAcceptance();
-      await loadReleaseActivation();
-      await loadLengthPlanning();
-      await loadUnderstandingReview();
-      await loadMigrationCutover();
-      await loadUnderstandingPreview();
-      await loadDialogueQuestions();
-      await loadContextManifest();
+      await loadAuthorJourneyCore();
       if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
-      connectRuntimeEvents();
       return;
     }
 
@@ -3319,40 +3377,8 @@ export const useNovelStore = defineStore("novel", () => {
       await openChapter(chapter, currentDocumentKind.value, { skipLeaveCheck: true });
       if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
     }
-    await openSupportFile(currentSupportPath.value, { skipLeaveCheck: true });
+    await loadAuthorJourneyCore();
     if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
-    await Promise.all([
-      loadStoryControl(),
-      loadStoryGraph(),
-      loadKnowledgeIndex(),
-      loadLedger(activeLedgerKind.value),
-      loadTaskHistory(),
-      loadAiInvocations(),
-      loadBackgroundJobs(),
-      loadRuntimeStatus().catch(() => undefined)
-    ]);
-    await loadCreativeSession();
-    await loadCreativeJourney();
-    await loadLatestStoryBlueprint();
-    await loadContractCandidates();
-    await loadContractAdoptionProposal();
-    await loadOutlineCandidates();
-    await loadOutlineAdoptionProposal();
-    await loadExecutionReadyProof();
-    await loadExecutionWorkItems();
-    await loadBookRuns();
-    await loadProseCandidates();
-    await loadQualityCalibrationEvidence();
-    await loadReleaseAcceptance();
-    await loadReleaseActivation();
-    await loadLengthPlanning();
-    await loadUnderstandingReview();
-    await loadMigrationCutover();
-    await loadUnderstandingPreview();
-    await loadDialogueQuestions();
-    await loadContextManifest();
-    if (!isWorkspaceLoadCurrent(workspaceLoad)) return;
-    connectRuntimeEvents();
   }
 
   async function runMemoryGovernance() {
@@ -5093,6 +5119,9 @@ export const useNovelStore = defineStore("novel", () => {
     createSharedAsset,
     linkSharedAsset,
     loadChapterCockpit,
+    loadChapterStructure,
+    loadChapterReview,
+    loadChapterRuntime,
     loadCreationRuntimeSnapshot,
     loadRuntimeStatus,
     connectRuntimeEvents,
@@ -5111,6 +5140,9 @@ export const useNovelStore = defineStore("novel", () => {
     loadStoryControl,
     loadStoryGraph,
     loadKnowledgeIndex,
+    loadStoryGovernance,
+    loadAuthorJourneyCore,
+    loadWorkspaceGovernance,
     loadBackgroundJobs,
     rebuildKnowledgeIndex,
     rebuildSeriesQualityMetrics,
@@ -5129,6 +5161,7 @@ export const useNovelStore = defineStore("novel", () => {
     reverseEngineerStructureFromDraft,
     generateStructureFromIdea,
     loadLedger,
+    loadTaskAudit,
     saveLedger,
     updateLedgerEntries,
     setWritingMode,

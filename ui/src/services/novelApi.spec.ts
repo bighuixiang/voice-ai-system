@@ -27,6 +27,14 @@ describe("novelApi", () => {
     expect(fetch).toHaveBeenCalledWith("/api/novel/projects", {});
   });
 
+  it("requests a bounded task history for the editor audit drawer", async () => {
+    mockJson({ tasks: [] });
+
+    await novelApi.listTasks("demo", 10);
+
+    expect(fetch).toHaveBeenCalledWith("/api/novel/projects/demo/tasks?limit=10", {});
+  });
+
   it("surfaces a structured API error by its actionable code", async () => {
     mockJson({ error: { code: "V2_DEPENDENCY_MISSING", message: "Freeze the author input first." } }, false, 409);
 

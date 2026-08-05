@@ -3778,12 +3778,22 @@ describe.sequential("novel API routes", () => {
     );
   });
 
-  it("returns a story graph projection for a project", async () => {
+  it("reads the platform library without writing a timestamped snapshot", async () => {
+    const response = await jsonFetch<{ library: { version: number } }>("/api/platform/library");
+
+    expect(response.status).toBe(200);
+    expect(response.data.library.version).toBe(1);
+    await expect(fs.access(path.join(tempRoot, "platform", "library.json"))).rejects.toThrow();
+  });
+
+  it("returns a story graph projection without mutating project files", async () => {
     const created = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: "Graph Route Demo", roughIdea: "Project story state into a graph." })
     });
+    const graphPath = path.join(tempRoot, "graph-route-demo", "story-graph", "storyline.json");
+    const before = await fs.readFile(graphPath, "utf8");
 
     const response = await jsonFetch<{ graph: { projectSlug: string; nodes: Array<{ type: string }>; edges: unknown[] } }>(
       `/api/novel/projects/${created.data.project.slug}/story-graph`
@@ -3793,9 +3803,7 @@ describe.sequential("novel API routes", () => {
     expect(response.data.graph.projectSlug).toBe("graph-route-demo");
     expect(response.data.graph.nodes).toEqual(expect.arrayContaining([expect.objectContaining({ type: "chapter" })]));
     expect(response.data.graph.edges).toEqual(expect.any(Array));
-    await expect(
-      fs.readFile(path.join(tempRoot, "graph-route-demo", "story-graph", "storyline.json"), "utf8")
-    ).resolves.toContain('"projectSlug": "graph-route-demo"');
+    expect(await fs.readFile(graphPath, "utf8")).toBe(before);
   });
 
   it("reads and rebuilds a project knowledge index", async () => {
