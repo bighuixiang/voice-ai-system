@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "runtime-retry-receipt.v1",
+  "runId": "run-1785721690507-n3rcg4",
+  "commandId": "cmd-1786347262043-ajsgpi",
+  "stage": "start",
+  "attempt": 2,
+  "maxAttempts": 3,
+  "errorCode": "ENOENT: no such file or directory, open 'E:\\work\\xs\\voice-ai-system\\novels\\rp2-profile-1785721684670\\project.json'",
+  "decision": {
+    "schemaVersion": "retry-decision.v1",
+    "retry": true,
+    "retryClass": "transient",
+    "retryChainId": "run-1785721690507-n3rcg4:start",
+    "attempt": 2,
+    "maxAttempts": 3,
+    "repairCall": false,
+    "reason": "transient failure within bounded retry chain",
+    "fingerprint": "75a2e924f14c5a43a9334e299fb2ee8883ddc13269431138ce32737727d682d2"
+  },
+  "stagnation": {
+    "schemaVersion": "stagnation-incident.v1",
+    "status": "paused",
+    "thresholds": [
+      "no-new-assets"
+    ],
+    "threshold": "no-new-assets",
+    "rootCauseHypotheses": [
+      "calls continue without producing reusable evidence"
+    ],
+    "breakOptions": [
+      "change-input",
+      "ask-author",
+      "narrow-scope",
+      "replan-subgraph"
+    ],
+    "evidence": {
+      "workFingerprints": [
+        "start",
+        "start"
+      ],
+      "rewriteCount": 0,
+      "newAssetCount": 0,
+      "completionSignals": 0,
+      "openObligations": 0
+    }
+  },
+  "createdAt": "2026-08-10T07:34:39.492Z",
+  "fingerprint": "ef4c53387f01eabfb74ac6e4b76a91022a5a59d656ee6aa4afe97ab0560492d6"
+}

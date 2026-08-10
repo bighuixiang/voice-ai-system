@@ -12,20 +12,19 @@
     "hasDraft": false
   },
   "pendingRefs": [],
-  "stage": "understanding",
+  "stage": "ready-for-outline",
   "primaryAsset": "understanding-preview",
-  "blockingRef": "question-primary-desire",
   "primaryAction": {
-    "id": "review-understanding",
-    "label": "确认原始输入并生成问题",
-    "kind": "review",
+    "id": "generate-outline",
+    "label": "生成故事大纲",
+    "kind": "continue",
     "status": "available"
   },
   "progress": {
-    "completed": 1,
+    "completed": 10,
     "total": 10,
-    "current": 2
+    "current": 10
   },
-  "nextInstruction": "请继续确认下一个关键问题。",
-  "fingerprint": "0004af8a3fa073196e62405d0a29ad8ded0c919efaccf30db9e4b98b262cba90"
+  "nextInstruction": "故事蓝图已确认，可以开始生成大纲。",
+  "fingerprint": "640e43de912b9f7c19bc3bc0acfe8ab360566524243cc47d0779eb85f794fda6"
 }

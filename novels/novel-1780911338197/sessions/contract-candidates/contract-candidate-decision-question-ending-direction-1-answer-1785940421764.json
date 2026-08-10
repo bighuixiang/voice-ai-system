@@ -1,0 +1,186 @@
+{
+  "schemaVersion": "story-contract-candidate.v1",
+  "candidateId": "contract-candidate-decision-question-ending-direction-1-answer-1785940421764",
+  "projectSlug": "novel-1780911338197",
+  "status": "candidate",
+  "sourceDecisionId": "decision-question-ending-direction-1-answer-1785940421764",
+  "sourceFingerprint": "ae98ded965a6fb3a6a821cc07346d8682eb985c40bd6cd7e3741f0c9e7b708d0",
+  "recompile": {
+    "mode": "initial",
+    "affectedPaths": [
+      "endingDirection"
+    ],
+    "preservedPaths": [],
+    "preservedFingerprints": {}
+  },
+  "fields": [
+    {
+      "fieldId": "field-decision-question-primary-desire-1-answer-1785828488345-protagonist-primaryDesire",
+      "path": "protagonist.primaryDesire",
+      "value": "想帮助师傅分担压力，封印将臣",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-primary-desire"
+        }
+      ],
+      "sourceDecisionId": "decision-question-primary-desire-1-answer-1785828488345",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-core-conflict-1-answer-1785939737184-conflict-core",
+      "path": "conflict.core",
+      "value": "将臣太强了，光不经意间散发的气息都能震飞主角。",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-core-conflict"
+        }
+      ],
+      "sourceDecisionId": "decision-question-core-conflict-1-answer-1785939737184",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-failure-cost-1-answer-1785939779251-stakes-failureCost",
+      "path": "stakes.failureCost",
+      "value": "封印失败，将臣逃离，人间将会掀起血雨腥风",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-failure-cost"
+        }
+      ],
+      "sourceDecisionId": "decision-question-failure-cost-1-answer-1785939779251",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-inner-need-1-answer-1785939831146-protagonist-innerNeed",
+      "path": "protagonist.innerNeed",
+      "value": "学会如何熟练使用道术，如何将其炼制的铜尸配合有素",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-inner-need"
+        }
+      ],
+      "sourceDecisionId": "decision-question-inner-need-1-answer-1785939831146",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-misbelief-1-answer-1785939839145-protagonist-misbelief",
+      "path": "protagonist.misbelief",
+      "value": "暂无吧",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-misbelief"
+        }
+      ],
+      "sourceDecisionId": "decision-question-misbelief-1-answer-1785939839145",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-world-rule-1-answer-1785939960601-world-rules-primary",
+      "path": "world.rules.primary",
+      "value": "这里是蓝星，主角本就是异界的主宰级的父母送来避难的，玉佩检测到危险触发破界送主角回家，结果由于大战玉佩为了保护主角导致能力不足，然后意外掉落在异界的下界，主宰父母在上界不能进入下界。",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-world-rule"
+        }
+      ],
+      "sourceDecisionId": "decision-question-world-rule-1-answer-1785939960601",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-opposing-pressure-1-answer-1785940015536-conflict-opposingPressure",
+      "path": "conflict.opposingPressure",
+      "value": "将臣内心善良，却因为无法讲话，每次想要解释就只会发出“嗷嗷嗷”的声音，在外人看来跟发狂一样，所以每次都会加深误会。",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-opposing-pressure"
+        }
+      ],
+      "sourceDecisionId": "decision-question-opposing-pressure-1-answer-1785940015536",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-irreversible-choice-1-answer-1785940038527-stakes-irreversibleChoice",
+      "path": "stakes.irreversibleChoice",
+      "value": "暂无",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-irreversible-choice"
+        }
+      ],
+      "sourceDecisionId": "decision-question-irreversible-choice-1-answer-1785940038527",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-reader-promise-1-answer-1785940123733-readerPromise",
+      "path": "readerPromise",
+      "value": "东方玄幻和西方魔法世界的精彩碰撞，能让大家啼笑皆非，前期轻松搞笑，后期孤狼黑暗压抑，然后最后大团圆结局，有缺但还算圆满的结局。",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-reader-promise"
+        }
+      ],
+      "sourceDecisionId": "decision-question-reader-promise-1-answer-1785940123733",
+      "lock": "unlocked"
+    },
+    {
+      "fieldId": "field-decision-question-ending-direction-1-answer-1785940421764-endingDirection",
+      "path": "endingDirection",
+      "value": "在异界点尸成兵，将臣修炼到极致的境界，然后主角道法和魔法双休，《道家宝典》乃是上古奇书，师傅在跟将臣决战的时候将储物袋赠与主角，里面就有这本书，还有三尺青峰桃木剑，一个酒葫芦（师傅爱喝酒），然后《道家宝典》主要就是可以点尸成兵，摇铃控尸，还兼顾修体，算命，拘魂，雷法等各大体系的法门。",
+      "epistemicStatus": "explicit",
+      "evidenceRefs": [
+        {
+          "kind": "dialogue-question",
+          "refId": "question-ending-direction"
+        }
+      ],
+      "sourceDecisionId": "decision-question-ending-direction-1-answer-1785940421764",
+      "lock": "unlocked"
+    }
+  ],
+  "contract": {
+    "protagonist": {
+      "primaryDesire": "想帮助师傅分担压力，封印将臣",
+      "innerNeed": "学会如何熟练使用道术，如何将其炼制的铜尸配合有素",
+      "misbelief": "暂无吧"
+    },
+    "conflict": {
+      "core": "将臣太强了，光不经意间散发的气息都能震飞主角。",
+      "opposingPressure": "将臣内心善良，却因为无法讲话，每次想要解释就只会发出“嗷嗷嗷”的声音，在外人看来跟发狂一样，所以每次都会加深误会。"
+    },
+    "stakes": {
+      "failureCost": "封印失败，将臣逃离，人间将会掀起血雨腥风",
+      "irreversibleChoice": "暂无"
+    },
+    "world": {
+      "primaryRule": "这里是蓝星，主角本就是异界的主宰级的父母送来避难的，玉佩检测到危险触发破界送主角回家，结果由于大战玉佩为了保护主角导致能力不足，然后意外掉落在异界的下界，主宰父母在上界不能进入下界。"
+    },
+    "readerPromise": "东方玄幻和西方魔法世界的精彩碰撞，能让大家啼笑皆非，前期轻松搞笑，后期孤狼黑暗压抑，然后最后大团圆结局，有缺但还算圆满的结局。",
+    "endingDirection": "在异界点尸成兵，将臣修炼到极致的境界，然后主角道法和魔法双休，《道家宝典》乃是上古奇书，师傅在跟将臣决战的时候将储物袋赠与主角，里面就有这本书，还有三尺青峰桃木剑，一个酒葫芦（师傅爱喝酒），然后《道家宝典》主要就是可以点尸成兵，摇铃控尸，还兼顾修体，算命，拘魂，雷法等各大体系的法门。"
+  },
+  "assumptions": [],
+  "impactSummary": [],
+  "unknowns": [
+    "near-term consequence"
+  ],
+  "canonWritten": false,
+  "createdAt": "2026-08-05T14:33:42.076Z",
+  "fingerprint": "25098f3e65396e28c01255d7adf8679708583eea4a019e998ad623fda61b00be"
+}

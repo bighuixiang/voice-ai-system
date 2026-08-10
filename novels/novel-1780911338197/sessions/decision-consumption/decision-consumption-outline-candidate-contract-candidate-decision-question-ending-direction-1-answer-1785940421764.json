@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "decision-consumption-receipt.v1",
+  "receiptId": "decision-consumption-outline-candidate-contract-candidate-decision-question-ending-direction-1-answer-1785940421764",
+  "projectSlug": "novel-1780911338197",
+  "decisionId": "decision-question-ending-direction-1-answer-1785940421764",
+  "decisionVersion": 1,
+  "consumer": "outline",
+  "consumerRef": "outline-candidate-contract-candidate-decision-question-ending-direction-1-answer-1785940421764",
+  "sourceFingerprint": "ae98ded965a6fb3a6a821cc07346d8682eb985c40bd6cd7e3741f0c9e7b708d0",
+  "consumedAt": "2026-08-05T14:39:53.652Z",
+  "fingerprint": "53ee67a486f7774d01af1c61efdc8a35034b74fd540e527c4c1af6b7cd162a9c"
+}

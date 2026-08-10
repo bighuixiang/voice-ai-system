@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "story-blueprint.v1",
+  "blueprintId": "story-blueprint-1785940422080-8ba3fbb0",
+  "projectSlug": "novel-1780911338197",
+  "sourceContractCandidateId": "contract-candidate-decision-question-ending-direction-1-answer-1785940421764",
+  "sourceFingerprint": "25098f3e65396e28c01255d7adf8679708583eea4a019e998ad623fda61b00be",
+  "decisionIds": [
+    "decision-question-primary-desire-1-answer-1785828488345",
+    "decision-question-core-conflict-1-answer-1785939737184",
+    "decision-question-failure-cost-1-answer-1785939779251",
+    "decision-question-inner-need-1-answer-1785939831146",
+    "decision-question-misbelief-1-answer-1785939839145",
+    "decision-question-world-rule-1-answer-1785939960601",
+    "decision-question-opposing-pressure-1-answer-1785940015536",
+    "decision-question-irreversible-choice-1-answer-1785940038527",
+    "decision-question-reader-promise-1-answer-1785940123733",
+    "decision-question-ending-direction-1-answer-1785940421764"
+  ],
+  "content": {
+    "storyPremise": "一位主角为了想帮助师傅分担压力，封印将臣，必须在“将臣太强了，光不经意间散发的气息都能震飞主角。”中作出无法回头的选择。",
+    "openingImage": "开篇以主角直面“将臣太强了，光不经意间散发的气息都能震飞主角。”的现场切入，让目标与危险同时显形。",
+    "protagonistGoal": "想帮助师傅分担压力，封印将臣",
+    "coreConflict": "将臣太强了，光不经意间散发的气息都能震飞主角。",
+    "failureCost": "封印失败，将臣逃离，人间将会掀起血雨腥风",
+    "worldRules": "这里是蓝星，主角本就是异界的主宰级的父母送来避难的，玉佩检测到危险触发破界送主角回家，结果由于大战玉佩为了保护主角导致能力不足，然后意外掉落在异界的下界，主宰父母在上界不能进入下界。",
+    "readerPromise": "东方玄幻和西方魔法世界的精彩碰撞，能让大家啼笑皆非，前期轻松搞笑，后期孤狼黑暗压抑，然后最后大团圆结局，有缺但还算圆满的结局。",
+    "endingDirection": "在异界点尸成兵，将臣修炼到极致的境界，然后主角道法和魔法双休，《道家宝典》乃是上古奇书，师傅在跟将臣决战的时候将储物袋赠与主角，里面就有这本书，还有三尺青峰桃木剑，一个酒葫芦（师傅爱喝酒），然后《道家宝典》主要就是可以点尸成兵，摇铃控尸，还兼顾修体，算命，拘魂，雷法等各大体系的法门。"
+  },
+  "createdAt": "2026-08-05T14:33:42.081Z",
+  "fingerprint": "f24a3dd0a3c38a098e4c419bc9378fc2ccc47d6bee5dc3fe3661c8974229957e"
+}

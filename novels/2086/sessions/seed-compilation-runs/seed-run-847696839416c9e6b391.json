@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "seed-compilation-run.v1",
+  "runId": "seed-run-847696839416c9e6b391",
+  "projectSlug": "2086",
+  "idempotencyKey": "project-create-1786350359967-707mjsx5uf",
+  "inputFingerprint": "8599233013432fb2d4086953212d2758422c1ae15ed1e0cbdba6eb1c0f3031dd",
+  "compilerVersion": "seed-compiler-v1",
+  "sourceMessageIds": [
+    "message-project-create:project-create-1786350359967-707mjsx5uf"
+  ],
+  "status": "captured",
+  "containerCreated": true,
+  "interpretationComplete": false,
+  "modelCallIssued": false,
+  "canonWritten": false,
+  "fingerprint": "021cc1e6b9322a5af71cdbd032fa0614f524e57e5e57fd52b60f7b61f229f12a"
+}

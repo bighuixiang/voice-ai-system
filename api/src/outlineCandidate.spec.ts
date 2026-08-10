@@ -44,6 +44,15 @@ describe("outline candidate compiler", () => {
       "outline:contract-candidate-demo:chapter:4",
       "outline:contract-candidate-demo:chapter:5"
     ]);
+    expect(result.outline.chapters.map((chapter) => chapter.title)).toEqual([
+      "第 1 章：危机初现",
+      "第 2 章：冲突升级",
+      "第 3 章：局势反转",
+      "第 4 章：关键抉择",
+      "第 5 章：余波与新局"
+    ]);
+    expect(result.outline.chapters.flatMap((chapter) => [chapter.goal, chapter.turningPoint, ...chapter.causalInputs, ...chapter.causalOutputs]).join("\n")).not.toMatch(/candidate|chapter-\d+ outcome|under the consequences|harder to defer|confirmed contract desire/i);
+    expect(result.outline.assumptions).toEqual(["章节功能仅为候选规划，不代表故事事实已被正式确认。"]);
     expect(await readOutlineCandidate(root, result.outline.outlineId)).toEqual(result.outline);
   });
 

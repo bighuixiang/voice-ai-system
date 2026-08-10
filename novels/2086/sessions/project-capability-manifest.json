@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "project-capability-manifest.v1",
+  "projectId": "2086",
+  "projectSchemaVersion": "v1",
+  "enabledSlices": [
+    "story-seed",
+    "runtime",
+    "session",
+    "delivery"
+  ],
+  "readable": [
+    "story-seed",
+    "runtime",
+    "session",
+    "delivery"
+  ],
+  "writable": [
+    "story-seed",
+    "runtime",
+    "session",
+    "delivery"
+  ],
+  "migrationStatus": "verified",
+  "rollbackWindow": "24h",
+  "missingDependencies": [],
+  "fingerprint": "d47929cbbcc514ec3fdba71b6478bfe78e1764d6a8833a20354fa36781d2bf6c"
+}

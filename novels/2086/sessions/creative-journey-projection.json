@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "creative-journey-projection.v1",
+  "projectSlug": "2086",
+  "sourceMessageIds": [
+    "message-project-create:project-create-1786350359967-707mjsx5uf",
+    "message-711f4b8f-435c-4642-9923-8a8a1c13eb57"
+  ],
+  "sessionFingerprint": "b9f70c80cae6279fca558d9df48b6f870c47cc5552d2b599f4b1ff36138cac8f",
+  "sourceFingerprint": "f674bd2afbf4cb5690385e029da6fdf1b0a338a5e6c2a80d48f4b3debc8f0f74",
+  "projectionVersion": "c71cb95aef459724451fa784",
+  "freshness": "current",
+  "unsavedState": {
+    "hasDraft": false
+  },
+  "pendingRefs": [],
+  "stage": "understanding",
+  "primaryAsset": "understanding-preview",
+  "blockingRef": "question-primary-desire",
+  "primaryAction": {
+    "id": "review-understanding",
+    "label": "确认原始输入并生成问题",
+    "kind": "review",
+    "status": "available"
+  },
+  "progress": {
+    "completed": 0,
+    "total": 10,
+    "current": 1
+  },
+  "nextInstruction": "请确认原始输入并生成第一个关键问题。",
+  "activeQuestion": {
+    "id": "question-primary-desire",
+    "text": "在开头阶段，主角最想得到什么？",
+    "status": "candidate",
+    "impact": "high",
+    "source": "deterministic-gap"
+  },
+  "fingerprint": "b8775f5e108ce99e23da33bede2f3680e314e6073ae2c7aa948baf815d1798d8"
+}

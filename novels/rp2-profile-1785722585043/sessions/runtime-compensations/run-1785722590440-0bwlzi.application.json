@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "runtime-compensation-application.v1",
+  "runId": "run-1785722590440-0bwlzi",
+  "commandId": "cmd-1785722590464-bs5dpg",
+  "compensationFingerprint": "a53d74a064dbb3d78885058805658b2510c99c2c10d6e7a69cc67d3d5fb518af",
+  "actions": [
+    {
+      "action": "preserve-stage-output",
+      "status": "applied"
+    },
+    {
+      "action": "block-dependent-work",
+      "status": "applied"
+    }
+  ],
+  "appliedAt": "2026-08-10T07:34:23.662Z",
+  "fingerprint": "79342ff3ab4d4f5977a922759dd31ab06f4b2c5ade06f264b6cdbf9c38f716a2"
+}

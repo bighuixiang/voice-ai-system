@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "runtime-compensation-effect.v1",
+  "runId": "run-1785657255697-2e54dl",
+  "commandId": "cmd-1785657255710-fmpd2x",
+  "compensationFingerprint": "64b1f8a13a7f8b2f7dee4616d2b3a166f773cfea84d4b5ebb0914038642eedfe",
+  "action": "block-dependent-work",
+  "appliedAt": "2026-08-10T07:34:15.573Z"
+}

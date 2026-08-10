@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { errorText, lengthLabel, operationTypeLabel, statusLabel, userFacingText } from "./novelLabels";
+import { errorText, lengthLabel, operationTypeLabel, outlineCandidateLabel, outlineChapterTitle, statusLabel, userFacingText } from "./novelLabels";
 
 describe("novel labels", () => {
   it("keeps workflow status and operation labels in Chinese", () => {
@@ -16,5 +16,11 @@ describe("novel labels", () => {
   it("translates machine summaries without changing author content", () => {
     expect(userFacingText("1 facts / 0 relations")).toBe("1 条事实 / 0 条关系");
     expect(userFacingText("正文草稿已完成")).toBe("正文草稿已完成");
+  });
+
+  it("keeps internal outline placeholders out of the author-facing UI", () => {
+    expect(outlineCandidateLabel(5)).toBe("大纲候选（共 5 章）");
+    expect(outlineChapterTitle("inciting-pressure candidate 1", "inciting-pressure", 1)).toBe("第 1 章：引发压力");
+    expect(outlineChapterTitle("将臣出世", "inciting-pressure", 1)).toBe("将臣出世");
   });
 });

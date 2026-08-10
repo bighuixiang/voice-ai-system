@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import ProjectCreatePanel from "./ProjectCreatePanel.vue";
 import { ElMessage } from "element-plus";
 
@@ -14,7 +14,8 @@ vi.mock("@/stores/novel", () => ({
 vi.mock("element-plus", () => ({
   ElMessage: {
     warning: vi.fn(),
-    success: vi.fn()
+    success: vi.fn(),
+    error: vi.fn()
   }
 }));
 
@@ -66,7 +67,7 @@ const stubs = {
 describe("ProjectCreatePanel", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockStore.createProject.mockResolvedValue(undefined);
+    mockStore.createProject.mockResolvedValue({ slug: "demo-novel" });
   });
 
   it("warns instead of creating a project without a rough idea", async () => {
@@ -92,7 +93,37 @@ describe("ProjectCreatePanel", () => {
       genre: "玄幻 / 悬疑",
       roughIdea: "A grounded progression story."
     });
+    await flushPromises();
     expect(ElMessage.success).toHaveBeenCalled();
+    expect(wrapper.emitted("created")).toEqual([[{ slug: "demo-novel" }]]);
+  });
+
+  it("surfaces the failure reason instead of reporting success when creation fails", async () => {
+    mockStore.createProject.mockRejectedValue(new Error("Origin is not allowed: http://127.0.0.1"));
+    const wrapper = mount(ProjectCreatePanel, { global: { stubs } });
+    const fields = wrapper.findAll("input, textarea");
+
+    await fields[1].setValue("A grounded progression story.");
+    await wrapper.find("button").trigger("click");
+    await flushPromises();
+
+    expect(ElMessage.success).not.toHaveBeenCalled();
+    expect(wrapper.emitted("created")).toBeUndefined();
+    expect(ElMessage.error).toHaveBeenCalledWith(expect.stringContaining("NOVEL_API_ORIGINS"));
+    expect(wrapper.find("button").attributes("data-loading")).toBe("false");
+  });
+
+  it("does not claim success when the store blocks creation", async () => {
+    mockStore.createProject.mockResolvedValue(undefined);
+    const wrapper = mount(ProjectCreatePanel, { global: { stubs } });
+    const fields = wrapper.findAll("input, textarea");
+
+    await fields[1].setValue("A grounded progression story.");
+    await wrapper.find("button").trigger("click");
+    await flushPromises();
+
+    expect(ElMessage.success).not.toHaveBeenCalled();
+    expect(wrapper.emitted("created")).toBeUndefined();
   });
 
   it("includes common web novel genre options", () => {

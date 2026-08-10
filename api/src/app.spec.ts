@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createApp } from "./app.js";
+import { createApp, isLoopbackOrigin } from "./app.js";
 import { createProseCandidate } from "./proseCandidate.js";
 import { appendAuthorMessage } from "./creativeSession.js";
 import { freezeContextManifest } from "./contextManifest.js";
@@ -170,6 +170,37 @@ describe.sequential("novel API routes", () => {
     delete process.env.NOVEL_DATA_ROOT;
     delete process.env.NOVEL_DB_PATH;
     await fs.rm(tempRoot, { recursive: true, force: true });
+  });
+
+  it("accepts project creation from any loopback origin and still rejects remote origins", async () => {
+    const loopback = await jsonFetch<{ project: { slug: string } }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "http://127.0.0.1" },
+      body: JSON.stringify({ title: "Loopback Origin", roughIdea: "A ship leaves the solar system." })
+    });
+    expect(loopback.status).toBe(201);
+    expect(loopback.data.project.slug).toBeTruthy();
+
+    const remote = await jsonFetch<{ error: string }>("/api/novel/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "http://evil.example.com" },
+      body: JSON.stringify({ title: "Remote Origin", roughIdea: "Should not be created." })
+    });
+    expect(remote.status).toBe(403);
+    expect(remote.data.error).toContain("Origin is not allowed");
+  });
+
+  it("classifies loopback origins without trusting lookalike hosts", () => {
+    expect(isLoopbackOrigin("http://127.0.0.1")).toBe(true);
+    expect(isLoopbackOrigin("http://127.0.0.1:5173")).toBe(true);
+    expect(isLoopbackOrigin("http://localhost:4173")).toBe(true);
+    expect(isLoopbackOrigin("http://[::1]:8080")).toBe(true);
+    expect(isLoopbackOrigin("http://127.0.0.2")).toBe(true);
+    expect(isLoopbackOrigin("http://localhost.evil.com")).toBe(false);
+    expect(isLoopbackOrigin("http://127.0.0.1.evil.com")).toBe(false);
+    expect(isLoopbackOrigin("http://192.168.1.10:5173")).toBe(false);
+    expect(isLoopbackOrigin("file://")).toBe(false);
+    expect(isLoopbackOrigin("null")).toBe(false);
   });
 
   it("creates, lists, reads, and saves a novel project file", async () => {

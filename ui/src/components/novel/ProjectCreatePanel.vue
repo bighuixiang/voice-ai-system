@@ -43,6 +43,7 @@ import { ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
 import { useNovelStore } from "@/stores/novel";
+import { errorText } from "@/utils/novelLabels";
 import { formatGenres, novelGenreOptions } from "./genreOptions";
 
 const props = defineProps<{
@@ -80,10 +81,11 @@ async function handleSubmit() {
       genre: formatGenres(genres.value),
       roughIdea: roughIdea.value
     });
-    if (project) {
-      emit("created", project);
-    }
+    if (!project) return;
+    emit("created", project);
     ElMessage.success("项目已创建。");
+  } catch (cause) {
+    ElMessage.error(errorText(cause, "项目创建失败，请稍后重试。"));
   } finally {
     isLoading.value = false;
   }

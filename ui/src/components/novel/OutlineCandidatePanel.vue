@@ -10,10 +10,10 @@
     <div v-else class="candidate-list">
       <article v-for="outline in candidates" :key="outline.outlineId" class="candidate-card" :class="{ stale: outline.status === 'stale' }">
         <p v-if="!canAdoptOutline(outline)" class="contract-prerequisite candidate-prerequisite">请先确认并采纳此大纲对应的故事设定，再进行大纲采纳。</p>
-        <div class="candidate-heading"><div><h3>{{ outline.outlineId }}</h3><p>{{ outline.status === "candidate" ? "候选，尚未成为正式设定" : "已过期候选，尚未成为正式设定" }}</p></div><button type="button" :aria-label="`验证大纲 ${outline.outlineId}`" :disabled="validatingId === outline.outlineId" @click="emit('validate', outline)">{{ validatingId === outline.outlineId ? "验证中…" : "验证" }}</button></div>
+        <div class="candidate-heading"><div><h3>{{ outlineCandidateLabel(outline.chapters.length) }}</h3><p>{{ outline.status === "candidate" ? "候选，尚未成为正式设定" : "已过期候选，尚未成为正式设定" }}</p></div><button type="button" :aria-label="`验证${outlineCandidateLabel(outline.chapters.length)}`" :disabled="validatingId === outline.outlineId" @click="emit('validate', outline)">{{ validatingId === outline.outlineId ? "验证中…" : "验证" }}</button></div>
         <p>近端冻结 {{ outline.horizon.strongFreezeCount }} / {{ outline.horizon.totalChapterCount }} 章 · 已写入正式设定：{{ booleanLabel(outline.canonWritten) }}</p>
         <ul class="chapter-list">
-          <li v-for="chapter in outline.chapters" :key="chapter.chapterId"><label><input type="checkbox" :aria-label="`选择 ${chapter.chapterId}`" :checked="selectedChapterIds(outline).includes(chapter.chapterId)" @change="toggleChapter(outline, chapter.chapterId, ($event.target as HTMLInputElement).checked)" />{{ chapter.order }}. {{ chapter.title }} <small>{{ functionLabel(chapter.function) }} · {{ freezeLabel(chapter.freeze) }}</small></label></li>
+          <li v-for="chapter in outline.chapters" :key="chapter.chapterId"><label><input type="checkbox" :aria-label="`选择第 ${chapter.order} 章`" :checked="selectedChapterIds(outline).includes(chapter.chapterId)" @change="toggleChapter(outline, chapter.chapterId, ($event.target as HTMLInputElement).checked)" />{{ outlineChapterTitle(chapter.title, chapter.function, chapter.order) }} <small>{{ functionLabel(chapter.function) }} · {{ freezeLabel(chapter.freeze) }}</small></label></li>
         </ul>
         <div v-if="reports[outline.outlineId]" class="validation-report"><strong>{{ reports[outline.outlineId].status === "passed" ? "验证通过，但尚未执行就绪" : "验证阻断" }}</strong><ul><li v-for="check in reports[outline.outlineId].checks" :key="check.checkId">{{ checkIdLabel(check.checkId) }}：{{ statusLabel(check.status) }} — {{ check.detail }}</li></ul></div>
         <button type="button" class="selection-button" :disabled="!selectedChapterIds(outline).length" @click="emit('select-chapters', { outline, chapterIds: selectedChapterIds(outline) })">确认章节选择（{{ selectedChapterIds(outline).length }}）</button>
@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import type { OutlineAdoptionProposal, OutlineCandidate, OutlineValidationReport } from "@/types/novel";
-import { booleanLabel, checkIdLabel, freezeLabel, functionLabel, statusLabel } from "@/utils/novelLabels";
+import { booleanLabel, checkIdLabel, freezeLabel, functionLabel, outlineCandidateLabel, outlineChapterTitle, statusLabel } from "@/utils/novelLabels";
 
 const props = withDefaults(defineProps<{ candidates: OutlineCandidate[]; reports: Record<string, OutlineValidationReport>; loading?: boolean; validatingId?: string; error?: string; proposal?: OutlineAdoptionProposal | null; adoptionLoading?: boolean; adoptionError?: string; adoptedContractCandidateId?: string }>(), { loading: false, validatingId: "", error: "", proposal: null, adoptionLoading: false, adoptionError: "", adoptedContractCandidateId: "" });
 const emit = defineEmits<{ refresh: []; validate: [outline: OutlineCandidate]; "select-chapters": [payload: { outline: OutlineCandidate; chapterIds: string[] }]; "create-proposal": [payload: { outline: OutlineCandidate; chapterIds: string[] }]; authorize: [payload: { expectedProposalFingerprint: string; actorId: string; authorizationId: string }]; commit: [expectedProposalFingerprint: string] }>();

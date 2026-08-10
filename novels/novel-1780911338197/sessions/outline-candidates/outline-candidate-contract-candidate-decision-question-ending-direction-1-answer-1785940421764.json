@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "outline-candidate.v1",
+  "outlineId": "outline-candidate-contract-candidate-decision-question-ending-direction-1-answer-1785940421764",
+  "projectSlug": "novel-1780911338197",
+  "status": "candidate",
+  "sourceCandidateId": "contract-candidate-decision-question-ending-direction-1-answer-1785940421764",
+  "sourceCandidateFingerprint": "25098f3e65396e28c01255d7adf8679708583eea4a019e998ad623fda61b00be",
+  "horizon": {
+    "strongFreezeCount": 3,
+    "totalChapterCount": 5
+  },
+  "chapters": [
+    {
+      "semanticId": "outline:contract-candidate-decision-question-ending-direction-1-answer-1785940421764:chapter:1",
+      "chapterId": "chapter-001",
+      "order": 1,
+      "title": "inciting-pressure candidate 1",
+      "function": "inciting-pressure",
+      "goal": "想帮助师傅分担压力，封印将臣",
+      "conflict": "将臣太强了，光不经意间散发的气息都能震飞主角。",
+      "turningPoint": "封印失败，将臣逃离，人间将会掀起血雨腥风 becomes harder to defer",
+      "causalInputs": [
+        "confirmed contract desire"
+      ],
+      "causalOutputs": [
+        "chapter-001 outcome"
+      ],
+      "freeze": "strong",
+      "confidence": "rolling",
+      "role": "chapter-detail",
+      "detailLevel": "detailed",
+      "status": "candidate"
+    },
+    {
+      "semanticId": "outline:contract-candidate-decision-question-ending-direction-1-answer-1785940421764:chapter:2",
+      "chapterId": "chapter-002",
+      "order": 2,
+      "title": "complication candidate 2",
+      "function": "complication",
+      "goal": "想帮助师傅分担压力，封印将臣 under the consequences of chapter 1",
+      "conflict": "将臣太强了，光不经意间散发的气息都能震飞主角。",
+      "turningPoint": "封印失败，将臣逃离，人间将会掀起血雨腥风 becomes harder to defer",
+      "causalInputs": [
+        "chapter-001 outcome"
+      ],
+      "causalOutputs": [
+        "chapter-002 outcome"
+      ],
+      "freeze": "strong",
+      "confidence": "rolling",
+      "role": "chapter-detail",
+      "detailLevel": "detailed",
+      "status": "candidate"
+    },
+    {
+      "semanticId": "outline:contract-candidate-decision-question-ending-direction-1-answer-1785940421764:chapter:3",
+      "chapterId": "chapter-003",
+      "order": 3,
+      "title": "reversal candidate 3",
+      "function": "reversal",
+      "goal": "想帮助师傅分担压力，封印将臣 under the consequences of chapter 2",
+      "conflict": "将臣太强了，光不经意间散发的气息都能震飞主角。",
+      "turningPoint": "封印失败，将臣逃离，人间将会掀起血雨腥风 becomes harder to defer",
+      "causalInputs": [
+        "chapter-002 outcome"
+      ],
+      "causalOutputs": [
+        "chapter-003 outcome"
+      ],
+      "freeze": "strong",
+      "confidence": "rolling",
+      "role": "chapter-detail",
+      "detailLevel": "detailed",
+      "status": "candidate"
+    },
+    {
+      "semanticId": "outline:contract-candidate-decision-question-ending-direction-1-answer-1785940421764:chapter:4",
+      "chapterId": "chapter-004",
+      "order": 4,
+      "title": "choice candidate 4",
+      "function": "choice",
+      "goal": "想帮助师傅分担压力，封印将臣 under the consequences of chapter 3",
+      "conflict": "将臣太强了，光不经意间散发的气息都能震飞主角。",
+      "turningPoint": "封印失败，将臣逃离，人间将会掀起血雨腥风 becomes harder to defer",
+      "causalInputs": [
+        "chapter-003 outcome"
+      ],
+      "causalOutputs": [
+        "chapter-004 outcome"
+      ],
+      "freeze": "tentative",
+      "confidence": "tentative",
+      "role": "chapter-detail",
+      "detailLevel": "milestone",
+      "status": "candidate"
+    },
+    {
+      "semanticId": "outline:contract-candidate-decision-question-ending-direction-1-answer-1785940421764:chapter:5",
+      "chapterId": "chapter-005",
+      "order": 5,
+      "title": "aftermath candidate 5",
+      "function": "aftermath",
+      "goal": "想帮助师傅分担压力，封印将臣 under the consequences of chapter 4",
+      "conflict": "将臣太强了，光不经意间散发的气息都能震飞主角。",
+      "turningPoint": "在异界点尸成兵，将臣修炼到极致的境界，然后主角道法和魔法双休，《道家宝典》乃是上古奇书，师傅在跟将臣决战的时候将储物袋赠与主角，里面就有这本书，还有三尺青峰桃木剑，一个酒葫芦（师傅爱喝酒），然后《道家宝典》主要就是可以点尸成兵，摇铃控尸，还兼顾修体，算命，拘魂，雷法等各大体系的法门。",
+      "causalInputs": [
+        "chapter-004 outcome"
+      ],
+      "causalOutputs": [
+        "author review of ending direction"
+      ],
+      "freeze": "tentative",
+      "confidence": "tentative",
+      "role": "chapter-detail",
+      "detailLevel": "milestone",
+      "status": "candidate"
+    }
+  ],
+  "assumptions": [
+    "Chapter functions are provisional and do not assert settled plot facts."
+  ],
+  "unknowns": [
+    "near-term consequence"
+  ],
+  "canonWritten": false,
+  "createdAt": "2026-08-05T14:39:53.649Z",
+  "fingerprint": "95cd6d0ec2433fdf1c641577bd038ab6e965a6f13d9097ab118f7b9b4a69ef18"
+}

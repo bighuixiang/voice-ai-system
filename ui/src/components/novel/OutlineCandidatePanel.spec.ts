@@ -51,15 +51,17 @@ describe("OutlineCandidatePanel", () => {
   it("separates outline candidates from canon and shows validation state", () => {
     const wrapper = mount(OutlineCandidatePanel, { props: { candidates: [outline], reports: { [outline.outlineId]: report } } });
     expect(wrapper.text()).toContain("候选，尚未成为正式设定");
-    expect(wrapper.text()).toContain("The pressure");
+    expect(wrapper.text()).toContain("第 1 章：引发压力");
+    expect(wrapper.text()).not.toContain("The pressure");
+    expect(wrapper.text()).not.toContain("outline-1");
     expect(wrapper.text()).toContain("因果链");
     expect(wrapper.text()).toContain("验证通过，但尚未执行就绪");
   });
 
   it("emits validation and chapter selection actions", async () => {
     const wrapper = mount(OutlineCandidatePanel, { props: { candidates: [outline], reports: {} } });
-    await wrapper.get("button[aria-label='验证大纲 outline-1']").trigger("click");
-    await wrapper.get("input[aria-label='选择 chapter-001']").setValue(true);
+    await wrapper.get("button[aria-label='验证大纲候选（共 1 章）']").trigger("click");
+    await wrapper.get("input[aria-label='选择第 1 章']").setValue(true);
     await wrapper.get(".selection-button").trigger("click");
     expect(wrapper.emitted("validate")?.[0]).toEqual([outline]);
     expect(wrapper.emitted("select-chapters")?.[0]).toEqual([{ outline, chapterIds: ["chapter-001"] }]);
@@ -77,7 +79,7 @@ describe("OutlineCandidatePanel", () => {
     const wrapper = mount(OutlineCandidatePanel, { props: { candidates: [outline], reports: { [outline.outlineId]: report }, proposal, adoptedContractCandidateId: "" } });
 
     expect(wrapper.get("[data-testid='outline-contract-prerequisite']").text()).toContain("当前大纲对应的故事设定尚未采纳");
-    expect(wrapper.text()).toContain("The pressure");
+    expect(wrapper.text()).toContain("第 1 章：引发压力");
     expect(wrapper.get(".candidate-heading button").exists()).toBe(true);
     expect((wrapper.get(".authorization-form button").element as HTMLButtonElement).disabled).toBe(true);
   });

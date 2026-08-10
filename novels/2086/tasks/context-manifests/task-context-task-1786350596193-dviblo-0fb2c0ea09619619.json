@@ -1,0 +1,306 @@
+{
+  "schemaVersion": "task-context-manifest.v1",
+  "manifestId": "task-context-task-1786350596193-dviblo-0fb2c0ea09619619",
+  "projectSlug": "2086",
+  "taskId": "task-1786350596193-dviblo",
+  "taskType": "outline.generate",
+  "sourceFingerprint": "0fb2c0ea09619619ae10d891e767856438ba4f4cc51a42e4cb02dea13f13db5c",
+  "blocks": [
+    {
+      "id": "context-block-1-项目配置",
+      "title": "项目配置",
+      "tier": "T0",
+      "sourceRefs": [
+        "project.json"
+      ],
+      "sourceVersion": "71b5e2271119dc2fafe7fcbd4816a8fe57d11ef89d5a73429a3e638dcf01a030",
+      "sourceHash": "ab3a7acc6f2017817eca2397538490e9b22bcd282884119df94d122260fa91a4",
+      "originalTokens": 542,
+      "finalTokens": 542,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-2-叙事承诺锁",
+      "title": "叙事承诺锁",
+      "tier": "T0",
+      "sourceRefs": [
+        "context://block/叙事承诺锁"
+      ],
+      "sourceVersion": "6d5149ebd66a0eed63ca02efecd575dfc2a2838905f1a749d985bb7854266041",
+      "sourceHash": "6d5149ebd66a0eed63ca02efecd575dfc2a2838905f1a749d985bb7854266041",
+      "originalTokens": 82,
+      "finalTokens": 82,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-3-科幻题材-Profile",
+      "title": "科幻题材 Profile",
+      "tier": "T0",
+      "sourceRefs": [
+        "context://block/科幻题材-Profile"
+      ],
+      "sourceVersion": "743128739bc44cb8cd2675b96c1b5c8919d1355c46454ab29335356b8dc0fa83",
+      "sourceHash": "743128739bc44cb8cd2675b96c1b5c8919d1355c46454ab29335356b8dc0fa83",
+      "originalTokens": 30,
+      "finalTokens": 30,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-4-Craft-Profile",
+      "title": "Craft Profile",
+      "tier": "T0",
+      "sourceRefs": [
+        "context://block/Craft-Profile"
+      ],
+      "sourceVersion": "dce391343c9a002cf49e87b1ed2e0f7fcd285a6cfc5e680716c0d08f7bc81396",
+      "sourceHash": "dce391343c9a002cf49e87b1ed2e0f7fcd285a6cfc5e680716c0d08f7bc81396",
+      "originalTokens": 1251,
+      "finalTokens": 1251,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-5-Voice-Contract",
+      "title": "Voice Contract",
+      "tier": "T0",
+      "sourceRefs": [
+        "context://block/Voice-Contract"
+      ],
+      "sourceVersion": "46569d87c01d222108216594cdcc88f4caec4fa177e5d4edc9e8125fdce04f60",
+      "sourceHash": "46569d87c01d222108216594cdcc88f4caec4fa177e5d4edc9e8125fdce04f60",
+      "originalTokens": 406,
+      "finalTokens": 406,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-6-Long-Novel-Writer-Skill",
+      "title": "Long Novel Writer Skill",
+      "tier": "T0",
+      "sourceRefs": [
+        "context://block/Long-Novel-Writer-Skill"
+      ],
+      "sourceVersion": "8b0c97cd38cef147427d201f9af68f75377bee588fc125ba0d43e56ae3d0bfd9",
+      "sourceHash": "8b0c97cd38cef147427d201f9af68f75377bee588fc125ba0d43e56ae3d0bfd9",
+      "originalTokens": 192,
+      "finalTokens": 192,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-7-Active-Novel-Skills",
+      "title": "Active Novel Skills",
+      "tier": "T1",
+      "sourceRefs": [
+        "context://block/Active-Novel-Skills"
+      ],
+      "sourceVersion": "ce876b666869f53b55ea44616352223114fd3ee971818227930bddb82dcaff7c",
+      "sourceHash": "ce876b666869f53b55ea44616352223114fd3ee971818227930bddb82dcaff7c",
+      "originalTokens": 70,
+      "finalTokens": 70,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-8-文风规则",
+      "title": "文风规则",
+      "tier": "T1",
+      "sourceRefs": [
+        "style/style-guide.md"
+      ],
+      "sourceVersion": "b0754bad7e22ff27abe67a1e8170c048e652bc12bb73fc5eaf4113e04c5a61c0",
+      "sourceHash": "b0754bad7e22ff27abe67a1e8170c048e652bc12bb73fc5eaf4113e04c5a61c0",
+      "originalTokens": 90,
+      "finalTokens": 90,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-9-角色档案",
+      "title": "角色档案",
+      "tier": "T1",
+      "sourceRefs": [
+        "bible/characters.md"
+      ],
+      "sourceVersion": "8a1c8af355ac54bb3ab9dbd56e847af8b1da076f84cc2a0aba149731cd05d65d",
+      "sourceHash": "8a1c8af355ac54bb3ab9dbd56e847af8b1da076f84cc2a0aba149731cd05d65d",
+      "originalTokens": 12,
+      "finalTokens": 12,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-10-世界观",
+      "title": "世界观",
+      "tier": "T1",
+      "sourceRefs": [
+        "bible/world.md"
+      ],
+      "sourceVersion": "abb2ee23eb14a6ff6a483adb558b344be570af8daa57cc717cf617690d2412f7",
+      "sourceHash": "abb2ee23eb14a6ff6a483adb558b344be570af8daa57cc717cf617690d2412f7",
+      "originalTokens": 3,
+      "finalTokens": 3,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-11-力量体系",
+      "title": "力量体系",
+      "tier": "T1",
+      "sourceRefs": [
+        "bible/power-system.md"
+      ],
+      "sourceVersion": "10f70c5447576c0740034160a29d6b1105c1a52b5206d797c02aa013d73638ad",
+      "sourceHash": "10f70c5447576c0740034160a29d6b1105c1a52b5206d797c02aa013d73638ad",
+      "originalTokens": 7,
+      "finalTokens": 7,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-12-故事总控台",
+      "title": "故事总控台",
+      "tier": "T1",
+      "sourceRefs": [
+        "story-control/story-control.json"
+      ],
+      "sourceVersion": "cf63cfdfdfd3f3291697cc090ffa38efdb70e3a0aed5650d369a41e7d20cf9b4",
+      "sourceHash": "cf63cfdfdfd3f3291697cc090ffa38efdb70e3a0aed5650d369a41e7d20cf9b4",
+      "originalTokens": 678,
+      "finalTokens": 678,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-13-卷纲",
+      "title": "卷纲",
+      "tier": "T2",
+      "sourceRefs": [
+        "outline/volume-01.md"
+      ],
+      "sourceVersion": "140ae0ff330804605bf58da3a231a69076e2ef5008f4337d27bf837342e8e147",
+      "sourceHash": "140ae0ff330804605bf58da3a231a69076e2ef5008f4337d27bf837342e8e147",
+      "originalTokens": 4,
+      "finalTokens": 4,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-14-伏笔账本",
+      "title": "伏笔账本",
+      "tier": "T2",
+      "sourceRefs": [
+        "ledger/foreshadowing.md"
+      ],
+      "sourceVersion": "a4628d23d6db4ed2ad83fe5efc2c47153a85e440c26501889e4a07f632de23ba",
+      "sourceHash": "a4628d23d6db4ed2ad83fe5efc2c47153a85e440c26501889e4a07f632de23ba",
+      "originalTokens": 15,
+      "finalTokens": 15,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-15-升级节奏账本",
+      "title": "升级节奏账本",
+      "tier": "T2",
+      "sourceRefs": [
+        "ledger/power-progression.md"
+      ],
+      "sourceVersion": "ac9aff43c7e305ac136c2557c369b6cf82af230caba6ef4cd5fb8aebbfb3cbc0",
+      "sourceHash": "ac9aff43c7e305ac136c2557c369b6cf82af230caba6ef4cd5fb8aebbfb3cbc0",
+      "originalTokens": 18,
+      "finalTokens": 18,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    },
+    {
+      "id": "context-block-16-Task-Input",
+      "title": "Task Input",
+      "sourceRefs": [
+        "context://block/Task-Input"
+      ],
+      "sourceVersion": "fb5bf7fe481399cad9e66f838b5d08a24a1877f5e5f4c3fab3e6eec98c31a202",
+      "sourceHash": "fb5bf7fe481399cad9e66f838b5d08a24a1877f5e5f4c3fab3e6eec98c31a202",
+      "originalTokens": 23,
+      "finalTokens": 23,
+      "compression": "none",
+      "permission": "model",
+      "selected": true,
+      "truncated": false
+    }
+  ],
+  "status": "pass",
+  "sourceGate": {
+    "schemaVersion": "context-source-gate.v1",
+    "purpose": "task:outline.generate",
+    "query": "chapter-001",
+    "status": "pass",
+    "selectedBlockIds": [
+      "项目配置",
+      "叙事承诺锁",
+      "科幻题材 Profile",
+      "Craft Profile",
+      "Voice Contract",
+      "Long Novel Writer Skill",
+      "Active Novel Skills",
+      "文风规则",
+      "角色档案",
+      "世界观",
+      "力量体系",
+      "故事总控台",
+      "卷纲",
+      "伏笔账本",
+      "升级节奏账本",
+      "上下文预算日志",
+      "Task Input"
+    ],
+    "excluded": [],
+    "conflicts": [],
+    "fingerprint": "aa8ec3c877c5f783d5a0e1d64cb028b6f36c545f059a62376c0d26a9cb915a30"
+  },
+  "retrievalEligibility": {
+    "schemaVersion": "retrieval-eligibility.v1",
+    "status": "pass",
+    "selectedIds": [],
+    "excluded": [],
+    "fingerprint": "2b786ed4a605a149ed689e6bfcf95addadc9c8804f55c0ed8aa4350c65ed91fb"
+  },
+  "warnings": [
+    "SOURCE_REF_FALLBACK_USED"
+  ],
+  "createdAt": "2026-08-10T08:29:56.214Z",
+  "fingerprint": "e51d23c71b909e102fa305d6c7c7ce46ab83c4c92c5d71d8f4d6ef4a94e8de28"
+}

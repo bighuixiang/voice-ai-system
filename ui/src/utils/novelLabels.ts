@@ -161,6 +161,10 @@ const checkLabels: Record<string, string> = {
 
 const functionLabels: Record<string, string> = {
   "inciting-pressure": "引发压力",
+  complication: "冲突升级",
+  reversal: "局势反转",
+  choice: "关键抉择",
+  aftermath: "余波与新局",
   escalation: "冲突升级",
   midpoint: "中点转折",
   "low-point": "低谷",
@@ -211,6 +215,26 @@ export function checkIdLabel(value: unknown): string {
 export function functionLabel(value: unknown): string {
   if (typeof value !== "string" || !value.trim()) return "未指定功能";
   return functionLabels[value] || (/[\u4e00-\u9fff]/.test(value) ? value : "章节功能");
+}
+
+/**
+ * Internal outline IDs are stable evidence references, not author-facing names.
+ * Keep them out of the creative surface so generated bookkeeping never leaks
+ * into Chinese creation.
+ */
+export function outlineCandidateLabel(chapterCount: unknown): string {
+  return typeof chapterCount === "number" && Number.isInteger(chapterCount) && chapterCount > 0
+    ? `大纲候选（共 ${chapterCount} 章）`
+    : "大纲候选";
+}
+
+/** Show a real Chinese chapter title when one exists; replace legacy machine
+ * placeholders such as "inciting-pressure candidate 1" with a Chinese label. */
+export function outlineChapterTitle(value: unknown, chapterFunction: unknown, order: unknown): string {
+  const title = typeof value === "string" ? value.trim() : "";
+  if (title && /[\u4e00-\u9fff]/.test(title)) return title;
+  const prefix = typeof order === "number" && Number.isInteger(order) && order > 0 ? `第 ${order} 章：` : "";
+  return `${prefix}${functionLabel(chapterFunction)}`;
 }
 
 export function freezeLabel(value: unknown): string {
@@ -342,6 +366,10 @@ function translateUserFacingString(value: string): string {
   if (nodes) return `${nodes[1]} 个节点 / ${nodes[2]} 条关系`;
   const chapters = trimmed.match(/^(\d+)\/(\d+) chapters reviewed, average (.+)$/i);
   if (chapters) return `${chapters[1]}/${chapters[2]} 章已评审，平均分 ${chapters[3]}`;
+  const blockedOrigin = trimmed.match(/^Origin is not allowed: (.+)$/i);
+  if (blockedOrigin) {
+    return `接口拒绝了来源 ${blockedOrigin[1]}：请通过 http://127.0.0.1:5173 打开工作台，或把该来源加入 NOVEL_API_ORIGINS 后重启接口服务。`;
+  }
   const exited = trimmed.match(/^(.+) exited with (\d+)$/i);
   if (exited) return `${exited[1]} 已退出，退出码：${exited[2]}`;
   const parseFailure = trimmed.match(/^Failed to parse (.+) output: (.+)$/i);

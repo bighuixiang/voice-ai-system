@@ -52,6 +52,14 @@ export interface OutlineCandidate {
 
 interface OutlineCompileOptions { strongFreezeCount?: number; totalChapterCount?: number }
 
+const chapterFunctionTitles: Record<OutlineChapterCandidate["function"], string> = {
+  "inciting-pressure": "危机初现",
+  complication: "冲突升级",
+  reversal: "局势反转",
+  choice: "关键抉择",
+  aftermath: "余波与新局"
+};
+
 function outlinePath(root: string, outlineId: string): string {
   return resolveInside(root, `sessions/outline-candidates/${outlineId}.json`);
 }
@@ -121,24 +129,24 @@ export async function compileOutlineCandidate(root: string, sourceCandidateId: s
   const outlineId = `outline-candidate-${source.candidateId}`;
   const existing = await readOutlineCandidate(root, outlineId);
   if (existing) return { outline: existing, created: false };
-  const desire = source.contract.protagonist.primaryDesire || "The protagonist must clarify what they are willing to risk.";
-  const conflict = value(source, "conflict.core") || "Pressure exposes a choice the protagonist cannot postpone.";
-  const failureCost = value(source, "stakes.failureCost") || "Failure carries an unresolved cost.";
-  const ending = value(source, "endingDirection") || "The direction of the ending remains open pending author confirmation.";
+  const desire = source.contract.protagonist.primaryDesire || "主角必须确认自己愿意承担的风险。";
+  const conflict = value(source, "conflict.core") || "外部压力迫使主角面对无法继续拖延的抉择。";
+  const failureCost = value(source, "stakes.failureCost") || "一旦失败，将付出尚未解决的代价。";
+  const ending = value(source, "endingDirection") || "结局走向仍待作者确认。";
   const functions: OutlineChapterCandidate["function"][] = ["inciting-pressure", "complication", "reversal", "choice", "aftermath"];
   const chapters: OutlineChapterCandidate[] = functions.slice(0, totalChapterCount).map((chapterFunction, index) => {
     const order = index + 1;
-    const previous = order === 1 ? "confirmed contract desire" : `chapter-${String(order - 1).padStart(3, "0")} outcome`;
-    const next = order === totalChapterCount ? "author review of ending direction" : `chapter-${String(order).padStart(3, "0")} outcome`;
+    const previous = order === 1 ? "已确认的主角核心诉求" : `第 ${order - 1} 章结果`;
+    const next = order === totalChapterCount ? "作者审阅结局走向" : `第 ${order} 章结果`;
     return {
       semanticId: `outline:${source.candidateId}:chapter:${order}`,
       chapterId: `chapter-${String(order).padStart(3, "0")}`,
       order,
-      title: `${chapterFunction} candidate ${order}`,
+      title: `第 ${order} 章：${chapterFunctionTitles[chapterFunction]}`,
       function: chapterFunction,
-      goal: order === 1 ? desire : `${desire} under the consequences of chapter ${order - 1}`,
+      goal: order === 1 ? desire : `在第 ${order - 1} 章结果的影响下，推进：${desire}`,
       conflict,
-      turningPoint: order === totalChapterCount ? ending : `${failureCost} becomes harder to defer`,
+      turningPoint: order === totalChapterCount ? ending : `代价进一步逼近：${failureCost}`,
       causalInputs: [previous],
       causalOutputs: [next],
       freeze: order <= strongFreezeCount ? "strong" : "tentative",
@@ -157,7 +165,7 @@ export async function compileOutlineCandidate(root: string, sourceCandidateId: s
     sourceCandidateFingerprint: source.fingerprint,
     horizon: { strongFreezeCount, totalChapterCount },
     chapters,
-    assumptions: ["Chapter functions are provisional and do not assert settled plot facts."],
+    assumptions: ["章节功能仅为候选规划，不代表故事事实已被正式确认。"],
     unknowns: source.unknowns,
     canonWritten: false as const,
     createdAt: new Date().toISOString()

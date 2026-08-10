@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "runtime-compensation-effect.v1",
+  "runId": "run-1785699692723-7wtdb7",
+  "commandId": "cmd-1785699692735-jpg9uk",
+  "compensationFingerprint": "640997387a26f60cfec1841542fbf2d86cbc4b9bc4f34ba89ed353786ab05fbf",
+  "action": "preserve-stage-output",
+  "appliedAt": "2026-08-10T07:34:18.786Z"
+}

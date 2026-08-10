@@ -1334,6 +1334,7 @@ describe("useNovelStore", () => {
     await store.executeCreativeJourneyAction("generate-outline");
 
     expect(mockNovelApi.compileOutlineCandidate).toHaveBeenCalledWith("demo", "candidate-blueprint-1", {});
+    expect(mockNovelApi.listContractCandidates).toHaveBeenCalledWith("demo");
   });
 
   it("loads and answers the active dialogue question through the idempotent API", async () => {
@@ -1691,6 +1692,7 @@ describe("useNovelStore", () => {
     expect(mockNovelApi.readUnderstandingPreview).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.listDialogueQuestions).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readContextManifest).toHaveBeenCalledWith("demo");
+    expect(mockNovelApi.readLatestStoryBlueprint).toHaveBeenCalledWith("demo");
     expect(mockNovelApi.readStoryControl).not.toHaveBeenCalled();
     expect(mockNovelApi.readStoryGraph).not.toHaveBeenCalled();
     expect(mockNovelApi.readKnowledgeIndex).not.toHaveBeenCalled();

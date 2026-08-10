@@ -126,13 +126,6 @@
           @retry-question="store.loadDialogueQuestions"
           @retry-contract="store.retryContractCandidateCompilation"
         />
-        <CollapsiblePanel
-          title="创作规划与全书治理"
-          subtitle="按需加载"
-          :collapsed="!workspaceGovernanceOpen"
-          @update:collapsed="setWorkspaceGovernanceOpen"
-        >
-          <div v-if="workspaceGovernanceOpen" class="workspace-governance-stack">
         <StoryBlueprintPanel
           :blueprint="store.activeStoryBlueprint || null"
           :confirmed="store.creativeJourney?.stage === 'ready-for-outline'"
@@ -146,6 +139,46 @@
           @start-outline="store.executeCreativeJourneyAction('generate-outline')"
           @reload="store.loadLatestStoryBlueprint"
         />
+        <ContractCandidatePanel
+          v-if="store.creativeJourney?.stage === 'ready-for-outline' || store.contractCandidates.length"
+          :candidates="store.contractCandidates || []"
+          :outline-source-candidate-id="store.activeStoryBlueprint?.sourceContractCandidateId || ''"
+          :outline-loading="store.isLoadingStoryBlueprint || Boolean(store.storyBlueprintLoadError)"
+          :loading="store.isLoadingContractCandidates || false"
+          :error="store.contractCandidatesError || ''"
+          :adoption-loading="store.isCreatingContractAdoptionProposal || false"
+          :adoption-error="store.contractAdoptionError || ''"
+          :proposal="store.contractAdoptionProposal"
+          @refresh="store.loadContractCandidates?.()"
+          @compile-outline="store.compileOutlineCandidate?.($event.sourceCandidateId)"
+          @adopt="store.createContractAdoptionProposal?.($event)"
+          @commit="store.commitContractAdoption?.($event)"
+        />
+        <OutlineCandidatePanel
+          v-if="store.outlineCandidates.length || store.isLoadingOutlineCandidates"
+          :candidates="store.outlineCandidates || []"
+          :reports="store.outlineValidationReports || {}"
+          :loading="store.isLoadingOutlineCandidates || false"
+          :validating-id="store.validatingOutlineId || ''"
+          :error="store.outlineCandidatesError || ''"
+          :proposal="store.outlineAdoptionProposal"
+          :adoption-loading="store.isAdoptingOutline || false"
+          :adoption-error="store.outlineAdoptionError || ''"
+          :adopted-contract-candidate-id="store.contractAdoptionProposal?.status === 'committed' && store.contractAdoptionProposal?.canonWritten === true ? store.contractAdoptionProposal.candidateId : ''"
+          @refresh="store.loadOutlineCandidates?.()"
+          @validate="store.validateOutlineCandidate?.($event)"
+          @select-chapters="store.setOutlineChapterSelection?.($event)"
+          @create-proposal="store.createOutlineAdoptionProposal?.($event)"
+          @authorize="store.authorizeOutlineAdoption?.($event)"
+          @commit="store.commitOutlineAdoption?.($event)"
+        />
+        <CollapsiblePanel
+          title="创作规划与全书治理"
+          subtitle="按需加载"
+          :collapsed="!workspaceGovernanceOpen"
+          @update:collapsed="setWorkspaceGovernanceOpen"
+        >
+          <div v-if="workspaceGovernanceOpen" class="workspace-governance-stack">
         <LearningGovernancePanel
           :policy="store.learningPolicy || null"
           :budgets="store.explorationBudgets || {}"
@@ -164,37 +197,6 @@
           :contracts="store.characterContracts || []"
           @refresh="handleCharacterContractsRefresh"
           @confirm="handleCharacterContractConfirm"
-        />
-        <ContractCandidatePanel
-          :candidates="store.contractCandidates || []"
-          :outline-source-candidate-id="store.creativeJourney?.stage === 'ready-for-outline' ? store.activeStoryBlueprint?.sourceContractCandidateId : ''"
-          :outline-loading="store.isLoadingStoryBlueprint || Boolean(store.storyBlueprintLoadError)"
-          :loading="store.isLoadingContractCandidates || false"
-          :error="store.contractCandidatesError || ''"
-          :adoption-loading="store.isCreatingContractAdoptionProposal || false"
-          :adoption-error="store.contractAdoptionError || ''"
-          :proposal="store.contractAdoptionProposal"
-          @refresh="store.loadContractCandidates?.()"
-          @compile-outline="store.compileOutlineCandidate?.($event.sourceCandidateId)"
-          @adopt="store.createContractAdoptionProposal?.($event)"
-          @commit="store.commitContractAdoption?.($event)"
-        />
-        <OutlineCandidatePanel
-          :candidates="store.outlineCandidates || []"
-          :reports="store.outlineValidationReports || {}"
-          :loading="store.isLoadingOutlineCandidates || false"
-          :validating-id="store.validatingOutlineId || ''"
-          :error="store.outlineCandidatesError || ''"
-          :proposal="store.outlineAdoptionProposal"
-          :adoption-loading="store.isAdoptingOutline || false"
-          :adoption-error="store.outlineAdoptionError || ''"
-          :adopted-contract-candidate-id="store.contractAdoptionProposal?.status === 'committed' && store.contractAdoptionProposal?.canonWritten === true ? store.contractAdoptionProposal.candidateId : ''"
-          @refresh="store.loadOutlineCandidates?.()"
-          @validate="store.validateOutlineCandidate?.($event)"
-          @select-chapters="store.setOutlineChapterSelection?.($event)"
-          @create-proposal="store.createOutlineAdoptionProposal?.($event)"
-          @authorize="store.authorizeOutlineAdoption?.($event)"
-          @commit="store.commitOutlineAdoption?.($event)"
         />
         <ExecutionReadinessPanel
           :proof="store.executionReadyProof || null"

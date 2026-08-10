@@ -3299,10 +3299,15 @@ export const useNovelStore = defineStore("novel", () => {
     // stale "question not synchronized" placeholder after opening a project.
     await loadCreativeSession();
     await loadCreativeJourney();
+    const shouldLoadOutlinePipeline = creativeJourney.value?.stage === "ready-for-outline";
     await Promise.all([
+      loadLatestStoryBlueprint(),
       loadUnderstandingPreview(),
       loadDialogueQuestions(),
-      loadContextManifest()
+      loadContextManifest(),
+      ...(shouldLoadOutlinePipeline
+        ? [loadContractCandidates(), loadContractAdoptionProposal(), loadOutlineCandidates(), loadOutlineAdoptionProposal()]
+        : [])
     ]);
   }
 
@@ -4405,7 +4410,14 @@ export const useNovelStore = defineStore("novel", () => {
       authorJourneyError.value = "";
       try {
         const result = await compileOutlineCandidate(sourceCandidateId);
-        if (result) await loadCreativeJourney();
+        if (result) {
+          await Promise.all([
+            loadCreativeJourney(),
+            loadContractCandidates(),
+            loadContractAdoptionProposal(),
+            loadOutlineAdoptionProposal()
+          ]);
+        }
         if (!result && !authorJourneyError.value) authorJourneyError.value = "大纲暂时未生成，请稍后重试。";
         return result;
       } finally {

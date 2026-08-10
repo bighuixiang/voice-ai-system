@@ -749,6 +749,22 @@ function allowedOrigins(): Set<string> {
   );
 }
 
+// The API binds loopback only, so any page served from this machine is the
+// operator's own UI regardless of which port serves it (5173 dev, 4173 preview,
+// 80 static host). A remote site cannot forge a loopback Origin, so accepting
+// them keeps the local workbench usable without widening the network surface.
+export function isLoopbackOrigin(origin: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(origin);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+  const host = url.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  return host === "localhost" || host === "::1" || /^127(?:\.\d{1,3}){3}$/.test(host);
+}
+
 function validateAiScenarioConfig(config: AiScenarioConfig): AiScenarioConfig {
   const profileId = String(config.profileId || "").trim();
   const profile = listAgentProfiles().find((item) => item.id === profileId);
@@ -1018,7 +1034,7 @@ export function createApp() {
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || origins.has(origin)) {
+        if (!origin || origins.has(origin) || isLoopbackOrigin(origin)) {
           callback(null, true);
           return;
         }

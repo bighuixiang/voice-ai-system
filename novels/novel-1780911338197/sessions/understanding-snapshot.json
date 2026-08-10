@@ -32,13 +32,13 @@
   ],
   "question": {
     "id": "question-primary-desire",
-    "text": "What must the protagonist want most in the opening movement?",
+    "text": "在开头阶段，主角最想得到什么？",
     "status": "candidate",
     "impact": "high",
     "source": "deterministic-gap"
   },
   "modelCallIssued": false,
   "canonWritten": false,
-  "createdAt": "2026-08-04T07:05:34.640Z",
-  "fingerprint": "46349dd2d446246c2b5b217a96604f10e6d0349cb4acd742a9b8de0a51ffaa07"
+  "createdAt": "2026-08-05T14:21:23.475Z",
+  "fingerprint": "995bc432e6e63d3e1a7726eb1b4df1d8fd2d0fd5b29d55b1cc7b12798a4d8922"
 }

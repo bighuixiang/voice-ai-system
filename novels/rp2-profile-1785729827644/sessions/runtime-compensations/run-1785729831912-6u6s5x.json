@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "runtime-compensation.v1",
+  "runId": "run-1785729831912-6u6s5x",
+  "commandId": "cmd-1785729831923-w8ui2e",
+  "stage": "start",
+  "failureFingerprint": "2867fceb95ee9abb834c73b09ba6e607e0cad59ebba95f57850c63377e4c76be",
+  "actions": [
+    {
+      "action": "preserve-stage-output",
+      "status": "planned",
+      "reason": "retain immutable evidence for recovery and audit"
+    },
+    {
+      "action": "block-dependent-work",
+      "status": "planned",
+      "reason": "dependents must wait for a settled or explicitly waived stage"
+    }
+  ],
+  "createdAt": "2026-08-10T07:34:26.883Z",
+  "fingerprint": "7aeb994b32ccecc937a98d67b4f5c21a106709ec58f1bebddd4de7cdba97b249"
+}
