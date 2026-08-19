@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "creative-journey-projection.v1",
+  "projectSlug": "novel-1780473478439",
+  "sourceMessageIds": [],
+  "sessionFingerprint": "ef40fb395fb571e5cea3684aaa7b85d4b58d33ce4b7a43048d048a233d2f01a0",
+  "sourceFingerprint": "ef40fb395fb571e5cea3684aaa7b85d4b58d33ce4b7a43048d048a233d2f01a0",
+  "projectionVersion": "865e754dca66ea93da82a104",
+  "freshness": "current",
+  "unsavedState": {
+    "hasDraft": false
+  },
+  "pendingRefs": [],
+  "stage": "capture",
+  "primaryAsset": "creative-session",
+  "primaryAction": {
+    "id": "capture-idea",
+    "label": "告诉我你的想法",
+    "kind": "capture",
+    "status": "available"
+  },
+  "progress": {
+    "completed": 0,
+    "total": 10,
+    "current": 1
+  },
+  "nextInstruction": "请先用自己的话描述想创作的故事。",
+  "fingerprint": "ee6b32725fe41141ce5232263bbdb8676099dc933e44b15383e89c9605b4a6a9"
+}

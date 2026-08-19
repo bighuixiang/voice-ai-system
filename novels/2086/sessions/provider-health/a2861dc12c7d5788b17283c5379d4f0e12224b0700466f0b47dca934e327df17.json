@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "provider-health.v1",
+  "providerRef": "codex-cli",
+  "state": "closed",
+  "consecutiveFailures": 1,
+  "failureThreshold": 3,
+  "cooldownMs": 30000,
+  "halfOpenProbeInFlight": false,
+  "updatedAt": "2026-08-10T08:32:31.571Z",
+  "fingerprint": "fc84ce72a8f37cae60fda40b74f0f708bba6903c2f568782b7e72493044b39a7"
+}
